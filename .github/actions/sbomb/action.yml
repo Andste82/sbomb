@@ -1,0 +1,56 @@
+name: sbomb
+description: Download and run a pinned sbomb release
+inputs:
+  repository:
+    description: GitHub repository hosting the release
+    required: false
+    default: ${{ github.repository }}
+  version:
+    description: Release tag to download
+    required: false
+    default: v0.0.0
+  config:
+    description: Optional sbomb JSON configuration file
+    required: false
+  policy:
+    description: Optional policy profile
+    required: false
+    default: default
+  output:
+    description: CycloneDX output path
+    required: false
+    default: sbomb.cdx.json
+runs:
+  using: composite
+  steps:
+    - name: Download sbomb
+      shell: bash
+      env:
+        SBOMB_VERSION: ${{ inputs.version }}
+        SBOMB_REPOSITORY: ${{ inputs.repository }}
+      run: |
+        set -euo pipefail
+        case "${RUNNER_OS}/${RUNNER_ARCH}" in
+          Linux/X64) asset=sbomb-linux-amd64 ;;
+          Linux/ARM64) asset=sbomb-linux-arm64 ;;
+          Windows/X64) asset=sbomb-windows-amd64.exe ;;
+          *) echo "Unsupported runner: ${RUNNER_OS}/${RUNNER_ARCH}" >&2; exit 1 ;;
+        esac
+        base="https://github.com/${SBOMB_REPOSITORY}/releases/download/${SBOMB_VERSION}"
+        mkdir -p "$RUNNER_TEMP/sbomb"
+        curl --fail --location --silent --show-error "$base/$asset" -o "$RUNNER_TEMP/sbomb/$asset"
+        curl --fail --location --silent --show-error "$base/SHA256SUMS" -o "$RUNNER_TEMP/sbomb/SHA256SUMS"
+        (cd "$RUNNER_TEMP/sbomb" && sha256sum --check --ignore-missing SHA256SUMS)
+        chmod +x "$RUNNER_TEMP/sbomb/$asset"
+        echo "SBOMB_ASSET=$asset" >> "$GITHUB_ENV"
+    - name: Generate SBOM
+      shell: bash
+      env:
+        SBOMB_CONFIG: ${{ inputs.config }}
+        SBOMB_POLICY: ${{ inputs.policy }}
+        SBOMB_OUTPUT: ${{ inputs.output }}
+      run: |
+        set -euo pipefail
+        args=(generate --build-dir "$GITHUB_WORKSPACE" --output "$SBOMB_OUTPUT" --policy "$SBOMB_POLICY")
+        if [[ -n "$SBOMB_CONFIG" ]]; then args+=(--config "$SBOMB_CONFIG"); fi
+        "$RUNNER_TEMP/sbomb/$SBOMB_ASSET" "${args[@]}"

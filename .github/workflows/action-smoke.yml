@@ -1,0 +1,59 @@
+name: action-smoke
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Existing release tag to smoke-test
+        required: false
+        default: v0.0.0
+        type: string
+
+jobs:
+  ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build fixture evidence
+        run: go test -tags e2e ./test/e2e/...
+      - name: Create action evidence input
+        shell: bash
+        run: |
+          printf '[{"directory":"%s","file":"%s","output":"%s/main.o","arguments":["cc","-c","%s"]}]\n' "$GITHUB_WORKSPACE" "$GITHUB_WORKSPACE/README.md" "$GITHUB_WORKSPACE" "$GITHUB_WORKSPACE/README.md" > compile_commands.json
+          printf 'map\n' > link.map
+      - name: Run sbomb action
+        uses: ./.github/actions/sbomb
+        with:
+          version: ${{ inputs.version || github.ref_name }}
+          output: action-smoke.cdx.json
+      - name: Check generated SBOM
+        run: test -s action-smoke.cdx.json
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Create action evidence input
+        shell: pwsh
+        run: |
+          $workspace = $env:GITHUB_WORKSPACE.Replace('\', '/')
+          $entry = @(@{ directory = $workspace; file = "$workspace/README.md"; output = "$workspace/main.o"; arguments = @('cc', '-c', "$workspace/README.md") })
+          $entry | ConvertTo-Json -Depth 4 | Set-Content -Encoding utf8 compile_commands.json
+          Set-Content -Encoding utf8 link.map map
+      - name: Run sbomb action
+        uses: ./.github/actions/sbomb
+        with:
+          version: ${{ inputs.version || github.ref_name }}
+          output: action-smoke.cdx.json
+      - name: Check generated SBOM
+        shell: pwsh
+        run: if (-not (Test-Path action-smoke.cdx.json)) { throw 'SBOM was not generated' }

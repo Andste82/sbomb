@@ -17,6 +17,8 @@ import (
 	"github.com/example/sbomb/internal/report"
 )
 
+var version = "0.0.0-milestone16"
+
 func main() {
 	code, out, errOut := execute(os.Args[1:])
 	if out != "" {
@@ -30,12 +32,12 @@ func main() {
 
 func execute(args []string) (int, string, string) {
 	if len(args) == 0 {
-		return 0, "sbomb 0.0.0-milestone13\n", ""
+		return 0, "sbomb " + version + "\n", ""
 	}
 
 	switch args[0] {
 	case "version", "--version":
-		return 0, "sbomb 0.0.0-milestone13\n", ""
+		return 0, "sbomb " + version + "\n", ""
 	case "schema":
 		return handleSchema(args[1:])
 	case "generate":
