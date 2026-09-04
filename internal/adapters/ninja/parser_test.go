@@ -136,9 +136,9 @@ func TestTokenize(t *testing.T) {
 		expected []string
 	}{
 		{"foo bar baz", []string{"foo", "bar", "baz"}},
-		{"foo  bar", []string{"foo", "bar"}}, // multiple spaces
-		{"$$", []string{"$"}}, // $$ -> single $
-		{"C$:/Windows/path", []string{"C$:/Windows/path"}}, // Windows path with $:
+		{"foo  bar", []string{"foo", "bar"}},                 // multiple spaces
+		{"$$", []string{"$"}},                                // $$ -> single $
+		{"C$:/Windows/path", []string{"C$:/Windows/path"}},   // Windows path with $:
 		{"path\\ with\\ space", []string{"path with space"}}, // backslash-escaped spaces
 	}
 	for _, tt := range tests {

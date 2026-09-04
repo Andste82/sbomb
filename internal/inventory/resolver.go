@@ -19,12 +19,12 @@ import (
 // 6. DWARF (derived, high confidence)
 // 7. Build log fallback (weak, low confidence)
 type ObjectSourceResolver struct {
-	cmakeData     map[string]string // object -> source from CMake File API
-	ninjaData     map[string]string // object -> source from Ninja
-	depfileData   map[string]string // object -> source from depfiles
-	dwarfData     map[string]string // object -> source from DWARF
-	compileData   map[string]string // object -> source from compile_commands.json
-	
+	cmakeData   map[string]string // object -> source from CMake File API
+	ninjaData   map[string]string // object -> source from Ninja
+	depfileData map[string]string // object -> source from depfiles
+	dwarfData   map[string]string // object -> source from DWARF
+	compileData map[string]string // object -> source from compile_commands.json
+
 	graph *evidence.Graph
 }
 
@@ -54,7 +54,7 @@ func New(g *evidence.Graph) *ObjectSourceResolver {
 // conflict is non-empty if multiple strategies disagree.
 func (r *ObjectSourceResolver) ResolveObjectSource(objID domain.NodeID) (domain.NodeID, string, string, error) {
 	objPath := string(objID)
-	
+
 	// Try strategies in priority order
 	strategies := []struct {
 		name string
@@ -66,12 +66,12 @@ func (r *ObjectSourceResolver) ResolveObjectSource(objID domain.NodeID) (domain.
 		{"depfile-adjacency", r.depfileData},
 		{"dwarf", r.dwarfData},
 	}
-	
+
 	var results []struct {
 		strategy string
 		source   string
 	}
-	
+
 	for _, strat := range strategies {
 		if source, ok := strat.data[objPath]; ok {
 			results = append(results, struct {
@@ -80,12 +80,12 @@ func (r *ObjectSourceResolver) ResolveObjectSource(objID domain.NodeID) (domain.
 			}{strat.name, source})
 		}
 	}
-	
+
 	if len(results) == 0 {
 		// No evidence found - return error with weak confidence
 		return "", "no-strategy", "", fmt.Errorf("no source mapping found for object %s", objPath)
 	}
-	
+
 	// Check for conflicts
 	firstSource := results[0].source
 	conflict := ""
@@ -96,7 +96,7 @@ func (r *ObjectSourceResolver) ResolveObjectSource(objID domain.NodeID) (domain.
 			break
 		}
 	}
-	
+
 	// Highest priority (first) strategy wins
 	return domain.NodeID(results[0].source), results[0].strategy, conflict, nil
 }
@@ -131,26 +131,26 @@ func (r *ObjectSourceResolver) AddCompileCommandsMapping(objectPath, sourcePath 
 // Returns the count of successfully resolved objects and any errors.
 func (r *ObjectSourceResolver) ResolveAndAddEdges() (int, error) {
 	resolved := 0
-	
+
 	// Get all nodes in the graph
 	nodes := r.graph.Nodes()
-	
+
 	// For each object node, attempt to resolve and add edges
 	for _, node := range nodes {
 		if node.Kind != domain.NodeObject {
 			continue
 		}
-		
+
 		srcID, strategy, conflict, err := r.ResolveObjectSource(node.ID)
 		if err != nil {
 			// Unresolved object - could emit finding here
 			// For now, just skip
 			continue
 		}
-		
+
 		// Determine confidence based on strategy
 		confidence := r.confidenceForStrategy(strategy)
-		
+
 		// Create and add source-mapping edge
 		edge := domain.Edge{
 			From:       node.ID,
@@ -161,7 +161,7 @@ func (r *ObjectSourceResolver) ResolveAndAddEdges() (int, error) {
 			Source:     fmt.Sprintf("%s:object-source-mapping", strategy),
 			Adapter:    "resolver",
 		}
-		
+
 		if conflict != "" {
 			// Record the conflict in attributes
 			if edge.Attributes == nil {
@@ -169,11 +169,11 @@ func (r *ObjectSourceResolver) ResolveAndAddEdges() (int, error) {
 			}
 			edge.Attributes["conflictingStrategy"] = conflict
 		}
-		
+
 		r.graph.AddEdge(edge)
 		resolved++
 	}
-	
+
 	return resolved, nil
 }
 
@@ -183,19 +183,18 @@ func (r *ObjectSourceResolver) confidenceForStrategy(strategy string) domain.Con
 	// Confidence mapping per §8.6: derived = medium-to-high depending on source class
 	switch strategy {
 	case "cmake-file-api":
-		return domain.ConfidenceHigh      // structured-authoritative
+		return domain.ConfidenceHigh // structured-authoritative
 	case "ninja-buildgraph":
-		return domain.ConfidenceHigh      // structured-secondary -> medium, but Ninja is quite reliable
+		return domain.ConfidenceHigh // structured-secondary -> medium, but Ninja is quite reliable
 	case "compile-commands-json":
-		return domain.ConfidenceMedium    // structured-secondary
+		return domain.ConfidenceMedium // structured-secondary
 	case "depfile-adjacency":
-		return domain.ConfidenceMedium    // structured-secondary
+		return domain.ConfidenceMedium // structured-secondary
 	case "dwarf":
-		return domain.ConfidenceHigh      // structured-authoritative
+		return domain.ConfidenceHigh // structured-authoritative
 	case "build-log-fallback":
-		return domain.ConfidenceLow       // textual-fallback + weak strength
+		return domain.ConfidenceLow // textual-fallback + weak strength
 	default:
 		return domain.ConfidenceUnknown
 	}
 }
-

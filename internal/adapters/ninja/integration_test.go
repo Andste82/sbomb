@@ -17,7 +17,7 @@ srcdir = src
 # Variables
 cxx = g++
 cxxflags = -std=c++17 -Wall -fPIC
-ldflags = 
+ldflags =
 
 rule CXX_COMPILER
   command = $cxx $cxxflags -o $out -c $in

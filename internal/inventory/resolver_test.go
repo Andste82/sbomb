@@ -195,8 +195,8 @@ func TestConfidenceForStrategy(t *testing.T) {
 	r := New(g)
 
 	tests := []struct {
-		strategy   string
-		expected   domain.Confidence
+		strategy string
+		expected domain.Confidence
 	}{
 		{"cmake-file-api", domain.ConfidenceHigh},
 		{"ninja-buildgraph", domain.ConfidenceHigh},
