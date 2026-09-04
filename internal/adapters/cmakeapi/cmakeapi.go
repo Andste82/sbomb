@@ -10,30 +10,36 @@ import (
 
 // Model captures the minimal File API data needed for milestone 03.
 type Model struct {
-	Cache         map[string]string
+	Cache          map[string]string
 	Configurations []Configuration
 }
 
 type Configuration struct {
-	Name   string
+	Name    string
 	Targets []Target
 }
 
 type Target struct {
-	Name            string
-	Type            string
-	Artifacts       []Artifact
-	Sources         []Source
-	CompileGroups   []CompileGroup
-	SourceGroups    []SourceGroup
-	Install         []InstallRule
+	Name          string
+	Type          string
+	Artifacts     []Artifact
+	Sources       []Source
+	CompileGroups []CompileGroup
+	SourceGroups  []SourceGroup
+	Install       []InstallRule
 }
 
-type Artifact struct { Path string }
-type Source struct { Path string; IsGenerated bool }
-type CompileGroup struct { SourceFiles []string }
-type SourceGroup struct { Name string; Files []string }
-type InstallRule struct { Dest string }
+type Artifact struct{ Path string }
+type Source struct {
+	Path        string
+	IsGenerated bool
+}
+type CompileGroup struct{ SourceFiles []string }
+type SourceGroup struct {
+	Name  string
+	Files []string
+}
+type InstallRule struct{ Dest string }
 
 // DiscoverReplyDir locates a CMake File API reply directory under a build root.
 func DiscoverReplyDir(buildDir string) (string, error) {
@@ -146,7 +152,7 @@ func (m *Model) parseCache(raw map[string]any) error {
 		if !ok {
 			continue
 		}
-		m.Cache[asString(em["name"])] = asString(em["value"]) 
+		m.Cache[asString(em["name"])] = asString(em["value"])
 	}
 	return nil
 }
