@@ -86,13 +86,41 @@ type Discovery struct {
 	ExcludeTargetPatterns []string `json:"excludeTargetPatterns,omitempty"`
 }
 
+type StringList []string
+
+func (s *StringList) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" || len(data) == 0 {
+		*s = nil
+		return nil
+	}
+	if data[0] == '[' {
+		var out []string
+		if err := json.Unmarshal(data, &out); err != nil {
+			return err
+		}
+		*s = out
+		return nil
+	}
+	var single string
+	if err := json.Unmarshal(data, &single); err != nil {
+		return err
+	}
+	*s = []string{single}
+	return nil
+}
+
 type Component struct {
-	Path    string `json:"path,omitempty"`
-	Match   string `json:"match,omitempty"`
-	Name    string `json:"name,omitempty"`
-	Type    string `json:"type,omitempty"`
-	CDXType string `json:"cdxType,omitempty"`
-	License string `json:"license,omitempty"`
+	Path        string      `json:"path,omitempty"`
+	Match       string      `json:"match,omitempty"`
+	Name        string      `json:"name,omitempty"`
+	Type        string      `json:"type,omitempty"`
+	CDXType     string      `json:"cdxType,omitempty"`
+	Version     string      `json:"version,omitempty"`
+	VersionFrom StringList  `json:"versionFrom,omitempty"`
+	License     string      `json:"license,omitempty"`
+	Supplier    string      `json:"supplier,omitempty"`
+	PURL        string      `json:"purl,omitempty"`
+	Upstream    interface{} `json:"upstream,omitempty"`
 }
 
 type Generator struct {
