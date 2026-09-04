@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "toolVersion": "0.0.0",
+  "anchors": [],
+  "nodes": [
+    {
+      "id": "artifact:build/app.elf",
+      "kind": "artifact"
+    },
+    {
+      "id": "build:app.o",
+      "kind": "object"
+    },
+    {
+      "id": "build:generated/version.h",
+      "kind": "header"
+    },
+    {
+      "id": "build:main.cpp.tu",
+      "kind": "translation-unit"
+    },
+    {
+      "id": "pkg:conan/mbedtls",
+      "kind": "package"
+    },
+    {
+      "id": "project:cmake/version.in",
+      "kind": "generator-input"
+    },
+    {
+      "id": "project:include/app.h",
+      "kind": "header"
+    },
+    {
+      "id": "project:src/main.cpp",
+      "kind": "source"
+    },
+    {
+      "id": "tools/genversion.py",
+      "kind": "generator"
+    }
+  ],
+  "edges": [
+    {
+      "from": "artifact:build/app.elf",
+      "to": "build:app.o",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "ld:--dependency-file",
+      "adapter": "linkdepfile"
+    },
+    {
+      "from": "artifact:build/app.elf",
+      "to": "pkg:conan/mbedtls",
+      "type": "package",
+      "strength": "direct",
+      "confidence": "medium",
+      "source": "conanfile:conanfile.txt",
+      "adapter": "conan"
+    },
+    {
+      "from": "build:app.o",
+      "to": "build:main.cpp.tu",
+      "type": "compile",
+      "strength": "derived",
+      "confidence": "high",
+      "source": "ninja:build.ninja",
+      "adapter": "ninja"
+    },
+    {
+      "from": "build:generated/version.h",
+      "to": "tools/genversion.py",
+      "type": "generated",
+      "strength": "generated",
+      "confidence": "high",
+      "source": "ninja:build.ninja",
+      "adapter": "ninja"
+    },
+    {
+      "from": "build:main.cpp.tu",
+      "to": "build:generated/version.h",
+      "type": "header-dependency",
+      "strength": "derived",
+      "confidence": "high",
+      "source": "depfile:main.cpp.d",
+      "adapter": "depfiles"
+    },
+    {
+      "from": "build:main.cpp.tu",
+      "to": "project:include/app.h",
+      "type": "header-dependency",
+      "strength": "derived",
+      "confidence": "high",
+      "source": "depfile:main.cpp.d",
+      "adapter": "depfiles"
+    },
+    {
+      "from": "build:main.cpp.tu",
+      "to": "project:src/main.cpp",
+      "type": "source-mapping",
+      "strength": "derived",
+      "confidence": "high",
+      "source": "ninja:build.ninja",
+      "adapter": "ninja"
+    },
+    {
+      "from": "tools/genversion.py",
+      "to": "project:cmake/version.in",
+      "type": "generator-input",
+      "strength": "derived",
+      "confidence": "high",
+      "source": "ninja:build.ninja",
+      "adapter": "ninja"
+    }
+  ]
+}
