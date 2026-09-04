@@ -49,13 +49,17 @@ func handleGenerate(args []string) (int, string, string) {
 	for i := 0; i < len(args); i++ {
 		switch {
 		case args[i] == "--build-dir":
-			if i+1 >= len(args) { return 1, "", "missing value for --build-dir\n" }
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --build-dir\n"
+			}
 			buildDir = args[i+1]
 			i++
 		case strings.HasPrefix(args[i], "--build-dir="):
 			buildDir = strings.TrimPrefix(args[i], "--build-dir=")
 		case args[i] == "--output":
-			if i+1 >= len(args) { return 1, "", "missing value for --output\n" }
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --output\n"
+			}
 			output = args[i+1]
 			i++
 		case strings.HasPrefix(args[i], "--output="):
@@ -63,7 +67,9 @@ func handleGenerate(args []string) (int, string, string) {
 		case args[i] == "--reproducible":
 			repro = true
 		case args[i] == "--config":
-			if i+1 >= len(args) { return 1, "", "missing value for --config\n" }
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --config\n"
+			}
 			cfgPath = args[i+1]
 			i++
 		case strings.HasPrefix(args[i], "--config="):

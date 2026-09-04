@@ -45,10 +45,10 @@ type Strength string
 type Confidence string
 
 const (
-	ConfidenceHigh      Confidence = "high"
-	ConfidenceMedium    Confidence = "medium"
-	ConfidenceLow       Confidence = "low"
-	ConfidenceUnknown   Confidence = "unknown"
+	ConfidenceHigh    Confidence = "high"
+	ConfidenceMedium  Confidence = "medium"
+	ConfidenceLow     Confidence = "low"
+	ConfidenceUnknown Confidence = "unknown"
 )
 
 func (c Confidence) Float() float64 {

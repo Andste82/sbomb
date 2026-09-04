@@ -47,8 +47,8 @@ type Project struct {
 }
 
 type Build struct {
-	Dir          string `json:"dir"`
-	Config       string `json:"config,omitempty"`
+	Dir           string `json:"dir"`
+	Config        string `json:"config,omitempty"`
 	Introspection struct {
 		CMake      bool `json:"cmake,omitempty"`
 		Ninja      bool `json:"ninja,omitempty"`

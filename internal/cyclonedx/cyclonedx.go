@@ -16,18 +16,18 @@ const version = "0.0.0-milestone01"
 
 // BOM is a minimal CycloneDX 1.6 BOM for milestone 01.
 type BOM struct {
-	BomFormat    string      `json:"bomFormat"`
-	SpecVersion  string      `json:"specVersion"`
-	Version      int         `json:"version"`
-	SerialNumber string      `json:"serialNumber,omitempty"`
-	Metadata     *Metadata   `json:"metadata,omitempty"`
-	Components   []Component `json:"components,omitempty"`
+	BomFormat    string       `json:"bomFormat"`
+	SpecVersion  string       `json:"specVersion"`
+	Version      int          `json:"version"`
+	SerialNumber string       `json:"serialNumber,omitempty"`
+	Metadata     *Metadata    `json:"metadata,omitempty"`
+	Components   []Component  `json:"components,omitempty"`
 	Dependencies []Dependency `json:"dependencies,omitempty"`
 }
 
 type Metadata struct {
-	Timestamp string     `json:"timestamp,omitempty"`
-	Tools     []Tool     `json:"tools,omitempty"`
+	Timestamp string `json:"timestamp,omitempty"`
+	Tools     []Tool `json:"tools,omitempty"`
 }
 
 type Tool struct {
@@ -42,8 +42,8 @@ type Component struct {
 }
 
 type Dependency struct {
-	Ref          string   `json:"ref"`
-	DependsOn    []string `json:"dependsOn,omitempty"`
+	Ref       string   `json:"ref"`
+	DependsOn []string `json:"dependsOn,omitempty"`
 }
 
 func MarshalEmpty(reproducible bool) (string, error) {
@@ -58,9 +58,9 @@ func MarshalEmpty(reproducible bool) (string, error) {
 		serial = "urn:uuid:" + id.String()
 	}
 	bom := BOM{
-		BomFormat:   "CycloneDX",
-		SpecVersion: "1.6",
-		Version:     1,
+		BomFormat:    "CycloneDX",
+		SpecVersion:  "1.6",
+		Version:      1,
 		SerialNumber: serial,
 		Metadata: &Metadata{
 			Tools: []Tool{{Vendor: "sbomb", Name: "sbomb", Version: version}},
