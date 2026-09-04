@@ -1,0 +1,36 @@
+{
+  "name": "sbomb development",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "workspaceFolder": "/workspaces/sbomb",
+  "containerEnv": {
+    "GOTOOLCHAIN": "local"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "golang.go",
+        "ms-vscode.cpptools",
+        "ms-vscode.cmake-tools",
+        "tamasfe.even-better-toml",
+        "streetsidesoftware.code-spell-checker",
+        "github.vscode-github-actions"
+      ],
+      "settings": {
+        "go.toolsManagement.autoUpdate": true,
+        "go.useLanguageServer": true,
+        "cmake.configureOnOpen": false,
+        "[go]": {
+          "editor.formatOnSave": true,
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+          }
+        }
+      }
+    }
+  },
+  "forwardPorts": [],
+  "postCreateCommand": "git lfs install --local 2>/dev/null || true"
+}
