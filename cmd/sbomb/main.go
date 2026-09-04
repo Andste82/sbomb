@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -35,18 +37,52 @@ func execute(args []string) (int, string, string) {
 		return 0, "sbomb " + version + "\n", ""
 	}
 
-	switch args[0] {
+	subArgs := args
+	globalFlags := []string{}
+	for len(subArgs) > 0 {
+		if subArgs[0] == "-v" || subArgs[0] == "--verbose" || strings.HasPrefix(subArgs[0], "-v=") || strings.HasPrefix(subArgs[0], "--verbose=") || (strings.HasPrefix(subArgs[0], "-v") && isAllV(subArgs[0])) {
+			globalFlags = append(globalFlags, subArgs[0])
+			subArgs = subArgs[1:]
+		} else {
+			break
+		}
+	}
+	if len(subArgs) == 0 {
+		return 0, "sbomb " + version + "\n", ""
+	}
+	if len(globalFlags) > 0 {
+		subArgs = append(subArgs, globalFlags...)
+	}
+
+	switch subArgs[0] {
 	case "version", "--version":
 		return 0, "sbomb " + version + "\n", ""
 	case "schema":
-		return handleSchema(args[1:])
+		return handleSchema(subArgs[1:])
 	case "generate":
-		return handleGenerate(args[1:])
+		return handleGenerate(subArgs[1:])
 	case "explain":
-		return handleExplain(args[1:])
+		return handleExplain(subArgs[1:])
 	default:
 		return 1, "", "usage: sbomb [version|generate|schema|explain]\n"
 	}
+}
+
+func isInteger(s string) bool {
+	_, err := strconv.Atoi(s)
+	return err == nil
+}
+
+func isAllV(s string) bool {
+	if len(s) < 2 || s[0] != '-' {
+		return false
+	}
+	for _, r := range s[1:] {
+		if r != 'v' {
+			return false
+		}
+	}
+	return true
 }
 
 func handleSchema(args []string) (int, string, string) {
@@ -64,8 +100,31 @@ func handleGenerate(args []string) (int, string, string) {
 	reviewReportPath := ""
 	reportFormat := "text"
 	pathFlavor := ""
+	verbosity := 0
 	for i := 0; i < len(args); i++ {
 		switch {
+		case args[i] == "--verbose" || args[i] == "-v":
+			if i+1 < len(args) && isInteger(args[i+1]) {
+				v, _ := strconv.Atoi(args[i+1])
+				verbosity = v
+				i++
+			} else if verbosity == 0 {
+				verbosity = 1
+			} else {
+				verbosity++
+			}
+		case strings.HasPrefix(args[i], "--verbose="):
+			v, err := strconv.Atoi(strings.TrimPrefix(args[i], "--verbose="))
+			if err == nil {
+				verbosity = v
+			}
+		case strings.HasPrefix(args[i], "-v="):
+			v, err := strconv.Atoi(strings.TrimPrefix(args[i], "-v="))
+			if err == nil {
+				verbosity = v
+			}
+		case strings.HasPrefix(args[i], "-v") && isAllV(args[i]):
+			verbosity += len(args[i]) - 1
 		case args[i] == "--build-dir":
 			if i+1 >= len(args) {
 				return 1, "", "missing value for --build-dir\n"
@@ -150,16 +209,24 @@ func handleGenerate(args []string) (int, string, string) {
 	if buildDir == "" {
 		return 1, "", "--build-dir is required\n"
 	}
+	var logBuf bytes.Buffer
+	var logWriter io.Writer
+	if verbosity > 0 {
+		logWriter = &logBuf
+	}
+	cliLogger := generate.NewLogger(verbosity, logWriter)
+
+	cliLogger.Info("Loading configuration (config file: '%s')...", cfgPath)
 	loadedCfg := config.Config{}
 	if cfgPath != "" {
 		var err error
 		loadedCfg, err = config.Load(cfgPath)
 		if err != nil {
-			return 1, "", err.Error() + "\n"
+			return 1, logBuf.String(), err.Error() + "\n"
 		}
 	}
 	if err := os.MkdirAll(buildDir, 0o755); err != nil {
-		return 1, "", err.Error() + "\n"
+		return 1, logBuf.String(), err.Error() + "\n"
 	}
 	if output == "" {
 		output = "sbomb.cdx.json"
@@ -172,32 +239,39 @@ func handleGenerate(args []string) (int, string, string) {
 	case "windows":
 		flavor = pathmodel.WindowsFlavor{}
 	default:
-		return 1, "", "invalid value for --path-flavor: " + pathFlavor + "\n"
+		return 1, logBuf.String(), "invalid value for --path-flavor: " + pathFlavor + "\n"
 	}
-	generated, err := generate.RunWithOptions(loadedCfg, buildDir, repro, generate.Options{PathFlavor: flavor})
+	generated, err := generate.RunWithOptions(loadedCfg, buildDir, repro, generate.Options{
+		PathFlavor: flavor,
+		Verbosity:  verbosity,
+		LogWriter:  logWriter,
+	})
 	if err != nil {
-		return 2, "", err.Error() + "\n"
+		return 2, logBuf.String(), err.Error() + "\n"
 	}
+	cliLogger.Info("Writing CycloneDX BOM to '%s'...", output)
 	if err := cyclonedx.WriteBOM(output, generated.BOM); err != nil {
-		return 2, "", err.Error() + "\n"
+		return 2, logBuf.String(), err.Error() + "\n"
 	}
 	evidencePath := filepath.Join(buildDir, "evidence.json")
+	cliLogger.Info("Writing evidence graph dump to '%s'...", evidencePath)
 	evidenceFile, err := os.Create(evidencePath)
 	if err != nil {
-		return 2, "", err.Error() + "\n"
+		return 2, logBuf.String(), err.Error() + "\n"
 	}
 	if err := generated.Graph.Dump(evidenceFile); err != nil {
 		evidenceFile.Close()
-		return 2, "", err.Error() + "\n"
+		return 2, logBuf.String(), err.Error() + "\n"
 	}
 	if err := evidenceFile.Close(); err != nil {
-		return 2, "", err.Error() + "\n"
+		return 2, logBuf.String(), err.Error() + "\n"
 	}
 
+	cliLogger.Info("Evaluating policy profile '%s'...", policyName)
 	cfg := policy.ResolveProfile(policyName)
 	waivers, err := policy.LoadWaivers(waiversPath)
 	if err != nil {
-		return 1, "", err.Error() + "\n"
+		return 1, logBuf.String(), err.Error() + "\n"
 	}
 	findings := generated.Findings
 	now := time.Now().UTC()
@@ -207,24 +281,29 @@ func handleGenerate(args []string) (int, string, string) {
 		}
 	}
 	res := policy.Evaluate(findings, cfg, waivers, now)
+	cliLogger.Info("Policy evaluation complete: %d finding(s) (fail: %v, exit code: %d)", len(res.Findings), res.Fail, res.ExitCode)
+
 	if findingsJSONPath != "" {
+		cliLogger.Info("Writing findings JSON to '%s'...", findingsJSONPath)
 		if err := policy.WriteFindingsJSON(findingsJSONPath, res.Findings); err != nil {
-			return 1, "", err.Error() + "\n"
+			return 1, logBuf.String(), err.Error() + "\n"
 		}
 	}
 	if reviewReportPath != "" {
+		cliLogger.Info("Writing review report (%s format) to '%s'...", reportFormat, reviewReportPath)
 		text := report.RenderText(cfg.Profile, res.Findings, res.ExitCode)
 		if strings.EqualFold(reportFormat, "markdown") {
 			text = report.RenderMarkdown(cfg.Profile, res.Findings, res.ExitCode)
 		}
 		if err := os.WriteFile(reviewReportPath, []byte(text), 0o600); err != nil {
-			return 1, "", err.Error() + "\n"
+			return 1, logBuf.String(), err.Error() + "\n"
 		}
 	}
+	outStr := logBuf.String()
 	if res.Fail {
-		return 3, "", ""
+		return 3, outStr, ""
 	}
-	return 0, "", ""
+	return 0, outStr, ""
 }
 
 func handleExplain(args []string) (int, string, string) {

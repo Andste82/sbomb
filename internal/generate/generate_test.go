@@ -152,3 +152,34 @@ func TestRunUsesMakeEvidenceWhenCompileDatabaseIsMissing(t *testing.T) {
 		}
 	}
 }
+
+func TestFileComponentResolvesSPDXAndNearestLicense(t *testing.T) {
+	root := t.TempDir()
+	spdxFile := filepath.Join(root, "src", "spdx.c")
+	licensedDir := filepath.Join(root, "vendor", "lib")
+	licensedFile := filepath.Join(licensedDir, "lib.c")
+	if err := os.MkdirAll(filepath.Dir(spdxFile), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(licensedDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(spdxFile, []byte("/* SPDX-License-Identifier: MIT */\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(licensedFile, []byte("int answer(void) { return 42; }\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(licensedDir, "LICENSE"), []byte("SPDX-License-Identifier: MIT\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	spdx := fileComponent("src/spdx.c", spdxFile, pathmodel.PosixFlavor{}, nil)
+	if len(spdx.Licenses) != 1 || spdx.Licenses[0].Expression != "MIT" {
+		t.Fatalf("SPDX license was not resolved: %#v", spdx.Licenses)
+	}
+	nearest := fileComponent("vendor/lib/lib.c", licensedFile, pathmodel.PosixFlavor{}, nil)
+	if len(nearest.Licenses) != 1 || nearest.Licenses[0].Expression != "MIT" {
+		t.Fatalf("nearest license was not resolved: %#v", nearest.Licenses)
+	}
+}

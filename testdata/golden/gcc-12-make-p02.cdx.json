@@ -2,7 +2,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "version": 1,
-  "serialNumber": "urn:uuid:f7f4654a-acdd-5f08-a339-87fe1d100414",
+  "serialNumber": "urn:uuid:d754e90e-acaf-57d9-be89-eda0842298b9",
   "metadata": {
     "tools": [
       {
@@ -17,7 +17,22 @@
       "type": "file",
       "name": "crypto.c",
       "bom-ref": "file:project:__fixture_src__/p02/crypto.c",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
       "properties": [
+        {
+          "name": "sbomb:license:evidence",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
         {
           "name": "sbomb:path:canonical",
           "value": "project:__fixture_src__/p02/crypto.c"
@@ -28,7 +43,22 @@
       "type": "file",
       "name": "crypto.h",
       "bom-ref": "file:project:__fixture_src__/p02/crypto.h",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
       "properties": [
+        {
+          "name": "sbomb:license:evidence",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
         {
           "name": "sbomb:path:canonical",
           "value": "project:__fixture_src__/p02/crypto.h"
@@ -39,7 +69,22 @@
       "type": "file",
       "name": "main.c",
       "bom-ref": "file:project:__fixture_src__/p02/main.c",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
       "properties": [
+        {
+          "name": "sbomb:license:evidence",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
         {
           "name": "sbomb:path:canonical",
           "value": "project:__fixture_src__/p02/main.c"
@@ -50,7 +95,22 @@
       "type": "file",
       "name": "crypto.c.o",
       "bom-ref": "file:project:testdata/fixtures/gcc-12-make/p02-static/build/CMakeFiles/app.dir/crypto.c.o",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
       "properties": [
+        {
+          "name": "sbomb:license:evidence",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
         {
           "name": "sbomb:path:canonical",
           "value": "project:testdata/fixtures/gcc-12-make/p02-static/build/CMakeFiles/app.dir/crypto.c.o"
@@ -61,7 +121,22 @@
       "type": "file",
       "name": "main.c.o",
       "bom-ref": "file:project:testdata/fixtures/gcc-12-make/p02-static/build/CMakeFiles/app.dir/main.c.o",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
       "properties": [
+        {
+          "name": "sbomb:license:evidence",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
         {
           "name": "sbomb:path:canonical",
           "value": "project:testdata/fixtures/gcc-12-make/p02-static/build/CMakeFiles/app.dir/main.c.o"
@@ -72,7 +147,22 @@
       "type": "file",
       "name": "libcore.a",
       "bom-ref": "file:project:testdata/fixtures/gcc-12-make/p02-static/build/CMakeFiles/libcore.dir/libcore.a",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
       "properties": [
+        {
+          "name": "sbomb:license:evidence",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
         {
           "name": "sbomb:path:canonical",
           "value": "project:testdata/fixtures/gcc-12-make/p02-static/build/CMakeFiles/libcore.dir/libcore.a"

@@ -51,3 +51,43 @@ func TestExecuteExplainLoadsEvidenceDump(t *testing.T) {
 		t.Fatalf("explain output missing subject: %q", out)
 	}
 }
+
+func TestExecuteVerboseLevels(t *testing.T) {
+	fixtureDir := filepath.Join("..", "..", "testdata", "fixtures", "gcc-13", "p02-static", "build")
+
+	// Level 1: [INFO]
+	outDir1 := t.TempDir()
+	code1, out1, errOut1 := execute([]string{"generate", "--build-dir", fixtureDir, "--policy", "lenient", "--output", filepath.Join(outDir1, "out.json"), "-v", "--reproducible"})
+	if code1 != 0 || errOut1 != "" {
+		t.Fatalf("generate -v failed: code=%d err=%q", code1, errOut1)
+	}
+	if !strings.Contains(out1, "[INFO]") {
+		t.Fatalf("expected [INFO] logs in level 1 output: %s", out1)
+	}
+	if strings.Contains(out1, "[DEBUG]") || strings.Contains(out1, "[TRACE]") {
+		t.Fatalf("level 1 output should not contain [DEBUG] or [TRACE]: %s", out1)
+	}
+
+	// Level 2: [INFO] and [DEBUG]
+	outDir2 := t.TempDir()
+	code2, out2, errOut2 := execute([]string{"generate", "--build-dir", fixtureDir, "--policy", "lenient", "--output", filepath.Join(outDir2, "out.json"), "-vv", "--reproducible"})
+	if code2 != 0 || errOut2 != "" {
+		t.Fatalf("generate -vv failed: code=%d err=%q", code2, errOut2)
+	}
+	if !strings.Contains(out2, "[INFO]") || !strings.Contains(out2, "[DEBUG]") {
+		t.Fatalf("expected [INFO] and [DEBUG] logs in level 2 output: %s", out2)
+	}
+	if strings.Contains(out2, "[TRACE]") {
+		t.Fatalf("level 2 output should not contain [TRACE]: %s", out2)
+	}
+
+	// Level 3: [INFO], [DEBUG] and [TRACE]
+	outDir3 := t.TempDir()
+	code3, out3, errOut3 := execute([]string{"generate", "--build-dir", fixtureDir, "--policy", "lenient", "--output", filepath.Join(outDir3, "out.json"), "--verbose=3", "--reproducible"})
+	if code3 != 0 || errOut3 != "" {
+		t.Fatalf("generate --verbose=3 failed: code=%d err=%q", code3, errOut3)
+	}
+	if !strings.Contains(out3, "[INFO]") || !strings.Contains(out3, "[DEBUG]") || !strings.Contains(out3, "[TRACE]") {
+		t.Fatalf("expected [INFO], [DEBUG], and [TRACE] logs in level 3 output: %s", out3)
+	}
+}
