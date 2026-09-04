@@ -1,0 +1,1 @@
+link trace for gcc-12/p01-hello

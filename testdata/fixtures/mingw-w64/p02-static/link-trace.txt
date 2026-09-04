@@ -1,0 +1,1 @@
+link trace for mingw-w64/p02-static
