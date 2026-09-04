@@ -364,14 +364,15 @@ func validateUniqueRefs(bom BOM) error {
 		}
 		seen[bom.Metadata.Component.BomRef] = struct{}{}
 	}
+	dependencyRefs := make(map[string]struct{}, len(bom.Dependencies))
 	for _, dep := range bom.Dependencies {
 		if dep.Ref == "" {
 			continue
 		}
-		if _, ok := seen[dep.Ref]; ok {
+		if _, ok := dependencyRefs[dep.Ref]; ok {
 			return fmt.Errorf("duplicate dependency ref: %s", dep.Ref)
 		}
-		seen[dep.Ref] = struct{}{}
+		dependencyRefs[dep.Ref] = struct{}{}
 	}
 	return nil
 }

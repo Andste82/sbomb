@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "project": {
+    "name": "p02-static",
+    "root": "/__fixture_src__"
+  },
+  "build": {
+    "dir": "/__fixture_build__"
+  },
+  "mode": "single",
+  "output": {
+    "format": "cyclonedx",
+    "specVersion": "1.6",
+    "reproducible": true,
+    "hashAlgorithms": ["sha256"]
+  },
+  "policy": {
+    "profile": "default"
+  }
+}

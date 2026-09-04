@@ -69,7 +69,7 @@ func Run(cfg config.Config, buildDir string, reproducible bool) (Result, error) 
 		graph.AddEdge(domain.Edge{From: objectID, To: sourceID, Type: "compile", Strength: "derived", Confidence: domain.ConfidenceHigh, Source: "compile_commands", Adapter: "compiledb"})
 		components = append(components, fileComponent(rel, command.File))
 	}
-	if len(commands) == 0 {
+	if len(commands) == 0 || !hasLinkEvidence(buildDir) {
 		findings = append(findings, domain.Finding{ID: "MISSING_LINK_EVIDENCE", Severity: domain.SeverityError, Subject: domain.Subject{Kind: "artifact", Ref: string(artifactID)}, Message: "no compile or link evidence was discovered"})
 	}
 	sort.Slice(components, func(i, j int) bool { return components[i].BomRef < components[j].BomRef })
@@ -103,4 +103,13 @@ func deterministicSerial(bom cyclonedx.BOM) string {
 	b, _ := cyclonedx.MarshalBOM(bom)
 	hash := sha256.Sum256([]byte(b))
 	return strings.ToLower(hex.EncodeToString(hash[:]))[:32]
+}
+
+func hasLinkEvidence(buildDir string) bool {
+	for _, name := range []string{"link-trace.txt", "link.d", "link.map"} {
+		if info, err := os.Stat(filepath.Join(buildDir, name)); err == nil && !info.IsDir() {
+			return true
+		}
+	}
+	return false
 }

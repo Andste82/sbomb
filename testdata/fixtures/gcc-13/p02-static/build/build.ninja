@@ -1,0 +1,4 @@
+rule cc
+  command = gcc -c $in -o $out
+
+build crypto.o: cc /__fixture_src__/src/crypto.c
