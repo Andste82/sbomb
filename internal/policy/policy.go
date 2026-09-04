@@ -16,31 +16,31 @@ import (
 type Config struct {
 	Profile string
 
-	FailOnUnknownComponent            bool
-	FailOnUnknownLicense              bool
-	FailOnMissingHash                 bool
+	FailOnUnknownComponent             bool
+	FailOnUnknownLicense               bool
+	FailOnMissingHash                  bool
 	FailOnMissingSourceForLinkedObject bool
-	FailOnStaleBuildArtifacts         bool
-	FailOnReviewRequired              bool
-	FailOnWeakEvidence                bool
-	FailOnMissingHeaderEvidence       bool
-	FailOnUnanchoredFile             bool
-	FailOnUnknownVersion             bool
-	FailOnMissingSupplier            bool
-	FailOnMissingComponentHash       bool
-	AllowMissingLinkEvidence         bool
+	FailOnStaleBuildArtifacts          bool
+	FailOnReviewRequired               bool
+	FailOnWeakEvidence                 bool
+	FailOnMissingHeaderEvidence        bool
+	FailOnUnanchoredFile               bool
+	FailOnUnknownVersion               bool
+	FailOnMissingSupplier              bool
+	FailOnMissingComponentHash         bool
+	AllowMissingLinkEvidence           bool
 
-	HeaderEvidence     string
+	HeaderEvidence    string
 	SeverityOverrides map[string]domain.Severity
 	WaiversFile       string
 }
 
 type Waiver struct {
-	ID        string `json:"id"`
-	Subject   string `json:"subject"`
-	Reason    string `json:"reason"`
+	ID         string `json:"id"`
+	Subject    string `json:"subject"`
+	Reason     string `json:"reason"`
 	ApprovedBy string `json:"approvedBy,omitempty"`
-	Expires   string `json:"expires,omitempty"`
+	Expires    string `json:"expires,omitempty"`
 }
 
 type Result struct {
@@ -53,21 +53,21 @@ func DefaultConfig() Config {
 	return Config{
 		Profile: "default",
 
-		FailOnUnknownComponent:            false,
-		FailOnUnknownLicense:              false,
-		FailOnMissingHash:                 true,
+		FailOnUnknownComponent:             false,
+		FailOnUnknownLicense:               false,
+		FailOnMissingHash:                  true,
 		FailOnMissingSourceForLinkedObject: true,
-		FailOnStaleBuildArtifacts:         true,
-		FailOnReviewRequired:              false,
-		FailOnWeakEvidence:                false,
-		FailOnMissingHeaderEvidence:       false,
-		FailOnUnanchoredFile:             false,
-		FailOnUnknownVersion:             false,
-		FailOnMissingSupplier:            false,
-		FailOnMissingComponentHash:       false,
-		AllowMissingLinkEvidence:         false,
-		HeaderEvidence:                  "dwarf-preferred",
-		SeverityOverrides:               map[string]domain.Severity{},
+		FailOnStaleBuildArtifacts:          true,
+		FailOnReviewRequired:               false,
+		FailOnWeakEvidence:                 false,
+		FailOnMissingHeaderEvidence:        false,
+		FailOnUnanchoredFile:               false,
+		FailOnUnknownVersion:               false,
+		FailOnMissingSupplier:              false,
+		FailOnMissingComponentHash:         false,
+		AllowMissingLinkEvidence:           false,
+		HeaderEvidence:                     "dwarf-preferred",
+		SeverityOverrides:                  map[string]domain.Severity{},
 	}
 }
 
@@ -133,6 +133,9 @@ func Evaluate(findings []domain.Finding, cfg Config, waivers []Waiver, now time.
 	out := make([]domain.Finding, 0, len(findings))
 	used := make(map[string]bool)
 	for _, f := range findings {
+		if severity, ok := cfg.SeverityOverrides[f.ID]; ok {
+			f.Severity = severity
+		}
 		matched, waiverUsed, waiverReason, expired := matchWaiver(f, waivers, now)
 		if matched {
 			used[waiverKey(waiverUsed)] = true
@@ -158,7 +161,7 @@ func Evaluate(findings []domain.Finding, cfg Config, waivers []Waiver, now time.
 				Severity: domain.SeverityInfo,
 				Subject:  domain.Subject{Kind: "configuration", Ref: w.Subject},
 				Message:  fmt.Sprintf("waiver for %s matched no findings", w.ID),
-				Detail: map[string]any{"waiver": w},
+				Detail:   map[string]any{"waiver": w},
 			})
 		}
 	}
