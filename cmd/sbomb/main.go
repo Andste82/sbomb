@@ -3,12 +3,14 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/example/sbomb/internal/config"
 	"github.com/example/sbomb/internal/cyclonedx"
-	"github.com/example/sbomb/internal/domain"
+	"github.com/example/sbomb/internal/evidence"
+	"github.com/example/sbomb/internal/generate"
 	"github.com/example/sbomb/internal/policy"
 	"github.com/example/sbomb/internal/report"
 )
@@ -135,8 +137,11 @@ func handleGenerate(args []string) (int, string, string) {
 	if buildDir == "" {
 		return 1, "", "--build-dir is required\n"
 	}
+	loadedCfg := config.Config{}
 	if cfgPath != "" {
-		if _, err := config.Load(cfgPath); err != nil {
+		var err error
+		loadedCfg, err = config.Load(cfgPath)
+		if err != nil {
 			return 1, "", err.Error() + "\n"
 		}
 	}
@@ -146,8 +151,24 @@ func handleGenerate(args []string) (int, string, string) {
 	if output == "" {
 		output = "sbomb.cdx.json"
 	}
-	if err := cyclonedx.WriteEmpty(output, repro); err != nil {
-		return 1, "", err.Error() + "\n"
+	generated, err := generate.Run(loadedCfg, buildDir, repro)
+	if err != nil {
+		return 2, "", err.Error() + "\n"
+	}
+	if err := cyclonedx.WriteBOM(output, generated.BOM); err != nil {
+		return 2, "", err.Error() + "\n"
+	}
+	evidencePath := filepath.Join(buildDir, "evidence.json")
+	evidenceFile, err := os.Create(evidencePath)
+	if err != nil {
+		return 2, "", err.Error() + "\n"
+	}
+	if err := generated.Graph.Dump(evidenceFile); err != nil {
+		evidenceFile.Close()
+		return 2, "", err.Error() + "\n"
+	}
+	if err := evidenceFile.Close(); err != nil {
+		return 2, "", err.Error() + "\n"
 	}
 
 	cfg := policy.ResolveProfile(policyName)
@@ -155,7 +176,7 @@ func handleGenerate(args []string) (int, string, string) {
 	if err != nil {
 		return 1, "", err.Error() + "\n"
 	}
-	findings := []domain.Finding{}
+	findings := generated.Findings
 	res := policy.Evaluate(findings, cfg, waivers, time.Now().UTC())
 	if findingsJSONPath != "" {
 		if err := policy.WriteFindingsJSON(findingsJSONPath, res.Findings); err != nil {
@@ -178,11 +199,21 @@ func handleGenerate(args []string) (int, string, string) {
 }
 
 func handleExplain(args []string) (int, string, string) {
+	buildDir := ""
 	fileRef := ""
 	component := ""
 	bomRef := ""
+	format := "text"
 	for i := 0; i < len(args); i++ {
 		switch {
+		case args[i] == "--build-dir":
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --build-dir\n"
+			}
+			buildDir = args[i+1]
+			i++
+		case strings.HasPrefix(args[i], "--build-dir="):
+			buildDir = strings.TrimPrefix(args[i], "--build-dir=")
 		case args[i] == "--file":
 			if i+1 >= len(args) {
 				return 1, "", "missing value for --file\n"
@@ -207,6 +238,14 @@ func handleExplain(args []string) (int, string, string) {
 			i++
 		case strings.HasPrefix(args[i], "--bom-ref="):
 			bomRef = strings.TrimPrefix(args[i], "--bom-ref=")
+		case args[i] == "--format":
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --format\n"
+			}
+			format = args[i+1]
+			i++
+		case strings.HasPrefix(args[i], "--format="):
+			format = strings.TrimPrefix(args[i], "--format=")
 		default:
 			if strings.HasPrefix(args[i], "--") {
 				return 1, "", fmt.Sprintf("unknown flag: %s\n", args[i])
@@ -224,7 +263,41 @@ func handleExplain(args []string) (int, string, string) {
 	if bomRef != "" {
 		subject = bomRef
 	}
-	msg := fmt.Sprintf("explain not yet implemented for %s; this is the milestone-13 CLI stub\n", subject)
-	return 0, msg, ""
+	if buildDir == "" {
+		return 1, "", "--build-dir is required\n"
+	}
+	g, err := loadEvidenceGraph(buildDir)
+	if err != nil {
+		return 1, "", err.Error() + "\n"
+	}
+
+	var text string
+	if strings.EqualFold(format, "json") {
+		text, err = report.RenderExplainJSON(g, subject)
+	} else if strings.EqualFold(format, "text") {
+		text, err = report.RenderExplain(g, subject)
+	} else {
+		return 1, "", fmt.Sprintf("unsupported explain format: %s\n", format)
+	}
+	if err != nil {
+		return 1, "", err.Error() + "\n"
+	}
+	return 0, text, ""
 }
 
+func loadEvidenceGraph(buildDir string) (*evidence.Graph, error) {
+	for _, name := range []string{"evidence.json", ".sbomb/evidence.json"} {
+		path := filepath.Join(buildDir, name)
+		file, err := os.Open(path)
+		if err != nil {
+			continue
+		}
+		graph, loadErr := evidence.LoadDump(file)
+		_ = file.Close()
+		if loadErr != nil {
+			return nil, fmt.Errorf("load evidence graph %s: %w", path, loadErr)
+		}
+		return graph, nil
+	}
+	return nil, fmt.Errorf("no evidence graph found in %s", buildDir)
+}

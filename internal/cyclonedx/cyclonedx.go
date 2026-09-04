@@ -43,16 +43,16 @@ type Tool struct {
 }
 
 type Component struct {
-	Type       string         `json:"type,omitempty"`
-	Name       string         `json:"name,omitempty"`
-	Version    string         `json:"version,omitempty"`
-	BomRef     string         `json:"bom-ref,omitempty"`
-	PURL       string         `json:"purl,omitempty"`
+	Type       string                `json:"type,omitempty"`
+	Name       string                `json:"name,omitempty"`
+	Version    string                `json:"version,omitempty"`
+	BomRef     string                `json:"bom-ref,omitempty"`
+	PURL       string                `json:"purl,omitempty"`
 	Supplier   *OrganizationalEntity `json:"supplier,omitempty"`
-	Hashes     []Hash         `json:"hashes,omitempty"`
-	Licenses   []License      `json:"licenses,omitempty"`
-	Properties []Property     `json:"properties,omitempty"`
-	Evidence   *Evidence      `json:"evidence,omitempty"`
+	Hashes     []Hash                `json:"hashes,omitempty"`
+	Licenses   []License             `json:"licenses,omitempty"`
+	Properties []Property            `json:"properties,omitempty"`
+	Evidence   *Evidence             `json:"evidence,omitempty"`
 }
 
 type OrganizationalEntity struct {
@@ -65,8 +65,8 @@ type Hash struct {
 }
 
 type License struct {
-	License *LicenseIdentifier `json:"license,omitempty"`
-	Expression string `json:"expression,omitempty"`
+	License    *LicenseIdentifier `json:"license,omitempty"`
+	Expression string             `json:"expression,omitempty"`
 }
 
 type LicenseIdentifier struct {
@@ -92,8 +92,8 @@ type IdentityEvidence struct {
 }
 
 type Method struct {
-	Technique string  `json:"technique"`
-	Value     string  `json:"value,omitempty"`
+	Technique  string  `json:"technique"`
+	Value      string  `json:"value,omitempty"`
 	Confidence float64 `json:"confidence,omitempty"`
 }
 
@@ -234,6 +234,40 @@ func reproducibleSerialNumber() string {
 
 func WriteEmpty(path string, reproducible bool) error {
 	out, err := MarshalEmpty(reproducible)
+	if err != nil {
+		return err
+	}
+	if err := ValidateDocument([]byte(out)); err != nil {
+		return err
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return err
+	}
+	tmp, err := os.CreateTemp(filepath.Dir(path), ".sbomb-*.tmp")
+	if err != nil {
+		return err
+	}
+	name := tmp.Name()
+	if _, err := tmp.WriteString(out); err != nil {
+		tmp.Close()
+		os.Remove(name)
+		return err
+	}
+	if err := tmp.Close(); err != nil {
+		os.Remove(name)
+		return err
+	}
+	if err := os.Rename(name, path); err != nil {
+		os.Remove(name)
+		return err
+	}
+	return nil
+}
+
+// WriteBOM serializes and validates a populated document using the same atomic
+// write path as the empty-document compatibility helper.
+func WriteBOM(path string, bom BOM) error {
+	out, err := MarshalBOM(bom)
 	if err != nil {
 		return err
 	}
@@ -464,14 +498,14 @@ func validatePropertyName(name string) error {
 		return fmt.Errorf("property name %q must start with sbomb:", name)
 	}
 	allowed := map[string]struct{}{
-		"sbomb:cdx:archiveProperty": {},
+		"sbomb:cdx:archiveProperty":    {},
 		"sbomb:cdx:executableProperty": {},
 		"sbomb:cdx:structuredProperty": {},
-		"sbomb:evidence:artifacts": {},
-		"sbomb:license:reason": {},
-		"sbomb:license:review": {},
-		"sbomb:run:timestamp": {},
-		"sbomb:run:sourceDateEpoch": {},
+		"sbomb:evidence:artifacts":     {},
+		"sbomb:license:reason":         {},
+		"sbomb:license:review":         {},
+		"sbomb:run:timestamp":          {},
+		"sbomb:run:sourceDateEpoch":    {},
 	}
 	if _, ok := allowed[name]; ok {
 		return nil
