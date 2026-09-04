@@ -22,7 +22,7 @@ var hostPathFragments = []string{
 }
 
 func Toolchains() []string {
-	return []string{"gcc-13", "clang-17", "gcc-12", "mingw-w64", "arm-none-eabi"}
+	return []string{"gcc-13", "clang-17", "gcc-12", "gcc-12-make", "mingw-w64", "arm-none-eabi"}
 }
 
 func Projects() []string {

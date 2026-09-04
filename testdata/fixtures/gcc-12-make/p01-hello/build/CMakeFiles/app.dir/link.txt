@@ -1,0 +1,1 @@
+cc -o app CMakeFiles/app.dir/main.c.o

@@ -101,3 +101,54 @@ func TestRunBuildsGraphAndReportsMissingEvidence(t *testing.T) {
 		t.Fatal("expected missing link evidence finding")
 	}
 }
+
+func TestRunUsesMakeEvidenceWhenCompileDatabaseIsMissing(t *testing.T) {
+	root := t.TempDir()
+	buildDir := filepath.Join(root, "build")
+	targetDir := filepath.Join(buildDir, "CMakeFiles", "app.dir")
+	if err := os.MkdirAll(targetDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	source := filepath.Join(root, "src", "main.c")
+	header := filepath.Join(root, "include", "config.h")
+	if err := os.MkdirAll(filepath.Dir(source), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Dir(header), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(source, []byte("int main(void) { return 0; }\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(header, []byte("#define VALUE 1\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	write := func(name, content string) {
+		t.Helper()
+		if err := os.WriteFile(filepath.Join(targetDir, name), []byte(content), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	write("build.make", "CMakeFiles/app.dir/main.c.o: "+source+"\n")
+	write("link.txt", "cc -o app CMakeFiles/app.dir/main.c.o\n")
+	write("compiler_depend.make", "CMakeFiles/app.dir/main.c.o: "+source+" "+header+"\n")
+
+	result, err := RunWithOptions(config.Config{Project: config.Project{Root: root}}, buildDir, true, Options{PathFlavor: pathmodel.PosixFlavor{}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	makeEdges := 0
+	for _, edge := range result.Graph.Edges() {
+		if edge.Adapter == "make" {
+			makeEdges++
+		}
+	}
+	if makeEdges < 3 {
+		t.Fatalf("got %d Make evidence edges, want link, source, and header edges", makeEdges)
+	}
+	for _, finding := range result.Findings {
+		if finding.ID == "MISSING_LINK_EVIDENCE" {
+			t.Fatal("Make link.txt should satisfy link evidence")
+		}
+	}
+}

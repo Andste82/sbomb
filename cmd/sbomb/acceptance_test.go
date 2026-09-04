@@ -106,3 +106,32 @@ func TestMilestone13Acceptance(t *testing.T) {
 		t.Fatalf("discovery precedence = code %d, stderr %q; want code 2 with an error", discoveryCode, discoveryErr)
 	}
 }
+
+func TestMilestone17MakefilesAcceptance(t *testing.T) {
+	workingDirectory, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chdir(filepath.Join("..", "..")); err != nil {
+		t.Fatal(err)
+	}
+	defer os.Chdir(workingDirectory)
+	buildDir := filepath.Join("testdata", "fixtures", "gcc-12-make", "p02-static", "build")
+	defer os.Remove(filepath.Join(buildDir, "evidence.json"))
+	output := filepath.Join(t.TempDir(), "mk.cdx.json")
+	code, _, stderr := execute([]string{"generate", "--build-dir", buildDir, "--output", output, "--reproducible"})
+	if code != 0 || stderr != "" {
+		t.Fatalf("Make acceptance result = code %d, stderr %q", code, stderr)
+	}
+	actual, err := os.ReadFile(output)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected, err := os.ReadFile(filepath.Join("testdata", "golden", "gcc-12-make-p02.cdx.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(actual, expected) {
+		t.Fatal("Makefiles SBOM differs from golden")
+	}
+}

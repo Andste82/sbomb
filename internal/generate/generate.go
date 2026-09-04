@@ -9,9 +9,11 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/example/sbomb/internal/adapters/compiledb"
+	makeadapter "github.com/example/sbomb/internal/adapters/make"
 	"github.com/example/sbomb/internal/adapters/manifest"
 	"github.com/example/sbomb/internal/config"
 	"github.com/example/sbomb/internal/cyclonedx"
@@ -81,6 +83,15 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		findings = append(findings, domain.Finding{ID: "MISSING_COMPILE_EVIDENCE", Severity: domain.SeverityWarning, Subject: domain.Subject{Kind: "build", Ref: buildDir}, Message: "compile_commands.json was not found"})
 	}
 	seen := map[string]bool{}
+	componentSeen := map[string]bool{}
+	addComponent := func(path string) {
+		canonical := pathmodel.ResolveWithFlavor(path, projectRoot, buildDir, options.PathFlavor)
+		if componentSeen[canonical] {
+			return
+		}
+		componentSeen[canonical] = true
+		components = append(components, fileComponent(canonical, path, options.PathFlavor))
+	}
 	for _, command := range commands {
 		rel := pathmodel.ResolveWithFlavor(command.File, projectRoot, buildDir, options.PathFlavor)
 		if seen[rel] {
@@ -97,9 +108,43 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		graph.AddNode(domain.Node{ID: sourceID, Kind: domain.NodeSource})
 		graph.AddEdge(domain.Edge{From: artifactID, To: objectID, Type: "compile-output", Strength: "linked", Confidence: domain.ConfidenceMedium, Source: "compile_commands", Adapter: "compiledb"})
 		graph.AddEdge(domain.Edge{From: objectID, To: sourceID, Type: "compile", Strength: "derived", Confidence: domain.ConfidenceHigh, Source: "compile_commands", Adapter: "compiledb"})
-		components = append(components, fileComponent(rel, command.File, options.PathFlavor))
+		addComponent(command.File)
 	}
-	if len(commands) == 0 || !hasLinkEvidence(buildDir) {
+	if len(commands) == 0 {
+		if makeBuild, makeErr := makeadapter.Parse(buildDir); makeErr == nil {
+			for _, target := range makeBuild.Targets {
+				for _, input := range target.LinkInputs {
+					canonical := pathmodel.ResolveWithFlavor(input, projectRoot, buildDir, options.PathFlavor)
+					objectID := domain.NodeID("object:" + canonical)
+					kind := domain.NodeObject
+					if strings.HasSuffix(input, ".a") || strings.HasSuffix(input, ".lib") {
+						kind = domain.NodeArchive
+					}
+					graph.AddNode(domain.Node{ID: objectID, Kind: kind})
+					graph.AddEdge(domain.Edge{From: artifactID, To: objectID, Type: "link", Strength: "linked", Confidence: domain.ConfidenceHigh, Source: filepath.Join(target.Directory, "link.txt"), Adapter: "make"})
+					if source, ok := target.ObjectSources[input]; ok {
+						sourceCanonical := pathmodel.ResolveWithFlavor(source, projectRoot, buildDir, options.PathFlavor)
+						sourceID := domain.NodeID(sourceCanonical)
+						graph.AddNode(domain.Node{ID: sourceID, Kind: domain.NodeSource})
+						graph.AddEdge(domain.Edge{From: objectID, To: sourceID, Type: "source-mapping", Strength: "derived", Confidence: domain.ConfidenceHigh, Source: filepath.Join(target.Directory, "build.make"), Adapter: "make"})
+						addComponent(source)
+					}
+					for _, dependency := range target.ObjectDeps[input] {
+						if dependency == target.ObjectSources[input] {
+							continue
+						}
+						dependencyCanonical := pathmodel.ResolveWithFlavor(dependency, projectRoot, buildDir, options.PathFlavor)
+						dependencyID := domain.NodeID(dependencyCanonical)
+						graph.AddNode(domain.Node{ID: dependencyID, Kind: domain.NodeHeader})
+						graph.AddEdge(domain.Edge{From: objectID, To: dependencyID, Type: "include", Strength: "derived", Confidence: domain.ConfidenceMedium, Source: target.CompilerDepend, Adapter: "make"})
+						addComponent(dependency)
+					}
+					addComponent(input)
+				}
+			}
+		}
+	}
+	if (len(commands) == 0 && !hasMakeLinkEvidence(buildDir)) || !hasLinkEvidence(buildDir) {
 		findings = append(findings, domain.Finding{ID: "MISSING_LINK_EVIDENCE", Severity: domain.SeverityError, Subject: domain.Subject{Kind: "artifact", Ref: string(artifactID)}, Message: "no compile or link evidence was discovered"})
 	}
 	sort.Slice(components, func(i, j int) bool { return components[i].BomRef < components[j].BomRef })
@@ -144,5 +189,19 @@ func hasLinkEvidence(buildDir string) bool {
 			return true
 		}
 	}
+	if hasMakeLinkEvidence(buildDir) {
+		return true
+	}
+	for _, pattern := range []string{"*.map", "*.d"} {
+		matches, err := filepath.Glob(filepath.Join(buildDir, pattern))
+		if err == nil && len(matches) > 0 {
+			return true
+		}
+	}
 	return false
+}
+
+func hasMakeLinkEvidence(buildDir string) bool {
+	matches, err := filepath.Glob(filepath.Join(buildDir, "CMakeFiles", "*.dir", "link.txt"))
+	return err == nil && len(matches) > 0
 }

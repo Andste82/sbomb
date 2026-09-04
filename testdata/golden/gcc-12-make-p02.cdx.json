@@ -1,0 +1,103 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "version": 1,
+  "serialNumber": "urn:uuid:f7f4654a-acdd-5f08-a339-87fe1d100414",
+  "metadata": {
+    "tools": [
+      {
+        "vendor": "sbomb",
+        "name": "sbomb",
+        "version": "0.0.0-milestone14"
+      }
+    ]
+  },
+  "components": [
+    {
+      "type": "file",
+      "name": "crypto.c",
+      "bom-ref": "file:project:__fixture_src__/p02/crypto.c",
+      "properties": [
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:__fixture_src__/p02/crypto.c"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "crypto.h",
+      "bom-ref": "file:project:__fixture_src__/p02/crypto.h",
+      "properties": [
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:__fixture_src__/p02/crypto.h"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "main.c",
+      "bom-ref": "file:project:__fixture_src__/p02/main.c",
+      "properties": [
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:__fixture_src__/p02/main.c"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "crypto.c.o",
+      "bom-ref": "file:project:testdata/fixtures/gcc-12-make/p02-static/build/CMakeFiles/app.dir/crypto.c.o",
+      "properties": [
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:testdata/fixtures/gcc-12-make/p02-static/build/CMakeFiles/app.dir/crypto.c.o"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "main.c.o",
+      "bom-ref": "file:project:testdata/fixtures/gcc-12-make/p02-static/build/CMakeFiles/app.dir/main.c.o",
+      "properties": [
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:testdata/fixtures/gcc-12-make/p02-static/build/CMakeFiles/app.dir/main.c.o"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "libcore.a",
+      "bom-ref": "file:project:testdata/fixtures/gcc-12-make/p02-static/build/CMakeFiles/libcore.dir/libcore.a",
+      "properties": [
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:testdata/fixtures/gcc-12-make/p02-static/build/CMakeFiles/libcore.dir/libcore.a"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "file:project:__fixture_src__/p02/crypto.c"
+    },
+    {
+      "ref": "file:project:__fixture_src__/p02/crypto.h"
+    },
+    {
+      "ref": "file:project:__fixture_src__/p02/main.c"
+    },
+    {
+      "ref": "file:project:testdata/fixtures/gcc-12-make/p02-static/build/CMakeFiles/app.dir/crypto.c.o"
+    },
+    {
+      "ref": "file:project:testdata/fixtures/gcc-12-make/p02-static/build/CMakeFiles/app.dir/main.c.o"
+    },
+    {
+      "ref": "file:project:testdata/fixtures/gcc-12-make/p02-static/build/CMakeFiles/libcore.dir/libcore.a"
+    }
+  ]
+}
