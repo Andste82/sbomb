@@ -65,4 +65,44 @@ func TestMilestone13Acceptance(t *testing.T) {
 	if !bytes.Equal([]byte(explainOutput), goldenExplain) {
 		t.Fatalf("explain differs from golden:\n%s", explainOutput)
 	}
+
+	secondBuild := t.TempDir()
+	for _, name := range []string{"compile_commands.json", "build.ninja"} {
+		data, err := os.ReadFile(filepath.Join(fixture, name))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(secondBuild, name), data, 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	secondOutput := filepath.Join(t.TempDir(), "second.cdx.json")
+	secondReport := filepath.Join(t.TempDir(), "second.txt")
+	secondCode, _, secondErr := execute([]string{"generate", "--build-dir", secondBuild, "--config", configPath, "--policy", "strict", "--output", secondOutput, "--review-report", secondReport, "--reproducible"})
+	if secondCode != 3 || secondErr != "" {
+		t.Fatalf("second strict result = code %d, stderr %q; want code 3", secondCode, secondErr)
+	}
+	secondSBOM, err := os.ReadFile(secondOutput)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(strictSBOM, secondSBOM) {
+		t.Fatal("reproducible SBOM changed between runs")
+	}
+	secondReportBytes, err := os.ReadFile(secondReport)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(actualReport, secondReportBytes) {
+		t.Fatal("reproducible report changed between runs")
+	}
+
+	brokenBuild := t.TempDir()
+	if err := os.WriteFile(filepath.Join(brokenBuild, "compile_commands.json"), []byte("{"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	discoveryCode, _, discoveryErr := execute([]string{"generate", "--build-dir", brokenBuild, "--config", configPath, "--policy", "strict", "--output", filepath.Join(t.TempDir(), "broken.cdx.json"), "--reproducible"})
+	if discoveryCode != 2 || discoveryErr == "" {
+		t.Fatalf("discovery precedence = code %d, stderr %q; want code 2 with an error", discoveryCode, discoveryErr)
+	}
 }
