@@ -1,5 +1,4 @@
 package buildctx
-package buildctx
 
 import (
 	"os"
