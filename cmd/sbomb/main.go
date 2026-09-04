@@ -282,6 +282,9 @@ func handleExplain(args []string) (int, string, string) {
 	if err != nil {
 		return 1, "", err.Error() + "\n"
 	}
+	if strings.EqualFold(format, "text") && !strings.HasSuffix(text, "\n") {
+		text += "\n"
+	}
 	return 0, text, ""
 }
 

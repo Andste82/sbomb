@@ -37,7 +37,11 @@ func Run(cfg config.Config, buildDir string, reproducible bool) (Result, error) 
 		projectRoot = "."
 	}
 	graph := evidence.New()
-	artifactID := domain.NodeID("artifact:" + pathmodel.Slug(filepath.Base(buildDir), 64))
+	artifactName := "build"
+	if len(cfg.Artifacts) > 0 && cfg.Artifacts[0].Path != "" {
+		artifactName = filepath.Base(cfg.Artifacts[0].Path)
+	}
+	artifactID := domain.NodeID("artifact:" + pathmodel.Slug(artifactName, 64))
 	graph.AddNode(domain.Node{ID: artifactID, Kind: domain.NodeArtifact})
 	findings := make([]domain.Finding, 0)
 	components := make([]cyclonedx.Component, 0)
