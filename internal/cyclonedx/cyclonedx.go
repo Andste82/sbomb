@@ -1,20 +1,24 @@
 package cyclonedx
 
 import (
+	"bytes"
 	"crypto/sha256"
+	"crypto/sha512"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
 )
 
-const version = "0.0.0-milestone01"
+const version = "0.0.0-milestone12"
 
-// BOM is a minimal CycloneDX 1.6 BOM for milestone 01.
+// BOM is the in-memory CycloneDX 1.6 document used by the SBOM writer.
 type BOM struct {
 	BomFormat    string       `json:"bomFormat"`
 	SpecVersion  string       `json:"specVersion"`
@@ -23,11 +27,13 @@ type BOM struct {
 	Metadata     *Metadata    `json:"metadata,omitempty"`
 	Components   []Component  `json:"components,omitempty"`
 	Dependencies []Dependency `json:"dependencies,omitempty"`
+	Properties   []Property   `json:"properties,omitempty"`
 }
 
 type Metadata struct {
-	Timestamp string `json:"timestamp,omitempty"`
-	Tools     []Tool `json:"tools,omitempty"`
+	Timestamp string     `json:"timestamp,omitempty"`
+	Tools     []Tool     `json:"tools,omitempty"`
+	Component *Component `json:"component,omitempty"`
 }
 
 type Tool struct {
@@ -37,8 +43,63 @@ type Tool struct {
 }
 
 type Component struct {
-	Type string `json:"type,omitempty"`
+	Type       string         `json:"type,omitempty"`
+	Name       string         `json:"name,omitempty"`
+	Version    string         `json:"version,omitempty"`
+	BomRef     string         `json:"bom-ref,omitempty"`
+	PURL       string         `json:"purl,omitempty"`
+	Supplier   *OrganizationalEntity `json:"supplier,omitempty"`
+	Hashes     []Hash         `json:"hashes,omitempty"`
+	Licenses   []License      `json:"licenses,omitempty"`
+	Properties []Property     `json:"properties,omitempty"`
+	Evidence   *Evidence      `json:"evidence,omitempty"`
+}
+
+type OrganizationalEntity struct {
 	Name string `json:"name,omitempty"`
+}
+
+type Hash struct {
+	Alg   string `json:"alg"`
+	Value string `json:"content"`
+}
+
+type License struct {
+	License *LicenseIdentifier `json:"license,omitempty"`
+	Expression string `json:"expression,omitempty"`
+}
+
+type LicenseIdentifier struct {
+	ID   string `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
+}
+
+type Property struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+type Evidence struct {
+	Identity    []IdentityEvidence `json:"identity,omitempty"`
+	Occurrences []Occurrence       `json:"occurrences,omitempty"`
+}
+
+type IdentityEvidence struct {
+	Field      string   `json:"field"`
+	Value      string   `json:"value"`
+	Confidence float64  `json:"confidence,omitempty"`
+	Methods    []Method `json:"methods,omitempty"`
+}
+
+type Method struct {
+	Technique string  `json:"technique"`
+	Value     string  `json:"value,omitempty"`
+	Confidence float64 `json:"confidence,omitempty"`
+}
+
+type Occurrence struct {
+	BomRef   string `json:"bom-ref,omitempty"`
+	Location string `json:"location"`
 }
 
 type Dependency struct {
@@ -69,11 +130,86 @@ func MarshalEmpty(reproducible bool) (string, error) {
 	if !reproducible {
 		bom.Metadata.Timestamp = time.Now().UTC().Format(time.RFC3339)
 	}
-	out, err := json.MarshalIndent(bom, "", "  ")
-	if err != nil {
+	return MarshalBOM(bom)
+}
+
+func MarshalBOM(bom BOM) (string, error) {
+	canonicalizeBOM(&bom)
+	var out bytes.Buffer
+	enc := json.NewEncoder(&out)
+	enc.SetEscapeHTML(false)
+	enc.SetIndent("", "  ")
+	if err := enc.Encode(bom); err != nil {
 		return "", err
 	}
-	return string(out) + "\n", nil
+	return out.String(), nil
+}
+
+func canonicalizeBOM(bom *BOM) {
+	for i := range bom.Components {
+		sort.SliceStable(bom.Components[i].Hashes, func(a, b int) bool {
+			return bom.Components[i].Hashes[a].Alg < bom.Components[i].Hashes[b].Alg
+		})
+		sort.SliceStable(bom.Components[i].Properties, func(a, b int) bool {
+			if bom.Components[i].Properties[a].Name == bom.Components[i].Properties[b].Name {
+				return bom.Components[i].Properties[a].Value < bom.Components[i].Properties[b].Value
+			}
+			return bom.Components[i].Properties[a].Name < bom.Components[i].Properties[b].Name
+		})
+		if bom.Components[i].Evidence != nil {
+			sort.SliceStable(bom.Components[i].Evidence.Identity, func(a, b int) bool {
+				if bom.Components[i].Evidence.Identity[a].Field == bom.Components[i].Evidence.Identity[b].Field {
+					return bom.Components[i].Evidence.Identity[a].Value < bom.Components[i].Evidence.Identity[b].Value
+				}
+				return bom.Components[i].Evidence.Identity[a].Field < bom.Components[i].Evidence.Identity[b].Field
+			})
+			for j := range bom.Components[i].Evidence.Identity {
+				sort.SliceStable(bom.Components[i].Evidence.Identity[j].Methods, func(a, b int) bool {
+					if bom.Components[i].Evidence.Identity[j].Methods[a].Technique == bom.Components[i].Evidence.Identity[j].Methods[b].Technique {
+						return bom.Components[i].Evidence.Identity[j].Methods[a].Value < bom.Components[i].Evidence.Identity[j].Methods[b].Value
+					}
+					return bom.Components[i].Evidence.Identity[j].Methods[a].Technique < bom.Components[i].Evidence.Identity[j].Methods[b].Technique
+				})
+			}
+			sort.SliceStable(bom.Components[i].Evidence.Occurrences, func(a, b int) bool {
+				return bom.Components[i].Evidence.Occurrences[a].Location < bom.Components[i].Evidence.Occurrences[b].Location
+			})
+		}
+		if len(bom.Components[i].Licenses) > 1 {
+			sort.SliceStable(bom.Components[i].Licenses, func(a, b int) bool {
+				if bom.Components[i].Licenses[a].Expression != "" && bom.Components[i].Licenses[b].Expression != "" {
+					return bom.Components[i].Licenses[a].Expression < bom.Components[i].Licenses[b].Expression
+				}
+				if bom.Components[i].Licenses[a].License != nil && bom.Components[i].Licenses[b].License != nil {
+					if bom.Components[i].Licenses[a].License.ID != "" && bom.Components[i].Licenses[b].License.ID != "" {
+						return bom.Components[i].Licenses[a].License.ID < bom.Components[i].Licenses[b].License.ID
+					}
+					if bom.Components[i].Licenses[a].License.Name != "" && bom.Components[i].Licenses[b].License.Name != "" {
+						return bom.Components[i].Licenses[a].License.Name < bom.Components[i].Licenses[b].License.Name
+					}
+				}
+				return fmt.Sprintf("%v", bom.Components[i].Licenses[a]) < fmt.Sprintf("%v", bom.Components[i].Licenses[b])
+			})
+		}
+	}
+	sort.SliceStable(bom.Components, func(a, b int) bool {
+		if bom.Components[a].Type != bom.Components[b].Type {
+			return bom.Components[a].Type < bom.Components[b].Type
+		}
+		return bom.Components[a].BomRef < bom.Components[b].BomRef
+	})
+	sort.SliceStable(bom.Dependencies, func(a, b int) bool {
+		return bom.Dependencies[a].Ref < bom.Dependencies[b].Ref
+	})
+	for i := range bom.Dependencies {
+		sort.Strings(bom.Dependencies[i].DependsOn)
+	}
+	sort.SliceStable(bom.Properties, func(a, b int) bool {
+		if bom.Properties[a].Name == bom.Properties[b].Name {
+			return bom.Properties[a].Value < bom.Properties[b].Value
+		}
+		return bom.Properties[a].Name < bom.Properties[b].Name
+	})
 }
 
 func reproducibleSerialNumber() string {
@@ -101,17 +237,31 @@ func WriteEmpty(path string, reproducible bool) error {
 	if err != nil {
 		return err
 	}
-	if err := os.MkdirAll(filepathDir(path), 0o755); err != nil {
+	if err := ValidateDocument([]byte(out)); err != nil {
 		return err
 	}
-	return os.WriteFile(path, []byte(out), 0o644)
-}
-
-func filepathDir(p string) string {
-	if i := strings.LastIndex(p, "/"); i >= 0 {
-		return p[:i]
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return err
 	}
-	return "."
+	tmp, err := os.CreateTemp(filepath.Dir(path), ".sbomb-*.tmp")
+	if err != nil {
+		return err
+	}
+	name := tmp.Name()
+	if _, err := tmp.WriteString(out); err != nil {
+		tmp.Close()
+		os.Remove(name)
+		return err
+	}
+	if err := tmp.Close(); err != nil {
+		os.Remove(name)
+		return err
+	}
+	if err := os.Rename(name, path); err != nil {
+		os.Remove(name)
+		return err
+	}
+	return nil
 }
 
 func Validate(path string) error {
@@ -119,6 +269,10 @@ func Validate(path string) error {
 	if err != nil {
 		return err
 	}
+	return ValidateDocument(data)
+}
+
+func ValidateDocument(data []byte) error {
 	var bom BOM
 	if err := json.Unmarshal(data, &bom); err != nil {
 		return err
@@ -138,7 +292,207 @@ func Validate(path string) error {
 	if len(bom.Metadata.Tools) == 0 {
 		return fmt.Errorf("metadata.tools is required")
 	}
+	if bom.Metadata.Timestamp != "" && !isRFC3339Timestamp(bom.Metadata.Timestamp) {
+		return fmt.Errorf("metadata.timestamp must be RFC3339")
+	}
+	if err := validateUniqueRefs(bom); err != nil {
+		return err
+	}
+	if err := validateDependencies(bom); err != nil {
+		return err
+	}
+	if err := validateHashes(bom); err != nil {
+		return err
+	}
+	if err := validatePURLs(bom); err != nil {
+		return err
+	}
+	if err := validateProperties(bom); err != nil {
+		return err
+	}
 	return nil
 }
 
+func validateUniqueRefs(bom BOM) error {
+	seen := make(map[string]struct{}, len(bom.Components)+1)
+	for _, comp := range bom.Components {
+		if comp.BomRef == "" {
+			continue
+		}
+		if _, ok := seen[comp.BomRef]; ok {
+			return fmt.Errorf("duplicate bom-ref: %s", comp.BomRef)
+		}
+		seen[comp.BomRef] = struct{}{}
+	}
+	if bom.Metadata != nil && bom.Metadata.Component != nil && bom.Metadata.Component.BomRef != "" {
+		if _, ok := seen[bom.Metadata.Component.BomRef]; ok {
+			return fmt.Errorf("duplicate bom-ref: %s", bom.Metadata.Component.BomRef)
+		}
+		seen[bom.Metadata.Component.BomRef] = struct{}{}
+	}
+	for _, dep := range bom.Dependencies {
+		if dep.Ref == "" {
+			continue
+		}
+		if _, ok := seen[dep.Ref]; ok {
+			return fmt.Errorf("duplicate dependency ref: %s", dep.Ref)
+		}
+		seen[dep.Ref] = struct{}{}
+	}
+	return nil
+}
+
+func validateDependencies(bom BOM) error {
+	refs := make(map[string]struct{}, len(bom.Components)+len(bom.Dependencies))
+	for _, comp := range bom.Components {
+		if comp.BomRef == "" {
+			continue
+		}
+		refs[comp.BomRef] = struct{}{}
+	}
+	if bom.Metadata != nil && bom.Metadata.Component != nil && bom.Metadata.Component.BomRef != "" {
+		refs[bom.Metadata.Component.BomRef] = struct{}{}
+	}
+	for _, dep := range bom.Dependencies {
+		if _, ok := refs[dep.Ref]; !ok {
+			return fmt.Errorf("dangling dependency ref: %s", dep.Ref)
+		}
+		for _, target := range dep.DependsOn {
+			if _, ok := refs[target]; !ok {
+				return fmt.Errorf("dangling dependency target %q in %q", target, dep.Ref)
+			}
+		}
+	}
+	for _, comp := range bom.Components {
+		if comp.BomRef != "" {
+			if _, ok := refs[comp.BomRef]; !ok {
+				return fmt.Errorf("component bom-ref not declared in dependencies: %s", comp.BomRef)
+			}
+		}
+	}
+	return nil
+}
+
+func validateHashes(bom BOM) error {
+	for _, comp := range bom.Components {
+		for _, h := range comp.Hashes {
+			if err := validateHashValue(h.Alg, h.Value); err != nil {
+				return fmt.Errorf("component %q hash invalid: %w", comp.BomRef, err)
+			}
+		}
+	}
+	return nil
+}
+
+func validateHashValue(alg, value string) error {
+	want := hashLengthFor(alg)
+	if want == 0 {
+		return nil
+	}
+	if len(value) != want {
+		return fmt.Errorf("hash length for %s is %d but got %d", alg, want, len(value))
+	}
+	return nil
+}
+
+func hashLengthFor(alg string) int {
+	switch strings.ToUpper(alg) {
+	case "MD5":
+		return 32
+	case "SHA-1", "SHA1":
+		return 40
+	case "SHA-256", "SHA256":
+		return 64
+	case "SHA-384", "SHA384":
+		return 96
+	case "SHA-512", "SHA512":
+		return 128
+	case "BLAKE2B-256":
+		return 64
+	case "BLAKE2B-384":
+		return 96
+	case "BLAKE2B-512":
+		return 128
+	case "BLAKE3":
+		return 64
+	default:
+		return 0
+	}
+}
+
+func validatePURLs(bom BOM) error {
+	for _, comp := range bom.Components {
+		if comp.PURL == "" {
+			continue
+		}
+		if !strings.HasPrefix(comp.PURL, "pkg:") {
+			return fmt.Errorf("bad purl: %s", comp.PURL)
+		}
+		if strings.Contains(comp.PURL, " ") {
+			return fmt.Errorf("bad purl: %s", comp.PURL)
+		}
+	}
+	return nil
+}
+
+func validateProperties(bom BOM) error {
+	seen := map[string]struct{}{}
+	for _, p := range bom.Properties {
+		if err := validatePropertyName(p.Name); err != nil {
+			return err
+		}
+		if _, ok := seen[p.Name+"="+p.Value]; ok {
+			continue
+		}
+		seen[p.Name+"="+p.Value] = struct{}{}
+	}
+	for _, comp := range bom.Components {
+		for _, p := range comp.Properties {
+			if err := validatePropertyName(p.Name); err != nil {
+				return fmt.Errorf("component %q: %w", comp.BomRef, err)
+			}
+		}
+	}
+	return nil
+}
+
+func validatePropertyName(name string) error {
+	if name == "" {
+		return fmt.Errorf("empty property name")
+	}
+	if !strings.HasPrefix(name, "sbomb:") {
+		return fmt.Errorf("property name %q must start with sbomb:", name)
+	}
+	allowed := map[string]struct{}{
+		"sbomb:cdx:archiveProperty": {},
+		"sbomb:cdx:executableProperty": {},
+		"sbomb:cdx:structuredProperty": {},
+		"sbomb:evidence:artifacts": {},
+		"sbomb:license:reason": {},
+		"sbomb:license:review": {},
+		"sbomb:run:timestamp": {},
+		"sbomb:run:sourceDateEpoch": {},
+	}
+	if _, ok := allowed[name]; ok {
+		return nil
+	}
+	if strings.Contains(name, ":") {
+		return nil
+	}
+	return fmt.Errorf("property name %q is not in the sbomb namespace", name)
+}
+
+func isRFC3339Timestamp(v string) bool {
+	if v == "" {
+		return true
+	}
+	_, err := time.Parse(time.RFC3339, v)
+	return err == nil
+}
+
 func versionString() string { return version }
+
+func init() {
+	_ = sha512.New
+	_ = sha256.New
+}

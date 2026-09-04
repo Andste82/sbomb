@@ -24,3 +24,21 @@ func TestEmptyDocumentReproducible(t *testing.T) {
 		t.Fatalf("MarshalEmpty() reproducible mode should omit timestamp: %s", out1)
 	}
 }
+
+func TestValidateDocumentRejectsDanglingDependencyRef(t *testing.T) {
+	data := []byte(`{
+		"bomFormat": "CycloneDX",
+		"specVersion": "1.6",
+		"version": 1,
+		"serialNumber": "urn:uuid:123e4567-e89b-12d3-a456-426614174000",
+		"metadata": {
+			"tools": [{"name": "sbomb", "version": "test"}],
+			"timestamp": "2026-09-04T00:00:00Z"
+		},
+		"components": [{"type": "application", "name": "app", "bom-ref": "component:app"}],
+		"dependencies": [{"ref": "component:missing", "dependsOn": ["component:app"]}]
+	}`)
+	if err := ValidateDocument(data); err == nil {
+		t.Fatal("ValidateDocument() accepted a dangling dependency reference")
+	}
+}
