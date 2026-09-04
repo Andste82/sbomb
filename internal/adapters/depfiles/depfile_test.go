@@ -1,9 +1,28 @@
 package depfiles
 
 import (
+	"errors"
 	"reflect"
+	"strings"
 	"testing"
 )
+
+func TestParseRejectsOversizedLine(t *testing.T) {
+	_, err := Parse(strings.Repeat("x", MaxLineLength+1))
+	if !errors.Is(err, ErrInputLimitExceeded) {
+		t.Fatalf("Parse() error = %v, want input limit exceeded", err)
+	}
+}
+
+func BenchmarkParse(b *testing.B) {
+	input := "main.o: main.c include/config.h include/platform.h\n"
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		if _, err := Parse(input); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
 
 func TestParseDepfileHandlesEscapesAndContinuations(t *testing.T) {
 	text := "app.elf: src/main.cpp \\\n  src/with\\ space.h \\#note.h libfoo.a(bar.o)\n\\\n" +

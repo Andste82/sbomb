@@ -5,6 +5,19 @@ import (
 	"testing"
 )
 
+func BenchmarkMarshalBOM(b *testing.B) {
+	document := BOM{BomFormat: "CycloneDX", SpecVersion: "1.6", Version: 1, Components: make([]Component, 1000)}
+	for index := range document.Components {
+		document.Components[index] = Component{Type: "file", Name: "source", BomRef: "file:project:src/" + strings.Repeat("x", index%20), Properties: []Property{{Name: "sbomb:file:class", Value: "source"}}}
+	}
+	b.ResetTimer()
+	for iteration := 0; iteration < b.N; iteration++ {
+		if _, err := MarshalBOM(document); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
 func TestSourceDateEpoch(t *testing.T) {
 	t.Setenv("SOURCE_DATE_EPOCH", "1700000000")
 	out, err := MarshalEmpty(false)

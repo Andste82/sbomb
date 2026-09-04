@@ -11,7 +11,8 @@ import (
 
 const (
 	MaxLineLength = 1 << 20
-	MaxAllocation = 64 << 20
+	MaxInputSize  = 2 << 30
+	MaxTokensLine = 100000
 )
 
 type Kind string
@@ -59,6 +60,7 @@ func Sniff(text string) string {
 }
 
 var ErrMalformed = errors.New("malformed link evidence")
+var ErrInputLimitExceeded = errors.New("input limit exceeded")
 
 func Parse(r io.Reader, format string) Result {
 	result := Result{Format: format}
@@ -69,11 +71,15 @@ func Parse(r io.Reader, format string) Result {
 	for scanner.Scan() {
 		line := scanner.Text()
 		allocated += len(line)
-		if allocated > MaxAllocation {
-			result.Err = fmt.Errorf("map allocation exceeds %d bytes: %w", MaxAllocation, ErrMalformed)
+		if allocated > MaxInputSize {
+			result.Err = fmt.Errorf("map input exceeds %d bytes: %w", MaxInputSize, ErrInputLimitExceeded)
 			break
 		}
 		trimmed := strings.TrimSpace(line)
+		if len(strings.Fields(line)) > MaxTokensLine {
+			result.Err = fmt.Errorf("map line exceeds %d tokens: %w", MaxTokensLine, ErrInputLimitExceeded)
+			break
+		}
 		if strings.HasPrefix(trimmed, "Discarded input sections") || strings.HasPrefix(trimmed, "Discarded sections") {
 			inDiscarded = true
 			continue
@@ -96,7 +102,11 @@ func Parse(r io.Reader, format string) Result {
 		}
 	}
 	if err := scanner.Err(); err != nil {
-		result.Err = fmt.Errorf("read linker map: %w: %v", ErrMalformed, err)
+		if strings.Contains(err.Error(), "token too long") {
+			result.Err = fmt.Errorf("read linker map: %w: %v", ErrInputLimitExceeded, err)
+		} else {
+			result.Err = fmt.Errorf("read linker map: %w: %v", ErrMalformed, err)
+		}
 	}
 	if result.Err == nil && len(result.Records) == 0 {
 		result.Err = ErrMalformed

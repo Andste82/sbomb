@@ -1,9 +1,17 @@
 package ninja
 
 import (
+	"errors"
 	"strings"
 	"testing"
 )
+
+func TestParseFileRejectsOversizedLine(t *testing.T) {
+	_, err := ParseFile(strings.NewReader(strings.Repeat("x", MaxLineLength+1)))
+	if !errors.Is(err, ErrInputLimitExceeded) {
+		t.Fatalf("ParseFile() error = %v, want input limit exceeded", err)
+	}
+}
 
 func TestParseSimpleBuildRule(t *testing.T) {
 	input := `build output.o: CXX_COMPILER source.cpp

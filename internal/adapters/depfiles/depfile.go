@@ -1,9 +1,15 @@
 package depfiles
 
 import (
+	"errors"
+	"fmt"
 	"strings"
 	"unicode"
 )
+
+const MaxLineLength = 1 << 20
+
+var ErrInputLimitExceeded = errors.New("input limit exceeded")
 
 // Rule represents a Make-style depfile rule.
 type Rule struct {
@@ -14,6 +20,9 @@ type Rule struct {
 // Parse parses a Make-format depfile, including escaped spaces, line continuations,
 // and Ninja's $: form used for Windows paths like C$:/src.
 func Parse(text string) ([]Rule, error) {
+	if err := validateInput(text); err != nil {
+		return nil, err
+	}
 	lines := splitLogicalLines(text)
 	out := make([]Rule, 0, len(lines))
 	for _, line := range lines {
@@ -39,6 +48,28 @@ func Parse(text string) ([]Rule, error) {
 		})
 	}
 	return out, nil
+}
+
+func validateInput(text string) error {
+	lineLength := 0
+	for index := 0; index < len(text); index++ {
+		if text[index] == '\\' && index+1 < len(text) && (text[index+1] == '\n' || text[index+1] == '\r') {
+			lineLength++
+			if lineLength > MaxLineLength {
+				return fmt.Errorf("depfile line exceeds %d bytes: %w", MaxLineLength, ErrInputLimitExceeded)
+			}
+			continue
+		}
+		if text[index] == '\n' || text[index] == '\r' {
+			lineLength = 0
+			continue
+		}
+		lineLength++
+		if lineLength > MaxLineLength {
+			return fmt.Errorf("depfile line exceeds %d bytes: %w", MaxLineLength, ErrInputLimitExceeded)
+		}
+	}
+	return nil
 }
 
 func splitLogicalLines(text string) []string {

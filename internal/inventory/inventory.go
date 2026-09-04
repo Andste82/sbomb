@@ -16,12 +16,12 @@ import (
 
 // InventoryFile is the JSON-serializable representation used for --inventory-dump.
 type InventoryFile struct {
-	Canonical  string            `json:"canonical"`
-	Class      string            `json:"class"`
-	Hashes     map[string]string `json:"hashes,omitempty"`
-	SizeBytes  int64             `json:"sizeBytes,omitempty"`
-	Missing    bool              `json:"missing,omitempty"`
-	Component  string            `json:"component,omitempty"`
+	Canonical  string              `json:"canonical"`
+	Class      string              `json:"class"`
+	Hashes     map[string]string   `json:"hashes,omitempty"`
+	SizeBytes  int64               `json:"sizeBytes,omitempty"`
+	Missing    bool                `json:"missing,omitempty"`
+	Component  string              `json:"component,omitempty"`
 	Properties map[string][]string `json:"properties,omitempty"`
 }
 
@@ -34,9 +34,14 @@ type InventoryComponent struct {
 
 // InventoryDump is the stable, CycloneDX-independent inventory document.
 type InventoryDump struct {
-	SchemaVersion int                 `json:"schemaVersion"`
-	Files         []InventoryFile     `json:"files"`
+	SchemaVersion int                  `json:"schemaVersion"`
+	Files         []InventoryFile      `json:"files"`
 	Components    []InventoryComponent `json:"components,omitempty"`
+}
+
+type HashOptions struct {
+	Anchors              []string
+	AllowUnanchoredReads bool
 }
 
 // MergeUsedFiles collapses duplicate file evidence records into a single inhabited record.
@@ -111,6 +116,10 @@ func MergeUsedFiles(files []domain.UsedFile) []domain.UsedFile {
 
 // HashUsedFiles computes SHA-256 hashes for all readable file records and marks missing files.
 func HashUsedFiles(files []domain.UsedFile) []domain.UsedFile {
+	return HashUsedFilesWithOptions(files, HashOptions{})
+}
+
+func HashUsedFilesWithOptions(files []domain.UsedFile, options HashOptions) []domain.UsedFile {
 	out := make([]domain.UsedFile, len(files))
 	for i, f := range files {
 		clone := f
@@ -136,6 +145,15 @@ func HashUsedFiles(files []domain.UsedFile) []domain.UsedFile {
 			out[i] = clone
 			continue
 		}
+		resolved, err := filepath.EvalSymlinks(path)
+		isSymlink := err == nil && filepath.Clean(resolved) != filepath.Clean(path)
+		if err != nil || (isSymlink && !options.AllowUnanchoredReads && !withinAnchor(resolved, options.Anchors)) {
+			clone.Missing = true
+			clone.Hashes = nil
+			clone.Properties["finding"] = appendUnique(clone.Properties["finding"], "MISSING_FILE_HASH")
+			out[i] = clone
+			continue
+		}
 		clone.SizeBytes = st.Size()
 		data, err := os.ReadFile(path)
 		if err != nil {
@@ -150,6 +168,24 @@ func HashUsedFiles(files []domain.UsedFile) []domain.UsedFile {
 		out[i] = clone
 	}
 	return out
+}
+
+func withinAnchor(path string, anchors []string) bool {
+	cleanPath, err := filepath.Abs(path)
+	if err != nil {
+		return false
+	}
+	for _, anchor := range anchors {
+		cleanAnchor, err := filepath.Abs(anchor)
+		if err != nil {
+			continue
+		}
+		rel, err := filepath.Rel(cleanAnchor, cleanPath)
+		if err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)) && !filepath.IsAbs(rel) {
+			return true
+		}
+	}
+	return false
 }
 
 // BuildInventoryDump converts a file set into the stable machine-readable inventory dump format.
@@ -210,9 +246,9 @@ func DetectStaleness(files []domain.UsedFile, artifacts []string, buildID string
 					Subject:  domain.Subject{Kind: "file", Ref: f.ID.Canonical()},
 					Message:  "Source file is newer than the build artifact",
 					Detail: map[string]any{
-						"source":     f.ID.Canonical(),
-						"artifact":   artifact,
-						"source_mtime": info.ModTime().UTC().Format(time.RFC3339),
+						"source":         f.ID.Canonical(),
+						"artifact":       artifact,
+						"source_mtime":   info.ModTime().UTC().Format(time.RFC3339),
 						"artifact_mtime": artInfo.ModTime().UTC().Format(time.RFC3339),
 					},
 					Evidence: []string{artifact},

@@ -2,12 +2,17 @@ package ninja
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"regexp"
 	"strings"
 	"unicode"
 )
+
+const MaxLineLength = 1 << 20
+
+var ErrInputLimitExceeded = errors.New("input limit exceeded")
 
 // Rule represents a Ninja build rule.
 type Rule struct {
@@ -39,6 +44,7 @@ func ParseFile(r io.Reader) (*File, error) {
 	}
 
 	scanner := bufio.NewScanner(r)
+	scanner.Buffer(make([]byte, 4096), MaxLineLength)
 	var lineNum int
 	var currentRule *Rule
 
@@ -113,6 +119,9 @@ func ParseFile(r io.Reader) (*File, error) {
 	}
 
 	if err := scanner.Err(); err != nil {
+		if strings.Contains(err.Error(), "token too long") {
+			return nil, fmt.Errorf("read ninja file: %w: %v", ErrInputLimitExceeded, err)
+		}
 		return nil, err
 	}
 

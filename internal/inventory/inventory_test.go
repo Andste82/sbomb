@@ -3,19 +3,38 @@ package resolver
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/example/sbomb/internal/domain"
 )
 
+func BenchmarkHashUsedFiles(b *testing.B) {
+	dir := b.TempDir()
+	files := make([]domain.UsedFile, 100)
+	content := []byte(strings.Repeat("x", 4096))
+	for index := range files {
+		path := filepath.Join(dir, fmt.Sprintf("file-%03d.bin", index))
+		if err := os.WriteFile(path, content, 0o600); err != nil {
+			b.Fatal(err)
+		}
+		files[index] = domain.UsedFile{ID: domain.FileID{Anchor: "project", RelPath: path}, Class: domain.FileClassSource}
+	}
+	b.ResetTimer()
+	for iteration := 0; iteration < b.N; iteration++ {
+		_ = HashUsedFiles(files)
+	}
+}
+
 func TestMergeUsedFilesDeduplicatesEvidence(t *testing.T) {
 	files := []domain.UsedFile{
 		{
-			ID: domain.FileID{Anchor: "project", RelPath: "src/main.c"},
+			ID:    domain.FileID{Anchor: "project", RelPath: "src/main.c"},
 			Class: domain.FileClassSource,
 			Properties: map[string][]string{
 				"evidence": {"cmake"},
@@ -23,7 +42,7 @@ func TestMergeUsedFilesDeduplicatesEvidence(t *testing.T) {
 			Hashes: map[string]string{"sha256": "aaa"},
 		},
 		{
-			ID: domain.FileID{Anchor: "project", RelPath: "src/main.c"},
+			ID:    domain.FileID{Anchor: "project", RelPath: "src/main.c"},
 			Class: domain.FileClassSource,
 			Properties: map[string][]string{
 				"evidence": {"ninja"},
@@ -77,6 +96,31 @@ func TestHashUsedFilesMatchesRawBytesAndMissingFile(t *testing.T) {
 	}
 	if got, ok := out[2].Properties["finding"]; !ok || len(got) == 0 || got[0] != "MISSING_FILE_HASH" {
 		t.Fatalf("missing file should record MISSING_FILE_HASH finding, got %#v", out[2].Properties)
+	}
+}
+
+func TestHashUsedFilesRejectsSymlinkEscapingAnchors(t *testing.T) {
+	dir := t.TempDir()
+	anchor := filepath.Join(dir, "anchor")
+	escaping := filepath.Join(dir, "outside.txt")
+	if err := os.Mkdir(anchor, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(escaping, []byte("secret"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	link := filepath.Join(anchor, "link.txt")
+	if err := os.Symlink(escaping, link); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+	file := domain.UsedFile{ID: domain.FileID{Anchor: "project", RelPath: link}, Class: domain.FileClassSource}
+	blocked := HashUsedFilesWithOptions([]domain.UsedFile{file}, HashOptions{Anchors: []string{anchor}})[0]
+	if !blocked.Missing {
+		t.Fatal("escaping symlink was hashed without allow-unanchored-reads")
+	}
+	allowed := HashUsedFilesWithOptions([]domain.UsedFile{file}, HashOptions{AllowUnanchoredReads: true})[0]
+	if allowed.Missing || allowed.Hashes["sha256"] == "" {
+		t.Fatal("explicitly allowed unanchored symlink was not hashed")
 	}
 }
 

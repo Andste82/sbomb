@@ -3,6 +3,7 @@ package generate
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	"github.com/example/sbomb/internal/adapters/compiledb"
+	"github.com/example/sbomb/internal/adapters/manifest"
 	"github.com/example/sbomb/internal/config"
 	"github.com/example/sbomb/internal/cyclonedx"
 	"github.com/example/sbomb/internal/domain"
@@ -56,6 +58,19 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	graph.AddNode(domain.Node{ID: artifactID, Kind: domain.NodeArtifact})
 	findings := make([]domain.Finding, 0)
 	components := make([]cyclonedx.Component, 0)
+	for _, manifestPath := range cfg.Manifests {
+		path := manifestPath
+		if !filepath.IsAbs(path) {
+			path = filepath.Join(projectRoot, path)
+		}
+		if _, err := manifest.ParseFile(path); err != nil {
+			id := "MISSING_PACKAGE_EVIDENCE"
+			if errors.Is(err, manifest.ErrInputLimitExceeded) {
+				id = "INPUT_LIMIT_EXCEEDED"
+			}
+			findings = append(findings, domain.Finding{ID: id, Severity: domain.SeverityWarning, Subject: domain.Subject{Kind: "configuration", Ref: manifestPath}, Message: err.Error()})
+		}
+	}
 
 	compilePath := filepath.Join(buildDir, "compile_commands.json")
 	commands, err := compiledb.ParseFile(compilePath)

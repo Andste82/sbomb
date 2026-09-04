@@ -2,11 +2,27 @@ package evidence
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/example/sbomb/internal/domain"
 )
+
+func BenchmarkGraphBuild(b *testing.B) {
+	for iteration := 0; iteration < b.N; iteration++ {
+		graph := New()
+		graph.AddNode(domain.Node{ID: "artifact:build/app.elf", Kind: domain.NodeArtifact})
+		for index := 0; index < 1000; index++ {
+			objectID := domain.NodeID(fmt.Sprintf("build:obj/%04d.o", index))
+			sourceID := domain.NodeID(fmt.Sprintf("project:src/%04d.c", index))
+			graph.AddNode(domain.Node{ID: objectID, Kind: domain.NodeObject})
+			graph.AddNode(domain.Node{ID: sourceID, Kind: domain.NodeSource})
+			graph.AddEdge(domain.Edge{From: "artifact:build/app.elf", To: objectID, Type: "link", Strength: "linked", Confidence: domain.ConfidenceHigh, Source: "benchmark", Adapter: "benchmark"})
+			graph.AddEdge(domain.Edge{From: objectID, To: sourceID, Type: "source-mapping", Strength: "derived", Confidence: domain.ConfidenceHigh, Source: "benchmark", Adapter: "benchmark"})
+		}
+	}
+}
 
 func contains(s, substr string) bool {
 	return strings.Contains(s, substr)
@@ -91,9 +107,9 @@ func TestEdgeDeduplication(t *testing.T) {
 
 func TestConfidenceDerivation(t *testing.T) {
 	tests := []struct {
-		strength   domain.Strength
+		strength    domain.Strength
 		sourceClass SourceClass
-		want       domain.Confidence
+		want        domain.Confidence
 	}{
 		// direct + structured-authoritative = high
 		{"direct", SourceClassStructuredAuthoritative, domain.ConfidenceHigh},
@@ -145,11 +161,11 @@ func TestConfidenceDerivation(t *testing.T) {
 
 func TestDowngrades(t *testing.T) {
 	tests := []struct {
-		name             string
-		startConf        domain.Confidence
-		numDowngrades    int
-		wantFinal        domain.Confidence
-		wantReasonCount  int
+		name            string
+		startConf       domain.Confidence
+		numDowngrades   int
+		wantFinal       domain.Confidence
+		wantReasonCount int
 	}{
 		// high → medium → low → unknown
 		{"high_1x", domain.ConfidenceHigh, 1, domain.ConfidenceMedium, 1},

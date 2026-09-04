@@ -1,9 +1,25 @@
 package mapparser
 
 import (
+	"errors"
+	"fmt"
 	"strings"
 	"testing"
 )
+
+func BenchmarkParse(b *testing.B) {
+	var input strings.Builder
+	for index := 0; index < 1000; index++ {
+		fmt.Fprintf(&input, "build/obj/file%d.o\n", index)
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		result := Parse(strings.NewReader(input.String()), "gnu-ld")
+		if result.Err != nil {
+			b.Fatal(result.Err)
+		}
+	}
+}
 
 func TestSniff(t *testing.T) {
 	tests := map[string]string{
@@ -42,8 +58,8 @@ func TestParseRecordsAndDiscardedSections(t *testing.T) {
 
 func TestParseTruncatedLine(t *testing.T) {
 	result := Parse(strings.NewReader(strings.Repeat("x", MaxLineLength+1)), "gnu-ld")
-	if result.Err == nil {
-		t.Fatal("Parse() error = nil, want malformed evidence")
+	if !errors.Is(result.Err, ErrInputLimitExceeded) {
+		t.Fatalf("Parse() error = %v, want input limit exceeded", result.Err)
 	}
 	if len(result.Records) != 0 {
 		t.Fatalf("Parse() records = %#v, want none", result.Records)
