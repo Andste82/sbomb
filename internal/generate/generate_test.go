@@ -1,11 +1,83 @@
 package generate
 
 import (
+	"bytes"
+	"encoding/json"
+	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/example/sbomb/internal/config"
+	"github.com/example/sbomb/internal/cyclonedx"
+	"github.com/example/sbomb/internal/pathmodel"
 )
+
+func portableFixture(t *testing.T) (config.Config, string) {
+	t.Helper()
+	buildDir := filepath.Join("..", "..", "testdata", "fixtures", "portable", "build")
+	return config.Config{Project: config.Project{Root: "/__fixture_src__"}}, buildDir
+}
+
+func marshalPortable(t *testing.T, cfg config.Config, buildDir string, flavor pathmodel.Flavor) []byte {
+	t.Helper()
+	result, err := RunWithOptions(cfg, buildDir, true, Options{PathFlavor: flavor})
+	if err != nil {
+		t.Fatal(err)
+	}
+	output, err := cyclonedx.MarshalBOM(result.BOM)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return []byte(output)
+}
+
+func TestByteIdenticalAcrossRuns(t *testing.T) {
+	cfg, buildDir := portableFixture(t)
+	first := marshalPortable(t, cfg, buildDir, pathmodel.PosixFlavor{})
+	for run := 1; run < 10; run++ {
+		if got := marshalPortable(t, cfg, buildDir, pathmodel.PosixFlavor{}); !bytes.Equal(first, got) {
+			t.Fatalf("run %d changed the serialized BOM", run+1)
+		}
+	}
+}
+
+func TestByteIdenticalWithShuffledInputOrder(t *testing.T) {
+	cfg, buildDir := portableFixture(t)
+	original, err := os.ReadFile(filepath.Join(buildDir, "compile_commands.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var entries []map[string]any
+	if err := json.Unmarshal(original, &entries); err != nil {
+		t.Fatal(err)
+	}
+	entries[0], entries[1] = entries[1], entries[0]
+	shuffled, err := json.Marshal(entries)
+	if err != nil {
+		t.Fatal(err)
+	}
+	temporaryBuild := t.TempDir()
+	if err := os.WriteFile(filepath.Join(temporaryBuild, "compile_commands.json"), shuffled, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(temporaryBuild, "link-trace.txt"), []byte("portable\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	first := marshalPortable(t, cfg, buildDir, pathmodel.PosixFlavor{})
+	second := marshalPortable(t, cfg, temporaryBuild, pathmodel.PosixFlavor{})
+	if !bytes.Equal(first, second) {
+		t.Fatal("shuffling compile database entries changed the serialized BOM")
+	}
+}
+
+func TestNoAbsolutePathsInOutput(t *testing.T) {
+	cfg, buildDir := portableFixture(t)
+	output := string(marshalPortable(t, cfg, buildDir, pathmodel.PosixFlavor{}))
+	if strings.Contains(output, "\\") || strings.Contains(output, "\"/") || strings.Contains(output, "C:") {
+		t.Fatalf("serialized BOM contains a host path: %s", output)
+	}
+}
 
 func TestRunBuildsGraphAndReportsMissingEvidence(t *testing.T) {
 	fixture := filepath.Join("..", "..", "testdata", "fixtures", "gcc-13", "p02-static")

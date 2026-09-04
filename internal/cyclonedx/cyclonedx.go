@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -128,7 +129,7 @@ func MarshalEmpty(reproducible bool) (string, error) {
 		},
 	}
 	if !reproducible {
-		bom.Metadata.Timestamp = time.Now().UTC().Format(time.RFC3339)
+		bom.Metadata.Timestamp = timestamp()
 	}
 	return MarshalBOM(bom)
 }
@@ -213,23 +214,37 @@ func canonicalizeBOM(bom *BOM) {
 }
 
 func reproducibleSerialNumber() string {
+	return ReproducibleSerialNumber(BOM{BomFormat: "CycloneDX", SpecVersion: "1.6", Version: 1, Metadata: &Metadata{Tools: []Tool{{Vendor: "sbomb", Name: "sbomb", Version: version}}}})
+}
+
+// ReproducibleSerialNumber derives the UUIDv5 serial from the canonical BOM
+// with volatile fields removed.
+func ReproducibleSerialNumber(bom BOM) string {
 	const namespace = "6ba7b811-9dad-11d1-80b4-00c04fd430c8"
-	canonical := BOM{
-		BomFormat:   "CycloneDX",
-		SpecVersion: "1.6",
-		Version:     1,
-		Metadata: &Metadata{
-			Tools: []Tool{{Vendor: "sbomb", Name: "sbomb", Version: version}},
-		},
+	bom.SerialNumber = ""
+	if bom.Metadata != nil {
+		metadata := *bom.Metadata
+		metadata.Timestamp = ""
+		bom.Metadata = &metadata
 	}
-	body, _ := json.Marshal(canonical)
+	canonicalizeBOM(&bom)
+	body, _ := json.Marshal(bom)
 	hash := sha256.Sum256(body)
 	name := "sbomb:" + hex.EncodeToString(hash[:])
 	ns, err := uuid.Parse(namespace)
 	if err != nil {
-		return "urn:uuid:" + uuid.NewString()
+		return ""
 	}
 	return "urn:uuid:" + uuid.NewSHA1(ns, []byte(name)).String()
+}
+
+func timestamp() string {
+	if value := os.Getenv("SOURCE_DATE_EPOCH"); value != "" {
+		if seconds, err := strconv.ParseInt(value, 10, 64); err == nil {
+			return time.Unix(seconds, 0).UTC().Format(time.RFC3339)
+		}
+	}
+	return time.Now().UTC().Format(time.RFC3339)
 }
 
 func WriteEmpty(path string, reproducible bool) error {

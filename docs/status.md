@@ -3,6 +3,7 @@
 - Milestone 00: fixture corpus skeleton created and repository is buildable.
 - Milestone 01: CLI skeleton, config validation, path canonicalization, and empty CycloneDX generation are implemented and buildable.
 - Milestone 07: Ninja buildgraph parsing and object-to-source resolution are implemented, including evidence-graph integration, strategy priority, conflict recording, and test coverage.
+- Milestone 14: deterministic serialization, SOURCE_DATE_EPOCH handling, portable fixture checks, injectable POSIX/Windows path flavors, and x86_64/ARM64 CI hash comparison are implemented. Native Windows execution remains unverified; Windows semantics are covered by flavor tests and the Windows binary is not run in CI.
 
 ## Next Work
 

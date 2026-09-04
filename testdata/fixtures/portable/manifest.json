@@ -1,0 +1,6 @@
+{
+  "name": "portable",
+  "projectRoot": "/__fixture_src__",
+  "buildRoot": "/__fixture_build__",
+  "volatile": []
+}

@@ -1,0 +1,2 @@
+/__fixture_build__/CMakeFiles/portable.dir/src/main.c.o
+/__fixture_build__/CMakeFiles/portable.dir/src/util.c.o

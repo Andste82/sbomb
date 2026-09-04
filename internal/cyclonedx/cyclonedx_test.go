@@ -5,6 +5,24 @@ import (
 	"testing"
 )
 
+func TestSourceDateEpoch(t *testing.T) {
+	t.Setenv("SOURCE_DATE_EPOCH", "1700000000")
+	out, err := MarshalEmpty(false)
+	if err != nil {
+		t.Fatalf("MarshalEmpty() error = %v", err)
+	}
+	if !strings.Contains(out, `"timestamp": "2023-11-14T22:13:20Z"`) {
+		t.Fatalf("timestamp did not use SOURCE_DATE_EPOCH: %s", out)
+	}
+}
+
+func TestReproducibleSerialIsUUID(t *testing.T) {
+	serial := ReproducibleSerialNumber(BOM{BomFormat: "CycloneDX", SpecVersion: "1.6", Version: 1})
+	if len(serial) != len("urn:uuid:123e4567-e89b-12d3-a456-426614174000") || !strings.HasPrefix(serial, "urn:uuid:") {
+		t.Fatalf("serial = %q, want UUID format", serial)
+	}
+}
+
 func TestEmptyDocumentReproducible(t *testing.T) {
 	out1, err := MarshalEmpty(true)
 	if err != nil {

@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "project": {"name": "portable", "root": "/__fixture_src__"},
+  "build": {"dir": "/__fixture_build__"},
+  "mode": "single",
+  "output": {"format": "cyclonedx", "specVersion": "1.6", "reproducible": true}
+}

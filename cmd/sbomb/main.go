@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/example/sbomb/internal/cyclonedx"
 	"github.com/example/sbomb/internal/evidence"
 	"github.com/example/sbomb/internal/generate"
+	"github.com/example/sbomb/internal/pathmodel"
 	"github.com/example/sbomb/internal/policy"
 	"github.com/example/sbomb/internal/report"
 )
@@ -59,6 +61,7 @@ func handleGenerate(args []string) (int, string, string) {
 	findingsJSONPath := ""
 	reviewReportPath := ""
 	reportFormat := "text"
+	pathFlavor := ""
 	for i := 0; i < len(args); i++ {
 		switch {
 		case args[i] == "--build-dir":
@@ -79,6 +82,14 @@ func handleGenerate(args []string) (int, string, string) {
 			output = strings.TrimPrefix(args[i], "--output=")
 		case args[i] == "--reproducible":
 			repro = true
+		case args[i] == "--path-flavor":
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --path-flavor\n"
+			}
+			pathFlavor = args[i+1]
+			i++
+		case strings.HasPrefix(args[i], "--path-flavor="):
+			pathFlavor = strings.TrimPrefix(args[i], "--path-flavor=")
 		case args[i] == "--config":
 			if i+1 >= len(args) {
 				return 1, "", "missing value for --config\n"
@@ -151,7 +162,17 @@ func handleGenerate(args []string) (int, string, string) {
 	if output == "" {
 		output = "sbomb.cdx.json"
 	}
-	generated, err := generate.Run(loadedCfg, buildDir, repro)
+	flavor := pathmodel.DefaultFlavor()
+	switch strings.ToLower(pathFlavor) {
+	case "", "default":
+	case "posix":
+		flavor = pathmodel.PosixFlavor{}
+	case "windows":
+		flavor = pathmodel.WindowsFlavor{}
+	default:
+		return 1, "", "invalid value for --path-flavor: " + pathFlavor + "\n"
+	}
+	generated, err := generate.RunWithOptions(loadedCfg, buildDir, repro, generate.Options{PathFlavor: flavor})
 	if err != nil {
 		return 2, "", err.Error() + "\n"
 	}
@@ -177,7 +198,13 @@ func handleGenerate(args []string) (int, string, string) {
 		return 1, "", err.Error() + "\n"
 	}
 	findings := generated.Findings
-	res := policy.Evaluate(findings, cfg, waivers, time.Now().UTC())
+	now := time.Now().UTC()
+	if epoch := os.Getenv("SOURCE_DATE_EPOCH"); epoch != "" {
+		if seconds, parseErr := strconv.ParseInt(epoch, 10, 64); parseErr == nil {
+			now = time.Unix(seconds, 0).UTC()
+		}
+	}
+	res := policy.Evaluate(findings, cfg, waivers, now)
 	if findingsJSONPath != "" {
 		if err := policy.WriteFindingsJSON(findingsJSONPath, res.Findings); err != nil {
 			return 1, "", err.Error() + "\n"

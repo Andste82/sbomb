@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strings"
+	"strconv"
 	"time"
 
 	"github.com/example/sbomb/internal/adapters/compiledb"
@@ -29,8 +29,19 @@ type Result struct {
 // graph and CycloneDX document. Adapters contribute only evidence they can
 // prove; missing evidence is returned as a finding for policy evaluation.
 func Run(cfg config.Config, buildDir string, reproducible bool) (Result, error) {
+	return RunWithOptions(cfg, buildDir, reproducible, Options{PathFlavor: pathmodel.DefaultFlavor()})
+}
+
+type Options struct {
+	PathFlavor pathmodel.Flavor
+}
+
+func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, options Options) (Result, error) {
 	if buildDir == "" {
 		return Result{}, fmt.Errorf("build dir is required")
+	}
+	if options.PathFlavor == nil {
+		options.PathFlavor = pathmodel.DefaultFlavor()
 	}
 	projectRoot := cfg.Project.Root
 	if projectRoot == "" {
@@ -39,7 +50,7 @@ func Run(cfg config.Config, buildDir string, reproducible bool) (Result, error) 
 	graph := evidence.New()
 	artifactName := "build"
 	if len(cfg.Artifacts) > 0 && cfg.Artifacts[0].Path != "" {
-		artifactName = filepath.Base(cfg.Artifacts[0].Path)
+		artifactName = pathmodel.Base(cfg.Artifacts[0].Path, options.PathFlavor)
 	}
 	artifactID := domain.NodeID("artifact:" + pathmodel.Slug(artifactName, 64))
 	graph.AddNode(domain.Node{ID: artifactID, Kind: domain.NodeArtifact})
@@ -56,7 +67,7 @@ func Run(cfg config.Config, buildDir string, reproducible bool) (Result, error) 
 	}
 	seen := map[string]bool{}
 	for _, command := range commands {
-		rel := pathmodel.Resolve(command.File, projectRoot, buildDir)
+		rel := pathmodel.ResolveWithFlavor(command.File, projectRoot, buildDir, options.PathFlavor)
 		if seen[rel] {
 			continue
 		}
@@ -66,12 +77,12 @@ func Run(cfg config.Config, buildDir string, reproducible bool) (Result, error) 
 		if objectRef == "" {
 			objectRef = rel + ".o"
 		}
-		objectID := domain.NodeID("object:" + pathmodel.Resolve(objectRef, projectRoot, buildDir))
+		objectID := domain.NodeID("object:" + pathmodel.ResolveWithFlavor(objectRef, projectRoot, buildDir, options.PathFlavor))
 		graph.AddNode(domain.Node{ID: objectID, Kind: domain.NodeObject})
 		graph.AddNode(domain.Node{ID: sourceID, Kind: domain.NodeSource})
 		graph.AddEdge(domain.Edge{From: artifactID, To: objectID, Type: "compile-output", Strength: "linked", Confidence: domain.ConfidenceMedium, Source: "compile_commands", Adapter: "compiledb"})
 		graph.AddEdge(domain.Edge{From: objectID, To: sourceID, Type: "compile", Strength: "derived", Confidence: domain.ConfidenceHigh, Source: "compile_commands", Adapter: "compiledb"})
-		components = append(components, fileComponent(rel, command.File))
+		components = append(components, fileComponent(rel, command.File, options.PathFlavor))
 	}
 	if len(commands) == 0 || !hasLinkEvidence(buildDir) {
 		findings = append(findings, domain.Finding{ID: "MISSING_LINK_EVIDENCE", Severity: domain.SeverityError, Subject: domain.Subject{Kind: "artifact", Ref: string(artifactID)}, Message: "no compile or link evidence was discovered"})
@@ -85,16 +96,16 @@ func Run(cfg config.Config, buildDir string, reproducible bool) (Result, error) 
 	if reproducible {
 		// The writer omits timestamps in reproducible mode; the serial is derived
 		// from the canonical document by the existing CycloneDX implementation.
-		bom.SerialNumber = "urn:uuid:" + deterministicSerial(bom)
+		bom.SerialNumber = cyclonedx.ReproducibleSerialNumber(bom)
 	} else {
 		bom.SerialNumber = "urn:uuid:" + uuid.NewString()
-		bom.Metadata.Timestamp = time.Now().UTC().Format(time.RFC3339)
+		bom.Metadata.Timestamp = buildTimestamp()
 	}
 	return Result{Graph: graph, Findings: findings, BOM: bom}, nil
 }
 
-func fileComponent(canonical, path string) cyclonedx.Component {
-	component := cyclonedx.Component{Type: "file", Name: filepath.Base(path), BomRef: "file:" + canonical, Properties: []cyclonedx.Property{{Name: "sbomb:path:canonical", Value: canonical}}}
+func fileComponent(canonical, path string, flavor pathmodel.Flavor) cyclonedx.Component {
+	component := cyclonedx.Component{Type: "file", Name: pathmodel.Base(path, flavor), BomRef: "file:" + canonical, Properties: []cyclonedx.Property{{Name: "sbomb:path:canonical", Value: canonical}}}
 	data, err := os.ReadFile(path)
 	if err == nil {
 		hash := sha256.Sum256(data)
@@ -103,10 +114,13 @@ func fileComponent(canonical, path string) cyclonedx.Component {
 	return component
 }
 
-func deterministicSerial(bom cyclonedx.BOM) string {
-	b, _ := cyclonedx.MarshalBOM(bom)
-	hash := sha256.Sum256([]byte(b))
-	return strings.ToLower(hex.EncodeToString(hash[:]))[:32]
+func buildTimestamp() string {
+	if value := os.Getenv("SOURCE_DATE_EPOCH"); value != "" {
+		if seconds, err := strconv.ParseInt(value, 10, 64); err == nil {
+			return time.Unix(seconds, 0).UTC().Format(time.RFC3339)
+		}
+	}
+	return time.Now().UTC().Format(time.RFC3339)
 }
 
 func hasLinkEvidence(buildDir string) bool {
