@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/x86_64-w64-mingw32-gcc -I/__fixture_src__/vendor_hdronly -g -o CMakeFiles/hdr.dir/main.c.obj -c /__fixture_src__/main.c",
+  "file": "/__fixture_src__/main.c",
+  "output": "CMakeFiles/hdr.dir/main.c.obj"
+}
+]

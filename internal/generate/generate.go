@@ -16,6 +16,7 @@ import (
 	"github.com/example/sbomb/internal/adapters/compiledb"
 	makeadapter "github.com/example/sbomb/internal/adapters/make"
 	"github.com/example/sbomb/internal/adapters/manifest"
+	"github.com/example/sbomb/internal/buildinfo"
 	"github.com/example/sbomb/internal/config"
 	"github.com/example/sbomb/internal/cyclonedx"
 	"github.com/example/sbomb/internal/domain"
@@ -220,7 +221,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	for _, component := range components {
 		deps = append(deps, cyclonedx.Dependency{Ref: component.BomRef})
 	}
-	bom := cyclonedx.BOM{BomFormat: "CycloneDX", SpecVersion: "1.6", Version: 1, Components: components, Dependencies: deps, Metadata: &cyclonedx.Metadata{Tools: []cyclonedx.Tool{{Vendor: "sbomb", Name: "sbomb", Version: "0.0.0-milestone14"}}}}
+	bom := cyclonedx.BOM{BomFormat: "CycloneDX", SpecVersion: "1.6", Version: 1, Components: components, Dependencies: deps, Metadata: &cyclonedx.Metadata{Tools: []cyclonedx.Tool{{Vendor: buildinfo.Vendor, Name: buildinfo.Name, Version: buildinfo.Version}}}}
 	if reproducible {
 		bom.SerialNumber = cyclonedx.ReproducibleSerialNumber(bom)
 		logger.Debug("Reproducible mode enabled: generated deterministic serial '%s'", bom.SerialNumber)

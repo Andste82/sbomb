@@ -1,0 +1,437 @@
+Archive member included to satisfy reference by file (symbol)
+
+libmod_a.a(util.c.obj)        CMakeFiles/dup.dir/main.c.obj (util_a)
+libmod_b.a(util.c.obj)        CMakeFiles/dup.dir/main.c.obj (util_b)
+
+There are no discarded input sections
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD CMakeFiles/dup.dir/main.c.obj
+LOAD libmod_a.a
+LOAD libmod_b.a
+                [!provide]                        PROVIDE (__executable_start = SEGMENT_START ("text-segment", 0x8000))
+                0x00008000                        . = SEGMENT_START ("text-segment", 0x8000)
+
+.interp
+ *(.interp)
+
+.note.gnu.build-id
+ *(.note.gnu.build-id)
+
+.hash
+ *(.hash)
+
+.gnu.hash
+ *(.gnu.hash)
+
+.dynsym
+ *(.dynsym)
+
+.dynstr
+ *(.dynstr)
+
+.gnu.version
+ *(.gnu.version)
+
+.gnu.version_d
+ *(.gnu.version_d)
+
+.gnu.version_r
+ *(.gnu.version_r)
+
+.rel.dyn        0x00008000        0x0
+ *(.rel.init)
+ *(.rel.text .rel.text.* .rel.gnu.linkonce.t.*)
+ *(.rel.fini)
+ *(.rel.rodata .rel.rodata.* .rel.gnu.linkonce.r.*)
+ *(.rel.data.rel.ro .rel.data.rel.ro.* .rel.gnu.linkonce.d.rel.ro.*)
+ *(.rel.data .rel.data.* .rel.gnu.linkonce.d.*)
+ *(.rel.tdata .rel.tdata.* .rel.gnu.linkonce.td.*)
+ *(.rel.tbss .rel.tbss.* .rel.gnu.linkonce.tb.*)
+ *(.rel.ctors)
+ *(.rel.dtors)
+ *(.rel.got)
+ *(.rel.bss .rel.bss.* .rel.gnu.linkonce.b.*)
+                [!provide]                        PROVIDE (__rel_iplt_start = .)
+ *(.rel.iplt)
+ .rel.iplt      0x00008000        0x0 CMakeFiles/dup.dir/main.c.obj
+                [!provide]                        PROVIDE (__rel_iplt_end = .)
+
+.rela.dyn       0x00008000        0x0
+ *(.rela.init)
+ *(.rela.text .rela.text.* .rela.gnu.linkonce.t.*)
+ *(.rela.fini)
+ *(.rela.rodata .rela.rodata.* .rela.gnu.linkonce.r.*)
+ *(.rela.data .rela.data.* .rela.gnu.linkonce.d.*)
+ *(.rela.tdata .rela.tdata.* .rela.gnu.linkonce.td.*)
+ *(.rela.tbss .rela.tbss.* .rela.gnu.linkonce.tb.*)
+ *(.rela.ctors)
+ *(.rela.dtors)
+ *(.rela.got)
+ *(.rela.bss .rela.bss.* .rela.gnu.linkonce.b.*)
+                [!provide]                        PROVIDE (__rela_iplt_start = .)
+ *(.rela.iplt)
+                [!provide]                        PROVIDE (__rela_iplt_end = .)
+
+.rel.plt
+ *(.rel.plt)
+
+.rela.plt
+ *(.rela.plt)
+
+.init
+ *(SORT_NONE(.init))
+
+.plt
+ *(.plt)
+
+.iplt           0x00008000        0x0
+ *(.iplt)
+ .iplt          0x00008000        0x0 CMakeFiles/dup.dir/main.c.obj
+
+.gnu.sgstubs
+ *(.gnu.sgstubs*)
+
+.text           0x00008000       0x36
+ *(.text.unlikely .text.*_unlikely .text.unlikely.*)
+ *(.text.exit .text.exit.*)
+ *(.text.startup .text.startup.*)
+ *(.text.hot .text.hot.*)
+ *(SORT_BY_NAME(.text.sorted.*))
+ *(.text .stub .text.* .gnu.linkonce.t.*)
+ .text          0x00008000       0x1a CMakeFiles/dup.dir/main.c.obj
+                0x00008000                main
+ .text          0x0000801a        0xe libmod_a.a(util.c.obj)
+                0x0000801a                util_a
+ .text          0x00008028        0xe libmod_b.a(util.c.obj)
+                0x00008028                util_b
+ *(.gnu.warning)
+ *(.glue_7t)
+ .glue_7t       0x00008036        0x0 linker stubs
+ *(.glue_7)
+ .glue_7        0x00008036        0x0 linker stubs
+ *(.vfp11_veneer)
+ .vfp11_veneer  0x00008036        0x0 linker stubs
+ *(.v4_bx)
+ .v4_bx         0x00008036        0x0 linker stubs
+
+.fini
+ *(SORT_NONE(.fini))
+                [!provide]                        PROVIDE (__etext = .)
+                [!provide]                        PROVIDE (_etext = .)
+                [!provide]                        PROVIDE (etext = .)
+
+.rodata
+ *(.rodata .rodata.* .gnu.linkonce.r.*)
+
+.rodata1
+ *(.rodata1)
+
+.ARM.extab
+ *(.ARM.extab* .gnu.linkonce.armextab.*)
+
+.ARM.exidx      0x00008036        0x0
+                [!provide]                        PROVIDE (__exidx_start = .)
+ *(.ARM.exidx* .gnu.linkonce.armexidx.*)
+                [!provide]                        PROVIDE (__exidx_end = .)
+
+.eh_frame_hdr
+ *(.eh_frame_hdr)
+ *(.eh_frame_entry .eh_frame_entry.*)
+
+.eh_frame
+ *(.eh_frame)
+ *(.eh_frame.*)
+
+.sframe
+ *(.sframe)
+ *(.sframe.*)
+
+.gcc_except_table
+ *(.gcc_except_table .gcc_except_table.*)
+
+.gnu_extab
+ *(.gnu_extab*)
+
+.exception_ranges
+ *(.exception_ranges*)
+                0x00009036                        . = (ALIGN (CONSTANT (MAXPAGESIZE)) + (. & (CONSTANT (MAXPAGESIZE) - 0x1)))
+
+.eh_frame
+ *(.eh_frame)
+ *(.eh_frame.*)
+
+.sframe
+ *(.sframe)
+ *(.sframe.*)
+
+.gnu_extab
+ *(.gnu_extab)
+
+.gcc_except_table
+ *(.gcc_except_table .gcc_except_table.*)
+
+.exception_ranges
+ *(.exception_ranges*)
+
+.tdata          0x00009036        0x0
+                [!provide]                        PROVIDE (__tdata_start = .)
+ *(.tdata .tdata.* .gnu.linkonce.td.*)
+
+.tbss
+ *(.tbss .tbss.* .gnu.linkonce.tb.*)
+ *(.tcommon)
+
+.preinit_array  0x00009036        0x0
+                [!provide]                        PROVIDE (__preinit_array_start = .)
+ *(.preinit_array)
+                [!provide]                        PROVIDE (__preinit_array_end = .)
+
+.init_array     0x00009036        0x0
+                [!provide]                        PROVIDE (__init_array_start = .)
+ *(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*))
+ *(.init_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .ctors)
+                [!provide]                        PROVIDE (__init_array_end = .)
+
+.fini_array     0x00009036        0x0
+                [!provide]                        PROVIDE (__fini_array_start = .)
+ *(SORT_BY_INIT_PRIORITY(.fini_array.*) SORT_BY_INIT_PRIORITY(.dtors.*))
+ *(.fini_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .dtors)
+                [!provide]                        PROVIDE (__fini_array_end = .)
+
+.ctors
+ *crtbegin.o(.ctors)
+ *crtbegin?.o(.ctors)
+ *(EXCLUDE_FILE(*crtend?.o *crtend.o) .ctors)
+ *(SORT_BY_NAME(.ctors.*))
+ *(.ctors)
+
+.dtors
+ *crtbegin.o(.dtors)
+ *crtbegin?.o(.dtors)
+ *(EXCLUDE_FILE(*crtend?.o *crtend.o) .dtors)
+ *(SORT_BY_NAME(.dtors.*))
+ *(.dtors)
+
+.jcr
+ *(.jcr)
+
+.data.rel.ro
+ *(.data.rel.ro.local* .gnu.linkonce.d.rel.ro.local.*)
+ *(.data.rel.ro .data.rel.ro.* .gnu.linkonce.d.rel.ro.*)
+
+.dynamic
+ *(.dynamic)
+
+.got            0x00009038        0x0
+ *(.got.plt)
+ *(.igot.plt)
+ .igot.plt      0x00009038        0x0 CMakeFiles/dup.dir/main.c.obj
+ *(.got)
+ *(.igot)
+
+.data           0x00009036        0x0
+                0x00009036                        __data_start = .
+ *(.data .data.* .gnu.linkonce.d.*)
+ .data          0x00009036        0x0 CMakeFiles/dup.dir/main.c.obj
+ .data          0x00009036        0x0 libmod_a.a(util.c.obj)
+ .data          0x00009036        0x0 libmod_b.a(util.c.obj)
+
+.data1
+ *(.data1)
+                0x00009036                        _edata = .
+                [!provide]                        PROVIDE (edata = .)
+
+.persistent     0x00009038        0x0
+                [!provide]                        PROVIDE (__persistent_start = .)
+ *(.persistent .persistent.* .gnu.linkonce.p.*)
+                0x00009038                        . = ALIGN (0x4)
+                [!provide]                        PROVIDE (__persistent_end = .)
+                0x00009038                        . = ALIGN (ALIGNOF (NEXT_SECTION))
+                0x00009038                        __bss_start = .
+                0x00009038                        __bss_start__ = .
+
+.bss            0x00009038        0x0
+ *(.dynbss)
+ *(.bss .bss.* .gnu.linkonce.b.*)
+ .bss           0x00009038        0x0 CMakeFiles/dup.dir/main.c.obj
+ .bss           0x00009038        0x0 libmod_a.a(util.c.obj)
+ .bss           0x00009038        0x0 libmod_b.a(util.c.obj)
+ *(COMMON)
+                0x00009038                        . = ALIGN ((. != 0x0)?0x4:0x1)
+                0x00009038                        _bss_end__ = .
+                0x00009038                        __bss_end__ = .
+
+.noinit         0x00009038        0x0
+                [!provide]                        PROVIDE (__noinit_start = .)
+ *(.noinit .noinit.* .gnu.linkonce.n.*)
+                0x00009038                        . = ALIGN (0x4)
+                [!provide]                        PROVIDE (__noinit_end = .)
+                0x00009038                        . = ALIGN (0x4)
+                0x00009038                        . = SEGMENT_START ("ldata-segment", .)
+                0x00009038                        . = ALIGN (0x4)
+                0x00009038                        __end__ = .
+                0x00009038                        _end = .
+                [!provide]                        PROVIDE (end = .)
+
+.stack          0x00080000        0x0
+                0x00080000                        _stack = .
+ *(.stack)
+
+.stab
+ *(.stab)
+
+.stabstr
+ *(.stabstr)
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.comment        0x00000000       0x26
+ *(.comment)
+ .comment       0x00000000       0x26 CMakeFiles/dup.dir/main.c.obj
+                                 0x27 (size before relaxing)
+ .comment       0x00000026       0x27 libmod_a.a(util.c.obj)
+ .comment       0x00000026       0x27 libmod_b.a(util.c.obj)
+
+.gnu.build.attributes
+ *(.gnu.build.attributes .gnu.build.attributes.*)
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges  0x00000000       0x60
+ *(.debug_aranges)
+ .debug_aranges
+                0x00000000       0x20 CMakeFiles/dup.dir/main.c.obj
+ .debug_aranges
+                0x00000020       0x20 libmod_a.a(util.c.obj)
+ .debug_aranges
+                0x00000040       0x20 libmod_b.a(util.c.obj)
+
+.debug_pubnames
+ *(.debug_pubnames)
+
+.debug_info     0x00000000       0xe0
+ *(.debug_info .gnu.linkonce.wi.*)
+ .debug_info    0x00000000       0x58 CMakeFiles/dup.dir/main.c.obj
+ .debug_info    0x00000058       0x44 libmod_a.a(util.c.obj)
+ .debug_info    0x0000009c       0x44 libmod_b.a(util.c.obj)
+
+.debug_abbrev   0x00000000       0xc5
+ *(.debug_abbrev)
+ .debug_abbrev  0x00000000       0x51 CMakeFiles/dup.dir/main.c.obj
+ .debug_abbrev  0x00000051       0x3a libmod_a.a(util.c.obj)
+ .debug_abbrev  0x0000008b       0x3a libmod_b.a(util.c.obj)
+
+.debug_line     0x00000000      0x108
+ *(.debug_line .debug_line.* .debug_line_end)
+ .debug_line    0x00000000       0x62 CMakeFiles/dup.dir/main.c.obj
+ .debug_line    0x00000062       0x53 libmod_a.a(util.c.obj)
+ .debug_line    0x000000b5       0x53 libmod_b.a(util.c.obj)
+
+.debug_frame    0x00000000       0x90
+ *(.debug_frame)
+ .debug_frame   0x00000000       0x30 CMakeFiles/dup.dir/main.c.obj
+ .debug_frame   0x00000030       0x30 libmod_a.a(util.c.obj)
+ .debug_frame   0x00000060       0x30 libmod_b.a(util.c.obj)
+
+.debug_str      0x00000000       0xdd
+ *(.debug_str)
+ .debug_str     0x00000000       0xdd CMakeFiles/dup.dir/main.c.obj
+                                 0xa1 (size before relaxing)
+ .debug_str     0x000000dd       0x9b libmod_a.a(util.c.obj)
+ .debug_str     0x000000dd       0x9b libmod_b.a(util.c.obj)
+
+.debug_loc
+ *(.debug_loc)
+
+.debug_macinfo
+ *(.debug_macinfo)
+
+.debug_weaknames
+ *(.debug_weaknames)
+
+.debug_funcnames
+ *(.debug_funcnames)
+
+.debug_typenames
+ *(.debug_typenames)
+
+.debug_varnames
+ *(.debug_varnames)
+
+.debug_pubtypes
+ *(.debug_pubtypes)
+
+.debug_ranges
+ *(.debug_ranges)
+
+.debug_addr
+ *(.debug_addr)
+
+.debug_line_str
+ *(.debug_line_str)
+
+.debug_loclists
+ *(.debug_loclists)
+
+.debug_macro
+ *(.debug_macro)
+
+.debug_names
+ *(.debug_names)
+
+.debug_rnglists
+ *(.debug_rnglists)
+
+.debug_str_offsets
+ *(.debug_str_offsets)
+
+.debug_sup
+ *(.debug_sup)
+
+.ARM.attributes
+                0x00000000       0x2e
+ *(.ARM.attributes)
+ .ARM.attributes
+                0x00000000       0x2e CMakeFiles/dup.dir/main.c.obj
+ .ARM.attributes
+                0x0000002e       0x2e libmod_a.a(util.c.obj)
+ .ARM.attributes
+                0x0000005c       0x2e libmod_b.a(util.c.obj)
+ *(.gnu.attributes)
+
+.note.gnu.arm.ident
+ *(.note.gnu.arm.ident)
+
+/DISCARD/
+ *(.note.GNU-stack)
+ *(.gnu_debuglink)
+ *(.gnu.lto_*)
+OUTPUT(dup elf32-littlearm)
+LOAD linker stubs

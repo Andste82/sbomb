@@ -1,6 +1,6 @@
-project:src/crypto.c
+project:crypto.c
   used because:
-    project:src/crypto.c
-      <- [compile | derived | high | compile_commands] object:abs:__fixture_build__/crypto.o
-    object:abs:__fixture_build__/crypto.o
+    project:crypto.c
+      <- [compile | derived | high | compile_commands] object:abs:__fixture_build__/CMakeFiles/crypto.dir/crypto.c.o
+    object:abs:__fixture_build__/CMakeFiles/crypto.dir/crypto.c.o
       <- [compile-output | linked | medium | compile_commands] artifact:build

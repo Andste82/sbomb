@@ -1,3 +1,28 @@
 # Open Questions
 
-- None for milestone 00; the initial fixture corpus is intentionally minimal and specification-backed.
+Questions the specification does not settle and which affect output. Recorded
+per specification section 0.2 rather than being guessed at.
+
+## Q1 — Should the corpus commit built artifacts?
+
+The fixture corpus currently commits the linked executables, because DWARF
+evidence (section 11.4) and artifact correlation by GNU build-id (section 11.7)
+cannot be exercised without them. They are small (17-120 KiB) and contain no
+host paths, since the corpus is built under the sentinel roots.
+
+The alternative -- building artifacts on demand in tests -- would remove about
+2 MB from the repository but makes the corpus non-hermetic and the tests
+toolchain-dependent. Revisit if the corpus grows.
+
+## Q2 — Staleness evidence from `.ninja_log`
+
+Section 27.2 lists `.ninja_log` output hashes as the third-strongest staleness
+signal. `.ninja_log` records wall-clock timestamps, so committing it would make
+the corpus non-reproducible. It is currently not harvested.
+
+Artifact identity correlation (section 27.2 signal 1) is stronger and is
+available from the committed artifacts, so this may not need resolving.
+
+## Q3 — Which compilation database entry wins for a unity or PCH object?
+
+Not yet reached; deferred to the compile-evidence work.

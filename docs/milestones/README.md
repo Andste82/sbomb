@@ -9,7 +9,7 @@ Every milestone must satisfy:
 ```text
 go build ./...
 go vet ./...
-go test ./... -race
+CGO_ENABLED=1 go test ./... -race     # the race detector needs cgo (docs/deviations.md D2)
 gofmt -l . | wc -l   ->  0
 ```
 

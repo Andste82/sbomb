@@ -4,7 +4,7 @@ set -euo pipefail
 root_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 version=${VERSION:-$(git -C "$root_dir" describe --tags --always --dirty 2>/dev/null || printf 'dev')}
 output_dir=${OUTPUT_DIR:-"$root_dir/dist/$version"}
-ldflags="-s -w -X main.version=$version"
+ldflags="-s -w -X github.com/example/sbomb/internal/buildinfo.Version=$version"
 
 build_one() {
   local goos=$1 goarch=$2 suffix=$3

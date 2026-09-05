@@ -12,10 +12,10 @@ import (
 // Rule describes a single component mapping rule. Either Path or Match may be
 // set; if both are empty the rule is ignored.
 type Rule struct {
-	Path string
+	Path  string
 	Match string
-	Name string
-	Type string
+	Name  string
+	Type  string
 }
 
 type Mapper struct {

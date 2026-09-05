@@ -1,1 +1,0 @@
-c++ -o app CMakeFiles/app.dir/one/main.cpp.o CMakeFiles/app.dir/two/main.cpp.o

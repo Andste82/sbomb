@@ -1,7 +1,0 @@
-[
-  {
-    "directory": "/__fixture_build__",
-    "file": "/__fixture_src__/src/crypto.c",
-    "arguments": ["gcc", "-c", "/__fixture_src__/src/crypto.c", "-o", "/__fixture_build__/crypto.o"]
-  }
-]

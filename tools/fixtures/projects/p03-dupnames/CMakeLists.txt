@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.20)
+project(p03_dupnames C)
+include(${CMAKE_CURRENT_LIST_DIR}/common.cmake)
+add_library(mod_a STATIC mod_a/util.c)
+add_library(mod_b STATIC mod_b/util.c)
+fixture_executable(dup main.c)
+target_link_libraries(dup PRIVATE mod_a mod_b)

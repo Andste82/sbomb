@@ -1,2 +1,7 @@
 _demo
+.env
 sbomb
+dist/
+
+# Devcontainer-local Claude Code state; not part of the project.
+.devcontainer/.claude-config/

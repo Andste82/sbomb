@@ -100,9 +100,13 @@ func parseBuildMake(path, buildDir string, target *Target) error {
 		if !looksLikeObject(object) {
 			continue
 		}
+		objectPath := resolvePath(buildDir, object)
+		if _, resolved := target.ObjectSources[objectPath]; resolved {
+			continue
+		}
 		for _, prerequisite := range splitShellWords(line[colon+1:]) {
 			if looksLikeSource(prerequisite) {
-				target.ObjectSources[resolvePath(buildDir, object)] = resolvePath(buildDir, prerequisite)
+				target.ObjectSources[objectPath] = resolvePath(buildDir, prerequisite)
 				break
 			}
 		}
@@ -296,8 +300,27 @@ func quotedStrings(text string) []string {
 func looksLikeObject(path string) bool {
 	return strings.HasSuffix(path, ".o") || strings.HasSuffix(path, ".obj")
 }
+
+// sourceExtensions is the set of compiler inputs that can produce a linked
+// object, per specification section 14.6. It is deliberately an allowlist: a
+// generated build.make lists bookkeeping prerequisites such as flags.make and
+// compiler_depend.ts alongside the real source, and a blocklist would accept
+// those as the translation unit.
+var sourceExtensions = map[string]bool{
+	".c": true, ".cc": true, ".cpp": true, ".cxx": true, ".c++": true,
+	".m": true, ".mm": true,
+	".s": true, ".asm": true,
+	".cu": true,
+	".rc": true, ".def": true,
+}
+
 func looksLikeSource(path string) bool {
-	return !looksLikeObject(path) && !strings.HasSuffix(path, ".d") && !strings.HasPrefix(path, "$(")
+	if strings.HasPrefix(path, "$(") {
+		return false
+	}
+	// .S and .s are both assembly; extensions are otherwise case-insensitive
+	// only on Windows, but CMake emits them as written, so compare lowercased.
+	return sourceExtensions[strings.ToLower(filepath.Ext(path))]
 }
 func resolvePath(base, path string) string {
 	if filepath.IsAbs(path) {

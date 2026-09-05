@@ -1,0 +1,20 @@
+[
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/x86_64-w64-mingw32-gcc -g -o CMakeFiles/crypto.dir/crypto.c.obj -c /__fixture_src__/crypto.c",
+  "file": "/__fixture_src__/crypto.c",
+  "output": "CMakeFiles/crypto.dir/crypto.c.obj"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/x86_64-w64-mingw32-gcc -g -o CMakeFiles/crypto.dir/unused.c.obj -c /__fixture_src__/unused.c",
+  "file": "/__fixture_src__/unused.c",
+  "output": "CMakeFiles/crypto.dir/unused.c.obj"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/x86_64-w64-mingw32-gcc -g -o CMakeFiles/app.dir/main.c.obj -c /__fixture_src__/main.c",
+  "file": "/__fixture_src__/main.c",
+  "output": "CMakeFiles/app.dir/main.c.obj"
+}
+]

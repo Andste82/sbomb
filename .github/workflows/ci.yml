@@ -1,0 +1,89 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  # The universal gate from docs/milestones/README.md. Every milestone must
+  # leave the repository in a state where all four of these succeed.
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: go build
+        run: go build ./...
+      - name: go vet
+        run: go vet ./...
+      - name: go test
+        run: go test ./...
+      - name: gofmt
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "these files are not gofmt-clean:" >&2
+            echo "$unformatted" >&2
+            exit 1
+          fi
+
+  # Release binaries are built with CGO_ENABLED=0 (specification section 37.1),
+  # which is also the devcontainer default -- but the race detector needs cgo,
+  # so this job overrides it rather than dropping the requirement.
+  race:
+    runs-on: ubuntu-latest
+    env:
+      CGO_ENABLED: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: go test -race
+        run: go test -race ./...
+
+  # The fixture corpus is a committed golden artifact. CI verifies that it is
+  # complete and free of host paths; regenerating it needs the pinned
+  # toolchains of the devcontainer and is therefore a developer task.
+  fixtures:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Corpus is complete
+        run: tools/fixtures/regen.sh --check
+      - name: Corpus contains no host paths
+        run: go test ./tools/fixtures/...
+      - name: Corpus is unchanged by the test suite
+        run: |
+          go test ./... > /dev/null
+          if ! git diff --quiet -- testdata/fixtures; then
+            echo "the test suite modified the fixture corpus:" >&2
+            git diff --stat -- testdata/fixtures >&2
+            exit 1
+          fi
+          untracked=$(git ls-files --others --exclude-standard -- testdata/fixtures)
+          if [ -n "$untracked" ]; then
+            echo "the test suite left files in the fixture corpus:" >&2
+            echo "$untracked" >&2
+            exit 1
+          fi
+
+  # The end-to-end CMake integration is behind a build tag because it needs a
+  # real cmake on PATH.
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: go test -tags e2e
+        run: go test -tags e2e ./test/...

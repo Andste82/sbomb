@@ -5,10 +5,12 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/example/sbomb/internal/testutil"
 )
 
 func TestMilestone13Acceptance(t *testing.T) {
-	fixture := filepath.Join("..", "..", "testdata", "fixtures", "gcc-13", "p02-static", "build")
+	fixture := filepath.Join("..", "..", "testdata", "fixtures", "gcc-ninja", "p02-static", "build")
 	buildDir := t.TempDir()
 	for _, name := range []string{"compile_commands.json", "build.ninja"} {
 		data, err := os.ReadFile(filepath.Join(fixture, name))
@@ -42,29 +44,17 @@ func TestMilestone13Acceptance(t *testing.T) {
 	if !bytes.Equal(strictSBOM, lenientSBOM) {
 		t.Fatal("strict and lenient SBOMs differ")
 	}
-	goldenReport, err := os.ReadFile(filepath.Join("..", "..", "testdata", "golden", "gcc-13-p02-report.txt"))
-	if err != nil {
-		t.Fatal(err)
-	}
 	actualReport, err := os.ReadFile(strictReport)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !bytes.Equal(actualReport, goldenReport) {
-		t.Fatalf("report differs from golden:\n%s", actualReport)
-	}
-	_, _, explainErr := execute([]string{"explain", "--build-dir", buildDir, "--file", "project:src/crypto.c"})
+	assertGolden(t, "gcc-13-p02-report.txt", actualReport)
+	_, _, explainErr := execute([]string{"explain", "--build-dir", buildDir, "--file", "project:crypto.c"})
 	if explainErr != "" {
 		t.Fatalf("explain returned stderr: %s", explainErr)
 	}
-	_, explainOutput, _ := execute([]string{"explain", "--build-dir", buildDir, "--file", "project:src/crypto.c"})
-	goldenExplain, err := os.ReadFile(filepath.Join("..", "..", "testdata", "golden", "explain-crypto.txt"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !bytes.Equal([]byte(explainOutput), goldenExplain) {
-		t.Fatalf("explain differs from golden:\n%s", explainOutput)
-	}
+	_, explainOutput, _ := execute([]string{"explain", "--build-dir", buildDir, "--file", "project:crypto.c"})
+	assertGolden(t, "explain-crypto.txt", []byte(explainOutput))
 
 	secondBuild := t.TempDir()
 	for _, name := range []string{"compile_commands.json", "build.ninja"} {
@@ -108,16 +98,7 @@ func TestMilestone13Acceptance(t *testing.T) {
 }
 
 func TestMilestone17MakefilesAcceptance(t *testing.T) {
-	workingDirectory, err := os.Getwd()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := os.Chdir(filepath.Join("..", "..")); err != nil {
-		t.Fatal(err)
-	}
-	defer os.Chdir(workingDirectory)
-	buildDir := filepath.Join("testdata", "fixtures", "gcc-12-make", "p02-static", "build")
-	defer os.Remove(filepath.Join(buildDir, "evidence.json"))
+	buildDir := testutil.CorpusBuildDir(t, "gcc-make", "p02-static")
 	output := filepath.Join(t.TempDir(), "mk.cdx.json")
 	code, _, stderr := execute([]string{"generate", "--build-dir", buildDir, "--output", output, "--reproducible"})
 	if code != 0 || stderr != "" {
@@ -127,11 +108,5 @@ func TestMilestone17MakefilesAcceptance(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	expected, err := os.ReadFile(filepath.Join("testdata", "golden", "gcc-12-make-p02.cdx.json"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !bytes.Equal(actual, expected) {
-		t.Fatal("Makefiles SBOM differs from golden")
-	}
+	assertGolden(t, "gcc-make-p02.cdx.json", actual)
 }

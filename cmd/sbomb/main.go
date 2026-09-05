@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/example/sbomb/internal/buildinfo"
 	"github.com/example/sbomb/internal/config"
 	"github.com/example/sbomb/internal/cyclonedx"
 	"github.com/example/sbomb/internal/evidence"
@@ -18,8 +19,6 @@ import (
 	"github.com/example/sbomb/internal/policy"
 	"github.com/example/sbomb/internal/report"
 )
-
-var version = "0.0.0-milestone16"
 
 func main() {
 	code, out, errOut := execute(os.Args[1:])
@@ -34,37 +33,66 @@ func main() {
 
 func execute(args []string) (int, string, string) {
 	if len(args) == 0 {
-		return 0, "sbomb " + version + "\n", ""
+		return 0, buildinfo.Name + " " + buildinfo.Version + "\n", ""
 	}
 
+	// Verbosity may be given before the subcommand. It is consumed here rather
+	// than reinjected into the subcommand's arguments, so that subcommands
+	// which take no verbosity flag do not reject it as an unknown argument.
 	subArgs := args
-	globalFlags := []string{}
+	verbosity := 0
 	for len(subArgs) > 0 {
-		if subArgs[0] == "-v" || subArgs[0] == "--verbose" || strings.HasPrefix(subArgs[0], "-v=") || strings.HasPrefix(subArgs[0], "--verbose=") || (strings.HasPrefix(subArgs[0], "-v") && isAllV(subArgs[0])) {
-			globalFlags = append(globalFlags, subArgs[0])
-			subArgs = subArgs[1:]
-		} else {
+		level, ok := verbosityFlag(subArgs[0], verbosity)
+		if !ok {
 			break
 		}
+		verbosity = level
+		subArgs = subArgs[1:]
 	}
 	if len(subArgs) == 0 {
-		return 0, "sbomb " + version + "\n", ""
-	}
-	if len(globalFlags) > 0 {
-		subArgs = append(subArgs, globalFlags...)
+		return 0, buildinfo.Name + " " + buildinfo.Version + "\n", ""
 	}
 
 	switch subArgs[0] {
 	case "version", "--version":
-		return 0, "sbomb " + version + "\n", ""
+		return 0, buildinfo.Name + " " + buildinfo.Version + "\n", ""
 	case "schema":
 		return handleSchema(subArgs[1:])
 	case "generate":
-		return handleGenerate(subArgs[1:])
+		return handleGenerate(subArgs[1:], verbosity)
 	case "explain":
 		return handleExplain(subArgs[1:])
 	default:
 		return 1, "", "usage: sbomb [version|generate|schema|explain]\n"
+	}
+}
+
+// verbosityFlag reports the new verbosity level for a single verbosity flag.
+// It accepts -v, -vvv, -v=N, --verbose and --verbose=N; the second return
+// value is false when arg is not a verbosity flag at all.
+func verbosityFlag(arg string, current int) (int, bool) {
+	switch {
+	case arg == "-v" || arg == "--verbose":
+		if current == 0 {
+			return 1, true
+		}
+		return current + 1, true
+	case strings.HasPrefix(arg, "--verbose="):
+		level, err := strconv.Atoi(strings.TrimPrefix(arg, "--verbose="))
+		if err != nil {
+			return current, false
+		}
+		return level, true
+	case strings.HasPrefix(arg, "-v="):
+		level, err := strconv.Atoi(strings.TrimPrefix(arg, "-v="))
+		if err != nil {
+			return current, false
+		}
+		return level, true
+	case isAllV(arg):
+		return current + len(arg) - 1, true
+	default:
+		return current, false
 	}
 }
 
@@ -89,7 +117,7 @@ func handleSchema(args []string) (int, string, string) {
 	return 0, config.Schema() + "\n", ""
 }
 
-func handleGenerate(args []string) (int, string, string) {
+func handleGenerate(args []string, verbosity int) (int, string, string) {
 	buildDir := ""
 	output := ""
 	repro := false
@@ -100,7 +128,6 @@ func handleGenerate(args []string) (int, string, string) {
 	reviewReportPath := ""
 	reportFormat := "text"
 	pathFlavor := ""
-	verbosity := 0
 	for i := 0; i < len(args); i++ {
 		switch {
 		case args[i] == "--verbose" || args[i] == "-v":

@@ -1,0 +1,20 @@
+[
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/cc -g -o CMakeFiles/crypto.dir/crypto.c.o -c /__fixture_src__/crypto.c",
+  "file": "/__fixture_src__/crypto.c",
+  "output": "CMakeFiles/crypto.dir/crypto.c.o"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/cc -g -o CMakeFiles/crypto.dir/unused.c.o -c /__fixture_src__/unused.c",
+  "file": "/__fixture_src__/unused.c",
+  "output": "CMakeFiles/crypto.dir/unused.c.o"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/cc -g -o CMakeFiles/app.dir/main.c.o -c /__fixture_src__/main.c",
+  "file": "/__fixture_src__/main.c",
+  "output": "CMakeFiles/app.dir/main.c.o"
+}
+]

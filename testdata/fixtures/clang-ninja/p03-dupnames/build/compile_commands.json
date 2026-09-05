@@ -1,0 +1,20 @@
+[
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/clang -g -o CMakeFiles/mod_a.dir/mod_a/util.c.o -c /__fixture_src__/mod_a/util.c",
+  "file": "/__fixture_src__/mod_a/util.c",
+  "output": "CMakeFiles/mod_a.dir/mod_a/util.c.o"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/clang -g -o CMakeFiles/mod_b.dir/mod_b/util.c.o -c /__fixture_src__/mod_b/util.c",
+  "file": "/__fixture_src__/mod_b/util.c",
+  "output": "CMakeFiles/mod_b.dir/mod_b/util.c.o"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/clang -g -o CMakeFiles/dup.dir/main.c.o -c /__fixture_src__/main.c",
+  "file": "/__fixture_src__/main.c",
+  "output": "CMakeFiles/dup.dir/main.c.o"
+}
+]

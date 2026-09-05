@@ -15,7 +15,7 @@ import (
 
 func portableFixture(t *testing.T) (config.Config, string) {
 	t.Helper()
-	buildDir := filepath.Join("..", "..", "testdata", "fixtures", "portable", "build")
+	buildDir := filepath.Join("..", "..", "testdata", "fixtures", "gcc-ninja", "p02-static", "build")
 	return config.Config{Project: config.Project{Root: "/__fixture_src__"}}, buildDir
 }
 
@@ -80,7 +80,7 @@ func TestNoAbsolutePathsInOutput(t *testing.T) {
 }
 
 func TestRunBuildsGraphAndReportsMissingEvidence(t *testing.T) {
-	fixture := filepath.Join("..", "..", "testdata", "fixtures", "gcc-13", "p02-static")
+	fixture := filepath.Join("..", "..", "testdata", "fixtures", "gcc-ninja", "p02-static")
 	result, err := Run(config.Config{}, fixture, true)
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)

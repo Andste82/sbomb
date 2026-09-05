@@ -1,10 +1,8 @@
-package resolver
+package inventory
 
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
@@ -336,9 +334,4 @@ func cloneStringMap(in map[string][]string) map[string][]string {
 		out[k] = cp
 	}
 	return out
-}
-
-func init() {
-	_ = json.Marshal
-	_ = fmt.Sprintf
 }

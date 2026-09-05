@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/cc   -g -o CMakeFiles/hello.dir/main.c.o -c /__fixture_src__/main.c",
+  "file": "/__fixture_src__/main.c",
+  "output": "CMakeFiles/hello.dir/main.c.o"
+}
+]

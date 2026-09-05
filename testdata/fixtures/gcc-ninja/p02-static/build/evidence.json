@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "toolVersion": "0.0.0",
+  "anchors": [],
+  "nodes": [
+    {
+      "id": "artifact:build",
+      "kind": "artifact"
+    },
+    {
+      "id": "object:abs:__fixture_build__/CMakeFiles/app.dir/main.c.o",
+      "kind": "object"
+    },
+    {
+      "id": "object:abs:__fixture_build__/CMakeFiles/crypto.dir/crypto.c.o",
+      "kind": "object"
+    },
+    {
+      "id": "object:abs:__fixture_build__/CMakeFiles/crypto.dir/unused.c.o",
+      "kind": "object"
+    },
+    {
+      "id": "project:crypto.c",
+      "kind": "source"
+    },
+    {
+      "id": "project:main.c",
+      "kind": "source"
+    },
+    {
+      "id": "project:unused.c",
+      "kind": "source"
+    }
+  ],
+  "edges": [
+    {
+      "from": "artifact:build",
+      "to": "object:abs:__fixture_build__/CMakeFiles/app.dir/main.c.o",
+      "type": "compile-output",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "compile_commands",
+      "adapter": "compiledb"
+    },
+    {
+      "from": "artifact:build",
+      "to": "object:abs:__fixture_build__/CMakeFiles/crypto.dir/crypto.c.o",
+      "type": "compile-output",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "compile_commands",
+      "adapter": "compiledb"
+    },
+    {
+      "from": "artifact:build",
+      "to": "object:abs:__fixture_build__/CMakeFiles/crypto.dir/unused.c.o",
+      "type": "compile-output",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "compile_commands",
+      "adapter": "compiledb"
+    },
+    {
+      "from": "object:abs:__fixture_build__/CMakeFiles/app.dir/main.c.o",
+      "to": "project:main.c",
+      "type": "compile",
+      "strength": "derived",
+      "confidence": "high",
+      "source": "compile_commands",
+      "adapter": "compiledb"
+    },
+    {
+      "from": "object:abs:__fixture_build__/CMakeFiles/crypto.dir/crypto.c.o",
+      "to": "project:crypto.c",
+      "type": "compile",
+      "strength": "derived",
+      "confidence": "high",
+      "source": "compile_commands",
+      "adapter": "compiledb"
+    },
+    {
+      "from": "object:abs:__fixture_build__/CMakeFiles/crypto.dir/unused.c.o",
+      "to": "project:unused.c",
+      "type": "compile",
+      "strength": "derived",
+      "confidence": "high",
+      "source": "compile_commands",
+      "adapter": "compiledb"
+    }
+  ]
+}

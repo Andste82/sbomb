@@ -8,6 +8,8 @@ import (
 
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/evidence"
+
+	"github.com/example/sbomb/internal/testutil"
 )
 
 func TestExecuteVersion(t *testing.T) {
@@ -53,7 +55,7 @@ func TestExecuteExplainLoadsEvidenceDump(t *testing.T) {
 }
 
 func TestExecuteVerboseLevels(t *testing.T) {
-	fixtureDir := filepath.Join("..", "..", "testdata", "fixtures", "gcc-13", "p02-static", "build")
+	fixtureDir := testutil.CorpusBuildDir(t, "gcc-ninja", "p02-static")
 
 	// Level 1: [INFO]
 	outDir1 := t.TempDir()

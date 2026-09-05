@@ -1,14 +1,15 @@
 #!/bin/sh
 set -eu
 
-fixture=$(CDPATH= cd -- "$(dirname -- "$0")/../testdata/fixtures/portable" && pwd)
+repo=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+fixture="$repo/testdata/fixtures/gcc-ninja/p02-static"
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 
 run() {
   go run ./cmd/sbomb generate \
     --build-dir "$fixture/build" \
-    --config "$fixture/config.json" \
+    --config "$repo/testdata/config/portable.json" \
     --output "$1" \
     --reproducible \
     --path-flavor posix

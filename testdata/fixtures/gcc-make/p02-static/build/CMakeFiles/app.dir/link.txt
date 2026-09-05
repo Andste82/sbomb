@@ -1,0 +1,1 @@
+/usr/bin/cc -g -Wl,-Map=/__fixture_build__/app.map -Wl,--dependency-file=/__fixture_build__/app.d CMakeFiles/app.dir/main.c.o -o app  libcrypto.a 

@@ -12,11 +12,11 @@ import (
 // compiled units, and source files. Edges represent evidence relationships.
 //
 // The graph maintains invariants per §8.8:
-// 1. Every node except product has at least one incoming edge.
-// 2. The graph is acyclic.
-// 3. Every included file's node is reachable from at least one artifact node.
-// 4. Node IDs are canonical path strings (§7.7) for file-like nodes, and
-//    product:<name> / artifact:<canonical path> otherwise.
+//  1. Every node except product has at least one incoming edge.
+//  2. The graph is acyclic.
+//  3. Every included file's node is reachable from at least one artifact node.
+//  4. Node IDs are canonical path strings (§7.7) for file-like nodes, and
+//     product:<name> / artifact:<canonical path> otherwise.
 type Graph struct {
 	nodes map[domain.NodeID]*domain.Node
 	// edges maps (from, to, type, source, adapter) to the best Edge

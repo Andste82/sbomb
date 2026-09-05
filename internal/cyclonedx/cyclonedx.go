@@ -3,7 +3,6 @@ package cyclonedx
 import (
 	"bytes"
 	"crypto/sha256"
-	"crypto/sha512"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -14,10 +13,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/example/sbomb/internal/buildinfo"
 	"github.com/google/uuid"
 )
-
-const version = "0.0.0-milestone12"
 
 // BOM is the in-memory CycloneDX 1.6 document used by the SBOM writer.
 type BOM struct {
@@ -125,7 +123,7 @@ func MarshalEmpty(reproducible bool) (string, error) {
 		Version:      1,
 		SerialNumber: serial,
 		Metadata: &Metadata{
-			Tools: []Tool{{Vendor: "sbomb", Name: "sbomb", Version: version}},
+			Tools: []Tool{{Vendor: buildinfo.Vendor, Name: buildinfo.Name, Version: buildinfo.Version}},
 		},
 	}
 	if !reproducible {
@@ -214,7 +212,7 @@ func canonicalizeBOM(bom *BOM) {
 }
 
 func reproducibleSerialNumber() string {
-	return ReproducibleSerialNumber(BOM{BomFormat: "CycloneDX", SpecVersion: "1.6", Version: 1, Metadata: &Metadata{Tools: []Tool{{Vendor: "sbomb", Name: "sbomb", Version: version}}}})
+	return ReproducibleSerialNumber(BOM{BomFormat: "CycloneDX", SpecVersion: "1.6", Version: 1, Metadata: &Metadata{Tools: []Tool{{Vendor: buildinfo.Vendor, Name: buildinfo.Name, Version: buildinfo.Version}}}})
 }
 
 // ReproducibleSerialNumber derives the UUIDv5 serial from the canonical BOM
@@ -538,11 +536,4 @@ func isRFC3339Timestamp(v string) bool {
 	}
 	_, err := time.Parse(time.RFC3339, v)
 	return err == nil
-}
-
-func versionString() string { return version }
-
-func init() {
-	_ = sha512.New
-	_ = sha256.New
 }

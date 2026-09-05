@@ -7,7 +7,7 @@ import (
 )
 
 func FuzzLoadFixtureManifest(f *testing.F) {
-	f.Add([]byte(`{"toolchain":"gcc-12","project":"hello","host":"linux"}`))
+	f.Add([]byte(`{"toolchain":"gcc-ninja","project":"hello","host":"linux"}`))
 	f.Add([]byte(`{}`))
 	f.Fuzz(func(t *testing.T, input []byte) {
 		path := filepath.Join(t.TempDir(), "manifest.json")

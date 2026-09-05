@@ -1,0 +1,1 @@
+/usr/bin/cc -g -Wl,-Map=/__fixture_build__/gen.map -Wl,--dependency-file=/__fixture_build__/gen.d CMakeFiles/gen.dir/main.c.o CMakeFiles/gen.dir/generated_version.c.o -o gen 

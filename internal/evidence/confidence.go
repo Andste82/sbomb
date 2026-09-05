@@ -78,13 +78,13 @@ func ApplyDowngrades(conf domain.Confidence, reasons ...string) (domain.Confiden
 
 // DumpFormat is the JSON structure for the evidence dump per Appendix C.
 type DumpFormat struct {
-	SchemaVersion int64                    `json:"schemaVersion"`
-	ToolVersion   string                   `json:"toolVersion"`
-	GeneratedAt   string                   `json:"generatedAt,omitempty"`
-	Anchors       []AnchorDump             `json:"anchors"`
-	Nodes         []NodeDump               `json:"nodes"`
-	Edges         []EdgeDump               `json:"edges"`
-	Findings      []domain.Finding         `json:"findings,omitempty"`
+	SchemaVersion int64            `json:"schemaVersion"`
+	ToolVersion   string           `json:"toolVersion"`
+	GeneratedAt   string           `json:"generatedAt,omitempty"`
+	Anchors       []AnchorDump     `json:"anchors"`
+	Nodes         []NodeDump       `json:"nodes"`
+	Edges         []EdgeDump       `json:"edges"`
+	Findings      []domain.Finding `json:"findings,omitempty"`
 }
 
 type AnchorDump struct {
@@ -93,21 +93,21 @@ type AnchorDump struct {
 }
 
 type NodeDump struct {
-	ID         domain.NodeID        `json:"id"`
-	Kind       domain.NodeKind      `json:"kind"`
-	Attributes map[string]string    `json:"attributes,omitempty"`
+	ID         domain.NodeID     `json:"id"`
+	Kind       domain.NodeKind   `json:"kind"`
+	Attributes map[string]string `json:"attributes,omitempty"`
 }
 
 type EdgeDump struct {
-	From       domain.NodeID        `json:"from"`
-	To         domain.NodeID        `json:"to"`
-	Type       domain.EvidenceType  `json:"type"`
-	Strength   domain.Strength      `json:"strength"`
-	Confidence domain.Confidence    `json:"confidence"`
-	Source     string               `json:"source"`
-	Adapter    string               `json:"adapter"`
-	Attributes map[string]string    `json:"attributes,omitempty"`
-	Downgrades []string             `json:"downgrades,omitempty"`
+	From       domain.NodeID       `json:"from"`
+	To         domain.NodeID       `json:"to"`
+	Type       domain.EvidenceType `json:"type"`
+	Strength   domain.Strength     `json:"strength"`
+	Confidence domain.Confidence   `json:"confidence"`
+	Source     string              `json:"source"`
+	Adapter    string              `json:"adapter"`
+	Attributes map[string]string   `json:"attributes,omitempty"`
+	Downgrades []string            `json:"downgrades,omitempty"`
 }
 
 // Dump writes the evidence graph to a JSON dump file in Appendix C format.

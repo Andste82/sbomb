@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.20)
+project(p05_headeronly C)
+include(${CMAKE_CURRENT_LIST_DIR}/common.cmake)
+add_library(hdronly INTERFACE)
+target_include_directories(hdronly INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/vendor_hdronly")
+fixture_executable(hdr main.c)
+target_link_libraries(hdr PRIVATE hdronly)

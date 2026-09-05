@@ -1,8 +1,0 @@
-{
-  "buildRoot": "/__fixture_build__",
-  "generatedAt": "2026-09-04T00:00:00Z",
-  "host": "linux",
-  "project": "p01-hello",
-  "sourceRoot": "/__fixture_src__",
-  "toolchain": "gcc-12-make"
-}

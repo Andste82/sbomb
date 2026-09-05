@@ -1,0 +1,14 @@
+[
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -ffreestanding -g -o CMakeFiles/gen.dir/main.c.obj -c /__fixture_src__/main.c",
+  "file": "/__fixture_src__/main.c",
+  "output": "CMakeFiles/gen.dir/main.c.obj"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -ffreestanding -g -o CMakeFiles/gen.dir/generated_version.c.obj -c /__fixture_build__/generated_version.c",
+  "file": "/__fixture_build__/generated_version.c",
+  "output": "CMakeFiles/gen.dir/generated_version.c.obj"
+}
+]

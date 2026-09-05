@@ -1,0 +1,106 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "version": 1,
+  "serialNumber": "urn:uuid:34ebcaf0-35fe-51cd-aeea-7a8768a5b285",
+  "metadata": {
+    "tools": [
+      {
+        "vendor": "sbomb",
+        "name": "sbomb",
+        "version": "0.0.0-test"
+      }
+    ]
+  },
+  "components": [
+    {
+      "type": "file",
+      "name": "crypto.c",
+      "bom-ref": "file:project:__fixture_src__/crypto.c",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:license:evidence",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:__fixture_src__/crypto.c"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "main.c",
+      "bom-ref": "file:project:__fixture_src__/main.c",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:license:evidence",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:__fixture_src__/main.c"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "unused.c",
+      "bom-ref": "file:project:__fixture_src__/unused.c",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:license:evidence",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:__fixture_src__/unused.c"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "file:project:__fixture_src__/crypto.c"
+    },
+    {
+      "ref": "file:project:__fixture_src__/main.c"
+    },
+    {
+      "ref": "file:project:__fixture_src__/unused.c"
+    }
+  ]
+}

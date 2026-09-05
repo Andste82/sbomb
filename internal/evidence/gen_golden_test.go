@@ -11,7 +11,8 @@ import (
 
 // TestGenerateGoldenData generates the golden test data files.
 // This test is skipped in normal test runs and must be invoked explicitly with:
-//   go test ./internal/evidence/... -run TestGenerateGoldenData -v
+//
+//	go test ./internal/evidence/... -run TestGenerateGoldenData -v
 func TestGenerateGoldenData(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping golden data generation in short mode")
@@ -116,13 +117,13 @@ func TestGenerateGoldenData(t *testing.T) {
 
 	// Generate dump file
 	goldenPath := "../../testdata/golden/synthetic-graph.json"
-	
+
 	// Ensure directory exists
 	dir := filepath.Dir(goldenPath)
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		t.Fatalf("Failed to create directory %s: %v", dir, err)
 	}
-	
+
 	// Dump to buffer first
 	var buf bytes.Buffer
 	if err := g.Dump(&buf); err != nil {
@@ -143,7 +144,7 @@ func TestGenerateGoldenData(t *testing.T) {
 
 	// Generate stats file
 	statsPath := "../../testdata/golden/synthetic-graph-stats.json"
-	
+
 	// Create stats output - same as the dump for now
 	// In the future, this would be the output of `sbomb evidence --load <dump> --format json`
 	if err := os.WriteFile(statsPath, buf.Bytes(), 0644); err != nil {

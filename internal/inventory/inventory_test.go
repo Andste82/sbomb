@@ -1,4 +1,4 @@
-package resolver
+package inventory
 
 import (
 	"crypto/sha256"
