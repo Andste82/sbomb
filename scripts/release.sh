@@ -15,7 +15,7 @@ build_one() {
 write_self_config() {
   local build_dir=$1 artifact=$2 config=$3
   cat > "$config" <<EOF
-{"project":{"name":"sbomb","root":"$root_dir"},"build":{"dir":"$build_dir"},"artifacts":[{"path":"$artifact","role":"application"}]}
+{"project":{"name":"sbomb","root":"$root_dir","version":"$version","supplier":"sbomb","license":"MIT"},"build":{"dir":"$build_dir"},"artifacts":[{"path":"$artifact","role":"application"}]}
 EOF
   cat > "$build_dir/compile_commands.json" <<EOF
 [{"directory":"$root_dir","file":"$root_dir/cmd/sbomb/main.go","output":"$build_dir/sbomb-main.o","arguments":["go","tool","compile","-o","$build_dir/sbomb-main.o","$root_dir/cmd/sbomb/main.go"]}]

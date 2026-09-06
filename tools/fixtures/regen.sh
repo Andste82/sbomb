@@ -237,7 +237,7 @@ Toolchain: $toolchain
 Version: $version
 Generator: $generator
 Source: built from tools/fixtures/projects/$project by tools/fixtures/regen.sh
-License: repository-license
+License: MIT (the repository licence; the fixture sources are part of it)
 Date: $FIXTURE_DATE
 PROVENANCE
 

@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.7.0 - 2026-09-06
+
+First numbered version. Seven of the nine roadmap phases are complete: the tool
+produces an evidence-based, schema-validated, CRA-field-complete CycloneDX 1.6
+document and gates on it, with header evidence taken from DWARF and dependency
+files. What 1.0.0 still needs is adapter breadth -- package managers, packaging
+and images, an SDK adapter -- and the performance budget of section 31.
+
+sbomb is released under the MIT license.
+
 ### Header evidence in full
 
 - DWARF line tables are the primary header source and dependency files the

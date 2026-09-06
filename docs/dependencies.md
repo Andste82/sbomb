@@ -8,6 +8,10 @@ so a build needs no network at all.
 Each direct dependency is listed with what it does and what removing it would
 cost.
 
+sbomb itself is under the MIT license. Every module below is under a permissive
+license compatible with it, which is why `vendor/` can be committed and
+redistributed with the source.
+
 | Module | Purpose | Cost of removing it |
 |---|---|---|
 | `github.com/google/uuid` | Serial numbers: UUIDv4 in normal mode, UUIDv5 over the canonical document in reproducible mode (section 28.9). | Small. RFC 4122 v4 and v5 are a few dozen lines over `crypto/rand` and `crypto/sha1`. |
