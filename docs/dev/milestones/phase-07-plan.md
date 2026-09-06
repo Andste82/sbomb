@@ -82,7 +82,9 @@ produce first. Nothing else in phase 7 depends on it.
 
 ## Noted while working
 
-**The corpus does not regenerate byte-for-byte.** Two runs of `regen.sh` with no
+**The corpus does not regenerate byte-for-byte.** *(Fixed in phase 8, step 8f;
+deviation D17 records the three projects where the toolchain is what is not
+reproducible.)* Two runs of `regen.sh` with no
 source change produce a diff of roughly 150 files: CMake names its File API
 index `index-<wall-clock timestamp>.json`, the codemodel reply carries a
 content hash that moves with it, and `.ninja_deps` is a binary log of

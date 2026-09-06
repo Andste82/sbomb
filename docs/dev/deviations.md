@@ -43,9 +43,14 @@ CMake names the File API index `index-<configure timestamp>.json`. The
 referenced reply files are content-addressed and therefore stable, but the
 index filename changes on every configure.
 
-The fixture corpus commits the index under its real name, and consumers must
-locate it by glob rather than by a fixed filename -- which is also how a real
-build directory behaves.
+Consumers must locate it by glob rather than by a fixed filename, which is also
+how a real build directory behaves, and the adapter does.
+
+The corpus no longer commits it under its real name. That made every fixture
+churn on every regeneration, so `tools/fixtures/regen.sh` pins the name to the
+fixture date -- keeping the shape the glob matches and the lexical-is-temporal
+ordering the adapter uses to pick the newest of several. The deviation stands
+for a real build directory; it no longer costs the corpus anything. See D17.
 
 ## D4 — ARM fixtures link freestanding
 
@@ -82,11 +87,11 @@ Section 19.2 lists eight component-mapping strategies. Implemented are the
 curated configuration (1), the nearest directory carrying package metadata (6),
 the anchor root (7) and the `unknown:` fallback with a review flag (8).
 
-Not yet implemented are the package-manager strategies (2-5): Conan, vcpkg, CPM
-and FetchContent. Until they exist, a dependency that a package manager
-installed is named from its anchor or its manifest directory rather than from
-the manager's own metadata, and its version and supplier have to come from
-curated configuration. That is roadmap phase 7.
+Strategies 2 through 5 -- Conan, vcpkg, FetchContent and git submodules -- were
+added in roadmap phase 7, so a dependency a package manager installed is now
+named from that manager's own metadata. **Closed**, except that CPM is not
+covered: it is a CMake-level wrapper around FetchContent, and what reaches the
+build tree is FetchContent's own evidence, which strategy 4 already reads.
 
 ## D8 — DWARF carries no inclusion depth
 

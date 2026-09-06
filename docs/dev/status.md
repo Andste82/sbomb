@@ -68,16 +68,22 @@
   classes of section 14.4 from the implicit include directories the toolchain
   reports. Precompiled headers, unity builds, LTO confidence downgrades and
   section garbage collection are handled (sections 14.5, 17.1, 17.3, 4.5).
+- **Adapter breadth (roadmap phase 7).** vcpkg, Conan, FetchContent and git
+  submodules are read for component identity, so strategies 2 through 5 of
+  section 19.2 resolve without a curated entry. Introspection exists behind
+  `--allow-introspection` with the exact allowlist of section 9.2 and is off by
+  default. Response files are expanded, and packaging manifests, images and
+  assets are handled (section 18). ESP-IDF (milestone 20) is parked.
+- **Hardening (roadmap phase 8).** The performance budget of section 31 is
+  measured by a test; the parser bounds of section 30 are one policy with
+  `--max-input-size` and `--strict-symlinks`; fourteen fuzz targets cover every
+  parser; determinism is checked on a Windows runner; each released binary
+  carries an SBOM of itself derived from its linker's own record; and
+  regenerating an unchanged fixture corpus is a no-op outside three recorded
+  projects.
 
 ## Known Gaps
 
-- **Package managers, SDKs and submodule boundaries are not consulted.**
-  Strategies 2 through 5 of section 19.2 are missing, so a dependency without a
-  curated entry or a package manifest falls back to its anchor. Roadmap
-  phase 7.
-- **Introspection is not implemented.** Section 9.2 allows a fixed allowlist
-  of commands behind `--allow-introspection`; without it, git-derived versions,
-  `ninja -t deps` and toolchain probing are unavailable. Roadmap phase 7.
 - **DWARF is not yet an object-to-source strategy.** It is wired as the primary
   header source (section 11.4 point 2), but strategy 6 of section 13.2 -- the
   compilation-unit name of an object that still carries debug info -- is not
