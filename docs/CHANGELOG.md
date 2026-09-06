@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+### A release workflow, and a release build that works
+
+Nothing published a release. `scripts/release.sh` produced the artifacts
+locally and no workflow ever called it, so no release existed, and the
+composite action -- which downloads a release asset and verifies its checksum
+-- could only ever answer 404. That is what `action-smoke` has been reporting.
+
+`release.yaml` runs on a `v*` tag: it checks that the build is reproducible,
+builds the three targets, verifies that the binary reports the tag it was built
+from, checks the checksums cover every artifact, and publishes the release. It
+is the only workflow with write access; the other three now say `contents: read`
+explicitly.
+
+Two defects surfaced while making it work. `scripts/release.sh build` failed
+every time: the self-SBOM it generated tripped the default policy, `sbomb`
+returned exit 3, and `set -e` aborted before the checksums were written. And
+the release binary reported `sbomb v0.8.0` where every development build
+reported `sbomb 0.8.0`, so the tag prefix reached `metadata.tools` in the SBOM.
+
+The fabricated self-SBOM is gone rather than fixed in place; see deviation D16.
+
+Workflow files are `.yaml` now, including the composite action.
+
 ## 0.8.0 - 2026-09-06
 
 Roadmap phase 7 is complete: sbomb reads what package managers recorded, so a

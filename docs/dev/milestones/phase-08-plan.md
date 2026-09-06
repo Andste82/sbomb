@@ -53,10 +53,13 @@ what makes the cross-platform claim true.
 
 ### 8e — An honest self-SBOM
 
-`scripts/release.sh` writes a fabricated `compile_commands.json` naming one
-file and an empty map. The tool that refuses to guess guesses about itself.
-`go list -deps -json` is real evidence; the alternative is to drop the
-self-SBOM rather than fake it.
+`scripts/release.sh` wrote a fabricated `compile_commands.json` naming one file
+and an empty map. The tool that refuses to guess guessed about itself, and the
+resulting findings made every release build exit 3 before it wrote its
+checksums. The fabrication is removed (deviation D16); what remains is to
+derive the self-SBOM from evidence. Go emits neither a compile database nor a
+linker map, so it needs a source of its own -- `go list -deps -json` is the
+obvious candidate.
 
 ### 8f — Corpus reproducibility
 

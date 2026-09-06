@@ -1,0 +1,91 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to build a release from
+        required: true
+        type: string
+
+# The only workflow in this repository that publishes anything, and therefore
+# the only one that needs more than read access.
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          # scripts/release.sh derives the version from git describe, which
+          # needs the tags and enough history to reach one.
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      # The gate runs on every push already; these are the two properties that
+      # are specific to a release and would otherwise be claimed rather than
+      # checked.
+      - name: Release binaries are reproducible
+        run: scripts/release.sh --check-reproducible
+
+      - name: Build release artifacts
+        env:
+          VERSION: ${{ inputs.tag || github.ref_name }}
+        run: scripts/release.sh build
+
+      - name: The version in the binary matches the tag
+        env:
+          VERSION: ${{ inputs.tag || github.ref_name }}
+        run: |
+          set -euo pipefail
+          reported=$(dist/"${VERSION#v}"/sbomb-linux-amd64 version)
+          expected="sbomb ${VERSION#v}"
+          if [ "$reported" != "$expected" ]; then
+            echo "the binary reports '$reported', the tag says '$expected'" >&2
+            exit 1
+          fi
+
+      - name: Checksums cover every artifact
+        env:
+          VERSION: ${{ inputs.tag || github.ref_name }}
+        run: |
+          set -euo pipefail
+          cd dist/"${VERSION#v}"
+          sha256sum --check SHA256SUMS
+          cat SHA256SUMS
+
+      # The self-SBOM that release.sh writes is not published. It is produced
+      # from a fabricated compile database naming a single Go file, which is
+      # exactly the guessing this tool exists to refuse; shipping it would put
+      # a false bill of materials next to the binary it describes. It is
+      # attached once it is derived from evidence -- roadmap phase 8, step 8e.
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.tag || github.ref_name }}
+        run: |
+          set -euo pipefail
+          notes=$(mktemp)
+          {
+            printf 'Static, single-file executables for linux/amd64, linux/arm64 and\n'
+            printf 'windows/amd64, built with CGO_ENABLED=0 -trimpath -buildvcs=false and\n'
+            printf 'verified to build reproducibly.\n\n'
+            printf 'Verify a download against `SHA256SUMS` before running it:\n\n'
+            printf '```\nsha256sum --check --ignore-missing SHA256SUMS\n```\n\n'
+            printf 'See docs/CHANGELOG.md for what changed.\n'
+          } > "$notes"
+          gh release create "$VERSION" \
+            --title "sbomb $VERSION" \
+            --notes-file "$notes" \
+            dist/"${VERSION#v}"/sbomb-linux-amd64 \
+            dist/"${VERSION#v}"/sbomb-linux-arm64 \
+            dist/"${VERSION#v}"/sbomb-windows-amd64.exe \
+            dist/"${VERSION#v}"/SHA256SUMS
