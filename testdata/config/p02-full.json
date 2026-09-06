@@ -9,10 +9,9 @@
   },
   "mode": "single",
   "output": {
-    "format": "cyclonedx",
+    "format": "cyclonedx-json",
     "specVersion": "1.6",
-    "reproducible": true,
-    "hashAlgorithms": ["sha256"]
+    "reproducible": true
   },
   "policy": {
     "profile": "default"

@@ -28,7 +28,7 @@ func TestRedactionAppliesToEveryOutput(t *testing.T) {
   "project": {"name": "unanchored", "root": "/nowhere/source"},
   "build": {"dir": "/nowhere/build"},
   "mode": "single",
-  "output": {"format": "cyclonedx", "specVersion": "1.6", "reproducible": true}
+  "output": {"format": "cyclonedx-json", "specVersion": "1.6", "reproducible": true}
 }`
 	if err := os.WriteFile(configPath, []byte(config), 0o644); err != nil {
 		t.Fatal(err)

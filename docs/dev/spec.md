@@ -777,7 +777,8 @@ Generator input evidence sources, in priority order:
 1. CMake File API custom-command `dependencies`/`byproducts`.
 2. Ninja `build` edge inputs for the generating rule (including implicit and order-only inputs; order-only inputs are recorded with strength `weak`).
 3. Depfile emitted by the generator.
-4. Explicit configuration `generators[]` mapping.
+
+An explicit `generators[]` mapping was a fourth source. It is removed: it is an unverifiable assertion from a configuration file in a tool that otherwise records only what it can prove, and no build has needed it (deviation D20).
 
 If a generated file is used but no generator input evidence exists, emit `MISSING_GENERATOR_INPUT_EVIDENCE`.
 
@@ -986,9 +987,10 @@ License detection is scoped to used files and mapped components only. The tool M
 5. Recognized license file in the component root (§22.3).
 6. Recognized documentation in the component root (`README*` with an explicit `SPDX-License-Identifier:` line only).
 7. SDK metadata.
-8. Configured upstream metadata (`components[].upstream`).
-9. External scanner results supplied via `--license-scan <file>` (SPDX or CycloneDX JSON input).
-10. NOASSERTION.
+8. External scanner results supplied via `--license-scan <file>` (SPDX or CycloneDX JSON input).
+9. NOASSERTION.
+
+Configured upstream metadata (`components[].upstream`) was a further step. It is removed: a repository URL says nothing about a licence without fetching it, and this tool does not access the network (deviation D20).
 
 ### 22.3 Recognized License Files and Permitted Detection Techniques
 
@@ -2244,17 +2246,12 @@ The normative JSON Schema is embedded in the binary and printed by `sbomb schema
       "path": "dep/mbedtls",
       "name": "mbedtls",
       "type": "library",
-      "cdxType": "library",
       "versionFrom": ["git", "header:include/mbedtls/build_info.h:MBEDTLS_VERSION_STRING"],
       "license": "Apache-2.0",
       "supplier": "Trusted Firmware",
-      "purl": null,
-      "upstream": { "url": "https://github.com/Mbed-TLS/mbedtls" }
+      "purl": null
     },
     { "match": "dep/vendor-*/**", "name": "vendor-blobs", "type": "library", "license": "NOASSERTION" }
-  ],
-  "generators": [
-    { "output": "build/debug/generated/version.h", "inputs": ["cmake/version.in"], "tool": "cmake" }
   ],
   "manifests": ["packaging/firmware-manifest.json"],
   "policy": {
@@ -2291,13 +2288,12 @@ The normative JSON Schema is embedded in the binary and printed by `sbomb schema
   "output": {
     "format": "cyclonedx-json",
     "specVersion": "1.6",
-    "reproducible": false,
-    "hashAlgorithms": ["sha256"]
+    "reproducible": false
   }
 }
 ```
 
-Unknown keys are a configuration error (exit 1), so that typos in policy option names cannot silently disable a gate. Deprecated keys are accepted with `CONFIG_DEPRECATED_OPTION`.
+Unknown keys are a configuration error (exit 1) **at every level of the document**, so that a typo in a policy option name cannot silently disable a gate. Checking only the top level leaves exactly that hole: `{"policy": {"failOnMisingHash": true}}` loaded without complaint and the gate stayed off. Deprecated keys are accepted with `CONFIG_DEPRECATED_OPTION`.
 
 ---
 

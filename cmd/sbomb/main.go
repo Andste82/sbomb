@@ -537,6 +537,12 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 	}
 	cliLogger.Info("Policy profile '%s' resolved", policyConfig.Profile)
 
+	// A project that wants comparable SBOMs wants them from every run, not
+	// only from the ones where somebody passed the flag, so the configuration
+	// can ask for it. The flag still forces it on for a single run; neither
+	// can turn the other off.
+	repro = repro || loadedCfg.Output.Reproducible
+
 	introspection, err := resolveIntrospection(loadedCfg, allowIntrospection, introspectionGroups)
 	if err != nil {
 		return 1, logBuf.String(), err.Error() + "\n"

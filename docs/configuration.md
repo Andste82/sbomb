@@ -5,7 +5,9 @@ deliverable explicitly, curate component metadata for the CRA fields, give
 external directories a portable identity, or pin a policy.
 
 The file is JSON, `sbomb.json` by default, selected with `--config`. **Unknown
-keys are an error**, so a typo cannot silently disable a policy gate.
+keys are an error at every level of the document**, so a typo cannot silently
+disable a policy gate — `{"policy": {"failOnMisingHash": true}}` is refused,
+not ignored.
 
 ```json
 {
@@ -280,21 +282,22 @@ Select it with `--waivers <file>` or `policy.waiversFile`.
 
 ## `output`
 
-The output settings are read from the command line, not from this block:
-`--format`, `--reproducible`. The only format is `cyclonedx-json` at
-specification version 1.6, and files are hashed with SHA-256.
+| Field | Values | Default |
+|---|---|---|
+| `format` | `cyclonedx-json` | `cyclonedx-json` |
+| `specVersion` | `1.6` | `1.6` |
+| `reproducible` | boolean | `false` |
 
-## Accepted but not yet acted on
+`reproducible` omits the timestamp and derives the serial number from the
+document's content, so two runs over the same evidence produce the same bytes.
+It belongs here as well as on the command line because it is a property of the
+project: a project whose SBOMs have to be comparable wants that of every run,
+not only of the ones where somebody remembered `--reproducible`. The flag still
+forces it on for a single run, and neither can turn the other off.
 
-These keys are valid — the schema accepts them and a file containing them
-loads — but nothing reads them yet. They are listed so that a configuration
-using them is not mistaken for one that has an effect.
-
-| Key | Status |
-|---|---|
-| `output.format`, `output.specVersion`, `output.reproducible`, `output.hashAlgorithms` | Use the command-line flags |
-| `generators[]` | Generated files are recognized from the build graph; declaring them adds nothing |
-| `components[].cdxType`, `components[].upstream` | Not rendered into the document |
+`format` and `specVersion` each have exactly one admissible value today and are
+checked against it, so a file asking for something that does not exist says so
+rather than being ignored.
 
 ## A worked example
 

@@ -420,3 +420,62 @@ the search.
 **Measured, on the same 142 files.** Of the 51 that no whole-file technique
 resolved, 8 now yield several licences as evidence and 15 yield one; 28 still
 yield nothing, being bespoke agreements or pointers to a licence elsewhere.
+
+## D20 — Four configuration keys are removed rather than implemented
+
+A configuration could set `output.hashAlgorithms`, declare `generators[]`,
+curate `components[].cdxType` or `components[].upstream` — and nothing read any
+of them. They were not stray: all four are in the specification. They were
+simply never built.
+
+That is a worse state than not having them. Unknown keys are a configuration
+error, which is a good property and one the documentation advertises; a reader
+therefore concludes that an accepted key has an effect. `generators[]` was even
+*validated* — a missing `output` field failed the load — so the file was
+checked and then discarded.
+
+Each is removed for its own reason:
+
+* **`output.hashAlgorithms`** had exactly one admissible value. BSI TR-03183-2
+  wants SHA-256 and sbomb computes SHA-256. A key with one legal value is not
+  a setting.
+* **`components[].cdxType`** was meant to override the CycloneDX type
+  separately from `components[].type`. But `type` already passes through to
+  CycloneDX unchanged, so it solved a problem that does not exist.
+* **`components[].upstream`** was step 8 of the licence priority order of
+  section 22.2. A repository URL settles a licence only if something fetches
+  it, and this tool does not access the network. The step is not implementable
+  as specified.
+* **`generators[]`** was the fourth of four generator-input sources in section
+  14. The first three — CMake custom-command dependencies, build-graph edges,
+  the generator's own depfile — cover every well-behaved case. The fourth is an
+  unverifiable assertion from a configuration file, in a tool that otherwise
+  records only what it can prove. It comes back if a real build needs it, with
+  a fixture showing the case and an evidence strength that says what it is.
+
+`output.format` and `output.specVersion` stay and are now *checked* against the
+one value each admits, so a file asking for a format that does not exist says
+so. Selecting a format from them is the work of issues #1 and #3.
+
+**`output.reproducible` is wired rather than removed.** Reproducibility is a
+property of a project, not of an invocation: a project whose SBOMs have to be
+comparable wants that of every run, not only of the ones where somebody
+remembered the flag. `--reproducible` still forces it on for a single run;
+neither can turn the other off.
+
+## D21 — Unknown configuration keys are refused at every level, not only the top
+
+The specification promises that a typo cannot silently disable a policy gate,
+and the documentation repeats it. It was true only of top-level keys.
+`{"policy": {"failOnMisingHash": true}}` and `{"policy": {"profil": "strict"}}`
+both loaded without complaint, and the gate somebody believed was on stayed
+off — which is the one failure a configuration file must not have.
+
+The cause was the shape of the check: a hand-written allowlist of top-level
+names, with `encoding/json` silently dropping everything unknown below it.
+Loading now decodes with `DisallowUnknownFields`, so every object in the
+document is checked, and the allowlist is gone.
+
+This is stricter than before and can reject a file that used to load. That is
+the point: a file it now rejects was a file whose author believed something
+that was not happening.

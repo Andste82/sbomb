@@ -1,12 +1,11 @@
 package config
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
-	"sort"
-	"strings"
 )
 
 var schemaJSON = `{
@@ -33,7 +32,6 @@ type Config struct {
 	Anchors       []Anchor    `json:"anchors,omitempty"`
 	Discovery     Discovery   `json:"discovery,omitempty"`
 	Components    []Component `json:"components,omitempty"`
-	Generators    []Generator `json:"generators,omitempty"`
 	Manifests     []string    `json:"manifests,omitempty"`
 }
 
@@ -106,11 +104,14 @@ type Policy struct {
 	SeverityOverrides     map[string]string `json:"severityOverrides,omitempty"`
 }
 
+// Output selects the serialization. Reproducible is a project property rather
+// than a per-invocation choice: a project whose SBOMs have to be comparable
+// wants that of every run, not only of the ones where somebody remembered the
+// flag. --reproducible still forces it on for a single run.
 type Output struct {
-	Format         string   `json:"format,omitempty"`
-	SpecVersion    string   `json:"specVersion,omitempty"`
-	Reproducible   bool     `json:"reproducible,omitempty"`
-	HashAlgorithms []string `json:"hashAlgorithms,omitempty"`
+	Format       string `json:"format,omitempty"`
+	SpecVersion  string `json:"specVersion,omitempty"`
+	Reproducible bool   `json:"reproducible,omitempty"`
 }
 
 type Anchor struct {
@@ -146,23 +147,15 @@ func (s *StringList) UnmarshalJSON(data []byte) error {
 }
 
 type Component struct {
-	Path        string      `json:"path,omitempty"`
-	Match       string      `json:"match,omitempty"`
-	Name        string      `json:"name,omitempty"`
-	Type        string      `json:"type,omitempty"`
-	CDXType     string      `json:"cdxType,omitempty"`
-	Version     string      `json:"version,omitempty"`
-	VersionFrom StringList  `json:"versionFrom,omitempty"`
-	License     string      `json:"license,omitempty"`
-	Supplier    string      `json:"supplier,omitempty"`
-	PURL        string      `json:"purl,omitempty"`
-	Upstream    interface{} `json:"upstream,omitempty"`
-}
-
-type Generator struct {
-	Output string   `json:"output"`
-	Inputs []string `json:"inputs,omitempty"`
-	Tool   string   `json:"tool,omitempty"`
+	Path        string     `json:"path,omitempty"`
+	Match       string     `json:"match,omitempty"`
+	Name        string     `json:"name,omitempty"`
+	Type        string     `json:"type,omitempty"`
+	Version     string     `json:"version,omitempty"`
+	VersionFrom StringList `json:"versionFrom,omitempty"`
+	License     string     `json:"license,omitempty"`
+	Supplier    string     `json:"supplier,omitempty"`
+	PURL        string     `json:"purl,omitempty"`
 }
 
 func Schema() string { return schemaJSON }
@@ -172,16 +165,15 @@ func Load(path string) (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
-	var raw map[string]json.RawMessage
-	if err := json.Unmarshal(data, &raw); err != nil {
-		return Config{}, err
-	}
-	if err := validateUnknownKeys(raw); err != nil {
-		return Config{}, err
-	}
+	// Unknown fields are refused at every level, not only the top one. A typo
+	// in a policy gate -- "failOnMisingHash" -- used to load without complaint,
+	// which meant a gate somebody believed was on was off. That is the one
+	// failure a configuration file must not have.
 	var cfg Config
-	if err := json.Unmarshal(data, &cfg); err != nil {
-		return Config{}, err
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&cfg); err != nil {
+		return Config{}, fmt.Errorf("%s: %w", filepath.Base(path), err)
 	}
 	if err := validate(cfg); err != nil {
 		return Config{}, err
@@ -224,38 +216,16 @@ func validate(cfg Config) error {
 			return fmt.Errorf("anchor key and path are required")
 		}
 	}
-	for _, g := range cfg.Generators {
-		if g.Output == "" {
-			return fmt.Errorf("generator output is required")
-		}
+	// The output settings have exactly one valid value each today. Checking
+	// them here is what keeps a configuration from being silently wrong: a
+	// file asking for a format that does not exist should say so, not be
+	// ignored. Adding a format or a specification version replaces these
+	// literals with a lookup in the writer registry.
+	if cfg.Output.Format != "" && cfg.Output.Format != "cyclonedx-json" {
+		return fmt.Errorf("invalid output format %q; the only format is cyclonedx-json", cfg.Output.Format)
 	}
-	return nil
-}
-
-func validateUnknownKeys(raw map[string]json.RawMessage) error {
-	allowed := map[string]bool{
-		"schemaVersion": true,
-		"project":       true,
-		"build":         true,
-		"mode":          true,
-		"artifacts":     true,
-		"policy":        true,
-		"anchors":       true,
-		"discovery":     true,
-		"components":    true,
-		"generators":    true,
-		"manifests":     true,
-		"output":        true,
-	}
-	var extra []string
-	for k := range raw {
-		if !allowed[k] {
-			extra = append(extra, k)
-		}
-	}
-	sort.Strings(extra)
-	if len(extra) > 0 {
-		return fmt.Errorf("unknown key: %s", strings.Join(extra, ", "))
+	if cfg.Output.SpecVersion != "" && cfg.Output.SpecVersion != "1.6" {
+		return fmt.Errorf("invalid output specVersion %q; the only version is 1.6", cfg.Output.SpecVersion)
 	}
 	return nil
 }

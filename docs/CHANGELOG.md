@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+### A typo in a policy gate is no longer ignored
+
+The specification promises that a typo cannot silently disable a policy gate,
+and the documentation repeats it. It held only for top-level keys:
+`{"policy": {"failOnMisingHash": true}}` loaded without complaint and the gate
+stayed off — the one failure a configuration file must not have. Loading now
+refuses an unknown field at every level of the document (deviation D21). This
+is stricter than before and can reject a file that used to load; a file it
+rejects was one whose author believed something that was not happening.
+
+### Configuration keys that did nothing are gone, and one is wired
+
+`output.reproducible` was parsed and never read, so a project asking for
+reproducible output got a timestamp and a random serial number. It works now.
+It belongs in the file as well as on the command line because reproducibility
+is a property of a project, not of an invocation.
+
+`output.hashAlgorithms`, `generators[]`, `components[].cdxType` and
+`components[].upstream` are removed rather than implemented — deviation D20
+gives the reason for each, and the specification is amended. `output.format`
+and `output.specVersion` stay and are now checked against the one value each
+admits, instead of being accepted and ignored.
+
+
 ### The user documentation describes the tool that exists
 
 The README documented a dozen flags that were never implemented --

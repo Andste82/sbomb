@@ -232,7 +232,8 @@ directories a portable identity:
 }
 ```
 
-Unknown keys are an error, so a typo cannot silently disable a policy gate.
+Unknown keys are an error at every level of the file, so a typo cannot
+silently disable a policy gate.
 [docs/configuration.md](docs/configuration.md) covers every section.
 
 ## Documentation

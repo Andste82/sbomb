@@ -34,3 +34,119 @@ func TestLoadRejectsUnknownKey(t *testing.T) {
 		t.Fatal("Load() accepted unknown key")
 	}
 }
+
+// The keys below were accepted and then ignored: a configuration could ask for
+// a hash algorithm, declare a generator's inputs or curate an upstream URL and
+// nothing happened. Since an unknown key is an error, a reader reasonably
+// concludes that an accepted one has an effect. They are gone (deviation D20),
+// and loading has to say so rather than continue quietly.
+func TestRemovedKeysAreRejectedRatherThanIgnored(t *testing.T) {
+	for _, removed := range []struct{ name, body string }{
+		{"generators", `{"project":{"name":"a"},"build":{"dir":"build"},"generators":[{"output":"x.h"}]}`},
+		{"output.hashAlgorithms", `{"project":{"name":"a"},"build":{"dir":"build"},"output":{"hashAlgorithms":["sha512"]}}`},
+		{"components[].cdxType", `{"project":{"name":"a"},"build":{"dir":"build"},"components":[{"path":"d","cdxType":"framework"}]}`},
+		{"components[].upstream", `{"project":{"name":"a"},"build":{"dir":"build"},"components":[{"path":"d","upstream":{"url":"https://example.invalid"}}]}`},
+	} {
+		path := filepath.Join(t.TempDir(), "sbomb.json")
+		if err := os.WriteFile(path, []byte(removed.body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := Load(path); err == nil {
+			t.Errorf("%s: loading succeeded; a removed key must be reported, not ignored", removed.name)
+		}
+	}
+}
+
+// The output settings have one valid value each. Checking them is what keeps a
+// configuration from being silently wrong.
+func TestOutputSettingsAreChecked(t *testing.T) {
+	for _, testCase := range []struct {
+		name, body string
+		wantError  bool
+	}{
+		{"the only format", `{"project":{"name":"a"},"build":{"dir":"build"},"output":{"format":"cyclonedx-json"}}`, false},
+		{"another format", `{"project":{"name":"a"},"build":{"dir":"build"},"output":{"format":"spdx-json"}}`, true},
+		{"the only version", `{"project":{"name":"a"},"build":{"dir":"build"},"output":{"specVersion":"1.6"}}`, false},
+		{"another version", `{"project":{"name":"a"},"build":{"dir":"build"},"output":{"specVersion":"1.7"}}`, true},
+		{"absent is fine", `{"project":{"name":"a"},"build":{"dir":"build"}}`, false},
+	} {
+		path := filepath.Join(t.TempDir(), "sbomb.json")
+		if err := os.WriteFile(path, []byte(testCase.body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		_, err := Load(path)
+		if testCase.wantError && err == nil {
+			t.Errorf("%s: expected an error", testCase.name)
+		}
+		if !testCase.wantError && err != nil {
+			t.Errorf("%s: %v", testCase.name, err)
+		}
+	}
+}
+
+// Reproducibility is a project property, so the configuration can ask for it.
+func TestReproducibleIsReadFromTheConfiguration(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "sbomb.json")
+	if err := os.WriteFile(path, []byte(`{"project":{"name":"a"},"build":{"dir":"build"},"output":{"reproducible":true}}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !cfg.Output.Reproducible {
+		t.Error("output.reproducible did not survive loading")
+	}
+}
+
+// The promise the documentation makes -- a typo cannot silently disable a
+// policy gate -- held only at the top level. "failOnMisingHash" and "profil"
+// both loaded without complaint, so a gate somebody believed was on was off.
+func TestATypoInsideAnObjectIsRefused(t *testing.T) {
+	for _, typo := range []string{
+		`{"project":{"name":"a"},"build":{"dir":"b"},"policy":{"failOnMisingHash":true}}`,
+		`{"project":{"name":"a"},"build":{"dir":"b"},"policy":{"profil":"strict"}}`,
+		`{"project":{"name":"a"},"build":{"dir":"b"},"project_name":"a"}`,
+		`{"project":{"nam":"a"},"build":{"dir":"b"}}`,
+		`{"project":{"name":"a"},"build":{"dir":"b"},"artifacts":[{"path":"x","rol":"library"}]}`,
+		`{"project":{"name":"a"},"build":{"dir":"b"},"components":[{"path":"d","licence":"MIT"}]}`,
+	} {
+		path := filepath.Join(t.TempDir(), "sbomb.json")
+		if err := os.WriteFile(path, []byte(typo), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := Load(path); err == nil {
+			t.Errorf("loaded without complaint: %s", typo)
+		}
+	}
+}
+
+// And a correct file still loads, at every level.
+func TestAFullyPopulatedConfigurationStillLoads(t *testing.T) {
+	body := `{
+      "schemaVersion": 3,
+      "project": {"name":"a","type":"firmware","root":".","version":"1","supplier":"s","license":"MIT"},
+      "build": {"dir":"b","config":"Debug","introspection":{"git":true,"ninja":true}},
+      "mode": "single",
+      "artifacts": [{"path":"b/app","role":"application","map":"b/app.map","linkDepfile":"b/app.d"}],
+      "anchors": [{"key":"sdk:x","path":"/opt/x"}],
+      "discovery": {"excludeTargetPatterns":["*test*"]},
+      "components": [{"path":"d","match":"d/**","name":"n","type":"library","version":"1","versionFrom":["git"],"license":"MIT","supplier":"s","purl":"pkg:generic/n@1"}],
+      "manifests": ["d/conanfile.txt"],
+      "policy": {"profile":"cra","profileOverlay":"host-linux","headerEvidence":"union","waiversFile":"w.json",
+                 "failOnMissingHash":true,"includeAssets":true,"systemLibraries":"exclude",
+                 "staleToleranceSeconds":5,"severityOverrides":{"UNKNOWN_LICENSE":"info"}},
+      "output": {"format":"cyclonedx-json","specVersion":"1.6","reproducible":true}
+    }`
+	path := filepath.Join(t.TempDir(), "sbomb.json")
+	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !cfg.Output.Reproducible || cfg.Policy.Profile != "cra" || len(cfg.Components) != 1 {
+		t.Errorf("configuration did not survive loading: %+v", cfg)
+	}
+}
