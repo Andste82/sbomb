@@ -16,6 +16,43 @@ build_one() {
     -trimpath -buildvcs=false -ldflags "$ldflags" -o "$output_dir/sbomb-${goos}-${goarch}${suffix}" ./cmd/sbomb
 }
 
+# self_licences curates what exact licence-text matching cannot recognize.
+#
+# The matcher of section 22.3 hashes the normalized text and compares it to the
+# SPDX list. That finds a verbatim licence and nothing else, and a real file is
+# rarely verbatim: these three fill in the copyright holder and renumber the
+# clause list, so the text is unmistakable to a person and unmatchable to a
+# hash. The identifiers below are each taken from the licence file vendored in
+# this repository. They are recorded as curated, never as detected, and
+# "sbomb self" reports a conflict if the text ever contradicts one.
+self_licences=(
+  --license "github.com/google/uuid=BSD-3-Clause"
+  --license "golang.org/x/text=BSD-3-Clause"
+  --license "github.com/santhosh-tekuri/jsonschema/v6=Apache-2.0"
+  --license "std=BSD-3-Clause"
+)
+
+# write_self_sbom describes one released binary from the module evidence its
+# linker recorded (roadmap phase 8, step 8e). The earlier attempt fabricated a
+# compile database naming one Go file beside an empty linker map, which is the
+# evidence-free guessing this tool exists to refuse (deviation D16).
+write_self_sbom() {
+  local binary=$1
+  # The tool is built with the release ldflags rather than run from dist,
+  # because one of the three artifacts is for another platform and the SBOM has
+  # to name the same tool version whichever host writes it. The supplier is the
+  # one the tool already publishes for itself in metadata.tools; it is curated,
+  # not derived from a repository URL, which section 20.5 forbids.
+  (cd "$root_dir" && go run -ldflags "$ldflags" ./cmd/sbomb self "$binary" \
+    --output "${binary}.cdx.json" \
+    --version "$version" \
+    --supplier sbomb \
+    --module-dir "$root_dir" \
+    --goroot "$(go env GOROOT)" \
+    "${self_licences[@]}" \
+    --reproducible)
+}
+
 check_reproducible() {
   local first second
   first=$(mktemp)
@@ -35,11 +72,9 @@ case "${1:-build}" in
     build_one linux amd64 ""
     build_one linux arm64 ""
     build_one windows amd64 ".exe"
-    # No self-SBOM. It was produced from a compile database written here on the
-    # spot, naming one Go file and an empty linker map -- the evidence-free
-    # guessing this tool exists to refuse, and it made every release build fail
-    # with exit 3 besides, because the resulting findings tripped the policy.
-    # It returns when it is derived from evidence (deviation D16).
+    for binary in "$output_dir"/sbomb-*; do
+      write_self_sbom "$binary"
+    done
     (cd "$output_dir" && sha256sum sbomb-* > SHA256SUMS)
     ;;
   *)

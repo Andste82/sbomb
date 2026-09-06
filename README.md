@@ -89,6 +89,32 @@ sbomb validate --input build/debug/app.cdx.json
 
 This checks whether the generated CycloneDX document conforms to the expected structure and policy expectations.
 
+### Describe a Go binary
+
+```bash
+sbomb self dist/sbomb-linux-amd64 \
+  --output dist/sbomb-linux-amd64.cdx.json \
+  --version 0.9.0 \
+  --module-dir . \
+  --goroot "$(go env GOROOT)" \
+  --reproducible
+```
+
+This writes a CycloneDX document for a Go executable from the module record its
+linker embedded: every module that was linked in, at the version and with the
+`go.sum` hash that ended up in the artifact. It reads the binary and nothing
+else -- no `go` subprocess, no network, no source-tree scan -- so it also works
+on a cross-compiled binary for a platform the host cannot run.
+
+`--module-dir` adds licence evidence from a vendor directory, but only for
+modules whose vendored version matches what the binary records. `--license
+<module>=<SPDX expression>` curates a licence that exact text matching cannot
+recognize; a curated value that contradicts the licence text is reported as a
+conflict rather than silently preferred.
+
+sbomb uses this on its own releases: every published binary ships the SBOM of
+itself beside it.
+
 ### Inspect evidence and schemas
 
 ```bash
@@ -222,6 +248,7 @@ This makes it usable both for downstream software inventory and for internal eng
 - `sbomb generate`: produce SBOM(s) and evaluate policy
 - `sbomb explain`: explain inclusion of a file or component
 - `sbomb validate`: validate an generated CycloneDX SBOM
+- `sbomb self`: describe a Go binary from the module record its linker embedded
 - `sbomb evidence`: dump evidence graph details
 - `sbomb schema`: print embedded configuration and findings schemas
 - `sbomb version`: print tool version information

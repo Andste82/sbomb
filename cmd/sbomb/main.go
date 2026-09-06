@@ -69,8 +69,10 @@ func execute(args []string) (int, string, string) {
 		return handleValidate(subArgs[1:])
 	case "evidence":
 		return handleEvidence(subArgs[1:])
+	case "self":
+		return handleSelf(subArgs[1:], verbosity)
 	default:
-		return 1, "", "usage: sbomb [version|generate|validate|evidence|explain|schema]\n"
+		return 1, "", "usage: sbomb [version|generate|self|validate|evidence|explain|schema]\n"
 	}
 }
 

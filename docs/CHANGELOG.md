@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+### A release describes itself, from evidence
+
+- `sbomb self <binary>` writes a CycloneDX document for a Go executable from
+  the module record its linker embedded: every module linked in, at the version
+  and with the `go.sum` hash that reached the artifact. It reads the binary and
+  nothing else -- no subprocess, no network, no source-tree scan -- so it works
+  on a cross-compiled binary for a platform the host cannot run.
+- Every released binary now ships that document beside it, and the release
+  workflow re-validates each one from the published file. This closes deviation
+  D16: the previous self-SBOM was generated from a compile database the release
+  script wrote on the spot naming one Go file, which is the guessing this tool
+  exists to refuse.
+- Licence evidence comes from a vendor directory, but only for modules whose
+  vendored version matches what the binary records -- a vendor tree from
+  another commit would otherwise hand the wrong licence to the right component
+  and look exactly as confident as a correct answer. `--license
+  <module>=<SPDX>` curates what exact text matching cannot recognize, is marked
+  as curated rather than detected, and is reported as a conflict if the licence
+  text contradicts it.
+- **The tool did not build for Windows.** `internal/limits` used
+  `syscall.O_NOFOLLOW`, which does not exist there, so every cross-compile to
+  windows/amd64 failed -- including the one in the release script. The
+  no-follow open is platform-split now: the kernel enforces it where it can,
+  and where it cannot the check precedes the open and the remaining race is
+  documented rather than hidden.
+
 ### Bounded parsers, and fuzzing for the newest ones
 
 - `internal/limits` holds the four bounds of section 30 in one place. Eighteen

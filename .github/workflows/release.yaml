@@ -62,11 +62,20 @@ jobs:
           sha256sum --check SHA256SUMS
           cat SHA256SUMS
 
-      # The self-SBOM that release.sh writes is not published. It is produced
-      # from a fabricated compile database naming a single Go file, which is
-      # exactly the guessing this tool exists to refuse; shipping it would put
-      # a false bill of materials next to the binary it describes. It is
-      # attached once it is derived from evidence -- roadmap phase 8, step 8e.
+      # A tool that reports what is inside somebody else's build has to be able
+      # to report what is inside its own. The document beside each binary is
+      # derived from the module evidence that binary's linker recorded, so this
+      # re-validates it from the published file rather than trusting that the
+      # writer validated it.
+      - name: Self-SBOMs validate
+        env:
+          VERSION: ${{ inputs.tag || github.ref_name }}
+        run: |
+          set -euo pipefail
+          for document in dist/"${VERSION#v}"/*.cdx.json; do
+            dist/"${VERSION#v}"/sbomb-linux-amd64 validate --input "$document"
+          done
+
       - name: Create the release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -78,6 +87,8 @@ jobs:
             printf 'Static, single-file executables for linux/amd64, linux/arm64 and\n'
             printf 'windows/amd64, built with CGO_ENABLED=0 -trimpath -buildvcs=false and\n'
             printf 'verified to build reproducibly.\n\n'
+            printf 'Each binary ships a CycloneDX 1.6 SBOM of itself, derived from the\n'
+            printf 'module evidence its linker recorded.\n\n'
             printf 'Verify a download against `SHA256SUMS` before running it:\n\n'
             printf '```\nsha256sum --check --ignore-missing SHA256SUMS\n```\n\n'
             printf 'See docs/CHANGELOG.md for what changed.\n'
@@ -86,6 +97,9 @@ jobs:
             --title "sbomb $VERSION" \
             --notes-file "$notes" \
             dist/"${VERSION#v}"/sbomb-linux-amd64 \
+            dist/"${VERSION#v}"/sbomb-linux-amd64.cdx.json \
             dist/"${VERSION#v}"/sbomb-linux-arm64 \
+            dist/"${VERSION#v}"/sbomb-linux-arm64.cdx.json \
             dist/"${VERSION#v}"/sbomb-windows-amd64.exe \
+            dist/"${VERSION#v}"/sbomb-windows-amd64.exe.cdx.json \
             dist/"${VERSION#v}"/SHA256SUMS

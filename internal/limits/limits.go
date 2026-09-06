@@ -13,7 +13,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"syscall"
 )
 
 // The bounds of section 30 point 2. They are the defaults; MaxInput is
@@ -102,22 +101,14 @@ func (c Config) Stat(path string) (os.FileInfo, error) {
 	return info, nil
 }
 
-// Open opens a file under the run's limits. With strict symlinks it asks the
-// kernel to refuse a symbolic link in the final component (section 30.5),
-// which closes the window between checking and opening that an Lstat alone
-// leaves open.
+// Open opens a file under the run's limits. With strict symlinks it refuses a
+// symbolic link in the final component (section 30.5); how that refusal is
+// enforced is platform-specific and lives in openNoFollow.
 func (c Config) Open(path string) (*os.File, error) {
 	if !c.StrictSymlinks {
 		return os.Open(path)
 	}
-	file, err := os.OpenFile(path, os.O_RDONLY|syscall.O_NOFOLLOW, 0)
-	if err != nil {
-		if errors.Is(err, syscall.ELOOP) {
-			return nil, fmt.Errorf("%s: %w", path, ErrSymlink)
-		}
-		return nil, err
-	}
-	return file, nil
+	return openNoFollow(path)
 }
 
 // TooManyTokens reports a line whose field count is beyond what section 30

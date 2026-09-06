@@ -242,7 +242,24 @@ default policy, `sbomb generate` returned exit 3, and `set -e` aborted the
 script before it wrote `SHA256SUMS` -- which nobody noticed, because nothing
 ever ran `scripts/release.sh build` in CI.
 
-The fabricated generation is removed. Releases ship the binaries and their
-checksums. The self-SBOM returns when it comes from evidence: Go emits neither
-a compile database nor a linker map, so it needs a source of its own, and
-`go list -deps -json` is the obvious candidate. Roadmap phase 8, step 8e.
+The fabricated generation is removed, and the self-SBOM is back, derived from
+evidence: `sbomb self` reads the module record the Go linker embeds in the
+binary. **Closed.**
+
+The evidence source is not the one this entry first proposed. `go list -deps
+-json` describes the working tree and would have to run as a subprocess outside
+the allowlist of section 9.2; the linker's record describes the artifact, is
+read from the artifact, and needs no subprocess at all. What it costs is
+file-level detail: nothing in a Go binary names the source files that went into
+it, so the module is the component. A Go module is versioned, licensed and
+published as a unit, so that is the right granularity, and the document says
+what it has rather than implying evidence it does not.
+
+Two things a release SBOM would like are still absent, both deliberately. The
+build carries `-buildvcs=false`, so no commit is recorded: enabling it would
+make a build from a source tarball differ from a build from a git clone, and
+reproducibility across environments is worth more than the field -- the tag
+pins the commit anyway. And no component carries a CycloneDX hash, because a Go
+module has no artifact to hash on its own; the `go.sum` entry covers a file
+tree, not a file, so it is recorded as `sbomb:go:moduleSum` and
+`MISSING_COMPONENT_HASH` is reported rather than suppressed.
