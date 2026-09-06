@@ -84,15 +84,16 @@
   used, because the earlier strategies resolve every object in the corpus.
 - **`sbomb:evidence:header:directInclude` is never set.** DWARF carries no
   inclusion depth; see deviation D8.
-- **Exact digests cannot match a filled-in licence template.** Section 22.3
-  technique 2 hashes the normalized official SPDX text, and section 22.7
-  forbids fuzzy matching, so a licence whose placeholders have been filled in
-  -- `<ORGANIZATION>` replaced by a real name, `1.`/`2.`/`3.` rewritten as
-  bullets -- does not match and yields NOASSERTION rather than a guess. sbomb
-  identifies its own MIT licence but not the BSD-3-Clause of its three vendored
-  dependencies, whose texts are Google and Go Authors variants. The remedy
-  within the rules is the official `standardLicenseTemplate` with its
-  `<<var;...>>` markers, which is substitution, not similarity.
+- **A filled-in licence template still does not match.** Measured against 160
+  real licence files, detection is now 93 matched to 16 distinct unmatched
+  texts. Nine of those sixteen are BSD-family licences whose `<ORGANIZATION>`
+  placeholder has been filled in with a real name; section 22.3 technique 2
+  hashes the official text exactly, and section 22.7 forbids matching by
+  similarity, so they correctly yield NOASSERTION rather than a guess. The
+  remedy inside the rules is SPDX's own `standardLicenseTemplate` with its
+  `<<var;...>>` markers -- substitution against an official declaration of what
+  may vary, not a similarity score. It costs the single hash lookup, so the
+  digest table stays the fast path and the template match becomes the fallback.
 
 ## Next Work
 

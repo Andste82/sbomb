@@ -138,7 +138,7 @@ func normalizeLicenseText(text string) string {
 		if trimmed == "" {
 			continue
 		}
-		if strings.HasPrefix(strings.ToLower(trimmed), "copyright") {
+		if isCopyrightNotice(trimmed) {
 			continue
 		}
 		if isPunctuationOnly(trimmed) {
@@ -157,6 +157,19 @@ func collapseSpaces(s string) string {
 		s = strings.ReplaceAll(s, "  ", " ")
 	}
 	return strings.TrimSpace(s)
+}
+
+// copyrightNotice matches a copyright *statement*, which the SPDX matching
+// guidelines ignore. It deliberately does not match prose that merely begins
+// with the word: the Apache-2.0 text wraps "copyright notice that is included
+// in or attached to the work" onto its own line, and dropping it mutilates the
+// licence. A statement is recognized by what follows the keyword -- a year, a
+// (c) or an unfilled SPDX placeholder -- so the result no longer depends on
+// where the source happened to wrap its lines.
+var copyrightNotice = regexp.MustCompile(`(?i)^(copyright|\(c\)|©)\b[^a-z0-9]*((\(c\)|©|\d{4}|\[[^\]]*\]|<[^>]*>)|$)`)
+
+func isCopyrightNotice(line string) bool {
+	return copyrightNotice.MatchString(line)
 }
 
 func isPunctuationOnly(s string) bool {

@@ -3,6 +3,7 @@ package license
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/example/sbomb/internal/domain"
@@ -86,5 +87,55 @@ func TestCuratedOverrideWithConflict(t *testing.T) {
 	}
 	if len(got.Conflicts) != 1 || got.Conflicts[0] != "Apache-2.0" {
 		t.Fatalf("expected conflicting value recorded, got %#v", got.Conflicts)
+	}
+}
+
+// The normalizer must not depend on where the source wrapped its lines. It
+// did: it dropped every line beginning with "copyright", and the Apache-2.0
+// text wraps "copyright notice that is included in or attached to the work"
+// onto its own line. The clause was deleted, the digest could never match, and
+// 92 of 93 Apache-2.0 files in a sample of 160 real licence files came out as
+// NOASSERTION.
+func TestNormalizationDoesNotDependOnLineWrapping(t *testing.T) {
+	wrapped := "Terms and conditions.\n" +
+		"made available under the License, as indicated by a\n" +
+		"copyright notice that is included in or attached to the work\n" +
+		"(an example is provided in the Appendix below).\n"
+	unwrapped := "Terms and conditions.\n" +
+		"made available under the License, as indicated by a copyright notice\n" +
+		"that is included in or attached to the work (an example is provided\n" +
+		"in the Appendix below).\n"
+
+	if NormalizeText(wrapped) != NormalizeText(unwrapped) {
+		t.Errorf("the same text wrapped differently normalized differently:\n  %q\n  %q",
+			NormalizeText(wrapped), NormalizeText(unwrapped))
+	}
+	if !strings.Contains(NormalizeText(wrapped), "copyright notice that is included") {
+		t.Error("a substantive clause was removed as if it were a copyright notice")
+	}
+}
+
+// A copyright statement is still ignored, as the SPDX matching guidelines
+// require, in every form the licence texts actually use -- including the
+// unfilled placeholders of the official texts.
+func TestCopyrightStatementsAreStillIgnored(t *testing.T) {
+	for _, notice := range []string{
+		"Copyright (c) 2025 andste82",
+		"Copyright 2009 The Go Authors. All rights reserved.",
+		"Copyright [yyyy] [name of copyright owner]",
+		"Copyright <year> <owner>",
+		"Copyright © 2020 Example GmbH",
+	} {
+		if got := NormalizeText("Preamble.\n" + notice + "\nBody."); got != "preamble. body." {
+			t.Errorf("NormalizeText with %q = %q, want the notice removed", notice, got)
+		}
+	}
+	for _, prose := range []string{
+		"copyright notice that is included in or attached to the work",
+		"copyright license to reproduce, prepare Derivative Works of,",
+	} {
+		if got := NormalizeText("Preamble.\n" + prose + "\nBody."); got == "preamble. body." {
+			t.Errorf("NormalizeText removed licence prose: %q", prose)
+		}
 	}
 }

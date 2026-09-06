@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+### License detection worked on 1 file in 160
+
+Normalization dropped every line beginning with `copyright`, which is not a
+normalization at all: it depends on where the source wrapped its lines. The
+Apache-2.0 text wraps "copyright notice that is included in or attached to the
+work" onto its own line, so the clause was deleted and no digest could ever
+match. The official SPDX text wraps the same words differently, so the two
+sides disagreed even though both used the same function.
+
+Only actual copyright *statements* are ignored now, recognized by what follows
+the keyword -- a year, a `(c)` or `©`, or an unfilled SPDX placeholder -- so
+the result no longer depends on line wrapping. Measured against 160 real
+licence files found on the build host, detection goes from 1 match to 93.
+Regenerating the digest table changed 86 of its 698 entries, which is how many
+official texts contained a wrapped `copyright` line of their own.
+
 ## 0.7.0 - 2026-09-06
 
 First numbered version. Seven of the nine roadmap phases are complete: the tool
