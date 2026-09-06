@@ -11,8 +11,8 @@
 - Milestone 02: evidence graph with confidence-aware edge deduplication,
   invariant checking, cycle detection and a dump format.
 - Milestone 14: deterministic serialization, `SOURCE_DATE_EPOCH` handling,
-  injectable POSIX/Windows path flavors, cross-architecture hash comparison
-  in CI. Native Windows execution remains unverified.
+  injectable POSIX/Windows path flavors, and a hash comparison in CI across
+  linux/amd64, linux/arm64 and windows/amd64.
 - Milestone 03: the CMake File API adapter reads a real reply directory. It
   resolves the index, follows the per-target reply files, and exposes the
   source and build roots, the toolchain layout and the install rules.

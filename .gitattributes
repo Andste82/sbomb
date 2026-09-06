@@ -1,0 +1,10 @@
+# The fixture corpus and the goldens are byte-exact artifacts. Git's
+# end-of-line conversion would rewrite them on a Windows checkout, and the
+# determinism check compares hashes across platforms -- a difference there has
+# to mean the tool behaved differently, not that git edited its input.
+testdata/fixtures/** -text
+testdata/golden/** -text
+
+# Shell scripts must keep LF wherever they are checked out; CRLF makes them
+# unrunnable under bash.
+*.sh text eol=lf

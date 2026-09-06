@@ -45,11 +45,22 @@ table reader, the two response-file tokenizers, the unity and PCH include
 parsers, the vcpkg SPDX reader or the package manifest. All of it is untrusted
 input from somebody else's build tree.
 
-### 8d — Windows determinism executed, not simulated
+### 8d — Windows determinism executed, not simulated — done
 
 `WindowsFlavor` is unit-tested on Linux, which proves the type and not the
-tool. A `windows-latest` job running the same corpus and comparing bytes is
-what makes the cross-platform claim true.
+tool. The determinism matrix gained a `windows-latest` runner, so the corpus is
+now processed on all three targets and the three hashes are compared.
+
+Recorded correctly this time: milestone 14 said "there is no Windows runner",
+which read like a design decision and was a property of the host it was written
+for. Flavor tests stay where they are -- string-level behaviour is better
+tested where it is deterministic. The runner covers what they cannot: that the
+binary runs, and that a case-insensitive filesystem does not change the answer.
+
+`.gitattributes` marks the corpus and the goldens as byte-exact, because git's
+end-of-line conversion would otherwise rewrite them on a Windows checkout and a
+hash difference would mean git edited the input rather than the tool behaving
+differently.
 
 ### 8e — An honest self-SBOM
 

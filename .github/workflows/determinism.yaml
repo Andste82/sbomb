@@ -10,12 +10,18 @@ permissions:
 jobs:
   determinism:
     strategy:
+      # Milestone 14 recorded that there was no Windows runner. That was true
+      # of the host it was written for and is not true of this one, so the
+      # claim that a Windows build produces the same document is checked here
+      # rather than declared unverified.
       matrix:
         include:
           - runner: ubuntu-latest
-            arch: amd64
+            target: linux-amd64
           - runner: ubuntu-24.04-arm
-            arch: arm64
+            target: linux-arm64
+          - runner: windows-latest
+            target: windows-amd64
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
@@ -23,12 +29,15 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Run deterministic fixture check
-        run: scripts/determinism-check.sh > "determinism-${{ matrix.arch }}.txt"
+        # bash on the Windows runner too: the script is the same one developers
+        # run, and rewriting it per platform would test something else.
+        shell: bash
+        run: scripts/determinism-check.sh > "determinism-${{ matrix.target }}.txt"
       - name: Upload deterministic hash
         uses: actions/upload-artifact@v4
         with:
-          name: determinism-${{ matrix.arch }}
-          path: determinism-${{ matrix.arch }}.txt
+          name: determinism-${{ matrix.target }}
+          path: determinism-${{ matrix.target }}.txt
 
   compare:
     needs: determinism
@@ -42,6 +51,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          hashes=$(grep 'portable SBOM SHA-256:' determinism-*.txt | awk '{print $NF}' | sort -u)
-          test "$(printf '%s\n' "$hashes" | wc -l)" -eq 1
+          # Trailing carriage returns would make two identical hashes compare
+          # unequal, which is the one difference this job must not report.
+          hashes=$(grep 'portable SBOM SHA-256:' determinism-*.txt | awk '{print $NF}' | tr -d '\r' | sort -u)
+          count=$(printf '%s\n' "$hashes" | wc -l)
+          if [ "$count" -ne 1 ]; then
+            echo "the platforms produced different documents:" >&2
+            grep -H 'portable SBOM SHA-256:' determinism-*.txt >&2
+            exit 1
+          fi
           printf 'matching portable SBOM SHA-256: %s\n' "$hashes"
