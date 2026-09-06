@@ -22,6 +22,12 @@
   decompressed only after a digest lookup has missed.
 - Each component now carries `sbomb:license:technique`, so a reviewer can tell
   a declared identifier from a digest match from a template match.
+- Optional blocks in a template nest, and closing an outer one on an inner
+  one's marker truncated it silently: GPL-2.0 and LGPL-3.0 matched nothing at
+  all. They are reported now as an ambiguity naming both `-only` and
+  `-or-later`, which the licence text genuinely does not distinguish.
+- A deprecated identifier is used only when nothing current matched, so
+  `GPL-2.0` no longer contradicts `GPL-2.0-only`.
 - **An `SPDX-License-Identifier:` tag could swallow the following line.** The
   expression's character class admitted `\s`, so a tag above a copyright
   statement yielded `MIT\nCopyright (c) 2009` as the licence. Found by a test

@@ -348,11 +348,28 @@ and section 37 asks for one file rather than a small one. The blob is
 decompressed only after a digest lookup has already missed, so a run whose
 licences are all verbatim never pays for it.
 
-**Two things the implementation had to get right.** RE2 caps a bounded repeat
+**Four things the implementation had to get right.** RE2 caps a bounded repeat
 at 1000 and SPDX writes `.{0,5000}` throughout; 334 of the 739 templates fail
 to compile without rewriting it. The bound has to be *clamped* rather than
-dropped — with an unbounded variable, a two-clause template swallows a third
+dropped: with an unbounded variable, a two-clause template swallows a third
 clause and a second licence after it, which is how a BSD-2-Clause template came
-to match a BSD-3-Clause file. And translating all 739 templates takes 3.5
-seconds, far too long for a run, so each is compiled only if a prefilter on its
-longest invariant literal survives a substring search.
+to match a BSD-3-Clause file. Optional blocks nest, three deep at the most in
+46 templates, so the closing marker is found by counting; taking the first one
+ends an outer block on an inner block's marker and truncates it silently, which
+is why GPL-2.0 and LGPL-3.0 matched nothing at all until this counted. A
+deprecated identifier is used only when nothing current matched, because
+GPL-2.0 is the superseded spelling of GPL-2.0-only and matches every text it
+does; reporting both would report SPDX's own renaming as a disagreement, and
+the digest table already resolves collisions this way. And translating all 739
+templates takes 3.5 seconds, far too long for a run, so each is compiled only
+if a prefilter on its longest invariant literal survives a substring search.
+
+**What is left, measured on the same corpus.** Of the 55 files that still yield
+NOASSERTION: 24 contain no known licence text at all, being bespoke agreements
+or pointers to a licence elsewhere; 18 contain several licence texts in one
+file, which nothing in the permitted techniques resolves into one expression; 4
+are `-only`/`-or-later` pairs, reported as an ambiguity with both candidates
+named because the licence text genuinely does not distinguish them; and the
+rest deviate from the SPDX text in ways SPDX does not declare, such as the
+older Apache LICENSE saying `brackets "{}"` where the current text says
+`brackets "[]"`.
