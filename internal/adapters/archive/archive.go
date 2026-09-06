@@ -21,6 +21,10 @@ type Member struct {
 	Name string
 	Path string
 	Thin bool
+	// Content is the member's bytes, for a regular archive. A thin archive
+	// holds only references, so its members are files on disk and this is nil.
+	// It is a slice of the archive already read, not a second copy.
+	Content []byte
 }
 
 func ParseFile(path string) ([]Member, error) {
@@ -81,6 +85,7 @@ func Parse(r io.Reader, archivePath string) ([]Member, error) {
 					member.Path = filepath.Join(filepath.Dir(archivePath), filepath.FromSlash(name))
 				} else {
 					member.Path = name
+					member.Content = content
 				}
 				members = append(members, member)
 			}

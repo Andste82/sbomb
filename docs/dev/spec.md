@@ -662,7 +662,7 @@ Object→source mapping MUST NOT rely on basenames alone. The resolver runs thes
 3. **MSBuild `.tlog`**: `CL.write.1.tlog` maps sources to written objects.
 4. **`compile_commands.json`**: match on the `output` field if present; otherwise match `(directory, file)` against the object's expected path.
 5. **Depfile adjacency**: the `.d`/`.o.d` file next to the object names the object as its target and its first prerequisite as the source.
-6. **DWARF**: CU name for the object, when the object still carries debug info.
+6. **DWARF**: the compilation-unit name inside the object, when it still carries debug information. This is the only strategy that asks the object rather than the build system, which is why it is the one that answers for a prebuilt archive: nothing in the compile database, the build graph or a depfile mentions its members, because this build did not compile them. It reads a member of a static archive as readily as a standalone object, and only objects no earlier strategy claimed, because opening every object of a large build would cost more than the run does.
 7. **Build log fallback** (`weak`).
 
 Strategies 1–6 are `derived`; strategy 7 is `weak`. Basename-only matching is **forbidden** as a standalone strategy.

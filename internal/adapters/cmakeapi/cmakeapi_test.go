@@ -210,8 +210,10 @@ func TestEveryFixtureReplyParses(t *testing.T) {
 			parsed++
 		}
 	}
-	if parsed != 58 {
-		t.Errorf("parsed %d fixture replies, want 58", parsed)
+	// Five toolchains times twelve projects, less the four p11-conan builds
+	// the other toolchains cannot produce, plus the five p13-prebuilt ones.
+	if parsed != 63 {
+		t.Errorf("parsed %d fixture replies, want 63", parsed)
 	}
 }
 

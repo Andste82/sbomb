@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+### A prebuilt library's sources are named, not left opaque
+
+Strategy 6 of section 13.2 -- the compilation-unit name in an object's own
+debug information -- was specified, the resolver already had a slot for it, and
+nothing ever filled it. Every other strategy asks the build system, so an
+object the build system does not know about could not be resolved at all: a
+static library a vendor ships appeared in the SBOM as an opaque
+`libvendor.a(vendor_blob.o)` with `LINKED_OBJECT_SOURCE_UNRESOLVED` beside it.
+
+It reads a member of a static archive as readily as a standalone object, and
+only objects no earlier strategy claimed -- opening every object file of a
+fifty-thousand-unit build to parse DWARF would cost more than the whole run.
+`binfmt.InspectBytes` and the member content the archive parser already had in
+hand are what makes the archive case work without unpacking anything to disk.
+
+The corpus gains `p13-prebuilt`, which compiles and archives a source at
+configure time so that nothing in `build.ninja`, `compile_commands.json` or any
+depfile records how it was made. It is the first fixture where strategies 1 to
+5 all fail.
+
+
 ### The property catalogue is checked too
 
 Appendix B lists the `sbomb:` properties a document may carry, and nothing

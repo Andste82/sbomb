@@ -63,6 +63,13 @@ func Inspect(path string, opts Options) (Result, error) {
 	if err != nil {
 		return Result{Path: path}, err
 	}
+	return InspectBytes(data, path, opts), nil
+}
+
+// InspectBytes is Inspect for content that is not a file of its own: a member
+// of a static archive, which exists only inside it. path names the content for
+// diagnostics and is not opened.
+func InspectBytes(data []byte, path string, opts Options) Result {
 	result := Result{Path: path}
 	switch {
 	case bytes.HasPrefix(data, []byte{0x7f, 'E', 'L', 'F'}):
@@ -74,7 +81,7 @@ func Inspect(path string, opts Options) (Result, error) {
 	default:
 		result.Findings = append(result.Findings, finding("MALFORMED_BINARY", "artifact is not a supported ELF or PE file"))
 	}
-	return result, nil
+	return result
 }
 
 func inspectELF(result *Result, data []byte, opts Options) {

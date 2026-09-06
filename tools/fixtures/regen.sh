@@ -43,7 +43,7 @@ if [[ "${1:-}" == "--only" ]]; then
   shift 2
 fi
 
-PROJECTS=(p01-hello p02-static p03-dupnames p04-generated p05-headeronly p06-unity p07-pch p08-gcsections p09-lto p10-fetchcontent p11-conan p12-assets)
+PROJECTS=(p01-hello p02-static p03-dupnames p04-generated p05-headeronly p06-unity p07-pch p08-gcsections p09-lto p10-fetchcontent p11-conan p12-assets p13-prebuilt)
 
 # Some projects only make sense for some toolchains. A Conan package is built
 # for one target, so linking it into an ARM or Windows binary is not a fixture
@@ -88,6 +88,12 @@ if [[ "${1:-}" == "--check" ]]; then
       done
       if ! compgen -G "$dir/build/.cmake/api/v1/reply/index-*.json" > /dev/null; then
         log "missing $toolchain/$project CMake File API reply"
+        missing=1
+      fi
+      # The prebuilt archive is the whole point of p13: without it there is
+      # nothing for section 13.2 strategy 6 to read.
+      if [[ "$project" == p13-prebuilt && ! -e "$dir/build/prebuilt/libvendor.a" ]]; then
+        log "missing $toolchain/$project prebuilt archive"
         missing=1
       fi
     done
@@ -337,6 +343,12 @@ QUERY
   harvest_glob "$BUILD_ROOT/*.map" "$build_out"
   harvest_glob "$BUILD_ROOT/*.d" "$build_out"
   harvest_glob "$BUILD_ROOT/*.a" "$build_out"
+  # Archives below the build root too. A prebuilt library a project ships does
+  # not sit at the top level, and its members are the only place their own
+  # source is named (section 13.2 strategy 6).
+  while IFS= read -r found; do
+    harvest "$found" "$build_out/${found#"$BUILD_ROOT"/}"
+  done < <(find "$BUILD_ROOT" -mindepth 2 -maxdepth 3 -name '*.a' -type f ! -path '*/CMakeFiles/*' | sort)
   harvest_glob "$BUILD_ROOT/*.exe" "$build_out"
   while IFS= read -r found; do
     harvest "$found" "$build_out/${found#"$BUILD_ROOT"/}"

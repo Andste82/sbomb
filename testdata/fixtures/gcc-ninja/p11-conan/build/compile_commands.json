@@ -1,7 +1,7 @@
 [
 {
   "directory": "/__fixture_build__",
-  "command": "/usr/bin/cc -isystem /__fixture_pkg__/conan/p/b/tinycfa3dd3519e088/p/include -g -o CMakeFiles/conanapp.dir/main.c.o -c /__fixture_src__/main.c",
+  "command": "/usr/bin/cc -isystem /__fixture_pkg__/conan/p/b/tinycdf9aa2f556023/p/include -g -o CMakeFiles/conanapp.dir/main.c.o -c /__fixture_src__/main.c",
   "file": "/__fixture_src__/main.c",
   "output": "CMakeFiles/conanapp.dir/main.c.o"
 }

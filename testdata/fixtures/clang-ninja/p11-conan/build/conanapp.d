@@ -3,7 +3,7 @@ conanapp: \
  /lib/x86_64-linux-gnu/crti.o \
  /usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o \
  CMakeFiles/conanapp.dir/main.c.o \
- /__fixture_pkg__/conan/p/b/tinyc9a247e7f41bbd/p/lib/libtinycbor.a \
+ /__fixture_pkg__/conan/p/b/tinyc672ca60bc75dc/p/lib/libtinycbor.a \
  /usr/lib/gcc/x86_64-linux-gnu/13/libgcc.a \
  /usr/lib/gcc/x86_64-linux-gnu/13/libgcc_s.so \
  /lib/x86_64-linux-gnu/libgcc_s.so.1 \
@@ -22,7 +22,7 @@ conanapp: \
 
 CMakeFiles/conanapp.dir/main.c.o:
 
-/__fixture_pkg__/conan/p/b/tinyc9a247e7f41bbd/p/lib/libtinycbor.a:
+/__fixture_pkg__/conan/p/b/tinyc672ca60bc75dc/p/lib/libtinycbor.a:
 
 /usr/lib/gcc/x86_64-linux-gnu/13/libgcc.a:
 

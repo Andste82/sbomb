@@ -7,6 +7,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/example/sbomb/internal/adapters/archive"
+	"github.com/example/sbomb/internal/adapters/binfmt"
 	"github.com/example/sbomb/internal/adapters/compiledb"
 	makeadapter "github.com/example/sbomb/internal/adapters/make"
 	"github.com/example/sbomb/internal/adapters/ninja"
@@ -67,6 +69,101 @@ func (c *compileEvidence) addHeaders(object string, headers []string) {
 		return
 	}
 	c.objectHeaders[object] = append(c.objectHeaders[object], headers...)
+}
+
+// addDWARFMappings is strategy 6 of section 13.2: an object that no build
+// record accounts for still carries, in its own debug information, the name of
+// the translation unit it was compiled from.
+//
+// It is the only strategy that asks the object instead of the build system,
+// which is why it is the one that answers for a prebuilt archive shipped by a
+// vendor: nothing in the compile database, the build graph or a depfile
+// mentions its members, because this build did not compile them.
+//
+// Only objects no earlier strategy claimed are read. Opening every object file
+// of a fifty-thousand-unit build to parse DWARF would cost more than the whole
+// run does today, and would tell us nothing we do not already know.
+func addDWARFMappings(graph *evidence.Graph, b *builder, resolver *inventory.ObjectSourceResolver, mapped map[string]bool, logger *Logger) {
+	inspected, found := 0, 0
+	// Archives are parsed at most once each, however many of their members
+	// need reading.
+	archives := map[string][]archive.Member{}
+	for _, node := range graph.Nodes() {
+		if node.Kind != domain.NodeObject {
+			continue
+		}
+		canonical := string(node.ID)
+		if mapped[canonical] {
+			continue
+		}
+		result, ok := inspectObject(node, b, archives, logger)
+		if !ok {
+			continue
+		}
+		inspected++
+		// Exactly one unit, or the object is an amalgamation and naming one of
+		// its sources would be a guess. A unity build is resolved by section
+		// 17.1, not here.
+		if len(result.CompilationUnits) != 1 {
+			if len(result.CompilationUnits) > 1 {
+				logger.Debug("Object '%s' holds %d translation units; DWARF cannot name one", canonical, len(result.CompilationUnits))
+			}
+			continue
+		}
+		unit := result.CompilationUnits[0]
+		if unit.Source == "" {
+			continue
+		}
+		sourceCanonical, _ := b.identify(unit.Source)
+		resolver.AddDWARFMapping(canonical, sourceCanonical)
+		found++
+	}
+	if inspected > 0 {
+		logger.Info("Read debug information from %d unmapped object(s); %d named their source", inspected, found)
+	}
+}
+
+// inspectObject reads one object's debug information, whether it is a file of
+// its own or a member of a static archive. A prebuilt library is the second
+// case, and it is the case that matters: a vendor ships an archive, and its
+// members exist nowhere else.
+func inspectObject(node domain.Node, b *builder, archives map[string][]archive.Member, logger *Logger) (binfmt.Result, bool) {
+	canonical := string(node.ID)
+	memberName := node.Attributes["member"]
+	if memberName == "" {
+		path := b.physical[canonical]
+		if path == "" {
+			return binfmt.Result{}, false
+		}
+		result, err := binfmt.Inspect(path, binfmt.Options{})
+		if err != nil {
+			logger.Debug("Object '%s' could not be read: %v", canonical, err)
+			return binfmt.Result{}, false
+		}
+		return result, true
+	}
+
+	archiveCanonical := node.Attributes["archive"]
+	archivePath := b.physical[archiveCanonical]
+	if archivePath == "" {
+		return binfmt.Result{}, false
+	}
+	members, parsed := archives[archiveCanonical]
+	if !parsed {
+		var err error
+		members, err = archive.ParseFile(archivePath)
+		if err != nil {
+			logger.Debug("Archive '%s' could not be read: %v", archiveCanonical, err)
+		}
+		archives[archiveCanonical] = members
+	}
+	for _, member := range members {
+		if member.Name != memberName || len(member.Content) == 0 {
+			continue
+		}
+		return binfmt.InspectBytes(member.Content, archiveCanonical+"("+memberName+")", binfmt.Options{}), true
+	}
+	return binfmt.Result{}, false
 }
 
 // collectCompileEvidence gathers object-to-source mappings and header
@@ -205,9 +302,11 @@ func buildEvidenceGraph(
 
 	// Object to source, using the resolver of section 13.2.
 	resolver := inventory.New(graph)
+	mappedObjects := map[string]bool{}
 	for object, source := range compile.objectSources {
 		objectCanonical, _ := b.identify(object)
 		sourceCanonical, _ := b.identify(source)
+		mappedObjects[objectCanonical] = true
 		switch compile.strategy[object] {
 		case "ninja-buildgraph":
 			resolver.AddNinjaMapping(objectCanonical, sourceCanonical)
@@ -219,6 +318,7 @@ func buildEvidenceGraph(
 			resolver.AddDepfileMapping(objectCanonical, sourceCanonical)
 		}
 	}
+	addDWARFMappings(graph, b, resolver, mappedObjects, logger)
 	resolved, _ := resolver.ResolveAndAddEdges()
 	logger.Info("Resolved %d object(s) to their source", resolved)
 
