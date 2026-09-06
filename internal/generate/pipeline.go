@@ -14,6 +14,7 @@ import (
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/evidence"
 	"github.com/example/sbomb/internal/inventory"
+	"github.com/example/sbomb/internal/policy"
 )
 
 // compileEvidence is what the compile-side adapters contribute: object to
@@ -409,4 +410,109 @@ func scopeOfNode(node domain.Node, anchorResult *anchors.Result) anchors.Scope {
 		}
 	}
 	return anchorResult.Scope(domain.FileID{Anchor: anchorOf(string(node.ID)), RelPath: relOf(string(node.ID))})
+}
+
+// includedByPolicy decides whether a file of a given origin belongs in the
+// SBOM. The defaults of section 24.1 apply unless a scope option of section
+// 33.1 says otherwise.
+func includedByPolicy(scope anchors.Scope, node domain.Node, cfg policy.Config) bool {
+	switch scope {
+	case anchors.ScopeSystem:
+		if node.Kind == domain.NodeHeader {
+			return cfg.IncludeSystemHeaders
+		}
+		return cfg.SystemLibraries == "main-sbom" || cfg.SystemLibraries == "separate-component"
+	case anchors.ScopeToolchain:
+		if node.Kind == domain.NodeHeader {
+			return cfg.IncludeSystemHeaders
+		}
+		return cfg.IncludeToolchainRuntime == "main-sbom" || cfg.IncludeToolchainRuntime == "separate-component"
+	default:
+		return anchors.IncludedByDefault(scope)
+	}
+}
+
+// evidenceQualityFindings reports what the evidence could not establish, so
+// that the gates of section 33.1 have something to act on.
+func evidenceQualityFindings(graph *evidence.Graph, used []domain.Node, anchorResult *anchors.Result, cfg policy.Config) []domain.Finding {
+	findings := []domain.Finding{}
+
+	// Weak evidence must never pass as equivalent to linked evidence (8.4).
+	for _, edge := range graph.Edges() {
+		if edge.Strength != "weak" {
+			continue
+		}
+		findings = append(findings, domain.Finding{
+			ID: "WEAK_EVIDENCE", Severity: domain.SeverityWarning,
+			Subject: domain.Subject{Kind: "evidence", Ref: string(edge.To)},
+			Message: fmt.Sprintf("the only evidence for this file is %s, which is a fallback source", edge.Source),
+		})
+	}
+
+	for _, node := range used {
+		scope := scopeOfNode(node, anchorResult)
+		switch node.Kind {
+		case domain.NodeHeader:
+			// Section 14.4: an unclassifiable header is included and flagged.
+			if scope == anchors.ScopeUnknown {
+				findings = append(findings, domain.Finding{
+					ID: "UNKNOWN_HEADER_CLASS", Severity: domain.SeverityInfo,
+					Subject: domain.Subject{Kind: "file", Ref: string(node.ID)},
+					Message: "the header could not be classified; it is included and flagged for review",
+				})
+			}
+		case domain.NodeObject:
+			if !anchors.IncludedByDefault(scope) {
+				continue
+			}
+			var hasSource, hasHeaders bool
+			for _, edge := range graph.EdgesFrom(node.ID) {
+				switch edge.Type {
+				case "source-mapping":
+					hasSource = true
+				case "header-dependency":
+					hasHeaders = true
+				}
+			}
+			if hasSource && !hasHeaders {
+				findings = append(findings, domain.Finding{
+					ID: "MISSING_HEADER_DEPENDENCY_EVIDENCE", Severity: domain.SeverityWarning,
+					Subject: domain.Subject{Kind: "file", Ref: string(node.ID)},
+					Message: "the translation unit reached the link but no dependency evidence names the headers it read",
+				})
+			}
+		case domain.NodeArchive:
+			// Section 33.1: a prebuilt library that maps to no component is a
+			// gap in the bill of materials, not a detail.
+			if strings.HasPrefix(string(node.ID), "build:") || !anchors.IncludedByDefault(scope) {
+				continue
+			}
+			findings = append(findings, domain.Finding{
+				ID: "PREBUILT_LIBRARY_UNMAPPED", Severity: domain.SeverityWarning,
+				Subject:     domain.Subject{Kind: "file", Ref: string(node.ID)},
+				Message:     "a prebuilt library is linked but belongs to no configured component",
+				Remediation: "Add a components[] entry naming the library, its version and its supplier.",
+			})
+		}
+	}
+
+	// Section 4.5: asking for section garbage collection when the evidence
+	// does not report discarded sections would silently do nothing.
+	if cfg.SectionGarbageCollection != "ignore" {
+		var reported bool
+		for _, edge := range graph.Edges() {
+			if edge.Type == "discarded-section" {
+				reported = true
+				break
+			}
+		}
+		if !reported {
+			findings = append(findings, domain.Finding{
+				ID: "SECTION_GC_INFO_UNAVAILABLE", Severity: domain.SeverityInfo,
+				Subject: domain.Subject{Kind: "run", Ref: cfg.SectionGarbageCollection},
+				Message: "section garbage collection was requested but the link evidence does not report discarded sections",
+			})
+		}
+	}
+	return findings
 }

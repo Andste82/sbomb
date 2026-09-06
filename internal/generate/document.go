@@ -14,6 +14,16 @@ import (
 // not a bom-ref; the writer derives that (section 36.1).
 const productID = "product"
 
+// buildEnvironmentID groups everything that was needed to build the product
+// but is not part of it (section 24.2).
+const buildEnvironmentID = "component:build-environment"
+
+// isBuildEnvironment reports whether a component describes the build
+// environment rather than the product.
+func isBuildEnvironment(scope string) bool {
+	return scope == "toolchain" || scope == "system"
+}
+
 // buildDocument assembles the format-neutral document: a root product, the
 // grouping components the used files belong to, and the relations between
 // them (sections 19 and 28.5).
@@ -37,14 +47,36 @@ func buildDocument(
 	relations := make([]sbomwriter.Relation, 0, len(groups)+1)
 	productTargets := make([]string, 0, len(groups))
 
+	// Toolchain and system components are not project dependencies. Section
+	// 24.2 hangs them under a synthetic build-environment component so that a
+	// consumer can tell what the product needs from what building it needed.
+	buildEnvironmentTargets := make([]string, 0)
 	for _, group := range groups {
 		document.Components = append(document.Components, group.component)
-		productTargets = append(productTargets, group.component.ID)
+		if isBuildEnvironment(group.component.Scope) {
+			buildEnvironmentTargets = append(buildEnvironmentTargets, group.component.ID)
+		} else {
+			productTargets = append(productTargets, group.component.ID)
+		}
 		fileRefs := make([]string, 0, len(group.files))
 		for _, file := range group.files {
 			fileRefs = append(fileRefs, file.ID.Canonical())
 		}
 		relations = append(relations, sbomwriter.Relation{From: group.component.ID, To: fileRefs})
+	}
+	if len(buildEnvironmentTargets) > 0 {
+		sort.Strings(buildEnvironmentTargets)
+		document.Components = append(document.Components, domain.Component{
+			ID:    buildEnvironmentID,
+			Name:  "build-environment",
+			Type:  "framework",
+			Scope: "toolchain",
+			Properties: map[string][]string{
+				"sbomb:component:detectedBy": {"synthetic"},
+			},
+		})
+		productTargets = append(productTargets, buildEnvironmentID)
+		relations = append(relations, sbomwriter.Relation{From: buildEnvironmentID, To: buildEnvironmentTargets})
 	}
 	sort.Strings(productTargets)
 	relations = append(relations, sbomwriter.Relation{From: productID, To: productTargets})

@@ -222,6 +222,88 @@ func handleEvidence(args []string) (int, string, string) {
 	return 0, "", ""
 }
 
+// reportBuildDir names the build the way the evidence does, so that a review
+// report of the same build is byte-identical wherever it was produced.
+func reportBuildDir(cfg config.Config, buildDir string) string {
+	if cfg.Build.Dir != "" {
+		return cfg.Build.Dir
+	}
+	return buildDir
+}
+
+// policyGateFlags maps a CLI flag onto the policy gate it sets. The flag names
+// follow section 32.2; one table keeps flag, configuration key and field from
+// drifting apart.
+var policyGateFlags = map[string]string{
+	"--fail-on-unknown-component":                "unknownComponent",
+	"--fail-on-unknown-license":                  "unknownLicense",
+	"--fail-on-unknown-version":                  "unknownVersion",
+	"--fail-on-missing-supplier":                 "missingSupplier",
+	"--fail-on-missing-hash":                     "missingHash",
+	"--fail-on-missing-component-hash":           "missingComponentHash",
+	"--fail-on-missing-source-for-linked-object": "missingSourceForLinkedObject",
+	"--fail-on-stale-build-artifacts":            "staleBuildArtifacts",
+	"--fail-on-review-required":                  "reviewRequired",
+	"--fail-on-weak-evidence":                    "weakEvidence",
+	"--fail-on-missing-header-evidence":          "missingHeaderEvidence",
+	"--fail-on-unanchored-file":                  "unanchoredFile",
+	"--allow-missing-link-evidence":              "allowMissingLinkEvidence",
+	"--include-system-headers":                   "systemHeaders",
+	"--include-linker-scripts":                   "linkerScripts",
+	"--include-generated-intermediate-files":     "generatedIntermediateFiles",
+	"--include-assets":                           "assets",
+	"--include-transient-build-artifacts":        "transientBuildArtifacts",
+	"--prebuilt-libraries-require-mapping":       "prebuiltLibrariesRequireMapping",
+}
+
+var policyScopeFlags = map[string]string{
+	"--include-toolchain-runtime":  "includeToolchainRuntime",
+	"--system-libraries":           "systemLibraries",
+	"--pch-headers":                "pchHeaders",
+	"--section-garbage-collection": "sectionGarbageCollection",
+}
+
+func flagName(arg string) string {
+	name, _, _ := strings.Cut(arg, "=")
+	return name
+}
+
+func isPolicyGateFlag(arg string) bool {
+	_, known := policyGateFlags[flagName(arg)]
+	return known
+}
+
+func isPolicyScopeFlag(arg string) bool {
+	_, known := policyScopeFlags[flagName(arg)]
+	return known
+}
+
+// parsePolicyGateFlag accepts "--fail-on-x" as true and "--fail-on-x=false"
+// as an explicit override, which is what makes turning a profile gate off
+// possible from the command line.
+func parsePolicyGateFlag(arg string) (string, bool, error) {
+	name, value, hasValue := strings.Cut(arg, "=")
+	gate := policyGateFlags[name]
+	if !hasValue {
+		return gate, true, nil
+	}
+	switch strings.ToLower(value) {
+	case "true", "1", "yes":
+		return gate, true, nil
+	case "false", "0", "no":
+		return gate, false, nil
+	}
+	return "", false, fmt.Errorf("invalid value %q for %s; use true or false", value, name)
+}
+
+func parsePolicyScopeFlag(arg string) (string, string, error) {
+	name, value, hasValue := strings.Cut(arg, "=")
+	if !hasValue || value == "" {
+		return "", "", fmt.Errorf("%s requires a value, for example %s=exclude", name, name)
+	}
+	return policyScopeFlags[name], value, nil
+}
+
 // exitCodeFor honours the exit-code precedence of section 32.4 by letting a
 // finding carry its own code.
 func exitCodeFor(err error, fallback int) int {
@@ -237,11 +319,16 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 	output := ""
 	repro := false
 	cfgPath := ""
-	policyName := "default"
+	policyName := ""
+	profileOverlay := ""
+	gateOverrides := map[string]bool{}
+	scopeOverrides := map[string]string{}
+	headerEvidence := ""
 	waiversPath := ""
 	findingsJSONPath := ""
 	reviewReportPath := ""
 	reportFormat := "text"
+	reportChains := ""
 	pathFlavor := ""
 	redactUnanchored := false
 	for i := 0; i < len(args); i++ {
@@ -312,6 +399,28 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 			i++
 		case strings.HasPrefix(args[i], "--policy="):
 			policyName = strings.TrimPrefix(args[i], "--policy=")
+		case args[i] == "--profile-overlay":
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --profile-overlay\n"
+			}
+			profileOverlay = args[i+1]
+			i++
+		case strings.HasPrefix(args[i], "--profile-overlay="):
+			profileOverlay = strings.TrimPrefix(args[i], "--profile-overlay=")
+		case strings.HasPrefix(args[i], "--header-evidence="):
+			headerEvidence = strings.TrimPrefix(args[i], "--header-evidence=")
+		case isPolicyGateFlag(args[i]):
+			name, value, err := parsePolicyGateFlag(args[i])
+			if err != nil {
+				return 1, "", err.Error() + "\n"
+			}
+			gateOverrides[name] = value
+		case isPolicyScopeFlag(args[i]):
+			name, value, err := parsePolicyScopeFlag(args[i])
+			if err != nil {
+				return 1, "", err.Error() + "\n"
+			}
+			scopeOverrides[name] = value
 		case args[i] == "--waivers":
 			if i+1 >= len(args) {
 				return 1, "", "missing value for --waivers\n"
@@ -344,6 +453,8 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 			i++
 		case strings.HasPrefix(args[i], "--report-format="):
 			reportFormat = strings.TrimPrefix(args[i], "--report-format=")
+		case strings.HasPrefix(args[i], "--report-chains="):
+			reportChains = strings.TrimPrefix(args[i], "--report-chains=")
 		default:
 			if strings.HasPrefix(args[i], "--") {
 				return 1, "", fmt.Sprintf("unknown flag: %s\n", args[i])
@@ -386,11 +497,27 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 	default:
 		return 1, logBuf.String(), "invalid value for --path-flavor: " + pathFlavor + "\n"
 	}
+	// The scope options of section 33.1 are discovery settings, so the policy
+	// has to be resolved before generation, not after it.
+	policyConfig, err := policy.Resolve(loadedCfg.Policy, policy.Overrides{
+		Profile:        policyName,
+		Overlay:        profileOverlay,
+		Gates:          gateOverrides,
+		Scopes:         scopeOverrides,
+		HeaderEvidence: headerEvidence,
+		WaiversFile:    waiversPath,
+	})
+	if err != nil {
+		return 1, logBuf.String(), err.Error() + "\n"
+	}
+	cliLogger.Info("Policy profile '%s' resolved", policyConfig.Profile)
+
 	generated, err := generate.RunWithOptions(loadedCfg, buildDir, repro, generate.Options{
 		PathFlavor:            flavor,
 		Verbosity:             verbosity,
 		LogWriter:             logWriter,
 		RedactUnanchoredPaths: redactUnanchored,
+		Policy:                policyConfig,
 	})
 	if err != nil {
 		return exitCodeFor(err, 2), logBuf.String(), err.Error() + "\n"
@@ -414,9 +541,7 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 		return 2, logBuf.String(), err.Error() + "\n"
 	}
 
-	cliLogger.Info("Evaluating policy profile '%s'...", policyName)
-	cfg := policy.ResolveProfile(policyName)
-	waivers, err := policy.LoadWaivers(waiversPath)
+	waivers, err := policy.LoadWaivers(policyConfig.WaiversFile)
 	if err != nil {
 		return 1, logBuf.String(), err.Error() + "\n"
 	}
@@ -427,7 +552,7 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 			now = time.Unix(seconds, 0).UTC()
 		}
 	}
-	res := policy.Evaluate(findings, cfg, waivers, now)
+	res := policy.Evaluate(findings, policyConfig, waivers, now)
 	cliLogger.Info("Policy evaluation complete: %d finding(s) (fail: %v, exit code: %d)", len(res.Findings), res.Fail, res.ExitCode)
 
 	if findingsJSONPath != "" {
@@ -438,9 +563,19 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 	}
 	if reviewReportPath != "" {
 		cliLogger.Info("Writing review report (%s format) to '%s'...", reportFormat, reviewReportPath)
-		text := report.RenderText(cfg.Profile, res.Findings, res.ExitCode)
+		text := report.RenderReview(report.ReviewInput{
+			Profile:    policyConfig.Profile,
+			ExitCode:   res.ExitCode,
+			ConfigPath: cfgPath,
+			BuildDir:   reportBuildDir(loadedCfg, buildDir),
+			Document:   generated.Document,
+			Graph:      generated.Graph,
+			Findings:   res.Findings,
+			Adapters:   generated.Adapters,
+			Chains:     reportChains,
+		})
 		if strings.EqualFold(reportFormat, "markdown") {
-			text = report.RenderMarkdown(cfg.Profile, res.Findings, res.ExitCode)
+			text = report.RenderMarkdown(policyConfig.Profile, res.Findings, res.ExitCode)
 		}
 		if err := os.WriteFile(reviewReportPath, []byte(text), 0o600); err != nil {
 			return 1, logBuf.String(), err.Error() + "\n"

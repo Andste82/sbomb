@@ -64,10 +64,43 @@ type Artifact struct {
 	LinkDepfile string `json:"linkDepfile,omitempty"`
 }
 
+// Policy mirrors section 33.1. Every field is a pointer so that "absent" is
+// distinguishable from "explicitly false": without that, a configuration file
+// could never turn a gate off, and the precedence of section 32.2 -- CLI over
+// profile over configuration over default -- could not be expressed.
 type Policy struct {
-	Profile              string `json:"profile,omitempty"`
-	HeaderEvidence       string `json:"headerEvidence,omitempty"`
-	FailOnUnanchoredFile bool   `json:"failOnUnanchoredFile,omitempty"`
+	Profile        string `json:"profile,omitempty"`
+	Overlay        string `json:"profileOverlay,omitempty"`
+	HeaderEvidence string `json:"headerEvidence,omitempty"`
+	WaiversFile    string `json:"waiversFile,omitempty"`
+
+	FailOnUnknownComponent             *bool `json:"failOnUnknownComponent,omitempty"`
+	FailOnUnknownLicense               *bool `json:"failOnUnknownLicense,omitempty"`
+	FailOnUnknownVersion               *bool `json:"failOnUnknownVersion,omitempty"`
+	FailOnMissingSupplier              *bool `json:"failOnMissingSupplier,omitempty"`
+	FailOnMissingHash                  *bool `json:"failOnMissingHash,omitempty"`
+	FailOnMissingComponentHash         *bool `json:"failOnMissingComponentHash,omitempty"`
+	FailOnMissingSourceForLinkedObject *bool `json:"failOnMissingSourceForLinkedObject,omitempty"`
+	FailOnStaleBuildArtifacts          *bool `json:"failOnStaleBuildArtifacts,omitempty"`
+	FailOnReviewRequired               *bool `json:"failOnReviewRequired,omitempty"`
+	FailOnWeakEvidence                 *bool `json:"failOnWeakEvidence,omitempty"`
+	FailOnMissingHeaderEvidence        *bool `json:"failOnMissingHeaderEvidence,omitempty"`
+	FailOnUnanchoredFile               *bool `json:"failOnUnanchoredFile,omitempty"`
+	AllowMissingLinkEvidence           *bool `json:"allowMissingLinkEvidence,omitempty"`
+
+	IncludeSystemHeaders             *bool  `json:"includeSystemHeaders,omitempty"`
+	IncludeToolchainRuntime          string `json:"includeToolchainRuntime,omitempty"`
+	IncludeLinkerScripts             *bool  `json:"includeLinkerScripts,omitempty"`
+	IncludeGeneratedIntermediateFile *bool  `json:"includeGeneratedIntermediateFiles,omitempty"`
+	IncludeAssets                    *bool  `json:"includeAssets,omitempty"`
+	IncludeTransientBuildArtifacts   *bool  `json:"includeTransientBuildArtifacts,omitempty"`
+	SystemLibraries                  string `json:"systemLibraries,omitempty"`
+	PCHHeaders                       string `json:"pchHeaders,omitempty"`
+	SectionGarbageCollection         string `json:"sectionGarbageCollection,omitempty"`
+	PrebuiltLibrariesRequireMapping  *bool  `json:"prebuiltLibrariesRequireMapping,omitempty"`
+
+	StaleToleranceSeconds *int              `json:"staleToleranceSeconds,omitempty"`
+	SeverityOverrides     map[string]string `json:"severityOverrides,omitempty"`
 }
 
 type Output struct {

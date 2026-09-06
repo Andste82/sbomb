@@ -2,6 +2,37 @@
 
 ## Unreleased
 
+### The policy model does its job
+
+- All 27 options of section 33.1 exist and can be set from the configuration
+  file or from a CLI flag, with the precedence of section 32.2: CLI flag over
+  policy profile over configuration file over built-in default. One table maps
+  a flag, a configuration key and the field it sets, so the three cannot drift
+  apart. An invalid value is an error, not a silently ignored setting.
+- The `host-linux` overlay and `--profile-overlay` exist. An overlay changes
+  scope only, never a gate.
+- Scope options are applied before output, as section 33.3 requires, and every
+  exclusion is counted and reported. Toolchain and system components hang under
+  a synthetic `build-environment` component rather than appearing as product
+  dependencies (section 24.2).
+- New findings give the remaining gates something to act on: `WEAK_EVIDENCE`,
+  `MISSING_HEADER_DEPENDENCY_EVIDENCE`, `UNKNOWN_HEADER_CLASS`,
+  `PREBUILT_LIBRARY_UNMAPPED`, `SECTION_GC_INFO_UNAVAILABLE`, and staleness
+  detection from section 27.3.
+- The review report has the nine sections of section 34: run metadata,
+  deliverables, counts by kind and strength, components with their version and
+  license provenance, unresolved items, staleness, findings by severity with
+  waived ones separated, the policy verdict, and evidence chains selected by
+  `--report-chains`.
+
+### Fixed
+
+- The `policy` block of the configuration file was read and then ignored
+  entirely. Its fields are now pointers, so that a configuration can turn a
+  profile gate off rather than only on.
+- The review report embedded the directory the run read from, which put a
+  temporary path into the golden file on every run.
+
 ### The CRA fields
 
 - Files are mapped to components by the priority chain of section 19.2:

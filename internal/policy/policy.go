@@ -30,6 +30,22 @@ type Config struct {
 	FailOnMissingComponentHash         bool
 	AllowMissingLinkEvidence           bool
 
+	// Scope options (section 33.1). Unlike the gates above these change what
+	// discovery includes, and section 33.3 requires each removal to be
+	// reported rather than applied silently.
+	IncludeSystemHeaders             bool
+	IncludeToolchainRuntime          string
+	IncludeLinkerScripts             bool
+	IncludeGeneratedIntermediateFile bool
+	IncludeAssets                    bool
+	IncludeTransientBuildArtifacts   bool
+	SystemLibraries                  string
+	PCHHeaders                       string
+	SectionGarbageCollection         string
+	PrebuiltLibrariesRequireMapping  bool
+
+	StaleToleranceSeconds int
+
 	HeaderEvidence    string
 	SeverityOverrides map[string]domain.Severity
 	WaiversFile       string
@@ -66,8 +82,38 @@ func DefaultConfig() Config {
 		FailOnMissingSupplier:              false,
 		FailOnMissingComponentHash:         false,
 		AllowMissingLinkEvidence:           false,
-		HeaderEvidence:                     "dwarf-preferred",
-		SeverityOverrides:                  map[string]domain.Severity{},
+
+		IncludeSystemHeaders:             false,
+		IncludeToolchainRuntime:          "separate-component",
+		IncludeLinkerScripts:             false,
+		IncludeGeneratedIntermediateFile: false,
+		IncludeAssets:                    true,
+		IncludeTransientBuildArtifacts:   false,
+		SystemLibraries:                  "exclude",
+		PCHHeaders:                       "include",
+		SectionGarbageCollection:         "ignore",
+		PrebuiltLibrariesRequireMapping:  true,
+		StaleToleranceSeconds:            5,
+
+		HeaderEvidence:    "dwarf-preferred",
+		SeverityOverrides: map[string]domain.Severity{},
+	}
+}
+
+// Overlay is a scope profile meant to be combined with a gate profile, per
+// section 33.2. The only one is host-linux, which turns on the distribution
+// libraries that are pure noise on an embedded target.
+func Overlay(name string) (func(*Config), error) {
+	switch strings.ToLower(name) {
+	case "":
+		return func(*Config) {}, nil
+	case "host-linux":
+		return func(cfg *Config) {
+			cfg.SystemLibraries = "separate-component"
+			cfg.Profile += "+host-linux"
+		}, nil
+	default:
+		return nil, fmt.Errorf("unknown profile overlay %q; the only overlay is host-linux", name)
 	}
 }
 
@@ -83,6 +129,8 @@ func ResolveProfile(name string) Config {
 		cfg.FailOnStaleBuildArtifacts = false
 		cfg.AllowMissingLinkEvidence = true
 		cfg.HeaderEvidence = "dwarf-preferred"
+		cfg.IncludeToolchainRuntime = "report-only"
+		cfg.PrebuiltLibrariesRequireMapping = false
 		return cfg
 	case "strict":
 		cfg := DefaultConfig()
@@ -101,6 +149,8 @@ func ResolveProfile(name string) Config {
 		cfg.FailOnMissingComponentHash = true
 		cfg.AllowMissingLinkEvidence = false
 		cfg.HeaderEvidence = "union"
+		cfg.IncludeLinkerScripts = true
+		cfg.SectionGarbageCollection = "annotate"
 		return cfg
 	case "cra":
 		cfg := DefaultConfig()

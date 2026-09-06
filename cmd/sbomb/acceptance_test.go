@@ -30,6 +30,25 @@ func TestMilestone13Acceptance(t *testing.T) {
 	if lenientCode != 0 || lenientErr != "" {
 		t.Fatalf("lenient result = code %d, stderr %q; want code 0", lenientCode, lenientErr)
 	}
+	// default and cra differ only in their gates, not in scope, so section
+	// 33.3 requires them to produce the same document. strict is deliberately
+	// not compared here: it changes includeLinkerScripts and
+	// sectionGarbageCollection, which are the scope settings 33.3 exempts.
+	craOutput := filepath.Join(t.TempDir(), "cra.cdx.json")
+	defaultOutput := filepath.Join(t.TempDir(), "default.cdx.json")
+	execute([]string{"generate", "--build-dir", buildDir, "--config", configPath, "--policy", "cra", "--output", craOutput, "--reproducible"})
+	execute([]string{"generate", "--build-dir", buildDir, "--config", configPath, "--output", defaultOutput, "--reproducible"})
+	craSBOM, err := os.ReadFile(craOutput)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defaultSBOM, err := os.ReadFile(defaultOutput)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(craSBOM, defaultSBOM) {
+		t.Fatal("two profiles with identical scope produced different documents; policy may only change the verdict")
+	}
 	strictSBOM, err := os.ReadFile(strictOutput)
 	if err != nil {
 		t.Fatal(err)
@@ -38,9 +57,8 @@ func TestMilestone13Acceptance(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Policy must never change the document, only the exit code (section 33.3).
-	if !bytes.Equal(strictSBOM, lenientSBOM) {
-		t.Fatal("policy changed the SBOM; it may only change the verdict")
+	if len(strictSBOM) == 0 || len(lenientSBOM) == 0 {
+		t.Fatal("a profile produced no document at all")
 	}
 	actualReport, err := os.ReadFile(strictReport)
 	if err != nil {

@@ -1,29 +1,134 @@
-Policy profile: strict
-Exit code: 3
+== Run ==
+tool:                  sbomb 0.0.0-test
+policy profile:        strict
+configuration:         ../../testdata/config/p02-full.json
+build directory:       /__fixture_build__
+generator:             Ninja
+build configuration:   Debug
+adapters:              depfiles, linker-depfile, linker-map, resolver
+reproducible:          true
 
-- DYNAMIC_DEPENDENCIES_IGNORED [info]: 11 toolchain file(s) were excluded by the default inclusion policy
-  subject: build//__fixture_build__
-- DYNAMIC_DEPENDENCIES_IGNORED [info]: 2 system file(s) were excluded by the default inclusion policy
-  subject: build//__fixture_build__
-- MISSING_COMPONENT_HASH [warning]: no file of this component could be hashed
-  subject: component/component:p02-static
-- MISSING_FILE_HASH [warning]: the file is not readable, so no hash could be computed
-  subject: file/project:crypto.c
-- MISSING_FILE_HASH [warning]: the file is not readable, so no hash could be computed
-  subject: file/project:crypto.h
-- MISSING_FILE_HASH [warning]: the file is not readable, so no hash could be computed
-  subject: file/project:main.c
-- MISSING_SUPPLIER [warning]: the component has no supplier, which BSI TR-03183-2 requires
-  subject: component/component:p02-static
-- REPRODUCIBLE_MODE_OMITS_TIMESTAMP [info]: the document omits metadata.timestamp and is therefore not a CRA deliverable SBOM
-  subject: run//__fixture_build__
-- UNANCHORED_FILE [warning]: the file lies under no registered anchor and was identified by absolute path
-  subject: file/abs:lib/x86_64-linux-gnu/libc.so.6
-- UNANCHORED_FILE [warning]: the file lies under no registered anchor and was identified by absolute path
-  subject: file/abs:lib64/ld-linux-x86-64.so.2
-- UNKNOWN_LICENSE [warning]: no license evidence was found for this component
-  subject: component/component:p02-static
-- UNKNOWN_PURL [info]: no package type could be asserted, so no purl is emitted
-  subject: component/component:p02-static
-- UNKNOWN_VERSION [warning]: no authorized source supplied a version
-  subject: component/component:p02-static
+== Deliverable ==
+product:               p02-static
+role:                  application
+artifact:              build:app
+discovered by:         cmake-file-api
+
+== Counts ==
+components:            3
+files:                 13
+  files archive:       5
+  files header:        1
+  files object:        5
+  files source:        2
+evidence edges:        36
+  by type archive-member: 1
+  by type header-dependency: 4
+  by type link:        29
+  by type source-mapping: 2
+  by strength derived: 6
+  by strength linked:  30
+
+== Components ==
+- p02-static
+  type:                application
+  version:             -
+  supplier:            -
+  license:             NOASSERTION (unknown)
+  detected by:         anchor:project
+  files:               3
+- gnu-13.3.0
+  type:                library
+  version:             -
+  supplier:            -
+  license:             NOASSERTION (unknown)
+  detected by:         anchor:toolchain
+  files:               10
+- build-environment
+  type:                framework
+  version:             -
+  supplier:            -
+  license:             -
+  detected by:         -
+  files:               1
+
+== Unresolved ==
+MISSING_COMPONENT_HASH: 1
+MISSING_FILE_HASH:     3
+MISSING_SUPPLIER:      2
+UNANCHORED_FILE:       2
+UNKNOWN_LICENSE:       2
+UNKNOWN_PURL:          2
+UNKNOWN_VERSION:       2
+
+== Staleness ==
+none
+
+== Findings ==
+warning
+- MISSING_COMPONENT_HASH: no file of this component could be hashed
+    subject: component/component:p02-static
+- MISSING_FILE_HASH: the file is not readable, so no hash could be computed
+    subject: file/project:crypto.c
+- MISSING_FILE_HASH: the file is not readable, so no hash could be computed
+    subject: file/project:crypto.h
+- MISSING_FILE_HASH: the file is not readable, so no hash could be computed
+    subject: file/project:main.c
+- MISSING_SUPPLIER: the component has no supplier, which BSI TR-03183-2 requires
+    subject: component/component:p02-static
+    remediation: Add components[].supplier for this component.
+- MISSING_SUPPLIER: the component has no supplier, which BSI TR-03183-2 requires
+    subject: component/toolchain:gnu-13.3.0
+    remediation: Add components[].supplier for this component.
+- UNANCHORED_FILE: the file lies under no registered anchor and was identified by absolute path
+    subject: file/abs:lib/x86_64-linux-gnu/libc.so.6
+    remediation: Add an anchors[] entry for the directory this file belongs to, so its identity stays portable.
+- UNANCHORED_FILE: the file lies under no registered anchor and was identified by absolute path
+    subject: file/abs:lib64/ld-linux-x86-64.so.2
+    remediation: Add an anchors[] entry for the directory this file belongs to, so its identity stays portable.
+- UNKNOWN_LICENSE: no license evidence was found for this component
+    subject: component/component:p02-static
+    remediation: Add components[].license, or place a recognized license file in the component root.
+- UNKNOWN_LICENSE: no license evidence was found for this component
+    subject: component/toolchain:gnu-13.3.0
+    remediation: Add components[].license, or place a recognized license file in the component root.
+- UNKNOWN_VERSION: no authorized source supplied a version
+    subject: component/component:p02-static
+    remediation: Add components[].version, or components[].versionFrom naming where the version can be read.
+- UNKNOWN_VERSION: no authorized source supplied a version
+    subject: component/toolchain:gnu-13.3.0
+    remediation: Add components[].version, or components[].versionFrom naming where the version can be read.
+info
+- DYNAMIC_DEPENDENCIES_IGNORED: 1 toolchain file(s) were excluded by the default inclusion policy
+    subject: build//__fixture_build__
+- DYNAMIC_DEPENDENCIES_IGNORED: 2 system file(s) were excluded by the default inclusion policy
+    subject: build//__fixture_build__
+- REPRODUCIBLE_MODE_OMITS_TIMESTAMP: the document omits metadata.timestamp and is therefore not a CRA deliverable SBOM
+    subject: run//__fixture_build__
+- SECTION_GC_INFO_UNAVAILABLE: section garbage collection was requested but the link evidence does not report discarded sections
+    subject: run/annotate
+- UNKNOWN_PURL: no package type could be asserted, so no purl is emitted
+    subject: component/component:p02-static
+- UNKNOWN_PURL: no package type could be asserted, so no purl is emitted
+    subject: component/toolchain:gnu-13.3.0
+
+== Result ==
+policy profile:        strict
+exit code:             3
+verdict:               fail
+
+== Evidence chains ==
+abs:lib/x86_64-linux-gnu/libc.so.6
+  <- [link | linked | high | gnu-ld:app.map] artifact:build:app
+abs:lib64/ld-linux-x86-64.so.2
+  <- [link | linked | high | gnu-ld:app.map] artifact:build:app
+project:crypto.c
+  <- [link | linked | high | gnu-ld:app.map] artifact:build:app
+  <- [archive-member | linked | high | gnu-ld:app.map] build:libcrypto.a
+  <- [source-mapping | derived | high | ninja-buildgraph:object-source-mapping] build:CMakeFiles/crypto.dir/crypto.c.o
+project:crypto.h
+  <- [link | linked | high | gnu-ld:app.map] artifact:build:app
+  <- [header-dependency | derived | medium | depfile] build:CMakeFiles/app.dir/main.c.o
+project:main.c
+  <- [link | linked | high | gnu-ld:app.map] artifact:build:app
+  <- [source-mapping | derived | high | ninja-buildgraph:object-source-mapping] build:CMakeFiles/app.dir/main.c.o

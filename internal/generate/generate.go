@@ -22,6 +22,7 @@ import (
 	"github.com/example/sbomb/internal/inventory"
 	"github.com/example/sbomb/internal/license"
 	"github.com/example/sbomb/internal/pathmodel"
+	"github.com/example/sbomb/internal/policy"
 	"github.com/example/sbomb/internal/sbomwriter"
 	"github.com/google/uuid"
 )
@@ -34,6 +35,9 @@ type Result struct {
 	// BOM is the CycloneDX rendering of Document, kept for callers that need
 	// the serialized form directly.
 	BOM cyclonedx.BOM
+	// Adapters names the evidence sources that contributed, for the review
+	// report (section 34 point 1).
+	Adapters []string
 }
 
 // Run assembles the currently available build evidence into one deterministic
@@ -50,6 +54,10 @@ type Options struct {
 	// RedactUnanchoredPaths replaces the identity of files that match no
 	// anchor with a digest, per specification section 7.5.
 	RedactUnanchoredPaths bool
+	// Policy carries the scope options of section 33.1. They are discovery
+	// settings, not verdicts: section 33.3 applies them before output and
+	// requires each removal to be reported.
+	Policy policy.Config
 }
 
 type Logger struct {
@@ -88,6 +96,9 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	}
 	if options.PathFlavor == nil {
 		options.PathFlavor = pathmodel.DefaultFlavor()
+	}
+	if options.Policy.Profile == "" {
+		options.Policy = policy.DefaultConfig()
 	}
 	logger := NewLogger(options.Verbosity, options.LogWriter)
 	logger.Info("Starting SBOM generation (build-dir: '%s', verbosity: level %d)", buildDir, options.Verbosity)
@@ -204,18 +215,22 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	reachable := usedFiles(graph, artifactIDs)
 	logger.Info("Reachable from a deliverable: %d node(s) [%s]", len(reachable), describeCounts(reachable))
 	findings = append(findings, unresolvedObjects(graph, reachable, anchorResult)...)
+	findings = append(findings, evidenceQualityFindings(graph, reachable, anchorResult, options.Policy)...)
 
 	// 7. Inventory: scope filter, representation rules, hashing.
 	excludedByScope := map[anchors.Scope]int{}
 	used := make([]domain.UsedFile, 0, len(reachable))
 	for _, node := range reachable {
 		scope := scopeOfNode(node, anchorResult)
-		if !anchors.IncludedByDefault(scope) {
+		if !includedByPolicy(scope, node, options.Policy) {
 			excludedByScope[scope]++
 			logger.Debug("Excluded %s file '%s'", scope, node.ID)
 			continue
 		}
 		represent, reason := representInSBOM(graph, node)
+		if options.Policy.IncludeTransientBuildArtifacts {
+			represent, reason = true, "includeTransientBuildArtifacts"
+		}
 		if !represent {
 			logger.Debug("Transient build artifact '%s' is evidence only", node.ID)
 			continue
@@ -234,6 +249,17 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	used = inventory.MergeUsedFiles(used)
 	used, hashFindings := hashUsedFiles(used, b.physical, logger)
 	findings = append(findings, hashFindings...)
+
+	// Staleness: the hashes describe the files as they are now, which is only
+	// meaningful when the build is not out of date (section 27).
+	artifactPaths := make([]string, 0, len(deliverables))
+	for _, deliverable := range deliverables {
+		artifactPaths = append(artifactPaths, deliverable.Path)
+	}
+	if staleFindings, staleErr := inventory.DetectStaleness(used, artifactPaths, "",
+		func(id domain.FileID) string { return b.physical[id.Canonical()] }); staleErr == nil {
+		findings = append(findings, staleFindings...)
+	}
 
 	for _, scope := range []anchors.Scope{anchors.ScopeToolchain, anchors.ScopeSystem} {
 		if count := excludedByScope[scope]; count > 0 {
@@ -304,7 +330,19 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	}
 
 	logger.Info("CycloneDX 1.6 BOM constructed: %d component(s) in %d group(s)", len(bom.Components), len(document.Components))
-	return Result{Graph: graph, Findings: findings, Document: document, BOM: bom}, nil
+	adapters := map[string]bool{}
+	for _, edge := range graph.Edges() {
+		if edge.Adapter != "" {
+			adapters[edge.Adapter] = true
+		}
+	}
+	adapterNames := make([]string, 0, len(adapters))
+	for name := range adapters {
+		adapterNames = append(adapterNames, name)
+	}
+	sort.Strings(adapterNames)
+
+	return Result{Graph: graph, Findings: findings, Document: document, BOM: bom, Adapters: adapterNames}, nil
 }
 
 // addProperty appends a value to a multi-valued property map.
