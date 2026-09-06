@@ -263,3 +263,43 @@ pins the commit anyway. And no component carries a CycloneDX hash, because a Go
 module has no artifact to hash on its own; the `go.sum` entry covers a file
 tree, not a file, so it is recorded as `sbomb:go:moduleSum` and
 `MISSING_COMPONENT_HASH` is reported rather than suppressed.
+
+## D17 — Three fixture projects are not byte-reproducible
+
+Section 27 asks for determinism from sbomb. Nothing asks it of the fixture
+corpus, but a corpus that changes on every regeneration makes a real corpus
+change impossible to review: two runs of `tools/fixtures/regen.sh` over
+unchanged sources rewrote around 150 files.
+
+Most of that was ours and is fixed. The CMake File API index carries the
+configure wall clock in its filename, so it is now pinned to the fixture date,
+keeping the shape the adapter globs for. `.ninja_deps` records each output's
+modification time, so `tools/fixtures/depsnorm` zeroes that field -- nothing
+sbomb reads uses it; the parser decodes it and no caller looks. Ninja logs
+dependencies in the order edges finish, so the builds run serially. The GNU PE
+linker stamps a link time into every `.exe`, so the mingw toolchain file passes
+`--no-insert-timestamp`. GCC draws a random seed per invocation and embeds it
+in LTO sections, so `p09-lto` pins `-frandom-seed`.
+
+Three projects remain, and in each the toolchain is what is not reproducible:
+
+* **p03-dupnames.** CMake writes a target's dependency list in an unstable
+  order, so `mod_a` and `mod_b` swap places in the File API reply. The reply is
+  content-addressed, so its filename moves with its content, and the codemodel
+  and index that name it move too. Sorting the array at harvest time would be
+  post-hoc rewriting of the evidence and would break the content-addressed name.
+* **p09-lto.** The linker map names GCC's temporary LTO objects,
+  `/tmp/ccXXXXXX.ltrans0.ltrans.o`, drawn per invocation. That is what the
+  fixture is for: section 17.3 downgrades attribution under LTO precisely
+  because the map names temporaries rather than sources. The object files are
+  stable now; only the map moves.
+* **p11-conan.** Conan gives the cache folder of a locally built package a
+  random suffix, and every generated file naming that folder moves with it.
+  The cache is wiped per run so the corpus does not depend on host state;
+  keeping it would trade this for a worse kind of unreproducibility. A
+  deterministic layout via `conan install --deployer=full_deploy` would change
+  what the fixture demonstrates and is not worth it for one project.
+
+`tools/fixtures/check-reproducible.sh` regenerates twice and fails on any
+difference outside those three, which are named in it rather than matched by
+pattern, so a fourth cannot join them quietly.

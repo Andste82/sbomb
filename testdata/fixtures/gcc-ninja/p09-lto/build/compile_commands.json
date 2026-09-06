@@ -1,13 +1,13 @@
 [
 {
   "directory": "/__fixture_build__",
-  "command": "/usr/bin/cc -g -flto -o CMakeFiles/ltoapp.dir/main.c.o -c /__fixture_src__/main.c",
+  "command": "/usr/bin/cc -g -flto -frandom-seed=p09-lto -o CMakeFiles/ltoapp.dir/main.c.o -c /__fixture_src__/main.c",
   "file": "/__fixture_src__/main.c",
   "output": "CMakeFiles/ltoapp.dir/main.c.o"
 },
 {
   "directory": "/__fixture_build__",
-  "command": "/usr/bin/cc -g -flto -o CMakeFiles/ltoapp.dir/helper.c.o -c /__fixture_src__/helper.c",
+  "command": "/usr/bin/cc -g -flto -frandom-seed=p09-lto -o CMakeFiles/ltoapp.dir/helper.c.o -c /__fixture_src__/helper.c",
   "file": "/__fixture_src__/helper.c",
   "output": "CMakeFiles/ltoapp.dir/helper.c.o"
 }

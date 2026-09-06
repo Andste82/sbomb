@@ -8,3 +8,9 @@ set(CMAKE_FIND_ROOT_PATH /usr/x86_64-w64-mingw32)
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+
+# A PE header carries a link timestamp, which is wall clock, so an unchanged
+# fixture produced a different .exe on every regeneration. --no-insert-timestamp
+# is the standard reproducible-build flag for the GNU PE linker; it changes a
+# build input rather than rewriting harvested evidence afterwards.
+set(CMAKE_EXE_LINKER_FLAGS_INIT "-Wl,--no-insert-timestamp")

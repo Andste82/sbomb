@@ -1,13 +1,13 @@
 [
 {
   "directory": "/__fixture_build__",
-  "command": "/usr/bin/arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -ffreestanding -g -flto -o CMakeFiles/ltoapp.dir/main.c.obj -c /__fixture_src__/main.c",
+  "command": "/usr/bin/arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -ffreestanding -g -flto -frandom-seed=p09-lto -o CMakeFiles/ltoapp.dir/main.c.obj -c /__fixture_src__/main.c",
   "file": "/__fixture_src__/main.c",
   "output": "CMakeFiles/ltoapp.dir/main.c.obj"
 },
 {
   "directory": "/__fixture_build__",
-  "command": "/usr/bin/arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -ffreestanding -g -flto -o CMakeFiles/ltoapp.dir/helper.c.obj -c /__fixture_src__/helper.c",
+  "command": "/usr/bin/arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -ffreestanding -g -flto -frandom-seed=p09-lto -o CMakeFiles/ltoapp.dir/helper.c.obj -c /__fixture_src__/helper.c",
   "file": "/__fixture_src__/helper.c",
   "output": "CMakeFiles/ltoapp.dir/helper.c.obj"
 }

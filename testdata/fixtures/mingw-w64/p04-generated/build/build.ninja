@@ -75,7 +75,7 @@ build CMakeFiles/gen.dir/generated_version.c.obj: C_COMPILER__gen_unscanned_Debu
 
 build gen.exe: C_EXECUTABLE_LINKER__gen_Debug CMakeFiles/gen.dir/main.c.obj CMakeFiles/gen.dir/generated_version.c.obj
   FLAGS = -g
-  LINK_FLAGS = -Wl,-Map=/__fixture_build__/gen.exe.map -Wl,--dependency-file=/__fixture_build__/gen.exe.d
+  LINK_FLAGS = -Wl,--no-insert-timestamp    -Wl,-Map=/__fixture_build__/gen.exe.map -Wl,--dependency-file=/__fixture_build__/gen.exe.d
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles/gen.dir
   POST_BUILD = :

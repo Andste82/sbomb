@@ -11,7 +11,7 @@ endif()
 
 ########### VARIABLES #######################################################################
 #############################################################################################
-set(tinycbor_PACKAGE_FOLDER_DEBUG "/__fixture_pkg__/conan/p/b/tinyc71a1c07a8217d/p")
+set(tinycbor_PACKAGE_FOLDER_DEBUG "/__fixture_pkg__/conan/p/b/tinyc9a247e7f41bbd/p")
 set(tinycbor_BUILD_MODULES_PATHS_DEBUG )
 
 

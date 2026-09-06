@@ -9,9 +9,9 @@ Name             Origin             Length             Attributes
 Linker script and memory map
 
 LOAD CMakeFiles/ltoapp.dir/main.c.obj
-LOAD /tmp/ccWEqJyS.ltrans0.ltrans.o
-LOAD /tmp/cc0TTpO6.debug.temp.o
-LOAD /tmp/ccKeasIz.debug.temp.o
+LOAD /tmp/ccgnYM9K.ltrans0.ltrans.o
+LOAD /tmp/cc5ifYzV.debug.temp.o
+LOAD /tmp/ccglwvWU.debug.temp.o
 LOAD CMakeFiles/ltoapp.dir/helper.c.obj
                 [!provide]                        PROVIDE (__executable_start = SEGMENT_START ("text-segment", 0x8000))
                 0x00008000                        . = SEGMENT_START ("text-segment", 0x8000)
@@ -101,7 +101,7 @@ LOAD CMakeFiles/ltoapp.dir/helper.c.obj
  *(.text.hot .text.hot.*)
  *(SORT_BY_NAME(.text.sorted.*))
  *(.text .stub .text.* .gnu.linkonce.t.*)
- .text          0x00008000       0x20 /tmp/ccWEqJyS.ltrans0.ltrans.o
+ .text          0x00008000       0x20 /tmp/ccgnYM9K.ltrans0.ltrans.o
                 0x00008000                main
  *(.gnu.warning)
  *(.glue_7t)
@@ -230,7 +230,7 @@ LOAD CMakeFiles/ltoapp.dir/helper.c.obj
 .data           0x00009020        0x0
                 0x00009020                        __data_start = .
  *(.data .data.* .gnu.linkonce.d.*)
- .data          0x00009020        0x0 /tmp/ccWEqJyS.ltrans0.ltrans.o
+ .data          0x00009020        0x0 /tmp/ccgnYM9K.ltrans0.ltrans.o
 
 .data1
  *(.data1)
@@ -249,7 +249,7 @@ LOAD CMakeFiles/ltoapp.dir/helper.c.obj
 .bss            0x00009020        0x0
  *(.dynbss)
  *(.bss .bss.* .gnu.linkonce.b.*)
- .bss           0x00009020        0x0 /tmp/ccWEqJyS.ltrans0.ltrans.o
+ .bss           0x00009020        0x0 /tmp/ccgnYM9K.ltrans0.ltrans.o
  *(COMMON)
                 0x00009020                        . = ALIGN ((. != 0x0)?0x4:0x1)
                 0x00009020                        _bss_end__ = .
@@ -291,10 +291,10 @@ LOAD CMakeFiles/ltoapp.dir/helper.c.obj
 
 .comment        0x00000000       0x26
  *(.comment)
- .comment       0x00000000       0x26 /tmp/ccWEqJyS.ltrans0.ltrans.o
+ .comment       0x00000000       0x26 /tmp/ccgnYM9K.ltrans0.ltrans.o
                                  0x27 (size before relaxing)
- .comment       0x00000026       0x27 /tmp/cc0TTpO6.debug.temp.o
- .comment       0x00000026       0x27 /tmp/ccKeasIz.debug.temp.o
+ .comment       0x00000026       0x27 /tmp/cc5ifYzV.debug.temp.o
+ .comment       0x00000026       0x27 /tmp/ccglwvWU.debug.temp.o
 
 .gnu.build.attributes
  *(.gnu.build.attributes .gnu.build.attributes.*)
@@ -314,41 +314,41 @@ LOAD CMakeFiles/ltoapp.dir/helper.c.obj
 .debug_aranges  0x00000000       0x20
  *(.debug_aranges)
  .debug_aranges
-                0x00000000       0x20 /tmp/ccWEqJyS.ltrans0.ltrans.o
+                0x00000000       0x20 /tmp/ccgnYM9K.ltrans0.ltrans.o
 
 .debug_pubnames
  *(.debug_pubnames)
 
 .debug_info     0x00000000       0xb5
  *(.debug_info .gnu.linkonce.wi.*)
- .debug_info    0x00000000       0x45 /tmp/ccWEqJyS.ltrans0.ltrans.o
- .debug_info    0x00000045       0x3e /tmp/cc0TTpO6.debug.temp.o
+ .debug_info    0x00000000       0x45 /tmp/ccgnYM9K.ltrans0.ltrans.o
+ .debug_info    0x00000045       0x3e /tmp/cc5ifYzV.debug.temp.o
                 0x00000045                main.c.fc83d734
- .debug_info    0x00000083       0x32 /tmp/ccKeasIz.debug.temp.o
+ .debug_info    0x00000083       0x32 /tmp/ccglwvWU.debug.temp.o
                 0x00000083                helper.c.ba17f55b
 
 .debug_abbrev   0x00000000       0xa3
  *(.debug_abbrev)
- .debug_abbrev  0x00000000       0x32 /tmp/ccWEqJyS.ltrans0.ltrans.o
- .debug_abbrev  0x00000032       0x43 /tmp/cc0TTpO6.debug.temp.o
- .debug_abbrev  0x00000075       0x2e /tmp/ccKeasIz.debug.temp.o
+ .debug_abbrev  0x00000000       0x32 /tmp/ccgnYM9K.ltrans0.ltrans.o
+ .debug_abbrev  0x00000032       0x43 /tmp/cc5ifYzV.debug.temp.o
+ .debug_abbrev  0x00000075       0x2e /tmp/ccglwvWU.debug.temp.o
 
 .debug_line     0x00000000       0xf6
  *(.debug_line .debug_line.* .debug_line_end)
- .debug_line    0x00000000       0x7d /tmp/ccWEqJyS.ltrans0.ltrans.o
- .debug_line    0x0000007d       0x3f /tmp/cc0TTpO6.debug.temp.o
- .debug_line    0x000000bc       0x3a /tmp/ccKeasIz.debug.temp.o
+ .debug_line    0x00000000       0x7d /tmp/ccgnYM9K.ltrans0.ltrans.o
+ .debug_line    0x0000007d       0x3f /tmp/cc5ifYzV.debug.temp.o
+ .debug_line    0x000000bc       0x3a /tmp/ccglwvWU.debug.temp.o
 
 .debug_frame    0x00000000       0x4c
  *(.debug_frame)
- .debug_frame   0x00000000       0x4c /tmp/ccWEqJyS.ltrans0.ltrans.o
+ .debug_frame   0x00000000       0x4c /tmp/ccgnYM9K.ltrans0.ltrans.o
 
-.debug_str      0x00000000      0x178
+.debug_str      0x00000000      0x18e
  *(.debug_str)
- .debug_str     0x00000000      0x178 /tmp/ccWEqJyS.ltrans0.ltrans.o
+ .debug_str     0x00000000      0x18e /tmp/ccgnYM9K.ltrans0.ltrans.o
                                  0xcb (size before relaxing)
- .debug_str     0x00000178       0xa6 /tmp/cc0TTpO6.debug.temp.o
- .debug_str     0x00000178       0xa3 /tmp/ccKeasIz.debug.temp.o
+ .debug_str     0x0000018e       0xbc /tmp/cc5ifYzV.debug.temp.o
+ .debug_str     0x0000018e       0xb9 /tmp/ccglwvWU.debug.temp.o
 
 .debug_loc
  *(.debug_loc)
@@ -381,10 +381,10 @@ LOAD CMakeFiles/ltoapp.dir/helper.c.obj
                 0x00000000       0x5f
  *(.debug_line_str)
  .debug_line_str
-                0x00000000       0x5f /tmp/cc0TTpO6.debug.temp.o
+                0x00000000       0x5f /tmp/cc5ifYzV.debug.temp.o
                                  0x4c (size before relaxing)
  .debug_line_str
-                0x0000005f       0x47 /tmp/ccKeasIz.debug.temp.o
+                0x0000005f       0x47 /tmp/ccglwvWU.debug.temp.o
 
 .debug_loclists
  *(.debug_loclists)
@@ -408,7 +408,7 @@ LOAD CMakeFiles/ltoapp.dir/helper.c.obj
                 0x00000000       0x2c
  *(.ARM.attributes)
  .ARM.attributes
-                0x00000000       0x2c /tmp/ccWEqJyS.ltrans0.ltrans.o
+                0x00000000       0x2c /tmp/ccgnYM9K.ltrans0.ltrans.o
  *(.gnu.attributes)
 
 .note.gnu.arm.ident

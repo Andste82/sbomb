@@ -1,13 +1,13 @@
 [
 {
   "directory": "/__fixture_build__",
-  "command": "/usr/bin/x86_64-w64-mingw32-gcc -g -flto -o CMakeFiles/ltoapp.dir/main.c.obj -c /__fixture_src__/main.c",
+  "command": "/usr/bin/x86_64-w64-mingw32-gcc -g -flto -frandom-seed=p09-lto -o CMakeFiles/ltoapp.dir/main.c.obj -c /__fixture_src__/main.c",
   "file": "/__fixture_src__/main.c",
   "output": "CMakeFiles/ltoapp.dir/main.c.obj"
 },
 {
   "directory": "/__fixture_build__",
-  "command": "/usr/bin/x86_64-w64-mingw32-gcc -g -flto -o CMakeFiles/ltoapp.dir/helper.c.obj -c /__fixture_src__/helper.c",
+  "command": "/usr/bin/x86_64-w64-mingw32-gcc -g -flto -frandom-seed=p09-lto -o CMakeFiles/ltoapp.dir/helper.c.obj -c /__fixture_src__/helper.c",
   "file": "/__fixture_src__/helper.c",
   "output": "CMakeFiles/ltoapp.dir/helper.c.obj"
 }

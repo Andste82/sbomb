@@ -51,7 +51,7 @@ build cmake_object_order_depends_target_ltoapp: phony || CMakeFiles/ltoapp.dir
 
 build CMakeFiles/ltoapp.dir/main.c.obj: C_COMPILER__ltoapp_unscanned_Debug /__fixture_src__/main.c || cmake_object_order_depends_target_ltoapp
   DEP_FILE = CMakeFiles/ltoapp.dir/main.c.obj.d
-  FLAGS = -g -flto
+  FLAGS = -g -flto -frandom-seed=p09-lto
   OBJECT_DIR = CMakeFiles/ltoapp.dir
   OBJECT_FILE_DIR = CMakeFiles/ltoapp.dir
   TARGET_COMPILE_PDB = CMakeFiles/ltoapp.dir/
@@ -59,7 +59,7 @@ build CMakeFiles/ltoapp.dir/main.c.obj: C_COMPILER__ltoapp_unscanned_Debug /__fi
 
 build CMakeFiles/ltoapp.dir/helper.c.obj: C_COMPILER__ltoapp_unscanned_Debug /__fixture_src__/helper.c || cmake_object_order_depends_target_ltoapp
   DEP_FILE = CMakeFiles/ltoapp.dir/helper.c.obj.d
-  FLAGS = -g -flto
+  FLAGS = -g -flto -frandom-seed=p09-lto
   OBJECT_DIR = CMakeFiles/ltoapp.dir
   OBJECT_FILE_DIR = CMakeFiles/ltoapp.dir
   TARGET_COMPILE_PDB = CMakeFiles/ltoapp.dir/
@@ -75,7 +75,7 @@ build CMakeFiles/ltoapp.dir/helper.c.obj: C_COMPILER__ltoapp_unscanned_Debug /__
 
 build ltoapp.exe: C_EXECUTABLE_LINKER__ltoapp_Debug CMakeFiles/ltoapp.dir/main.c.obj CMakeFiles/ltoapp.dir/helper.c.obj
   FLAGS = -g
-  LINK_FLAGS = -Wl,-Map=/__fixture_build__/ltoapp.exe.map -Wl,--dependency-file=/__fixture_build__/ltoapp.exe.d -flto
+  LINK_FLAGS = -Wl,--no-insert-timestamp    -Wl,-Map=/__fixture_build__/ltoapp.exe.map -Wl,--dependency-file=/__fixture_build__/ltoapp.exe.d -flto
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles/ltoapp.dir
   POST_BUILD = :

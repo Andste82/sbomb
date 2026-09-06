@@ -68,7 +68,7 @@ build CMakeFiles/fcapp.dir/main.c.obj: C_COMPILER__fcapp_unscanned_Debug /__fixt
 
 build fcapp.exe: C_EXECUTABLE_LINKER__fcapp_Debug CMakeFiles/fcapp.dir/main.c.obj | _deps/tinylog-build/libtinylog.a || _deps/tinylog-build/libtinylog.a
   FLAGS = -g
-  LINK_FLAGS = -Wl,-Map=/__fixture_build__/fcapp.exe.map -Wl,--dependency-file=/__fixture_build__/fcapp.exe.d
+  LINK_FLAGS = -Wl,--no-insert-timestamp    -Wl,-Map=/__fixture_build__/fcapp.exe.map -Wl,--dependency-file=/__fixture_build__/fcapp.exe.d
   LINK_LIBRARIES = _deps/tinylog-build/libtinylog.a  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles/fcapp.dir
   POST_BUILD = :

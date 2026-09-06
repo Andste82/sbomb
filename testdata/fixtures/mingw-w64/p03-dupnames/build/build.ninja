@@ -135,7 +135,7 @@ build CMakeFiles/dup.dir/main.c.obj: C_COMPILER__dup_unscanned_Debug /__fixture_
 
 build dup.exe: C_EXECUTABLE_LINKER__dup_Debug CMakeFiles/dup.dir/main.c.obj | libmod_a.a libmod_b.a || libmod_a.a libmod_b.a
   FLAGS = -g
-  LINK_FLAGS = -Wl,-Map=/__fixture_build__/dup.exe.map -Wl,--dependency-file=/__fixture_build__/dup.exe.d
+  LINK_FLAGS = -Wl,--no-insert-timestamp    -Wl,-Map=/__fixture_build__/dup.exe.map -Wl,--dependency-file=/__fixture_build__/dup.exe.d
   LINK_LIBRARIES = libmod_a.a  libmod_b.a  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles/dup.dir
   POST_BUILD = :

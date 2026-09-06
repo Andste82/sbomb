@@ -9,8 +9,13 @@
 # portable paths natively, with no post-hoc text rewriting.
 #
 # Usage:
-#   tools/fixtures/regen.sh            regenerate the corpus
-#   tools/fixtures/regen.sh --check    verify the committed corpus is complete
+#   tools/fixtures/regen.sh                        regenerate the corpus
+#   tools/fixtures/regen.sh --check                verify the corpus is complete
+#   tools/fixtures/regen.sh --only gcc-ninja       one toolchain
+#   tools/fixtures/regen.sh --only gcc-ninja/p01-hello   one pair
+#
+# --only exists because verifying that a regeneration is a no-op means running
+# one, and a full corpus takes minutes while one pair takes seconds.
 set -euo pipefail
 
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
@@ -27,6 +32,16 @@ PKG_ROOT=${SBOMB_FIXTURE_PKG:-/__fixture_pkg__}
 # Fixed so that regenerating an unchanged corpus is a no-op. Bump deliberately
 # when the corpus is rebuilt against a new toolchain.
 FIXTURE_DATE="2026-09-05"
+
+# --only filters, empty when everything is regenerated.
+ONLY_TOOLCHAIN=""
+ONLY_PROJECT=""
+if [[ "${1:-}" == "--only" ]]; then
+  [[ -n "${2:-}" ]] || { printf 'error: --only needs <toolchain>[/<project>]\n' >&2; exit 1; }
+  ONLY_TOOLCHAIN=${2%%/*}
+  [[ "$2" == */* ]] && ONLY_PROJECT=${2#*/}
+  shift 2
+fi
 
 PROJECTS=(p01-hello p02-static p03-dupnames p04-generated p05-headeronly p06-unity p07-pch p08-gcsections p09-lto p10-fetchcontent p11-conan p12-assets)
 
@@ -85,9 +100,15 @@ fi
 # --------------------------------------------------------------------------
 # Preconditions
 # --------------------------------------------------------------------------
-for tool in cmake ninja make; do
+for tool in cmake ninja make go; do
   command -v "$tool" >/dev/null || die "$tool is required to regenerate fixtures"
 done
+
+# Built once rather than "go run" per fixture: the deps log normalizer runs for
+# every Ninja fixture, and there are dozens.
+depsnorm=$(mktemp -t depsnorm.XXXXXX)
+trap 'rm -f "$depsnorm"' EXIT
+(cd "$repo_root" && go build -o "$depsnorm" ./tools/fixtures/depsnorm)
 
 if ! mkdir -p "$SRC_ROOT" "$BUILD_ROOT" 2>/dev/null; then
   die "cannot create sentinel roots $SRC_ROOT and $BUILD_ROOT.
@@ -226,7 +247,11 @@ QUERY
     sed 's/^/    /' "$BUILD_ROOT/configure.log" | tail -8 >&2
     return 1
   fi
-  if ! cmake --build "$BUILD_ROOT" >/dev/null 2>"$BUILD_ROOT/build.log"; then
+  # Serially, because .ninja_deps records dependencies in the order edges
+  # finish. A parallel build reorders them and renumbers the node table, so an
+  # unchanged fixture produced a different log on every regeneration. The
+  # fixtures are small enough that the wall clock cost is a few seconds.
+  if ! cmake --build "$BUILD_ROOT" --parallel 1 >/dev/null 2>"$BUILD_ROOT/build.log"; then
     log "  BUILD FAILED: $toolchain/$project"
     sed 's/^/    /' "$BUILD_ROOT/build.log" | tail -8 >&2
     return 1
@@ -239,9 +264,18 @@ QUERY
 
   # Structured build-system evidence.
   harvest "$BUILD_ROOT/compile_commands.json" "$build_out/compile_commands.json"
-  local reply
+  local reply reply_name
   for reply in "$BUILD_ROOT"/.cmake/api/v1/reply/*.json; do
-    harvest "$reply" "$build_out/.cmake/api/v1/reply/$(basename "$reply")"
+    reply_name=$(basename "$reply")
+    # Every other reply file is content-addressed and therefore stable, but the
+    # index carries the configure wall clock in its name, so an unchanged
+    # corpus churned one file per fixture on every regeneration. The name is
+    # pinned to the fixture date, keeping the shape the adapter globs for and
+    # the lexical-is-temporal ordering it relies on to pick the newest.
+    if [[ "$reply_name" == index-*.json ]]; then
+      reply_name="index-${FIXTURE_DATE}T00-00-00-0000.json"
+    fi
+    harvest "$reply" "$build_out/.cmake/api/v1/reply/$reply_name"
   done
 
   # Generator-specific evidence.
@@ -249,6 +283,10 @@ QUERY
     harvest "$BUILD_ROOT/build.ninja" "$build_out/build.ninja"
     harvest "$BUILD_ROOT/rules.ninja" "$build_out/rules.ninja"
     harvest "$BUILD_ROOT/.ninja_deps" "$build_out/.ninja_deps"
+    # The deps log records each output's modification time, which is wall
+    # clock. Nothing sbomb reads uses it, and leaving it in churned every Ninja
+    # fixture on every regeneration.
+    [[ -f "$build_out/.ninja_deps" ]] && "$depsnorm" "$build_out/.ninja_deps"
   else
     harvest "$BUILD_ROOT/Makefile" "$build_out/Makefile"
     while IFS= read -r found; do
@@ -348,6 +386,9 @@ failures=0
 skipped=()
 for toolchain_spec in "${TOOLCHAINS[@]}"; do
   IFS='|' read -r toolchain generator toolchain_file <<< "$toolchain_spec"
+  if [[ -n "$ONLY_TOOLCHAIN" && "$toolchain" != "$ONLY_TOOLCHAIN" ]]; then
+    continue
+  fi
   if ! toolchain_available "$toolchain"; then
     log "skipping $toolchain (not installed)"
     skipped+=("$toolchain")
@@ -355,6 +396,9 @@ for toolchain_spec in "${TOOLCHAINS[@]}"; do
   fi
   log "$toolchain ($generator)"
   for project in "${PROJECTS[@]}"; do
+    if [[ -n "$ONLY_PROJECT" && "$project" != "$ONLY_PROJECT" ]]; then
+      continue
+    fi
     allowed=${PROJECT_TOOLCHAINS[$project]:-}
     if [[ -n "$allowed" && " $allowed " != *" $toolchain "* ]]; then
       continue

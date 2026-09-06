@@ -67,7 +67,7 @@ build CMakeFiles/imgapp.dir/main.c.obj: C_COMPILER__imgapp_unscanned_Debug /__fi
 
 build imgapp.exe: C_EXECUTABLE_LINKER__imgapp_Debug CMakeFiles/imgapp.dir/main.c.obj
   FLAGS = -g
-  LINK_FLAGS = -Wl,-Map=/__fixture_build__/imgapp.exe.map -Wl,--dependency-file=/__fixture_build__/imgapp.exe.d
+  LINK_FLAGS = -Wl,--no-insert-timestamp    -Wl,-Map=/__fixture_build__/imgapp.exe.map -Wl,--dependency-file=/__fixture_build__/imgapp.exe.d
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles/imgapp.dir
   POST_BUILD = :

@@ -51,7 +51,7 @@ build cmake_object_order_depends_target_ltoapp: phony || CMakeFiles/ltoapp.dir
 
 build CMakeFiles/ltoapp.dir/main.c.obj: C_COMPILER__ltoapp_unscanned_Debug /__fixture_src__/main.c || cmake_object_order_depends_target_ltoapp
   DEP_FILE = CMakeFiles/ltoapp.dir/main.c.obj.d
-  FLAGS = -mcpu=cortex-m4 -mthumb -ffreestanding -g -flto
+  FLAGS = -mcpu=cortex-m4 -mthumb -ffreestanding -g -flto -frandom-seed=p09-lto
   OBJECT_DIR = CMakeFiles/ltoapp.dir
   OBJECT_FILE_DIR = CMakeFiles/ltoapp.dir
   TARGET_COMPILE_PDB = CMakeFiles/ltoapp.dir/
@@ -59,7 +59,7 @@ build CMakeFiles/ltoapp.dir/main.c.obj: C_COMPILER__ltoapp_unscanned_Debug /__fi
 
 build CMakeFiles/ltoapp.dir/helper.c.obj: C_COMPILER__ltoapp_unscanned_Debug /__fixture_src__/helper.c || cmake_object_order_depends_target_ltoapp
   DEP_FILE = CMakeFiles/ltoapp.dir/helper.c.obj.d
-  FLAGS = -mcpu=cortex-m4 -mthumb -ffreestanding -g -flto
+  FLAGS = -mcpu=cortex-m4 -mthumb -ffreestanding -g -flto -frandom-seed=p09-lto
   OBJECT_DIR = CMakeFiles/ltoapp.dir
   OBJECT_FILE_DIR = CMakeFiles/ltoapp.dir
   TARGET_COMPILE_PDB = CMakeFiles/ltoapp.dir/

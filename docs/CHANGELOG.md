@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+### Regenerating the fixture corpus is a no-op again
+
+- Two runs of `tools/fixtures/regen.sh` over unchanged sources rewrote around
+  150 files, which makes a real corpus change impossible to review. Five causes
+  were ours and are fixed: the File API index filename carried the configure
+  wall clock, `.ninja_deps` carried each output's modification time, parallel
+  builds reordered that log, the GNU PE linker stamped a link time into every
+  `.exe`, and GCC drew a fresh random seed for the LTO sections.
+- Three projects still move and the toolchain is why in each case: CMake orders
+  a target's dependency list unstably, the LTO map names GCC's temporary
+  objects, and Conan gives a locally built package a random cache folder.
+  Deviation D17 records what was measured.
+- `tools/fixtures/check-reproducible.sh` regenerates twice and fails on any
+  difference outside those three, which it names rather than pattern-matches.
+- `tools/fixtures/regen.sh --only <toolchain>[/<project>]` regenerates one
+  toolchain or one pair, because verifying that a regeneration is a no-op means
+  running one and a full corpus takes minutes.
+- `--redact-unanchored-paths` is now tested against all three outputs at once.
+  Section 30.7 requires it of the SBOM, the findings JSON and the review report
+  equally; that it held was assumed rather than checked.
+
 ### A release describes itself, from evidence
 
 - `sbomb self <binary>` writes a CycloneDX document for a Go executable from

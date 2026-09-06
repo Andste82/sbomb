@@ -1,6 +1,6 @@
 Archive member included to satisfy reference by file (symbol)
 
-/__fixture_pkg__/conan/p/b/tinyc97c3a3b4c2c9a/p/lib/libtinycbor.a(tinycbor.c.o)
+/__fixture_pkg__/conan/p/b/tinycfa3dd3519e088/p/lib/libtinycbor.a(tinycbor.c.o)
                               CMakeFiles/conanapp.dir/main.c.o (tinycbor_tag)
 
 Merging program properties
@@ -27,9 +27,9 @@ Discarded input sections
  .note.gnu.property
                 0x0000000000000000       0x20 CMakeFiles/conanapp.dir/main.c.o
  .note.GNU-stack
-                0x0000000000000000        0x0 /__fixture_pkg__/conan/p/b/tinyc97c3a3b4c2c9a/p/lib/libtinycbor.a(tinycbor.c.o)
+                0x0000000000000000        0x0 /__fixture_pkg__/conan/p/b/tinycfa3dd3519e088/p/lib/libtinycbor.a(tinycbor.c.o)
  .note.gnu.property
-                0x0000000000000000       0x20 /__fixture_pkg__/conan/p/b/tinyc97c3a3b4c2c9a/p/lib/libtinycbor.a(tinycbor.c.o)
+                0x0000000000000000       0x20 /__fixture_pkg__/conan/p/b/tinycfa3dd3519e088/p/lib/libtinycbor.a(tinycbor.c.o)
  .note.GNU-stack
                 0x0000000000000000        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o
  .note.gnu.property
@@ -50,7 +50,7 @@ LOAD /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
 LOAD /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o
 LOAD /usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o
 LOAD CMakeFiles/conanapp.dir/main.c.o
-LOAD /__fixture_pkg__/conan/p/b/tinyc97c3a3b4c2c9a/p/lib/libtinycbor.a
+LOAD /__fixture_pkg__/conan/p/b/tinycfa3dd3519e088/p/lib/libtinycbor.a
 LOAD /usr/lib/gcc/x86_64-linux-gnu/13/libgcc.a
 LOAD /usr/lib/gcc/x86_64-linux-gnu/13/libgcc_s.so
 START GROUP
@@ -192,7 +192,7 @@ LOAD /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
  .text          0x0000000000001070       0xb9 /usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o
  .text          0x0000000000001129       0x12 CMakeFiles/conanapp.dir/main.c.o
                 0x0000000000001129                main
- .text          0x000000000000113b        0xf /__fixture_pkg__/conan/p/b/tinyc97c3a3b4c2c9a/p/lib/libtinycbor.a(tinycbor.c.o)
+ .text          0x000000000000113b        0xf /__fixture_pkg__/conan/p/b/tinycfa3dd3519e088/p/lib/libtinycbor.a(tinycbor.c.o)
                 0x000000000000113b                tinycbor_tag
  .text          0x000000000000114a        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o
  .text          0x000000000000114a        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
@@ -235,7 +235,7 @@ LOAD /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
  .eh_frame      0x00000000000020a8        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
  .eh_frame      0x00000000000020a8       0x20 CMakeFiles/conanapp.dir/main.c.o
                                          0x38 (size before relaxing)
- .eh_frame      0x00000000000020c8       0x20 /__fixture_pkg__/conan/p/b/tinyc97c3a3b4c2c9a/p/lib/libtinycbor.a(tinycbor.c.o)
+ .eh_frame      0x00000000000020c8       0x20 /__fixture_pkg__/conan/p/b/tinycfa3dd3519e088/p/lib/libtinycbor.a(tinycbor.c.o)
                                          0x38 (size before relaxing)
  .eh_frame      0x00000000000020e8        0x4 /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o
  *(.eh_frame.*)
@@ -349,7 +349,7 @@ LOAD /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
                 0x0000000000004008        0x8 /usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o
                 0x0000000000004008                __dso_handle
  .data          0x0000000000004010        0x0 CMakeFiles/conanapp.dir/main.c.o
- .data          0x0000000000004010        0x0 /__fixture_pkg__/conan/p/b/tinyc97c3a3b4c2c9a/p/lib/libtinycbor.a(tinycbor.c.o)
+ .data          0x0000000000004010        0x0 /__fixture_pkg__/conan/p/b/tinycfa3dd3519e088/p/lib/libtinycbor.a(tinycbor.c.o)
  .data          0x0000000000004010        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o
  .data          0x0000000000004010        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
 
@@ -375,7 +375,7 @@ LOAD /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
  .bss           0x0000000000004010        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o
  .bss           0x0000000000004010        0x1 /usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o
  .bss           0x0000000000004011        0x0 CMakeFiles/conanapp.dir/main.c.o
- .bss           0x0000000000004011        0x0 /__fixture_pkg__/conan/p/b/tinyc97c3a3b4c2c9a/p/lib/libtinycbor.a(tinycbor.c.o)
+ .bss           0x0000000000004011        0x0 /__fixture_pkg__/conan/p/b/tinycfa3dd3519e088/p/lib/libtinycbor.a(tinycbor.c.o)
  .bss           0x0000000000004011        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o
  .bss           0x0000000000004011        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
  *(COMMON)
@@ -423,7 +423,7 @@ LOAD /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
  .comment       0x0000000000000000       0x2d /usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o
                                          0x2e (size before relaxing)
  .comment       0x000000000000002d       0x2e CMakeFiles/conanapp.dir/main.c.o
- .comment       0x000000000000002d       0x2e /__fixture_pkg__/conan/p/b/tinyc97c3a3b4c2c9a/p/lib/libtinycbor.a(tinycbor.c.o)
+ .comment       0x000000000000002d       0x2e /__fixture_pkg__/conan/p/b/tinycfa3dd3519e088/p/lib/libtinycbor.a(tinycbor.c.o)
  .comment       0x000000000000002d       0x2e /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o
 
 .gnu.build.attributes
@@ -446,7 +446,7 @@ LOAD /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
  .debug_aranges
                 0x0000000000000000       0x30 CMakeFiles/conanapp.dir/main.c.o
  .debug_aranges
-                0x0000000000000030       0x30 /__fixture_pkg__/conan/p/b/tinyc97c3a3b4c2c9a/p/lib/libtinycbor.a(tinycbor.c.o)
+                0x0000000000000030       0x30 /__fixture_pkg__/conan/p/b/tinycfa3dd3519e088/p/lib/libtinycbor.a(tinycbor.c.o)
 
 .debug_pubnames
  *(.debug_pubnames)
@@ -454,17 +454,17 @@ LOAD /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
 .debug_info     0x0000000000000000       0xb4
  *(.debug_info .gnu.linkonce.wi.*)
  .debug_info    0x0000000000000000       0x60 CMakeFiles/conanapp.dir/main.c.o
- .debug_info    0x0000000000000060       0x54 /__fixture_pkg__/conan/p/b/tinyc97c3a3b4c2c9a/p/lib/libtinycbor.a(tinycbor.c.o)
+ .debug_info    0x0000000000000060       0x54 /__fixture_pkg__/conan/p/b/tinycfa3dd3519e088/p/lib/libtinycbor.a(tinycbor.c.o)
 
 .debug_abbrev   0x0000000000000000       0x89
  *(.debug_abbrev)
  .debug_abbrev  0x0000000000000000       0x4f CMakeFiles/conanapp.dir/main.c.o
- .debug_abbrev  0x000000000000004f       0x3a /__fixture_pkg__/conan/p/b/tinyc97c3a3b4c2c9a/p/lib/libtinycbor.a(tinycbor.c.o)
+ .debug_abbrev  0x000000000000004f       0x3a /__fixture_pkg__/conan/p/b/tinycfa3dd3519e088/p/lib/libtinycbor.a(tinycbor.c.o)
 
 .debug_line     0x0000000000000000       0xb6
  *(.debug_line .debug_line.* .debug_line_end)
  .debug_line    0x0000000000000000       0x63 CMakeFiles/conanapp.dir/main.c.o
- .debug_line    0x0000000000000063       0x53 /__fixture_pkg__/conan/p/b/tinyc97c3a3b4c2c9a/p/lib/libtinycbor.a(tinycbor.c.o)
+ .debug_line    0x0000000000000063       0x53 /__fixture_pkg__/conan/p/b/tinycfa3dd3519e088/p/lib/libtinycbor.a(tinycbor.c.o)
 
 .debug_frame
  *(.debug_frame)
@@ -473,7 +473,7 @@ LOAD /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
  *(.debug_str)
  .debug_str     0x0000000000000000      0x133 CMakeFiles/conanapp.dir/main.c.o
                                          0xa0 (size before relaxing)
- .debug_str     0x0000000000000133       0xa0 /__fixture_pkg__/conan/p/b/tinyc97c3a3b4c2c9a/p/lib/libtinycbor.a(tinycbor.c.o)
+ .debug_str     0x0000000000000133       0xa0 /__fixture_pkg__/conan/p/b/tinycfa3dd3519e088/p/lib/libtinycbor.a(tinycbor.c.o)
 
 .debug_loc
  *(.debug_loc)
@@ -509,7 +509,7 @@ LOAD /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
                 0x0000000000000000      0x126 CMakeFiles/conanapp.dir/main.c.o
                                          0xa0 (size before relaxing)
  .debug_line_str
-                0x0000000000000126       0xf9 /__fixture_pkg__/conan/p/b/tinyc97c3a3b4c2c9a/p/lib/libtinycbor.a(tinycbor.c.o)
+                0x0000000000000126       0xf9 /__fixture_pkg__/conan/p/b/tinycfa3dd3519e088/p/lib/libtinycbor.a(tinycbor.c.o)
 
 .debug_loclists
  *(.debug_loclists)

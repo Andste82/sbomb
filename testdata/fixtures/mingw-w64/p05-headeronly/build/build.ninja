@@ -68,7 +68,7 @@ build CMakeFiles/hdr.dir/main.c.obj: C_COMPILER__hdr_unscanned_Debug /__fixture_
 
 build hdr.exe: C_EXECUTABLE_LINKER__hdr_Debug CMakeFiles/hdr.dir/main.c.obj
   FLAGS = -g
-  LINK_FLAGS = -Wl,-Map=/__fixture_build__/hdr.exe.map -Wl,--dependency-file=/__fixture_build__/hdr.exe.d
+  LINK_FLAGS = -Wl,--no-insert-timestamp    -Wl,-Map=/__fixture_build__/hdr.exe.map -Wl,--dependency-file=/__fixture_build__/hdr.exe.d
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles/hdr.dir
   POST_BUILD = :

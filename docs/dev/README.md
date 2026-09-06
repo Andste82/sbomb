@@ -22,6 +22,15 @@ scripts/determinism-check.sh            # two runs produce the same bytes
 go run ./tools/findingsdoc --check      # the findings catalogue matches the code
 ```
 
+Two checks are not in the gate because they need every fixture toolchain
+installed, which CI does not have. Run them when the corpus or the release
+path changes:
+
+```
+tools/fixtures/check-reproducible.sh    # two regenerations agree
+scripts/release.sh build                # the release artifacts and their SBOMs
+```
+
 ## What is here
 
 | Document | Contents |
