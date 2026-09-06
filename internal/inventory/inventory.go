@@ -5,8 +5,10 @@ import (
 	"encoding/hex"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/example/sbomb/internal/domain"
@@ -43,6 +45,13 @@ const HashAlgorithmSHA256 = "SHA-256"
 type HashOptions struct {
 	Anchors              []string
 	AllowUnanchoredReads bool
+	// Resolve maps a file identity to where its bytes can be read. A canonical
+	// identity such as "project:main.c" is not a filesystem path, so without
+	// this nothing can be hashed.
+	Resolve func(domain.FileID) string
+	// Jobs bounds the worker pool. Section 23 requires hashing to be
+	// parallelized and its results to be order-independent.
+	Jobs int
 }
 
 // MergeUsedFiles collapses duplicate file evidence records into a single inhabited record.
@@ -121,56 +130,77 @@ func HashUsedFiles(files []domain.UsedFile) []domain.UsedFile {
 }
 
 func HashUsedFilesWithOptions(files []domain.UsedFile, options HashOptions) []domain.UsedFile {
-	out := make([]domain.UsedFile, len(files))
-	for i, f := range files {
-		clone := f
-		if clone.Properties == nil {
-			clone.Properties = map[string][]string{}
-		}
-		if clone.Hashes == nil {
-			clone.Hashes = map[string]string{}
-		}
-		path := canonicalFilePath(clone.ID)
-		if path == "" {
-			clone.Missing = true
-			clone.Hashes = nil
-			clone.Properties["finding"] = appendUnique(clone.Properties["finding"], "MISSING_FILE_HASH")
-			out[i] = clone
-			continue
-		}
-		st, err := os.Stat(path)
-		if err != nil || !st.Mode().IsRegular() {
-			clone.Missing = true
-			clone.Hashes = nil
-			clone.Properties["finding"] = appendUnique(clone.Properties["finding"], "MISSING_FILE_HASH")
-			out[i] = clone
-			continue
-		}
-		resolved, err := filepath.EvalSymlinks(path)
-		isSymlink := err == nil && filepath.Clean(resolved) != filepath.Clean(path)
-		if err != nil || (isSymlink && !options.AllowUnanchoredReads && !withinAnchor(resolved, options.Anchors)) {
-			clone.Missing = true
-			clone.Hashes = nil
-			clone.Properties["finding"] = appendUnique(clone.Properties["finding"], "MISSING_FILE_HASH")
-			out[i] = clone
-			continue
-		}
-		clone.SizeBytes = st.Size()
-		data, err := os.ReadFile(path)
-		if err != nil {
-			clone.Missing = true
-			clone.Hashes = nil
-			clone.Properties["finding"] = appendUnique(clone.Properties["finding"], "MISSING_FILE_HASH")
-			out[i] = clone
-			continue
-		}
-		sum := sha256.Sum256(data)
-		// CycloneDX names the algorithm "SHA-256"; the inventory dump and
-		// the SBOM must agree on one spelling (section 28.6).
-		clone.Hashes[HashAlgorithmSHA256] = hex.EncodeToString(sum[:])
-		out[i] = clone
+	jobs := options.Jobs
+	if jobs <= 0 {
+		jobs = runtime.NumCPU()
 	}
+	if jobs > len(files) {
+		jobs = len(files)
+	}
+	out := make([]domain.UsedFile, len(files))
+	if len(files) == 0 {
+		return out
+	}
+
+	// Results are written to a fixed index, so the output order does not
+	// depend on which worker finished first.
+	indexes := make(chan int)
+	var group sync.WaitGroup
+	for worker := 0; worker < jobs; worker++ {
+		group.Add(1)
+		go func() {
+			defer group.Done()
+			for i := range indexes {
+				out[i] = hashOne(files[i], options)
+			}
+		}()
+	}
+	for i := range files {
+		indexes <- i
+	}
+	close(indexes)
+	group.Wait()
 	return out
+}
+
+func hashOne(file domain.UsedFile, options HashOptions) domain.UsedFile {
+	clone := file
+	clone.Properties = cloneStringMap(file.Properties)
+	if clone.Properties == nil {
+		clone.Properties = map[string][]string{}
+	}
+	clone.Hashes = map[string]string{}
+
+	unreadable := func() domain.UsedFile {
+		clone.Missing = true
+		clone.Hashes = nil
+		clone.Properties["finding"] = appendUnique(clone.Properties["finding"], "MISSING_FILE_HASH")
+		return clone
+	}
+
+	path := canonicalFilePath(clone.ID, options)
+	if path == "" {
+		return unreadable()
+	}
+	info, err := os.Stat(path)
+	if err != nil || !info.Mode().IsRegular() {
+		return unreadable()
+	}
+	resolved, err := filepath.EvalSymlinks(path)
+	isSymlink := err == nil && filepath.Clean(resolved) != filepath.Clean(path)
+	if err != nil || (isSymlink && !options.AllowUnanchoredReads && !withinAnchor(resolved, options.Anchors)) {
+		return unreadable()
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return unreadable()
+	}
+	clone.SizeBytes = info.Size()
+	sum := sha256.Sum256(data)
+	// CycloneDX names the algorithm "SHA-256"; the inventory dump and the
+	// SBOM must agree on one spelling (section 28.6).
+	clone.Hashes[HashAlgorithmSHA256] = hex.EncodeToString(sum[:])
+	return clone
 }
 
 func withinAnchor(path string, anchors []string) bool {
@@ -222,14 +252,16 @@ func BuildInventoryDump(files []domain.UsedFile, components []domain.Component) 
 }
 
 // DetectStaleness checks for timestamp violations where a source or header is newer than the artifact.
-func DetectStaleness(files []domain.UsedFile, artifacts []string, buildID string) ([]domain.Finding, error) {
+// DetectStaleness compares file and artifact timestamps (section 27.3).
+// Resolve maps identities to readable paths, exactly as in HashOptions.
+func DetectStaleness(files []domain.UsedFile, artifacts []string, buildID string, resolve func(domain.FileID) string) ([]domain.Finding, error) {
 	_ = buildID
 	findings := make([]domain.Finding, 0, len(files))
 	for _, f := range files {
 		if f.Class == "" || !isSourceLike(f.Class) {
 			continue
 		}
-		filePath := canonicalFilePath(f.ID)
+		filePath := canonicalFilePath(f.ID, HashOptions{Resolve: resolve})
 		if filePath == "" {
 			continue
 		}
@@ -287,12 +319,17 @@ func classifyFile(path string, generated bool) domain.FileClass {
 	}
 }
 
-func canonicalFilePath(id domain.FileID) string {
+// canonicalFilePath maps a file identity to where its bytes can be read. An
+// identity is not a path -- "project:main.c" names no file -- so the caller
+// supplies the mapping; the fallback exists only for callers that still work
+// with plain paths.
+func canonicalFilePath(id domain.FileID, options HashOptions) string {
+	if options.Resolve != nil {
+		return options.Resolve(id)
+	}
 	if id.RelPath == "" {
 		return ""
 	}
-	// For the in-memory model, RelPath is usually already a real path on disk.
-	// If it is a relative path, resolve against the working directory to make hashing deterministic.
 	if filepath.IsAbs(id.RelPath) {
 		return id.RelPath
 	}

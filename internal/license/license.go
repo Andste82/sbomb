@@ -122,6 +122,12 @@ func sameLicense(a, b string) bool {
 	return strings.EqualFold(normalizeSPDXExpression(a), normalizeSPDXExpression(b))
 }
 
+// NormalizeText applies the normalization of specification section 22.3
+// technique 3: lowercase, whitespace collapsed, copyright lines and
+// punctuation-only lines removed. tools/spdxgen must use exactly this
+// function, or the embedded hashes would never match a real license file.
+func NormalizeText(text string) string { return normalizeLicenseText(text) }
+
 func normalizeLicenseText(text string) string {
 	text = strings.ReplaceAll(text, "\r\n", "\n")
 	text = strings.ReplaceAll(text, "\r", "\n")
@@ -167,9 +173,4 @@ func lookupNormalizedHash(normalized string) (string, bool) {
 	key := hex.EncodeToString(h[:])
 	id, ok := knownLicenseHashes[key]
 	return id, ok
-}
-
-var knownLicenseHashes = map[string]string{
-	"69539425723b87be2bdbc194c23a63b78c57c7a0ea2b261b3845c396bc7bda60": "MIT",
-	"5a91d4f4fe0abcf7bfe0b4fc10c02f4580a3a9898af4c4d8c7d3d8d10a3740f2": "Apache-2.0",
 }

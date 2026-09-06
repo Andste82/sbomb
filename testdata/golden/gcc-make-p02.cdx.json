@@ -2,7 +2,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "version": 1,
-  "serialNumber": "urn:uuid:44ff7432-6d18-5078-98ae-4740f470f8e1",
+  "serialNumber": "urn:uuid:d9cc60d0-c74a-51f1-973a-0e8781971607",
   "metadata": {
     "tools": [
       {
@@ -58,6 +58,13 @@
       "type": "application",
       "name": "project",
       "bom-ref": "component:project",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
       "properties": [
         {
           "name": "sbomb:cdx:archiveProperty",
@@ -72,8 +79,24 @@
           "value": "unstructured"
         },
         {
+          "name": "sbomb:component:detectedBy",
+          "value": "anchor:project"
+        },
+        {
           "name": "sbomb:component:scope",
           "value": "project"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
         }
       ]
     },
@@ -97,14 +120,6 @@
         {
           "name": "sbomb:component:scope",
           "value": "build"
-        },
-        {
-          "name": "sbomb:license:evidence",
-          "value": "unknown"
-        },
-        {
-          "name": "sbomb:license:reason",
-          "value": "no-evidence"
         },
         {
           "name": "sbomb:path:canonical",
@@ -134,14 +149,6 @@
           "value": "project"
         },
         {
-          "name": "sbomb:license:evidence",
-          "value": "unknown"
-        },
-        {
-          "name": "sbomb:license:reason",
-          "value": "no-evidence"
-        },
-        {
           "name": "sbomb:path:canonical",
           "value": "project:crypto.h"
         }
@@ -167,14 +174,6 @@
         {
           "name": "sbomb:component:scope",
           "value": "build"
-        },
-        {
-          "name": "sbomb:license:evidence",
-          "value": "unknown"
-        },
-        {
-          "name": "sbomb:license:reason",
-          "value": "no-evidence"
         },
         {
           "name": "sbomb:path:canonical",

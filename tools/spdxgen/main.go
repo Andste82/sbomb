@@ -1,0 +1,218 @@
+// Command spdxgen generates the embedded table of SPDX license text hashes
+// that specification section 22.3 technique 2 requires.
+//
+// Only hashes are embedded, never the texts: roughly 740 entries at 32 bytes
+// each keeps the single-executable requirement of section 37 unaffected while
+// still allowing an exact match against a real LICENSE file.
+//
+//	go run ./tools/spdxgen              regenerate internal/license/spdxhashes.go
+//	go run ./tools/spdxgen --check      fail if the committed table has drifted
+//
+// The check mode exists because the SPDX list changes: a table that silently
+// falls behind turns into silent NOASSERTION results.
+package main
+
+import (
+	"encoding/json"
+	"flag"
+	"fmt"
+	"net/http"
+	"os"
+	"path/filepath"
+	"sort"
+	"strings"
+	"sync"
+	"time"
+
+	"crypto/sha256"
+	"encoding/hex"
+
+	"github.com/example/sbomb/internal/license"
+)
+
+const defaultSource = "https://raw.githubusercontent.com/spdx/license-list-data/main/json"
+
+type licenseIndex struct {
+	Version  string `json:"licenseListVersion"`
+	Licenses []struct {
+		ID         string `json:"licenseId"`
+		Name       string `json:"name"`
+		Deprecated bool   `json:"isDeprecatedLicenseId"`
+	} `json:"licenses"`
+}
+
+type licenseDetail struct {
+	ID   string `json:"licenseId"`
+	Text string `json:"licenseText"`
+}
+
+func main() {
+	source := flag.String("source", defaultSource, "base URL of the SPDX license list JSON")
+	output := flag.String("output", filepath.Join("internal", "license", "spdxhashes.go"), "generated file")
+	check := flag.Bool("check", false, "verify the committed table instead of writing it")
+	workers := flag.Int("workers", 16, "concurrent downloads")
+	flag.Parse()
+
+	generated, err := generate(*source, *workers)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "spdxgen:", err)
+		os.Exit(1)
+	}
+
+	if *check {
+		committed, err := os.ReadFile(*output)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "spdxgen:", err)
+			os.Exit(1)
+		}
+		if string(committed) != generated {
+			fmt.Fprintf(os.Stderr, "spdxgen: %s is out of date; run: go run ./tools/spdxgen\n", *output)
+			os.Exit(1)
+		}
+		fmt.Println("spdxgen: the embedded license table matches the current SPDX list")
+		return
+	}
+
+	if err := os.WriteFile(*output, []byte(generated), 0o644); err != nil {
+		fmt.Fprintln(os.Stderr, "spdxgen:", err)
+		os.Exit(1)
+	}
+	fmt.Printf("spdxgen: wrote %s\n", *output)
+}
+
+func generate(source string, workers int) (string, error) {
+	client := &http.Client{Timeout: 30 * time.Second}
+
+	var index licenseIndex
+	if err := fetchJSON(client, source+"/licenses.json", &index); err != nil {
+		return "", fmt.Errorf("fetching the license index: %w", err)
+	}
+	if len(index.Licenses) == 0 {
+		return "", fmt.Errorf("the license index is empty")
+	}
+
+	type result struct {
+		id     string
+		digest string
+		err    error
+	}
+	deprecated := map[string]bool{}
+	ids := make([]string, 0, len(index.Licenses))
+	for _, entry := range index.Licenses {
+		ids = append(ids, entry.ID)
+		deprecated[entry.ID] = entry.Deprecated
+	}
+	sort.Strings(ids)
+
+	jobs := make(chan string)
+	results := make(chan result)
+	var group sync.WaitGroup
+	for i := 0; i < workers; i++ {
+		group.Add(1)
+		go func() {
+			defer group.Done()
+			for id := range jobs {
+				var detail licenseDetail
+				if err := fetchJSON(client, source+"/details/"+id+".json", &detail); err != nil {
+					results <- result{id: id, err: err}
+					continue
+				}
+				normalized := license.NormalizeText(detail.Text)
+				if normalized == "" {
+					results <- result{id: id}
+					continue
+				}
+				sum := sha256.Sum256([]byte(normalized))
+				results <- result{id: id, digest: hex.EncodeToString(sum[:])}
+			}
+		}()
+	}
+	go func() {
+		for _, id := range ids {
+			jobs <- id
+		}
+		close(jobs)
+		group.Wait()
+		close(results)
+	}()
+
+	// A digest maps to one identifier. Some licenses normalize identically --
+	// GPL-2.0 and GPL-2.0-only, for instance, differ only in a header this
+	// normalization strips. A current identifier always beats a deprecated
+	// one, because emitting a deprecated SPDX id in a compliance document is
+	// a defect; among equals the lexically first wins, which keeps the table
+	// deterministic.
+	byDigest := map[string]string{}
+	var failures []string
+	for r := range results {
+		switch {
+		case r.err != nil:
+			failures = append(failures, r.id)
+		case r.digest == "":
+			// A license with no text, such as some deprecated entries.
+		default:
+			existing, taken := byDigest[r.digest]
+			if !taken || preferID(r.id, existing, deprecated) {
+				byDigest[r.digest] = r.id
+			}
+		}
+	}
+	if len(failures) > 0 {
+		sort.Strings(failures)
+		return "", fmt.Errorf("could not fetch %d license text(s): %s", len(failures), strings.Join(failures[:min(5, len(failures))], ", "))
+	}
+
+	digests := make([]string, 0, len(byDigest))
+	for digest := range byDigest {
+		digests = append(digests, digest)
+	}
+	sort.Strings(digests)
+
+	var builder strings.Builder
+	fmt.Fprintf(&builder, `// Code generated by tools/spdxgen. DO NOT EDIT.
+//
+// SHA-256 digests of the normalized official SPDX license texts, per
+// specification section 22.3 technique 2. Only the digests are stored; the
+// texts are not embedded.
+//
+// SPDX license list version: %s
+// Licenses in the list: %d
+// Distinct normalized texts: %d
+
+package license
+
+var knownLicenseHashes = map[string]string{
+`, index.Version, len(index.Licenses), len(digests))
+	for _, digest := range digests {
+		fmt.Fprintf(&builder, "\t%q: %q,\n", digest, byDigest[digest])
+	}
+	builder.WriteString("}\n")
+	return builder.String(), nil
+}
+
+// preferID reports whether candidate should replace existing.
+func preferID(candidate, existing string, deprecated map[string]bool) bool {
+	if deprecated[existing] != deprecated[candidate] {
+		return !deprecated[candidate]
+	}
+	return candidate < existing
+}
+
+func fetchJSON(client *http.Client, url string, into any) error {
+	response, err := client.Get(url)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		return fmt.Errorf("%s: %s", url, response.Status)
+	}
+	return json.NewDecoder(response.Body).Decode(into)
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}

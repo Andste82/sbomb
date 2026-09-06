@@ -163,19 +163,22 @@ const (
 	SeverityInfo    Severity = "info"
 )
 
+// Finding is the machine-readable diagnostic of section 26.1. The JSON field
+// names are normative: a consumer greps for "id" and "severity", not for Go
+// field names.
 type Finding struct {
-	ID           string
-	Severity     Severity
-	Subject      Subject
-	Message      string
-	Detail       map[string]any
-	Evidence     []string
-	Remediation  string
-	Waived       bool
-	WaiverReason string
+	ID           string         `json:"id"`
+	Severity     Severity       `json:"severity"`
+	Subject      Subject        `json:"subject"`
+	Message      string         `json:"message"`
+	Detail       map[string]any `json:"detail,omitempty"`
+	Evidence     []string       `json:"evidence,omitempty"`
+	Remediation  string         `json:"remediation,omitempty"`
+	Waived       bool           `json:"waived"`
+	WaiverReason string         `json:"waiverReason,omitempty"`
 }
 
 type Subject struct {
-	Kind string
-	Ref  string
+	Kind string `json:"kind"`
+	Ref  string `json:"ref"`
 }

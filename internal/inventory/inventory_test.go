@@ -114,11 +114,11 @@ func TestHashUsedFilesRejectsSymlinkEscapingAnchors(t *testing.T) {
 		t.Skipf("symlinks unavailable: %v", err)
 	}
 	file := domain.UsedFile{ID: domain.FileID{Anchor: "project", RelPath: link}, Class: domain.FileClassSource}
-	blocked := HashUsedFilesWithOptions([]domain.UsedFile{file}, HashOptions{Anchors: []string{anchor}})[0]
+	blocked := HashUsedFilesWithOptions([]domain.UsedFile{file}, HashOptions{Anchors: []string{anchor}, Resolve: byRelPath})[0]
 	if !blocked.Missing {
 		t.Fatal("escaping symlink was hashed without allow-unanchored-reads")
 	}
-	allowed := HashUsedFilesWithOptions([]domain.UsedFile{file}, HashOptions{AllowUnanchoredReads: true})[0]
+	allowed := HashUsedFilesWithOptions([]domain.UsedFile{file}, HashOptions{AllowUnanchoredReads: true, Resolve: byRelPath})[0]
 	if allowed.Missing || allowed.Hashes[HashAlgorithmSHA256] == "" {
 		t.Fatal("explicitly allowed unanchored symlink was not hashed")
 	}
@@ -179,7 +179,7 @@ func TestStalenessDetectionAndBuildIDSuppression(t *testing.T) {
 	findings, err := DetectStaleness([]domain.UsedFile{{
 		ID:    domain.FileID{Anchor: "project", RelPath: source},
 		Class: domain.FileClassSource,
-	}}, []string{artifact}, "")
+	}}, []string{artifact}, "", byRelPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -199,3 +199,7 @@ func containsFileClass(files []domain.UsedFile, want domain.FileClass) bool {
 	}
 	return false
 }
+
+// byRelPath is the identity-to-path mapping these tests use: they build file
+// identities whose relative path is already a real path on disk.
+func byRelPath(id domain.FileID) string { return id.RelPath }

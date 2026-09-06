@@ -5,19 +5,25 @@ Exit code: 3
   subject: build//__fixture_build__
 - DYNAMIC_DEPENDENCIES_IGNORED [info]: 2 system file(s) were excluded by the default inclusion policy
   subject: build//__fixture_build__
+- MISSING_COMPONENT_HASH [warning]: no file of this component could be hashed
+  subject: component/component:p02-static
 - MISSING_FILE_HASH [warning]: the file is not readable, so no hash could be computed
   subject: file/project:crypto.c
 - MISSING_FILE_HASH [warning]: the file is not readable, so no hash could be computed
   subject: file/project:crypto.h
 - MISSING_FILE_HASH [warning]: the file is not readable, so no hash could be computed
   subject: file/project:main.c
+- MISSING_SUPPLIER [warning]: the component has no supplier, which BSI TR-03183-2 requires
+  subject: component/component:p02-static
 - REPRODUCIBLE_MODE_OMITS_TIMESTAMP [info]: the document omits metadata.timestamp and is therefore not a CRA deliverable SBOM
   subject: run//__fixture_build__
 - UNANCHORED_FILE [warning]: the file lies under no registered anchor and was identified by absolute path
   subject: file/abs:lib/x86_64-linux-gnu/libc.so.6
 - UNANCHORED_FILE [warning]: the file lies under no registered anchor and was identified by absolute path
-  subject: file/abs:lib/x86_64-linux-gnu/libc.so.6
-- UNANCHORED_FILE [warning]: the file lies under no registered anchor and was identified by absolute path
   subject: file/abs:lib64/ld-linux-x86-64.so.2
-- UNANCHORED_FILE [warning]: the file lies under no registered anchor and was identified by absolute path
-  subject: file/abs:lib64/ld-linux-x86-64.so.2
+- UNKNOWN_LICENSE [warning]: no license evidence was found for this component
+  subject: component/component:p02-static
+- UNKNOWN_PURL [info]: no package type could be asserted, so no purl is emitted
+  subject: component/component:p02-static
+- UNKNOWN_VERSION [warning]: no authorized source supplied a version
+  subject: component/component:p02-static

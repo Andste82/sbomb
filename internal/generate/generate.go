@@ -224,6 +224,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 			logger.Debug("Keeping '%s' as a component: %s", node.ID, reason)
 		}
 		canonical := string(node.ID)
+		logger.Trace("Used file: %s (%s, scope %s)", canonical, node.Kind, scope)
 		used = append(used, domain.UsedFile{
 			ID:         domain.FileID{Anchor: anchorOf(canonical), RelPath: relOf(canonical)},
 			Class:      fileClassOf(node),
@@ -276,17 +277,12 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		})
 	}
 
-	for index := range used {
-		canonical := used[index].ID.Canonical()
-		if licenses := fileLicenses(b.physical[canonical], logger); len(licenses) > 0 {
-			used[index].Properties = addProperty(used[index].Properties, "sbomb:license:evidence", licenses[0].Evidence)
-			if licenses[0].Reason != "" {
-				used[index].Properties = addProperty(used[index].Properties, "sbomb:license:reason", licenses[0].Reason)
-			}
-		}
+	anchorRoots := map[string]string{}
+	for _, anchor := range anchorResult.Registry.Anchors() {
+		anchorRoots[anchor.Key] = anchor.Root
 	}
-
-	document := buildDocument(cfg, deliverables, used, findings, run)
+	resolver := newComponentResolver(cfg, b.physical, anchorRoots, logger)
+	document, findings := buildDocument(cfg, resolver, deliverables, used, findings, run)
 	writer, err := sbomwriter.Get("cyclonedx-json", "1.6")
 	if err != nil {
 		return Result{Graph: graph, Findings: findings}, err

@@ -19,32 +19,38 @@ const productID = "product"
 // them (sections 19 and 28.5).
 func buildDocument(
 	cfg config.Config,
+	resolver *componentResolver,
 	deliverables []Deliverable,
 	files []domain.UsedFile,
 	findings []domain.Finding,
 	run sbomwriter.RunMetadata,
-) *sbomwriter.Document {
+) (*sbomwriter.Document, []domain.Finding) {
 	document := &sbomwriter.Document{
-		Product:  productComponent(cfg, deliverables),
-		Files:    files,
-		Findings: findings,
-		Run:      run,
+		Product: productComponent(cfg, deliverables),
+		Files:   files,
+		Run:     run,
 	}
 
-	groups := groupFilesByComponent(cfg, files)
+	groups, componentFindings := groupFilesByComponent(resolver, files)
+	findings = append(findings, componentFindings...)
+	document.Findings = findings
 	relations := make([]sbomwriter.Relation, 0, len(groups)+1)
 	productTargets := make([]string, 0, len(groups))
 
 	for _, group := range groups {
 		document.Components = append(document.Components, group.component)
 		productTargets = append(productTargets, group.component.ID)
-		relations = append(relations, sbomwriter.Relation{From: group.component.ID, To: group.files})
+		fileRefs := make([]string, 0, len(group.files))
+		for _, file := range group.files {
+			fileRefs = append(fileRefs, file.ID.Canonical())
+		}
+		relations = append(relations, sbomwriter.Relation{From: group.component.ID, To: fileRefs})
 	}
 	sort.Strings(productTargets)
 	relations = append(relations, sbomwriter.Relation{From: productID, To: productTargets})
 	sort.Slice(relations, func(i, j int) bool { return relations[i].From < relations[j].From })
 	document.Relations = relations
-	return document
+	return document, findings
 }
 
 // productComponent describes what the SBOM is about. In single-artifact mode
@@ -98,82 +104,51 @@ func cycloneTypeForRole(role string) string {
 
 type fileGroup struct {
 	component domain.Component
-	files     []string
+	files     []domain.UsedFile
 }
 
-// groupFilesByComponent applies strategy 7 of section 19.2: the anchor root
-// itself is the component. The earlier strategies -- curated configuration,
-// package-manager metadata, submodule boundaries -- refine this later; until
-// then every file still belongs to exactly one named component rather than
-// floating unattached.
-func groupFilesByComponent(cfg config.Config, files []domain.UsedFile) []fileGroup {
+// groupFilesByComponent maps every used file onto exactly one component using
+// the priority order of section 19.2, then fills in the CRA fields each
+// component needs.
+func groupFilesByComponent(resolver *componentResolver, files []domain.UsedFile) ([]fileGroup, []domain.Finding) {
 	byComponentID := map[string]*fileGroup{}
 	order := []string{}
 
 	for _, file := range files {
-		anchorKey := string(file.ID.Anchor)
-		id, name, componentType, scope := componentForAnchor(cfg, anchorKey, file.ID.RelPath)
+		id, name, componentType, scope, detectedBy := resolver.resolve(file)
 		group, known := byComponentID[id]
 		if !known {
 			component := domain.Component{
-				ID:    id,
-				Name:  name,
-				Type:  componentType,
-				Scope: scope,
+				ID:         id,
+				Name:       name,
+				Type:       componentType,
+				Scope:      scope,
+				DetectedBy: detectedBy,
+				Properties: map[string][]string{"sbomb:component:detectedBy": {detectedBy}},
 			}
 			if strings.HasPrefix(name, "unknown:") {
-				// Section 19.3: an unmapped component is emitted and flagged,
-				// never silently dropped.
-				component.Properties = map[string][]string{
-					"sbomb:component:detectedBy": {"unresolved"},
-					"sbomb:review:required":      {"true"},
-				}
-				component.Licenses = []domain.LicenseFinding{{Name: "NOASSERTION", Reason: "component-unresolved"}}
+				component.Properties["sbomb:review:required"] = []string{"true"}
 			}
 			group = &fileGroup{component: component}
 			byComponentID[id] = group
 			order = append(order, id)
 		}
-		group.files = append(group.files, file.ID.Canonical())
+		group.files = append(group.files, file)
 	}
 
 	sort.Strings(order)
 	groups := make([]fileGroup, 0, len(order))
+	findings := []domain.Finding{}
 	for _, id := range order {
 		group := byComponentID[id]
-		sort.Strings(group.files)
+		sort.Slice(group.files, func(i, j int) bool {
+			return group.files[i].ID.Canonical() < group.files[j].ID.Canonical()
+		})
+		findings = append(findings, resolver.enrichComponent(&group.component, group.files)...)
 		groups = append(groups, *group)
 	}
-	return groups
-}
-
-// componentForAnchor names the component a file belongs to, based on its anchor.
-func componentForAnchor(cfg config.Config, anchorKey, relPath string) (id, name, componentType, scope string) {
-	kind, anchorName, _ := strings.Cut(anchorKey, ":")
-	switch kind {
-	case "project", "build":
-		projectName := cfg.Project.Name
-		if projectName == "" {
-			projectName = "project"
-		}
-		// The project's own code and what the build generated from it are one
-		// component: the application (section 19.1).
-		return "component:project", projectName, "application", string(anchors.ScopeProject)
-	case "pkg", "sdk", "extern":
-		return anchorKey, anchorName, "library", scopeForAnchorKind(kind)
-	case "toolchain":
-		return anchorKey, anchorName, "library", string(anchors.ScopeToolchain)
-	case "sysroot":
-		return anchorKey, anchorName, "library", string(anchors.ScopeSystem)
-	default:
-		// Section 19.3: unknown:<anchorKey>/<first relative segment>.
-		segment := relPath
-		if index := strings.IndexByte(segment, '/'); index >= 0 {
-			segment = segment[:index]
-		}
-		unknown := "unknown:" + anchorKey + "/" + segment
-		return unknown, unknown, "library", string(anchors.ScopeUnknown)
-	}
+	sortFindings(findings)
+	return groups, findings
 }
 
 func scopeForAnchorKind(kind string) string {

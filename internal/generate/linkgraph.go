@@ -80,9 +80,12 @@ func (b *builder) identify(path string) (string, anchors.Scope) {
 	canonical := id.Canonical()
 	if _, known := b.physical[canonical]; !known {
 		b.physical[canonical] = b.physicalFor(b.logicalFor(path))
-	}
-	if id.Anchor == "abs" {
-		b.findings = append(b.findings, anchors.UnanchoredFinding(id))
+		b.logger.Trace("Identity: %-64s <- %s", canonical, path)
+		// One finding per file, not one per mention: a path named by both the
+		// dependency file and the map would otherwise be reported twice.
+		if id.Anchor == "abs" {
+			b.findings = append(b.findings, anchors.UnanchoredFinding(id))
+		}
 	}
 	return canonical, scope
 }

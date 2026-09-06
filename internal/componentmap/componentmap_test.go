@@ -21,16 +21,22 @@ func TestMapFileUsesLongestPrefixAndGlob(t *testing.T) {
 	}
 }
 
-func TestMapFileUnknownComponentStillMarked(t *testing.T) {
+// TestMapFileReportsNoMatch pins the contract that makes the priority chain of
+// section 19.2 possible: strategy 1 must be able to say it found nothing, so
+// that strategies 6 through 8 can run. Answering "unknown" here would make
+// curated configuration the only strategy that ever applies.
+func TestMapFileReportsNoMatch(t *testing.T) {
 	m := NewMapper(nil)
 	got, ok := m.MapFile(domain.FileID{Anchor: "project", RelPath: "dep/third_party/noise.c"})
-	if !ok {
-		t.Fatal("expected unknown mapping to be returned")
+	if ok {
+		t.Fatalf("an empty rule set matched: %#v", got)
 	}
-	if got.Name == "" || got.Type != "library" {
-		t.Fatalf("unexpected unknown component: %#v", got)
+
+	withRules := NewMapper([]Rule{{Path: "dep/mbedtls", Name: "mbedtls"}})
+	if _, ok := withRules.MapFile(domain.FileID{Anchor: "project", RelPath: "src/main.c"}); ok {
+		t.Fatal("a file outside every rule matched")
 	}
-	if got.Properties["sbomb:component:detectedBy"][0] != "unresolved" {
-		t.Fatalf("unknown component missing unresolved marker: %#v", got.Properties)
+	if got, ok := withRules.MapFile(domain.FileID{Anchor: "project", RelPath: "dep/mbedtls/aes.c"}); !ok || got.Name != "mbedtls" {
+		t.Fatalf("MapFile() = (%#v, %v), want the mbedtls rule", got, ok)
 	}
 }

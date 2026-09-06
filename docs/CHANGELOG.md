@@ -2,6 +2,43 @@
 
 ## Unreleased
 
+### The CRA fields
+
+- Files are mapped to components by the priority chain of section 19.2:
+  curated `components[]` entries, then the nearest ancestor directory carrying
+  a package manifest, then the anchor root, then an explicit `unknown:`
+  component that is flagged for review. Which strategy decided a mapping is
+  recorded in `sbomb:component:detectedBy`.
+- Components carry a version, supplier, purl and license when an authorized
+  source supplies one, and a finding when none does: `UNKNOWN_VERSION`,
+  `MISSING_SUPPLIER`, `UNKNOWN_PURL`, `UNKNOWN_LICENSE`,
+  `MISSING_COMPONENT_HASH`, `UNKNOWN_COMPONENT`. Nothing is inferred from a
+  directory name, and a supplier is never derived from a repository host.
+- License resolution follows section 22.2 and stays inside the component root,
+  as section 22.1 requires. A disagreement between configuration and the
+  component's own files keeps the curated value, records the other in
+  `sbomb:license:conflictingValue` and reports `LICENSE_CONFLICT` rather than
+  resolving it silently.
+- `tools/spdxgen` generates the embedded license table from the official SPDX
+  list: 698 digests of normalized license texts, with current identifiers
+  preferred over deprecated ones. `--check` detects drift, and CI reports it
+  without blocking.
+
+### Fixed
+
+- `componentmap.MapFile` always reported a match, answering "unknown" when no
+  rule applied. That made curated configuration the only mapping strategy that
+  could ever run, because no later strategy was ever reached.
+- Hashing resolved a file identity as if it were a filesystem path, so
+  `project:main.c` was looked up relative to the working directory and nothing
+  was ever hashed. The caller now supplies the identity-to-path mapping.
+- Hashing runs on a bounded worker pool with order-independent results, as
+  section 23 requires; it was sequential.
+- The findings JSON used Go field names instead of the normative keys of
+  section 26.1, so a consumer looking for `id` or `severity` found neither.
+- `UNANCHORED_FILE` was reported once per mention of a path rather than once
+  per file.
+
 ### A document a consumer can use
 
 - The SBOM now has a root component in `metadata.component` describing the

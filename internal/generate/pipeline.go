@@ -345,7 +345,9 @@ func hashUsedFiles(files []domain.UsedFile, physical map[string]string, logger *
 		}
 		files[index].SizeBytes = info.Size()
 	}
-	hashed := inventory.HashUsedFiles(files)
+	hashed := inventory.HashUsedFilesWithOptions(files, inventory.HashOptions{
+		Resolve: func(id domain.FileID) string { return physical[id.Canonical()] },
+	})
 	for index := range hashed {
 		if len(hashed[index].Hashes) == 0 && !hashed[index].Missing {
 			findings = append(findings, domain.Finding{

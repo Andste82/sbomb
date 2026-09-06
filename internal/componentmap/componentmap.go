@@ -35,7 +35,6 @@ func NewMapper(rules []Rule) *Mapper {
 
 func (m *Mapper) MapFile(fileID domain.FileID) (domain.Component, bool) {
 	path := normalizeRelPath(fileID.RelPath)
-	anchor := string(fileID.Anchor)
 	best := Rule{}
 	bestLen := -1
 	for _, rule := range m.rules {
@@ -59,25 +58,10 @@ func (m *Mapper) MapFile(fileID domain.FileID) (domain.Component, bool) {
 			},
 		}, true
 	}
-	first := path
-	if first == "" {
-		first = "<root>"
-	} else {
-		first = strings.TrimPrefix(filepath.ToSlash(first), "/")
-		if idx := strings.Index(first, "/"); idx >= 0 {
-			first = first[:idx]
-		}
-	}
-	return domain.Component{
-		ID:         "unknown",
-		Name:       "unknown:" + anchor + "/" + first,
-		Type:       "library",
-		DetectedBy: "unresolved",
-		Properties: map[string][]string{
-			"sbomb:component:detectedBy": {"unresolved"},
-			"sbomb:review:required":      {"true"},
-		},
-	}, true
+	// No curated rule matched. The caller continues down the priority chain of
+	// section 19.2; producing an "unknown" component here would make strategy
+	// 1 answer for all eight and no later strategy could ever run.
+	return domain.Component{}, false
 }
 
 func chooseType(kind string) string {
