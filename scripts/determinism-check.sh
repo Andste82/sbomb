@@ -15,14 +15,20 @@ run() {
   go run ./cmd/sbomb generate \
     --build-dir "$fixture/build" \
     --config "$repo/testdata/config/portable.json" \
-    --output "$1" \
+    --output "$2" \
+    --spec-version "$1" \
     --reproducible \
     --path-flavor posix \
     --policy lenient
 }
 
-run "$tmp/first.cdx.json"
-run "$tmp/second.cdx.json"
-cmp "$tmp/first.cdx.json" "$tmp/second.cdx.json"
-printf 'portable SBOM SHA-256: '
-sha256sum "$tmp/first.cdx.json" | cut -d ' ' -f 1
+# Every version the tool writes, because the claim is about the tool and not
+# about one of its outputs: the same evidence must produce the same bytes on
+# every platform, whichever revision was asked for.
+for version in 1.6 1.7; do
+  run "$version" "$tmp/first.cdx.json"
+  run "$version" "$tmp/second.cdx.json"
+  cmp "$tmp/first.cdx.json" "$tmp/second.cdx.json"
+  printf 'portable SBOM %s SHA-256: ' "$version"
+  sha256sum "$tmp/first.cdx.json" | cut -d ' ' -f 1
+done

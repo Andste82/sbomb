@@ -404,11 +404,17 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	})
 	narrowing := narrowingByComponent(resolver, outcome.narrowed)
 	document, findings := buildDocument(cfg, resolver, deliverables, used, findings, run)
-	writer, err := sbomwriter.Get("cyclonedx-json", "1.6")
+	// The configuration names the serialization; an empty value is the
+	// writer's default rather than a guess made here (section 32.2).
+	format := cfg.Output.Format
+	if format == "" {
+		format = "cyclonedx-json"
+	}
+	writer, specVersion, err := sbomwriter.Resolve(format, cfg.Output.SpecVersion)
 	if err != nil {
 		return Result{Graph: graph, Findings: findings}, err
 	}
-	bom, err := writer.(cyclonedx.Writer).Build(document, sbomwriter.Options{SpecVersion: "1.6", Reproducible: reproducible})
+	bom, err := writer.(cyclonedx.Writer).Build(document, sbomwriter.Options{SpecVersion: specVersion, Reproducible: reproducible})
 	if err != nil {
 		return Result{Graph: graph, Findings: findings}, &ExitError{
 			Code: 70,
@@ -424,7 +430,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		bom.SerialNumber = "urn:uuid:" + uuid.NewString()
 	}
 
-	logger.Info("CycloneDX 1.6 BOM constructed: %d component(s) in %d group(s)", len(bom.Components), len(document.Components))
+	logger.Info("CycloneDX %s BOM constructed: %d component(s) in %d group(s)", specVersion, len(bom.Components), len(document.Components))
 	adapters := map[string]bool{}
 	for _, edge := range graph.Edges() {
 		if edge.Adapter != "" {

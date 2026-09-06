@@ -25,10 +25,13 @@ import (
 // a Go type -- a string field admits any string -- so they are listed here, by
 // the path of the field they belong to.
 var enums = map[string][]string{
-	"mode":                             {"single", "assembly"},
-	"artifacts.role":                   {"application", "bootloader", "library", "filesystem", "image", "package", "data", "other"},
+	"mode":           {"single", "assembly"},
+	"artifacts.role": {"application", "bootloader", "library", "filesystem", "image", "package", "data", "other"},
+	// The output enums are the writer registry's answer, written here because
+	// the loader must not depend on a serializer. TestConfigEnumsMatchTheWriter
+	// in cmd/sbomb imports both and fails if they part company.
 	"output.format":                    {"cyclonedx-json"},
-	"output.specVersion":               {"1.6"},
+	"output.specVersion":               {"1.6", "1.7"},
 	"policy.headerEvidence":            {"dwarf-preferred", "union", "depfiles"},
 	"policy.includeToolchainRuntime":   {"separate-component", "report-only", "exclude"},
 	"policy.systemLibraries":           {"exclude", "separate-component", "report-only"},

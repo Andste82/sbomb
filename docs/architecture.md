@@ -80,7 +80,7 @@ flowchart LR
     DISC --> GRAPH["Evidence graph"]
     GRAPH --> INV["Inventory<br/><i>classify · hash · staleness</i>"]
     INV --> COMP["Components<br/><i>versions · licences · purls</i>"]
-    COMP --> DOC["CycloneDX 1.6<br/><i>written and validated</i>"]
+    COMP --> DOC["CycloneDX 1.6 or 1.7<br/><i>written and validated</i>"]
     GRAPH --> POL["Policy<br/><i>findings · waivers · exit code</i>"]
     COMP --> POL
 ```
@@ -281,7 +281,7 @@ flowchart LR
 
 | Output | Contents |
 |---|---|
-| `<name>.cdx.json` | The CycloneDX 1.6 document. Validated against the official schema *and* semantically before it is written |
+| `<name>.cdx.json` | The CycloneDX document, 1.6 by default and 1.7 on request. Validated against the official schema of the version it declares *and* semantically before it is written |
 | `evidence.json` | The full evidence graph — every node, every edge, its strength, confidence and source |
 | Findings JSON | Machine-readable diagnostics, with severity, subject and remediation |
 | Review report | The same for a human, with the evidence chains behind the answers |

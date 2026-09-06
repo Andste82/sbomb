@@ -1,0 +1,214 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.7",
+  "version": 1,
+  "serialNumber": "urn:uuid:044790bf-f738-5e9f-a9d1-2fa2762f7b0e",
+  "metadata": {
+    "tools": [
+      {
+        "vendor": "sbomb",
+        "name": "sbomb",
+        "version": "0.0.0-test"
+      }
+    ],
+    "component": {
+      "type": "application",
+      "name": "app",
+      "bom-ref": "product:app",
+      "properties": [
+        {
+          "name": "sbomb:artifact:role",
+          "value": "application"
+        },
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        }
+      ]
+    },
+    "properties": [
+      {
+        "name": "sbomb:run:specVersion",
+        "value": "1.7"
+      },
+      {
+        "name": "sbomb:run:toolVersion",
+        "value": "0.0.0-test"
+      },
+      {
+        "name": "sbomb:build:config",
+        "value": "Debug"
+      },
+      {
+        "name": "sbomb:build:generator",
+        "value": "Unix Makefiles"
+      }
+    ]
+  },
+  "components": [
+    {
+      "type": "application",
+      "name": "project",
+      "bom-ref": "component:project",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "anchor:project"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "crypto.c",
+      "bom-ref": "file:project:crypto.c",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:crypto.c"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "crypto.h",
+      "bom-ref": "file:project:crypto.h",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:evidence:header:class",
+          "value": "project-header"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:crypto.h"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "main.c",
+      "bom-ref": "file:project:main.c",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:main.c"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "component:project",
+      "dependsOn": [
+        "file:project:crypto.c",
+        "file:project:crypto.h",
+        "file:project:main.c"
+      ]
+    },
+    {
+      "ref": "file:project:crypto.c"
+    },
+    {
+      "ref": "file:project:crypto.h"
+    },
+    {
+      "ref": "file:project:main.c"
+    },
+    {
+      "ref": "product:app",
+      "dependsOn": [
+        "component:project"
+      ]
+    }
+  ]
+}

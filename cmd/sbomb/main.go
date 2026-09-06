@@ -21,6 +21,7 @@ import (
 	"github.com/example/sbomb/internal/pathmodel"
 	"github.com/example/sbomb/internal/policy"
 	"github.com/example/sbomb/internal/report"
+	"github.com/example/sbomb/internal/sbomwriter"
 )
 
 func main() {
@@ -123,16 +124,35 @@ func isAllV(s string) bool {
 }
 
 func handleSchema(args []string) (int, string, string) {
-	for _, arg := range args {
-		if arg == "--cyclonedx" {
-			schema, err := cyclonedx.EmbeddedSchema()
-			if err != nil {
-				return 1, "", err.Error() + "\n"
+	cyclone := false
+	specVersion := ""
+	for i := 0; i < len(args); i++ {
+		switch {
+		case args[i] == "--cyclonedx":
+			cyclone = true
+		case args[i] == "--spec-version":
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --spec-version\n"
 			}
-			return 0, schema, ""
+			specVersion = args[i+1]
+			i++
+		case strings.HasPrefix(args[i], "--spec-version="):
+			specVersion = strings.TrimPrefix(args[i], "--spec-version=")
 		}
 	}
-	return 0, config.Schema() + "\n", ""
+	if !cyclone {
+		if specVersion != "" {
+			return 1, "", "--spec-version selects a CycloneDX schema and needs --cyclonedx\n"
+		}
+		return 0, config.Schema() + "\n", ""
+	}
+	// Which schema a document is checked against is the question this answers,
+	// so it has to be answerable for either version.
+	schema, err := cyclonedx.EmbeddedSchema(specVersion)
+	if err != nil {
+		return 1, "", err.Error() + "\n"
+	}
+	return 0, schema, ""
 }
 
 // handleValidate runs both validation layers over an existing document
@@ -156,10 +176,30 @@ func handleValidate(args []string) (int, string, string) {
 	if input == "" {
 		return 1, "", "--input is required\n"
 	}
-	if err := cyclonedx.ValidateFile(input); err != nil {
+	data, err := os.ReadFile(input)
+	if err != nil {
 		return 4, "", err.Error() + "\n"
 	}
-	return 0, "valid CycloneDX 1.6 document: " + input + "\n", ""
+	// The format is detected rather than assumed or asked for. Somebody
+	// checking a file another tool sent them knows they have an SBOM, not
+	// which serialization it is in, and the document says so itself.
+	writer, specVersion, err := sbomwriter.DetectFormat(data)
+	if err != nil {
+		return 4, "", err.Error() + "\n"
+	}
+	if err := writer.Validate(bytes.NewReader(data)); err != nil {
+		return 4, "", err.Error() + "\n"
+	}
+	return 0, fmt.Sprintf("valid %s %s document: %s\n", formatLabel(writer.ID()), specVersion, input), ""
+}
+
+// formatLabel names a format the way a person writes it, rather than by the
+// identifier the registry keys on.
+func formatLabel(id string) string {
+	if id == "cyclonedx-json" {
+		return "CycloneDX"
+	}
+	return id
 }
 
 // handleEvidence dumps the evidence graph without producing an SBOM, which is
@@ -338,6 +378,7 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 	allowIntrospection := false
 	sourceDir := ""
 	mode := ""
+	specVersion := ""
 	configName := ""
 	mapPath := ""
 	linkDepfile := ""
@@ -417,6 +458,14 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 			i++
 		case strings.HasPrefix(args[i], "--mode="):
 			mode = strings.TrimPrefix(args[i], "--mode=")
+		case args[i] == "--spec-version":
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --spec-version\n"
+			}
+			specVersion = args[i+1]
+			i++
+		case strings.HasPrefix(args[i], "--spec-version="):
+			specVersion = strings.TrimPrefix(args[i], "--spec-version=")
 		case args[i] == "--config-name":
 			if i+1 >= len(args) {
 				return 1, "", "missing value for --config-name\n"
@@ -556,6 +605,14 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 	if buildDir == "" {
 		return 1, "", "--build-dir is required\n"
 	}
+	// A version no writer emits is a usage error, refused here rather than at
+	// the write: nothing should be read, created or discovered on the strength
+	// of an argument that cannot be honoured.
+	if specVersion != "" {
+		if _, _, err := sbomwriter.Resolve("cyclonedx-json", specVersion); err != nil {
+			return 1, "", err.Error() + "\n"
+		}
+	}
 	var logBuf bytes.Buffer
 	var logWriter io.Writer
 	if verbosity > 0 {
@@ -600,6 +657,12 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 	}
 	if configName != "" {
 		loadedCfg.Build.Config = configName
+	}
+	// output.specVersion is read from the configuration, and the flag overrides
+	// it, so a project that always wants 1.7 says so once. The configuration's
+	// own value was checked by the loader.
+	if specVersion != "" {
+		loadedCfg.Output.SpecVersion = specVersion
 	}
 	loadedCfg.Manifests = append(loadedCfg.Manifests, imageManifests...)
 

@@ -57,8 +57,8 @@ func TestRemovedKeysAreRejectedRatherThanIgnored(t *testing.T) {
 	}
 }
 
-// The output settings have one valid value each. Checking them is what keeps a
-// configuration from being silently wrong.
+// The output settings admit a closed set of values each. Checking them is what
+// keeps a configuration from being silently wrong.
 func TestOutputSettingsAreChecked(t *testing.T) {
 	for _, testCase := range []struct {
 		name, body string
@@ -66,8 +66,9 @@ func TestOutputSettingsAreChecked(t *testing.T) {
 	}{
 		{"the only format", `{"project":{"name":"a"},"build":{"dir":"build"},"output":{"format":"cyclonedx-json"}}`, false},
 		{"another format", `{"project":{"name":"a"},"build":{"dir":"build"},"output":{"format":"spdx-json"}}`, true},
-		{"the only version", `{"project":{"name":"a"},"build":{"dir":"build"},"output":{"specVersion":"1.6"}}`, false},
-		{"another version", `{"project":{"name":"a"},"build":{"dir":"build"},"output":{"specVersion":"1.7"}}`, true},
+		{"the default version", `{"project":{"name":"a"},"build":{"dir":"build"},"output":{"specVersion":"1.6"}}`, false},
+		{"the opt-in version", `{"project":{"name":"a"},"build":{"dir":"build"},"output":{"specVersion":"1.7"}}`, false},
+		{"a version no writer emits", `{"project":{"name":"a"},"build":{"dir":"build"},"output":{"specVersion":"1.5"}}`, true},
 		{"absent is fine", `{"project":{"name":"a"},"build":{"dir":"build"}}`, false},
 	} {
 		path := filepath.Join(t.TempDir(), "sbomb.json")

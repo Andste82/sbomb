@@ -290,7 +290,7 @@ Select it with `--waivers <file>` or `policy.waiversFile`.
 | Field | Values | Default |
 |---|---|---|
 | `format` | `cyclonedx-json` | `cyclonedx-json` |
-| `specVersion` | `1.6` | `1.6` |
+| `specVersion` | `1.6`, `1.7` | `1.6` |
 | `reproducible` | boolean | `false` |
 
 `reproducible` omits the timestamp and derives the serial number from the
@@ -300,9 +300,40 @@ project: a project whose SBOMs have to be comparable wants that of every run,
 not only of the ones where somebody remembered `--reproducible`. The flag still
 forces it on for a single run, and neither can turn the other off.
 
-`format` and `specVersion` each have exactly one admissible value today and are
-checked against it, so a file asking for something that does not exist says so
-rather than being ignored.
+`format` and `specVersion` are checked against the values the writer registry
+actually offers, so a file asking for something that does not exist says so
+rather than being ignored. The values in the table above are the ones
+`sbomb schema` publishes.
+
+### Choosing a specification version
+
+`specVersion` selects the CycloneDX revision. **1.6 is the default and stays
+the default**: BSI TR-03183-2 names it as the minimum, and nothing in 1.7
+changes that. Write 1.7 when a consumer asks for it.
+
+`--spec-version` on `generate` and `self` overrides this for a single run;
+`sbomb schema --cyclonedx --spec-version 1.7` prints the schema a 1.7 document
+is checked against.
+
+The two documents describe the same evidence and differ only in saying so: the
+`specVersion` field, the `sbomb:run:specVersion` property that records it, and
+the serial number, which is a digest of the canonical document and therefore
+moves once anything in it does. A document written at 1.6 is structurally valid
+at 1.7 with only `specVersion` changed — 1.7 is additive over 1.6, with nothing
+removed and the same required top-level fields.
+
+One 1.7-only difference exists and appears only when the evidence calls for
+it. `component.evidence.licenses` may mix SPDX expressions with licence
+identifiers at 1.7, where 1.6 admits a list of one kind or the other; sbomb
+emits an expression there when an observation carries a relation between
+licences rather than naming one (see [D19](dev/deviations.md)). Observation
+today yields bare identifiers, which are written identically at both versions,
+so this raises the ceiling rather than changing current output.
+
+`sbomb validate` needs no version: it reads what the document declares and
+checks it against the matching embedded schema, including a 1.7 document
+written by another tool. A version this build has no schema for is refused
+rather than checked against the wrong one.
 
 ## A worked example
 

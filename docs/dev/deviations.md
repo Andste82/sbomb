@@ -73,7 +73,8 @@ exact toolchain version is recorded in each fixture's `manifest.json` and
 Section 32.5 requires validation with "a pure-Go JSON Schema draft 2020-12
 validator". The official CycloneDX 1.6 schema files declare
 `http://json-schema.org/draft-07/schema#`, as do the SPDX and JSF schemas they
-reference.
+reference. CycloneDX 1.7 is draft-07 as well, so adding it does not change
+this.
 
 The embedded validator therefore has to support draft-07. The one in use
 (`github.com/santhosh-tekuri/jsonschema/v6`) supports both, so the requirement
@@ -403,10 +404,26 @@ knows what the question is. Curating `components[].license` fills in the
 conclusion, and because the observation sits beside it the assertion can be
 checked rather than believed.
 
-The two forms are not interchangeable, which is the point: CycloneDX's
+The two forms are not interchangeable, which is the point: CycloneDX 1.6's
 `licenseChoice` is a choice between a *list of licences* and a *tuple of
 exactly one expression*. A list says which are present; an expression says how
 they combine. An observation can only make the first statement.
+
+**What CycloneDX 1.7 changes, and what it does not.** 1.7 relaxes
+`licenseChoice`: one array may now mix licence objects and SPDX expressions.
+That does not make the deviation obsolete, because the deviation is about what
+an observation may *claim*, not about what the schema will *hold*. Two complete
+licence texts in one file still say which licences are present and nothing
+about how they relate, and at 1.7 they are still rendered as two identifiers.
+
+What it does lift is a ceiling. Where an observation does carry a relation —
+an `SPDX-License-Identifier` line reading `MIT OR Apache-2.0`, which states the
+relation in the text rather than leaving a reader to infer it — 1.6 forced it
+to be flattened to one identifier as soon as a second observation stood beside
+it, and 1.7 does not. sbomb emits an expression there when written at 1.7, and
+identifiers at both versions otherwise. Observation yields bare identifiers
+today, so this changes no current output; it means the writer no longer has to
+throw away a relation it was given.
 
 **One thing the implementation had to get right.** Locating a licence inside a
 larger file uses the template between its first and last fixed words, not the

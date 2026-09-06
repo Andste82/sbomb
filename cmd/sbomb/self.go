@@ -59,7 +59,11 @@ func handleSelf(args []string, verbosity int) (int, string, string) {
 	logger.Info("Recorded %d module(s) plus the standard library, toolchain %s",
 		len(result.Binary.Deps), result.Binary.GoVersion)
 
-	bom, err := (cyclonedx.Writer{}).Build(result.Document, sbomwriter.Options{SpecVersion: "1.6", Reproducible: options.reproducible})
+	writer, specVersion, err := sbomwriter.Resolve("cyclonedx-json", options.specVersion)
+	if err != nil {
+		return 1, logBuf.String(), err.Error() + "\n"
+	}
+	bom, err := writer.(cyclonedx.Writer).Build(result.Document, sbomwriter.Options{SpecVersion: specVersion, Reproducible: options.reproducible})
 	if err != nil {
 		return 4, logBuf.String(), err.Error() + "\n"
 	}
@@ -68,7 +72,7 @@ func handleSelf(args []string, verbosity int) (int, string, string) {
 	} else {
 		bom.SerialNumber = "urn:uuid:" + uuid.NewString()
 	}
-	logger.Info("Writing CycloneDX BOM to '%s'...", options.output)
+	logger.Info("Writing CycloneDX %s BOM to '%s'...", specVersion, options.output)
 	if err := cyclonedx.WriteBOM(options.output, bom); err != nil {
 		// Either validation layer failing is exit code 4 (section 32.5).
 		return 4, logBuf.String(), err.Error() + "\n"
@@ -107,6 +111,7 @@ type selfOptions struct {
 	goroot           string
 	supplier         string
 	policyName       string
+	specVersion      string
 	findingsJSONPath string
 	evidencePath     string
 	licenses         map[string]string
@@ -117,7 +122,8 @@ type selfOptions struct {
 
 const selfUsage = "usage: sbomb self <binary> [--output <path>] [--version <v>] " +
 	"[--module-dir <dir>] [--goroot <dir>] [--supplier <name>] [--policy <profile>] " +
-	"[--license <module>=<SPDX>]... [--findings-json <path>] [--evidence <path>] [--reproducible]\n"
+	"[--spec-version <v>] [--license <module>=<SPDX>]... [--findings-json <path>] " +
+	"[--evidence <path>] [--reproducible]\n"
 
 // parse reads the arguments. It returns an exit code and a message, both zero
 // valued when the arguments are good.
@@ -184,6 +190,9 @@ func (o *selfOptions) parse(args []string) (int, string) {
 		case "--policy":
 			value, ok = take()
 			o.policyName = value
+		case "--spec-version":
+			value, ok = take()
+			o.specVersion = value
 		case "--findings-json":
 			value, ok = take()
 			o.findingsJSONPath = value
