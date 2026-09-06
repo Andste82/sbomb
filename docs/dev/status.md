@@ -97,23 +97,31 @@
 
 ## Next Work
 
-Roadmap phase 8 is four steps of six done: the performance budget is measured
-and met, the parser limits of section 30 are one policy with the two flags that
-were missing, the parsers of phases 6 and 7 are fuzzed, and determinism is
-checked on Windows rather than declared unverified. See
-[milestones/phase-08-plan.md](milestones/phase-08-plan.md).
+Roadmap phase 8 is complete. The performance budget is measured and met, the
+parser limits of section 30 are one policy with the two flags that were
+missing, the parsers of phases 6 and 7 are fuzzed, determinism is checked on
+Windows rather than declared unverified, every released binary carries an SBOM
+of itself derived from its linker's own record, and regenerating an unchanged
+fixture corpus is a no-op outside three projects where the toolchain is what is
+not reproducible. See
+[milestones/phase-08-plan.md](milestones/phase-08-plan.md) and deviations D16
+and D17.
 
-Two remain:
+Nothing in section 30 is assumed any more: point 7, that
+`--redact-unanchored-paths` applies equally to the SBOM, the findings JSON and
+the review report, is now covered by a test that also proves the unredacted
+outputs contain the paths.
 
-* **8e, an honest self-SBOM.** `scripts/release.sh` fabricated one and it is
-  removed (deviation D16), so a release currently ships binaries and checksums
-  and no SBOM. Go emits neither a compile database nor a linker map, so
-  deriving one needs an evidence source of its own; `go list -deps -json` is
-  the obvious candidate.
-* **8f, corpus reproducibility.** Two regenerations of an unchanged corpus
-  differ in about 150 files, because CMake names its File API index by wall
-  clock and `.ninja_deps` records modification times.
+What is left is not phase work:
 
-One smaller item is open inside section 30: point 7 requires
-`--redact-unanchored-paths` to apply equally to the SBOM, the findings JSON and
-the review report. That is assumed rather than verified.
+* **No release has ever been published.** `v0.7.0` and `v0.8.0` are tags with
+  no release behind them, so `smoke-test` downloads a 404. Either run
+  `release.yaml` by `workflow_dispatch` on an existing tag or cut a new one.
+  It is an outward-facing action and therefore a decision, not a task.
+* **ESP-IDF (milestone 20) is parked**, at the point where it was parked in
+  phase 7.
+* **The licence template matcher.** Detection is measured at 93 of 109 real
+  licence files; the sixteen misses are filled-in templates, and SPDX's
+  `standardLicenseTemplate` is the remedy inside the rules. The self-SBOM feels
+  this directly: none of the three vendored Go licences match, so they are
+  curated by hand in `scripts/release.sh`.

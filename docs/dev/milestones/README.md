@@ -56,4 +56,4 @@ each phase uncovered. They are the working state of the roadmap.
 - [phase-05-plan.md](phase-05-plan.md) - Arming the policy model — complete
 - [phase-06-plan.md](phase-06-plan.md) - Header evidence in full — complete
 - [phase-07-plan.md](phase-07-plan.md) - Adapter breadth — complete, ESP-IDF parked
-- [phase-08-plan.md](phase-08-plan.md) - Hardening — in progress
+- [phase-08-plan.md](phase-08-plan.md) - Hardening — complete

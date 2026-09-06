@@ -9,7 +9,7 @@ requirements), §14 and §27 (determinism), milestone 15.
 This is the phase that decides whether sbomb can be pointed at a real firmware
 build without falling over or becoming an attack surface. It adds no capability.
 
-**Two of six steps remain: 8e and 8f.**
+**All six steps are done.**
 
 ---
 
@@ -60,9 +60,9 @@ The two flags §30 names and nothing implemented now exist:
 Hashing goes through it, which is where a link pointing out of every anchor
 would otherwise be followed.
 
-**Still open in §30:** point 7 -- that `--redact-unanchored-paths` applies
-equally to the SBOM, the findings JSON *and* the review report -- is assumed
-rather than verified. It is one test.
+**§30 point 7** -- that `--redact-unanchored-paths` applies equally to the
+SBOM, the findings JSON *and* the review report -- was assumed rather than
+verified here. It is verified in 8f.
 
 ## 8c — Fuzzing what phases 6 and 7 added — done
 
@@ -106,36 +106,82 @@ differently.
 
 ---
 
-## 8e — An honest self-SBOM — open
+## 8e — An honest self-SBOM — done
 
 `scripts/release.sh` wrote a fabricated `compile_commands.json` naming one Go
 file beside an empty linker map. It made every release build exit 3 before
 writing its checksums, and it would have shipped a false bill of materials next
-to the binary it claims to describe. The fabrication is removed
-(deviation D16); a release currently carries the binaries and their checksums
-and no SBOM.
+to the binary it claims to describe. That fabrication was removed in 8a
+(deviation D16); this puts the document back, derived from evidence.
 
-What remains is to derive one from evidence. Go emits neither a compile
-database nor a linker map, so this needs an evidence source of its own.
-`go list -deps -json` is the obvious candidate: it names every package in the
-binary, its module, its version and its files. That is a small adapter plus a
-fixture, not a script change.
+The evidence is the module record the Go linker writes into the binary: every
+module linked in, at the version and with the `go.sum` hash that reached the
+artifact, plus the toolchain, the target platform and the commit. It is not a
+description of what the build was asked to do, it is part of the deliverable,
+so it cannot disagree with the deliverable. `sbomb self <binary>` reads it and
+nothing else -- no subprocess, no network, no source tree -- which is why a
+linux host describes a cross-compiled windows/amd64 binary correctly.
 
-Milestone 16 requires the self-SBOM, so this closes a deviation rather than
-adding a feature.
+`go list -deps -json`, which this plan named first, was dropped. It describes
+the working tree rather than the artifact and would have to run outside the
+allowlist of section 9.2. What it would have added is file-level detail, and
+nothing in a Go binary names its source files; a module is versioned, licensed
+and published as a unit, so the module is the component.
 
-## 8f — Corpus reproducibility — open
+| Piece | Where |
+|---|---|
+| Reads the linker's record | `internal/adapters/gobin` |
+| Reads `vendor/modules.txt` | `internal/adapters/govendor` |
+| Assembles the document | `internal/selfsbom` |
+| Command | `cmd/sbomb/self.go` |
 
-Two `regen.sh` runs with no source change produce roughly 150 changed files:
+Licence evidence comes from the vendor tree and only where it agrees with the
+binary: a vendor directory from another commit holds the right module at the
+wrong version, and its licence would be attributed to what was linked while
+looking exactly as confident as a correct answer. That case is
+`STALE_BUILD_EVIDENCE` now.
 
-* CMake names its File API index `index-<wall clock>.json`, and the codemodel
-  reply carries a content hash that moves with it.
-* `.ninja_deps` is a binary log of modification times.
+Exact licence-text matching turned out to recognize none of the three vendored
+licences. All three fill in the copyright holder or renumber the clause list,
+which is what a real licence file looks like; section 22.3 technique 2 hashes
+the normalized text and only matches a verbatim one. `--license
+<module>=<SPDX>` curates them, they are marked `curated` rather than detected,
+and a curated value the licence text contradicts is a `LICENSE_CONFLICT`.
 
-`regen.sh --check` verifies completeness, not byte equality, so nothing claims
-otherwise -- but it makes reviewing a real corpus change harder than it should
-be. Normalizing the index filename and the deps log at harvest time removes the
-churn. Verifying it costs several regenerations, each a few minutes.
+Running `scripts/release.sh build` end to end for the first time found that
+**the tool did not build for Windows at all**: `internal/limits` used
+`syscall.O_NOFOLLOW`, which does not exist there, so every cross-compile had
+failed since 8b landed. The no-follow open is platform-split now.
+
+## 8f — Corpus reproducibility — done
+
+Two `regen.sh` runs over unchanged sources rewrote around 150 files. Five
+causes were ours:
+
+| Cause | Fix |
+|---|---|
+| File API index filename carries the configure wall clock | pinned to the fixture date |
+| `.ninja_deps` records each output's modification time | `tools/fixtures/depsnorm` zeroes the field |
+| Parallel builds reorder that log | builds run serially |
+| The GNU PE linker stamps a link time into every `.exe` | `--no-insert-timestamp` |
+| GCC draws a random seed for the LTO sections | `-frandom-seed` pinned |
+
+Three projects still move, and in each the toolchain is what is not
+reproducible: CMake orders a target's dependency list unstably, the LTO map
+names GCC's temporary objects -- which is what that fixture exists to show --
+and Conan gives a locally built package a random cache folder. Deviation D17
+records each with what was measured.
+
+`tools/fixtures/check-reproducible.sh` regenerates twice and fails on any
+difference outside those three, which it names rather than pattern-matches, so
+a fourth cannot join them quietly. `regen.sh --only <toolchain>[/<project>]`
+makes the loop tolerable: one pair takes seconds where the corpus takes
+minutes.
+
+Section 30 point 7 is closed with it. `--redact-unanchored-paths` had to apply
+to the SBOM, the findings JSON and the review report equally, which was assumed
+rather than checked; it does, and a test says so -- including the half that
+proves the unredacted outputs do contain the paths.
 
 ---
 
@@ -145,5 +191,6 @@ churn. Verifying it costs several regenerations, each a few minutes.
 * [x] `--max-input-size` and `--strict-symlinks` exist and are honoured.
 * [x] Every parser added in phases 6 and 7 has a fuzz target.
 * [x] A Windows runner produces byte-identical output to Linux.
-* [ ] The self-SBOM is derived from evidence or does not exist.
-* [ ] Two regenerations of an unchanged corpus produce no diff.
+* [x] The self-SBOM is derived from evidence or does not exist.
+* [x] Two regenerations of an unchanged corpus produce no diff, outside three
+  projects where the toolchain is what is not reproducible (D17).
