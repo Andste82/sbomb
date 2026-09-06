@@ -73,11 +73,20 @@ func TestWindowsPathFlavorWithHostileBuildPath(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(build, "compile_commands.json"), []byte(compileDB), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(build, "link.map"), []byte("map"), 0o600); err != nil {
+	// A deliverable and its map: without a configured artifact the run refuses
+	// to guess what the SBOM is about (section 5.2).
+	if err := os.WriteFile(filepath.Join(build, "app.exe"), []byte("MZ"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	linkMap := "Archive member included to satisfy reference by file (symbol)\n\n" +
+		"Linker script and memory map\n\nLOAD C:\\fixture\\build\\main.o\n"
+	if err := os.WriteFile(filepath.Join(build, "app.exe.map"), []byte(linkMap), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	config := filepath.Join(work, "config.json")
-	configJSON := `{"project":{"name":"windows-paths","root":"C:\\fixture\\project"},"build":{"dir":"C:\\fixture\\build"}}`
+	configJSON := `{"project":{"name":"windows-paths","root":"C:\\fixture\\project"},` +
+		`"build":{"dir":"C:\\fixture\\build"},` +
+		`"artifacts":[{"path":"app.exe","role":"application"}]}`
 	if err := os.WriteFile(config, []byte(configJSON), 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -88,7 +97,7 @@ func TestWindowsPathFlavorWithHostileBuildPath(t *testing.T) {
 		t.Fatalf("go build: %v\n%s", err, output)
 	}
 	output := filepath.Join(work, "windows-paths.cdx.json")
-	if outputBytes, err := run(root, sbomb, "generate", "--build-dir", build, "--config", config, "--path-flavor", "windows", "--output", output, "--reproducible"); err != nil {
+	if outputBytes, err := run(root, sbomb, "generate", "--build-dir", build, "--config", config, "--path-flavor", "windows", "--output", output, "--reproducible", "--policy", "lenient"); err != nil {
 		t.Fatalf("windows path generation: %v\n%s", err, outputBytes)
 	}
 	if _, err := os.Stat(output); err != nil {

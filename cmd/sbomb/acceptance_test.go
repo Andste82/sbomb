@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 
@@ -19,9 +20,11 @@ func TestMilestone13Acceptance(t *testing.T) {
 	strictOutput := filepath.Join(t.TempDir(), "strict.cdx.json")
 	lenientOutput := filepath.Join(t.TempDir(), "lenient.cdx.json")
 	strictReport := filepath.Join(t.TempDir(), "strict.txt")
+	// The corpus commits build evidence, not sources, so the files the chains
+	// reach cannot be hashed. Strict gates on that; lenient does not.
 	strictCode, _, strictErr := execute([]string{"generate", "--build-dir", buildDir, "--config", configPath, "--policy", "strict", "--output", strictOutput, "--review-report", strictReport, "--reproducible"})
-	if strictCode != 0 || strictErr != "" {
-		t.Fatalf("strict result = code %d, stderr %q; want code 0 on complete evidence", strictCode, strictErr)
+	if strictCode != 3 || strictErr != "" {
+		t.Fatalf("strict result = code %d, stderr %q; want code 3 on unhashable files", strictCode, strictErr)
 	}
 	lenientCode, _, lenientErr := execute([]string{"generate", "--build-dir", buildDir, "--config", configPath, "--policy", "lenient", "--output", lenientOutput, "--reproducible"})
 	if lenientCode != 0 || lenientErr != "" {
@@ -57,8 +60,8 @@ func TestMilestone13Acceptance(t *testing.T) {
 	secondOutput := filepath.Join(t.TempDir(), "second.cdx.json")
 	secondReport := filepath.Join(t.TempDir(), "second.txt")
 	secondCode, _, secondErr := execute([]string{"generate", "--build-dir", secondBuild, "--config", configPath, "--policy", "strict", "--output", secondOutput, "--review-report", secondReport, "--reproducible"})
-	if secondCode != 0 || secondErr != "" {
-		t.Fatalf("second strict result = code %d, stderr %q; want code 0", secondCode, secondErr)
+	if secondCode != 3 || secondErr != "" {
+		t.Fatalf("second strict result = code %d, stderr %q; want code 3", secondCode, secondErr)
 	}
 	secondSBOM, err := os.ReadFile(secondOutput)
 	if err != nil {
@@ -114,7 +117,7 @@ func TestLinkEvidenceGateSeparatesProfiles(t *testing.T) {
 func TestToolchainAndSystemFilesAreNotComponents(t *testing.T) {
 	buildDir := testutil.CorpusBuildDir(t, "gcc-ninja", "p02-static")
 	output := filepath.Join(t.TempDir(), "scoped.cdx.json")
-	code, _, stderr := execute([]string{"generate", "--build-dir", buildDir, "--output", output, "--reproducible"})
+	code, _, stderr := execute([]string{"generate", "--build-dir", buildDir, "--policy", "lenient", "--output", output, "--reproducible"})
 	if code != 0 || stderr != "" {
 		t.Fatalf("generate = code %d, stderr %q", code, stderr)
 	}
@@ -159,7 +162,7 @@ func TestToolchainAndSystemFilesAreNotComponents(t *testing.T) {
 func TestMilestone17MakefilesAcceptance(t *testing.T) {
 	buildDir := testutil.CorpusBuildDir(t, "gcc-make", "p02-static")
 	output := filepath.Join(t.TempDir(), "mk.cdx.json")
-	code, _, stderr := execute([]string{"generate", "--build-dir", buildDir, "--output", output, "--reproducible"})
+	code, _, stderr := execute([]string{"generate", "--build-dir", buildDir, "--policy", "lenient", "--output", output, "--reproducible"})
 	if code != 0 || stderr != "" {
 		t.Fatalf("Make acceptance result = code %d, stderr %q", code, stderr)
 	}
@@ -168,4 +171,77 @@ func TestMilestone17MakefilesAcceptance(t *testing.T) {
 		t.Fatal(err)
 	}
 	assertGolden(t, "gcc-make-p02.cdx.json", actual)
+}
+
+// TestEvidenceChainYieldsTheSameFilesAcrossToolchains is the phase 2
+// acceptance criterion. The same project built with five different toolchain
+// and generator combinations must yield the same used-file set, because the
+// set is derived from what the linker demonstrably consumed rather than from
+// what each build system happens to record.
+//
+// It also pins the property the whole tool exists for: p02-static compiles
+// unused.c into libcrypto.a, the linker never extracts that member, and so it
+// must not appear -- while crypto.h, which no link evidence names directly,
+// must appear because a used translation unit included it.
+func TestEvidenceChainYieldsTheSameFilesAcrossToolchains(t *testing.T) {
+	want := []string{
+		"file:project:crypto.c",
+		"file:project:crypto.h",
+		"file:project:main.c",
+	}
+	for _, toolchain := range []string{"gcc-ninja", "gcc-make", "clang-ninja", "arm-none-eabi", "mingw-w64"} {
+		t.Run(toolchain, func(t *testing.T) {
+			buildDir := testutil.CorpusBuildDir(t, toolchain, "p02-static")
+			output := filepath.Join(t.TempDir(), "out.cdx.json")
+			code, _, stderr := execute([]string{"generate", "--build-dir", buildDir, "--policy", "lenient", "--output", output, "--reproducible"})
+			if code != 0 || stderr != "" {
+				t.Fatalf("generate = code %d, stderr %q", code, stderr)
+			}
+			data, err := os.ReadFile(output)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var document struct {
+				Components []struct {
+					BomRef string `json:"bom-ref"`
+				} `json:"components"`
+			}
+			if err := json.Unmarshal(data, &document); err != nil {
+				t.Fatal(err)
+			}
+			got := make([]string, 0, len(document.Components))
+			for _, component := range document.Components {
+				got = append(got, component.BomRef)
+			}
+			sort.Strings(got)
+			if len(got) != len(want) {
+				t.Fatalf("got %d components %v, want %v", len(got), got, want)
+			}
+			for index := range want {
+				if got[index] != want[index] {
+					t.Fatalf("component set = %v, want %v", got, want)
+				}
+			}
+		})
+	}
+}
+
+// TestUnextractedArchiveMembersAreAbsent states the same property directly, so
+// that a regression names its cause.
+func TestUnextractedArchiveMembersAreAbsent(t *testing.T) {
+	buildDir := testutil.CorpusBuildDir(t, "gcc-ninja", "p02-static")
+	output := filepath.Join(t.TempDir(), "out.cdx.json")
+	if code, _, stderr := execute([]string{"generate", "--build-dir", buildDir, "--policy", "lenient", "--output", output, "--reproducible"}); code != 0 {
+		t.Fatalf("generate = code %d, stderr %q", code, stderr)
+	}
+	data, err := os.ReadFile(output)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(data), "unused.c") {
+		t.Error("unused.c is in the SBOM although the linker never extracted its archive member")
+	}
+	if !strings.Contains(string(data), "crypto.h") {
+		t.Error("crypto.h is missing although a used translation unit included it")
+	}
 }

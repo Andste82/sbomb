@@ -2,7 +2,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "version": 1,
-  "serialNumber": "urn:uuid:f9666115-d105-592a-a90c-63ae7d27af12",
+  "serialNumber": "urn:uuid:e55b7587-e67b-5ff3-b755-738ff5bdef85",
   "metadata": {
     "tools": [
       {
@@ -27,7 +27,7 @@
       "properties": [
         {
           "name": "sbomb:component:scope",
-          "value": "project"
+          "value": "build"
         },
         {
           "name": "sbomb:license:evidence",
@@ -45,6 +45,36 @@
     },
     {
       "type": "file",
+      "name": "crypto.h",
+      "bom-ref": "file:project:crypto.h",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:license:evidence",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:crypto.h"
+        }
+      ]
+    },
+    {
+      "type": "file",
       "name": "main.c",
       "bom-ref": "file:project:main.c",
       "licenses": [
@@ -57,7 +87,7 @@
       "properties": [
         {
           "name": "sbomb:component:scope",
-          "value": "project"
+          "value": "build"
         },
         {
           "name": "sbomb:license:evidence",
@@ -72,36 +102,6 @@
           "value": "project:main.c"
         }
       ]
-    },
-    {
-      "type": "file",
-      "name": "unused.c",
-      "bom-ref": "file:project:unused.c",
-      "licenses": [
-        {
-          "license": {
-            "name": "NOASSERTION"
-          }
-        }
-      ],
-      "properties": [
-        {
-          "name": "sbomb:component:scope",
-          "value": "project"
-        },
-        {
-          "name": "sbomb:license:evidence",
-          "value": "unknown"
-        },
-        {
-          "name": "sbomb:license:reason",
-          "value": "no-evidence"
-        },
-        {
-          "name": "sbomb:path:canonical",
-          "value": "project:unused.c"
-        }
-      ]
     }
   ],
   "dependencies": [
@@ -109,10 +109,10 @@
       "ref": "file:project:crypto.c"
     },
     {
-      "ref": "file:project:main.c"
+      "ref": "file:project:crypto.h"
     },
     {
-      "ref": "file:project:unused.c"
+      "ref": "file:project:main.c"
     }
   ]
 }

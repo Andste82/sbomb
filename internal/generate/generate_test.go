@@ -3,6 +3,7 @@ package generate
 import (
 	"bytes"
 	"encoding/json"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,6 +12,7 @@ import (
 	"github.com/example/sbomb/internal/anchors"
 	"github.com/example/sbomb/internal/config"
 	"github.com/example/sbomb/internal/cyclonedx"
+	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/pathmodel"
 )
 
@@ -45,7 +47,9 @@ func TestByteIdenticalAcrossRuns(t *testing.T) {
 
 func TestByteIdenticalWithShuffledInputOrder(t *testing.T) {
 	cfg, buildDir := portableFixture(t)
-	original, err := os.ReadFile(filepath.Join(buildDir, "compile_commands.json"))
+	shuffled := copyFixtureBuild(t, buildDir)
+
+	original, err := os.ReadFile(filepath.Join(shuffled, "compile_commands.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,22 +58,51 @@ func TestByteIdenticalWithShuffledInputOrder(t *testing.T) {
 		t.Fatal(err)
 	}
 	entries[0], entries[1] = entries[1], entries[0]
-	shuffled, err := json.Marshal(entries)
+	reordered, err := json.Marshal(entries)
 	if err != nil {
 		t.Fatal(err)
 	}
-	temporaryBuild := t.TempDir()
-	if err := os.WriteFile(filepath.Join(temporaryBuild, "compile_commands.json"), shuffled, 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(shuffled, "compile_commands.json"), reordered, 0o600); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(temporaryBuild, "link-trace.txt"), []byte("portable\n"), 0o600); err != nil {
-		t.Fatal(err)
-	}
+
 	first := marshalPortable(t, cfg, buildDir, pathmodel.PosixFlavor{})
-	second := marshalPortable(t, cfg, temporaryBuild, pathmodel.PosixFlavor{})
+	second := marshalPortable(t, cfg, shuffled, pathmodel.PosixFlavor{})
 	if !bytes.Equal(first, second) {
 		t.Fatal("shuffling compile database entries changed the serialized BOM")
 	}
+}
+
+// copyFixtureBuild copies a committed build directory so a test can modify it
+// without touching the corpus.
+func copyFixtureBuild(t *testing.T, source string) string {
+	t.Helper()
+	destination := t.TempDir()
+	err := filepath.WalkDir(source, func(path string, entry fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		relative, relErr := filepath.Rel(source, path)
+		if relErr != nil {
+			return relErr
+		}
+		target := filepath.Join(destination, relative)
+		if entry.IsDir() {
+			return os.MkdirAll(target, 0o755)
+		}
+		data, readErr := os.ReadFile(path)
+		if readErr != nil {
+			return readErr
+		}
+		if mkErr := os.MkdirAll(filepath.Dir(target), 0o755); mkErr != nil {
+			return mkErr
+		}
+		return os.WriteFile(target, data, 0o644)
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return destination
 }
 
 func TestNoAbsolutePathsInOutput(t *testing.T) {
@@ -81,7 +114,7 @@ func TestNoAbsolutePathsInOutput(t *testing.T) {
 }
 
 func TestRunBuildsGraphAndReportsMissingEvidence(t *testing.T) {
-	fixture := filepath.Join("..", "..", "testdata", "fixtures", "gcc-ninja", "p02-static")
+	fixture := filepath.Join("..", "..", "testdata", "fixtures", "gcc-ninja", "p02-static", "build")
 	result, err := Run(config.Config{}, fixture, true)
 	if err != nil {
 		t.Fatalf("Run returned error: %v", err)
@@ -92,14 +125,56 @@ func TestRunBuildsGraphAndReportsMissingEvidence(t *testing.T) {
 	if result.BOM.Metadata == nil || result.BOM.Metadata.Timestamp != "" {
 		t.Fatal("reproducible BOM should omit metadata timestamp")
 	}
-	found := false
+	// The fixture carries a map and a dependency file, so link evidence must
+	// be present and the artifact must anchor a chain.
+	for _, finding := range result.Findings {
+		if finding.ID == "MISSING_LINK_EVIDENCE" {
+			t.Fatal("the fixture has a map and a dependency file; link evidence must be found")
+		}
+	}
+	var artifacts, sources int
+	for _, node := range result.Graph.Nodes() {
+		switch node.Kind {
+		case domain.NodeArtifact:
+			artifacts++
+		case domain.NodeSource:
+			sources++
+		}
+	}
+	if artifacts != 1 {
+		t.Errorf("got %d artifact nodes, want exactly one deliverable", artifacts)
+	}
+	if sources == 0 {
+		t.Error("no source node was reached from the deliverable")
+	}
+	if err := result.Graph.CheckInvariants(); err != nil {
+		t.Errorf("graph invariants violated: %v", err)
+	}
+}
+
+// TestMissingLinkEvidenceIsReported checks the finding on a build directory
+// that has compile evidence but nothing the linker produced.
+func TestMissingLinkEvidenceIsReported(t *testing.T) {
+	buildDir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(buildDir, "app"), []byte("binary\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(buildDir, "compile_commands.json"), []byte("[]"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	cfg := config.Config{Artifacts: []config.Artifact{{Path: "app"}}}
+	result, err := RunWithOptions(cfg, buildDir, true, Options{PathFlavor: pathmodel.PosixFlavor{}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var found bool
 	for _, finding := range result.Findings {
 		if finding.ID == "MISSING_LINK_EVIDENCE" {
 			found = true
 		}
 	}
 	if !found {
-		t.Fatal("expected missing link evidence finding")
+		t.Fatalf("expected MISSING_LINK_EVIDENCE, got %v", result.Findings)
 	}
 }
 
@@ -134,18 +209,28 @@ func TestRunUsesMakeEvidenceWhenCompileDatabaseIsMissing(t *testing.T) {
 	write("link.txt", "cc -o app CMakeFiles/app.dir/main.c.o\n")
 	write("compiler_depend.make", "CMakeFiles/app.dir/main.c.o: "+source+" "+header+"\n")
 
-	result, err := RunWithOptions(config.Config{Project: config.Project{Root: root}}, buildDir, true, Options{PathFlavor: pathmodel.PosixFlavor{}})
+	if err := os.WriteFile(filepath.Join(buildDir, "app"), []byte("binary\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	makeCfg := config.Config{
+		Project:   config.Project{Root: root},
+		Artifacts: []config.Artifact{{Path: "app", Role: "application"}},
+	}
+	result, err := RunWithOptions(makeCfg, buildDir, true, Options{PathFlavor: pathmodel.PosixFlavor{}})
 	if err != nil {
 		t.Fatal(err)
 	}
-	makeEdges := 0
+	// A Makefiles build without a map or dependency file still yields a full
+	// chain: link.txt reconstructs the link, build.make maps the object to its
+	// source, and compiler_depend.make names the headers.
+	byType := map[domain.EvidenceType]int{}
 	for _, edge := range result.Graph.Edges() {
-		if edge.Adapter == "make" {
-			makeEdges++
-		}
+		byType[edge.Type]++
 	}
-	if makeEdges < 3 {
-		t.Fatalf("got %d Make evidence edges, want link, source, and header edges", makeEdges)
+	for _, required := range []domain.EvidenceType{"link", "source-mapping", "header-dependency"} {
+		if byType[required] == 0 {
+			t.Errorf("no %s edge was produced; edges are %v", required, byType)
+		}
 	}
 	for _, finding := range result.Findings {
 		if finding.ID == "MISSING_LINK_EVIDENCE" {

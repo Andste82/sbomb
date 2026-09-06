@@ -89,8 +89,13 @@ func ParseDeps(data []byte) ([]DepsRecord, error) {
 		if size < 8 {
 			return nil, fmt.Errorf("invalid path record: %w", ErrDepsMalformed)
 		}
+		// A path record is the path, then up to three NUL bytes of padding to
+		// a four-byte boundary, then the checksum. The guard counts how many
+		// padding bytes have been removed; without it the loop condition is
+		// already false on entry and no padding is stripped at all, leaving a
+		// NUL inside every path whose length is not a multiple of four.
 		pathEnd := size - 4
-		for pathEnd > 0 && record[pathEnd-1] == 0 && size-pathEnd < 3 {
+		for padding := 0; padding < 3 && pathEnd > 0 && record[pathEnd-1] == 0; padding++ {
 			pathEnd--
 		}
 		if pathEnd == 0 {

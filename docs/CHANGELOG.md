@@ -2,6 +2,55 @@
 
 ## Unreleased
 
+### The output is derived from the evidence graph
+
+- Final deliverables are resolved per section 5: configured artifacts win, and
+  automatic discovery is limited to installed executable targets reported by
+  the CMake File API, never to the newest or only binary in the build tree.
+  Debug byproducts such as `app.pdb` are not deliverables.
+- Link evidence is read per section 11.2 with deviation D1: the linker
+  dependency file names what the link consumed, the map names which archive
+  members were extracted, and a Makefiles `link.txt` reconstructs the link
+  command when neither exists.
+- Extracted archive members are traced to the build-tree object they were
+  archived from, so a member the linker never extracted has no path to the
+  artifact and does not appear (section 12).
+- Objects are resolved to sources through the strategies of section 13.2, and
+  headers are attached from the Ninja deps log and Makefiles dependency output.
+- The used-file set is now what is reachable from a deliverable. The same
+  project built with `gcc-ninja`, `gcc-make`, `clang-ninja`, `arm-none-eabi`
+  and `mingw-w64` yields the same three files, and `unused.c` -- compiled into
+  the archive but never extracted -- appears in none of them.
+- Graph invariants are checked before anything is written; a violation is an
+  internal error with exit code 70.
+
+### Fixed
+
+- The linker map parsers were unusable against real map files. They scanned
+  every line for anything containing a file extension, so GNU ld linker-script
+  wildcards such as `*crtbegin.o(.ctors)` and lld section placements such as
+  `foo.o:(.text)` were reported as archive members, and a single member was
+  reported once per section it contributed. The parsers are now section-aware:
+  the archive-member block, the as-needed block, the discarded-section block
+  and the memory map are each read for what they actually contain, and lld's
+  input column is parsed as a column. Sniffing now distinguishes GNU ld from
+  gold by the memory map, which recent binutils is the only way to tell apart.
+  `LOAD linker stubs`, which GNU ld writes for ARM veneers, is no longer
+  recorded as a file.
+- The Ninja deps log parser never stripped the NUL padding from path records:
+  its trim condition was already false on entry. Every path whose length was
+  not a multiple of four carried a trailing NUL, so header evidence never
+  matched anything.
+- Findings about the build no longer carry the directory the run happened to
+  read from, which put a temporary path into every golden file.
+- `LINKED_OBJECT_SOURCE_UNRESOLVED` is no longer reported for the C runtime
+  startup objects, which section 24.1 excludes from the SBOM anyway.
+- Paths that an adapter resolved against the directory being read are mapped
+  back to the logical build root before being identified, so evidence from the
+  Makefiles adapter anchors the same way as evidence from a map.
+- `evidence.json`, which is sbomb's own output, was committed into the fixture
+  corpus; the determinism script now works on a copy.
+
 ### Anchors and scope
 
 - Added the section 7 anchor model: a registry with the registration order of

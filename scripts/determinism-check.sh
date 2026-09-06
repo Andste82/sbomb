@@ -2,9 +2,14 @@
 set -eu
 
 repo=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-fixture="$repo/testdata/fixtures/gcc-ninja/p02-static"
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
+
+# Work on a copy: generate writes an evidence dump into the build directory,
+# and the committed corpus is a golden artifact that must stay unchanged.
+fixture="$tmp/fixture"
+mkdir -p "$fixture"
+cp -r "$repo/testdata/fixtures/gcc-ninja/p02-static/build" "$fixture/build"
 
 run() {
   go run ./cmd/sbomb generate \
@@ -12,7 +17,8 @@ run() {
     --config "$repo/testdata/config/portable.json" \
     --output "$1" \
     --reproducible \
-    --path-flavor posix
+    --path-flavor posix \
+    --policy lenient
 }
 
 run "$tmp/first.cdx.json"

@@ -1,4 +1,23 @@
 Policy profile: strict
-Exit code: 0
+Exit code: 3
 
-No findings.
+- DYNAMIC_DEPENDENCIES_IGNORED [info]: 11 toolchain file(s) were excluded by the default inclusion policy
+  subject: build//__fixture_build__
+- DYNAMIC_DEPENDENCIES_IGNORED [info]: 2 system file(s) were excluded by the default inclusion policy
+  subject: build//__fixture_build__
+- MISSING_FILE_HASH [warning]: the file is not readable, so no hash could be computed
+  subject: file/project:crypto.c
+- MISSING_FILE_HASH [warning]: the file is not readable, so no hash could be computed
+  subject: file/project:crypto.h
+- MISSING_FILE_HASH [warning]: the file is not readable, so no hash could be computed
+  subject: file/project:main.c
+- REPRODUCIBLE_MODE_OMITS_TIMESTAMP [info]: the document omits metadata.timestamp and is therefore not a CRA deliverable SBOM
+  subject: run//__fixture_build__
+- UNANCHORED_FILE [warning]: the file lies under no registered anchor and was identified by absolute path
+  subject: file/abs:lib/x86_64-linux-gnu/libc.so.6
+- UNANCHORED_FILE [warning]: the file lies under no registered anchor and was identified by absolute path
+  subject: file/abs:lib/x86_64-linux-gnu/libc.so.6
+- UNANCHORED_FILE [warning]: the file lies under no registered anchor and was identified by absolute path
+  subject: file/abs:lib64/ld-linux-x86-64.so.2
+- UNANCHORED_FILE [warning]: the file lies under no registered anchor and was identified by absolute path
+  subject: file/abs:lib64/ld-linux-x86-64.so.2

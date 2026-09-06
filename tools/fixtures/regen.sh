@@ -166,6 +166,9 @@ QUERY
 
   local build_out="$out_dir/build"
 
+  # sbomb's own output must never become fixture input.
+  rm -f "$BUILD_ROOT/evidence.json"
+
   # Structured build-system evidence.
   harvest "$BUILD_ROOT/compile_commands.json" "$build_out/compile_commands.json"
   local reply

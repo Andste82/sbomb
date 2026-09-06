@@ -27,25 +27,38 @@
 - Adapters exist and are unit-tested for Ninja, compile databases, depfiles,
   linker maps, DWARF/ELF/PE and archives.
 
+- Sections 5, 11, 12 and 13: final deliverables are resolved from
+  configuration or discovered from installed executable targets; link evidence
+  is read from the dependency file and the map; extracted archive members are
+  traced to the object they were archived from; objects are resolved to their
+  sources through the strategies of section 13.2; headers come from the Ninja
+  deps log and from Makefiles dependency output.
+- **The output is derived from the evidence graph.** The used-file set is what
+  is reachable from a deliverable, so a compiled source whose archive member
+  the linker never extracted does not appear. The same project built with
+  five different toolchain and generator combinations produces the same set.
+
 ## Known Gaps
 
-The single most important one:
-
-- **The evidence graph is not the source of the output.** It is populated in
-  parallel with the component list rather than being what the component list
-  is derived from, so there is no reachability filter from artifact to file --
-  the central premise of section 4. Consequently `unused.c` still appears in
-  the `p02-static` SBOM even though its archive member is provably never
-  extracted by the linker.
-- **Link evidence is still unread.** The linker dependency file, the map and
-  DWARF are parsed by tested packages that `internal/generate` never calls, so
-  17 of 30 packages are reachable from the binary. The anchors can classify
-  toolchain and system paths, but nothing feeds those paths in yet.
+- **The document shape is not yet CRA-conformant.** There is no
+  `metadata.component`, the dependency array carries no `dependsOn`, and there
+  is no embedded CycloneDX schema validation. That is roadmap phase 3.
+- **Components, versions, licenses and suppliers are missing.** Files are
+  emitted individually rather than grouped into components with a version and
+  a supplier, so the CRA field set of section 1.5 is incomplete. Roadmap
+  phase 4.
+- **Most policy gates remain inert.** Two are wired end to end --
+  `MISSING_LINK_EVIDENCE` and `MISSING_FILE_HASH` -- so `strict` and `lenient`
+  now genuinely differ, but the remaining gates of section 33.1 have no
+  findings to act on. Roadmap phase 5.
+- **DWARF evidence is unused.** Section 11.4 makes it the primary header
+  source and a strong object-to-source strategy; the adapter exists and is
+  tested but is not called. Roadmap phase 6.
 
 ## Next Work
 
-Roadmap phase 2: make the evidence graph the single source of the output.
-Resolve the configured artifact, read link evidence in the preference order of
-section 11.2 (with deviation D1: the map supplies archive members, the
-dependency file does not), resolve objects to sources, and derive the used-file
-set from reachability rather than from whatever the adapters happened to see.
+Roadmap phase 3: bind the graph to a CycloneDX document that a consumer can
+use. A root component in `metadata.component`, grouping components, a real
+dependency cascade with `dependsOn`, the `bom-ref` scheme of section 28.4, the
+BSI properties of section 1.5(3), and the second validation layer of section
+32.5 with the official schema embedded via `go:embed`.

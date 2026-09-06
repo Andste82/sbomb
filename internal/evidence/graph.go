@@ -133,6 +133,15 @@ func (g *Graph) AddEdge(e domain.Edge) {
 	g.outgoingEdges[e.From] = append(g.outgoingEdges[e.From], edge)
 }
 
+// Node returns the node with the given ID.
+func (g *Graph) Node(id domain.NodeID) (domain.Node, bool) {
+	node, ok := g.nodes[id]
+	if !ok {
+		return domain.Node{}, false
+	}
+	return *node, true
+}
+
 // Nodes returns all nodes in the graph, sorted by ID.
 func (g *Graph) Nodes() []domain.Node {
 	nodes := make([]domain.Node, 0, len(g.nodes))

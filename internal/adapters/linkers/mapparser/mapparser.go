@@ -1,4 +1,15 @@
-// Package mapparser contains the bounded, format-neutral parts of linker map parsing.
+// Package mapparser reads linker map files.
+//
+// Map formats are not standardized and are not line-oriented in any uniform
+// way: they are divided into named sections whose contents mean different
+// things. A parser that scans every line for anything that looks like a path
+// reports linker-script wildcards such as *(.gnu.attributes) and lld section
+// placements such as foo.o:(.text) as archive members. Everything here is
+// therefore driven by which section the line belongs to.
+//
+// Map evidence matters more than specification section 11.2 suggests: GNU ld
+// does not list extracted archive members in its dependency file, only the
+// archive, so member-level attribution comes from here (docs/deviations.md D1).
 package mapparser
 
 import (
@@ -6,6 +17,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"regexp"
 	"strings"
 )
 
@@ -13,6 +25,15 @@ const (
 	MaxLineLength = 1 << 20
 	MaxInputSize  = 2 << 30
 	MaxTokensLine = 100000
+)
+
+// Format identifiers returned by Sniff.
+const (
+	FormatGNULD   = "gnu-ld"
+	FormatGNUGold = "gnu-gold"
+	FormatLLD     = "lld"
+	FormatMSVC    = "msvc"
+	FormatIAR     = "iar"
 )
 
 type Kind string
@@ -40,97 +61,262 @@ type Result struct {
 	Err     error
 }
 
+var ErrMalformed = errors.New("malformed link evidence")
+var ErrInputLimitExceeded = errors.New("input limit exceeded")
+var ErrUnknownFormat = errors.New("unknown linker map format")
+
+// Sniff identifies the map format from its content.
 func Sniff(text string) string {
+	hasMemberBlock := strings.Contains(text, "Archive member included")
+	switch {
+	// Only GNU ld (bfd) emits the linker script and memory map section. Gold
+	// writes the same archive-member header but no memory map, which is the
+	// only reliable way to tell the two apart in recent binutils.
+	case hasMemberBlock && strings.Contains(text, "Linker script and memory map"):
+		return FormatGNULD
+	case strings.Contains(text, "Memory Configuration"):
+		return FormatGNULD
+	case hasMemberBlock:
+		return FormatGNUGold
+	case strings.Contains(text, "Preferred load address is"), strings.Contains(text, " Address         Publics by Value"):
+		return FormatMSVC
+	case strings.Contains(text, "IAR ELF Linker"):
+		return FormatIAR
+	}
 	for _, line := range strings.Split(text, "\n") {
 		trimmed := strings.TrimSpace(line)
-		switch {
-		case strings.HasPrefix(trimmed, "Archive member included to satisfy reference by file"):
-			return "gnu-gold"
-		case strings.HasPrefix(trimmed, "Archive member included") || strings.HasPrefix(trimmed, "Memory Configuration"):
-			return "gnu-ld"
-		case strings.Contains(trimmed, "Preferred load address is"), strings.Contains(line, " Address         Publics by Value"):
-			return "msvc"
-		case strings.HasPrefix(trimmed, "VMA") && strings.Contains(trimmed, "LMA") && strings.Contains(trimmed, "Out") && strings.Contains(trimmed, "In") && strings.Contains(trimmed, "Symbol"):
-			return "lld"
-		case strings.Contains(trimmed, "IAR ELF Linker") || (strings.Contains(text, "MODULE SUMMARY") && strings.HasPrefix(trimmed, "***")):
-			return "iar"
+		if strings.HasPrefix(trimmed, "VMA") && strings.Contains(trimmed, "LMA") &&
+			strings.Contains(trimmed, "Out") && strings.Contains(trimmed, "In") && strings.Contains(trimmed, "Symbol") {
+			return FormatLLD
 		}
 	}
 	return ""
 }
 
-var ErrMalformed = errors.New("malformed link evidence")
-var ErrInputLimitExceeded = errors.New("input limit exceeded")
+// gnuSection names the block a line belongs to in a GNU ld or gold map.
+type gnuSection int
 
+const (
+	gnuOther gnuSection = iota
+	gnuArchiveMembers
+	gnuAsNeeded
+	gnuDiscarded
+	gnuMemoryMap
+)
+
+// gnuHeaders maps a section header to the state it starts. Any other
+// unindented, non-empty line also ends the current section, which is what
+// keeps the archive-member block from swallowing the rest of the file.
+var gnuHeaders = map[string]gnuSection{
+	"Archive member included to satisfy reference by file (symbol)":    gnuArchiveMembers,
+	"Archive member included to satisfy reference by file":             gnuArchiveMembers,
+	"As-needed library included to satisfy reference by file (symbol)": gnuAsNeeded,
+	"As-needed library included to satisfy reference by file":          gnuAsNeeded,
+	"Discarded input sections":                                         gnuDiscarded,
+	"Linker script and memory map":                                     gnuMemoryMap,
+	"Allocating common symbols":                                        gnuOther,
+	"Merging program properties":                                       gnuOther,
+	"Memory Configuration":                                             gnuOther,
+}
+
+// lldInputColumn matches an entry of lld's "In" column: a file specification
+// followed by the section it contributed, such as
+// "libcrypto.a(crypto.c.o):(.text)" or "/lib/Scrt1.o:(.text)".
+var lldInputColumn = regexp.MustCompile(`^(.+?):\(([^)]*)\)$`)
+
+// Parse reads a map in the given format. An empty format is sniffed from the
+// content. Parsing is streaming and tolerates truncation: whatever was read
+// before the failure point is returned alongside the error, per section 11.5.
 func Parse(r io.Reader, format string) Result {
 	result := Result{Format: format}
 	scanner := bufio.NewScanner(r)
 	scanner.Buffer(make([]byte, 4096), MaxLineLength)
-	inDiscarded := false
+
+	emit := newRecorder(&result)
+	section := gnuOther
 	var allocated int
+
 	for scanner.Scan() {
 		line := scanner.Text()
 		allocated += len(line)
 		if allocated > MaxInputSize {
 			result.Err = fmt.Errorf("map input exceeds %d bytes: %w", MaxInputSize, ErrInputLimitExceeded)
-			break
+			return result
 		}
-		trimmed := strings.TrimSpace(line)
 		if len(strings.Fields(line)) > MaxTokensLine {
 			result.Err = fmt.Errorf("map line exceeds %d tokens: %w", MaxTokensLine, ErrInputLimitExceeded)
-			break
+			return result
 		}
-		if strings.HasPrefix(trimmed, "Discarded input sections") || strings.HasPrefix(trimmed, "Discarded sections") {
-			inDiscarded = true
-			continue
-		}
-		if inDiscarded && trimmed != "" {
-			if record, ok := discardedRecord(line); ok {
-				result.Records = append(result.Records, record)
-				continue
-			}
-			inDiscarded = false
-		}
-		for _, token := range paths(line) {
-			if archive, member, ok := splitArchiveMember(token); ok {
-				result.Records = append(result.Records,
-					Record{Kind: StaticArchive, Path: archive, Raw: line},
-					Record{Kind: ArchiveMember, Path: member, Archive: archive, Member: member, Raw: line})
-			} else {
-				result.Records = append(result.Records, Record{Kind: classify(token), Path: token, Raw: line})
-			}
+
+		switch result.Format {
+		case FormatLLD:
+			parseLLDLine(line, emit)
+		case FormatMSVC, FormatIAR:
+			parseGenericLine(line, emit)
+		default:
+			section = parseGNULine(line, section, emit)
 		}
 	}
+
 	if err := scanner.Err(); err != nil {
 		if strings.Contains(err.Error(), "token too long") {
 			result.Err = fmt.Errorf("read linker map: %w: %v", ErrInputLimitExceeded, err)
 		} else {
 			result.Err = fmt.Errorf("read linker map: %w: %v", ErrMalformed, err)
 		}
+		return result
 	}
-	if result.Err == nil && len(result.Records) == 0 {
+	if len(result.Records) == 0 {
 		result.Err = ErrMalformed
 	}
 	return result
 }
 
-func paths(line string) []string {
-	seen := make(map[string]bool)
-	var out []string
-	for _, token := range strings.Fields(line) {
-		token = strings.Trim(token, "[],:;")
-		if !hasFileExtension(token) || seen[token] {
-			continue
+// recorder appends a record unless an identical one was already seen. Map
+// files name the same archive member once per contributed section, so without
+// deduplication a single member appears a dozen times.
+func newRecorder(result *Result) func(Record) {
+	seen := map[string]bool{}
+	return func(record Record) {
+		if record.Path == "" {
+			return
 		}
-		seen[token] = true
-		out = append(out, token)
+		key := string(record.Kind) + "\x00" + record.Archive + "\x00" + record.Path
+		if seen[key] {
+			return
+		}
+		seen[key] = true
+		result.Records = append(result.Records, record)
 	}
-	return out
 }
 
-func hasFileExtension(token string) bool {
-	for _, extension := range []string{".a", ".so", ".o", ".obj", ".lib", ".dll", ".elf", ".ld", ".lds"} {
-		if strings.Contains(token, extension) {
+func parseGNULine(line string, section gnuSection, emit func(Record)) gnuSection {
+	trimmed := strings.TrimSpace(line)
+	if trimmed == "" {
+		return section
+	}
+	// An unindented line is either a known header or the start of something
+	// this parser does not model; either way the previous section ends.
+	if !strings.HasPrefix(line, " ") && !strings.HasPrefix(line, "\t") {
+		if next, known := gnuHeaders[trimmed]; known {
+			return next
+		}
+		if section == gnuMemoryMap {
+			// LOAD lines are the direct inputs the linker opened. Not every
+			// one names a file: GNU ld writes "LOAD linker stubs" for the
+			// veneers it synthesizes for ARM.
+			if path, found := strings.CutPrefix(trimmed, "LOAD "); found {
+				path = strings.TrimSpace(path)
+				if looksLikeFile(path) {
+					emit(Record{Kind: classify(path), Path: path, Raw: line})
+				}
+				return section
+			}
+			// Output section names and addresses live here too; ignore them.
+			return section
+		}
+		if section == gnuArchiveMembers || section == gnuAsNeeded {
+			return parseGNUInclusionLine(line, trimmed, section, emit)
+		}
+		return gnuOther
+	}
+
+	switch section {
+	case gnuArchiveMembers, gnuAsNeeded:
+		return parseGNUInclusionLine(line, trimmed, section, emit)
+	case gnuDiscarded:
+		// " .text.foo   0x0   0x2a   path/to/file.o"
+		fields := strings.Fields(trimmed)
+		if len(fields) > 0 {
+			if candidate := fields[len(fields)-1]; looksLikeFile(candidate) {
+				emit(Record{Kind: DiscardedSection, Path: candidate, Raw: line})
+			}
+		}
+	}
+	return section
+}
+
+// parseGNUInclusionLine reads one entry of the archive-member or as-needed
+// block: the included file, then the file and symbol that required it.
+func parseGNUInclusionLine(line, trimmed string, section gnuSection, emit func(Record)) gnuSection {
+	fields := strings.Fields(trimmed)
+	if len(fields) == 0 {
+		return section
+	}
+	included := fields[0]
+	if archive, member, ok := splitArchiveMember(included); ok {
+		emit(Record{Kind: StaticArchive, Path: archive, Raw: line})
+		emit(Record{Kind: ArchiveMember, Path: archive + "(" + member + ")", Archive: archive, Member: member, Raw: line})
+		return section
+	}
+	if !looksLikeFile(included) {
+		// Not an entry of this block after all; the block has ended.
+		return gnuOther
+	}
+	kind := SharedLibrary
+	if section == gnuArchiveMembers {
+		kind = classify(included)
+	}
+	emit(Record{Kind: kind, Path: included, Raw: line})
+	return section
+}
+
+// parseLLDLine reads lld's column layout. Only the "In" column names input
+// files; the "Out" column names output sections and the symbol column names
+// symbols, neither of which is evidence about inputs.
+func parseLLDLine(line string, emit func(Record)) {
+	for _, token := range strings.Fields(line) {
+		match := lldInputColumn.FindStringSubmatch(token)
+		if match == nil {
+			continue
+		}
+		spec := match[1]
+		if spec == "" || strings.HasPrefix(spec, "<") {
+			// "<internal>" is lld's own synthetic input.
+			continue
+		}
+		if archive, member, ok := splitArchiveMember(spec); ok {
+			emit(Record{Kind: StaticArchive, Path: archive, Raw: line})
+			emit(Record{Kind: ArchiveMember, Path: archive + "(" + member + ")", Archive: archive, Member: member, Raw: line})
+			continue
+		}
+		if looksLikeFile(spec) {
+			emit(Record{Kind: classify(spec), Path: spec, Raw: line})
+		}
+	}
+}
+
+// parseGenericLine is the fallback for the parked MSVC and IAR formats. It is
+// deliberately conservative: it records only tokens that are unambiguously
+// file paths with a known extension.
+func parseGenericLine(line string, emit func(Record)) {
+	for _, token := range strings.Fields(line) {
+		token = strings.Trim(token, "[],;")
+		if archive, member, ok := splitArchiveMember(token); ok && looksLikeFile(archive) {
+			emit(Record{Kind: StaticArchive, Path: archive, Raw: line})
+			emit(Record{Kind: ArchiveMember, Path: token, Archive: archive, Member: member, Raw: line})
+			continue
+		}
+		if looksLikeFile(token) {
+			emit(Record{Kind: classify(token), Path: token, Raw: line})
+		}
+	}
+}
+
+// fileExtensions are the suffixes a linker input can carry. A wildcard such as
+// *(.gnu.attributes) has none of them and is therefore never mistaken for one.
+var fileExtensions = []string{".a", ".lib", ".so", ".dll", ".o", ".obj", ".elf", ".exe", ".ld", ".lds"}
+
+func looksLikeFile(token string) bool {
+	if token == "" || strings.ContainsAny(token, "*?") {
+		return false
+	}
+	for _, extension := range fileExtensions {
+		if strings.HasSuffix(token, extension) {
+			return true
+		}
+		// Versioned shared objects such as libc.so.6.
+		if index := strings.Index(token, extension+"."); index > 0 {
 			return true
 		}
 	}
@@ -141,24 +327,29 @@ func classify(path string) Kind {
 	switch {
 	case strings.HasSuffix(path, ".a"), strings.HasSuffix(path, ".lib"):
 		return StaticArchive
-	case strings.HasSuffix(path, ".so"), strings.HasSuffix(path, ".dll"):
+	case strings.HasSuffix(path, ".ld"), strings.HasSuffix(path, ".lds"):
+		return LinkerScript
+	case strings.HasSuffix(path, ".so"), strings.HasSuffix(path, ".dll"), strings.Contains(path, ".so."):
 		return SharedLibrary
 	default:
 		return LinkedObject
 	}
 }
 
-func discardedRecord(line string) (Record, bool) {
-	for _, path := range paths(line) {
-		return Record{Kind: DiscardedSection, Path: path, Raw: line}, true
-	}
-	return Record{}, false
-}
-
 func splitArchiveMember(token string) (string, string, bool) {
-	open := strings.LastIndexByte(token, '(')
-	if open <= 0 || !strings.HasSuffix(token, ")") {
+	if !strings.HasSuffix(token, ")") {
 		return "", "", false
 	}
-	return token[:open], strings.TrimSuffix(token[open+1:], ")"), true
+	open := strings.LastIndexByte(token, '(')
+	if open <= 0 {
+		return "", "", false
+	}
+	archive := token[:open]
+	member := strings.TrimSuffix(token[open+1:], ")")
+	// An archive member is a real object inside a real archive; a linker
+	// script wildcard such as *crtbegin.o(.ctors) is neither.
+	if !looksLikeFile(archive) || !looksLikeFile(member) {
+		return "", "", false
+	}
+	return archive, member, true
 }

@@ -1,6 +1,15 @@
 project:crypto.c
   used because:
     project:crypto.c
-      <- [compile | derived | high | compile_commands] object:build:CMakeFiles/crypto.dir/crypto.c.o
-    object:build:CMakeFiles/crypto.dir/crypto.c.o
-      <- [compile-output | linked | medium | compile_commands] artifact:build
+      <- [source-mapping | derived | high | ninja-buildgraph:object-source-mapping] build:CMakeFiles/crypto.dir/crypto.c.o
+    build:CMakeFiles/crypto.dir/crypto.c.o
+      <- [archive-member | linked | high | gnu-ld:app.map] build:libcrypto.a
+    build:libcrypto.a
+      <- [link | linked | high | gnu-ld:app.map] artifact:build:app
+
+    project:crypto.c
+      <- [source-mapping | derived | high | ninja-buildgraph:object-source-mapping] build:CMakeFiles/crypto.dir/crypto.c.o
+    build:CMakeFiles/crypto.dir/crypto.c.o
+      <- [archive-member | linked | high | gnu-ld:app.map] build:libcrypto.a
+    build:libcrypto.a
+      <- [link | linked | high | ld:app.d] artifact:build:app
