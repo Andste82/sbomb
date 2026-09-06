@@ -59,6 +59,10 @@ type entry struct {
 	// match, and checking that is a substring search rather than a regular
 	// expression.
 	anchor string
+	// deprecated marks an identifier SPDX has superseded. Emitting one in a
+	// compliance document is a defect, so a current identifier that matches
+	// the same text wins.
+	deprecated bool
 	// source is the template, kept until the pattern is needed.
 	source string
 
@@ -94,13 +98,18 @@ func loadTemplates() ([]*entry, error) {
 			return
 		}
 		fields := bytes.Split(decompressed, []byte{0})
-		for index := 0; index+1 < len(fields); index += 2 {
+		for index := 0; index+2 < len(fields); index += 3 {
 			id := string(fields[index])
-			source := string(fields[index+1])
+			source := string(fields[index+2])
 			if id == "" || source == "" {
 				continue
 			}
-			templates = append(templates, &entry{id: id, anchor: templateAnchor(source), source: source})
+			templates = append(templates, &entry{
+				id:         id,
+				deprecated: string(fields[index+1]) == "1",
+				anchor:     templateAnchor(source),
+				source:     source,
+			})
 		}
 		// Sorted, so that the order candidates are tried in -- and therefore
 		// which of several matches is reported first -- does not depend on the
@@ -130,7 +139,7 @@ func matchTemplates(text string) ([]string, error) {
 	if normalized == "" {
 		return nil, nil
 	}
-	var matched []string
+	var matched, deprecatedMatches []string
 	for _, candidate := range entries {
 		if candidate.anchor != "" && !strings.Contains(normalized, candidate.anchor) {
 			continue
@@ -142,9 +151,22 @@ func matchTemplates(text string) ([]string, error) {
 			// other 738 from matching.
 			continue
 		}
-		if pattern.MatchString(normalized) {
-			matched = append(matched, candidate.id)
+		if !pattern.MatchString(normalized) {
+			continue
 		}
+		if candidate.deprecated {
+			deprecatedMatches = append(deprecatedMatches, candidate.id)
+			continue
+		}
+		matched = append(matched, candidate.id)
+	}
+	// A deprecated identifier counts only when nothing current matched. GPL-2.0
+	// is the superseded spelling of GPL-2.0-only and matches every text it
+	// does; reporting both as an ambiguity would be reporting SPDX's own
+	// renaming as a disagreement. The digest table resolves collisions the
+	// same way.
+	if len(matched) == 0 {
+		return deprecatedMatches, nil
 	}
 	return matched, nil
 }
@@ -176,7 +198,7 @@ func compileTemplate(template string) (*regexp.Regexp, error) {
 	// expressions are not; dot-all is irrelevant once newlines are gone, but
 	// costs nothing and guards a template that expects one.
 	builder.WriteString(`(?is)\A`)
-	if err := writeSegments(&builder, template, true); err != nil {
+	if err := writeSegments(&builder, template); err != nil {
 		return nil, err
 	}
 	builder.WriteString(`\z`)
@@ -184,15 +206,13 @@ func compileTemplate(template string) (*regexp.Regexp, error) {
 }
 
 // writeSegments walks a template, emitting literals, variables and optional
-// blocks. Optional blocks do not nest in the published list, so the recursion
-// is one level deep and `optional` says whether to allow them at all.
-func writeSegments(builder *strings.Builder, template string, optional bool) error {
+// blocks. Optional blocks nest -- 46 of the 739 templates do it, three deep at
+// the most -- so the recursion is unbounded in depth and the closing marker is
+// found by counting rather than by taking the first one.
+func writeSegments(builder *strings.Builder, template string) error {
 	rest := template
 	for {
-		var optionalAt = -1
-		if optional {
-			optionalAt = strings.Index(rest, beginOptional)
-		}
+		optionalAt := strings.Index(rest, beginOptional)
 		variableAt := varPattern.FindStringIndex(rest)
 
 		switch {
@@ -208,22 +228,55 @@ func writeSegments(builder *strings.Builder, template string, optional bool) err
 
 		default:
 			builder.WriteString(literalPattern(rest[:optionalAt]))
-			end := strings.Index(rest[optionalAt:], endOptional)
-			if end < 0 {
+			closing := closingOptional(rest, optionalAt)
+			if closing < 0 {
 				return fmt.Errorf("unterminated optional block")
 			}
-			block := rest[optionalAt : optionalAt+end]
-			if marker := strings.Index(block, ">>"); marker >= 0 {
-				block = block[marker+2:]
-			}
 			builder.WriteString("(?:")
-			if err := writeSegments(builder, block, false); err != nil {
+			if err := writeSegments(builder, optionalBody(rest, optionalAt, closing)); err != nil {
 				return err
 			}
 			builder.WriteString(")?")
-			rest = rest[optionalAt+end+len(endOptional):]
+			rest = rest[closing+len(endOptional):]
 		}
 	}
+}
+
+// closingOptional returns the index of the marker that closes the block
+// opening at openAt, or -1. Taking the first <<endOptional>> instead closes an
+// outer block on an inner one's marker, which silently truncates it: the
+// appendix of GPL-2.0 and of Apache-2.0 both contain nested blocks, and both
+// licences failed to match a real file until this counted.
+func closingOptional(template string, openAt int) int {
+	depth := 0
+	index := openAt
+	for index < len(template) {
+		nextOpen := strings.Index(template[index:], beginOptional)
+		nextClose := strings.Index(template[index:], endOptional)
+		if nextClose < 0 {
+			return -1
+		}
+		if nextOpen >= 0 && nextOpen < nextClose {
+			depth++
+			index += nextOpen + len(beginOptional)
+			continue
+		}
+		depth--
+		if depth == 0 {
+			return index + nextClose
+		}
+		index += nextClose + len(endOptional)
+	}
+	return -1
+}
+
+// optionalBody is what sits between an optional block's markers.
+func optionalBody(template string, openAt, closing int) string {
+	body := template[openAt:closing]
+	if marker := strings.Index(body, ">>"); marker >= 0 {
+		return body[marker+2:]
+	}
+	return body
 }
 
 // repeatLimit is RE2's maximum repeat count.
@@ -309,11 +362,11 @@ func invariantRuns(template string) []string {
 			rest = rest[variableAt[1]:]
 		default:
 			runs = append(runs, rest[:optionalAt])
-			end := strings.Index(rest[optionalAt:], endOptional)
-			if end < 0 {
+			closing := closingOptional(rest, optionalAt)
+			if closing < 0 {
 				return runs
 			}
-			rest = rest[optionalAt+end+len(endOptional):]
+			rest = rest[closing+len(endOptional):]
 		}
 	}
 }

@@ -143,8 +143,8 @@ func readBlob(blob []byte) (map[string]string, error) {
 	}
 	out := map[string]string{}
 	fields := bytes.Split(raw, []byte{0})
-	for i := 0; i+1 < len(fields); i += 2 {
-		out[string(fields[i])] = string(fields[i+1])
+	for i := 0; i+2 < len(fields); i += 3 {
+		out[string(fields[i])] = string(fields[i+1]) + "\x00" + string(fields[i+2])
 	}
 	return out, nil
 }
@@ -153,7 +153,7 @@ func readBlob(blob []byte) (map[string]string, error) {
 // A template is arbitrary text containing newlines and backslashes, so a
 // line-oriented format would need escaping, and an escaping bug would corrupt
 // a licence silently.
-func writeTemplateBlob(templates map[string]string) ([]byte, error) {
+func writeTemplateBlob(templates map[string]string, deprecated map[string]bool) ([]byte, error) {
 	ids := make([]string, 0, len(templates))
 	for id := range templates {
 		ids = append(ids, id)
@@ -169,7 +169,11 @@ func writeTemplateBlob(templates map[string]string) ([]byte, error) {
 		if strings.ContainsRune(id, 0) || strings.ContainsRune(templates[id], 0) {
 			return nil, fmt.Errorf("%s: a NUL byte in the record separator's own alphabet", id)
 		}
-		if _, err := writer.Write([]byte(id + "\x00" + templates[id] + "\x00")); err != nil {
+		flag := "0"
+		if deprecated[id] {
+			flag = "1"
+		}
+		if _, err := writer.Write([]byte(id + "\x00" + flag + "\x00" + templates[id] + "\x00")); err != nil {
 			return nil, err
 		}
 	}
@@ -302,7 +306,7 @@ var knownLicenseHashes = map[string]string{
 	}
 	builder.WriteString("}\n")
 
-	blob, err := writeTemplateBlob(byTemplate)
+	blob, err := writeTemplateBlob(byTemplate, deprecated)
 	if err != nil {
 		return "", nil, fmt.Errorf("packing the license templates: %w", err)
 	}

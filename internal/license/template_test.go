@@ -180,3 +180,66 @@ func TestLiteralPatternToleratesWhitespaceDisagreement(t *testing.T) {
 		t.Error("a file without the template's padding spaces did not match")
 	}
 }
+
+// Optional blocks nest: 46 of the 739 templates do it, three deep at the most.
+// Closing an outer block on an inner block's marker truncates it silently, and
+// the licence then matches nothing -- which is what GPL-2.0 and LGPL-3.0 did,
+// because the appendix that explains how to apply them is a nest of optional
+// pieces.
+func TestOptionalBlocksNest(t *testing.T) {
+	template := `Terms.<<beginOptional>> Appendix.<<beginOptional>> Sub<<endOptional>> End.<<endOptional>>`
+	pattern, err := compileTemplate(template)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, accepted := range []string{
+		"terms.",
+		"terms. appendix. end.",
+		"terms. appendix. sub end.",
+	} {
+		if !pattern.MatchString(looseNormalize(accepted)) {
+			t.Errorf("did not match: %q", accepted)
+		}
+	}
+	// Taking the first <<endOptional>> would end the outer block after "Sub",
+	// leaving " End." as mandatory literal text.
+	if pattern.MatchString(looseNormalize("terms. appendix. sub")) {
+		t.Error(`matched a text that omits the outer block's tail`)
+	}
+}
+
+func TestClosingOptionalCountsDepth(t *testing.T) {
+	template := `<<beginOptional>>a<<beginOptional>>b<<endOptional>>c<<endOptional>>tail`
+	closing := closingOptional(template, 0)
+	if closing < 0 {
+		t.Fatal("no closing marker found")
+	}
+	if rest := template[closing+len(endOptional):]; rest != "tail" {
+		t.Errorf("the outer block ended too early; the rest is %q, want %q", rest, "tail")
+	}
+	if body := optionalBody(template, 0, closing); body != `a<<beginOptional>>b<<endOptional>>c` {
+		t.Errorf("body = %q", body)
+	}
+}
+
+// A deprecated identifier matches every text its current spelling does. GPL-2.0
+// is the superseded name of GPL-2.0-only; reporting both would report SPDX's
+// own renaming as a disagreement.
+func TestADeprecatedIdentifierYieldsToACurrentOne(t *testing.T) {
+	entries, err := loadTemplates()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var current, superseded bool
+	for _, e := range entries {
+		switch e.id {
+		case "GPL-2.0-only":
+			current = !e.deprecated
+		case "GPL-2.0":
+			superseded = e.deprecated
+		}
+	}
+	if !current || !superseded {
+		t.Fatalf("the list no longer marks GPL-2.0 deprecated and GPL-2.0-only current (current=%v superseded=%v)", current, superseded)
+	}
+}
