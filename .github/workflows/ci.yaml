@@ -96,7 +96,10 @@ jobs:
   # The findings catalogue in the user documentation is generated from appendix
   # A and annotated with what the code emits. Unlike the SPDX list this depends
   # on nothing external, so drift is a fault and blocks the pull request.
-  findings-catalogue:
+  # The findings catalogue is generated from appendix A and annotated with what
+  # the code emits; the documented configurations are run through the loader.
+  # Both keep a document from describing something other than the tool.
+  documentation:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -105,6 +108,8 @@ jobs:
           go-version-file: go.mod
       - name: Matches the code and the specification
         run: go run ./tools/findingsdoc --check
+      - name: Documented configurations load
+        run: go run ./tools/docexamples
 
   # The SPDX license list changes upstream, so drift here is information, not
   # a reason to block a pull request. It is checked separately for that reason.

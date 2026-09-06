@@ -525,3 +525,41 @@ directory the tool was pointed at but does not own. That default stays, because
 documented workflow; but it is now a choice. `--evidence-dump <path>` puts it
 somewhere else, and `--evidence-dump=off` leaves the build directory as it was
 found.
+
+## D24 — The configuration schema is derived from the types, not written beside them
+
+`sbomb schema` published a hand-written JSON Schema. It named five of the
+eleven sections the loader accepts — `project`, `build`, `mode`, `artifacts`,
+`policy` — and set `additionalProperties: false`, so it actively rejected
+`schemaVersion`, `output`, `anchors`, `discovery`, `components` and
+`manifests`. Every documented example configuration failed against the schema
+the tool itself hands out, and `docs/configuration.md` pointed readers at it.
+
+A wrong schema is worse than no schema: it is machine readable, so it is
+believed, and it fails a file that is correct.
+
+It is generated from the Go types now (`internal/config/schema.go`). The
+loader refuses unknown fields at every level (D21) and the schema says
+`additionalProperties: false` at every level, from the same struct tags, so the
+two cannot disagree about what a valid file is. What reflection cannot see —
+the closed value sets `validate` enforces, and which fields are required — is
+listed in two small tables beside the generator.
+
+A test validates every committed configuration and a fully populated example
+against the published schema, and checks that the schema refuses what the
+loader refuses.
+
+## D25 — Documented configurations are run through the loader
+
+An example the tool would reject is worse than no example: somebody copies it,
+gets an error, and concludes the tool is broken. `tools/docexamples` extracts
+every fenced JSON block from the user documentation that looks like a
+configuration and loads it exactly as a run would, filling in only the two
+fields the loader insists on so that a fragment showing one section is judged
+on that section.
+
+It found one on its first run: the documentation described an artifact role
+`firmware`, which the loader has never accepted. The roles are `application`,
+`bootloader`, `library`, `filesystem`, `image`, `package`, `data` and `other`;
+`firmware` is the CycloneDX *type* that `bootloader`, `image` and `filesystem`
+produce.

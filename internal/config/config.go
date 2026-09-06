@@ -8,19 +8,6 @@ import (
 	"path/filepath"
 )
 
-var schemaJSON = `{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
-  "properties": {
-    "project": {"type": "object", "properties": {"name":{"type":"string"},"root":{"type":"string"}}},
-    "build": {"type": "object", "properties": {"dir":{"type":"string"}}},
-    "mode": {"type": "string", "enum": ["single", "assembly"]},
-    "artifacts": {"type": "array"},
-    "policy": {"type": "object"}
-  },
-  "additionalProperties": false
-}`
-
 type Config struct {
 	SchemaVersion int         `json:"schemaVersion,omitempty"`
 	Project       Project     `json:"project"`
@@ -157,8 +144,6 @@ type Component struct {
 	Supplier    string     `json:"supplier,omitempty"`
 	PURL        string     `json:"purl,omitempty"`
 }
-
-func Schema() string { return schemaJSON }
 
 func Load(path string) (Config, error) {
 	data, err := os.ReadFile(path)

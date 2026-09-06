@@ -20,6 +20,7 @@ go test -tags e2e ./test/...            # end-to-end, needs a real toolchain
 tools/fixtures/regen.sh --check         # the committed corpus is complete
 scripts/determinism-check.sh            # two runs produce the same bytes
 go run ./tools/findingsdoc --check      # the findings catalogue matches the code
+go run ./tools/docexamples             # the documented configurations load
 ```
 
 Two checks are not in the gate because they need every fixture toolchain

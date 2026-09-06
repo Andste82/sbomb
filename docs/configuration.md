@@ -64,7 +64,7 @@ The final deliverables. This is the entry point of the whole evidence chain.
   "artifacts": [
     {
       "path": "build/debug/firmware.elf",
-      "role": "firmware",
+      "role": "bootloader",
       "map": "build/debug/firmware.map",
       "linkDepfile": "build/debug/firmware.d"
     }
@@ -75,9 +75,14 @@ The final deliverables. This is the entry point of the whole evidence chain.
 | Field | Meaning |
 |---|---|
 | `path` | Path to the built artifact |
-| `role` | `application` (default), `library`, `firmware`, `bootloader`, `image`, `filesystem`, `data`, `package` |
+| `role` | `application` (default), `bootloader`, `library`, `filesystem`, `image`, `package`, `data`, `other` |
 | `map` | Linker map, when it is not beside the artifact |
 | `linkDepfile` | Link dependency file, when it is not beside the artifact |
+
+The role decides the CycloneDX type of the root component: `bootloader`,
+`image` and `filesystem` produce `firmware`, `library` produces `library`,
+`data` and `package` produce `file`, and everything else `application`. There
+is no `firmware` role — it is what those three roles mean.
 
 When `artifacts` is absent, sbomb asks the CMake File API which targets produce
 artifacts and uses those. Discovery is deterministic: it never picks "the
@@ -315,7 +320,7 @@ rather than being ignored.
   "build": {"dir": "build/debug", "config": "Debug"},
   "mode": "single",
   "artifacts": [
-    {"path": "build/debug/firmware.elf", "role": "firmware"}
+    {"path": "build/debug/firmware.elf", "role": "image"}
   ],
   "anchors": [
     {"key": "sdk:vendor", "path": "/opt/vendor-sdk"}

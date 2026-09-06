@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+### `sbomb schema` describes the configuration the tool actually reads
+
+The published schema was written by hand and had drifted: it named five of the
+eleven sections the loader accepts and set `additionalProperties: false`, so it
+rejected `schemaVersion`, `output`, `anchors`, `discovery`, `components` and
+`manifests` — every documented example failed against the document the tool
+hands out, and `docs/configuration.md` pointed readers at it. A wrong schema is
+worse than none, because it is machine readable and therefore believed.
+
+It is derived from the Go types now (deviation D24), so it and the loader
+cannot disagree about what a valid file is. A test validates every committed
+configuration against it and checks that it refuses what the loader refuses.
+
+`tools/docexamples` runs every documented configuration through the loader
+(D25). It found one on its first run: the documentation described an artifact
+role `firmware`, which the loader has never accepted — `firmware` is the
+CycloneDX type that the `bootloader`, `image` and `filesystem` roles produce.
+Both checks are in the gate and in CI.
+
+
 ### The specified command line and the real one are the same list again
 
 The specification described 43 flags and 20 existed. Nothing was silently
