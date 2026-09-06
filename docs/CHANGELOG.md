@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### smoke-test could never have passed on a tag
+
+It triggered on the same tag push as `release`, so it downloaded a release the
+other workflow had not created yet. v0.9.0 is the first release there has ever
+been, and it failed with a 404 while `release` was still building. It runs on
+`release: published` now, which fires when `gh release create` returns.
+
 ## 0.9.0
 
 ### Regenerating the fixture corpus is a no-op again
