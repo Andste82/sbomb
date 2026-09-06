@@ -126,10 +126,10 @@ What is left is not phase work:
 
 * **ESP-IDF (milestone 20) is parked**, at the point where it was parked in
   phase 7, as are MSVC (18) and the vendor linkers (21).
-* **The repository is private.** A release asset cannot be downloaded without
-  credentials, and an unauthenticated request answers 404 rather than 403 --
-  which reads like a missing tag. The composite action carries a token for
-  that reason; going public would make it unnecessary.
+
+That the repository is private is a property of where it lives rather than an
+open item; what it costs the composite action is in
+[../ci.md](../ci.md).
 
 Releases are published from `v0.9.0` onward; `v0.7.0` and `v0.8.0` are tags
 with nothing behind them. Cutting one is written down in
