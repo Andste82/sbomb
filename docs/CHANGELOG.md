@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased
+
+### smoke-test runs again
+
+`release: published` never fired it: GitHub does not start workflows from
+events created with the default `GITHUB_TOKEN`, which is what
+`gh release create` uses. So the check that downloads a published binary and
+runs it has not run on any release yet. `release.yaml` calls it now, after
+publishing, which leaves no gap for either failure mode this has had.
+
+### A skill for cutting a release
+
+`.claude/skills/release` records the whole sequence: how the version is decided
+from the changes, the gate, the local five-target build, the tag, and what to
+verify afterwards -- together with the five things that have gone wrong before,
+each of which cost a release.
+
 ## 0.10.0
 
 ### A file with two licences in it says so

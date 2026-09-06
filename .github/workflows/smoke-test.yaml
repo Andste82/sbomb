@@ -4,14 +4,19 @@ name: smoke-test
 # and expect the right answer. Nothing here builds sbomb -- if it did, it would
 # be testing something other than what was shipped.
 #
-# It runs when a release is published, not when a tag is pushed. Both start
-# from the same push, so on a tag this raced the workflow that creates the
-# release it downloads, and lost: v0.9.0 failed with a 404 while release was
-# still building. "release: published" fires after "gh release create" returns,
-# which is the first moment there is anything to smoke-test.
+# It is called by `release` once the release exists, not triggered by a tag.
+# Two earlier arrangements did not work. On a tag push it raced the workflow
+# that creates the release it downloads and lost, with a 404. On
+# `release: published` it never ran at all: GitHub does not start workflows
+# from events created with the default GITHUB_TOKEN, which is the token
+# `gh release create` uses. Being called leaves no gap for either.
 on:
-  release:
-    types: [published]
+  workflow_call:
+    inputs:
+      version:
+        description: Release tag to smoke-test
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       version:
@@ -45,7 +50,7 @@ jobs:
       - name: Run the released binary
         uses: ./.github/actions/sbomb
         with:
-          version: ${{ inputs.version || github.event.release.tag_name }}
+          version: ${{ inputs.version }}
           build-dir: ${{ runner.temp }}/build
           config: testdata/config/portable.json
           policy: lenient

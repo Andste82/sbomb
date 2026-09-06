@@ -19,6 +19,8 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -29,6 +31,12 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+
+      - name: Version
+        id: version
+        env:
+          VERSION: ${{ inputs.tag || github.ref_name }}
+        run: echo "tag=$VERSION" >> "$GITHUB_OUTPUT"
 
       # The gate runs on every push already; these are the two properties that
       # are specific to a release and would otherwise be claimed rather than
@@ -110,3 +118,12 @@ jobs:
             dist/"${VERSION#v}"/sbomb-darwin-arm64 \
             dist/"${VERSION#v}"/sbomb-darwin-arm64.cdx.json \
             dist/"${VERSION#v}"/SHA256SUMS
+
+  # Called rather than triggered: the release exists by now, and a workflow
+  # started from `gh release create` would never run at all, because GitHub
+  # does not start workflows from events the default token created.
+  smoke:
+    needs: publish
+    uses: ./.github/workflows/smoke-test.yaml
+    with:
+      version: ${{ needs.publish.outputs.version }}

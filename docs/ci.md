@@ -44,8 +44,16 @@ than which command it runs.
 | `determinism` | push, pull request | `hash` | Two runs on one platform produce one hash — linux/amd64, linux/arm64, windows/amd64 |
 | | | `compare` | All three platforms produced the same hash |
 | `release` | `v*` tag | `publish` | Reproducible build of the five targets, version matches the tag, checksums cover everything, self-SBOMs validate, release published |
-| `smoke-test` | release published | `run` | The published binary, on Linux and Windows, against the committed fixture: the right files and only those |
+| `smoke-test` | called by `release` | `run` | The published binary, on Linux and Windows, against the committed fixture: the right files and only those |
 | | | `compare` | Both platforms produced the same SBOM |
+
+`release` calls `smoke-test` once the release exists rather than letting a tag
+or a `release: published` event start it. A tag push raced the workflow that
+creates the release the smoke test downloads; `release: published` never fired
+at all, because GitHub does not start workflows from events created with the
+default `GITHUB_TOKEN`.
+
+Cutting a release is written down in `.claude/skills/release`.
 
 `release` is the only workflow with write access; the others are read-only.
 `spdx-drift` is the only job that may fail without blocking, because the SPDX
