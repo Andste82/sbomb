@@ -312,7 +312,9 @@ func buildEvidenceGraph(
 		}
 	}
 
-	outcome.excludedByGC = applySectionGC(graph, b, cfg, logger)
+	var gcFindings []domain.Finding
+	outcome.excludedByGC, gcFindings = applySectionGC(graph, b, cfg, logger)
+	outcome.findings = append(outcome.findings, gcFindings...)
 	for canonical := range outcome.excludedByGC {
 		outcome.findings = append(outcome.findings, domain.Finding{
 			ID: "SECTION_GC_EXCLUDED", Severity: domain.SeverityInfo,
@@ -328,12 +330,19 @@ func buildEvidenceGraph(
 // only when the evidence enumerates both what was kept and what was dropped and
 // the object appears solely among the dropped; partial information must never
 // remove a file.
-func applySectionGC(graph *evidence.Graph, b *builder, cfg policy.Config, logger *Logger) map[string]bool {
+func applySectionGC(graph *evidence.Graph, b *builder, cfg policy.Config, logger *Logger) (map[string]bool, []domain.Finding) {
 	if cfg.SectionGarbageCollection == "" || cfg.SectionGarbageCollection == "ignore" {
-		return nil
+		return nil, nil
 	}
+	// Asking for section garbage collection when the evidence enumerates only
+	// one half of the picture would silently do nothing, and section 4.5
+	// forbids acting on partial information.
 	if len(b.discardedObjects) == 0 || len(b.retainedObjects) == 0 {
-		return nil
+		return nil, []domain.Finding{{
+			ID: "SECTION_GC_INFO_UNAVAILABLE", Severity: domain.SeverityInfo,
+			Subject: domain.Subject{Kind: "run", Ref: cfg.SectionGarbageCollection},
+			Message: "section garbage collection was requested but the link evidence does not enumerate both retained and discarded sections",
+		}}
 	}
 	excluded := map[string]bool{}
 	for canonical := range b.discardedObjects {
@@ -354,7 +363,7 @@ func applySectionGC(graph *evidence.Graph, b *builder, cfg policy.Config, logger
 			logger.Debug("Object '%s' was fully discarded; excluded", canonical)
 		}
 	}
-	return excluded
+	return excluded, nil
 }
 
 // headerAttachments joins the two header sources onto the objects they belong
@@ -472,10 +481,10 @@ func collectObjects(paths []string) []string {
 // usedFiles derives the SBOM's file set from reachability. This is the whole
 // premise of the tool (section 4.1): a file belongs in the SBOM only when a
 // chain of evidence connects it to a final deliverable.
-func usedFiles(graph *evidence.Graph, artifactIDs []domain.NodeID) []domain.Node {
+func usedFiles(graph *evidence.Graph, artifactIDs []domain.NodeID, excluded map[string]bool) []domain.Node {
 	reachable := map[domain.NodeID]bool{}
 	for _, artifactID := range artifactIDs {
-		for id := range graph.Reachable(artifactID) {
+		for id := range graph.ReachableExcept(artifactID, excluded) {
 			reachable[id] = true
 		}
 	}
@@ -755,24 +764,6 @@ func evidenceQualityFindings(graph *evidence.Graph, used []domain.Node, anchorRe
 		}
 	}
 
-	// Section 4.5: asking for section garbage collection when the evidence
-	// does not report discarded sections would silently do nothing.
-	if cfg.SectionGarbageCollection != "ignore" {
-		var reported bool
-		for _, edge := range graph.Edges() {
-			if edge.Type == "discarded-section" {
-				reported = true
-				break
-			}
-		}
-		if !reported {
-			findings = append(findings, domain.Finding{
-				ID: "SECTION_GC_INFO_UNAVAILABLE", Severity: domain.SeverityInfo,
-				Subject: domain.Subject{Kind: "run", Ref: cfg.SectionGarbageCollection},
-				Message: "section garbage collection was requested but the link evidence does not report discarded sections",
-			})
-		}
-	}
 	return findings
 }
 

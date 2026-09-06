@@ -236,6 +236,29 @@ func (g *Graph) Roots() []domain.NodeID {
 
 // Reachable returns all nodes reachable from the given node via outgoing edges,
 // including the node itself.
+// ReachableExcept is Reachable with a set of nodes that the traversal neither
+// enters nor reports. Section 33.3 scope options work this way: the evidence
+// stays in the graph, because the linker really did see the file, but the
+// chain no longer carries anything into the document.
+func (g *Graph) ReachableExcept(from domain.NodeID, skip map[string]bool) map[domain.NodeID]bool {
+	if len(skip) == 0 {
+		return g.Reachable(from)
+	}
+	seen := map[domain.NodeID]bool{}
+	var walk func(domain.NodeID)
+	walk = func(id domain.NodeID) {
+		if seen[id] || skip[string(id)] {
+			return
+		}
+		seen[id] = true
+		for _, edge := range g.outgoingEdges[id] {
+			walk(edge.To)
+		}
+	}
+	walk(from)
+	return seen
+}
+
 func (g *Graph) Reachable(from domain.NodeID) map[domain.NodeID]bool {
 	reachable := make(map[domain.NodeID]bool)
 	var visit func(domain.NodeID)

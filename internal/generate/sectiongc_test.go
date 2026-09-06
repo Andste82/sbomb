@@ -38,14 +38,14 @@ func gcFixture(t *testing.T) (*evidence.Graph, *builder) {
 
 func TestSectionGCIgnoredByDefault(t *testing.T) {
 	graph, b := gcFixture(t)
-	if excluded := applySectionGC(graph, b, policy.Config{SectionGarbageCollection: "ignore"}, NewLogger(0, nil)); len(excluded) != 0 {
+	if excluded, _ := applySectionGC(graph, b, policy.Config{SectionGarbageCollection: "ignore"}, NewLogger(0, nil)); len(excluded) != 0 {
 		t.Errorf("the default removed %d object(s); section 4.5 says it tracks nothing", len(excluded))
 	}
 }
 
 func TestSectionGCAnnotateKeepsTheObjectAndLowersConfidence(t *testing.T) {
 	graph, b := gcFixture(t)
-	excluded := applySectionGC(graph, b, policy.Config{SectionGarbageCollection: "annotate"}, NewLogger(0, nil))
+	excluded, _ := applySectionGC(graph, b, policy.Config{SectionGarbageCollection: "annotate"}, NewLogger(0, nil))
 	if len(excluded) != 0 {
 		t.Fatal("annotate removed a file; it may only annotate")
 	}
@@ -71,7 +71,7 @@ func TestSectionGCAnnotateKeepsTheObjectAndLowersConfidence(t *testing.T) {
 
 func TestSectionGCExcludeRemovesOnlyFullyDiscardedObjects(t *testing.T) {
 	graph, b := gcFixture(t)
-	excluded := applySectionGC(graph, b, policy.Config{SectionGarbageCollection: "exclude"}, NewLogger(0, nil))
+	excluded, _ := applySectionGC(graph, b, policy.Config{SectionGarbageCollection: "exclude"}, NewLogger(0, nil))
 	if !excluded["build:gone.o"] {
 		t.Error("the fully discarded object was kept")
 	}
@@ -85,7 +85,7 @@ func TestPartialInformationNeverExcludes(t *testing.T) {
 	// enumerates both what was kept and what was dropped.
 	graph, b := gcFixture(t)
 	b.retainedObjects = map[string]bool{}
-	if excluded := applySectionGC(graph, b, policy.Config{SectionGarbageCollection: "exclude"}, NewLogger(0, nil)); len(excluded) != 0 {
+	if excluded, _ := applySectionGC(graph, b, policy.Config{SectionGarbageCollection: "exclude"}, NewLogger(0, nil)); len(excluded) != 0 {
 		t.Errorf("removed %d object(s) from evidence that lists no retained section", len(excluded))
 	}
 }

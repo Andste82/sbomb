@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+### Section garbage collection and LTO, verified against real toolchain output
+
+Both were implemented in 0.7.0 but covered by unit tests only: no fixture
+project built with `--gc-sections` or `-flto`, so `SECTION_GC_EXCLUDED` never
+fired across the whole corpus. Two new corpus projects close that, and doing so
+uncovered three defects in the implementation.
+
+- Retention was decided from `LOAD` lines, and GNU ld writes one for every
+  input it opens, including the ones it discards entirely. The memory map's
+  placement lines are what say a section was kept; the map parser now reads
+  them.
+- Retention counted every section, including `.debug_*`, `.comment` and a
+  zero-length `.eh_frame`. None of those reach the image, so no object in a
+  build with debug information was ever fully discarded. Decided over
+  image-contributing sections now; see deviation D12.
+- `sectionGarbageCollection=exclude` removed the object but left the source it
+  was the only chain to, because reachability was computed before the
+  exclusion. The exclusion now breaks the chain, which is what discarding an
+  object means.
+
+`SECTION_GC_INFO_UNAVAILABLE` was also testing for evidence edges that are
+never created, so it fired whenever the mode was on. It now reports what it
+claims to: that the link evidence enumerates only one of the two halves.
+
 ### License detection worked on 1 file in 160
 
 Normalization dropped every line beginning with `copyright`, which is not a

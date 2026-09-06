@@ -230,7 +230,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 
 	// 6. The reachability filter. This is what makes the output evidence-based
 	//    rather than a listing of everything the adapters happened to see.
-	reachable := usedFiles(graph, artifactIDs)
+	reachable := usedFiles(graph, artifactIDs, outcome.excludedByGC)
 	logger.Info("Reachable from a deliverable: %d node(s) [%s]", len(reachable), describeCounts(reachable))
 	findings = append(findings, unresolvedObjects(graph, reachable, anchorResult)...)
 	findings = append(findings, evidenceQualityFindings(graph, reachable, anchorResult, options.Policy)...)

@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"io"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -44,7 +45,11 @@ const (
 	ArchiveMember    Kind = "archive-member"
 	SharedLibrary    Kind = "shared-library"
 	DiscardedSection Kind = "discarded-section"
-	LinkerScript     Kind = "linker-script"
+	// RetainedSection is one input section the map places into an output
+	// section. Section 4.5 needs both halves: an object counts as fully
+	// discarded only when the evidence enumerates what was kept as well.
+	RetainedSection Kind = "retained-section"
+	LinkerScript    Kind = "linker-script"
 )
 
 type Record struct {
@@ -224,6 +229,16 @@ func parseGNULine(line string, section gnuSection, emit func(Record)) gnuSection
 	switch section {
 	case gnuArchiveMembers, gnuAsNeeded:
 		return parseGNUInclusionLine(line, trimmed, section, emit)
+	case gnuMemoryMap:
+		// " .text   0x0000000000001129   0x17   CMakeFiles/app.dir/main.c.o"
+		// A placement line names the object that contributed the section. It
+		// is not a LOAD line, which only says the linker opened the file, and
+		// not a wildcard pattern from the linker script.
+		if name, size, path, ok := placementLine(trimmed); ok {
+			if contributesToImage(name, size) {
+				emit(Record{Kind: RetainedSection, Path: path, Member: name, Raw: line})
+			}
+		}
 	case gnuDiscarded:
 		// " .text.foo   0x0   0x2a   path/to/file.o"
 		fields := strings.Fields(trimmed)
@@ -234,6 +249,55 @@ func parseGNULine(line string, section gnuSection, emit func(Record)) gnuSection
 		}
 	}
 	return section
+}
+
+// placementLine recognizes an input-section placement in the memory map:
+// a section name, a hexadecimal address, a hexadecimal size, and the file that
+// contributed it. Symbol lines carry two fields, fill lines do not start with
+// a section name, and linker-script wildcards start with an asterisk.
+func placementLine(trimmed string) (string, uint64, string, bool) {
+	fields := strings.Fields(trimmed)
+	if len(fields) < 4 {
+		return "", 0, "", false
+	}
+	if !strings.HasPrefix(fields[0], ".") {
+		return "", 0, "", false
+	}
+	if !strings.HasPrefix(fields[1], "0x") || !strings.HasPrefix(fields[2], "0x") {
+		return "", 0, "", false
+	}
+	path := fields[3]
+	if !looksLikeFile(path) {
+		return "", 0, "", false
+	}
+	size, err := strconv.ParseUint(strings.TrimPrefix(fields[2], "0x"), 16, 64)
+	if err != nil {
+		return "", 0, "", false
+	}
+	return fields[0], size, path, true
+}
+
+// nonImageSections are the section families that never occupy memory in the
+// linked image: debug information, tool comments and attribute blobs. They are
+// retained by the linker whatever it discards, so counting them as a
+// contribution would mean that a build with -g never has a fully discarded
+// object at all.
+var nonImageSections = []string{".debug", ".comment", ".stab", ".symtab", ".strtab", ".shstrtab", ".gnu.build.attributes"}
+
+// contributesToImage reports whether a retained input section puts bytes into
+// the deliverable. A zero-length section does not, whatever its name.
+func contributesToImage(name string, size uint64) bool {
+	if size == 0 {
+		return false
+	}
+	for _, prefix := range nonImageSections {
+		// Prefix, not exact or dot-separated: the families spell their members
+		// ".debug_info", ".debug_line_str", ".stabstr".
+		if strings.HasPrefix(name, prefix) {
+			return false
+		}
+	}
+	return !strings.HasSuffix(name, ".attributes")
 }
 
 // parseGNUInclusionLine reads one entry of the archive-member or as-needed

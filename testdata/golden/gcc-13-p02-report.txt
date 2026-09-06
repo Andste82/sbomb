@@ -108,8 +108,6 @@ info
     subject: build//__fixture_build__
 - REPRODUCIBLE_MODE_OMITS_TIMESTAMP: the document omits metadata.timestamp and is therefore not a CRA deliverable SBOM
     subject: run//__fixture_build__
-- SECTION_GC_INFO_UNAVAILABLE: section garbage collection was requested but the link evidence does not report discarded sections
-    subject: run/annotate
 - UNKNOWN_PURL: no package type could be asserted, so no purl is emitted
     subject: component/component:p02-static
 - UNKNOWN_PURL: no package type could be asserted, so no purl is emitted

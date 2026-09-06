@@ -1,0 +1,10 @@
+{
+  "buildRoot": "/__fixture_build__",
+  "generatedAt": "2026-09-05T00:00:00Z",
+  "generator": "Ninja",
+  "host": "linux",
+  "project": "p09-lto",
+  "sourceRoot": "/__fixture_src__",
+  "toolchain": "arm-none-eabi",
+  "toolchainVersion": "arm-none-eabi-gcc (15:13.2.rel1-2) 13.2.1 20231009"
+}

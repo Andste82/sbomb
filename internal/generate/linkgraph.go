@@ -53,7 +53,9 @@ type builder struct {
 	// discarded, per object path as recorded (section 4.5).
 	discardedObjects map[string]int
 	// retainedObjects are the objects the link evidence reports as contributing
-	// to the image. Without them, "fully discarded" cannot be decided, and
+	// at least one section to the image. A LOAD line is not enough: GNU ld
+	// writes one for every input it opens, including the ones it discards
+	// entirely. Without this half, "fully discarded" cannot be decided, and
 	// section 4.5 forbids acting on partial information.
 	retainedObjects map[string]bool
 	// reconstructedLinks holds link command lines recovered from the build
@@ -211,6 +213,9 @@ func (b *builder) collectLinkEvidence(deliverable Deliverable, mapPath, depfileP
 			case mapparser.DiscardedSection:
 				canonical, _ := b.identify(record.Path)
 				b.discardedObjects[canonical]++
+			case mapparser.RetainedSection:
+				canonical, _ := b.identify(record.Path)
+				b.retainedObjects[canonical] = true
 			}
 		}
 		b.logger.Info("Linker map '%s' (%s): %d record(s), %d extracted archive member(s)",
@@ -287,10 +292,6 @@ func readMap(path string) (mapparser.Result, error) {
 // from, so that an unextracted member has no path to the artifact at all --
 // which is exactly what section 12 requires.
 func (b *builder) addLinkEdges(artifactID domain.NodeID, inputs []linkInput) {
-	for _, input := range inputs {
-		canonical, _ := b.identify(input.Path)
-		b.retainedObjects[canonical] = true
-	}
 	for _, input := range inputs {
 		if input.Kind == domain.NodeArchiveMember {
 			b.addArchiveMember(artifactID, input)

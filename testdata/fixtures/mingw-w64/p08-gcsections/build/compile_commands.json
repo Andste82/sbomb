@@ -1,0 +1,20 @@
+[
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/x86_64-w64-mingw32-gcc -g -ffunction-sections -fdata-sections -o CMakeFiles/gcapp.dir/main.c.obj -c /__fixture_src__/main.c",
+  "file": "/__fixture_src__/main.c",
+  "output": "CMakeFiles/gcapp.dir/main.c.obj"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/x86_64-w64-mingw32-gcc -g -ffunction-sections -fdata-sections -o CMakeFiles/gcapp.dir/live.c.obj -c /__fixture_src__/live.c",
+  "file": "/__fixture_src__/live.c",
+  "output": "CMakeFiles/gcapp.dir/live.c.obj"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/x86_64-w64-mingw32-gcc -g -ffunction-sections -fdata-sections -o CMakeFiles/gcapp.dir/deadcode.c.obj -c /__fixture_src__/deadcode.c",
+  "file": "/__fixture_src__/deadcode.c",
+  "output": "CMakeFiles/gcapp.dir/deadcode.c.obj"
+}
+]

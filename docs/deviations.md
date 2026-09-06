@@ -149,3 +149,28 @@ makes it visible to `failOnWeakEvidence` without removing anything. Under
 `include` the edge keeps strength `derived` and carries only the
 `sbomb:evidence:header:viaPch` property and the lower confidence that
 section 14.5 prescribes.
+
+
+## D12 — "Fully discarded" is decided over image-contributing sections
+
+Section 4.5 says an object is fully discarded "only when the evidence source
+enumerates all of its contributed sections and all are listed as discarded".
+Taken over *all* sections, the rule never fires on a build with debug
+information. GNU ld's map for an object whose every function was garbage
+collected still shows:
+
+```
+ .eh_frame      0x00000000000020e8        0x0 CMakeFiles/gcapp.dir/deadcode.c.o
+ .comment       0x000000000000002d       0x2e CMakeFiles/gcapp.dir/deadcode.c.o
+ .debug_info    0x00000000000000ac       0x8a CMakeFiles/gcapp.dir/deadcode.c.o
+```
+
+None of those put a byte into the deliverable: `.debug_*`, `.comment`, `.stab*`
+and the attribute blobs are not allocated, and a zero-length section
+contributes nothing whatever its name. Retention is therefore decided over the
+sections that actually reach the image. Both criteria are read from the map --
+the section name and its size -- so nothing is inferred.
+
+A `LOAD` line is likewise not evidence of retention: GNU ld writes one for
+every input it opens, including the ones it discards entirely. Only the
+placement lines of the memory map say what was kept.

@@ -25,7 +25,7 @@ BUILD_ROOT=${SBOMB_FIXTURE_BUILD:-/__fixture_build__}
 # when the corpus is rebuilt against a new toolchain.
 FIXTURE_DATE="2026-09-05"
 
-PROJECTS=(p01-hello p02-static p03-dupnames p04-generated p05-headeronly p06-unity p07-pch)
+PROJECTS=(p01-hello p02-static p03-dupnames p04-generated p05-headeronly p06-unity p07-pch p08-gcsections p09-lto)
 
 # name|generator|toolchain file (empty for native)
 TOOLCHAINS=(

@@ -1,0 +1,1 @@
+/usr/bin/cc -g -Wl,-Map=/__fixture_build__/ltoapp.map -Wl,--dependency-file=/__fixture_build__/ltoapp.d -flto CMakeFiles/ltoapp.dir/main.c.o CMakeFiles/ltoapp.dir/helper.c.o -o ltoapp 
