@@ -36,7 +36,17 @@ type Build struct {
 
 // Parse discovers CMake target directories below buildDir and reads their
 // build.make, link.txt, DependInfo.cmake, and dependency files.
+// Parse reads a build tree produced by one of CMake's Makefiles generators.
+//
+// It requires a Makefile at the build root. Every CMake build has a
+// CMakeFiles directory whatever generator wrote it, so keying on that alone
+// made this adapter walk a Ninja build tree and read every dependency file in
+// it -- work whose evidence the Ninja adapter already supplies from
+// .ninja_deps, and which dominated the run at scale.
 func Parse(buildDir string) (*Build, error) {
+	if _, err := os.Stat(filepath.Join(buildDir, "Makefile")); err != nil {
+		return nil, fmt.Errorf("not a Makefiles build tree: %w", err)
+	}
 	entries, err := os.ReadDir(filepath.Join(buildDir, "CMakeFiles"))
 	if err != nil {
 		return nil, err

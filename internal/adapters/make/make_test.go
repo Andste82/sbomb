@@ -9,6 +9,11 @@ import (
 
 func TestParseTargetEvidence(t *testing.T) {
 	root := t.TempDir()
+	// The adapter applies to a Makefiles build tree, which a Makefile is what
+	// identifies (section 9.1).
+	if err := os.WriteFile(filepath.Join(root, "Makefile"), []byte("all:\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
 	targetDir := filepath.Join(root, "CMakeFiles", "app.dir")
 	if err := os.MkdirAll(targetDir, 0o755); err != nil {
 		t.Fatal(err)
@@ -50,6 +55,11 @@ func TestParseTargetEvidence(t *testing.T) {
 
 func TestParseFallsBackToDFile(t *testing.T) {
 	root := t.TempDir()
+	// The adapter applies to a Makefiles build tree, which a Makefile is what
+	// identifies (section 9.1).
+	if err := os.WriteFile(filepath.Join(root, "Makefile"), []byte("all:\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
 	directory := filepath.Join(root, "CMakeFiles", "app.dir", "nested")
 	if err := os.MkdirAll(directory, 0o755); err != nil {
 		t.Fatal(err)

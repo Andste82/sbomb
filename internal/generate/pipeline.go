@@ -28,6 +28,10 @@ type compileEvidence struct {
 	objectHeaders map[string][]string
 	// strategy records which adapter produced each object mapping.
 	strategy map[string]string
+	// makeBuild is the Makefiles generator's build tree, parsed once. It names
+	// object sources, link inputs and header dependencies, and reading it is
+	// the most expensive single step of a large run.
+	makeBuild *makeadapter.Build
 	// objectForcedIncludes maps an object to the headers its compile command
 	// forced in with -include / /FI. This is how a precompiled header reaches
 	// a translation unit whose dependency file never mentions it (section 14.5).
@@ -69,6 +73,11 @@ func (c *compileEvidence) addHeaders(object string, headers []string) {
 // of section 13.2. The first strategy to claim an object wins.
 func collectCompileEvidence(buildDir string, commands []compiledb.Command, logger *Logger) *compileEvidence {
 	evidence := newCompileEvidence()
+	if parsed, err := makeadapter.Parse(buildDir); err == nil {
+		evidence.makeBuild = parsed
+	} else {
+		logger.Debug("Makefiles adapter does not apply: %v", err)
+	}
 
 	// Strategy 2: the Ninja build graph names the source of every object.
 	if file, err := os.Open(filepath.Join(buildDir, "build.ninja")); err == nil {
@@ -108,7 +117,9 @@ func collectCompileEvidence(buildDir string, commands []compiledb.Command, logge
 	}
 
 	// The Makefiles generator supplies both mappings and header dependencies.
-	if makeBuild, err := makeadapter.Parse(buildDir); err == nil {
+	// Parsed once and carried, because reading fifty thousand dependency files
+	// twice per run is what it cost before.
+	if makeBuild := evidence.makeBuild; makeBuild != nil {
 		for _, target := range makeBuild.Targets {
 			for object, source := range target.ObjectSources {
 				evidence.addSource(object, source, "make-buildgraph")
@@ -160,7 +171,7 @@ func buildEvidenceGraph(
 	b.loadNinjaArchiveInputs(buildDir)
 	// A Makefiles target records both the objects it archives and the command
 	// line that produced its artifact, in link.txt.
-	if makeBuild, err := makeadapter.Parse(buildDir); err == nil {
+	if makeBuild := compile.makeBuild; makeBuild != nil {
 		for _, target := range makeBuild.Targets {
 			var archived bool
 			for _, input := range target.LinkInputs {

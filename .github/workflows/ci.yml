@@ -79,6 +79,20 @@ jobs:
             exit 1
           fi
 
+  # Section 31 states a budget; this measures it. The 10 000 unit row runs on
+  # every push because it costs seconds. The 50 000 unit row needs a 200 MB map
+  # and a minute of wall time, so it is run on demand:
+  #   go test -tags perf ./test/perf/ -timeout 15m
+  performance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Performance budget, 10 000 translation units
+        run: go test -tags perf ./test/perf/ -timeout 10m -units 10000 -map-bytes 41943040
+
   # The findings catalogue in the user documentation is generated from appendix
   # A and annotated with what the code emits. Unlike the SPDX list this depends
   # on nothing external, so drift is a fault and blocks the pull request.

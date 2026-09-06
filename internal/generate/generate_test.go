@@ -211,6 +211,11 @@ func TestRunUsesMakeEvidenceWhenCompileDatabaseIsMissing(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(buildDir, "app"), []byte("binary\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
+	// The Makefiles adapter applies to a Makefiles build tree, and a Makefile
+	// at the build root is what says it is one (section 9.1).
+	if err := os.WriteFile(filepath.Join(buildDir, "Makefile"), []byte("all:\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
 	makeCfg := config.Config{
 		Project:   config.Project{Root: root},
 		Artifacts: []config.Artifact{{Path: "app", Role: "application"}},

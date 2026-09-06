@@ -120,6 +120,12 @@ func generate(root string, files, headersPerFile int, mapSize int64) error {
 	if err := writeLinkDepfile(filepath.Join(build, "large.d"), objects, files); err != nil {
 		return err
 	}
+	// A Makefile at the build root, because the dependency files this writes
+	// are the Makefiles generator's layout and section 9.1 selects the adapter
+	// by what generated the tree.
+	if err := os.WriteFile(filepath.Join(build, "Makefile"), []byte("all:\n"), 0o644); err != nil {
+		return err
+	}
 	// The deliverable itself. Not a real ELF: what is being measured is the
 	// evidence pipeline, and an unparsable artifact is a case the tool has to
 	// handle anyway.

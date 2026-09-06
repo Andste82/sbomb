@@ -15,7 +15,7 @@ Performance comes first because it can force design changes: if memory grows
 with the source tree rather than with the used-file count, that is not a tuning
 problem. Everything after it is independent.
 
-### 8a — Measure the performance budget (§31)
+### 8a — Measure the performance budget (§31) — done
 
 | Scenario | Requirement |
 |---|---|
@@ -73,3 +73,33 @@ and the deps log at harvest time removes the churn.
 * A Windows runner produces byte-identical output to Linux for the portable
   fixture.
 * The self-SBOM is derived from evidence or does not exist.
+
+
+## 8a result
+
+Measured on this runner, `test/perf` with `-tags perf`:
+
+| Scenario | Budget | Before | After |
+|---|---|---|---|
+| 50 000 units, 200 MB map | ≤ 90 s, ≤ 1.5 GiB | 152 s, 1204 MiB | **65.6 s, 1370 MiB** |
+| 10 000 units, 40 MB map | ≤ 15 s, ≤ 512 MiB | — | **7.7 s, 273 MiB** |
+
+Memory grows linearly in the used-file count as section 31 requires: five times
+the units, five times the resident set.
+
+The first run missed the budget by 69 %. Profiling put 48 % of CPU in
+filesystem syscalls, and 77 % of all file reading in
+`make.parseDependencyFiles` -- on a build tree that has no Makefile. Two causes,
+both fixed:
+
+* `makeadapter.Parse` was called twice per run, once from `collectCompileEvidence`
+  and once from `buildEvidenceGraph`, so the whole scan and every dependency
+  file were read twice.
+* The adapter keyed on the presence of `CMakeFiles/`, which every CMake build
+  has whatever generator wrote it. It therefore walked Ninja build trees too,
+  duplicating evidence `.ninja_deps` already provides. It now requires a
+  `Makefile`, which is what section 9.1 selects an adapter by.
+
+Map parsing, which section 31 names and which had no benchmark, turned out not
+to be the bottleneck at all: 94.6 MB/s, so about two seconds for a 200 MB map.
+It has a benchmark now regardless, because the section requires one.
