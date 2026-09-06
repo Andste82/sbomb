@@ -260,7 +260,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	if len(cfg.Artifacts) > 0 {
 		mapPath, depfilePath = cfg.Artifacts[0].Map, cfg.Artifacts[0].LinkDepfile
 	}
-	outcome := buildEvidenceGraph(graph, b, deliverables, compile, buildDir, mapPath, depfilePath, options.Policy, logger)
+	outcome := buildEvidenceGraph(graph, b, deliverables, compile, buildDir, mapPath, depfilePath, cfg, options.Policy, logger)
 	artifactIDs := outcome.artifactIDs
 	findings = append(findings, b.Findings()...)
 	findings = append(findings, outcome.findings...)
@@ -439,6 +439,11 @@ func addProperty(properties map[string][]string, name, value string) map[string]
 }
 
 func fileClassOf(node domain.Node) domain.FileClass {
+	// A manifest states what an input is, which is better than inferring it
+	// from the node kind (section 18).
+	if class, ok := packagingClassOf(node); ok {
+		return class
+	}
 	switch node.Kind {
 	case domain.NodeHeader:
 		return domain.FileClassHeader
@@ -446,6 +451,8 @@ func fileClassOf(node domain.Node) domain.FileClass {
 		return domain.FileClassObject
 	case domain.NodeArchive:
 		return domain.FileClassArchive
+	case domain.NodeAsset:
+		return domain.FileClassAsset
 	default:
 		return domain.FileClassSource
 	}

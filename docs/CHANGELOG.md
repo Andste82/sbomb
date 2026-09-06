@@ -25,6 +25,15 @@
   what makes a `bom-ref` portable: a Conan cache path contains a random
   component, so without an anchor the identity of every file in an installed
   dependency would differ from machine to machine.
+- Package and image manifests are evidence (section 18). What a manifest names
+  as an input to an image or a package reaches the SBOM; what merely sits in the
+  same directory does not, which is the distinction section 18 exists to draw.
+  A `generatedFrom` entry links a generated asset to what produced it, and a
+  generated asset that names nothing reports
+  `MISSING_GENERATOR_INPUT_EVIDENCE` instead of having an input guessed for it.
+  The CMake install manifest is read as a manifest kind of its own.
+- `includeAssets` decides something. It was settable from three places and read
+  from none.
 - Git submodules are component boundaries (strategy 3 of section 19.2), read
   from `.gitmodules` because that is where the project declares them. Without
   introspection the boundary and the repository URL are known and the version

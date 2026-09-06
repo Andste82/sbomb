@@ -11,6 +11,7 @@ import (
 	makeadapter "github.com/example/sbomb/internal/adapters/make"
 	"github.com/example/sbomb/internal/adapters/ninja"
 	"github.com/example/sbomb/internal/anchors"
+	"github.com/example/sbomb/internal/config"
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/evidence"
 	"github.com/example/sbomb/internal/headers"
@@ -152,6 +153,7 @@ func buildEvidenceGraph(
 	compile *compileEvidence,
 	buildDir string,
 	mapPath, depfilePath string,
+	project config.Config,
 	cfg policy.Config,
 	logger *Logger,
 ) graphOutcome {
@@ -231,6 +233,11 @@ func buildEvidenceGraph(
 		})
 	}
 
+	// Section 18: what a package or image manifest declares. It runs before
+	// the reachability filter and adds only edges, so a manifest describing
+	// something nothing delivers still contributes nothing.
+	packagingFindings := addPackagingEvidence(graph, b, project, buildDir, deliverables, logger)
+
 	// Section 17.1: a unity translation unit stands for several sources. Its
 	// object maps to the generated aggregation file, which is not what belongs
 	// in the bill of materials.
@@ -243,6 +250,7 @@ func buildEvidenceGraph(
 	dwarf := inspectArtifacts(b, deliverables, logger)
 	outcome := graphOutcome{artifactIDs: artifactIDs, dwarf: dwarf, findings: dwarf.Findings}
 	outcome.findings = append(outcome.findings, unityFindings...)
+	outcome.findings = append(outcome.findings, packagingFindings...)
 
 	attachments := headerAttachments(graph, b, compile, dwarf)
 	resolution := resolveHeaderEvidence(attachments, cfg.HeaderEvidence)
@@ -668,6 +676,13 @@ func scopeOfNode(node domain.Node, anchorResult *anchors.Result) anchors.Scope {
 // SBOM. The defaults of section 24.1 apply unless a scope option of section
 // 33.1 says otherwise.
 func includedByPolicy(scope anchors.Scope, node domain.Node, cfg policy.Config) bool {
+	// Section 18: assets are in scope by default and can be turned off, which
+	// is a scope decision like any other and is counted when it removes
+	// something.
+	if node.Kind == domain.NodeAsset {
+		return cfg.IncludeAssets
+	}
+
 	// A header is decided by its class (section 14.4), not by its anchor: a
 	// vendored dependency and the project it sits in share an anchor, and a
 	// toolchain installation holds both compiler and distribution headers.

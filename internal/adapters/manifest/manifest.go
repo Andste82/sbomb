@@ -54,15 +54,15 @@ func Parse(data []byte) (Manifest, error) {
 		return Manifest{}, fmt.Errorf("unsupported manifest schema version %d", result.SchemaVersion)
 	}
 	for outputIndex, output := range result.Outputs {
-		if err := validateRelativePath(output.Path); err != nil {
+		if err := validatePath(output.Path); err != nil {
 			return Manifest{}, fmt.Errorf("output %d path: %w", outputIndex, err)
 		}
 		for inputIndex, input := range output.Inputs {
-			if err := validateRelativePath(input.Path); err != nil {
+			if err := validatePath(input.Path); err != nil {
 				return Manifest{}, fmt.Errorf("output %d input %d path: %w", outputIndex, inputIndex, err)
 			}
 			for generatedIndex, path := range input.GeneratedFrom {
-				if err := validateRelativePath(path); err != nil {
+				if err := validatePath(path); err != nil {
 					return Manifest{}, fmt.Errorf("output %d input %d generatedFrom %d: %w", outputIndex, inputIndex, generatedIndex, err)
 				}
 			}
@@ -71,13 +71,20 @@ func Parse(data []byte) (Manifest, error) {
 	return result, nil
 }
 
-func validateRelativePath(path string) error {
+// validatePath applies appendix E: a path is resolved against the project root
+// unless it is absolute, and absolute paths are explicitly permitted -- a build
+// that writes its own manifest names what it produced by full path. What the
+// specification rejects is a path that escapes every anchor, and whether it
+// does cannot be decided here, where no anchor is known: a relative path that
+// climbs above its own root is refused, and anything else is identified later
+// and reported as unanchored if it matches nothing.
+func validatePath(path string) error {
 	if path == "" {
 		return errors.New("path is empty")
 	}
 	normalized := strings.ReplaceAll(path, "\\", "/")
 	if strings.HasPrefix(normalized, "/") || isWindowsAbsolute(normalized) {
-		return errors.New("absolute path is not allowed")
+		return nil
 	}
 	depth := 0
 	for _, part := range strings.Split(normalized, "/") {
@@ -85,7 +92,7 @@ func validateRelativePath(path string) error {
 		case "", ".":
 		case "..":
 			if depth == 0 {
-				return errors.New("path escapes project root")
+				return fmt.Errorf("path escapes the project root: %w", ErrInputLimitExceeded)
 			}
 			depth--
 		default:

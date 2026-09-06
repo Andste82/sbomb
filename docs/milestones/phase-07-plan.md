@@ -57,17 +57,17 @@ Submodule boundaries as component boundaries, git-derived versions behind
 `VCS_DIRTY`. Git metadata must never expand the used-file set: a checked-out
 submodule is not a used dependency.
 
-### 7e — Packaging, images and assets (§18)
+### 7e — Packaging, images and assets — done (§18)
 
 `internal/adapters/packaging` for the four manifest kinds, asset
 classification, and assembly-mode product roots. A manifest that explicitly
 names a file as an input is sufficient evidence; adjacency never is.
 
-### 7f — ESP-IDF (milestone 20)
+### 7f — ESP-IDF (milestone 20) — parked
 
-Blocked on a fixture: the IDF toolchain is not installed in this container and
-is too large to add. The adapter is written against a captured fixture, so this
-step needs that capture first. Assessed at the end rather than faked.
+Parked by decision. ESP-IDF is available behind `--build-arg WITH_ESP_IDF=1`
+but adds 2.1 GB, and the adapter needs a captured fixture that the image has to
+produce first. Nothing else in phase 7 depends on it.
 
 ## Acceptance
 

@@ -28,7 +28,7 @@ PKG_ROOT=${SBOMB_FIXTURE_PKG:-/__fixture_pkg__}
 # when the corpus is rebuilt against a new toolchain.
 FIXTURE_DATE="2026-09-05"
 
-PROJECTS=(p01-hello p02-static p03-dupnames p04-generated p05-headeronly p06-unity p07-pch p08-gcsections p09-lto p10-fetchcontent p11-conan)
+PROJECTS=(p01-hello p02-static p03-dupnames p04-generated p05-headeronly p06-unity p07-pch p08-gcsections p09-lto p10-fetchcontent p11-conan p12-assets)
 
 # Some projects only make sense for some toolchains. A Conan package is built
 # for one target, so linking it into an ARM or Windows binary is not a fixture
@@ -257,6 +257,15 @@ QUERY
                \( -name build.make -o -name link.txt -o -name compiler_depend.make \
                   -o -name 'objects*.rsp' -o -name '*.o.d' \) -type f | sort)
   fi
+
+  # Packaging evidence: the manifest the build generated, the image it packed
+  # and the install manifest CMake wrote (section 18).
+  harvest_glob "$BUILD_ROOT/sbomb-manifest.json" "$build_out"
+  harvest_glob "$BUILD_ROOT/install_manifest.txt" "$build_out"
+  harvest_glob "$BUILD_ROOT/*.img" "$build_out"
+  while IFS= read -r found; do
+    harvest "$found" "$build_out/${found#"$BUILD_ROOT"/}"
+  done < <(find "$BUILD_ROOT/generated" -type f 2>/dev/null | sort)
 
   # Conan evidence: the CMakeDeps files name the version and the package root,
   # and the package root holds the licence Conan copied out of the recipe.

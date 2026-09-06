@@ -27,7 +27,7 @@
              5b0              5b0       70     8 .eh_frame
              5b0              5b0       2c     1         /lib/x86_64-linux-gnu/Scrt1.o:(.eh_frame+0x0)
              5dc              5dc       20     1         CMakeFiles/conanapp.dir/main.c.o:(.eh_frame+0x18)
-             5fc              5fc       20     1         /__fixture_pkg__/conan/p/b/tinyce802d47e1474d/p/lib/libtinycbor.a(tinycbor.c.o):(.eh_frame+0x18)
+             5fc              5fc       20     1         /__fixture_pkg__/conan/p/b/tinyc71a1c07a8217d/p/lib/libtinycbor.a(tinycbor.c.o):(.eh_frame+0x18)
             1620             1620      11c    16 .text
             1620             1620       26    16         /lib/x86_64-linux-gnu/Scrt1.o:(.text)
             1620             1620       26     1                 _start
@@ -39,7 +39,7 @@
             1700             1700        0     1                 frame_dummy
             1710             1710       1d    16         CMakeFiles/conanapp.dir/main.c.o:(.text)
             1710             1710       1d     1                 main
-            172d             172d        f     1         /__fixture_pkg__/conan/p/b/tinyce802d47e1474d/p/lib/libtinycbor.a(tinycbor.c.o):(.text)
+            172d             172d        f     1         /__fixture_pkg__/conan/p/b/tinyc71a1c07a8217d/p/lib/libtinycbor.a(tinycbor.c.o):(.text)
             172d             172d        f     1                 tinycbor_tag
             173c             173c        0     1         /usr/bin/../lib/gcc/x86_64-linux-gnu/13/crtendS.o:(.text)
             173c             173c        0     1         /lib/x86_64-linux-gnu/crtn.o:(.text)
@@ -73,7 +73,7 @@
             397c             397c        0     1         /usr/bin/../lib/gcc/x86_64-linux-gnu/13/crtbeginS.o:(.data)
             3980             3980        8     8         /usr/bin/../lib/gcc/x86_64-linux-gnu/13/crtbeginS.o:(.data.rel.local)
             3980             3980        0     1                 __dso_handle
-            3988             3988        0     1         /__fixture_pkg__/conan/p/b/tinyce802d47e1474d/p/lib/libtinycbor.a(tinycbor.c.o):(.data)
+            3988             3988        0     1         /__fixture_pkg__/conan/p/b/tinyc71a1c07a8217d/p/lib/libtinycbor.a(tinycbor.c.o):(.data)
             3988             3988        0     1         /usr/bin/../lib/gcc/x86_64-linux-gnu/13/crtendS.o:(.data)
             3988             3988        0     1         /lib/x86_64-linux-gnu/crtn.o:(.data)
             3988             3988        0     8 .tm_clone_table
@@ -88,17 +88,17 @@
             39a8             39a8        0     1         /lib/x86_64-linux-gnu/crti.o:(.bss)
             39a8             39a8        1     1         /usr/bin/../lib/gcc/x86_64-linux-gnu/13/crtbeginS.o:(.bss)
             39a8             39a8        1     1                 completed.0
-            39a9             39a9        0     1         /__fixture_pkg__/conan/p/b/tinyce802d47e1474d/p/lib/libtinycbor.a(tinycbor.c.o):(.bss)
+            39a9             39a9        0     1         /__fixture_pkg__/conan/p/b/tinyc71a1c07a8217d/p/lib/libtinycbor.a(tinycbor.c.o):(.bss)
             39a9             39a9        0     1         /usr/bin/../lib/gcc/x86_64-linux-gnu/13/crtendS.o:(.bss)
             39a9             39a9        0     1         /lib/x86_64-linux-gnu/crtn.o:(.bss)
                0                0       6f     1 .comment
                0                0       6f     1         <internal>:(.comment)
                0                0       74     1 .debug_abbrev
                0                0       3a     1         CMakeFiles/conanapp.dir/main.c.o:(.debug_abbrev)
-              3a               3a       3a     1         /__fixture_pkg__/conan/p/b/tinyce802d47e1474d/p/lib/libtinycbor.a(tinycbor.c.o):(.debug_abbrev)
+              3a               3a       3a     1         /__fixture_pkg__/conan/p/b/tinyc71a1c07a8217d/p/lib/libtinycbor.a(tinycbor.c.o):(.debug_abbrev)
                0                0       8b     1 .debug_info
                0                0       37     1         CMakeFiles/conanapp.dir/main.c.o:(.debug_info)
-              37               37       54     1         /__fixture_pkg__/conan/p/b/tinyce802d47e1474d/p/lib/libtinycbor.a(tinycbor.c.o):(.debug_info)
+              37               37       54     1         /__fixture_pkg__/conan/p/b/tinyc71a1c07a8217d/p/lib/libtinycbor.a(tinycbor.c.o):(.debug_info)
                0                0       1c     1 .debug_str_offsets
                0                0       1c     1         CMakeFiles/conanapp.dir/main.c.o:(.debug_str_offsets)
                0                0       fb     1 .debug_str
@@ -107,11 +107,11 @@
                0                0       10     1         CMakeFiles/conanapp.dir/main.c.o:(.debug_addr)
                0                0       b5     1 .debug_line
                0                0       62     1         CMakeFiles/conanapp.dir/main.c.o:(.debug_line)
-              62               62       53     1         /__fixture_pkg__/conan/p/b/tinyce802d47e1474d/p/lib/libtinycbor.a(tinycbor.c.o):(.debug_line)
+              62               62       53     1         /__fixture_pkg__/conan/p/b/tinyc71a1c07a8217d/p/lib/libtinycbor.a(tinycbor.c.o):(.debug_line)
                0                0       dd     1 .debug_line_str
                0                0       dd     1         <internal>:(.debug_line_str)
                0                0       30     1 .debug_aranges
-               0                0       30     1         /__fixture_pkg__/conan/p/b/tinyce802d47e1474d/p/lib/libtinycbor.a(tinycbor.c.o):(.debug_aranges)
+               0                0       30     1         /__fixture_pkg__/conan/p/b/tinyc71a1c07a8217d/p/lib/libtinycbor.a(tinycbor.c.o):(.debug_aranges)
                0                0      300     8 .symtab
                0                0      300     8         <internal>:(.symtab)
                0                0      196     1 .shstrtab

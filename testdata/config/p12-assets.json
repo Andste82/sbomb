@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "project": {
+    "name": "p12-assets",
+    "root": "/__fixture_src__"
+  },
+  "build": {
+    "dir": "/__fixture_build__"
+  },
+  "mode": "assembly",
+  "artifacts": [
+    { "path": "imgapp", "role": "application" },
+    { "path": "filesystem.img", "role": "image" }
+  ],
+  "output": {
+    "format": "cyclonedx",
+    "specVersion": "1.6",
+    "reproducible": true
+  },
+  "policy": {
+    "profile": "lenient"
+  }
+}

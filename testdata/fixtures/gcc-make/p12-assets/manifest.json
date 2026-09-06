@@ -1,0 +1,10 @@
+{
+  "buildRoot": "/__fixture_build__",
+  "generatedAt": "2026-09-05T00:00:00Z",
+  "generator": "Unix Makefiles",
+  "host": "linux",
+  "project": "p12-assets",
+  "sourceRoot": "/__fixture_src__",
+  "toolchain": "gcc-make",
+  "toolchainVersion": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+}

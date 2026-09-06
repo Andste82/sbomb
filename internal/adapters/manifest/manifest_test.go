@@ -17,16 +17,28 @@ func TestParseValidManifest(t *testing.T) {
 	}
 }
 
-func TestParseRejectsUnsafePaths(t *testing.T) {
+func TestParseRejectsPathsThatClimbOutOfTheirRoot(t *testing.T) {
 	tests := []string{
 		`{"schemaVersion":1,"outputs":[{"path":"../image.bin"}]}`,
-		`{"schemaVersion":1,"outputs":[{"path":"/tmp/image.bin"}]}`,
 		`{"schemaVersion":1,"outputs":[{"path":"build/image.bin","inputs":[{"path":"assets/a","generatedFrom":["../../config.yaml"]}]}]}`,
-		`{"schemaVersion":1,"outputs":[{"path":"C:/image.bin"}]}`,
 	}
 	for _, input := range tests {
 		if _, err := Parse([]byte(input)); err == nil {
-			t.Errorf("Parse(%q) accepted unsafe path", input)
+			t.Errorf("Parse(%q) accepted a path that escapes its root", input)
+		}
+	}
+}
+
+// Appendix E: "All paths are resolved relative to the project root unless
+// absolute." Rejecting absolute paths made the manifest unusable for a build
+// that writes one naming what it produced, which is the common case.
+func TestParseAcceptsAbsolutePaths(t *testing.T) {
+	for _, input := range []string{
+		`{"schemaVersion":1,"outputs":[{"path":"/build/image.bin","kind":"image","inputs":[{"path":"/src/index.html","role":"asset"}]}]}`,
+		`{"schemaVersion":1,"outputs":[{"path":"C:/build/image.bin"}]}`,
+	} {
+		if _, err := Parse([]byte(input)); err != nil {
+			t.Errorf("Parse(%q) = %v, want the absolute path accepted", input, err)
 		}
 	}
 }

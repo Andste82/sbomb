@@ -188,3 +188,21 @@ reports NOASSERTION there.
 The path is exercised by unit tests instead, and on a real build tree the
 licence resolves normally. Harvesting a package cache into the corpus would
 mean committing third-party sources, which the corpus policy forbids.
+
+
+## D14 — The native manifest accepted no absolute path
+
+Appendix E states that manifest paths "are resolved relative to the project
+root unless absolute", and what it rejects is a path that escapes *every
+anchor*. The parser rejected every absolute path outright, which made the
+format unusable for the common case: a build that writes its own manifest names
+what it produced by full path, because a build tree separate from the source
+tree cannot be addressed relative to the project root.
+
+Absolute paths are accepted now. A relative path that climbs above its own root
+is still refused, with `INPUT_LIMIT_EXCEEDED` as the specification requires,
+and whether a path escapes every anchor is decided where the anchors are known
+-- one that matches none is identified as unanchored and reported.
+
+The defect was invisible because the manifest adapter was parsed for
+validation only and never wired into the graph.
