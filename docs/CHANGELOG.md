@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+### Introspection gateway and response files (roadmap phase 7)
+
+- `internal/exec` is the only place sbomb can start a process. It carries the
+  fixed allowlist of section 9.2, exact argument shapes with named slots, no
+  shell, an environment reduced to `PATH`, a 30 second timeout, a 64 MiB output
+  bound, path arguments validated against the registered anchors, and a log
+  record per invocation. Off by default; enabled by `--allow-introspection`,
+  `--allow-introspection=<groups>` or the `build.introspection` block.
+- `internal/respfile` implements section 9.3: recursive `@file` expansion with
+  a depth limit of 8 and a 64 MiB budget, and the two quoting rule sets --
+  GNU, where a backslash escapes, and MSVC, where it does not unless it
+  precedes a quote. The choice follows the toolchain the build evidence named,
+  not the host, so a Windows path in a response file keeps its separators. The
+  compile-database and Makefiles adapters had each grown their own expander;
+  both now use this one, which is how they gained the MSVC rules and the size
+  bound.
+
 ### Section garbage collection and LTO, verified against real toolchain output
 
 Both were implemented in 0.7.0 but covered by unit tests only: no fixture

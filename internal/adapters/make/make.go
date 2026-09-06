@@ -10,6 +10,7 @@ import (
 	"unicode"
 
 	"github.com/example/sbomb/internal/adapters/depfiles"
+	"github.com/example/sbomb/internal/respfile"
 )
 
 const maxResponseDepth = 8
@@ -119,7 +120,20 @@ func parseLinkFile(path, buildDir string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	args, err := expandResponseFiles(splitShellWords(string(data)), filepath.Dir(path), 0, nil)
+	// Section 9.3: the link line of a large target lives in a response file,
+	// and CMake writes one for every Windows link. The shared expander applies
+	// the depth and size limits and the quoting rules of the detected
+	// toolchain.
+	words := splitShellWords(string(data))
+	var linker string
+	if len(words) > 0 {
+		linker = words[0]
+	}
+	args, err := respfile.Expand(words, respfile.Options{
+		Dir:      filepath.Dir(path),
+		Quoting:  respfile.QuotingForCompiler(linker),
+		MaxDepth: maxResponseDepth,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -198,38 +212,6 @@ func parseDependencyFiles(directory string, target *Target) error {
 		}
 		return nil
 	})
-}
-
-func expandResponseFiles(args []string, directory string, depth int, seen map[string]bool) ([]string, error) {
-	if depth > maxResponseDepth {
-		return nil, fmt.Errorf("response file expansion exceeded depth limit: %w", ErrInputLimitExceeded)
-	}
-	if seen == nil {
-		seen = make(map[string]bool)
-	}
-	var expanded []string
-	for _, arg := range args {
-		if len(arg) < 2 || arg[0] != '@' {
-			expanded = append(expanded, arg)
-			continue
-		}
-		path := resolvePath(directory, arg[1:])
-		if seen[path] {
-			return nil, fmt.Errorf("response file cycle %q", path)
-		}
-		data, err := os.ReadFile(path)
-		if err != nil {
-			return nil, err
-		}
-		seen[path] = true
-		nested, err := expandResponseFiles(splitShellWords(string(data)), filepath.Dir(path), depth+1, seen)
-		delete(seen, path)
-		if err != nil {
-			return nil, err
-		}
-		expanded = append(expanded, nested...)
-	}
-	return expanded, nil
 }
 
 func logicalLines(text string) []string {

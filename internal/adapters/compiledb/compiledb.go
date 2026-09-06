@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/example/sbomb/internal/respfile"
 	"unicode"
 )
 
@@ -83,13 +85,20 @@ func Parse(data []byte) ([]Command, error) {
 }
 
 func commandArguments(entry rawCommand) ([]string, error) {
+	var args []string
 	if len(entry.Arguments) > 0 {
-		return append([]string(nil), entry.Arguments...), nil
+		args = append([]string(nil), entry.Arguments...)
+	} else {
+		if entry.Command == "" {
+			return nil, errors.New("has neither arguments nor command")
+		}
+		split, err := shellSplit(entry.Command)
+		if err != nil {
+			return nil, err
+		}
+		args = split
 	}
-	if entry.Command == "" {
-		return nil, errors.New("has neither arguments nor command")
-	}
-	return shellSplit(entry.Command)
+	return args, nil
 }
 
 func outputPath(explicit string, args []string) string {
@@ -123,6 +132,11 @@ func resolvePath(directory, path string) string {
 }
 
 func expandResponseFiles(args []string, directory string) ([]string, []string, error) {
+	var compiler string
+	if len(args) > 0 {
+		compiler = args[0]
+	}
+	quoting := respfile.QuotingForCompiler(compiler)
 	var files []string
 	var size int
 	var expand func([]string, string, int) ([]string, error)
@@ -150,10 +164,10 @@ func expandResponseFiles(args []string, directory string) ([]string, []string, e
 				return nil, errors.New("response file expansion exceeded size limit")
 			}
 			files = append(files, path)
-			nested, err := shellSplit(string(data))
-			if err != nil {
-				return nil, fmt.Errorf("parse response file %q: %w", path, err)
-			}
+			// Section 9.3 ties the quoting rules to the detected toolchain,
+			// not to the host: under GNU rules every backslash in a Windows
+			// path would be read as an escape and the path would fall apart.
+			nested := respfile.Tokenize(string(data), quoting)
 			expanded, err := expand(nested, filepath.Dir(path), depth+1)
 			if err != nil {
 				return nil, err
