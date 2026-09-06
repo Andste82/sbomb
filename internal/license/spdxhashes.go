@@ -7,6 +7,9 @@
 // SPDX license list version: 01b8052
 // Licenses in the list: 739
 // Distinct normalized texts: 698
+//
+// The templates that go with them are in spdxtemplates.gz, written by the same
+// command.
 
 package license
 

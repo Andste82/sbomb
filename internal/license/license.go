@@ -19,7 +19,20 @@ const (
 	ReasonScannerInconclusive     = "scanner-inconclusive"
 )
 
-var spdxExprPattern = regexp.MustCompile(`(?i)SPDX-License-Identifier\s*:\s*([A-Za-z0-9\.\-+()\s/]+)`)
+// The detection techniques of section 22.3, recorded so that a reviewer can
+// tell how a licence was determined rather than only what it was.
+const (
+	TechniqueIdentifier = "spdx-identifier"
+	TechniqueDigest     = "spdx-digest"
+	TechniqueTemplate   = "spdx-template"
+)
+
+// spdxExprPattern reads one identifier line. The character class deliberately
+// admits only spaces and tabs, not \s: an expression is a single line, and a
+// class containing the newline ran the match on into whatever followed --
+// "SPDX-License-Identifier: MIT" above a copyright statement yielded
+// "MIT\nCopyright (c) 2009" as the expression.
+var spdxExprPattern = regexp.MustCompile(`(?i)SPDX-License-Identifier[ \t]*:[ \t]*([A-Za-z0-9.\-+()/ \t]+)`)
 
 func ResolveFromText(text, source string) domain.LicenseFinding {
 	if strings.TrimSpace(text) == "" {
@@ -39,6 +52,7 @@ func ResolveFromText(text, source string) domain.LicenseFinding {
 			Evidence:   "file-level",
 			Confidence: domain.ConfidenceHigh,
 			Source:     source,
+			Technique:  TechniqueIdentifier,
 		}
 	}
 	if id, ok := lookupNormalizedHash(normalizeLicenseText(text)); ok {
@@ -49,8 +63,44 @@ func ResolveFromText(text, source string) domain.LicenseFinding {
 			Evidence:   "component-level",
 			Confidence: domain.ConfidenceHigh,
 			Source:     source,
+			Technique:  TechniqueDigest,
 		}
 	}
+
+	// Technique 4 (deviation D18): the SPDX template, which declares which
+	// spans of the text may vary and what they may vary into. It runs only
+	// after the digest has missed, because that is the case it exists for: a
+	// licence whose copyright holder has been filled in or whose clause list
+	// has been renumbered is unmatchable by digest and unmistakable here.
+	if matches, err := matchTemplates(text); err == nil {
+		switch {
+		case len(matches) == 1:
+			return domain.LicenseFinding{
+				Expression: matches[0],
+				SPDXID:     matches[0],
+				Name:       matches[0],
+				Evidence:   "component-level",
+				Confidence: domain.ConfidenceHigh,
+				Source:     source,
+				Technique:  TechniqueTemplate,
+			}
+		case len(matches) > 1:
+			// Several licenses can be templates of one another -- a variant
+			// that makes a clause optional matches every text the stricter one
+			// does. Picking one would be the guessing section 22.7 forbids, so
+			// the ambiguity is reported with the candidates named.
+			return domain.LicenseFinding{
+				Name:       "NOASSERTION",
+				Evidence:   "unknown",
+				Confidence: domain.ConfidenceUnknown,
+				Source:     source,
+				Reason:     ReasonConflictingEvidence,
+				Conflicts:  matches,
+				Technique:  TechniqueTemplate,
+			}
+		}
+	}
+
 	return domain.LicenseFinding{
 		Name:       "NOASSERTION",
 		Evidence:   "unknown",

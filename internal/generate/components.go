@@ -381,6 +381,12 @@ func (r *componentResolver) resolveComponentLicense(component *domain.Component,
 
 	if len(component.Licenses) > 0 {
 		component.Properties = addProperty(component.Properties, "sbomb:license:evidenceClass", component.Licenses[0].Evidence)
+		if component.Licenses[0].Technique != "" {
+			// Which of the techniques of section 22.3 answered. A reviewer
+			// checking a licence needs to know whether it came from a
+			// declaration in the file, an exact digest or a template match.
+			component.Properties = addProperty(component.Properties, "sbomb:license:technique", component.Licenses[0].Technique)
+		}
 		if component.Licenses[0].Source != "" {
 			component.Properties = addProperty(component.Properties, "sbomb:license:source", component.Licenses[0].Source)
 		}

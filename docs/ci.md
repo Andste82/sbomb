@@ -39,7 +39,7 @@ than which command it runs.
 | | | `corpus` | Fixture corpus complete, free of host paths, unchanged by the tests |
 | | | `performance-budget` | 10 000 translation units within the budget of section 31 |
 | | | `findings-catalogue` | `docs/findings.md` matches the code and the specification |
-| | | `spdx-drift` | Embedded licence digests match the upstream SPDX list (informational) |
+| | | `spdx-drift` | Embedded licence digests and templates match the upstream SPDX list (informational) |
 | | | `end-to-end` | The CMake integration against a real toolchain |
 | `determinism` | push, pull request | `hash` | Two runs on one platform produce one hash — linux/amd64, linux/arm64, windows/amd64 |
 | | | `compare` | All three platforms produced the same hash |

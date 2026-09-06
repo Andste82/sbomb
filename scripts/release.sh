@@ -16,21 +16,13 @@ build_one() {
     -trimpath -buildvcs=false -ldflags "$ldflags" -o "$output_dir/sbomb-${goos}-${goarch}${suffix}" ./cmd/sbomb
 }
 
-# self_licences curates what exact licence-text matching cannot recognize.
-#
-# The matcher of section 22.3 hashes the normalized text and compares it to the
-# SPDX list. That finds a verbatim licence and nothing else, and a real file is
-# rarely verbatim: these three fill in the copyright holder and renumber the
-# clause list, so the text is unmistakable to a person and unmatchable to a
-# hash. The identifiers below are each taken from the licence file vendored in
-# this repository. They are recorded as curated, never as detected, and
-# "sbomb self" reports a conflict if the text ever contradicts one.
-self_licences=(
-  --license "github.com/google/uuid=BSD-3-Clause"
-  --license "golang.org/x/text=BSD-3-Clause"
-  --license "github.com/santhosh-tekuri/jsonschema/v6=Apache-2.0"
-  --license "std=BSD-3-Clause"
-)
+# No curated licences. Every dependency's licence is now detected from the
+# vendored text by the SPDX template matcher (section 22.3 technique 4,
+# deviation D18); the three entries that used to be asserted here -- two
+# BSD-3-Clause and one Apache-2.0 -- were only needed because exact text
+# matching cannot see through a filled-in copyright holder. If a future
+# dependency is not recognized, the SBOM says UNKNOWN_LICENSE rather than
+# carrying an assertion nobody re-derives.
 
 # write_self_sbom describes one released binary from the module evidence its
 # linker recorded (roadmap phase 8, step 8e). The earlier attempt fabricated a
@@ -49,7 +41,6 @@ write_self_sbom() {
     --supplier sbomb \
     --module-dir "$root_dir" \
     --goroot "$(go env GOROOT)" \
-    "${self_licences[@]}" \
     --reproducible)
 }
 

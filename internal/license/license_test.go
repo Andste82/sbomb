@@ -139,3 +139,23 @@ func TestCopyrightStatementsAreStillIgnored(t *testing.T) {
 		}
 	}
 }
+
+// An identifier is one line. Admitting \s into the expression's character
+// class ran the match on into the next line, so a tag above a copyright
+// statement produced "MIT\nCopyright (c) 2009" as the licence.
+func TestSPDXIdentifierDoesNotRunOnPastItsLine(t *testing.T) {
+	text := "SPDX-License-Identifier: MIT\nCopyright (c) 2026 Somebody\nAll rights reserved.\n"
+	got := ResolveFromText(text, "LICENSE")
+	if got.Expression != "MIT" {
+		t.Fatalf("expression = %q, want MIT", got.Expression)
+	}
+}
+
+func TestSPDXIdentifierKeepsCompoundExpressions(t *testing.T) {
+	for _, want := range []string{"Apache-2.0 WITH LLVM-exception", "(MIT OR Apache-2.0)"} {
+		got := ResolveFromText("// SPDX-License-Identifier: "+want+"\n", "src/x.c")
+		if got.Expression != want {
+			t.Errorf("expression = %q, want %q", got.Expression, want)
+		}
+	}
+}

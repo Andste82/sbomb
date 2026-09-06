@@ -2,6 +2,31 @@
 
 ## Unreleased
 
+### Licences with a filled-in copyright holder are recognized
+
+- The digest table of section 22.3 technique 2 only ever matched a verbatim
+  text, and a real licence file is rarely verbatim: `github.com/google/uuid`
+  writes "Neither the name of **Google Inc.**" where SPDX writes "the copyright
+  holder", and bullets its clauses instead of numbering them. Unmistakable to a
+  person, invisible to a hash. **All three of this tool's own dependencies
+  failed**, which is why the release script asserted their licences by hand.
+- sbomb now matches against the SPDX `standardLicenseTemplate`, which declares
+  in the licence list itself which spans may vary and, as a regular expression,
+  what into. Measured over 142 distinct real licence files: 32 matched by
+  digest before, 55 more match now. The release script no longer curates
+  anything -- every dependency's licence is derived from the vendored text.
+- It is not the similarity matching section 22.7 forbids: no score, no
+  threshold, exact outside the declared spans. It is a fourth technique where
+  the specification said three, so it is recorded as deviation D18 and section
+  22.3 is amended. The binary grows from 5.17 MB to 6.21 MB; the templates are
+  decompressed only after a digest lookup has missed.
+- Each component now carries `sbomb:license:technique`, so a reviewer can tell
+  a declared identifier from a digest match from a template match.
+- **An `SPDX-License-Identifier:` tag could swallow the following line.** The
+  expression's character class admitted `\s`, so a tag above a copyright
+  statement yielded `MIT\nCopyright (c) 2009` as the licence. Found by a test
+  written for the template work.
+
 ### macOS builds
 
 A release now carries darwin/amd64 and darwin/arm64 as well, each with its own

@@ -45,9 +45,8 @@ from this table: `sbomb self` reads the module record the linker embedded, so
 the published SBOM cannot drift from what was actually linked. It is the one
 place the module versions are not written down by hand.
 
-The licences here are curated in `scripts/release.sh`, not detected. All three
-vendored licence files fill in their copyright holder or renumber their clause
-list, and section 22.3 technique 2 only matches a verbatim text -- so the tool
-reports them as unrecognized and the release asserts them explicitly. If a
-dependency changes, that list changes with it, and a curated value the licence
-text contradicts is reported as a conflict.
+The licences are detected, not curated. All three vendored files fill in their
+copyright holder or renumber their clause list, so none matches a digest; the
+SPDX template matcher recognizes all three (section 22.3 technique 4, deviation
+D18) and each component records `sbomb:license:technique` so a reviewer can see
+which technique answered.

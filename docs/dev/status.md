@@ -90,16 +90,13 @@
   used, because the earlier strategies resolve every object in the corpus.
 - **`sbomb:evidence:header:directInclude` is never set.** DWARF carries no
   inclusion depth; see deviation D8.
-- **A filled-in licence template still does not match.** Measured against 160
-  real licence files, detection is now 93 matched to 16 distinct unmatched
-  texts. Nine of those sixteen are BSD-family licences whose `<ORGANIZATION>`
-  placeholder has been filled in with a real name; section 22.3 technique 2
-  hashes the official text exactly, and section 22.7 forbids matching by
-  similarity, so they correctly yield NOASSERTION rather than a guess. The
-  remedy inside the rules is SPDX's own `standardLicenseTemplate` with its
-  `<<var;...>>` markers -- substitution against an official declaration of what
-  may vary, not a similarity score. It costs the single hash lookup, so the
-  digest table stays the fast path and the template match becomes the fallback.
+- **Licence detection stops at one verbatim licence.** Measured over 142
+  distinct real licence files, 32 match by digest and 55 more by SPDX template
+  (deviation D18); the remaining 55 are mostly not a single verbatim licence at
+  all -- dual licensing, a licence behind a preamble, bespoke agreements,
+  pointers elsewhere -- where NOASSERTION is the right answer. A file that
+  contains two licences is not resolved into an expression, and nothing in the
+  permitted techniques would let it be.
 
 ## Next Work
 
@@ -126,8 +123,3 @@ What is left is not phase work:
   It is an outward-facing action and therefore a decision, not a task.
 * **ESP-IDF (milestone 20) is parked**, at the point where it was parked in
   phase 7.
-* **The licence template matcher.** Detection is measured at 93 of 109 real
-  licence files; the sixteen misses are filled-in templates, and SPDX's
-  `standardLicenseTemplate` is the remedy inside the rules. The self-SBOM feels
-  this directly: none of the three vendored Go licences match, so they are
-  curated by hand in `scripts/release.sh`.

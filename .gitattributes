@@ -8,3 +8,8 @@ testdata/golden/** -text
 # Shell scripts must keep LF wherever they are checked out; CRLF makes them
 # unrunnable under bash.
 *.sh text eol=lf
+
+# The embedded SPDX templates are a gzip stream. Git detects that on its own,
+# but end-of-line conversion on a Windows checkout would corrupt it silently
+# and the failure would surface as licences that stopped matching.
+*.gz binary

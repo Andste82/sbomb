@@ -308,3 +308,51 @@ Three projects remain, and in each the toolchain is what is not reproducible:
 `tools/fixtures/check-reproducible.sh` regenerates twice and fails on any
 difference outside those three, which are named in it rather than matched by
 pattern, so a fourth cannot join them quietly.
+
+## D18 — A fourth license detection technique: the SPDX template
+
+Section 22.3 lists the permitted detection techniques "exhaustively" as three,
+and the third of them recognizes only a verbatim text. Measured over 142
+distinct real licence files, that recognized 32. The misses were not exotic:
+`github.com/google/uuid` writes "Neither the name of **Google Inc.**" where
+SPDX writes "the copyright holder" and bullets its clauses with `*` instead of
+`1.`. Unmistakable to a person, unmatchable to a digest. Every dependency of
+this tool failed, which is why the release script asserted their licences by
+hand instead of deriving them.
+
+The SPDX list publishes, beside each text, a `standardLicenseTemplate` that
+marks the spans which may vary and gives a regular expression for each:
+
+```
+<<var;name="copyright";original="Copyright (c) <year> <owner>";match=".{0,5000}">>
+<<var;name="bullet";original="1.";match=".{0,20}">> Redistributions of
+```
+
+Matching against it is added as technique 4. It is not the similarity matching
+section 22.7 forbids: there is no score and no threshold, outside the marked
+spans the comparison is exact, and which spans may vary is declared by the same
+authority that publishes the text technique 2 hashes. It is nonetheless a
+fourth technique where the specification said three, which is why this entry
+exists rather than a silent change. Section 22.3 is amended.
+
+**Measured, on the same 142 files:** 32 by digest, 55 more by template, 0
+ambiguous, 55 unrecognized. The remainder are mostly not one verbatim licence
+at all — dual licensing, a licence behind a preamble, bespoke agreements,
+pointers to a licence elsewhere — where NOASSERTION is the right answer.
+
+**What it costs.** The templates are 5.6 MB of text, 979 KB gzipped, embedded
+with `go:embed` beside the digest table. The binary grows from 5.17 MB to
+6.21 MB. Section 22.3 justified hashes-only with "under 50 KB, which keeps the
+single-executable requirement unaffected"; that is a rationale, not a ceiling,
+and section 37 asks for one file rather than a small one. The blob is
+decompressed only after a digest lookup has already missed, so a run whose
+licences are all verbatim never pays for it.
+
+**Two things the implementation had to get right.** RE2 caps a bounded repeat
+at 1000 and SPDX writes `.{0,5000}` throughout; 334 of the 739 templates fail
+to compile without rewriting it. The bound has to be *clamped* rather than
+dropped — with an unbounded variable, a two-clause template swallows a third
+clause and a second licence after it, which is how a BSD-2-Clause template came
+to match a BSD-3-Clause file. And translating all 739 templates takes 3.5
+seconds, far too long for a run, so each is compiled only if a prefilter on its
+longest invariant literal survives a substring search.

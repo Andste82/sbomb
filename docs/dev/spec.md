@@ -999,8 +999,9 @@ Recognized filenames (case-insensitive, optional extension `.txt`, `.md`): `LICE
 1. `SPDX-License-Identifier:` expression extraction.
 2. Exact SHA-256 match of the normalized file text against an embedded table of hashes of the official SPDX license texts. **Only the hashes are embedded, not the texts** — roughly 700 entries at 32 bytes each, so under 50 KB, which keeps the single-executable requirement (§37) unaffected. The table is generated at build time from the SPDX license list by `tools/spdxgen` into a committed Go file, and `tools/spdxgen --check` runs in CI to detect drift.
 3. Normalized-text match after: lowercasing, collapsing whitespace, stripping copyright lines (`Copyright (c) ...`), stripping punctuation-only lines. Match must be exact after normalization.
+4. Match against the SPDX `standardLicenseTemplate`, which declares — in the license list itself — which spans of the text may vary and, as a regular expression, what each may vary into. Outside those spans the comparison is exact under the normalization of technique 3 minus its line stripping, because a template covers the copyright statement with a variable of its own. Several templates matching is an ambiguity, not a choice: the result is NOASSERTION with reason `conflicting-evidence` and the candidates named. The templates are embedded gzipped beside the digest table and decompressed only after technique 2 has missed. Added by deviation D18; see it for what this costs.
 
-**Forbidden:** fuzzy/similarity/percentage matching, keyword heuristics ("permission is hereby granted" → MIT), and any ML-based classification. If none of techniques 1–3 succeed, the result is NOASSERTION with reason `license-text-unrecognized`.
+**Forbidden:** fuzzy/similarity/percentage matching, keyword heuristics ("permission is hereby granted" → MIT), and any ML-based classification. Technique 4 is none of these: it has no score and no threshold, and what may vary is declared by the same authority that publishes the text technique 2 hashes. If none of techniques 1–4 succeed, the result is NOASSERTION with reason `license-text-unrecognized`.
 
 ### 22.4 License Evidence Classes
 
@@ -2035,6 +2036,7 @@ sbomb:version:source             sbomb:version:confidence
 sbomb:license:source             sbomb:license:evidenceClass
 sbomb:license:confidence         sbomb:license:review
 sbomb:license:reason             sbomb:license:conflictingValue
+sbomb:license:technique
 sbomb:review:required
 sbomb:cdx:executableProperty     (executable | non-executable)   [BSI TR-03183-2]
 sbomb:cdx:archiveProperty        (archive | no-archive)          [BSI TR-03183-2]

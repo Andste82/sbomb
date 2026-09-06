@@ -540,6 +540,9 @@ func annotateLicence(component *domain.Component, finding domain.LicenseFinding)
 	if finding.Evidence != "" {
 		component.Properties["sbomb:license:evidenceClass"] = []string{finding.Evidence}
 	}
+	if finding.Technique != "" {
+		component.Properties["sbomb:license:technique"] = []string{finding.Technique}
+	}
 	if finding.Source != "" {
 		component.Properties["sbomb:license:source"] = []string{finding.Source}
 	}

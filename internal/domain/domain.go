@@ -153,6 +153,10 @@ type LicenseFinding struct {
 	Source     string
 	Reason     string
 	Conflicts  []string
+	// Technique names which of the detection techniques of section 22.3
+	// produced this, so that a reviewer can tell an SPDX identifier read out
+	// of a file from a digest match from a template match.
+	Technique string
 }
 
 type Severity string
