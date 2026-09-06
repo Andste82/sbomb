@@ -2,6 +2,42 @@
 
 ## Unreleased
 
+### A document a consumer can use
+
+- The SBOM now has a root component in `metadata.component` describing the
+  deliverable, grouping components the files belong to, and a dependency
+  cascade in which every `bom-ref` appears exactly once, even when it depends
+  on nothing (section 28.5). `bom-ref` values follow the scheme of section
+  28.4, with the normative `slug()` normalization.
+- Every component carries the three properties BSI TR-03183-2 requires:
+  `sbomb:cdx:archiveProperty`, `sbomb:cdx:executableProperty` and
+  `sbomb:cdx:structuredProperty`, derived from the file class (section 1.5(3)).
+- Documents are validated in two layers before the temporary file is renamed
+  into place (section 32.5): the official CycloneDX 1.6 JSON Schema, embedded
+  with `go:embed`, and the semantic checks a schema cannot express. Either
+  layer failing is exit code 4.
+- Discovery hands a format-neutral `sbomwriter.Document` to a registered
+  writer (section 36.1). It carries no `bom-ref` strings and no CycloneDX
+  property names; the writer derives both.
+- Added `sbomb validate --input <file>` and `sbomb evidence --build-dir <dir>`,
+  and `sbomb schema --cyclonedx` prints the embedded schema.
+- `vendor/` is committed and `go build -mod=vendor` is verified in CI, so a
+  build needs no network (section 37.3). `docs/dependencies.md` records what
+  each direct dependency does and what removing it would cost.
+
+### Fixed
+
+- The dependency-closure check compared the component references against
+  themselves and therefore proved nothing. It now checks that every reference
+  has an entry in `dependencies[]`, as section 28.5 requires.
+- Hashes were recorded under the algorithm name `sha256`, which CycloneDX does
+  not accept; the schema layer caught it on its first run. The spelling is now
+  `SHA-256` in both the inventory dump and the SBOM.
+- `pathmodel.Slug` did not implement the normalization of section 28.4: it
+  neither lowercased nor replaced characters outside `[a-z0-9._-]`.
+- Internal annotations that discovery leaves on a file no longer reach the
+  document; only the property catalogue of appendix B does.
+
 ### The output is derived from the evidence graph
 
 - Final deliverables are resolved per section 5: configured artifacts win, and

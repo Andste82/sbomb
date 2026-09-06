@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -62,8 +63,12 @@ func execute(args []string) (int, string, string) {
 		return handleGenerate(subArgs[1:], verbosity)
 	case "explain":
 		return handleExplain(subArgs[1:])
+	case "validate":
+		return handleValidate(subArgs[1:])
+	case "evidence":
+		return handleEvidence(subArgs[1:])
 	default:
-		return 1, "", "usage: sbomb [version|generate|schema|explain]\n"
+		return 1, "", "usage: sbomb [version|generate|validate|evidence|explain|schema]\n"
 	}
 }
 
@@ -114,7 +119,117 @@ func isAllV(s string) bool {
 }
 
 func handleSchema(args []string) (int, string, string) {
+	for _, arg := range args {
+		if arg == "--cyclonedx" {
+			schema, err := cyclonedx.EmbeddedSchema()
+			if err != nil {
+				return 1, "", err.Error() + "\n"
+			}
+			return 0, schema, ""
+		}
+	}
 	return 0, config.Schema() + "\n", ""
+}
+
+// handleValidate runs both validation layers over an existing document
+// (section 32.5). Either layer failing is exit code 4.
+func handleValidate(args []string) (int, string, string) {
+	input := ""
+	for i := 0; i < len(args); i++ {
+		switch {
+		case args[i] == "--input":
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --input\n"
+			}
+			input = args[i+1]
+			i++
+		case strings.HasPrefix(args[i], "--input="):
+			input = strings.TrimPrefix(args[i], "--input=")
+		default:
+			return 1, "", fmt.Sprintf("unexpected argument: %s\n", args[i])
+		}
+	}
+	if input == "" {
+		return 1, "", "--input is required\n"
+	}
+	if err := cyclonedx.ValidateFile(input); err != nil {
+		return 4, "", err.Error() + "\n"
+	}
+	return 0, "valid CycloneDX 1.6 document: " + input + "\n", ""
+}
+
+// handleEvidence dumps the evidence graph without producing an SBOM, which is
+// what section 32.1 offers for inspecting discovery on its own.
+func handleEvidence(args []string) (int, string, string) {
+	buildDir := ""
+	output := ""
+	cfgPath := ""
+	for i := 0; i < len(args); i++ {
+		switch {
+		case args[i] == "--build-dir":
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --build-dir\n"
+			}
+			buildDir = args[i+1]
+			i++
+		case strings.HasPrefix(args[i], "--build-dir="):
+			buildDir = strings.TrimPrefix(args[i], "--build-dir=")
+		case args[i] == "--output":
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --output\n"
+			}
+			output = args[i+1]
+			i++
+		case strings.HasPrefix(args[i], "--output="):
+			output = strings.TrimPrefix(args[i], "--output=")
+		case args[i] == "--config":
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --config\n"
+			}
+			cfgPath = args[i+1]
+			i++
+		case strings.HasPrefix(args[i], "--config="):
+			cfgPath = strings.TrimPrefix(args[i], "--config=")
+		default:
+			return 1, "", fmt.Sprintf("unexpected argument: %s\n", args[i])
+		}
+	}
+	if buildDir == "" {
+		return 1, "", "--build-dir is required\n"
+	}
+	loadedCfg := config.Config{}
+	if cfgPath != "" {
+		var err error
+		loadedCfg, err = config.Load(cfgPath)
+		if err != nil {
+			return 1, "", err.Error() + "\n"
+		}
+	}
+	generated, err := generate.RunWithOptions(loadedCfg, buildDir, true, generate.Options{PathFlavor: pathmodel.DefaultFlavor()})
+	if err != nil && generated.Graph == nil {
+		return exitCodeFor(err, 2), "", err.Error() + "\n"
+	}
+	var buffer bytes.Buffer
+	if dumpErr := generated.Graph.Dump(&buffer); dumpErr != nil {
+		return 2, "", dumpErr.Error() + "\n"
+	}
+	if output == "" {
+		return 0, buffer.String(), ""
+	}
+	if writeErr := os.WriteFile(output, buffer.Bytes(), 0o600); writeErr != nil {
+		return 2, "", writeErr.Error() + "\n"
+	}
+	return 0, "", ""
+}
+
+// exitCodeFor honours the exit-code precedence of section 32.4 by letting a
+// finding carry its own code.
+func exitCodeFor(err error, fallback int) int {
+	var exit *generate.ExitError
+	if errors.As(err, &exit) {
+		return exit.Code
+	}
+	return fallback
 }
 
 func handleGenerate(args []string, verbosity int) (int, string, string) {
@@ -278,11 +393,12 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 		RedactUnanchoredPaths: redactUnanchored,
 	})
 	if err != nil {
-		return 2, logBuf.String(), err.Error() + "\n"
+		return exitCodeFor(err, 2), logBuf.String(), err.Error() + "\n"
 	}
 	cliLogger.Info("Writing CycloneDX BOM to '%s'...", output)
 	if err := cyclonedx.WriteBOM(output, generated.BOM); err != nil {
-		return 2, logBuf.String(), err.Error() + "\n"
+		// Either validation layer failing is exit code 4 (section 32.5).
+		return 4, logBuf.String(), err.Error() + "\n"
 	}
 	evidencePath := filepath.Join(buildDir, "evidence.json")
 	cliLogger.Info("Writing evidence graph dump to '%s'...", evidencePath)

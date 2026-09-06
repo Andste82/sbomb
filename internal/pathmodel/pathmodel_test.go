@@ -1,6 +1,9 @@
 package pathmodel
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestResolve(t *testing.T) {
 	if got := Resolve("/tmp/project/src", "/tmp/project", "/tmp/project"); got != "project:src" {
@@ -38,5 +41,33 @@ func TestWindowsFlavorOnLinux(t *testing.T) {
 		if got := ResolveWithFlavor(input, `C:\fixture\project`, `C:\fixture\build`, flavor); got != want {
 			t.Errorf("ResolveWithFlavor(%q) = %q, want %q", input, got, want)
 		}
+	}
+}
+
+func TestSlugFollowsTheSpecifiedNormalization(t *testing.T) {
+	cases := map[string]string{
+		"mbedTLS":          "mbedtls",
+		"my project/name":  "my-project-name",
+		"  spaced  out  ":  "spaced-out",
+		"Already-Fine_1.2": "already-fine_1.2",
+		"///":              "unnamed",
+		"a---b":            "a-b",
+	}
+	for input, want := range cases {
+		if got := Slug(input, 64); got != want {
+			t.Errorf("Slug(%q) = %q, want %q", input, got, want)
+		}
+	}
+}
+
+func TestSlugTruncatesWithADigest(t *testing.T) {
+	long := strings.Repeat("component-name-", 20)
+	got := Slug(long, 32)
+	if len(got) > 32 {
+		t.Errorf("Slug() = %q, longer than the limit", got)
+	}
+	other := Slug(long+"x", 32)
+	if got == other {
+		t.Error("two different long names produced the same slug")
 	}
 }

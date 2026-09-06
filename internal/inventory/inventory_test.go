@@ -39,7 +39,7 @@ func TestMergeUsedFilesDeduplicatesEvidence(t *testing.T) {
 			Properties: map[string][]string{
 				"evidence": {"cmake"},
 			},
-			Hashes: map[string]string{"sha256": "aaa"},
+			Hashes: map[string]string{HashAlgorithmSHA256: "aaa"},
 		},
 		{
 			ID:    domain.FileID{Anchor: "project", RelPath: "src/main.c"},
@@ -47,7 +47,7 @@ func TestMergeUsedFilesDeduplicatesEvidence(t *testing.T) {
 			Properties: map[string][]string{
 				"evidence": {"ninja"},
 			},
-			Hashes: map[string]string{"sha256": "bbb"},
+			Hashes: map[string]string{HashAlgorithmSHA256: "bbb"},
 		},
 	}
 
@@ -85,11 +85,11 @@ func TestHashUsedFilesMatchesRawBytesAndMissingFile(t *testing.T) {
 	if len(out) != 3 {
 		t.Fatalf("expected 3 files, got %d", len(out))
 	}
-	if out[0].Hashes["sha256"] != hex.EncodeToString(h1[:]) {
-		t.Fatalf("unexpected LF hash: %s", out[0].Hashes["sha256"])
+	if out[0].Hashes[HashAlgorithmSHA256] != hex.EncodeToString(h1[:]) {
+		t.Fatalf("unexpected LF hash: %s", out[0].Hashes[HashAlgorithmSHA256])
 	}
-	if out[1].Hashes["sha256"] != hex.EncodeToString(h2[:]) {
-		t.Fatalf("unexpected CRLF hash: %s", out[1].Hashes["sha256"])
+	if out[1].Hashes[HashAlgorithmSHA256] != hex.EncodeToString(h2[:]) {
+		t.Fatalf("unexpected CRLF hash: %s", out[1].Hashes[HashAlgorithmSHA256])
 	}
 	if !out[2].Missing || out[2].Hashes != nil {
 		t.Fatalf("missing file should not have a hash and should be marked missing: %#v", out[2])
@@ -119,7 +119,7 @@ func TestHashUsedFilesRejectsSymlinkEscapingAnchors(t *testing.T) {
 		t.Fatal("escaping symlink was hashed without allow-unanchored-reads")
 	}
 	allowed := HashUsedFilesWithOptions([]domain.UsedFile{file}, HashOptions{AllowUnanchoredReads: true})[0]
-	if allowed.Missing || allowed.Hashes["sha256"] == "" {
+	if allowed.Missing || allowed.Hashes[HashAlgorithmSHA256] == "" {
 		t.Fatal("explicitly allowed unanchored symlink was not hashed")
 	}
 }

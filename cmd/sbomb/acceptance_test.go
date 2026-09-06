@@ -209,11 +209,21 @@ func TestEvidenceChainYieldsTheSameFilesAcrossToolchains(t *testing.T) {
 			if err := json.Unmarshal(data, &document); err != nil {
 				t.Fatal(err)
 			}
+			// Only the file components: the grouping component that holds
+			// them is asserted separately.
 			got := make([]string, 0, len(document.Components))
+			var grouping int
 			for _, component := range document.Components {
-				got = append(got, component.BomRef)
+				if strings.HasPrefix(component.BomRef, "file:") {
+					got = append(got, component.BomRef)
+					continue
+				}
+				grouping++
 			}
 			sort.Strings(got)
+			if grouping != 1 {
+				t.Errorf("got %d grouping components, want exactly one for the project", grouping)
+			}
 			if len(got) != len(want) {
 				t.Fatalf("got %d components %v, want %v", len(got), got, want)
 			}
@@ -243,5 +253,85 @@ func TestUnextractedArchiveMembersAreAbsent(t *testing.T) {
 	}
 	if !strings.Contains(string(data), "crypto.h") {
 		t.Error("crypto.h is missing although a used translation unit included it")
+	}
+}
+
+// TestValidateSubcommandRunsBothLayers covers section 32.5: a generated
+// document validates, and either layer failing is exit code 4.
+func TestValidateSubcommandRunsBothLayers(t *testing.T) {
+	buildDir := testutil.CorpusBuildDir(t, "gcc-ninja", "p02-static")
+	output := filepath.Join(t.TempDir(), "out.cdx.json")
+	if code, _, stderr := execute([]string{"generate", "--build-dir", buildDir, "--policy", "lenient", "--output", output, "--reproducible"}); code != 0 {
+		t.Fatalf("generate = code %d, stderr %q", code, stderr)
+	}
+	if code, _, stderr := execute([]string{"validate", "--input", output}); code != 0 {
+		t.Fatalf("validate = code %d, stderr %q; the writer must produce documents its validator accepts", code, stderr)
+	}
+
+	// Schema layer: an invalid component type.
+	data, err := os.ReadFile(output)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var document map[string]any
+	if err := json.Unmarshal(data, &document); err != nil {
+		t.Fatal(err)
+	}
+	document["components"].([]any)[0].(map[string]any)["type"] = "not-a-type"
+	broken := filepath.Join(t.TempDir(), "broken.cdx.json")
+	brokenData, err := json.Marshal(document)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(broken, brokenData, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	code, _, stderr := execute([]string{"validate", "--input", broken})
+	if code != 4 {
+		t.Errorf("validate on a schema-invalid document = code %d, want 4", code)
+	}
+	if !strings.Contains(stderr, "components/0/type") {
+		t.Errorf("the error does not name the offending location: %q", stderr)
+	}
+}
+
+// TestEvidenceSubcommandDumpsTheGraph covers section 32.1: discovery can be
+// inspected on its own, without producing an SBOM.
+func TestEvidenceSubcommandDumpsTheGraph(t *testing.T) {
+	buildDir := testutil.CorpusBuildDir(t, "gcc-ninja", "p02-static")
+	output := filepath.Join(t.TempDir(), "evidence.json")
+	code, _, stderr := execute([]string{"evidence", "--build-dir", buildDir, "--output", output})
+	if code != 0 || stderr != "" {
+		t.Fatalf("evidence = code %d, stderr %q", code, stderr)
+	}
+	data, err := os.ReadFile(output)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var dump struct {
+		Nodes []map[string]any `json:"nodes"`
+		Edges []map[string]any `json:"edges"`
+	}
+	if err := json.Unmarshal(data, &dump); err != nil {
+		t.Fatal(err)
+	}
+	if len(dump.Nodes) == 0 || len(dump.Edges) == 0 {
+		t.Fatalf("the evidence dump is empty: %d nodes, %d edges", len(dump.Nodes), len(dump.Edges))
+	}
+}
+
+// TestMissingDeliverableIsAUsageError covers the exit-code precedence of
+// section 32.4: the tool refuses to guess what the SBOM is about.
+func TestMissingDeliverableIsAUsageError(t *testing.T) {
+	buildDir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(buildDir, "compile_commands.json"), []byte("[]"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	code, _, stderr := execute([]string{"generate", "--build-dir", buildDir, "--output", filepath.Join(t.TempDir(), "o.json")})
+	if code != 1 {
+		t.Errorf("generate without a deliverable = code %d, want 1", code)
+	}
+	if !strings.Contains(stderr, "MISSING_FINAL_DELIVERABLE") {
+		t.Errorf("stderr = %q, want MISSING_FINAL_DELIVERABLE", stderr)
 	}
 }

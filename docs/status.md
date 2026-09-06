@@ -37,16 +37,25 @@
   is reachable from a deliverable, so a compiled source whose archive member
   the linker never extracted does not appear. The same project built with
   five different toolchain and generator combinations produces the same set.
+- Sections 28 and 32.5: the document has a root component in
+  `metadata.component`, grouping components, a closed dependency cascade, the
+  `bom-ref` scheme of section 28.4 and the three BSI properties of section
+  1.5(3). Both validation layers run on the exact bytes before they are
+  renamed into place: the official CycloneDX 1.6 JSON Schema, embedded with
+  `go:embed`, and the semantic checks a schema cannot express.
+- Section 36.1: discovery hands a format-neutral `sbomwriter.Document` to a
+  registered writer. Nothing below that package knows about `bom-ref` strings
+  or CycloneDX property names.
+- `sbomb validate` and `sbomb evidence` exist, and `sbomb schema --cyclonedx`
+  prints the embedded schema.
 
 ## Known Gaps
 
-- **The document shape is not yet CRA-conformant.** There is no
-  `metadata.component`, the dependency array carries no `dependsOn`, and there
-  is no embedded CycloneDX schema validation. That is roadmap phase 3.
-- **Components, versions, licenses and suppliers are missing.** Files are
-  emitted individually rather than grouped into components with a version and
-  a supplier, so the CRA field set of section 1.5 is incomplete. Roadmap
-  phase 4.
+- **Component metadata is missing.** Grouping components come from the anchor
+  root alone -- strategy 7 of section 19.2 -- so they carry no version,
+  supplier or purl, and the CRA field set of section 1.5(1) stays incomplete.
+  The license table has two entries where it needs roughly seven hundred.
+  Roadmap phase 4.
 - **Most policy gates remain inert.** Two are wired end to end --
   `MISSING_LINK_EVIDENCE` and `MISSING_FILE_HASH` -- so `strict` and `lenient`
   now genuinely differ, but the remaining gates of section 33.1 have no
@@ -57,8 +66,7 @@
 
 ## Next Work
 
-Roadmap phase 3: bind the graph to a CycloneDX document that a consumer can
-use. A root component in `metadata.component`, grouping components, a real
-dependency cascade with `dependsOn`, the `bom-ref` scheme of section 28.4, the
-BSI properties of section 1.5(3), and the second validation layer of section
-32.5 with the official schema embedded via `go:embed`.
+Roadmap phase 4: fill in what CRA compliance actually needs. The component
+mapping strategies of section 19.2 beyond the anchor root, versions and purls
+per section 20, suppliers from curated configuration or package metadata, and
+the SPDX license hash table that `tools/spdxgen` is meant to generate.

@@ -62,3 +62,26 @@ adapters care about -- compiler family plus CMake generator -- rather than a
 compiler version that silently goes stale when the container is updated. The
 exact toolchain version is recorded in each fixture's `manifest.json` and
 `PROVENANCE.md`.
+
+## D6 — The CycloneDX schemas are draft-07, not draft 2020-12
+
+Section 32.5 requires validation with "a pure-Go JSON Schema draft 2020-12
+validator". The official CycloneDX 1.6 schema files declare
+`http://json-schema.org/draft-07/schema#`, as do the SPDX and JSF schemas they
+reference.
+
+The embedded validator therefore has to support draft-07. The one in use
+(`github.com/santhosh-tekuri/jsonschema/v6`) supports both, so the requirement
+is met in substance: validation is in-process, pure Go, cgo-free and needs no
+network. The draft named in the specification is simply not the one CycloneDX
+publishes.
+
+## D7 — Grouping components are anchor-derived for now
+
+Section 19.2 lists eight component-mapping strategies. Only the last one --
+the anchor root itself -- is implemented, so every used file belongs to exactly
+one named component but the names come from anchors rather than from curated
+configuration, package-manager metadata or submodule boundaries. The earlier
+strategies are roadmap phase 4; until then a component carries no version,
+supplier or purl, and `UNKNOWN_VERSION` and `MISSING_SUPPLIER` are not yet
+emitted.

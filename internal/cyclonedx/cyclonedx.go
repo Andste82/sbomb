@@ -30,9 +30,10 @@ type BOM struct {
 }
 
 type Metadata struct {
-	Timestamp string     `json:"timestamp,omitempty"`
-	Tools     []Tool     `json:"tools,omitempty"`
-	Component *Component `json:"component,omitempty"`
+	Timestamp  string     `json:"timestamp,omitempty"`
+	Tools      []Tool     `json:"tools,omitempty"`
+	Component  *Component `json:"component,omitempty"`
+	Properties []Property `json:"properties,omitempty"`
 }
 
 type Tool struct {
@@ -250,7 +251,9 @@ func WriteEmpty(path string, reproducible bool) error {
 	if err != nil {
 		return err
 	}
-	if err := ValidateDocument([]byte(out)); err != nil {
+	// Validation runs on the exact bytes that will be written, before the
+	// temporary file is renamed into place (section 32.5).
+	if err := Validate([]byte(out)); err != nil {
 		return err
 	}
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
@@ -284,7 +287,9 @@ func WriteBOM(path string, bom BOM) error {
 	if err != nil {
 		return err
 	}
-	if err := ValidateDocument([]byte(out)); err != nil {
+	// Validation runs on the exact bytes that will be written, before the
+	// temporary file is renamed into place (section 32.5).
+	if err := Validate([]byte(out)); err != nil {
 		return err
 	}
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
@@ -311,12 +316,13 @@ func WriteBOM(path string, bom BOM) error {
 	return nil
 }
 
-func Validate(path string) error {
+// ValidateFile runs both validation layers over a document on disk.
+func ValidateFile(path string) error {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}
-	return ValidateDocument(data)
+	return Validate(data)
 }
 
 func ValidateDocument(data []byte) error {
@@ -341,6 +347,9 @@ func ValidateDocument(data []byte) error {
 	}
 	if bom.Metadata.Timestamp != "" && !isRFC3339Timestamp(bom.Metadata.Timestamp) {
 		return fmt.Errorf("metadata.timestamp must be RFC3339")
+	}
+	if err := validateRootComponent(bom); err != nil {
+		return err
 	}
 	if err := validateUniqueRefs(bom); err != nil {
 		return err
@@ -411,11 +420,34 @@ func validateDependencies(bom BOM) error {
 			}
 		}
 	}
+	// Section 28.5: every bom-ref must appear exactly once as a dependency
+	// entry, even when it depends on nothing, so that a consumer can close the
+	// graph. Checking the component refs against themselves, as this did
+	// before, proves nothing.
+	declared := make(map[string]struct{}, len(bom.Dependencies))
+	for _, dep := range bom.Dependencies {
+		declared[dep.Ref] = struct{}{}
+	}
+	for ref := range refs {
+		if _, ok := declared[ref]; !ok {
+			return fmt.Errorf("bom-ref %q has no dependencies entry; section 28.5 requires one for every component", ref)
+		}
+	}
+	return nil
+}
+
+// validateRootComponent enforces section 28.2 and 28.3: the document has a
+// root component, and it is not repeated in the flat component array.
+func validateRootComponent(bom BOM) error {
+	if bom.Metadata == nil || bom.Metadata.Component == nil {
+		return fmt.Errorf("metadata.component is missing; the document does not say what it describes")
+	}
+	if bom.Metadata.Component.BomRef == "" {
+		return fmt.Errorf("metadata.component has no bom-ref")
+	}
 	for _, comp := range bom.Components {
-		if comp.BomRef != "" {
-			if _, ok := refs[comp.BomRef]; !ok {
-				return fmt.Errorf("component bom-ref not declared in dependencies: %s", comp.BomRef)
-			}
+		if comp.BomRef == bom.Metadata.Component.BomRef {
+			return fmt.Errorf("the root component %q also appears in components[]", comp.BomRef)
 		}
 	}
 	return nil

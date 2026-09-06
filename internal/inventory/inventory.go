@@ -37,6 +37,9 @@ type InventoryDump struct {
 	Components    []InventoryComponent `json:"components,omitempty"`
 }
 
+// HashAlgorithmSHA256 is the CycloneDX spelling of the default algorithm.
+const HashAlgorithmSHA256 = "SHA-256"
+
 type HashOptions struct {
 	Anchors              []string
 	AllowUnanchoredReads bool
@@ -162,7 +165,9 @@ func HashUsedFilesWithOptions(files []domain.UsedFile, options HashOptions) []do
 			continue
 		}
 		sum := sha256.Sum256(data)
-		clone.Hashes["sha256"] = hex.EncodeToString(sum[:])
+		// CycloneDX names the algorithm "SHA-256"; the inventory dump and
+		// the SBOM must agree on one spelling (section 28.6).
+		clone.Hashes[HashAlgorithmSHA256] = hex.EncodeToString(sum[:])
 		out[i] = clone
 	}
 	return out

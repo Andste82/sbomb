@@ -17,6 +17,8 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - name: Build without network (vendored)
+        run: go build -mod=vendor ./...
       - name: go build
         run: go build ./...
       - name: go vet
@@ -25,7 +27,8 @@ jobs:
         run: go test ./...
       - name: gofmt
         run: |
-          unformatted=$(gofmt -l .)
+          # Only our own packages; vendor/ is third-party source.
+          unformatted=$(gofmt -l $(go list -f '{{.Dir}}' ./...))
           if [ -n "$unformatted" ]; then
             echo "these files are not gofmt-clean:" >&2
             echo "$unformatted" >&2

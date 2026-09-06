@@ -9,7 +9,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/example/sbomb/internal/anchors"
 	"github.com/example/sbomb/internal/config"
 	"github.com/example/sbomb/internal/cyclonedx"
 	"github.com/example/sbomb/internal/domain"
@@ -260,12 +259,12 @@ func TestFileComponentResolvesSPDXAndNearestLicense(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	spdx := fileComponent("project:src/spdx.c", spdxFile, anchors.ScopeProject, pathmodel.PosixFlavor{}, nil)
-	if len(spdx.Licenses) != 1 || spdx.Licenses[0].Expression != "MIT" {
-		t.Fatalf("SPDX license was not resolved: %#v", spdx.Licenses)
+	spdx := fileLicenses(spdxFile, nil)
+	if len(spdx) != 1 || spdx[0].Expression != "MIT" {
+		t.Fatalf("SPDX license was not resolved: %#v", spdx)
 	}
-	nearest := fileComponent("project:vendor/lib/lib.c", licensedFile, anchors.ScopeProject, pathmodel.PosixFlavor{}, nil)
-	if len(nearest.Licenses) != 1 || nearest.Licenses[0].Expression != "MIT" {
-		t.Fatalf("nearest license was not resolved: %#v", nearest.Licenses)
+	nearest := fileLicenses(licensedFile, nil)
+	if len(nearest) != 1 || nearest[0].Expression != "MIT" {
+		t.Fatalf("nearest license was not resolved: %#v", nearest)
 	}
 }

@@ -1,8 +1,6 @@
 package generate
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -24,13 +22,18 @@ import (
 	"github.com/example/sbomb/internal/inventory"
 	"github.com/example/sbomb/internal/license"
 	"github.com/example/sbomb/internal/pathmodel"
+	"github.com/example/sbomb/internal/sbomwriter"
 	"github.com/google/uuid"
 )
 
 type Result struct {
 	Graph    *evidence.Graph
 	Findings []domain.Finding
-	BOM      cyclonedx.BOM
+	// Document is the format-neutral hand-off to a writer (section 36.1).
+	Document *sbomwriter.Document
+	// BOM is the CycloneDX rendering of Document, kept for callers that need
+	// the serialized form directly.
+	BOM cyclonedx.BOM
 }
 
 // Run assembles the currently available build evidence into one deterministic
@@ -253,58 +256,71 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		}
 	}
 
-	// 9. Serialize.
-	components := make([]cyclonedx.Component, 0, len(used))
-	for _, file := range used {
-		canonical := file.ID.Canonical()
-		scope := anchors.ScopeUnknown
-		if values := file.Properties["sbomb:component:scope"]; len(values) > 0 {
-			scope = anchors.Scope(values[0])
-		}
-		component := fileComponent(canonical, b.physical[canonical], scope, options.PathFlavor, logger)
-		if len(file.Hashes) > 0 {
-			component.Hashes = component.Hashes[:0]
-			for _, algorithm := range sortedKeys(file.Hashes) {
-				component.Hashes = append(component.Hashes, cyclonedx.Hash{Alg: algorithm, Value: file.Hashes[algorithm]})
-			}
-		}
-		components = append(components, component)
+	// 9. Hand the resolved facts to a writer.
+	run := sbomwriter.RunMetadata{
+		ToolName:     buildinfo.Name,
+		ToolVendor:   buildinfo.Vendor,
+		ToolVersion:  buildinfo.Version,
+		Reproducible: reproducible,
+		Timestamp:    buildTimestamp(),
 	}
-	sort.Slice(components, func(i, j int) bool { return components[i].BomRef < components[j].BomRef })
-
-	deps := make([]cyclonedx.Dependency, 0, len(components))
-	for _, component := range components {
-		deps = append(deps, cyclonedx.Dependency{Ref: component.BomRef})
-	}
-	bom := cyclonedx.BOM{
-		BomFormat: "CycloneDX", SpecVersion: "1.6", Version: 1,
-		Components: components, Dependencies: deps,
-		Metadata: &cyclonedx.Metadata{Tools: []cyclonedx.Tool{{Vendor: buildinfo.Vendor, Name: buildinfo.Name, Version: buildinfo.Version}}},
+	if replyModel != nil {
+		run.Generator = replyModel.Cache["CMAKE_GENERATOR"]
+		run.BuildConfig = replyModel.Cache["CMAKE_BUILD_TYPE"]
 	}
 	if reproducible {
-		bom.SerialNumber = cyclonedx.ReproducibleSerialNumber(bom)
 		findings = append(findings, domain.Finding{
 			ID: "REPRODUCIBLE_MODE_OMITS_TIMESTAMP", Severity: domain.SeverityInfo,
 			Subject: domain.Subject{Kind: "run", Ref: buildRootForIdentity},
 			Message: "the document omits metadata.timestamp and is therefore not a CRA deliverable SBOM",
 		})
+	}
+
+	for index := range used {
+		canonical := used[index].ID.Canonical()
+		if licenses := fileLicenses(b.physical[canonical], logger); len(licenses) > 0 {
+			used[index].Properties = addProperty(used[index].Properties, "sbomb:license:evidence", licenses[0].Evidence)
+			if licenses[0].Reason != "" {
+				used[index].Properties = addProperty(used[index].Properties, "sbomb:license:reason", licenses[0].Reason)
+			}
+		}
+	}
+
+	document := buildDocument(cfg, deliverables, used, findings, run)
+	writer, err := sbomwriter.Get("cyclonedx-json", "1.6")
+	if err != nil {
+		return Result{Graph: graph, Findings: findings}, err
+	}
+	bom, err := writer.(cyclonedx.Writer).Build(document, sbomwriter.Options{SpecVersion: "1.6", Reproducible: reproducible})
+	if err != nil {
+		return Result{Graph: graph, Findings: findings}, &ExitError{
+			Code: 70,
+			Finding: domain.Finding{
+				ID: "INTERNAL_INVARIANT_VIOLATION", Severity: domain.SeverityError,
+				Subject: domain.Subject{Kind: "run", Ref: buildRootForIdentity}, Message: err.Error(),
+			},
+		}
+	}
+	if reproducible {
+		bom.SerialNumber = cyclonedx.ReproducibleSerialNumber(bom)
 	} else {
 		bom.SerialNumber = "urn:uuid:" + uuid.NewString()
-		bom.Metadata.Timestamp = buildTimestamp()
 	}
 
-	logger.Info("CycloneDX 1.6 BOM constructed: %d component(s)", len(components))
-	return Result{Graph: graph, Findings: findings, BOM: bom}, nil
+	logger.Info("CycloneDX 1.6 BOM constructed: %d component(s) in %d group(s)", len(bom.Components), len(document.Components))
+	return Result{Graph: graph, Findings: findings, Document: document, BOM: bom}, nil
 }
 
-// buildSubject names the build in a finding using the identity the evidence
-// carries, so that a finding does not embed the directory the run happened to
-// read from.
-func buildSubject(cfg config.Config, buildDir string) string {
-	if cfg.Build.Dir != "" {
-		return cfg.Build.Dir
+// addProperty appends a value to a multi-valued property map.
+func addProperty(properties map[string][]string, name, value string) map[string][]string {
+	if value == "" {
+		return properties
 	}
-	return buildDir
+	if properties == nil {
+		properties = map[string][]string{}
+	}
+	properties[name] = append(properties[name], value)
+	return properties
 }
 
 func fileClassOf(node domain.Node) domain.FileClass {
@@ -329,35 +345,28 @@ func sortedKeys(m map[string]string) []string {
 	return keys
 }
 
-func fileComponent(canonical, path string, scope anchors.Scope, flavor pathmodel.Flavor, logger *Logger) cyclonedx.Component {
-	component := cyclonedx.Component{Type: "file", Name: pathmodel.Base(path, flavor), BomRef: "file:" + canonical, Properties: []cyclonedx.Property{
-		{Name: "sbomb:path:canonical", Value: canonical},
-		{Name: "sbomb:component:scope", Value: string(scope)},
-	}}
+// fileLicenses resolves the licenses of one used file. It is the only place
+// that reads file bytes for licensing, and only for evidence-selected files
+// (section 22.1).
+func fileLicenses(path string, logger *Logger) []domain.LicenseFinding {
+	if path == "" {
+		return nil
+	}
 	data, err := os.ReadFile(path)
-	if err == nil {
-		hash := sha256.Sum256(data)
-		hashStr := hex.EncodeToString(hash[:])
-		component.Hashes = []cyclonedx.Hash{{Alg: "SHA-256", Value: hashStr}}
-		logger.Trace("Hashed '%s' (%d bytes): sha256=%s", path, len(data), hashStr)
-	} else {
-		logger.Debug("Could not read file '%s': %v", path, err)
+	finding := resolveLicense(path, data, err, logger)
+	if finding.Name == "" && finding.Expression == "" {
+		return nil
 	}
+	return []domain.LicenseFinding{finding}
+}
 
-	if finding := resolveLicense(path, data, err, logger); finding.Name != "" {
-		licenseEntry := cyclonedx.License{}
-		if finding.Expression != "" {
-			licenseEntry.Expression = finding.Expression
-		} else {
-			licenseEntry.License = &cyclonedx.LicenseIdentifier{Name: finding.Name}
-		}
-		component.Licenses = []cyclonedx.License{licenseEntry}
-		if finding.Reason != "" {
-			component.Properties = append(component.Properties, cyclonedx.Property{Name: "sbomb:license:reason", Value: finding.Reason})
-		}
-		component.Properties = append(component.Properties, cyclonedx.Property{Name: "sbomb:license:evidence", Value: finding.Evidence})
+// buildSubject names the build in a finding using the identity the evidence
+// carries, so that a finding does not embed the directory the run read from.
+func buildSubject(cfg config.Config, buildDir string) string {
+	if cfg.Build.Dir != "" {
+		return cfg.Build.Dir
 	}
-	return component
+	return buildDir
 }
 
 func resolveLicense(path string, data []byte, readErr error, logger *Logger) domain.LicenseFinding {
@@ -399,27 +408,4 @@ func buildTimestamp() string {
 		}
 	}
 	return time.Now().UTC().Format(time.RFC3339)
-}
-
-func hasLinkEvidence(buildDir string) bool {
-	for _, name := range []string{"link-trace.txt", "link.d", "link.map"} {
-		if info, err := os.Stat(filepath.Join(buildDir, name)); err == nil && !info.IsDir() {
-			return true
-		}
-	}
-	if hasMakeLinkEvidence(buildDir) {
-		return true
-	}
-	for _, pattern := range []string{"*.map", "*.d"} {
-		matches, err := filepath.Glob(filepath.Join(buildDir, pattern))
-		if err == nil && len(matches) > 0 {
-			return true
-		}
-	}
-	return false
-}
-
-func hasMakeLinkEvidence(buildDir string) bool {
-	matches, err := filepath.Glob(filepath.Join(buildDir, "CMakeFiles", "*.dir", "link.txt"))
-	return err == nil && len(matches) > 0
 }

@@ -2,7 +2,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "version": 1,
-  "serialNumber": "urn:uuid:e55b7587-e67b-5ff3-b755-738ff5bdef85",
+  "serialNumber": "urn:uuid:44ff7432-6d18-5078-98ae-4740f470f8e1",
   "metadata": {
     "tools": [
       {
@@ -10,21 +10,90 @@
         "name": "sbomb",
         "version": "0.0.0-test"
       }
+    ],
+    "component": {
+      "type": "application",
+      "name": "app",
+      "bom-ref": "product:app",
+      "properties": [
+        {
+          "name": "sbomb:artifact:role",
+          "value": "application"
+        },
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        }
+      ]
+    },
+    "properties": [
+      {
+        "name": "sbomb:run:specVersion",
+        "value": "1.6"
+      },
+      {
+        "name": "sbomb:run:toolVersion",
+        "value": "0.0.0-test"
+      },
+      {
+        "name": "sbomb:build:config",
+        "value": "Debug"
+      },
+      {
+        "name": "sbomb:build:generator",
+        "value": "Unix Makefiles"
+      }
     ]
   },
   "components": [
     {
+      "type": "application",
+      "name": "project",
+      "bom-ref": "component:project",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        }
+      ]
+    },
+    {
       "type": "file",
       "name": "crypto.c",
       "bom-ref": "file:project:crypto.c",
-      "licenses": [
-        {
-          "license": {
-            "name": "NOASSERTION"
-          }
-        }
-      ],
       "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
         {
           "name": "sbomb:component:scope",
           "value": "build"
@@ -47,14 +116,19 @@
       "type": "file",
       "name": "crypto.h",
       "bom-ref": "file:project:crypto.h",
-      "licenses": [
-        {
-          "license": {
-            "name": "NOASSERTION"
-          }
-        }
-      ],
       "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
         {
           "name": "sbomb:component:scope",
           "value": "project"
@@ -77,14 +151,19 @@
       "type": "file",
       "name": "main.c",
       "bom-ref": "file:project:main.c",
-      "licenses": [
-        {
-          "license": {
-            "name": "NOASSERTION"
-          }
-        }
-      ],
       "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
         {
           "name": "sbomb:component:scope",
           "value": "build"
@@ -106,6 +185,14 @@
   ],
   "dependencies": [
     {
+      "ref": "component:project",
+      "dependsOn": [
+        "file:project:crypto.c",
+        "file:project:crypto.h",
+        "file:project:main.c"
+      ]
+    },
+    {
       "ref": "file:project:crypto.c"
     },
     {
@@ -113,6 +200,12 @@
     },
     {
       "ref": "file:project:main.c"
+    },
+    {
+      "ref": "product:app",
+      "dependsOn": [
+        "component:project"
+      ]
     }
   ]
 }

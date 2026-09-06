@@ -149,19 +149,45 @@ func hasPathPrefix(path, prefix string, flavor Flavor) bool {
 	return false
 }
 
-// Slug creates a stable short identifier with a hash suffix when truncated.
+// Slug normalizes a string into a stable identifier, per the definition in
+// specification section 28.4: lowercase, every character outside
+// [a-z0-9._-] replaced by a hyphen, runs of hyphens collapsed, leading and
+// trailing hyphens trimmed, and truncation to maxLen with a digest suffix so
+// that two long names cannot collide.
 func Slug(s string, maxLen int) string {
 	if maxLen <= 0 {
 		return ""
 	}
-	if len(s) <= maxLen {
-		return s
+	var builder strings.Builder
+	builder.Grow(len(s))
+	previousHyphen := false
+	for _, r := range strings.ToLower(s) {
+		keep := (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || r == '.' || r == '_' || r == '-'
+		if !keep {
+			r = '-'
+		}
+		if r == '-' {
+			if previousHyphen {
+				continue
+			}
+			previousHyphen = true
+		} else {
+			previousHyphen = false
+		}
+		builder.WriteRune(r)
 	}
-	h := sha256.Sum256([]byte(s))
-	trim := maxLen - 1 - 10
-	if trim < 1 {
-		trim = 1
+	slug := strings.Trim(builder.String(), "-")
+	if slug == "" {
+		slug = "unnamed"
 	}
-	prefix := s[:trim]
-	return prefix + "-" + hex.EncodeToString(h[:])[:10]
+	if len(slug) <= maxLen {
+		return slug
+	}
+	digest := sha256.Sum256([]byte(s))
+	suffix := "-" + hex.EncodeToString(digest[:])[:8]
+	keep := maxLen - len(suffix)
+	if keep < 1 {
+		keep = 1
+	}
+	return strings.Trim(slug[:keep], "-") + suffix
 }
