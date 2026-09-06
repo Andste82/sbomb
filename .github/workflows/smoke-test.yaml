@@ -1,0 +1,93 @@
+name: smoke-test
+
+# What a user does: take the published release, point it at a build directory,
+# and expect the right answer. Nothing here builds sbomb -- if it did, it would
+# be testing something other than what was shipped.
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Existing release tag to smoke-test
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            target: linux
+          - runner: windows-latest
+            target: windows
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Real evidence, committed in this repository, needing no toolchain.
+      # generate writes an evidence dump into the build directory, so it runs
+      # on a copy: the corpus is a golden artifact.
+      - name: Copy the fixture
+        shell: bash
+        run: cp -r testdata/fixtures/gcc-ninja/p02-static/build "$RUNNER_TEMP/build"
+
+      - name: Run the released binary
+        uses: ./.github/actions/sbomb
+        with:
+          version: ${{ inputs.version || github.ref_name }}
+          build-dir: ${{ runner.temp }}/build
+          config: testdata/config/portable.json
+          policy: lenient
+          reproducible: "true"
+          output: smoke.cdx.json
+
+      # The property the whole tool exists for: p02-static compiles unused.c
+      # into an archive the linker never extracts, so it must not appear, while
+      # crypto.h appears although no link evidence names it.
+      - name: The right files, and only those
+        shell: bash
+        run: |
+          set -euo pipefail
+          for ref in project:main.c project:crypto.c project:crypto.h; do
+            grep -q "\"file:$ref\"" smoke.cdx.json || {
+              echo "missing component: $ref" >&2; exit 1; }
+          done
+          if grep -q 'unused' smoke.cdx.json; then
+            echo "an archive member the linker never extracted is in the SBOM" >&2
+            exit 1
+          fi
+
+      - name: Keep the hash
+        shell: bash
+        run: sha256sum smoke.cdx.json | cut -d ' ' -f 1 > "smoke-${{ matrix.target }}.txt"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: smoke-${{ matrix.target }}
+          path: smoke-${{ matrix.target }}.txt
+
+  compare:
+    needs: run
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: smoke-*
+          merge-multiple: true
+      - name: Both platforms agree
+        shell: bash
+        run: |
+          set -euo pipefail
+          hashes=$(cat smoke-*.txt | tr -d '\r' | sort -u)
+          if [ "$(printf '%s\n' "$hashes" | wc -l)" -ne 1 ]; then
+            echo "the released binaries disagree:" >&2
+            grep -H '' smoke-*.txt >&2
+            exit 1
+          fi
+          printf 'matching SBOM SHA-256: %s\n' "$hashes"

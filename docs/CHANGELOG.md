@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+### The smoke test checks the release, not itself
+
+`action-smoke` fed the released binary a `compile_commands.json` naming
+`README.md` as a compiler input and a linker map whose contents were the word
+`map`, then asserted that the output file was not empty. An SBOM with no
+components would have passed. A step before it ran the whole end-to-end suite
+whose output nothing used.
+
+It is `smoke-test` now and uses the evidence this repository already commits.
+The released binary runs against `gcc-ninja/p02-static` and has to produce
+exactly `main.c`, `crypto.c` and `crypto.h` -- and not `unused.c`, which is
+compiled into an archive the linker never extracts. Both platforms run
+`--reproducible` and a third job checks they produced the same bytes, so the
+published Linux and Windows binaries are held to the same answer.
+
+The composite action gained `build-dir` and `reproducible` inputs. It could
+only ever read the workspace root, which is rarely where a build directory is.
+
 ### A release workflow, and a release build that works
 
 Nothing published a release. `scripts/release.sh` produced the artifacts

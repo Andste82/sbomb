@@ -9,6 +9,14 @@ inputs:
     description: Release tag to download
     required: false
     default: v0.0.0
+  build-dir:
+    description: Build directory to read evidence from
+    required: false
+    default: ${{ github.workspace }}
+  reproducible:
+    description: Omit the timestamp and derive a stable serial number
+    required: false
+    default: "false"
   config:
     description: Optional sbomb JSON configuration file
     required: false
@@ -46,11 +54,14 @@ runs:
     - name: Generate SBOM
       shell: bash
       env:
+        SBOMB_BUILD_DIR: ${{ inputs.build-dir }}
+        SBOMB_REPRODUCIBLE: ${{ inputs.reproducible }}
         SBOMB_CONFIG: ${{ inputs.config }}
         SBOMB_POLICY: ${{ inputs.policy }}
         SBOMB_OUTPUT: ${{ inputs.output }}
       run: |
         set -euo pipefail
-        args=(generate --build-dir "$GITHUB_WORKSPACE" --output "$SBOMB_OUTPUT" --policy "$SBOMB_POLICY")
+        args=(generate --build-dir "$SBOMB_BUILD_DIR" --output "$SBOMB_OUTPUT" --policy "$SBOMB_POLICY")
         if [[ -n "$SBOMB_CONFIG" ]]; then args+=(--config "$SBOMB_CONFIG"); fi
+        if [[ "$SBOMB_REPRODUCIBLE" == "true" ]]; then args+=(--reproducible); fi
         "$RUNNER_TEMP/sbomb/$SBOMB_ASSET" "${args[@]}"

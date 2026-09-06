@@ -32,7 +32,8 @@ than which command it runs.
 | `determinism` | push, pull request | `hash` | Two runs on one platform produce one hash — linux/amd64, linux/arm64, windows/amd64 |
 | | | `compare` | All three platforms produced the same hash |
 | `release` | `v*` tag | `publish` | Reproducible build of the three targets, version matches the tag, checksums cover everything, release published |
-| `action-smoke` | `v*` tag | `linux`, `windows` | The composite action downloads the release and produces an SBOM |
+| `smoke-test` | `v*` tag | `run` | The published binary, on Linux and Windows, against the committed fixture: the right files and only those |
+| | | `compare` | Both platforms produced the same SBOM |
 
 `release` is the only workflow with write access; the others are read-only.
 `spdx-drift` is the only job that may fail without blocking, because the SPDX
