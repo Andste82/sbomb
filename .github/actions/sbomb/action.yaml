@@ -58,6 +58,8 @@ runs:
           Linux/X64) asset=sbomb-linux-amd64 ;;
           Linux/ARM64) asset=sbomb-linux-arm64 ;;
           Windows/X64) asset=sbomb-windows-amd64.exe ;;
+          macOS/X64) asset=sbomb-darwin-amd64 ;;
+          macOS/ARM64) asset=sbomb-darwin-arm64 ;;
           *) echo "Unsupported runner: ${RUNNER_OS}/${RUNNER_ARCH}" >&2; exit 1 ;;
         esac
         mkdir -p "$RUNNER_TEMP/sbomb"

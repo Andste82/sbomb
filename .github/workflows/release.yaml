@@ -84,9 +84,12 @@ jobs:
           set -euo pipefail
           notes=$(mktemp)
           {
-            printf 'Static, single-file executables for linux/amd64, linux/arm64 and\n'
-            printf 'windows/amd64, built with CGO_ENABLED=0 -trimpath -buildvcs=false and\n'
-            printf 'verified to build reproducibly.\n\n'
+            printf 'Static, single-file executables for linux/amd64, linux/arm64,\n'
+            printf 'windows/amd64, darwin/amd64 and darwin/arm64, built with CGO_ENABLED=0\n'
+            printf -- '-trimpath -buildvcs=false and verified to build reproducibly.\n\n'
+            printf 'The macOS builds are not signed or notarized. A browser download is\n'
+            printf 'quarantined; remove it with `xattr -d com.apple.quarantine ./sbomb-darwin-*`\n'
+            printf 'or fetch with curl.\n\n'
             printf 'Each binary ships a CycloneDX 1.6 SBOM of itself, derived from the\n'
             printf 'module evidence its linker recorded.\n\n'
             printf 'Verify a download against `SHA256SUMS` before running it:\n\n'
@@ -102,4 +105,8 @@ jobs:
             dist/"${VERSION#v}"/sbomb-linux-arm64.cdx.json \
             dist/"${VERSION#v}"/sbomb-windows-amd64.exe \
             dist/"${VERSION#v}"/sbomb-windows-amd64.exe.cdx.json \
+            dist/"${VERSION#v}"/sbomb-darwin-amd64 \
+            dist/"${VERSION#v}"/sbomb-darwin-amd64.cdx.json \
+            dist/"${VERSION#v}"/sbomb-darwin-arm64 \
+            dist/"${VERSION#v}"/sbomb-darwin-arm64.cdx.json \
             dist/"${VERSION#v}"/SHA256SUMS

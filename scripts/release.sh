@@ -72,6 +72,11 @@ case "${1:-build}" in
     build_one linux amd64 ""
     build_one linux arm64 ""
     build_one windows amd64 ".exe"
+    # Darwin costs nothing to cross-compile: the tool is CGO_ENABLED=0 and
+    # reads files, so it needs no SDK and no macOS host. Both architectures,
+    # because Apple silicon and Intel are both still in use.
+    build_one darwin amd64 ""
+    build_one darwin arm64 ""
     for binary in "$output_dir"/sbomb-*; do
       write_self_sbom "$binary"
     done

@@ -43,16 +43,21 @@ than which command it runs.
 | | | `end-to-end` | The CMake integration against a real toolchain |
 | `determinism` | push, pull request | `hash` | Two runs on one platform produce one hash — linux/amd64, linux/arm64, windows/amd64 |
 | | | `compare` | All three platforms produced the same hash |
-| `release` | `v*` tag | `publish` | Reproducible build of the three targets, version matches the tag, checksums cover everything, release published |
-| `smoke-test` | `v*` tag | `run` | The published binary, on Linux and Windows, against the committed fixture: the right files and only those |
+| `release` | `v*` tag | `publish` | Reproducible build of the five targets, version matches the tag, checksums cover everything, self-SBOMs validate, release published |
+| `smoke-test` | release published | `run` | The published binary, on Linux and Windows, against the committed fixture: the right files and only those |
 | | | `compare` | Both platforms produced the same SBOM |
 
 `release` is the only workflow with write access; the others are read-only.
 `spdx-drift` is the only job that may fail without blocking, because the SPDX
 list changes upstream.
 
-A release carries the three executables and their checksums. Verify a download
-before running it:
+A release carries five executables -- linux/amd64, linux/arm64, windows/amd64,
+darwin/amd64 and darwin/arm64 -- a CycloneDX SBOM beside each one, and the
+checksums covering all of it. The macOS builds are cross-compiled and neither
+signed nor notarized, so a browser download arrives quarantined; `xattr -d
+com.apple.quarantine` clears it, and a `curl` download is unaffected.
+
+Verify a download before running it:
 
 ```
 sha256sum --check --ignore-missing SHA256SUMS

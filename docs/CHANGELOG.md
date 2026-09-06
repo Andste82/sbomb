@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### macOS builds
+
+A release now carries darwin/amd64 and darwin/arm64 as well, each with its own
+SBOM, and the composite action resolves them on a macOS runner. They cost
+nothing to produce: the tool is `CGO_ENABLED=0` and only reads files, so it
+cross-compiles without an SDK or a macOS host. They are not signed or
+notarized, which the release notes say.
+
 ### smoke-test could never have passed on a tag
 
 It triggered on the same tag push as `release`, so it downloaded a release the
