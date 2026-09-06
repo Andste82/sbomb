@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.9.0
 
 ### Regenerating the fixture corpus is a no-op again
 
