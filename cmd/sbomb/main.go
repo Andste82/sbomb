@@ -15,6 +15,7 @@ import (
 	"github.com/example/sbomb/internal/config"
 	"github.com/example/sbomb/internal/cyclonedx"
 	"github.com/example/sbomb/internal/evidence"
+	"github.com/example/sbomb/internal/exec"
 	"github.com/example/sbomb/internal/generate"
 	"github.com/example/sbomb/internal/pathmodel"
 	"github.com/example/sbomb/internal/policy"
@@ -331,6 +332,8 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 	reportChains := ""
 	pathFlavor := ""
 	redactUnanchored := false
+	allowIntrospection := false
+	var introspectionGroups []string
 	for i := 0; i < len(args); i++ {
 		switch {
 		case args[i] == "--verbose" || args[i] == "-v":
@@ -375,6 +378,15 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 			repro = true
 		case args[i] == "--redact-unanchored-paths":
 			redactUnanchored = true
+		case args[i] == "--allow-introspection":
+			allowIntrospection = true
+		case strings.HasPrefix(args[i], "--allow-introspection="):
+			value := strings.TrimPrefix(args[i], "--allow-introspection=")
+			if value == "false" {
+				introspectionGroups, allowIntrospection = nil, false
+				break
+			}
+			introspectionGroups = strings.Split(value, ",")
 		case args[i] == "--path-flavor":
 			if i+1 >= len(args) {
 				return 1, "", "missing value for --path-flavor\n"
@@ -512,12 +524,21 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 	}
 	cliLogger.Info("Policy profile '%s' resolved", policyConfig.Profile)
 
+	introspection, err := resolveIntrospection(loadedCfg, allowIntrospection, introspectionGroups)
+	if err != nil {
+		return 1, logBuf.String(), err.Error() + "\n"
+	}
+	if introspection.Enabled() {
+		cliLogger.Info("Introspection enabled: %s", strings.Join(exec.Allowlist(), "; "))
+	}
+
 	generated, err := generate.RunWithOptions(loadedCfg, buildDir, repro, generate.Options{
 		PathFlavor:            flavor,
 		Verbosity:             verbosity,
 		LogWriter:             logWriter,
 		RedactUnanchoredPaths: redactUnanchored,
 		Policy:                policyConfig,
+		Introspection:         introspection,
 	})
 	if err != nil {
 		return exitCodeFor(err, 2), logBuf.String(), err.Error() + "\n"
@@ -705,4 +726,39 @@ func narrowingForReport(counts []generate.NarrowingCount) []report.Narrowing {
 		out = append(out, report.Narrowing{Component: entry.Component, Count: entry.Count, Headers: entry.Headers})
 	}
 	return out
+}
+
+// resolveIntrospection combines the configuration's build.introspection block
+// with --allow-introspection. Section 9.2 makes the default off, so a group is
+// enabled only when something says so explicitly; the bare flag enables all of
+// them, and a comma-separated value enables the named ones.
+func resolveIntrospection(cfg config.Config, allowAll bool, groups []string) (exec.Features, error) {
+	features := exec.Features{
+		CMake:      cfg.Build.Introspection.CMake,
+		Ninja:      cfg.Build.Introspection.Ninja,
+		Git:        cfg.Build.Introspection.Git,
+		OSPackages: cfg.Build.Introspection.OSPackages,
+		Compiler:   cfg.Build.Introspection.Compiler,
+	}
+	if allowAll {
+		return exec.Features{CMake: true, Ninja: true, Git: true, OSPackages: true, Compiler: true}, nil
+	}
+	for _, group := range groups {
+		switch strings.TrimSpace(group) {
+		case "":
+		case "cmake":
+			features.CMake = true
+		case "ninja":
+			features.Ninja = true
+		case "git":
+			features.Git = true
+		case "osPackages", "os-packages":
+			features.OSPackages = true
+		case "compiler":
+			features.Compiler = true
+		default:
+			return exec.Features{}, fmt.Errorf("unknown introspection group %q (cmake, ninja, git, osPackages, compiler)", group)
+		}
+	}
+	return features, nil
 }

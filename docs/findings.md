@@ -45,6 +45,23 @@ unit does is excluded. It is never dropped silently: the review report counts
 it per component under `== Header narrowing ==`, and `--report-chains all`
 names every one of them.
 
+## Introspection
+
+sbomb never runs a build command. It may run a fixed allowlist of introspection
+commands, and only when `--allow-introspection` is passed or a
+`build.introspection.*` flag is set; the default is off. `--allow-introspection`
+enables every group, `--allow-introspection=git,ninja` only the named ones.
+
+Every permitted invocation has an exact argument shape, runs without a shell,
+inherits nothing but `PATH`, times out after 30 seconds and has its output
+bounded at 64 MiB. A path passed to one of them must exist and lie inside a
+registered anchor. `sbomb generate -v --allow-introspection` prints the
+allowlist, and every executed command is logged.
+
+When introspection is off and an adapter needs a command, the adapter degrades
+and emits an informational finding naming the evidence it could not obtain. It
+never guesses in place of the answer.
+
 ## Waivers
 
 A waiver file suppresses a finding deterministically. A waived finding still

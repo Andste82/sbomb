@@ -20,6 +20,7 @@ import (
 	"github.com/example/sbomb/internal/cyclonedx"
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/evidence"
+	"github.com/example/sbomb/internal/exec"
 	"github.com/example/sbomb/internal/headers"
 	"github.com/example/sbomb/internal/inventory"
 	"github.com/example/sbomb/internal/license"
@@ -73,6 +74,10 @@ type Options struct {
 	// settings, not verdicts: section 33.3 applies them before output and
 	// requires each removal to be reported.
 	Policy policy.Config
+	// Introspection enables the command allowlist of section 9.2. Every group
+	// is off unless the caller turned it on; an adapter that needs a command
+	// it may not run degrades and says which evidence it could not obtain.
+	Introspection exec.Features
 }
 
 type Logger struct {
