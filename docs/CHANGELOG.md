@@ -9,6 +9,12 @@ other workflow had not created yet. v0.9.0 is the first release there has ever
 been, and it failed with a 404 while `release` was still building. It runs on
 `release: published` now, which fires when `gh release create` returns.
 
+And once it got that far it failed again, for the second reason nothing had
+ever exercised: this repository is private, so an unauthenticated download of a
+release asset answers 404 -- indistinguishable from a missing tag. The
+composite action takes a `token`, defaulting to `${{ github.token }}`, and
+downloads with `gh` when it has one.
+
 ## 0.9.0
 
 ### Regenerating the fixture corpus is a no-op again

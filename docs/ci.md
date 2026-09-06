@@ -15,6 +15,13 @@ It does not implement discovery itself.
 Build evidence must exist before the action runs. The action should be called
 after the project build or after `cmake --build build --target sbomb` setup.
 
+While this repository is private its release assets are not downloadable
+without credentials, and an unauthenticated request answers 404 rather than
+403 -- which reads like a missing tag. The action therefore takes a `token`,
+defaulting to `${{ github.token }}`, and downloads with `gh` when it has one.
+Pass `token: ""` to download anonymously, which is what a consumer of a public
+release wants.
+
 ## Workflows
 
 A job never repeats the name of its workflow, and says what it checks rather

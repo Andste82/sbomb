@@ -28,6 +28,13 @@ inputs:
     description: CycloneDX output path
     required: false
     default: sbomb.cdx.json
+  token:
+    description: >
+      Token used to download the release. Needed only while the repository is
+      private, where an unauthenticated download of a release asset is a 404
+      rather than a 403. Pass an empty string to download anonymously.
+    required: false
+    default: ${{ github.token }}
 runs:
   using: composite
   steps:
@@ -36,6 +43,7 @@ runs:
       env:
         SBOMB_VERSION: ${{ inputs.version }}
         SBOMB_REPOSITORY: ${{ inputs.repository }}
+        GH_TOKEN: ${{ inputs.token }}
       run: |
         set -euo pipefail
         case "${RUNNER_OS}/${RUNNER_ARCH}" in
@@ -44,10 +52,19 @@ runs:
           Windows/X64) asset=sbomb-windows-amd64.exe ;;
           *) echo "Unsupported runner: ${RUNNER_OS}/${RUNNER_ARCH}" >&2; exit 1 ;;
         esac
-        base="https://github.com/${SBOMB_REPOSITORY}/releases/download/${SBOMB_VERSION}"
         mkdir -p "$RUNNER_TEMP/sbomb"
-        curl --fail --location --silent --show-error "$base/$asset" -o "$RUNNER_TEMP/sbomb/$asset"
-        curl --fail --location --silent --show-error "$base/SHA256SUMS" -o "$RUNNER_TEMP/sbomb/SHA256SUMS"
+        if [[ -n "${GH_TOKEN:-}" ]]; then
+          # gh reaches a private repository's assets and a public one's alike.
+          # The plain download URL below answers 404 for a private release,
+          # which reads like a missing tag and is why this action could not run
+          # against this repository at all.
+          gh release download "$SBOMB_VERSION" --repo "$SBOMB_REPOSITORY" \
+            --pattern "$asset" --pattern SHA256SUMS --dir "$RUNNER_TEMP/sbomb" --clobber
+        else
+          base="https://github.com/${SBOMB_REPOSITORY}/releases/download/${SBOMB_VERSION}"
+          curl --fail --location --silent --show-error "$base/$asset" -o "$RUNNER_TEMP/sbomb/$asset"
+          curl --fail --location --silent --show-error "$base/SHA256SUMS" -o "$RUNNER_TEMP/sbomb/SHA256SUMS"
+        fi
         (cd "$RUNNER_TEMP/sbomb" && sha256sum --check --ignore-missing SHA256SUMS)
         chmod +x "$RUNNER_TEMP/sbomb/$asset"
         echo "SBOMB_ASSET=$asset" >> "$GITHUB_ENV"
