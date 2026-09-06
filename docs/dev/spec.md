@@ -1203,7 +1203,15 @@ Also compare the CMake input files reported by `cmakeFiles-v1` against the File 
 
 ### 28.1 Specification Version
 
-Output is CycloneDX **1.6**. This is fixed by §1.5: BSI TR-03183-2 v2.1.0 requires CycloneDX 1.6 as its minimum. `--spec-version` currently accepts only `1.6`; any other value is a usage error (exit 1). The `$schema`, `bomFormat`, and `specVersion` fields MUST match. CycloneDX 1.7 support is a future addition behind the same writer interface (§36.1) and MUST NOT be implemented before it is explicitly requested.
+The default output is CycloneDX **1.6**, and it stays the default. This is fixed by §1.5: BSI TR-03183-2 v2.1.0 requires CycloneDX 1.6 as its minimum, and nothing in a later revision changes that. The default MUST NOT move until the compliance target does.
+
+CycloneDX **1.7** MAY be written on request, via `--spec-version 1.7` or `output.specVersion`. `--spec-version` accepts `1.6` and `1.7`; any other value is a usage error (exit 1), raised before discovery runs rather than at the write. The `bomFormat` and `specVersion` fields MUST match the version written, and `sbomb:run:specVersion` MUST record it.
+
+1.7 is additive over 1.6: 108 definitions against 91, nothing removed, the same required top-level fields, and JSON Schema draft-07 in both, so D6 is unaffected. A document written at 1.6 is therefore structurally valid at 1.7 with only `specVersion` changed.
+
+**A document MUST NOT change shape with the version beyond what the version requires.** A field that 1.7 permits and 1.6 forbids MAY be emitted at 1.7 only, and that difference MUST be documented rather than discovered. Exactly one such difference exists today: `component.evidence.licenses` MAY mix SPDX expressions with licence identifiers at 1.7, which 1.6's `licenseChoice` forbids (D19). The `citations`, `component.isExternal`, `externalReference.properties` and `metadata.distributionConstraints` structures 1.7 adds are not emitted.
+
+Both schemas MUST be embedded, so that `validate` can check either — including a document this tool did not write (§32.5).
 
 ### 28.2 Document Shape: Flat
 
@@ -1396,7 +1404,7 @@ sbomb generate \
 | `--config-name` | — | Build configuration (multi-config generators) |
 | `--policy` | `default` | `default` \| `strict` \| `lenient` \| path to a policy JSON |
 | `--format` | `cyclonedx-json` | Output format |
-| `--spec-version` | `1.6` | `1.6` (only value currently accepted) |
+| `--spec-version` | `1.6` | `1.6` \| `1.7` (§28.1) |
 | `--map` | auto | Linker map path (repeatable) |
 | `--link-depfile` | auto | Linker dependency file (repeatable) |
 | `--image-manifest` | — | Package/image manifest (repeatable) |
@@ -1422,8 +1430,8 @@ sbomb generate \
 | `--adapter` | — | Force an adapter, `<class>=<id>` (repeatable) |
 | `--inventory-dump` | — | Internal inventory dump path (§40) |
 
-Seven of these are specified and not implemented, each waiting on the feature it
-belongs to rather than on effort: `--spec-version` on a second output format,
+Six of these are specified and not implemented, each waiting on the feature it
+belongs to rather than on effort:
 `--license-scan` on external scanner input (§22.2), `--output-dir` on assembly
 mode, `--adapter` on adapter-selection override (§9.1),
 `--allow-cmake-regenerate` on File API regeneration,
@@ -1463,9 +1471,11 @@ Prints all evidence chains from the file/component to every reaching final deliv
 
 Third-party Go modules are permitted (§37), so validation is performed **in-process** and is mandatory:
 
-* The official CycloneDX 1.6 JSON Schema files (`bom-1.6.schema.json`, `spdx.schema.json`, `jsf-0.82.schema.json`) MUST be embedded with `go:embed` and validated against with a pure-Go JSON Schema validator. Every generated document is validated before it is written to its final path; validation runs on the exact bytes that will be written.
+* The official CycloneDX JSON Schema files of **every version §28.1 permits** (`bom-1.6.schema.json`, `bom-1.7.schema.json`, `spdx.schema.json`, `jsf-0.82.schema.json`, `cryptography-defs.schema.json`) MUST be embedded with `go:embed` and validated against with a pure-Go JSON Schema validator. Every generated document is validated before it is written to its final path; validation runs on the exact bytes that will be written.
+* The schema is selected by the **document's own `specVersion`**, not by the caller's: a file is checked against what it claims to be. A document declaring a version the build has no schema for MUST be refused, never checked against another version's schema.
 * In addition, the tool MUST perform **semantic validation** that a JSON Schema cannot express: `bom-ref` uniqueness, dependency-ref closure (every `ref` and `dependsOn` resolves), hash length matching the declared algorithm, purl syntax, RFC 3339 timestamps, property-name membership in Appendix B, and the §1.5 CRA field completeness check when the `cra` profile is active.
-* `sbomb schema --cyclonedx` prints the embedded schema; `sbomb validate --input <file>` runs both layers against an existing document.
+* `sbomb schema --cyclonedx [--spec-version <v>]` prints the embedded schema of one version; `sbomb validate --input <file>` runs both layers against an existing document.
+* `validate` MUST **detect** the serialization format from the document rather than assuming or requiring one: `bomFormat` identifies CycloneDX, and a second format identifies itself by its own marker. Somebody checking a file another tool sent them knows they have an SBOM, not which serialization it is in. A document in no format the build can read is a failure that names what it can read.
 * Output is written atomically: to a temporary file in the destination directory, validated, then renamed. A failed validation MUST NOT leave a partial or invalid file at the target path.
 
 Either validation layer failing → exit 4.
@@ -1639,7 +1649,9 @@ Module path: `github.com/<org>/sbomb`. Minimum Go version: **1.22**.
 
 ### 36.1 Output Format Abstraction
 
-Although only CycloneDX 1.6 is implemented, the writer layer MUST be format-agnostic from the start, so that SPDX 3.x or CycloneDX 1.7 can be added later without touching discovery, inventory, mapping, licensing, or policy.
+Although only CycloneDX is implemented, the writer layer MUST be format-agnostic, so that SPDX 3.x can be added without touching discovery, inventory, mapping, licensing, or policy.
+
+**One writer per serialization format; versions live inside it.** A consumer asks for a format, not for a shape, so CycloneDX 1.6 and 1.7 are one writer and SPDX 2.3 and 3.0.1 will be another. Where two versions of a format are a handful of fields on the same structure, one writer with version-conditional fields is honest. Where they share nothing at the document level, "one writer" MUST NOT become one function with a switch at the top: it dispatches to a renderer per version in separate files, over a shared mapping layer that decides which evidence edge means which relationship. That mapping is the reuse; the serialization is not.
 
 ```go
 package sbomwriter
@@ -1659,16 +1671,28 @@ type Document struct {
 
 type Writer interface {
     ID() string                     // "cyclonedx-json"
-    Versions() []string             // {"1.6"}
+    Versions() []string             // {"1.6", "1.7"}
+    DefaultVersion() string         // "1.6"
     Write(w io.Writer, d *Document, opts Options) error
     Validate(r io.Reader) error
 }
 
+// Detector is optional, and is how `validate` identifies a document
+// nobody told it the format of (§32.5).
+type Detector interface {
+    Detect(data []byte) (version string, ok bool)
+}
+
 func Register(w Writer)
 func Get(id, version string) (Writer, error)
+func Resolve(id, version string) (Writer, string, error)  // fills in the default
+func DetectFormat(data []byte) (Writer, string, error)
 ```
 
 Rules:
+
+* **There is no implicit default version.** A writer MUST state its `DefaultVersion()`; a caller MUST NOT assume `Versions()[0]` is special, because that convention breaks the first time somebody reorders a slice. `Resolve` is the single place where a caller's empty version becomes a version, and every call site goes through it.
+* A version a writer does not list is a usage error, raised before work begins. Silently downgrading a document a consumer asked for is worse than refusing.
 
 * `internal/domain` and every layer above it MUST NOT import `internal/cyclonedx`.
 * `Document` MUST NOT contain CycloneDX-specific field names, `bom-ref` strings, or property keys. `bom-ref` generation (§28.4) belongs to the CycloneDX writer; other formats derive their own identifiers from the same canonical paths.

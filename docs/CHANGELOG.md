@@ -2,6 +2,61 @@
 
 ## Unreleased
 
+### CycloneDX 1.7 is available, and 1.6 stays the default
+
+`--spec-version 1.7`, or `output.specVersion` in the configuration file, writes
+CycloneDX 1.7. Nothing changes for anyone who does not ask: 1.6 remains what
+`generate` and `self` write, because BSI TR-03183-2 names it as the minimum and
+nothing in 1.7 changes that. Every consumer that reads 1.6 today keeps working;
+nobody is moved.
+
+1.7 is additive over 1.6 — 108 definitions against 91, nothing removed, the
+same required top-level fields, still JSON Schema draft-07, so deviation D6 is
+untouched. The goldens say it plainly: the same build written at both versions
+differs in three lines, being `specVersion`, the `sbomb:run:specVersion`
+property that records it, and the serial number, which is a digest of the
+canonical document and so moves once anything in it does. A document must not
+change shape with the version beyond what the version requires, and that pair
+of goldens is what enforces it.
+
+One 1.7-only difference exists, behind the version and documented rather than
+discovered. `component.evidence.licenses` may mix SPDX expressions with licence
+identifiers at 1.7; at 1.6 `licenseChoice` is a choice between a list of
+licence objects and a tuple of exactly one expression, which is why
+[D19](dev/deviations.md) has to render an observation as identifiers as soon as
+there are two of them. Where an observation carries a relation between licences
+rather than naming one, 1.7 can now say so beside observations that do not.
+Observation yields bare identifiers today, and those are written identically at
+both versions, so this lifts the ceiling rather than changing current output.
+
+`sbomb validate` no longer assumes what it is reading. It detects the format
+from the document itself and checks it against the schema of the version the
+document declares, so a 1.7 file another tool wrote validates as 1.7 — and a
+1.7-only field in a document labelled 1.6 now fails, which is the proof the
+choice is real. A version this build has no schema for is refused rather than
+checked against the wrong one. `sbomb schema --cyclonedx --spec-version 1.7`
+prints the schema that check uses.
+
+Both schemas are embedded, which is what lets `validate` check either; half a
+megabyte of JSON is the price, and a validator that can only check what this
+build happens to emit is not a validator.
+
+Two gaps in the writer seam are closed on the way, because this is the first
+release where a writer offers more than one version. `Writer.DefaultVersion()`
+states which version is written when the caller has no opinion, rather than
+leaving it to a convention about slice order that breaks the first time
+somebody reorders one; `sbomwriter.Resolve` is the single place where "no
+version given" becomes a version. `sbomwriter.DetectFormat` and the `Detector`
+interface are what `validate` uses, and are the seam a second format will
+arrive through.
+
+The `citations`, `component.isExternal`, `externalReference.properties` and
+`metadata.distributionConstraints` structures that 1.7 adds are not emitted.
+Each is independently useful and lands on its own terms; `citations` in
+particular offers a standard vocabulary for the evidence attribution sbomb
+already records in `sbomb:` properties, and deserves its own look before the
+tool commits to it.
+
 ### A prebuilt library's sources are named, not left opaque
 
 Strategy 6 of section 13.2 -- the compilation-unit name in an object's own

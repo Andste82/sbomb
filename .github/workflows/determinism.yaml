@@ -51,13 +51,21 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # Trailing carriage returns would make two identical hashes compare
-          # unequal, which is the one difference this job must not report.
-          hashes=$(grep 'portable SBOM SHA-256:' determinism-*.txt | awk '{print $NF}' | tr -d '\r' | sort -u)
-          count=$(printf '%s\n' "$hashes" | wc -l)
-          if [ "$count" -ne 1 ]; then
-            echo "the platforms produced different documents:" >&2
-            grep -H 'portable SBOM SHA-256:' determinism-*.txt >&2
-            exit 1
-          fi
-          printf 'matching portable SBOM SHA-256: %s\n' "$hashes"
+          # Each specification version is compared on its own. Two versions
+          # produce two different documents by design, so pooling their hashes
+          # would report that design as a portability failure.
+          status=0
+          for version in 1.6 1.7; do
+            # Trailing carriage returns would make two identical hashes compare
+            # unequal, which is the one difference this job must not report.
+            hashes=$(grep "portable SBOM $version SHA-256:" determinism-*.txt | awk '{print $NF}' | tr -d '\r' | sort -u)
+            count=$(printf '%s\n' "$hashes" | wc -l)
+            if [ "$count" -ne 1 ]; then
+              echo "the platforms produced different CycloneDX $version documents:" >&2
+              grep -H "portable SBOM $version SHA-256:" determinism-*.txt >&2
+              status=1
+              continue
+            fi
+            printf 'matching portable SBOM %s SHA-256: %s\n' "$version" "$hashes"
+          done
+          exit "$status"

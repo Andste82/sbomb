@@ -41,11 +41,17 @@
   `metadata.component`, grouping components, a closed dependency cascade, the
   `bom-ref` scheme of section 28.4 and the three BSI properties of section
   1.5(3). Both validation layers run on the exact bytes before they are
-  renamed into place: the official CycloneDX 1.6 JSON Schema, embedded with
-  `go:embed`, and the semantic checks a schema cannot express.
+  renamed into place: the official CycloneDX JSON Schema of the version the
+  document declares, embedded with `go:embed`, and the semantic checks a schema
+  cannot express.
+- Section 28.1: CycloneDX 1.6 by default and 1.7 on request, via
+  `--spec-version` or `output.specVersion`. A golden per version pins that the
+  two differ only in saying so, and `validate` chooses the schema from the
+  document's own `specVersion` rather than assuming one.
 - Section 36.1: discovery hands a format-neutral `sbomwriter.Document` to a
   registered writer. Nothing below that package knows about `bom-ref` strings
-  or CycloneDX property names.
+  or CycloneDX property names. The writer states its `DefaultVersion()` and
+  recognises its own documents, which is what `validate` detects a format with.
 - `sbomb validate` and `sbomb evidence` exist, and `sbomb schema --cyclonedx`
   prints the embedded schema.
 - Sections 19, 20 and 22: files are mapped to components by the priority chain
@@ -84,8 +90,8 @@
 
 ## Known Gaps
 
-- **Seven specified flags are absent**, each waiting on the feature it belongs
-  to rather than on effort: `--spec-version`, `--license-scan`, `--output-dir`,
+- **Six specified flags are absent**, each waiting on the feature it belongs
+  to rather than on effort: `--license-scan`, `--output-dir`,
   `--adapter`, `--allow-cmake-regenerate`, `--include-runtime-libraries`,
   `--inventory-dump`. Section 32 names them beneath the CLI table; nine others
   were removed rather than built (deviation D22).

@@ -17,7 +17,9 @@ import (
 	"github.com/google/uuid"
 )
 
-// BOM is the in-memory CycloneDX 1.6 document used by the SBOM writer.
+// BOM is the in-memory CycloneDX document used by the SBOM writer. The same
+// structure serves 1.6 and 1.7: the schema is additive between them, and the
+// fields that differ are the ones SpecVersion gates.
 type BOM struct {
 	BomFormat    string       `json:"bomFormat"`
 	SpecVersion  string       `json:"specVersion"`
@@ -111,10 +113,16 @@ type Dependency struct {
 	DependsOn []string `json:"dependsOn,omitempty"`
 }
 
-func MarshalEmpty(reproducible bool) (string, error) {
+// MarshalEmpty writes the smallest valid document of one specification
+// version. An empty specVersion is the writer's default.
+func MarshalEmpty(specVersion string, reproducible bool) (string, error) {
+	specVersion, err := resolveSpecVersion(specVersion)
+	if err != nil {
+		return "", err
+	}
 	serial := ""
 	if reproducible {
-		serial = reproducibleSerialNumber()
+		serial = reproducibleSerialNumber(specVersion)
 	} else {
 		id, err := uuid.NewRandom()
 		if err != nil {
@@ -124,7 +132,7 @@ func MarshalEmpty(reproducible bool) (string, error) {
 	}
 	bom := BOM{
 		BomFormat:    "CycloneDX",
-		SpecVersion:  "1.6",
+		SpecVersion:  specVersion,
 		Version:      1,
 		SerialNumber: serial,
 		Metadata: &Metadata{
@@ -216,12 +224,15 @@ func canonicalizeBOM(bom *BOM) {
 	})
 }
 
-func reproducibleSerialNumber() string {
-	return ReproducibleSerialNumber(BOM{BomFormat: "CycloneDX", SpecVersion: "1.6", Version: 1, Metadata: &Metadata{Tools: []Tool{{Vendor: buildinfo.Vendor, Name: buildinfo.Name, Version: buildinfo.Version}}}})
+func reproducibleSerialNumber(specVersion string) string {
+	return ReproducibleSerialNumber(BOM{BomFormat: "CycloneDX", SpecVersion: specVersion, Version: 1, Metadata: &Metadata{Tools: []Tool{{Vendor: buildinfo.Vendor, Name: buildinfo.Name, Version: buildinfo.Version}}}})
 }
 
 // ReproducibleSerialNumber derives the UUIDv5 serial from the canonical BOM
-// with volatile fields removed.
+// with volatile fields removed. specVersion is part of that canonical form, so
+// the same evidence written at 1.6 and at 1.7 yields two serial numbers --
+// which is right: they are two documents, and a consumer that has both must be
+// able to tell them apart.
 func ReproducibleSerialNumber(bom BOM) string {
 	const namespace = "6ba7b811-9dad-11d1-80b4-00c04fd430c8"
 	bom.SerialNumber = ""
@@ -250,8 +261,8 @@ func timestamp() string {
 	return time.Now().UTC().Format(time.RFC3339)
 }
 
-func WriteEmpty(path string, reproducible bool) error {
-	out, err := MarshalEmpty(reproducible)
+func WriteEmpty(path, specVersion string, reproducible bool) error {
+	out, err := MarshalEmpty(specVersion, reproducible)
 	if err != nil {
 		return err
 	}
@@ -337,8 +348,11 @@ func ValidateDocument(data []byte) error {
 	if bom.BomFormat != "CycloneDX" {
 		return fmt.Errorf("invalid bomFormat")
 	}
-	if bom.SpecVersion != "1.6" {
-		return fmt.Errorf("unsupported specVersion %q", bom.SpecVersion)
+	// Every version this build writes is accepted, and everything else is
+	// still refused. `validate` reading a 1.5 document has to say so rather
+	// than check it against a schema it is not.
+	if !SupportsVersion(bom.SpecVersion) {
+		return fmt.Errorf("unsupported specVersion %q; this build reads %s", bom.SpecVersion, strings.Join(supportedVersions, ", "))
 	}
 	if bom.Version < 1 {
 		return fmt.Errorf("invalid version")

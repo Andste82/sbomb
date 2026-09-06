@@ -5,7 +5,7 @@
 **An evidence-based SBOM generator that reconstructs the software composition
 of CMake build artifacts.** It follows the build's own evidence backwards from
 the final artifact instead of inferring it from the source tree, and writes
-what it finds as CycloneDX 1.6.
+what it finds as CycloneDX 1.6, or 1.7 when a consumer asks for it.
 
 The chain runs from a firmware image, an executable or a library through link
 inputs, archive members, object files, translation units, sources, headers and
@@ -172,6 +172,7 @@ binary, produced this way.
 | `--report-chains all` | Include the full evidence chains in the report |
 | `--evidence-dump <path>` | Where the evidence graph goes; `off` writes none |
 | `--format cyclonedx-json` | Output format; the only one so far |
+| `--spec-version 1.6\|1.7` | CycloneDX revision; default `1.6` |
 | `--reproducible` | Omit the timestamp and derive a stable serial number |
 
 **Policy**

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type Config struct {
@@ -201,16 +202,35 @@ func validate(cfg Config) error {
 			return fmt.Errorf("anchor key and path are required")
 		}
 	}
-	// The output settings have exactly one valid value each today. Checking
-	// them here is what keeps a configuration from being silently wrong: a
-	// file asking for a format that does not exist should say so, not be
-	// ignored. Adding a format or a specification version replaces these
-	// literals with a lookup in the writer registry.
-	if cfg.Output.Format != "" && cfg.Output.Format != "cyclonedx-json" {
-		return fmt.Errorf("invalid output format %q; the only format is cyclonedx-json", cfg.Output.Format)
+	// Checking the output settings here is what keeps a configuration from
+	// being silently wrong: a file asking for a format that does not exist
+	// should say so, not be ignored.
+	//
+	// The admissible values are the enum table `sbomb schema` publishes, not
+	// literals written a second time beside it, so the loader and the
+	// published schema cannot disagree about what a valid file is. The writer
+	// registry is the origin of the table; a test that imports both holds them
+	// together, which the loader cannot do without depending on a serializer.
+	if err := checkOutputEnum("format", cfg.Output.Format); err != nil {
+		return err
 	}
-	if cfg.Output.SpecVersion != "" && cfg.Output.SpecVersion != "1.6" {
-		return fmt.Errorf("invalid output specVersion %q; the only version is 1.6", cfg.Output.SpecVersion)
+	if err := checkOutputEnum("specVersion", cfg.Output.SpecVersion); err != nil {
+		return err
 	}
 	return nil
+}
+
+// checkOutputEnum rejects a value outside the published enum for output.<key>.
+// An empty value is the default and is always allowed.
+func checkOutputEnum(key, value string) error {
+	if value == "" {
+		return nil
+	}
+	admissible := enums["output."+key]
+	for _, candidate := range admissible {
+		if candidate == value {
+			return nil
+		}
+	}
+	return fmt.Errorf("invalid output %s %q; supported: %s", key, value, strings.Join(admissible, ", "))
 }

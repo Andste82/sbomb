@@ -1,6 +1,7 @@
 package cyclonedx
 
 import (
+	"bytes"
 	"encoding/json"
 	"strings"
 	"testing"
@@ -232,19 +233,177 @@ func TestReproducibleModeOmitsTheTimestamp(t *testing.T) {
 }
 
 func TestWriterIsRegisteredUnderItsFormatIdentifier(t *testing.T) {
-	writer, err := sbomwriter.Get("cyclonedx-json", "1.6")
-	if err != nil {
-		t.Fatalf("Get() error = %v", err)
+	for _, specVersion := range supportedVersions {
+		writer, err := sbomwriter.Get("cyclonedx-json", specVersion)
+		if err != nil {
+			t.Fatalf("Get(%s) error = %v", specVersion, err)
+		}
+		if writer.ID() != "cyclonedx-json" {
+			t.Errorf("ID() = %q", writer.ID())
+		}
 	}
-	if writer.ID() != "cyclonedx-json" {
-		t.Errorf("ID() = %q", writer.ID())
-	}
-	if _, err := sbomwriter.Get("cyclonedx-json", "1.7"); err == nil {
+	if _, err := sbomwriter.Get("cyclonedx-json", "1.5"); err == nil {
 		t.Error("an unsupported specification version should be rejected")
 	}
 	if _, err := sbomwriter.Get("spdx-json", ""); err == nil {
 		t.Error("an unregistered format should be rejected")
 	}
+}
+
+// TestResolveFillsInTheDefaultVersion pins the seam gap this closes: asking
+// for a format without naming a version yields a version, and it is the one
+// the writer states rather than whichever happens to be first in the slice.
+func TestResolveFillsInTheDefaultVersion(t *testing.T) {
+	writer, specVersion, err := sbomwriter.Resolve("cyclonedx-json", "")
+	if err != nil {
+		t.Fatalf("Resolve() error = %v", err)
+	}
+	if specVersion != Version16 {
+		t.Errorf("default version = %q, want %q", specVersion, Version16)
+	}
+	if specVersion != writer.DefaultVersion() {
+		t.Errorf("Resolve gave %q but the writer's default is %q", specVersion, writer.DefaultVersion())
+	}
+	if _, _, err := sbomwriter.Resolve("cyclonedx-json", "1.5"); err == nil {
+		t.Error("Resolve accepted a version the writer cannot emit")
+	}
+}
+
+// TestDetectReadsTheDocumentsOwnClaims pins that `validate` can identify a
+// document without being told what it is -- including a version this build
+// cannot write, so that it can say what it is looking at.
+func TestDetectReadsTheDocumentsOwnClaims(t *testing.T) {
+	for _, testCase := range []struct {
+		name    string
+		data    string
+		version string
+		ok      bool
+	}{
+		{"1.6", `{"bomFormat":"CycloneDX","specVersion":"1.6"}`, "1.6", true},
+		{"1.7", `{"bomFormat":"CycloneDX","specVersion":"1.7"}`, "1.7", true},
+		{"a version this build cannot write", `{"bomFormat":"CycloneDX","specVersion":"1.4"}`, "1.4", true},
+		{"another format", `{"spdxVersion":"SPDX-2.3"}`, "", false},
+		{"not JSON at all", `<?xml version="1.0"?>`, "", false},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			version, ok := (Writer{}).Detect([]byte(testCase.data))
+			if ok != testCase.ok || version != testCase.version {
+				t.Errorf("Detect() = %q, %v; want %q, %v", version, ok, testCase.version, testCase.ok)
+			}
+		})
+	}
+
+	writer, version, err := sbomwriter.DetectFormat([]byte(`{"bomFormat":"CycloneDX","specVersion":"1.7"}`))
+	if err != nil {
+		t.Fatalf("DetectFormat() error = %v", err)
+	}
+	if writer.ID() != "cyclonedx-json" || version != Version17 {
+		t.Errorf("DetectFormat() = %q %q", writer.ID(), version)
+	}
+	if _, _, err := sbomwriter.DetectFormat([]byte(`{"spdxVersion":"SPDX-2.3"}`)); err == nil {
+		t.Error("DetectFormat accepted a document in no registered format")
+	}
+}
+
+// TestACompoundExpressionInEvidenceNeedsSeventeen is the one place where 1.7
+// lets sbomb say something 1.6 forbids (deviation D19).
+//
+// At 1.6, licenseChoice is a choice: a list of licence objects, or a tuple of
+// exactly one expression. So an observation that did carry a relation between
+// licences -- an SPDX-License-Identifier line reading "MIT OR Apache-2.0" --
+// had to be flattened to the identifier of one of them as soon as a second
+// observation stood beside it. At 1.7 one array may mix the two forms.
+//
+// The second half of the test is what makes the first half mean anything: the
+// mixed array is checked against the 1.6 schema and must be rejected there.
+func TestACompoundExpressionInEvidenceNeedsSeventeen(t *testing.T) {
+	document := func() *sbomwriter.Document {
+		return &sbomwriter.Document{
+			Product: domain.Component{ID: "product", Name: "app", Type: "application"},
+			Components: []domain.Component{{
+				ID:       "component:mixed",
+				Name:     "mixed",
+				Type:     "library",
+				Licenses: []domain.LicenseFinding{{Name: "NOASSERTION", Evidence: "unknown"}},
+				LicenseEvidence: []domain.LicenseFinding{
+					{Expression: "MIT OR Apache-2.0", SPDXID: "MIT", Name: "MIT OR Apache-2.0"},
+					{Expression: "BSD-3-Clause", SPDXID: "BSD-3-Clause", Name: "BSD-3-Clause"},
+				},
+			}},
+			Relations: []sbomwriter.Relation{{From: "product", To: []string{"component:mixed"}}},
+			Run:       sbomwriter.RunMetadata{ToolName: "sbomb", ToolVendor: "sbomb", ToolVersion: "0.0.0-test"},
+		}
+	}
+
+	at16, err := MarshalDocument(document(), sbomwriter.Options{SpecVersion: Version16, Reproducible: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := Validate(at16); err != nil {
+		t.Fatalf("the 1.6 document is not valid: %v", err)
+	}
+	// 1.6 flattens: two identifiers, no expression, because a list is the only
+	// form that admits two entries there.
+	for _, license := range evidenceLicensesOf(t, at16, "mixed") {
+		if license.Expression != "" {
+			t.Errorf("1.6 emitted the expression %q, which its licenseChoice forbids in a list", license.Expression)
+		}
+	}
+
+	at17, err := MarshalDocument(document(), sbomwriter.Options{SpecVersion: Version17, Reproducible: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := Validate(at17); err != nil {
+		t.Fatalf("the 1.7 document is not valid: %v", err)
+	}
+	observed := evidenceLicensesOf(t, at17, "mixed")
+	expressions, identifiers := 0, 0
+	for _, license := range observed {
+		switch {
+		case license.Expression != "":
+			expressions++
+			if license.Expression != "MIT OR Apache-2.0" {
+				t.Errorf("expression = %q", license.Expression)
+			}
+		case license.License != nil:
+			identifiers++
+			// A bare identifier stays an identifier: rendering "BSD-3-Clause"
+			// as an expression says nothing more and loses the distinction.
+			if license.License.ID != "BSD-3-Clause" {
+				t.Errorf("identifier = %+v", license.License)
+			}
+		}
+	}
+	if expressions != 1 || identifiers != 1 {
+		t.Errorf("1.7 evidence = %d expression(s) and %d identifier(s), want one of each", expressions, identifiers)
+	}
+
+	// The proof that this needed 1.7: the same array, labelled 1.6, is not a
+	// valid document.
+	mislabelled := bytes.Replace(at17, []byte(`"specVersion": "1.7"`), []byte(`"specVersion": "1.6"`), 1)
+	if err := ValidateAgainstSchema(mislabelled); err == nil {
+		t.Error("the 1.6 schema accepted a licenses array mixing an expression with a licence object")
+	}
+}
+
+func evidenceLicensesOf(t *testing.T, data []byte, name string) []License {
+	t.Helper()
+	var bom BOM
+	if err := json.Unmarshal(data, &bom); err != nil {
+		t.Fatal(err)
+	}
+	for _, component := range bom.Components {
+		if component.Name != name {
+			continue
+		}
+		if component.Evidence == nil {
+			t.Fatalf("component %q carries no evidence", name)
+		}
+		return component.Evidence.Licenses
+	}
+	t.Fatalf("component %q is not in the document", name)
+	return nil
 }
 
 // A licence file holding two complete texts says which licences are present

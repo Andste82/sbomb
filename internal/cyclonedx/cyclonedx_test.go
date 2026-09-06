@@ -1,6 +1,7 @@
 package cyclonedx
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 )
@@ -20,7 +21,7 @@ func BenchmarkMarshalBOM(b *testing.B) {
 
 func TestSourceDateEpoch(t *testing.T) {
 	t.Setenv("SOURCE_DATE_EPOCH", "1700000000")
-	out, err := MarshalEmpty(false)
+	out, err := MarshalEmpty("", false)
 	if err != nil {
 		t.Fatalf("MarshalEmpty() error = %v", err)
 	}
@@ -37,23 +38,73 @@ func TestReproducibleSerialIsUUID(t *testing.T) {
 }
 
 func TestEmptyDocumentReproducible(t *testing.T) {
-	out1, err := MarshalEmpty(true)
+	for _, specVersion := range supportedVersions {
+		t.Run(specVersion, func(t *testing.T) {
+			out1, err := MarshalEmpty(specVersion, true)
+			if err != nil {
+				t.Fatalf("MarshalEmpty() error = %v", err)
+			}
+			out2, err := MarshalEmpty(specVersion, true)
+			if err != nil {
+				t.Fatalf("MarshalEmpty() second call error = %v", err)
+			}
+			if !strings.Contains(out1, "\"bomFormat\": \"CycloneDX\"") {
+				t.Fatalf("MarshalEmpty() missing bomFormat: %s", out1)
+			}
+			if !strings.Contains(out1, "\"specVersion\": \""+specVersion+"\"") {
+				t.Fatalf("MarshalEmpty(%s) did not write that version: %s", specVersion, out1)
+			}
+			if out1 != out2 {
+				t.Fatalf("reproducible output changed between calls:\n%s\n---\n%s", out1, out2)
+			}
+			if strings.Contains(out1, "\"timestamp\"") {
+				t.Fatalf("MarshalEmpty() reproducible mode should omit timestamp: %s", out1)
+			}
+			// The schema layer only: the empty document has no root
+			// component, which the semantic layer requires of a real one.
+			if err := ValidateAgainstSchema([]byte(out1)); err != nil {
+				t.Fatalf("MarshalEmpty(%s) fails its own schema: %v", specVersion, err)
+			}
+		})
+	}
+}
+
+// TestMarshalEmptyRejectsAnUnknownVersion pins that a version this build
+// cannot write is a refusal rather than a silent downgrade to the default.
+func TestMarshalEmptyRejectsAnUnknownVersion(t *testing.T) {
+	if _, err := MarshalEmpty("1.5", true); err == nil {
+		t.Fatal("MarshalEmpty accepted CycloneDX 1.5")
+	}
+}
+
+// TestReproducibleSerialDiffersByVersion pins that the specification version
+// is part of the document's identity: two documents, two serial numbers.
+func TestReproducibleSerialDiffersByVersion(t *testing.T) {
+	at16, err := MarshalEmpty(Version16, true)
 	if err != nil {
-		t.Fatalf("MarshalEmpty() error = %v", err)
+		t.Fatal(err)
 	}
-	out2, err := MarshalEmpty(true)
+	at17, err := MarshalEmpty(Version17, true)
 	if err != nil {
-		t.Fatalf("MarshalEmpty() second call error = %v", err)
+		t.Fatal(err)
 	}
-	if !strings.Contains(out1, "\"bomFormat\": \"CycloneDX\"") {
-		t.Fatalf("MarshalEmpty() missing bomFormat: %s", out1)
+	serial16 := serialNumberOf(t, at16)
+	serial17 := serialNumberOf(t, at17)
+	if serial16 == serial17 {
+		t.Fatalf("1.6 and 1.7 share the serial number %s", serial16)
 	}
-	if out1 != out2 {
-		t.Fatalf("reproducible output changed between calls:\n%s\n---\n%s", out1, out2)
+}
+
+func serialNumberOf(t *testing.T, document string) string {
+	t.Helper()
+	var parsed BOM
+	if err := json.Unmarshal([]byte(document), &parsed); err != nil {
+		t.Fatal(err)
 	}
-	if strings.Contains(out1, "\"timestamp\"") {
-		t.Fatalf("MarshalEmpty() reproducible mode should omit timestamp: %s", out1)
+	if parsed.SerialNumber == "" {
+		t.Fatalf("document has no serial number: %s", document)
 	}
+	return parsed.SerialNumber
 }
 
 func TestValidateDocumentRejectsDanglingDependencyRef(t *testing.T) {

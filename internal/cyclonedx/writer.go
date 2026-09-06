@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io"
 	"sort"
@@ -14,16 +15,74 @@ import (
 	"github.com/example/sbomb/internal/sbomwriter"
 )
 
-// Writer serializes a document as CycloneDX 1.6 JSON.
+// Writer serializes a document as CycloneDX JSON, in either of the
+// specification versions this build knows.
 type Writer struct{}
 
 func init() { sbomwriter.Register(Writer{}) }
 
 func (Writer) ID() string { return "cyclonedx-json" }
 
-// Versions is fixed at 1.6 by section 28.1: BSI TR-03183-2 requires it as the
-// minimum, and section 1.5 makes that the field-level compliance target.
-func (Writer) Versions() []string { return []string{"1.6"} }
+// The specification versions this build can write and validate.
+const (
+	Version16 = "1.6"
+	Version17 = "1.7"
+)
+
+// supportedVersions is the one list every other check derives from: the
+// writer's Versions, the schema table, the semantic validator, and the
+// configuration enum are all this, so none of them can drift.
+var supportedVersions = []string{Version16, Version17}
+
+// Versions lists what this writer can emit. 1.7 is additive over 1.6 -- 108
+// definitions against 91, nothing removed, the same required top-level fields
+// -- so a document written at 1.6 stays structurally valid at 1.7.
+func (Writer) Versions() []string { return append([]string(nil), supportedVersions...) }
+
+// DefaultVersion stays 1.6 while the compliance target does. Section 28.1
+// pins it because BSI TR-03183-2 names it as the minimum, and nothing in 1.7
+// changes that; 1.7 is written when a consumer asks for it (section 32.2).
+func (Writer) DefaultVersion() string { return Version16 }
+
+// Detect recognises a CycloneDX JSON document by its own bomFormat field, and
+// reports the specification version it declares -- including one this build
+// cannot write, so that `validate` can say what it is looking at rather than
+// only that it does not know.
+func (Writer) Detect(data []byte) (string, bool) {
+	var header struct {
+		BomFormat   string `json:"bomFormat"`
+		SpecVersion string `json:"specVersion"`
+	}
+	if err := json.Unmarshal(data, &header); err != nil {
+		return "", false
+	}
+	if header.BomFormat != "CycloneDX" {
+		return "", false
+	}
+	return header.SpecVersion, true
+}
+
+// resolveSpecVersion turns the caller's choice into the version to write. An
+// empty value is the default rather than an error; anything else must be a
+// version this writer emits, because silently downgrading a document a
+// consumer asked for is worse than refusing.
+func resolveSpecVersion(requested string) (string, error) {
+	if requested == "" {
+		return Writer{}.DefaultVersion(), nil
+	}
+	for _, supported := range supportedVersions {
+		if supported == requested {
+			return requested, nil
+		}
+	}
+	return "", fmt.Errorf("unsupported CycloneDX specVersion %q; supported: %s", requested, strings.Join(supportedVersions, ", "))
+}
+
+// SupportsVersion reports whether this build can write and validate a version.
+func SupportsVersion(version string) bool {
+	_, err := resolveSpecVersion(version)
+	return err == nil && version != ""
+}
 
 func (w Writer) Write(out io.Writer, document *sbomwriter.Document, options sbomwriter.Options) error {
 	bom, err := w.Build(document, options)
@@ -65,19 +124,23 @@ func Validate(data []byte) error {
 // Build turns a format-neutral document into a CycloneDX BOM. All bom-ref
 // derivation lives here, per section 36.1: the document itself carries none.
 func (Writer) Build(document *sbomwriter.Document, options sbomwriter.Options) (BOM, error) {
+	specVersion, err := resolveSpecVersion(options.SpecVersion)
+	if err != nil {
+		return BOM{}, err
+	}
 	refs := newRefTable()
 
-	product := componentToCyclone(document.Product, refs.forProduct(document.Product))
+	product := componentToCyclone(document.Product, refs.forProduct(document.Product), specVersion)
 	if product.Type == "" {
 		product.Type = "application"
 	}
 
 	components := make([]Component, 0, len(document.Artifacts)+len(document.Components)+len(document.Files))
 	for _, artifact := range document.Artifacts {
-		components = append(components, componentToCyclone(artifact, refs.forArtifact(artifact)))
+		components = append(components, componentToCyclone(artifact, refs.forArtifact(artifact), specVersion))
 	}
 	for _, grouping := range document.Components {
-		components = append(components, componentToCyclone(grouping, refs.forComponent(grouping)))
+		components = append(components, componentToCyclone(grouping, refs.forComponent(grouping), specVersion))
 	}
 	for _, file := range document.Files {
 		components = append(components, fileToCyclone(file, refs.forFile(file)))
@@ -98,7 +161,7 @@ func (Writer) Build(document *sbomwriter.Document, options sbomwriter.Options) (
 			Version: document.Run.ToolVersion,
 		}},
 		Component:  &product,
-		Properties: runProperties(document.Run),
+		Properties: runProperties(document.Run, specVersion),
 	}
 	if !options.Reproducible {
 		metadata.Timestamp = document.Run.Timestamp
@@ -106,7 +169,7 @@ func (Writer) Build(document *sbomwriter.Document, options sbomwriter.Options) (
 
 	bom := BOM{
 		BomFormat:    "CycloneDX",
-		SpecVersion:  "1.6",
+		SpecVersion:  specVersion,
 		Version:      1,
 		Metadata:     metadata,
 		Components:   components,
@@ -208,7 +271,7 @@ func buildDependencies(document *sbomwriter.Document, refs *refTable, productRef
 	return dependencies
 }
 
-func componentToCyclone(component domain.Component, ref string) Component {
+func componentToCyclone(component domain.Component, ref, specVersion string) Component {
 	out := Component{
 		Type:    component.Type,
 		Name:    component.Name,
@@ -226,7 +289,7 @@ func componentToCyclone(component domain.Component, ref string) Component {
 	// Observed, not concluded. A licence file holding two complete texts says
 	// which licences are present and nothing about how they relate, so the
 	// finding goes here and out.Licenses stays NOASSERTION until curated.
-	if observed := observedLicensesToCyclone(component.LicenseEvidence); len(observed) > 0 {
+	if observed := observedLicensesToCyclone(component.LicenseEvidence, specVersion); len(observed) > 0 {
 		out.Evidence = &Evidence{Licenses: observed}
 	}
 	out.Properties = append(out.Properties, propertiesFromMap(component.Properties)...)
@@ -288,9 +351,9 @@ func bsiProperties(class domain.FileClass, componentType string) []Property {
 	}
 }
 
-func runProperties(run sbomwriter.RunMetadata) []Property {
+func runProperties(run sbomwriter.RunMetadata, specVersion string) []Property {
 	properties := []Property{
-		{Name: "sbomb:run:specVersion", Value: "1.6"},
+		{Name: "sbomb:run:specVersion", Value: specVersion},
 		{Name: "sbomb:run:toolVersion", Value: run.ToolVersion},
 	}
 	if run.PolicyProfile != "" {
@@ -309,17 +372,30 @@ func runProperties(run sbomwriter.RunMetadata) []Property {
 	return properties
 }
 
-// observedLicensesToCyclone renders licence evidence as a list of licence
-// identifiers rather than as an expression.
+// observedLicensesToCyclone renders licence evidence.
 //
-// The two are not interchangeable: CycloneDX's licenseChoice is a choice, and
-// its expression form is a tuple of exactly one. That is the point. An
-// expression states how licences combine, which is what an observation cannot
-// say; a list states which are present, which is what it can.
-func observedLicensesToCyclone(findings []domain.LicenseFinding) []License {
+// At 1.6 it is a list of licence identifiers and nothing else, because
+// licenseChoice there is a choice: a list of licence objects, or a tuple of
+// exactly one expression. That restriction and deviation D19 agree for the
+// commonest observation -- a file holding two complete texts says which
+// licences are present and nothing about how they relate, so a list is the
+// only honest form.
+//
+// 1.7 relaxes licenseChoice: one array may mix licence objects and SPDX
+// expressions. That does not change what an observation may claim. It only
+// lifts the ceiling for the case where the observation itself carries a
+// compound expression -- an SPDX-License-Identifier line reading
+// "MIT OR Apache-2.0" states the relation, in the text, rather than leaving a
+// reader to infer it. Where it does, 1.7 can now say so beside observations
+// that did not. A bare identifier stays an identifier at both versions, so a
+// 1.7 document differs from its 1.6 twin only where the extra expressiveness
+// is actually used.
+func observedLicensesToCyclone(findings []domain.LicenseFinding, specVersion string) []License {
 	licenses := make([]License, 0, len(findings))
 	for _, finding := range findings {
 		switch {
+		case mixedLicenseChoiceAllowed(specVersion) && isCompoundExpression(finding.Expression):
+			licenses = append(licenses, License{Expression: finding.Expression})
 		case finding.SPDXID != "":
 			licenses = append(licenses, License{License: &LicenseIdentifier{ID: finding.SPDXID}})
 		case finding.Name != "":
@@ -327,6 +403,28 @@ func observedLicensesToCyclone(findings []domain.LicenseFinding) []License {
 		}
 	}
 	return licenses
+}
+
+// mixedLicenseChoiceAllowed reports whether one licenses array may hold both
+// licence objects and SPDX expressions. Only 1.6 forbids it.
+func mixedLicenseChoiceAllowed(specVersion string) bool { return specVersion != Version16 }
+
+// isCompoundExpression reports whether an SPDX expression states a relation
+// between licences rather than naming one. "MIT" is not compound and is better
+// rendered as the identifier it is; "MIT OR Apache-2.0" is, and rendering it
+// as an identifier would invent a licence by that name.
+func isCompoundExpression(expression string) bool {
+	fields := strings.Fields(expression)
+	if len(fields) < 2 {
+		return strings.ContainsAny(expression, "()")
+	}
+	for _, field := range fields {
+		switch strings.ToUpper(strings.Trim(field, "()")) {
+		case "AND", "OR", "WITH":
+			return true
+		}
+	}
+	return strings.ContainsAny(expression, "()")
 }
 
 func licensesToCyclone(findings []domain.LicenseFinding) []License {
