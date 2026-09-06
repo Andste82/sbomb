@@ -336,6 +336,16 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 	pathFlavor := ""
 	redactUnanchored := false
 	allowIntrospection := false
+	sourceDir := ""
+	mode := ""
+	configName := ""
+	mapPath := ""
+	linkDepfile := ""
+	imageManifests := []string{}
+	// The evidence dump has always been written to <build-dir>/evidence.json,
+	// which is where "explain" looks for it. The path is selectable now, and
+	// "off" suppresses it, so a run can leave the build directory untouched.
+	evidenceDump := ""
 	var introspectionGroups []string
 	var bounds limits.Config
 	for i := 0; i < len(args); i++ {
@@ -391,6 +401,62 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 				return 1, "", fmt.Sprintf("invalid --max-input-size %q: %v\n", value, parseErr)
 			}
 			bounds.MaxInput = size
+		case args[i] == "--source-dir":
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --source-dir\n"
+			}
+			sourceDir = args[i+1]
+			i++
+		case strings.HasPrefix(args[i], "--source-dir="):
+			sourceDir = strings.TrimPrefix(args[i], "--source-dir=")
+		case args[i] == "--mode":
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --mode\n"
+			}
+			mode = args[i+1]
+			i++
+		case strings.HasPrefix(args[i], "--mode="):
+			mode = strings.TrimPrefix(args[i], "--mode=")
+		case args[i] == "--config-name":
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --config-name\n"
+			}
+			configName = args[i+1]
+			i++
+		case strings.HasPrefix(args[i], "--config-name="):
+			configName = strings.TrimPrefix(args[i], "--config-name=")
+		case args[i] == "--map":
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --map\n"
+			}
+			mapPath = args[i+1]
+			i++
+		case strings.HasPrefix(args[i], "--map="):
+			mapPath = strings.TrimPrefix(args[i], "--map=")
+		case args[i] == "--link-depfile":
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --link-depfile\n"
+			}
+			linkDepfile = args[i+1]
+			i++
+		case strings.HasPrefix(args[i], "--link-depfile="):
+			linkDepfile = strings.TrimPrefix(args[i], "--link-depfile=")
+		case args[i] == "--image-manifest":
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --image-manifest\n"
+			}
+			imageManifests = append(imageManifests, args[i+1])
+			i++
+		case strings.HasPrefix(args[i], "--image-manifest="):
+			imageManifests = append(imageManifests, strings.TrimPrefix(args[i], "--image-manifest="))
+		case args[i] == "--evidence-dump":
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --evidence-dump\n"
+			}
+			evidenceDump = args[i+1]
+			i++
+		case strings.HasPrefix(args[i], "--evidence-dump="):
+			evidenceDump = strings.TrimPrefix(args[i], "--evidence-dump=")
 		case args[i] == "--allow-introspection":
 			allowIntrospection = true
 		case strings.HasPrefix(args[i], "--allow-introspection="):
@@ -522,6 +588,21 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 	default:
 		return 1, logBuf.String(), "invalid value for --path-flavor: " + pathFlavor + "\n"
 	}
+	// Command line over configuration, per section 32.2.
+	if sourceDir != "" {
+		loadedCfg.Project.Root = sourceDir
+	}
+	if mode != "" {
+		if mode != "single" && mode != "assembly" {
+			return 1, logBuf.String(), "invalid value for --mode: " + mode + "\n"
+		}
+		loadedCfg.Mode = mode
+	}
+	if configName != "" {
+		loadedCfg.Build.Config = configName
+	}
+	loadedCfg.Manifests = append(loadedCfg.Manifests, imageManifests...)
+
 	// The scope options of section 33.1 are discovery settings, so the policy
 	// has to be resolved before generation, not after it.
 	policyConfig, err := policy.Resolve(loadedCfg.Policy, policy.Overrides{
@@ -559,6 +640,8 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 		Policy:                policyConfig,
 		Introspection:         introspection,
 		Limits:                bounds,
+		MapPath:               mapPath,
+		LinkDepfilePath:       linkDepfile,
 	})
 	if err != nil {
 		return exitCodeFor(err, 2), logBuf.String(), err.Error() + "\n"
@@ -568,18 +651,28 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 		// Either validation layer failing is exit code 4 (section 32.5).
 		return 4, logBuf.String(), err.Error() + "\n"
 	}
+	// The default is <build-dir>/evidence.json because that is where "explain"
+	// looks for it; --evidence-dump moves it, and "off" leaves the build
+	// directory untouched.
 	evidencePath := filepath.Join(buildDir, "evidence.json")
-	cliLogger.Info("Writing evidence graph dump to '%s'...", evidencePath)
-	evidenceFile, err := os.Create(evidencePath)
-	if err != nil {
-		return 2, logBuf.String(), err.Error() + "\n"
+	if evidenceDump != "" {
+		evidencePath = evidenceDump
 	}
-	if err := generated.Graph.Dump(evidenceFile); err != nil {
-		evidenceFile.Close()
-		return 2, logBuf.String(), err.Error() + "\n"
-	}
-	if err := evidenceFile.Close(); err != nil {
-		return 2, logBuf.String(), err.Error() + "\n"
+	if evidenceDump == "off" {
+		cliLogger.Info("Evidence graph dump suppressed by --evidence-dump=off")
+	} else {
+		cliLogger.Info("Writing evidence graph dump to '%s'...", evidencePath)
+		evidenceFile, err := os.Create(evidencePath)
+		if err != nil {
+			return 2, logBuf.String(), err.Error() + "\n"
+		}
+		if err := generated.Graph.Dump(evidenceFile); err != nil {
+			evidenceFile.Close()
+			return 2, logBuf.String(), err.Error() + "\n"
+		}
+		if err := evidenceFile.Close(); err != nil {
+			return 2, logBuf.String(), err.Error() + "\n"
+		}
 	}
 
 	waivers, err := policy.LoadWaivers(policyConfig.WaiversFile)

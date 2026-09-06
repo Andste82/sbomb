@@ -83,6 +83,11 @@ type Options struct {
 	// Limits is the parser policy of section 30. The zero value is the
 	// specified default, so a caller with no opinion still gets the bounds.
 	Limits limits.Config
+	// MapPath and LinkDepfilePath name the link evidence explicitly, for a
+	// build whose map does not sit beside its artifact. They override
+	// artifacts[].map and artifacts[].linkDepfile.
+	MapPath         string
+	LinkDepfilePath string
 }
 
 type Logger struct {
@@ -263,6 +268,14 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	mapPath, depfilePath := "", ""
 	if len(cfg.Artifacts) > 0 {
 		mapPath, depfilePath = cfg.Artifacts[0].Map, cfg.Artifacts[0].LinkDepfile
+	}
+	// The command line wins, so a one-off run can name evidence that lies
+	// somewhere the configuration does not describe.
+	if options.MapPath != "" {
+		mapPath = options.MapPath
+	}
+	if options.LinkDepfilePath != "" {
+		depfilePath = options.LinkDepfilePath
 	}
 	outcome := buildEvidenceGraph(graph, b, deliverables, compile, buildDir, mapPath, depfilePath, cfg, options.Policy, logger)
 	artifactIDs := outcome.artifactIDs

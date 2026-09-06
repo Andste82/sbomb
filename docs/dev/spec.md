@@ -1399,37 +1399,40 @@ sbomb generate \
 | `--spec-version` | `1.6` | `1.6` (only value currently accepted) |
 | `--map` | auto | Linker map path (repeatable) |
 | `--link-depfile` | auto | Linker dependency file (repeatable) |
-| `--compile-commands` | auto | `compile_commands.json` path |
-| `--buildgraph` | auto | `build.ninja` path |
-| `--depfile-mode` | `auto` | `auto` \| `ninja` \| `files` \| `off` |
 | `--image-manifest` | — | Package/image manifest (repeatable) |
 | `--license-scan` | — | External scanner results |
 | `--waivers` | from config | Waiver file |
 | `--review-report` | — | Human-readable report path |
 | `--findings-json` | — | Machine-readable findings path |
-| `--evidence-dump` | — | Evidence graph dump path |
+| `--evidence-dump` | `<build-dir>/evidence.json` | Evidence graph dump path, or `off` |
 | `--allow-introspection` | off | Permit §9.2 allowlisted commands |
 | `--allow-cmake-regenerate` | off | Permit `cmake -S -B` for File API queries |
 | `--reproducible` | off | Deterministic serialNumber, no timestamp |
-| `--absolute-paths` | off | Show absolute paths in human output |
 | `--redact-unanchored-paths` | off | Hash unanchored paths |
-| `--keep-raw-evidence` | off | Retain verbatim evidence excerpts |
 | `--include-system-headers` | policy | Override |
 | `--include-toolchain-runtime` | policy | Override |
 | `--include-linker-scripts` | policy | Override |
 | `--include-assets` | policy | Override |
 | `--include-runtime-libraries` | off | DT_NEEDED closure |
 | `--fail-on-review-required` | policy | Override |
-| `--hash-alg` | `sha256` | Comma-separated |
-| `--jobs` | NumCPU | Worker pool size |
 | `--max-input-size` | `2GiB` | Parser limit |
-| `--log-level` | `info` | `error` \| `warn` \| `info` \| `debug` \| `trace` |
-| `--log-format` | `text` | `text` \| `json` |
 | `--profile-overlay` | — | Additional profile merged over `--policy`, e.g. `host-linux` |
 | `--header-evidence` | policy | `dwarf-preferred` \| `union` \| `depfiles` |
 | `--path-flavor` | from `runtime.GOOS` | `posix` \| `windows`. Hidden flag; exists so Windows path semantics are testable on Linux (§41 M14). |
 | `--adapter` | — | Force an adapter, `<class>=<id>` (repeatable) |
 | `--inventory-dump` | — | Internal inventory dump path (§40) |
+
+Seven of these are specified and not implemented, each waiting on the feature it
+belongs to rather than on effort: `--spec-version` on a second output format,
+`--license-scan` on external scanner input (§22.2), `--output-dir` on assembly
+mode, `--adapter` on adapter-selection override (§9.1),
+`--allow-cmake-regenerate` on File API regeneration,
+`--include-runtime-libraries` on the `DT_NEEDED` closure, and
+`--inventory-dump` on §40. A flag that is specified and absent is refused with
+`unknown flag`, never accepted and ignored.
+
+Nine further flags were specified and are removed rather than built; deviation
+D22 gives the reason for each.
 
 Every `--include-*` / `--fail-on-*` flag overrides the corresponding policy value. Precedence: CLI flag > policy file/profile > configuration file `policy` block > built-in default.
 

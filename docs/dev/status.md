@@ -84,6 +84,11 @@
 
 ## Known Gaps
 
+- **Seven specified flags are absent**, each waiting on the feature it belongs
+  to rather than on effort: `--spec-version`, `--license-scan`, `--output-dir`,
+  `--adapter`, `--allow-cmake-regenerate`, `--include-runtime-libraries`,
+  `--inventory-dump`. Section 32 names them beneath the CLI table; nine others
+  were removed rather than built (deviation D22).
 - **DWARF is not yet an object-to-source strategy.** It is wired as the primary
   header source (section 11.4 point 2), but strategy 6 of section 13.2 -- the
   compilation-unit name of an object that still carries debug info -- is not

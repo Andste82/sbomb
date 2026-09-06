@@ -105,9 +105,10 @@ sbomb generate \
 `--build-dir` is the only required flag; `sbomb.json` is picked up
 automatically when it is present.
 
-Alongside the SBOM the run always writes `evidence.json` into the build
-directory: the complete graph, every edge with its strength, its confidence and
-where it came from.
+Alongside the SBOM the run writes `evidence.json` into the build directory: the
+complete graph, every edge with its strength, its confidence and where it came
+from. `sbomb explain` reads it from there. `--evidence-dump` moves it, and
+`--evidence-dump=off` leaves the build directory untouched.
 
 ### explain
 
@@ -154,6 +155,12 @@ binary, produced this way.
 | `--build-dir <dir>` | The CMake build directory. Required. |
 | `--config <file>` | Configuration file; defaults to `sbomb.json` if present |
 | `--output <file>` | Where to write the SBOM |
+| `--source-dir <dir>` | Source root, overriding `project.root` |
+| `--mode single\|assembly` | One deliverable, or several treated as one product |
+| `--config-name <name>` | Which configuration to read from a multi-config generator |
+| `--map <file>` | Linker map, when it is not beside the artifact |
+| `--link-depfile <file>` | Link dependency file, when it is not beside the artifact |
+| `--image-manifest <file>` | An extra packaging manifest; repeatable |
 
 **What comes out**
 
@@ -163,6 +170,7 @@ binary, produced this way.
 | `--review-report <file>` | Human-readable review report |
 | `--report-format text\|markdown` | Report rendering; default `text` |
 | `--report-chains all` | Include the full evidence chains in the report |
+| `--evidence-dump <path>` | Where the evidence graph goes; `off` writes none |
 | `--format cyclonedx-json` | Output format; the only one so far |
 | `--reproducible` | Omit the timestamp and derive a stable serial number |
 

@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+### The specified command line and the real one are the same list again
+
+The specification described 43 flags and 20 existed. Nothing was silently
+wrong — an absent flag is refused — but a normative table twice the size of the
+tool is not a reference anybody can use.
+
+Seven are built, each mirroring a setting the configuration file already had, so
+that a one-off run against somebody else's build tree needs no file written
+first: `--source-dir`, `--mode`, `--config-name`, `--map`, `--link-depfile`,
+`--image-manifest`, `--evidence-dump`.
+
+Nine are removed from the specification rather than built (deviation D22):
+`--hash-alg`, `--jobs`, `--log-level`, `--log-format`, `--absolute-paths`,
+`--keep-raw-evidence`, `--compile-commands`, `--buildgraph`, `--depfile-mode`.
+Seven stay specified and absent, each named with the feature it waits on.
+
+`sbomb generate` also stops writing into a directory it does not own without
+being asked: the evidence dump still defaults to `<build-dir>/evidence.json`,
+because that is where `explain` looks, but `--evidence-dump` moves it and
+`--evidence-dump=off` suppresses it (deviation D23).
+
+
 ### A typo in a policy gate is no longer ignored
 
 The specification promises that a typo cannot silently disable a policy gate,

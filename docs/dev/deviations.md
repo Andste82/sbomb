@@ -479,3 +479,49 @@ document is checked, and the allowlist is gone.
 This is stricter than before and can reject a file that used to load. That is
 the point: a file it now rejects was a file whose author believed something
 that was not happening.
+
+## D22 — Nine specified command-line flags are removed rather than built
+
+The specification's CLI table listed 43 flags; 20 existed. Unlike the
+configuration keys of D20 nothing here was silently ignored — an absent flag is
+refused with `unknown flag` — but a normative table describing a tool twice the
+size of the real one is not a reference anybody can use.
+
+Seven were built, because each mirrors a setting the configuration file already
+had and a one-off run against somebody else's build tree should not require
+writing a file first: `--source-dir`, `--mode`, `--config-name`, `--map`,
+`--link-depfile`, `--image-manifest`, `--evidence-dump`.
+
+Seven stay specified and absent, each waiting on the feature it belongs to
+rather than on effort. They are named in section 32 beneath the table.
+
+Nine are removed:
+
+* **`--hash-alg`** — SHA-256 is the only value, and its configuration
+  counterpart went with D20. A flag with one legal value is not a setting.
+* **`--jobs`** — the performance budget of section 31 is met single-threaded
+  and measured by a test. A worker-pool knob that changes nothing invites
+  tuning that cannot help.
+* **`--log-level`, `--log-format`** — `-v`, `-vv` and `-vvv` cover verbosity.
+  Structured logs are for a service; this is a batch tool whose real outputs
+  are already JSON.
+* **`--absolute-paths`** — an absolute path in human output contradicts the
+  anchor model, where the canonical identity *is* the path. It would also
+  quietly undo `--redact-unanchored-paths` for anyone reading the report.
+* **`--keep-raw-evidence`** — `evidence.json` already carries the source and
+  adapter of every edge, which is what the flag was for.
+* **`--compile-commands`, `--buildgraph`** — both are found in the build
+  directory. A path override is a workaround for a discovery bug, and the fix
+  for a discovery bug is to fix discovery.
+* **`--depfile-mode`** — section 9.1 selects an adapter from what generated the
+  tree. A switch that overrides that selection makes the answer depend on the
+  operator rather than on the build.
+
+## D23 — The evidence dump is no longer written unconditionally
+
+`sbomb generate` wrote `<build-dir>/evidence.json` on every run, into a
+directory the tool was pointed at but does not own. That default stays, because
+`sbomb explain` reads the dump from exactly there and moving it would break the
+documented workflow; but it is now a choice. `--evidence-dump <path>` puts it
+somewhere else, and `--evidence-dump=off` leaves the build directory as it was
+found.
