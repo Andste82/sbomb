@@ -143,13 +143,16 @@ func (b *builder) logicalFor(path string) string {
 
 // physicalFor maps a path from the evidence to where its bytes live now.
 func (b *builder) physicalFor(path string) string {
-	if !filepath.IsAbs(path) {
-		return filepath.Join(b.physicalBuild, path)
-	}
 	if b.logicalBuild != "" {
 		if rel, found := strings.CutPrefix(path, b.logicalBuild+"/"); found {
 			return filepath.Join(b.physicalBuild, rel)
 		}
+		if path == b.logicalBuild {
+			return b.physicalBuild
+		}
+	}
+	if !filepath.IsAbs(path) {
+		return filepath.Join(b.physicalBuild, path)
 	}
 	return path
 }

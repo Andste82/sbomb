@@ -326,6 +326,46 @@ func TestSubmoduleBoundariesComeFromGitmodules(t *testing.T) {
 	}
 }
 
+func TestRecursiveSubmoduleDiscovery(t *testing.T) {
+	source := t.TempDir()
+	topGitmodules := `[submodule "dep/esp-idf"]
+	path = dep/esp-idf
+	url = https://github.com/espressif/esp-idf.git
+`
+	if err := os.WriteFile(filepath.Join(source, ".gitmodules"), []byte(topGitmodules), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	nestedDir := filepath.Join(source, "dep", "esp-idf")
+	if err := os.MkdirAll(nestedDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	nestedGitmodules := `[submodule "components/mbedtls/mbedtls"]
+	path = components/mbedtls/mbedtls
+	url = https://github.com/espressif/mbedtls.git
+`
+	if err := os.WriteFile(filepath.Join(nestedDir, ".gitmodules"), []byte(nestedGitmodules), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	packages, _ := Discover(Options{SourceDir: source, Context: context.Background()})
+	byName := map[string]Package{}
+	for _, entry := range packages {
+		byName[entry.Name] = entry
+	}
+	if len(packages) != 2 {
+		t.Fatalf("expected 2 packages, got %d: %#v", len(packages), packages)
+	}
+	if _, ok := byName["esp-idf"]; !ok {
+		t.Errorf("expected esp-idf package")
+	}
+	if got, ok := byName["mbedtls"]; !ok {
+		t.Errorf("expected mbedtls package")
+	} else if got.Root != filepath.Join(nestedDir, "components", "mbedtls", "mbedtls") {
+		t.Errorf("mbedtls Root = %q, want %q", got.Root, filepath.Join(nestedDir, "components", "mbedtls", "mbedtls"))
+	}
+}
+
 // Section 19.4: git metadata may describe a component but must never expand
 // the used-file set. Adapters only annotate; the reachability filter decides.
 func TestNoGitmodulesMeansNoPackages(t *testing.T) {

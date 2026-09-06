@@ -29,36 +29,71 @@ func (a submodule) Discover(options Options) ([]Package, []domain.Finding) {
 	if root == "" || root == "." {
 		return nil, nil
 	}
-	entries, err := parseGitmodules(filepath.Join(root, ".gitmodules"))
-	if err != nil || len(entries) == 0 {
-		return nil, nil
-	}
-	packages := make([]Package, 0, len(entries))
+
+	packages := make([]Package, 0)
 	findings := make([]domain.Finding, 0)
-	for _, entry := range entries {
-		name := filepath.Base(entry.path)
-		if name == "" || name == "." {
+	visitedDirs := make(map[string]bool)
+	claimedKeys := make(map[string]bool)
+
+	type scanTarget struct {
+		dir string
+	}
+	queue := []scanTarget{{dir: root}}
+
+	for len(queue) > 0 {
+		curr := queue[0]
+		queue = queue[1:]
+
+		if visitedDirs[curr.dir] {
 			continue
 		}
-		found := Package{
-			Name:      name,
-			Root:      filepath.Join(root, filepath.FromSlash(entry.path)),
-			Manager:   a.Manager(),
-			AnchorKey: "extern:" + name,
-			VCSURL:    NormalizeVCSURL(entry.url),
+		visitedDirs[curr.dir] = true
+
+		gitmodulesPath := filepath.Join(curr.dir, ".gitmodules")
+		entries, err := parseGitmodules(gitmodulesPath)
+		if err != nil || len(entries) == 0 {
+			continue
 		}
-		a.refineFromGit(options, &found, &findings)
-		if found.Version == "" {
-			findings = append(findings, domain.Finding{
-				ID: "UNKNOWN_VERSION", Severity: domain.SeverityWarning,
-				Subject:     domain.Subject{Kind: "component", Ref: name},
-				Message:     "the submodule declares no version; run with --allow-introspection=git to read it from the checkout",
-				Remediation: "Enable git introspection, or set components[].version for this submodule.",
-			})
+
+		for _, entry := range entries {
+			name := filepath.Base(entry.path)
+			if name == "" || name == "." {
+				continue
+			}
+			submoduleRoot := filepath.Join(curr.dir, filepath.FromSlash(entry.path))
+			anchorKey := "extern:" + name
+			if claimedKeys[anchorKey] {
+				anchorKey = "extern:" + strings.ReplaceAll(strings.Trim(entry.path, "/"), "/", "-")
+			}
+			claimedKeys[anchorKey] = true
+
+			found := Package{
+				Name:      name,
+				Root:      submoduleRoot,
+				Manager:   a.Manager(),
+				AnchorKey: anchorKey,
+				VCSURL:    NormalizeVCSURL(entry.url),
+			}
+			a.refineFromGit(options, &found, &findings)
+			if found.Version == "" {
+				findings = append(findings, domain.Finding{
+					ID: "UNKNOWN_VERSION", Severity: domain.SeverityWarning,
+					Subject:     domain.Subject{Kind: "component", Ref: name},
+					Message:     "the submodule declares no version; run with --allow-introspection=git to read it from the checkout",
+					Remediation: "Enable git introspection, or set components[].version for this submodule.",
+				})
+			}
+			found.PURL = GenericPURL(found.Name, found.Version, found.VCSURL, found.Commit)
+			packages = append(packages, found)
+
+			if !visitedDirs[submoduleRoot] {
+				if _, err := os.Stat(filepath.Join(submoduleRoot, ".gitmodules")); err == nil {
+					queue = append(queue, scanTarget{dir: submoduleRoot})
+				}
+			}
 		}
-		found.PURL = GenericPURL(found.Name, found.Version, found.VCSURL, found.Commit)
-		packages = append(packages, found)
 	}
+
 	return packages, findings
 }
 
@@ -69,6 +104,11 @@ func (a submodule) Discover(options Options) ([]Package, []domain.Finding) {
 func (submodule) refineFromGit(options Options, found *Package, findings *[]domain.Finding) {
 	if options.Runner == nil || !options.Runner.Features.Git {
 		return
+	}
+	if remote, err := options.Runner.Run(options.Context, "git", "-C", found.Root, "config", "--get", "remote.origin.url"); err == nil {
+		if u := strings.TrimSpace(string(remote)); u != "" {
+			found.VCSURL = NormalizeVCSURL(u)
+		}
 	}
 	described, err := options.Runner.Run(options.Context, "git", "-C", found.Root,
 		"describe", "--tags", "--always", "--dirty")
