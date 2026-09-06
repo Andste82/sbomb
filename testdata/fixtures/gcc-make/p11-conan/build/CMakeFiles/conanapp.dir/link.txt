@@ -1,0 +1,1 @@
+/usr/bin/cc -g -Wl,-Map=/__fixture_build__/conanapp.map -Wl,--dependency-file=/__fixture_build__/conanapp.d CMakeFiles/conanapp.dir/main.c.o -o conanapp   -L/__fixture_pkg__/conan/p/b/tinyc4ca05d5d8c66a/p/lib  -Wl,-rpath,/__fixture_pkg__/conan/p/b/tinyc4ca05d5d8c66a/p/lib: /__fixture_pkg__/conan/p/b/tinyc4ca05d5d8c66a/p/lib/libtinycbor.a 

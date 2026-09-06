@@ -16,6 +16,18 @@
   forbids deriving one from a repository host.
 - Adapters never add a file to the used set. Discovery stays evidence-based, so
   a dependency that was populated but never linked does not appear.
+- Conan and vcpkg adapters. Conan is read from the CMakeDeps files: the
+  version from `<name>-config-version.cmake`, the package root from the
+  per-configuration data file, and the licence Conan copied into the package.
+  vcpkg is read from the SPDX document it writes per package, which states the
+  name, the version, the licence and the purl outright.
+- Package managers now register anchors of their own (section 21), which is
+  what makes a `bom-ref` portable: a Conan cache path contains a random
+  component, so without an anchor the identity of every file in an installed
+  dependency would differ from machine to machine.
+- Licence resolution follows section 22.2 in order: an SPDX identifier in a
+  used file, then what the manager declared or placed in the package, then a
+  licence file found by walking the component root.
 
 
 - `internal/exec` is the only place sbomb can start a process. It carries the

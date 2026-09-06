@@ -190,11 +190,37 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	if projectRootForIdentity == "" && replyModel == nil {
 		projectRootForIdentity = absolutePath(".")
 	}
+	// Package managers are consulted before the anchors are assembled, because
+	// an installed dependency needs an anchor of its own (section 21): without
+	// one its files keep the absolute path of a package cache, which is
+	// neither portable nor the same on the next machine.
+	runner := &exec.Runner{
+		Features: options.Introspection,
+		Anchors:  []string{projectRootForIdentity, buildRootForIdentity, absolutePath(buildDir)},
+		Log: func(record exec.Record) {
+			logger.Info("Introspection: %s (%s)", strings.Join(record.Argv, " "), record.Duration.Round(time.Millisecond))
+		},
+	}
+	packages, packageFindings := pkgmanager.Discover(pkgmanager.Options{
+		BuildDir:  buildDir,
+		SourceDir: cfg.Project.Root,
+		Runner:    runner,
+	})
+	findings = append(findings, packageFindings...)
+	packageAnchors := make([]anchors.PackageAnchor, 0, len(packages))
+	for _, entry := range packages {
+		logger.Info("Package %s %s from %s at %s", entry.Name, entry.Version, entry.Manager, entry.Root)
+		if entry.AnchorKey != "" && entry.Root != "" {
+			packageAnchors = append(packageAnchors, anchors.PackageAnchor{Key: entry.AnchorKey, Root: entry.Root})
+		}
+	}
+
 	anchorResult, err := anchors.Assemble(anchors.Options{
 		Flavor:        options.PathFlavor,
 		ProjectRoot:   projectRootForIdentity,
 		BuildRoot:     buildRootForIdentity,
 		ConfigAnchors: cfg.Anchors,
+		Packages:      packageAnchors,
 		Model:         replyModel,
 		CompileFlags:  compileFlags,
 		Redact:        options.RedactUnanchoredPaths,
@@ -342,35 +368,16 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		anchorRoots[anchor.Key] = anchor.Root
 	}
 	resolver := newComponentResolver(cfg, b.physical, anchorRoots, logger)
-	// Section 21: package managers improve what is known about the files the
-	// evidence chain already reached. They never add a file to the used set,
-	// which is why this runs after the reachability filter, not before it.
-	runner := &exec.Runner{
-		Features: options.Introspection,
-		Anchors:  anchorRootList(anchorResult),
-		Log: func(record exec.Record) {
-			logger.Info("Introspection: %s (%s)", strings.Join(record.Argv, " "), record.Duration.Round(time.Millisecond))
-		},
-	}
-	packages, packageFindings := pkgmanager.Discover(pkgmanager.Options{
-		BuildDir:  buildDir,
-		SourceDir: cfg.Project.Root,
-		Runner:    runner,
-	})
-	findings = append(findings, packageFindings...)
-	for _, entry := range packages {
-		logger.Info("Package %s %s from %s at %s", entry.Name, entry.Version, entry.Manager, entry.Root)
-	}
-	resolver.setPackages(packages, func(root string) string {
-		// The adapters report a root below the build directory being read.
-		// Identity is computed against the logical build root (section 7.6),
-		// so the physical prefix has to come off first, exactly as it does for
-		// every other path the adapters hand over.
+	resolver.setPackages(packages, func(root string) domain.FileID {
+		// A root below the build directory being read has to be expressed in
+		// the logical build root first (section 7.6), exactly as every other
+		// path the adapters hand over. A root outside it -- a package cache --
+		// is already absolute and resolves against its own anchor.
 		if relative, err := filepath.Rel(buildDir, root); err == nil && !strings.HasPrefix(relative, "..") {
 			root = relative
 		}
 		canonical, _ := b.identify(root)
-		return canonical
+		return domain.FileID{Anchor: anchorOf(canonical), RelPath: relOf(canonical)}
 	})
 	narrowing := narrowingByComponent(resolver, outcome.narrowed)
 	document, findings := buildDocument(cfg, resolver, deliverables, used, findings, run)

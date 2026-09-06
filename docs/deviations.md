@@ -174,3 +174,17 @@ the section name and its size -- so nothing is inferred.
 A `LOAD` line is likewise not evidence of retention: GNU ld writes one for
 every input it opens, including the ones it discards entirely. Only the
 placement lines of the memory map say what was kept.
+
+
+## D13 — A Conan package root is not in the fixture corpus
+
+The corpus commits build evidence and no sources, and a Conan package lives in
+a cache outside the build tree. The committed `p11-conan` fixture therefore
+carries the CMakeDeps files -- which is what proves name, version, purl and
+package root -- but not the package itself, so the licence Conan copied into
+`<package>/licenses/` cannot be read back from the corpus and the component
+reports NOASSERTION there.
+
+The path is exercised by unit tests instead, and on a real build tree the
+licence resolves normally. Harvesting a package cache into the corpus would
+mean committing third-party sources, which the corpus policy forbids.

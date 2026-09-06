@@ -164,7 +164,7 @@ Linker script and memory map
 LOAD /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/crt2.o
 LOAD /usr/lib/gcc/x86_64-w64-mingw32/13-win32/crtbegin.o
 LOAD CMakeFiles/ltoapp.dir/main.c.obj
-LOAD /tmp/ccLR0wLF.ltrans0.ltrans.o
+LOAD /tmp/ccdd948s.ltrans0.ltrans.o
 LOAD CMakeFiles/ltoapp.dir/helper.c.obj
 LOAD /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libkernel32.a
 LOAD /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libuser32.a
@@ -208,7 +208,7 @@ LOAD /usr/lib/gcc/x86_64-w64-mingw32/13-win32/crtend.o
  .text          0x0000000140001460       0x20 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/crtbegin.o
                 0x0000000140001460                __gcc_register_frame
                 0x0000000140001470                __gcc_deregister_frame
- .text          0x0000000140001480       0x30 /tmp/ccLR0wLF.ltrans0.ltrans.o
+ .text          0x0000000140001480       0x30 /tmp/ccdd948s.ltrans0.ltrans.o
                 0x0000000140001480                main
  .text          0x00000001400014b0        0x8 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libkernel32.a(libkernel32s01580.o)
                 0x00000001400014b0                __C_specific_handler
@@ -374,7 +374,7 @@ LOAD /usr/lib/gcc/x86_64-w64-mingw32/13-win32/crtend.o
  *(.data)
  .data          0x0000000140003000        0x0 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/crt2.o
  .data          0x0000000140003000        0x0 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/crtbegin.o
- .data          0x0000000140003000        0x0 /tmp/ccLR0wLF.ltrans0.ltrans.o
+ .data          0x0000000140003000        0x0 /tmp/ccdd948s.ltrans0.ltrans.o
  .data          0x0000000140003000        0x0 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libkernel32.a(libkernel32s01580.o)
  .data          0x0000000140003000        0x0 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libkernel32.a(libkernel32s01406.o)
  .data          0x0000000140003000        0x0 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libkernel32.a(libkernel32s01390.o)
@@ -547,7 +547,7 @@ LOAD /usr/lib/gcc/x86_64-w64-mingw32/13-win32/crtend.o
                 0x00000001400044d0                .refptr._newmode
  .rdata$zzz     0x00000001400044e0       0x20 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/crt2.o
  .rdata$zzz     0x0000000140004500       0x20 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/crtbegin.o
- .rdata$zzz     0x0000000140004520       0x20 /tmp/ccLR0wLF.ltrans0.ltrans.o
+ .rdata$zzz     0x0000000140004520       0x20 /tmp/ccdd948s.ltrans0.ltrans.o
  .rdata$zzz     0x0000000140004540       0x20 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libmingw32.a(lib64_libmingw32_a-gccmain.o)
  .rdata$zzz     0x0000000140004560       0x20 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libmingw32.a(lib64_libmingw32_a-natstart.o)
  .rdata$zzz     0x0000000140004580       0x20 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libmingw32.a(lib64_libmingw32_a-wildcard.o)
@@ -591,7 +591,7 @@ LOAD /usr/lib/gcc/x86_64-w64-mingw32/13-win32/crtend.o
  *(.pdata*)
  .pdata         0x0000000140005000       0x54 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/crt2.o
  .pdata         0x0000000140005054       0x18 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/crtbegin.o
- .pdata         0x000000014000506c       0x18 /tmp/ccLR0wLF.ltrans0.ltrans.o
+ .pdata         0x000000014000506c       0x18 /tmp/ccdd948s.ltrans0.ltrans.o
  .pdata         0x0000000140005084       0x24 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libmingw32.a(lib64_libmingw32_a-gccmain.o)
  .pdata         0x00000001400050a8        0xc /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libmingw32.a(lib64_libmingw32_a-dllargv.o)
  .pdata         0x00000001400050b4       0x24 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libmingw32.a(lib64_libmingw32_a-tlssup.o)
@@ -613,7 +613,7 @@ LOAD /usr/lib/gcc/x86_64-w64-mingw32/13-win32/crtend.o
  *(.xdata*)
  .xdata         0x0000000140006000       0x84 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/crt2.o
  .xdata         0x0000000140006084        0x8 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/crtbegin.o
- .xdata         0x000000014000608c       0x14 /tmp/ccLR0wLF.ltrans0.ltrans.o
+ .xdata         0x000000014000608c       0x14 /tmp/ccdd948s.ltrans0.ltrans.o
  .xdata         0x00000001400060a0       0x20 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libmingw32.a(lib64_libmingw32_a-gccmain.o)
  .xdata         0x00000001400060c0        0x4 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libmingw32.a(lib64_libmingw32_a-dllargv.o)
  .xdata         0x00000001400060c4       0x20 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libmingw32.a(lib64_libmingw32_a-tlssup.o)
@@ -637,7 +637,7 @@ LOAD /usr/lib/gcc/x86_64-w64-mingw32/13-win32/crtend.o
  .bss           0x0000000140007000       0x30 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/crt2.o
                 0x0000000140007000                __mingw_module_is_dll
  .bss           0x0000000140007030        0x0 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/crtbegin.o
- .bss           0x0000000140007030        0x0 /tmp/ccLR0wLF.ltrans0.ltrans.o
+ .bss           0x0000000140007030        0x0 /tmp/ccdd948s.ltrans0.ltrans.o
  .bss           0x0000000140007030        0x0 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libkernel32.a(libkernel32s01580.o)
  .bss           0x0000000140007030        0x0 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libkernel32.a(libkernel32s01406.o)
  .bss           0x0000000140007030        0x0 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libkernel32.a(libkernel32s01390.o)
@@ -1008,7 +1008,7 @@ LOAD /usr/lib/gcc/x86_64-w64-mingw32/13-win32/crtend.o
  .debug_aranges
                 0x000000014000c000       0x30 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/crt2.o
  .debug_aranges
-                0x000000014000c030       0x30 /tmp/ccLR0wLF.ltrans0.ltrans.o
+                0x000000014000c030       0x30 /tmp/ccdd948s.ltrans0.ltrans.o
  .debug_aranges
                 0x000000014000c060       0x30 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libmingw32.a(lib64_libmingw32_a-gccmain.o)
  .debug_aranges
@@ -1070,7 +1070,7 @@ LOAD /usr/lib/gcc/x86_64-w64-mingw32/13-win32/crtend.o
 .debug_info     0x000000014000d000     0xaa00
  *(.debug_info .gnu.linkonce.wi.*)
  .debug_info    0x000000014000d000     0x2715 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/crt2.o
- .debug_info    0x000000014000f715       0xe9 /tmp/ccLR0wLF.ltrans0.ltrans.o
+ .debug_info    0x000000014000f715       0xe9 /tmp/ccdd948s.ltrans0.ltrans.o
  .debug_info    0x000000014000f7fe      0x6dc /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libmingw32.a(lib64_libmingw32_a-gccmain.o)
  .debug_info    0x000000014000feda      0x67d /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libmingw32.a(lib64_libmingw32_a-natstart.o)
  .debug_info    0x0000000140010557      0x108 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libmingw32.a(lib64_libmingw32_a-wildcard.o)
@@ -1102,7 +1102,7 @@ LOAD /usr/lib/gcc/x86_64-w64-mingw32/13-win32/crtend.o
 .debug_abbrev   0x0000000140018000     0x1e00
  *(.debug_abbrev)
  .debug_abbrev  0x0000000140018000      0x582 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/crt2.o
- .debug_abbrev  0x0000000140018582       0x53 /tmp/ccLR0wLF.ltrans0.ltrans.o
+ .debug_abbrev  0x0000000140018582       0x53 /tmp/ccdd948s.ltrans0.ltrans.o
  .debug_abbrev  0x00000001400185d5      0x13f /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libmingw32.a(lib64_libmingw32_a-gccmain.o)
  .debug_abbrev  0x0000000140018714       0xb6 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libmingw32.a(lib64_libmingw32_a-natstart.o)
  .debug_abbrev  0x00000001400187ca       0x2e /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libmingw32.a(lib64_libmingw32_a-wildcard.o)
@@ -1134,7 +1134,7 @@ LOAD /usr/lib/gcc/x86_64-w64-mingw32/13-win32/crtend.o
 .debug_line     0x000000014001a000     0x1e00
  *(.debug_line)
  .debug_line    0x000000014001a000      0x43d /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/crt2.o
- .debug_line    0x000000014001a43d       0x6b /tmp/ccLR0wLF.ltrans0.ltrans.o
+ .debug_line    0x000000014001a43d       0x6b /tmp/ccdd948s.ltrans0.ltrans.o
  .debug_line    0x000000014001a4a8      0x128 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libmingw32.a(lib64_libmingw32_a-gccmain.o)
  .debug_line    0x000000014001a5d0       0x56 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libmingw32.a(lib64_libmingw32_a-natstart.o)
  .debug_line    0x000000014001a626       0x3a /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libmingw32.a(lib64_libmingw32_a-wildcard.o)
@@ -1166,7 +1166,7 @@ LOAD /usr/lib/gcc/x86_64-w64-mingw32/13-win32/crtend.o
 .debug_frame    0x000000014001c000      0xa00
  *(.debug_frame*)
  .debug_frame   0x000000014001c000      0x170 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/crt2.o
- .debug_frame   0x000000014001c170       0x68 /tmp/ccLR0wLF.ltrans0.ltrans.o
+ .debug_frame   0x000000014001c170       0x68 /tmp/ccdd948s.ltrans0.ltrans.o
  .debug_frame   0x000000014001c1d8       0x98 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libmingw32.a(lib64_libmingw32_a-gccmain.o)
  .debug_frame   0x000000014001c270       0x30 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libmingw32.a(lib64_libmingw32_a-dllargv.o)
  .debug_frame   0x000000014001c2a0       0xb0 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libmingw32.a(lib64_libmingw32_a-tlssup.o)
@@ -1188,7 +1188,7 @@ LOAD /usr/lib/gcc/x86_64-w64-mingw32/13-win32/crtend.o
 .debug_str      0x000000014001d000      0x400
  *(.debug_str)
  .debug_str     0x000000014001d000      0x21f /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/crt2.o
- .debug_str     0x000000014001d21f        0x0 /tmp/ccLR0wLF.ltrans0.ltrans.o
+ .debug_str     0x000000014001d21f        0x0 /tmp/ccdd948s.ltrans0.ltrans.o
  .debug_str     0x000000014001d21f        0x0 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libmingw32.a(lib64_libmingw32_a-gccmain.o)
  .debug_str     0x000000014001d21f       0x18 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libmingw32.a(lib64_libmingw32_a-natstart.o)
  .debug_str     0x000000014001d237        0x0 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libmingw32.a(lib64_libmingw32_a-wildcard.o)
@@ -1283,7 +1283,7 @@ LOAD /usr/lib/gcc/x86_64-w64-mingw32/13-win32/crtend.o
  .debug_line_str
                 0x000000014001e000      0x1d5 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/crt2.o
  .debug_line_str
-                0x000000014001e1d5       0x61 /tmp/ccLR0wLF.ltrans0.ltrans.o
+                0x000000014001e1d5       0x61 /tmp/ccdd948s.ltrans0.ltrans.o
  .debug_line_str
                 0x000000014001e236       0xe5 /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libmingw32.a(lib64_libmingw32_a-gccmain.o)
  .debug_line_str

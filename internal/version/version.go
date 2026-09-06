@@ -90,7 +90,13 @@ func resolveGitCommit(root string) (string, bool) {
 	return "0.0.0-git.000000000000", true
 }
 
+// PURL builds a package URL of section 20.4. The type may be given with or
+// without the scheme; the result always carries it, because a "purl" without
+// "pkg:" is not one and the document validator rejects it.
 func PURL(pkgType, name, version string) string {
+	if !strings.HasPrefix(pkgType, "pkg:") {
+		pkgType = "pkg:" + pkgType
+	}
 	encodedName := strings.ReplaceAll(name, "%", "%25")
 	encodedName = strings.ReplaceAll(encodedName, "+", "%2B")
 	encodedName = strings.ReplaceAll(encodedName, "@", "%40")

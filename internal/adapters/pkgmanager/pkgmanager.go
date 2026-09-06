@@ -33,7 +33,10 @@ type Package struct {
 	// License is the manager's declared expression, which section 22.2 ranks
 	// above a licence file found in the component root.
 	License string
-	PURL    string
+	// LicenseFile is a licence file the manager itself placed in the package,
+	// which is stronger evidence than one found by walking a directory.
+	LicenseFile string
+	PURL        string
 
 	// VCSURL, Commit and Dirty describe the checkout, when the manager used
 	// one. The URL is normalized and stripped of credentials (section 19.4).
@@ -72,6 +75,8 @@ type Adapter interface {
 
 // adapters is the registry, in a fixed order so that two runs agree.
 var adapters = []Adapter{
+	conan{},
+	vcpkg{},
 	fetchContent{},
 }
 

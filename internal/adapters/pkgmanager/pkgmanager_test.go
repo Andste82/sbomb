@@ -156,3 +156,128 @@ func TestGenericPURLCarriesTheCheckout(t *testing.T) {
 		t.Error("a purl was built without a name")
 	}
 }
+
+// writeConan lays out what the CMakeDeps generator writes, which is what the
+// adapter reads: a version in the config-version file and the package root in
+// the per-configuration data file.
+func writeConan(t *testing.T, buildDir, name, version, packageRoot string) {
+	t.Helper()
+	version_file := "set(PACKAGE_VERSION \"" + version + "\")\n" +
+		"if(PACKAGE_VERSION VERSION_LESS PACKAGE_FIND_VERSION)\n  set(PACKAGE_VERSION_COMPATIBLE FALSE)\nendif()\n"
+	if err := os.WriteFile(filepath.Join(buildDir, name+"-config-version.cmake"), []byte(version_file), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	data := "set(" + name + "_COMPONENT_NAMES \"\")\n" +
+		"set(" + name + "_PACKAGE_FOLDER_RELEASE \"" + packageRoot + "\")\n" +
+		"set(" + name + "_INCLUDE_DIRS_RELEASE \"${" + name + "_PACKAGE_FOLDER_RELEASE}/include\")\n"
+	if err := os.WriteFile(filepath.Join(buildDir, name+"-release-x86_64-data.cmake"), []byte(data), 0o600); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestConanReadsVersionRootAndLicence(t *testing.T) {
+	build := t.TempDir()
+	packageRoot := filepath.Join(t.TempDir(), "p")
+	if err := os.MkdirAll(filepath.Join(packageRoot, "licenses"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(packageRoot, "licenses", "LICENSE"), []byte("MIT"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	writeConan(t, build, "tinycbor", "0.6.1", packageRoot)
+
+	packages, findings := Discover(Options{BuildDir: build, Context: context.Background()})
+	if len(packages) != 1 {
+		t.Fatalf("packages = %#v (findings %#v)", packages, findings)
+	}
+	found := packages[0]
+	if found.Name != "tinycbor" || found.Version != "0.6.1" {
+		t.Errorf("name/version = %q/%q", found.Name, found.Version)
+	}
+	if found.Root != packageRoot {
+		t.Errorf("root = %q, want the package folder the data file names", found.Root)
+	}
+	if found.PURL != "pkg:conan/tinycbor@0.6.1" {
+		t.Errorf("purl = %q", found.PURL)
+	}
+	if found.LicenseFile == "" {
+		t.Error("the licence Conan copied into the package was not found")
+	}
+}
+
+// Without a package folder the entry would name a component that owns nothing,
+// so it is reported rather than emitted.
+func TestConanWithoutAPackageFolderIsReported(t *testing.T) {
+	build := t.TempDir()
+	if err := os.WriteFile(filepath.Join(build, "mystery-config-version.cmake"),
+		[]byte("set(PACKAGE_VERSION \"1.0\")\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	packages, findings := Discover(Options{BuildDir: build, Context: context.Background()})
+	if len(packages) != 0 {
+		t.Errorf("packages = %#v, want none", packages)
+	}
+	var reported bool
+	for _, finding := range findings {
+		if finding.ID == "MISSING_PACKAGE_EVIDENCE" {
+			reported = true
+		}
+	}
+	if !reported {
+		t.Error("a dependency with no package folder was dropped silently")
+	}
+}
+
+func writeVcpkg(t *testing.T, buildDir, triplet, name, version, license, purl string) {
+	t.Helper()
+	dir := filepath.Join(buildDir, "vcpkg_installed", triplet, "share", name)
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	document := `{"packages":[{"name":"` + name + `","versionInfo":"` + version +
+		`","licenseConcluded":"` + license + `","externalRefs":[{"referenceCategory":"PACKAGE-MANAGER",` +
+		`"referenceType":"purl","referenceLocator":"` + purl + `"}]}]}`
+	if err := os.WriteFile(filepath.Join(dir, "vcpkg.spdx.json"), []byte(document), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "copyright"), []byte("MIT"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// vcpkg states the purl itself, so nothing has to be reconstructed.
+func TestVcpkgTakesThePurlItStates(t *testing.T) {
+	build := t.TempDir()
+	writeVcpkg(t, build, "x64-linux", "tinyfmt", "2.1.0", "MIT",
+		"pkg:vcpkg/tinyfmt@2.1.0?triplet=x64-linux")
+
+	packages, _ := Discover(Options{BuildDir: build, Context: context.Background()})
+	if len(packages) != 1 {
+		t.Fatalf("packages = %#v", packages)
+	}
+	found := packages[0]
+	if found.PURL != "pkg:vcpkg/tinyfmt@2.1.0?triplet=x64-linux" {
+		t.Errorf("purl = %q, want the one vcpkg wrote", found.PURL)
+	}
+	if found.Version != "2.1.0" || found.License != "MIT" {
+		t.Errorf("version/license = %q/%q", found.Version, found.License)
+	}
+	if found.LicenseFile == "" {
+		t.Error("the copyright file vcpkg writes was not found")
+	}
+}
+
+// NOASSERTION is vcpkg saying it does not know. Recording it as a licence
+// would turn an absence of evidence into an assertion.
+func TestVcpkgNoAssertionIsNotALicence(t *testing.T) {
+	build := t.TempDir()
+	writeVcpkg(t, build, "x64-linux", "mystery", "1.0", "NOASSERTION", "pkg:vcpkg/mystery@1.0")
+
+	packages, _ := Discover(Options{BuildDir: build, Context: context.Background()})
+	if len(packages) != 1 {
+		t.Fatalf("packages = %#v", packages)
+	}
+	if packages[0].License != "" {
+		t.Errorf("license = %q, want none", packages[0].License)
+	}
+}

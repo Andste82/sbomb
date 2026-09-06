@@ -20,12 +20,22 @@ corpus_dir="$repo_root/testdata/fixtures"
 
 SRC_ROOT=${SBOMB_FIXTURE_SRC:-/__fixture_src__}
 BUILD_ROOT=${SBOMB_FIXTURE_BUILD:-/__fixture_build__}
+# Package managers keep their caches outside both trees and record absolute
+# paths into the files they generate, so their root is a sentinel of its own.
+PKG_ROOT=${SBOMB_FIXTURE_PKG:-/__fixture_pkg__}
 
 # Fixed so that regenerating an unchanged corpus is a no-op. Bump deliberately
 # when the corpus is rebuilt against a new toolchain.
 FIXTURE_DATE="2026-09-05"
 
-PROJECTS=(p01-hello p02-static p03-dupnames p04-generated p05-headeronly p06-unity p07-pch p08-gcsections p09-lto p10-fetchcontent)
+PROJECTS=(p01-hello p02-static p03-dupnames p04-generated p05-headeronly p06-unity p07-pch p08-gcsections p09-lto p10-fetchcontent p11-conan)
+
+# Some projects only make sense for some toolchains. A Conan package is built
+# for one target, so linking it into an ARM or Windows binary is not a fixture
+# failure but a category error; the corpus records what a real build produces.
+declare -A PROJECT_TOOLCHAINS=(
+  [p11-conan]="gcc-ninja gcc-make clang-ninja"
+)
 
 # name|generator|toolchain file (empty for native)
 TOOLCHAINS=(
@@ -50,6 +60,10 @@ if [[ "${1:-}" == "--check" ]]; then
   for toolchain_spec in "${TOOLCHAINS[@]}"; do
     toolchain=${toolchain_spec%%|*}
     for project in "${PROJECTS[@]}"; do
+      allowed=${PROJECT_TOOLCHAINS[$project]:-}
+      if [[ -n "$allowed" && " $allowed " != *" $toolchain "* ]]; then
+        continue
+      fi
       dir="$corpus_dir/$toolchain/$project"
       for required in manifest.json PROVENANCE.md build/compile_commands.json; do
         if [[ ! -e "$dir/$required" ]]; then
@@ -126,6 +140,34 @@ toolchain_available() {
 }
 
 # --------------------------------------------------------------------------
+# Conan: a local recipe in a cache under the sentinel root, so the generated
+# CMakeDeps files name portable paths and no host directory reaches the corpus.
+# --------------------------------------------------------------------------
+conan_prepare() {
+  command -v conan >/dev/null 2>&1 || return 1
+  export CONAN_HOME="$PKG_ROOT/conan"
+  rm -rf "$CONAN_HOME"
+  mkdir -p "$CONAN_HOME/profiles"
+  cat > "$CONAN_HOME/profiles/default" <<'PROFILE'
+[settings]
+arch=x86_64
+build_type=Debug
+compiler=gcc
+compiler.cppstd=gnu17
+compiler.libcxx=libstdc++11
+compiler.version=13
+os=Linux
+PROFILE
+  local dep
+  for dep in "$SRC_ROOT"/dep/*/; do
+    [[ -f "$dep/conanfile.py" ]] || continue
+    conan create "$dep" --build=missing >/dev/null 2>&1 || return 1
+  done
+  conan install "$SRC_ROOT" --output-folder="$BUILD_ROOT" --build=missing >/dev/null 2>&1 || return 1
+  return 0
+}
+
+# --------------------------------------------------------------------------
 # Build and harvest one (toolchain, project) pair.
 # --------------------------------------------------------------------------
 generate_one() {
@@ -160,6 +202,17 @@ QUERY
 
   local configure_args=(-S "$SRC_ROOT" -B "$BUILD_ROOT" -G "$generator"
                         -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON)
+
+  # Conan: create the local recipe into a cache under the sentinel root, then
+  # install it for this project. The profile is written out rather than
+  # detected, so the package id does not move with the host compiler.
+  if [[ -f "$SRC_ROOT/conanfile.txt" ]]; then
+    if ! conan_prepare; then
+      log "  SKIPPED (conan unavailable): $toolchain/$project"
+      return 0
+    fi
+    configure_args+=(-DCMAKE_PREFIX_PATH="$BUILD_ROOT")
+  fi
   # The toolchain file is recorded verbatim in the cache, in build.ninja and in
   # cmakeFiles-v1, so it has to live under the sentinel root as well; passing
   # the repository path would leak it into the corpus.
@@ -204,6 +257,12 @@ QUERY
                \( -name build.make -o -name link.txt -o -name compiler_depend.make \
                   -o -name 'objects*.rsp' -o -name '*.o.d' \) -type f | sort)
   fi
+
+  # Conan evidence: the CMakeDeps files name the version and the package root,
+  # and the package root holds the licence Conan copied out of the recipe.
+  harvest_glob "$BUILD_ROOT/*-config-version.cmake" "$build_out"
+  harvest_glob "$BUILD_ROOT/*-data.cmake" "$build_out"
+  harvest_glob "$BUILD_ROOT/conandeps_legacy.cmake" "$build_out"
 
   # FetchContent evidence: the generated populate script names the repository
   # and the tag, and the licence file of the populated dependency is what the
@@ -287,6 +346,10 @@ for toolchain_spec in "${TOOLCHAINS[@]}"; do
   fi
   log "$toolchain ($generator)"
   for project in "${PROJECTS[@]}"; do
+    allowed=${PROJECT_TOOLCHAINS[$project]:-}
+    if [[ -n "$allowed" && " $allowed " != *" $toolchain "* ]]; then
+      continue
+    fi
     generate_one "$toolchain" "$generator" "$toolchain_file" "$project" || failures=$((failures + 1))
   done
 done

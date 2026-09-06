@@ -45,8 +45,12 @@ type componentResolver struct {
 // resolvedPackage is one package-manager result expressed in identity terms,
 // so that mapping a file needs no filesystem access.
 type resolvedPackage struct {
-	prefix string
-	pkg    pkgmanager.Package
+	// id is the package root as an identity. Matching happens on the anchor
+	// and the relative path separately: a package that received its own anchor
+	// has an empty relative path, and string surgery on the canonical form
+	// would have to special-case that.
+	id  domain.FileID
+	pkg pkgmanager.Package
 }
 
 func newComponentResolver(cfg config.Config, physical map[string]string, anchorRoots map[string]string, logger *Logger) *componentResolver {
@@ -130,26 +134,37 @@ func (r *componentResolver) resolve(file domain.UsedFile) (id, name, componentTy
 // setPackages records what the package-manager adapters found, expressed as
 // canonical identity prefixes. The longest prefix wins, so a package nested
 // inside another maps to the inner one (section 19.2).
-func (r *componentResolver) setPackages(packages []pkgmanager.Package, identify func(string) string) {
+func (r *componentResolver) setPackages(packages []pkgmanager.Package, identify func(string) domain.FileID) {
 	r.packages = make([]resolvedPackage, 0, len(packages))
 	for _, entry := range packages {
-		prefix := identify(entry.Root)
-		if prefix == "" {
+		id := identify(entry.Root)
+		if id.Anchor == "" {
 			continue
 		}
-		r.packages = append(r.packages, resolvedPackage{prefix: prefix, pkg: entry})
+		// A path that is its own anchor root comes back with "." as the
+		// relative part; the package then covers everything under the anchor.
+		if id.RelPath == "." || id.RelPath == "/" {
+			id.RelPath = ""
+		}
+		r.logger.Debug("Package %s maps to identity %s", entry.Name, id.Canonical())
+		r.packages = append(r.packages, resolvedPackage{id: id, pkg: entry})
 	}
 	sort.Slice(r.packages, func(i, j int) bool {
-		return len(r.packages[i].prefix) > len(r.packages[j].prefix)
+		return len(r.packages[i].id.RelPath) > len(r.packages[j].id.RelPath)
 	})
 }
 
 // packageFor finds the package a file belongs to, matching on whole path
 // segments so that a sibling directory with a shared prefix cannot claim it.
 func (r *componentResolver) packageFor(file domain.UsedFile) (resolvedPackage, bool) {
-	canonical := file.ID.Canonical()
 	for _, entry := range r.packages {
-		if canonical == entry.prefix || strings.HasPrefix(canonical, entry.prefix+"/") {
+		if file.ID.Anchor != entry.id.Anchor {
+			continue
+		}
+		root := entry.id.RelPath
+		// An empty relative path means the package is the anchor root, so
+		// everything under that anchor belongs to it.
+		if root == "" || file.ID.RelPath == root || strings.HasPrefix(file.ID.RelPath, root+"/") {
 			return entry, true
 		}
 	}
@@ -300,6 +315,9 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 func (r *componentResolver) resolveComponentLicense(component *domain.Component, files []domain.UsedFile, curated config.Component, hasCurated bool) []domain.Finding {
 	findings := []domain.Finding{}
 
+	// Section 22.2 in order: an SPDX identifier in a used file (2), then what
+	// the package manager declared or placed in the package (3 and 4), then a
+	// licence file found by walking the component root (5).
 	var fromFiles domain.LicenseFinding
 	for _, file := range files {
 		path := r.physical[file.ID.Canonical()]
@@ -313,6 +331,11 @@ func (r *componentResolver) resolveComponentLicense(component *domain.Component,
 		if found := license.ResolveFromText(string(data), path); found.Expression != "" {
 			fromFiles = found
 			break
+		}
+	}
+	if fromFiles.Expression == "" {
+		if found, ok := r.licenseFromPackageManager(component.Name); ok {
+			fromFiles = found
 		}
 	}
 	if fromFiles.Expression == "" {
@@ -363,6 +386,33 @@ func (r *componentResolver) resolveComponentLicense(component *domain.Component,
 		}
 	}
 	return findings
+}
+
+// licenseFromPackageManager uses what the manager declared, or the licence
+// file it placed in the package itself. Both are stronger than walking a
+// directory looking for something licence-shaped: the manager put it there and
+// says which package it belongs to.
+func (r *componentResolver) licenseFromPackageManager(name string) (domain.LicenseFinding, bool) {
+	managed, ok := r.packageByName(name)
+	if !ok {
+		return domain.LicenseFinding{}, false
+	}
+	if managed.License != "" {
+		return domain.LicenseFinding{
+			Expression: managed.License,
+			Evidence:   "component-level",
+			Confidence: domain.ConfidenceHigh,
+		}, true
+	}
+	if managed.LicenseFile == "" {
+		return domain.LicenseFinding{}, false
+	}
+	found, err := license.ResolveFile(managed.LicenseFile)
+	if err != nil || found.Expression == "" {
+		return domain.LicenseFinding{}, false
+	}
+	found.Evidence = "component-level"
+	return found, true
 }
 
 // licenseFromComponentRoot looks for a recognized license file, but only in

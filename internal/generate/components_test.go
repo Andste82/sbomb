@@ -3,6 +3,7 @@ package generate
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/example/sbomb/internal/config"
@@ -244,6 +245,11 @@ func TestPurlIsAssertedOnlyFromAPackageAnchor(t *testing.T) {
 	resolver.enrichComponent(&packaged, []domain.UsedFile{{ID: fileID("pkg:conan/mbedtls", "aes.c")}})
 	if packaged.PURL == "" {
 		t.Error("a package anchor should yield a purl")
+	}
+	// A purl without the scheme is not a purl, and the document validator
+	// rejects it. This went unnoticed while no pkg: anchor was ever registered.
+	if !strings.HasPrefix(packaged.PURL, "pkg:") {
+		t.Errorf("purl = %q, want the pkg: scheme", packaged.PURL)
 	}
 
 	plain := domain.Component{ID: "component:project", Name: "project"}

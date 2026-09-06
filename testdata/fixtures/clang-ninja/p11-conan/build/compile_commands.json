@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/clang -isystem /__fixture_pkg__/conan/p/b/tinyce802d47e1474d/p/include -g -o CMakeFiles/conanapp.dir/main.c.o -c /__fixture_src__/main.c",
+  "file": "/__fixture_src__/main.c",
+  "output": "CMakeFiles/conanapp.dir/main.c.o"
+}
+]

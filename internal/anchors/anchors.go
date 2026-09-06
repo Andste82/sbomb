@@ -51,11 +51,23 @@ type Options struct {
 	// sysroot.
 	Model *cmakeapi.Model
 
+	// Packages are the roots the package-manager adapters proved, registered
+	// under their own anchor keys (section 21). Without them the files of an
+	// installed dependency keep the absolute path of a package cache, which is
+	// neither portable nor stable between machines.
+	Packages []PackageAnchor
+
 	// CompileFlags are compiler command-line fragments, scanned for --sysroot.
 	CompileFlags []string
 
 	// Redact replaces unanchored paths with a digest (section 7.5).
 	Redact bool
+}
+
+// PackageAnchor is one package root and the key it is registered under.
+type PackageAnchor struct {
+	Key  string
+	Root string
 }
 
 // Result is the assembled registry plus what classification needs.
@@ -116,8 +128,20 @@ func Assemble(options Options) (*Result, error) {
 		}
 	}
 
-	// 3. and 4. Package-manager and SDK adapters do not exist yet; when they
-	//    do they register here, before toolchain probing.
+	// 3. and 4. Package-manager and SDK adapters. They come after the explicit
+	//    configuration, which stays the highest authority for naming, and
+	//    before toolchain probing.
+	for _, pkg := range sortedPackages(options.Packages) {
+		if pkg.Key == "" || pkg.Root == "" {
+			continue
+		}
+		if err := pathmodel.ValidateAnchorKey(pkg.Key); err != nil {
+			return nil, err
+		}
+		if _, err := registry.Register(pkg.Key, pkg.Root, "package manager"); err != nil {
+			return nil, err
+		}
+	}
 
 	// 5. Toolchain installation roots.
 	if options.Model != nil {
@@ -339,5 +363,18 @@ func dedupeSorted(values []string) []string {
 		previous = value
 		out = append(out, value)
 	}
+	return out
+}
+
+// sortedPackages fixes the registration order, because section 7.4 says an
+// earlier source keeps a directory an later one also claims.
+func sortedPackages(packages []PackageAnchor) []PackageAnchor {
+	out := append([]PackageAnchor{}, packages...)
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].Key != out[j].Key {
+			return out[i].Key < out[j].Key
+		}
+		return out[i].Root < out[j].Root
+	})
 	return out
 }
