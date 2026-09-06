@@ -2,7 +2,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "version": 1,
-  "serialNumber": "urn:uuid:d9cc60d0-c74a-51f1-973a-0e8781971607",
+  "serialNumber": "urn:uuid:cf7f0abc-9793-5341-b7b2-0e7d7563c681",
   "metadata": {
     "tools": [
       {
@@ -119,7 +119,7 @@
         },
         {
           "name": "sbomb:component:scope",
-          "value": "build"
+          "value": "project"
         },
         {
           "name": "sbomb:path:canonical",
@@ -149,6 +149,10 @@
           "value": "project"
         },
         {
+          "name": "sbomb:evidence:header:class",
+          "value": "project-header"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "project:crypto.h"
         }
@@ -173,7 +177,7 @@
         },
         {
           "name": "sbomb:component:scope",
-          "value": "build"
+          "value": "project"
         },
         {
           "name": "sbomb:path:canonical",

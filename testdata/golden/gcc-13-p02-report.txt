@@ -5,7 +5,7 @@ configuration:         ../../testdata/config/p02-full.json
 build directory:       /__fixture_build__
 generator:             Ninja
 build configuration:   Debug
-adapters:              depfiles, linker-depfile, linker-map, resolver
+adapters:              binfmt, depfiles, linker-depfile, linker-map, resolver
 reproducible:          true
 
 == Deliverable ==
@@ -51,6 +51,9 @@ evidence edges:        36
   license:             -
   detected by:         -
   files:               1
+
+== Header narrowing ==
+headers excluded by DWARF narrowing: 0
 
 == Unresolved ==
 MISSING_COMPONENT_HASH: 1
@@ -128,7 +131,7 @@ project:crypto.c
   <- [source-mapping | derived | high | ninja-buildgraph:object-source-mapping] build:CMakeFiles/crypto.dir/crypto.c.o
 project:crypto.h
   <- [link | linked | high | gnu-ld:app.map] artifact:build:app
-  <- [header-dependency | derived | medium | depfile] build:CMakeFiles/app.dir/main.c.o
+  <- [header-dependency | derived | high | debug-info+depfile] build:CMakeFiles/app.dir/main.c.o
 project:main.c
   <- [link | linked | high | gnu-ld:app.map] artifact:build:app
   <- [source-mapping | derived | high | ninja-buildgraph:object-source-mapping] build:CMakeFiles/app.dir/main.c.o

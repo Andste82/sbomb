@@ -2,6 +2,49 @@
 
 ## Unreleased
 
+### Header evidence in full
+
+- DWARF line tables are the primary header source and dependency files the
+  fallback, selected by `--header-evidence` / `policy.headerEvidence` in the
+  three modes of section 4.4. Headers that DWARF narrowing removes are counted
+  per component in the review report and listed by `--report-chains all`, so
+  the narrowing is auditable instead of silent.
+- Headers are classified into the seven classes of section 14.4 using the
+  implicit include directories the toolchain reports through `toolchains-v1`,
+  not a hardcoded path list. An unclassifiable header is included and flagged.
+- Unity builds are detected and their constituent sources recovered by parsing
+  the generated aggregation file's `#include` directives, which section 17.1
+  permits explicitly, with the dependency file as fallback
+  (`UNITY_SOURCE_UNRESOLVED` when neither works).
+- Precompiled headers are handled per section 14.5: the aggregation header and
+  its source are transient build artifacts, headers the build forces in are
+  annotated `sbomb:evidence:header:viaPch` and carry medium confidence, and
+  `--pch-headers=exclude` removes those that no compilation unit shows using,
+  reporting `PCH_HEADERS_EXCLUDED` with a count.
+- Link-time optimization downgrades object-to-source confidence by one level
+  with reason `lto` (section 17.3), recorded in `attributes.confidenceDowngrades`
+  as section 8.7 requires. `LTO_ATTRIBUTION_DEGRADED` is emitted when no debug
+  information is available to attribute the result.
+- `--section-garbage-collection` acts: `annotate` marks a fully discarded
+  object `sbomb:evidence:link:fullyDiscarded` and downgrades its confidence,
+  `exclude` removes it and reports `SECTION_GC_EXCLUDED`. An object counts as
+  fully discarded only when the evidence enumerates both retained and discarded
+  sections, so partial information can never remove a file.
+
+#### Defects this uncovered
+
+- The DWARF adapter had never produced a single header. It walked line
+  *entries* and recorded their file, but a header that contributes only
+  declarations produces no line entry; section 11.4 asks for the line-table
+  *file table*, which does name it. The adapter was also not reachable from the
+  binary at all.
+- `ScopeOfPath` was being handed canonical identities instead of paths in the
+  node-materialization path, which re-anchored `project:crypto.c` against the
+  build root and recorded its scope as `build`. Visible in the Makefiles golden,
+  where two project sources carried `sbomb:component:scope: build`.
+- The fixture corpus never harvested the generated unity and precompiled-header
+  files, so neither construct could be tested against real generator output.
+
 ### The policy model does its job
 
 - All 27 options of section 33.1 exist and can be set from the configuration

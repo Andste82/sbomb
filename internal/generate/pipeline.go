@@ -13,6 +13,7 @@ import (
 	"github.com/example/sbomb/internal/anchors"
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/evidence"
+	"github.com/example/sbomb/internal/headers"
 	"github.com/example/sbomb/internal/inventory"
 	"github.com/example/sbomb/internal/policy"
 )
@@ -26,13 +27,21 @@ type compileEvidence struct {
 	objectHeaders map[string][]string
 	// strategy records which adapter produced each object mapping.
 	strategy map[string]string
+	// objectForcedIncludes maps an object to the headers its compile command
+	// forced in with -include / /FI. This is how a precompiled header reaches
+	// a translation unit whose dependency file never mentions it (section 14.5).
+	objectForcedIncludes map[string][]string
+	// lto records that a compile command asked for link-time optimization
+	// (section 17.2).
+	lto bool
 }
 
 func newCompileEvidence() *compileEvidence {
 	return &compileEvidence{
-		objectSources: map[string]string{},
-		objectHeaders: map[string][]string{},
-		strategy:      map[string]string{},
+		objectSources:        map[string]string{},
+		objectHeaders:        map[string][]string{},
+		strategy:             map[string]string{},
+		objectForcedIncludes: map[string][]string{},
 	}
 }
 
@@ -87,6 +96,14 @@ func collectCompileEvidence(buildDir string, commands []compiledb.Command, logge
 		if command.Output != "" {
 			evidence.addSource(command.Output, command.File, "compile-commands-json")
 		}
+		if hasLTOFlag(command.Arguments) {
+			evidence.lto = true
+		}
+		if command.Output != "" {
+			if forced := forcedIncludes(command.Arguments); len(forced) > 0 {
+				evidence.objectForcedIncludes[command.Output] = forced
+			}
+		}
 	}
 
 	// The Makefiles generator supplies both mappings and header dependencies.
@@ -112,6 +129,20 @@ func collectCompileEvidence(buildDir string, commands []compiledb.Command, logge
 	return evidence
 }
 
+// graphOutcome carries what the graph construction learned beyond the graph
+// itself: which translation units debug information covered, what DWARF
+// narrowing removed, and which headers exist only behind a precompiled header.
+type graphOutcome struct {
+	artifactIDs []domain.NodeID
+	dwarf       *dwarfEvidence
+	narrowed    []narrowedHeader
+	pchOnly     map[string]bool
+	// excludedByGC are the objects removed because every section they
+	// contributed was discarded (section 4.5, sectionGarbageCollection=exclude).
+	excludedByGC map[string]bool
+	findings     []domain.Finding
+}
+
 // buildEvidenceGraph assembles the whole graph for one run: deliverables, link
 // evidence, object-to-source mappings and header dependencies.
 func buildEvidenceGraph(
@@ -121,8 +152,9 @@ func buildEvidenceGraph(
 	compile *compileEvidence,
 	buildDir string,
 	mapPath, depfilePath string,
+	cfg policy.Config,
 	logger *Logger,
-) []domain.NodeID {
+) graphOutcome {
 	b.loadNinjaArchiveInputs(buildDir)
 	// A Makefiles target records both the objects it archives and the command
 	// line that produced its artifact, in link.txt.
@@ -190,7 +222,7 @@ func buildEvidenceGraph(
 		if isHeaderPath(canonical) {
 			kind = domain.NodeHeader
 		}
-		_, scope := b.anchors.ScopeOfPath(b.logicalBuild, canonical)
+		scope := b.scopeOfCanonical(canonical)
 		graph.AddNode(domain.Node{
 			ID:         edge.To,
 			Kind:       kind,
@@ -199,32 +231,232 @@ func buildEvidenceGraph(
 		})
 	}
 
-	// Header dependencies hang off the object whose compilation read them.
+	// Section 17.1: a unity translation unit stands for several sources. Its
+	// object maps to the generated aggregation file, which is not what belongs
+	// in the bill of materials.
+	unityFindings := addUnityMappings(graph, b, compile, logger)
+
+	// Debug information says which translation units are really in the
+	// artifact and which headers reached them (section 11.4). It is read after
+	// the object-to-source mapping, because a compilation unit is identified by
+	// its source and has to be attached to the object it produced.
+	dwarf := inspectArtifacts(b, deliverables, logger)
+	outcome := graphOutcome{artifactIDs: artifactIDs, dwarf: dwarf, findings: dwarf.Findings}
+	outcome.findings = append(outcome.findings, unityFindings...)
+
+	attachments := headerAttachments(graph, b, compile, dwarf)
+	resolution := resolveHeaderEvidence(attachments, cfg.HeaderEvidence)
+	outcome.narrowed = resolution.narrowed
+	outcome.pchOnly = resolution.pchOnly
+	outcome.findings = append(outcome.findings, resolution.findings...)
+
+	excludePCH := cfg.PCHHeaders == "exclude"
+	var excludedPCH int
+	for _, edge := range resolution.edges {
+		if edge.viaPCH && resolution.pchOnly[edge.header] && excludePCH {
+			excludedPCH++
+			continue
+		}
+		headerCanonical := edge.header
+		scope := b.scopeOfCanonical(headerCanonical)
+		graph.AddNode(domain.Node{
+			ID:   domain.NodeID(headerCanonical),
+			Kind: domain.NodeHeader,
+			File: &domain.FileID{Anchor: anchorOf(headerCanonical), RelPath: relOf(headerCanonical)},
+			Attributes: map[string]string{
+				"scope": string(scope),
+				// Section 14.4: the class, not the anchor, decides whether a
+				// header belongs in the SBOM.
+				"headerClass": string(b.classify(headerCanonical, scope == anchors.ScopeBuild)),
+			},
+		})
+		attributes := map[string]string{}
+		if edge.viaPCH {
+			// The property records how the header reached the unit, which is
+			// also what justifies the lower confidence (section 14.5).
+			attributes["sbomb:evidence:header:viaPch"] = "true"
+		}
+		strength := domain.Strength("derived")
+		if attributes["sbomb:evidence:header:viaPch"] == "true" && cfg.PCHHeaders == "annotate-only" {
+			// The header stays, but the annotation has to be visible to the
+			// weak-evidence gate rather than only in a property.
+			strength = domain.Strength("weak")
+		}
+		graph.AddEdge(domain.Edge{
+			From: domain.NodeID(edge.object), To: domain.NodeID(headerCanonical),
+			Type: "header-dependency", Strength: strength, Confidence: edge.confidence,
+			Source: edge.source, Adapter: adapterForHeaderSource(edge.source),
+			Attributes: attributes,
+		})
+	}
+	if excludedPCH > 0 {
+		logger.Info("Excluded %d header(s) reached only through the precompiled header", excludedPCH)
+		outcome.findings = append(outcome.findings, pchExcludedFinding(excludedPCH, b.logicalBuild))
+	}
+	if len(resolution.narrowed) > 0 {
+		logger.Info("Headers excluded by DWARF narrowing: %d", len(resolution.narrowed))
+	}
+
+	// Section 17.3: LTO degrades symbol- and section-level attribution, so the
+	// object-to-source edges keep their strategy but lose one confidence level.
+	if dwarf.LTO || compile.lto {
+		affected := graph.Downgrade("lto", func(edge domain.Edge) bool { return edge.Type == "source-mapping" })
+		logger.Info("Link-time optimization detected: %d source mapping(s) downgraded", affected)
+		if !dwarf.available() {
+			outcome.findings = append(outcome.findings, domain.Finding{
+				ID: "LTO_ATTRIBUTION_DEGRADED", Severity: domain.SeverityWarning,
+				Subject:     domain.Subject{Kind: "build", Ref: b.logicalBuild},
+				Message:     "the build used link-time optimization and no debug information is available to attribute the result",
+				Remediation: "Build with -g, or with -ffat-lto-objects, so that object-level attribution survives.",
+			})
+		}
+	}
+
+	outcome.excludedByGC = applySectionGC(graph, b, cfg, logger)
+	for canonical := range outcome.excludedByGC {
+		outcome.findings = append(outcome.findings, domain.Finding{
+			ID: "SECTION_GC_EXCLUDED", Severity: domain.SeverityInfo,
+			Subject: domain.Subject{Kind: "file", Ref: canonical},
+			Message: "every section this object contributed was discarded by the linker",
+		})
+	}
+
+	return outcome
+}
+
+// applySectionGC implements section 4.5. An object counts as fully discarded
+// only when the evidence enumerates both what was kept and what was dropped and
+// the object appears solely among the dropped; partial information must never
+// remove a file.
+func applySectionGC(graph *evidence.Graph, b *builder, cfg policy.Config, logger *Logger) map[string]bool {
+	if cfg.SectionGarbageCollection == "" || cfg.SectionGarbageCollection == "ignore" {
+		return nil
+	}
+	if len(b.discardedObjects) == 0 || len(b.retainedObjects) == 0 {
+		return nil
+	}
+	excluded := map[string]bool{}
+	for canonical := range b.discardedObjects {
+		if b.retainedObjects[canonical] {
+			continue
+		}
+		if _, known := graph.Node(domain.NodeID(canonical)); !known {
+			continue
+		}
+		switch cfg.SectionGarbageCollection {
+		case "annotate":
+			match := func(edge domain.Edge) bool { return string(edge.To) == canonical && edge.Type == "link" }
+			graph.SetEdgeAttribute("sbomb:evidence:link:fullyDiscarded", "true", match)
+			graph.Downgrade("section-gc", match)
+			logger.Debug("Object '%s' was fully discarded; annotated", canonical)
+		case "exclude":
+			excluded[canonical] = true
+			logger.Debug("Object '%s' was fully discarded; excluded", canonical)
+		}
+	}
+	return excluded
+}
+
+// headerAttachments joins the two header sources onto the objects they belong
+// to. A compilation unit is named by its source, so the object-to-source
+// mapping is what connects debug information to the graph.
+func headerAttachments(graph *evidence.Graph, b *builder, compile *compileEvidence, dwarf *dwarfEvidence) []headerAttachment {
+	objectForSource := map[string]string{}
+	sourceForObject := map[string]string{}
+	for object, source := range compile.objectSources {
+		objectCanonical, _ := b.identify(object)
+		sourceCanonical, _ := b.identify(source)
+		sourceForObject[objectCanonical] = sourceCanonical
+		if _, taken := objectForSource[sourceCanonical]; !taken {
+			objectForSource[sourceCanonical] = objectCanonical
+		}
+	}
+
+	byObject := map[string]*headerAttachment{}
+	attach := func(objectCanonical string) *headerAttachment {
+		if existing, known := byObject[objectCanonical]; known {
+			return existing
+		}
+		source := sourceForObject[objectCanonical]
+		created := &headerAttachment{object: objectCanonical, source: source}
+		byObject[objectCanonical] = created
+		return created
+	}
+
 	for object, headers := range compile.objectHeaders {
 		objectCanonical, _ := b.identify(object)
 		if _, known := graph.Node(domain.NodeID(objectCanonical)); !known {
 			continue
 		}
+		entry := attach(objectCanonical)
 		for _, header := range dedupe(append([]string{}, headers...)) {
 			if !isHeaderPath(header) {
 				continue
 			}
-			headerCanonical, scope := b.identify(header)
-			graph.AddNode(domain.Node{
-				ID:         domain.NodeID(headerCanonical),
-				Kind:       domain.NodeHeader,
-				File:       &domain.FileID{Anchor: anchorOf(headerCanonical), RelPath: relOf(headerCanonical)},
-				Attributes: map[string]string{"scope": string(scope)},
-			})
-			graph.AddEdge(domain.Edge{
-				From: domain.NodeID(objectCanonical), To: domain.NodeID(headerCanonical),
-				Type: "header-dependency", Strength: "derived", Confidence: domain.ConfidenceMedium,
-				Source: "depfile", Adapter: "depfiles",
-			})
+			headerCanonical, _ := b.identify(header)
+			entry.depfileHeaders = append(entry.depfileHeaders, headerCanonical)
 		}
 	}
 
-	return artifactIDs
+	// Section 14.5: a precompiled header reaches a translation unit through the
+	// compile command, not through the dependency file. The generated
+	// aggregation header is the only evidence of which headers it carries.
+	for object, forced := range compile.objectForcedIncludes {
+		objectCanonical, _ := b.identify(object)
+		if _, known := graph.Node(domain.NodeID(objectCanonical)); !known {
+			continue
+		}
+		entry := attach(objectCanonical)
+		for _, include := range forced {
+			includeCanonical, _ := b.identify(include)
+			if !isPCHArtifact(includeCanonical) {
+				continue
+			}
+			for _, included := range pchIncludes(b.physical[includeCanonical]) {
+				headerCanonical, _ := b.identify(included)
+				entry.pchHeaders = append(entry.pchHeaders, headerCanonical)
+			}
+		}
+	}
+
+	for source, headers := range dwarf.headersBySource {
+		objectCanonical, known := objectForSource[source]
+		if !known {
+			continue
+		}
+		if _, inGraph := graph.Node(domain.NodeID(objectCanonical)); !inGraph {
+			continue
+		}
+		entry := attach(objectCanonical)
+		for _, header := range headers {
+			if !isHeaderPath(header) {
+				continue
+			}
+			entry.dwarfHeaders = append(entry.dwarfHeaders, header)
+		}
+		// Coverage is decided on the header subset, not on the file table as a
+		// whole. A unity unit's file table, for instance, names the aggregated
+		// sources and no header at all; narrowing the dependency file against
+		// that would delete every header the unit demonstrably read.
+		entry.dwarfCovered = len(entry.dwarfHeaders) > 0
+	}
+
+	out := make([]headerAttachment, 0, len(byObject))
+	for _, entry := range byObject {
+		out = append(out, *entry)
+	}
+	return out
+}
+
+func adapterForHeaderSource(source string) string {
+	switch {
+	case strings.HasPrefix(source, "debug-info"):
+		return "binfmt"
+	case source == "pch":
+		return "pch"
+	default:
+		return "depfiles"
+	}
 }
 
 func collectObjects(paths []string) []string {
@@ -263,7 +495,18 @@ func usedFiles(graph *evidence.Graph, artifactIDs []domain.NodeID) []domain.Node
 // only, and never becomes a file component.
 func representInSBOM(graph *evidence.Graph, node domain.Node) (bool, string) {
 	switch node.Kind {
-	case domain.NodeSource, domain.NodeHeader:
+	case domain.NodeSource:
+		// Section 14.5: the precompiled-header aggregation source and its
+		// object are transient build artifacts. The headers it pulls in are
+		// what belongs in the bill of materials, not the generated glue.
+		if isPCHArtifact(string(node.ID)) {
+			return false, ""
+		}
+		return true, ""
+	case domain.NodeHeader:
+		if isPCHArtifact(string(node.ID)) {
+			return false, ""
+		}
 		return true, ""
 	case domain.NodeObject:
 		// An object is transient when it lives in the build tree and its
@@ -416,20 +659,36 @@ func scopeOfNode(node domain.Node, anchorResult *anchors.Result) anchors.Scope {
 // SBOM. The defaults of section 24.1 apply unless a scope option of section
 // 33.1 says otherwise.
 func includedByPolicy(scope anchors.Scope, node domain.Node, cfg policy.Config) bool {
+	// A header is decided by its class (section 14.4), not by its anchor: a
+	// vendored dependency and the project it sits in share an anchor, and a
+	// toolchain installation holds both compiler and distribution headers.
+	if node.Kind == domain.NodeHeader {
+		class := headerClassOf(node)
+		if headers.IncludedByDefault(class) {
+			return true
+		}
+		return cfg.IncludeSystemHeaders
+	}
 	switch scope {
 	case anchors.ScopeSystem:
-		if node.Kind == domain.NodeHeader {
-			return cfg.IncludeSystemHeaders
-		}
 		return cfg.SystemLibraries == "main-sbom" || cfg.SystemLibraries == "separate-component"
 	case anchors.ScopeToolchain:
-		if node.Kind == domain.NodeHeader {
-			return cfg.IncludeSystemHeaders
-		}
 		return cfg.IncludeToolchainRuntime == "main-sbom" || cfg.IncludeToolchainRuntime == "separate-component"
 	default:
 		return anchors.IncludedByDefault(scope)
 	}
+}
+
+// headerClassOf reads the class recorded on a header node, defaulting to
+// unknown so that an unclassified header is included and flagged rather than
+// silently dropped.
+func headerClassOf(node domain.Node) headers.Class {
+	if node.Attributes != nil {
+		if value := node.Attributes["headerClass"]; value != "" {
+			return headers.Class(value)
+		}
+	}
+	return headers.ClassUnknown
 }
 
 // evidenceQualityFindings reports what the evidence could not establish, so
@@ -454,7 +713,7 @@ func evidenceQualityFindings(graph *evidence.Graph, used []domain.Node, anchorRe
 		switch node.Kind {
 		case domain.NodeHeader:
 			// Section 14.4: an unclassifiable header is included and flagged.
-			if scope == anchors.ScopeUnknown {
+			if headerClassOf(node) == headers.ClassUnknown {
 				findings = append(findings, domain.Finding{
 					ID: "UNKNOWN_HEADER_CLASS", Severity: domain.SeverityInfo,
 					Subject: domain.Subject{Kind: "file", Ref: string(node.ID)},
@@ -515,4 +774,96 @@ func evidenceQualityFindings(graph *evidence.Graph, used []domain.Node, anchorRe
 		}
 	}
 	return findings
+}
+
+// hasLTOFlag reports link-time optimization from the compile flags
+// (section 17.2). The ELF section scan of the binary adapter is the other
+// source; either is sufficient.
+func hasLTOFlag(arguments []string) bool {
+	for _, argument := range arguments {
+		switch {
+		case argument == "-flto", strings.HasPrefix(argument, "-flto="):
+			return true
+		case argument == "/GL", argument == "/LTCG", strings.HasPrefix(argument, "/LTCG:"):
+			return true
+		}
+	}
+	return false
+}
+
+// addUnityMappings recovers the constituent sources of every unity translation
+// unit and records them as source mappings (section 17.1). The generated
+// aggregation file itself stays out of the bill of materials: it is build glue,
+// not a source the product is made of.
+func addUnityMappings(graph *evidence.Graph, b *builder, compile *compileEvidence, logger *Logger) []domain.Finding {
+	findings := []domain.Finding{}
+	objects := make([]string, 0, len(compile.objectSources))
+	for object := range compile.objectSources {
+		objects = append(objects, object)
+	}
+	sort.Strings(objects)
+
+	for _, object := range objects {
+		source := compile.objectSources[object]
+		if !looksLikeUnityPath(source) {
+			continue
+		}
+		objectCanonical, _ := b.identify(object)
+		sourceCanonical, _ := b.identify(source)
+		if _, known := graph.Node(domain.NodeID(objectCanonical)); !known {
+			continue
+		}
+		dependencies := make([]string, 0, len(compile.objectHeaders[object]))
+		for _, dependency := range compile.objectHeaders[object] {
+			canonical, _ := b.identify(dependency)
+			dependencies = append(dependencies, canonical)
+		}
+		tu := resolveUnityTU(b, objectCanonical, sourceCanonical, dependencies, b.physical[sourceCanonical])
+		if len(tu.constituents) == 0 {
+			logger.Info("Unity translation unit '%s': no strategy recovered its sources", sourceCanonical)
+			findings = append(findings, unityUnresolvedFinding(objectCanonical))
+			continue
+		}
+		for _, constituent := range dedupe(tu.constituents) {
+			graph.AddNode(domain.Node{
+				ID:         domain.NodeID(constituent),
+				Kind:       domain.NodeSource,
+				File:       &domain.FileID{Anchor: anchorOf(constituent), RelPath: relOf(constituent)},
+				Attributes: map[string]string{"scope": string(b.scopeOfCanonical(constituent))},
+			})
+			graph.AddEdge(domain.Edge{
+				From: domain.NodeID(objectCanonical), To: domain.NodeID(constituent),
+				Type: "source-mapping", Strength: "derived", Confidence: tu.confidence,
+				Source: tu.strategy, Adapter: "unity",
+			})
+		}
+		logger.Info("Unity translation unit '%s': %d source(s) recovered by %s",
+			sourceCanonical, len(tu.constituents), tu.strategy)
+	}
+	return findings
+}
+
+// forcedIncludes extracts the headers a compile command forces into the
+// translation unit. CMake uses this to attach a precompiled header, and it is
+// the only per-unit evidence that the PCH applies to that unit: the dependency
+// file of a GCC build does not name the aggregation header at all.
+func forcedIncludes(arguments []string) []string {
+	out := make([]string, 0)
+	for index := 0; index < len(arguments); index++ {
+		argument := arguments[index]
+		switch {
+		case argument == "-include", argument == "-include-pch":
+			if index+1 < len(arguments) {
+				out = append(out, arguments[index+1])
+				index++
+			}
+		case strings.HasPrefix(argument, "-include="):
+			out = append(out, strings.TrimPrefix(argument, "-include="))
+		case strings.HasPrefix(argument, "/FI"), strings.HasPrefix(argument, "-FI"):
+			if value := argument[3:]; value != "" {
+				out = append(out, value)
+			}
+		}
+	}
+	return out
 }

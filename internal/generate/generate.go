@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/example/sbomb/internal/adapters/cmakeapi"
@@ -19,6 +20,7 @@ import (
 	"github.com/example/sbomb/internal/cyclonedx"
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/evidence"
+	"github.com/example/sbomb/internal/headers"
 	"github.com/example/sbomb/internal/inventory"
 	"github.com/example/sbomb/internal/license"
 	"github.com/example/sbomb/internal/pathmodel"
@@ -38,6 +40,19 @@ type Result struct {
 	// Adapters names the evidence sources that contributed, for the review
 	// report (section 34 point 1).
 	Adapters []string
+	// HeaderNarrowing counts, per component, the headers that DWARF narrowing
+	// removed. Section 4.4 requires the narrowing to be auditable rather than
+	// silent, so the count is carried out of the run even though the headers
+	// themselves are not in the document.
+	HeaderNarrowing []NarrowingCount
+}
+
+// NarrowingCount is one component's share of the headers DWARF narrowing
+// removed, with the headers themselves for --report-chains all.
+type NarrowingCount struct {
+	Component string
+	Count     int
+	Headers   []string
 }
 
 // Run assembles the currently available build evidence into one deterministic
@@ -201,13 +216,16 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 
 	// 5. Build the evidence graph from link and compile evidence.
 	b := newBuilder(graph, anchorResult, buildRootForIdentity, buildDir, logger)
+	b.headerClass = headers.New(anchorResult.ImplicitIncludeDirs, toolchainRoots(anchorResult), componentRoots(cfg))
 	compile := collectCompileEvidence(buildDir, commands, logger)
 	mapPath, depfilePath := "", ""
 	if len(cfg.Artifacts) > 0 {
 		mapPath, depfilePath = cfg.Artifacts[0].Map, cfg.Artifacts[0].LinkDepfile
 	}
-	artifactIDs := buildEvidenceGraph(graph, b, deliverables, compile, buildDir, mapPath, depfilePath, logger)
+	outcome := buildEvidenceGraph(graph, b, deliverables, compile, buildDir, mapPath, depfilePath, options.Policy, logger)
+	artifactIDs := outcome.artifactIDs
 	findings = append(findings, b.Findings()...)
+	findings = append(findings, outcome.findings...)
 	logger.Info("Evidence graph: %d node(s), %d edge(s) [%s]", len(graph.Nodes()), len(graph.Edges()), describeCounts(graph.Nodes()))
 
 	// 6. The reachability filter. This is what makes the output evidence-based
@@ -221,6 +239,10 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	excludedByScope := map[anchors.Scope]int{}
 	used := make([]domain.UsedFile, 0, len(reachable))
 	for _, node := range reachable {
+		if outcome.excludedByGC[string(node.ID)] {
+			logger.Debug("Excluded fully discarded object '%s'", node.ID)
+			continue
+		}
 		scope := scopeOfNode(node, anchorResult)
 		if !includedByPolicy(scope, node, options.Policy) {
 			excludedByScope[scope]++
@@ -240,10 +262,16 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		}
 		canonical := string(node.ID)
 		logger.Trace("Used file: %s (%s, scope %s)", canonical, node.Kind, scope)
+		properties := map[string][]string{"sbomb:component:scope": {string(scope)}}
+		if node.Kind == domain.NodeHeader {
+			// Section 14.4: the class that decided inclusion is part of the
+			// record, so a reviewer can see why a header is here.
+			properties["sbomb:evidence:header:class"] = []string{string(headerClassOf(node))}
+		}
 		used = append(used, domain.UsedFile{
 			ID:         domain.FileID{Anchor: anchorOf(canonical), RelPath: relOf(canonical)},
 			Class:      fileClassOf(node),
-			Properties: map[string][]string{"sbomb:component:scope": {string(scope)}},
+			Properties: properties,
 		})
 	}
 	used = inventory.MergeUsedFiles(used)
@@ -308,6 +336,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		anchorRoots[anchor.Key] = anchor.Root
 	}
 	resolver := newComponentResolver(cfg, b.physical, anchorRoots, logger)
+	narrowing := narrowingByComponent(resolver, outcome.narrowed)
 	document, findings := buildDocument(cfg, resolver, deliverables, used, findings, run)
 	writer, err := sbomwriter.Get("cyclonedx-json", "1.6")
 	if err != nil {
@@ -342,7 +371,10 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	}
 	sort.Strings(adapterNames)
 
-	return Result{Graph: graph, Findings: findings, Document: document, BOM: bom, Adapters: adapterNames}, nil
+	return Result{
+		Graph: graph, Findings: findings, Document: document, BOM: bom,
+		Adapters: adapterNames, HeaderNarrowing: narrowing,
+	}, nil
 }
 
 // addProperty appends a value to a multi-valued property map.
@@ -442,4 +474,63 @@ func buildTimestamp() string {
 		}
 	}
 	return time.Now().UTC().Format(time.RFC3339)
+}
+
+// narrowingByComponent groups the headers DWARF narrowing removed by the
+// component they would have belonged to (section 4.4). Grouping uses the same
+// resolver as the document, so a reviewer sees the count next to the component
+// it concerns rather than one undifferentiated total.
+func narrowingByComponent(resolver *componentResolver, narrowed []narrowedHeader) []NarrowingCount {
+	if len(narrowed) == 0 {
+		return nil
+	}
+	byComponent := map[string][]string{}
+	seen := map[string]bool{}
+	for _, entry := range narrowed {
+		if seen[entry.header] {
+			continue
+		}
+		seen[entry.header] = true
+		file := domain.UsedFile{ID: domain.FileID{Anchor: anchorOf(entry.header), RelPath: relOf(entry.header)}}
+		_, name, _, _, _ := resolver.resolve(file)
+		byComponent[name] = append(byComponent[name], entry.header)
+	}
+	out := make([]NarrowingCount, 0, len(byComponent))
+	for name, headers := range byComponent {
+		sort.Strings(headers)
+		out = append(out, NarrowingCount{Component: name, Count: len(headers), Headers: headers})
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Component < out[j].Component })
+	return out
+}
+
+// toolchainRoots are the installation roots of the registered toolchain
+// anchors. Section 14.4 separates the compiler's own headers from the
+// distribution's, and the anchor root is what marks the boundary.
+func toolchainRoots(result *anchors.Result) []string {
+	roots := make([]string, 0)
+	for _, anchor := range result.Registry.Anchors() {
+		if strings.HasPrefix(string(anchor.Key), "toolchain:") {
+			roots = append(roots, anchor.Root)
+		}
+	}
+	return roots
+}
+
+// componentRoots turns the curated components[] entries into the component
+// roots section 14.4 needs to tell a vendored third-party header apart from a
+// project header that happens to live under the same anchor.
+func componentRoots(cfg config.Config) []headers.ComponentRoot {
+	roots := make([]headers.ComponentRoot, 0, len(cfg.Components))
+	for _, component := range cfg.Components {
+		if component.Path == "" {
+			continue
+		}
+		roots = append(roots, headers.ComponentRoot{
+			Canonical: "project:" + strings.Trim(filepath.ToSlash(component.Path), "/"),
+			SDK:       component.Type == "sdk",
+			External:  component.Type != "sdk",
+		})
+	}
+	return roots
 }

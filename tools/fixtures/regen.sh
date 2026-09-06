@@ -25,7 +25,7 @@ BUILD_ROOT=${SBOMB_FIXTURE_BUILD:-/__fixture_build__}
 # when the corpus is rebuilt against a new toolchain.
 FIXTURE_DATE="2026-09-05"
 
-PROJECTS=(p01-hello p02-static p03-dupnames p04-generated p05-headeronly)
+PROJECTS=(p01-hello p02-static p03-dupnames p04-generated p05-headeronly p06-unity p07-pch)
 
 # name|generator|toolchain file (empty for native)
 TOOLCHAINS=(
@@ -189,6 +189,16 @@ QUERY
                \( -name build.make -o -name link.txt -o -name compiler_depend.make \
                   -o -name 'objects*.rsp' -o -name '*.o.d' \) -type f | sort)
   fi
+
+  # Build-tree sources the compiler consumed. A unity build compiles a
+  # generated aggregation file and a precompiled header aggregates a header
+  # set; both are evidence, and both have to be readable to be parsed
+  # (sections 17.1 and 14.5).
+  while IFS= read -r found; do
+    harvest "$found" "$build_out/${found#"$BUILD_ROOT"/}"
+  done < <(find "$BUILD_ROOT/CMakeFiles" \
+             \( -path '*/Unity/*' -o -name 'cmake_pch*' \) \
+             -type f ! -name '*.gch' ! -name '*.pch' ! -name '*.o' | sort)
 
   # Link and compile artifacts.
   harvest_glob "$BUILD_ROOT/*.map" "$build_out"

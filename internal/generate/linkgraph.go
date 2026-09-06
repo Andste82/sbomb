@@ -13,6 +13,7 @@ import (
 	"github.com/example/sbomb/internal/anchors"
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/evidence"
+	"github.com/example/sbomb/internal/headers"
 )
 
 // linkInput is one file the linker consumed, together with what kind of input
@@ -42,9 +43,19 @@ type builder struct {
 	// physical maps a canonical identity back to a readable path, because
 	// hashing and license detection need the bytes, not the identity.
 	physical map[string]string
+	// headerClass assigns each used header one of the seven classes of
+	// section 14.4, driven by the include directories the toolchain reports.
+	headerClass *headers.Classifier
 	// archiveInputs maps an archive identity to the objects it was built from,
 	// which is how an extracted member is traced back to a build-tree object.
 	archiveInputs map[string][]string
+	// discardedObjects counts the input sections the link evidence reported as
+	// discarded, per object path as recorded (section 4.5).
+	discardedObjects map[string]int
+	// retainedObjects are the objects the link evidence reports as contributing
+	// to the image. Without them, "fully discarded" cannot be decided, and
+	// section 4.5 forbids acting on partial information.
+	retainedObjects map[string]bool
 	// reconstructedLinks holds link command lines recovered from the build
 	// system, keyed by the artifact they produce. This is priority 5 of
 	// section 11.2 and the only link evidence a Makefiles build without map or
@@ -62,6 +73,8 @@ func newBuilder(graph *evidence.Graph, anchorResult *anchors.Result, logicalBuil
 		findings:           []domain.Finding{},
 		physical:           map[string]string{},
 		archiveInputs:      map[string][]string{},
+		discardedObjects:   map[string]int{},
+		retainedObjects:    map[string]bool{},
 		reconstructedLinks: map[string][]string{},
 	}
 }
@@ -88,6 +101,25 @@ func (b *builder) identify(path string) (string, anchors.Scope) {
 		}
 	}
 	return canonical, scope
+}
+
+// scopeOfCanonical reports the origin scope of an identity that has already
+// been resolved. ScopeOfPath must not be used for this: it resolves a *path*,
+// and handing it a canonical identity silently re-anchors the string against
+// the build root, which classifies a toolchain header as build output.
+func (b *builder) scopeOfCanonical(canonical string) anchors.Scope {
+	id := domain.FileID{Anchor: anchorOf(canonical), RelPath: relOf(canonical)}
+	if scope := b.anchors.Scope(id); scope != anchors.ScopeUnknown {
+		return scope
+	}
+	// An unanchored file may still be recognizable as a system path from where
+	// its bytes actually live (section 14.4).
+	if physical := b.physical[canonical]; physical != "" {
+		if _, scope := b.anchors.ScopeOfPath(b.logicalBuild, physical); scope != anchors.ScopeUnknown {
+			return scope
+		}
+	}
+	return anchors.ScopeUnknown
 }
 
 // logicalFor is the inverse of physicalFor: an adapter that resolved a path
@@ -176,6 +208,9 @@ func (b *builder) collectLinkEvidence(deliverable Deliverable, mapPath, depfileP
 					Source:  result.Format + ":" + filepath.Base(path),
 					Adapter: "linker-map",
 				})
+			case mapparser.DiscardedSection:
+				canonical, _ := b.identify(record.Path)
+				b.discardedObjects[canonical]++
 			}
 		}
 		b.logger.Info("Linker map '%s' (%s): %d record(s), %d extracted archive member(s)",
@@ -252,6 +287,10 @@ func readMap(path string) (mapparser.Result, error) {
 // from, so that an unextracted member has no path to the artifact at all --
 // which is exactly what section 12 requires.
 func (b *builder) addLinkEdges(artifactID domain.NodeID, inputs []linkInput) {
+	for _, input := range inputs {
+		canonical, _ := b.identify(input.Path)
+		b.retainedObjects[canonical] = true
+	}
 	for _, input := range inputs {
 		if input.Kind == domain.NodeArchiveMember {
 			b.addArchiveMember(artifactID, input)
@@ -428,4 +467,17 @@ func splitCanonical(canonical string) (string, string) {
 		return canonical, ""
 	}
 	return parts[0] + ":" + rest[0], rest[1]
+}
+
+// classify assigns a header one of the seven classes of section 14.4. Files
+// that are not headers have no class.
+func (b *builder) classify(canonical string, generated bool) headers.Class {
+	if b.headerClass == nil {
+		return headers.ClassUnknown
+	}
+	return b.headerClass.Classify(headers.Input{
+		Canonical: canonical,
+		Physical:  b.physical[canonical],
+		Generated: generated,
+	})
 }

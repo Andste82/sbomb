@@ -7,7 +7,7 @@
 				{
 					"build" : ".",
 					"hasInstallRule" : true,
-					"jsonFile" : "directory-.-Debug-f806a7f0ab99d71d3802.json",
+					"jsonFile" : "directory-.-Debug-7c810562fd0d5fc6afbf.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.20"
@@ -16,9 +16,7 @@
 					"source" : ".",
 					"targetIndexes" : 
 					[
-						0,
-						1,
-						2
+						0
 					]
 				}
 			],
@@ -30,12 +28,10 @@
 					[
 						0
 					],
-					"name" : "p03_dupnames",
+					"name" : "p07_pch",
 					"targetIndexes" : 
 					[
-						0,
-						1,
-						2
+						0
 					]
 				}
 			],
@@ -43,23 +39,9 @@
 			[
 				{
 					"directoryIndex" : 0,
-					"id" : "dup::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-dup-Debug-7b4410e70053d5a43f6b.json",
-					"name" : "dup",
-					"projectIndex" : 0
-				},
-				{
-					"directoryIndex" : 0,
-					"id" : "mod_a::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-mod_a-Debug-8af5e328ab33176509f6.json",
-					"name" : "mod_a",
-					"projectIndex" : 0
-				},
-				{
-					"directoryIndex" : 0,
-					"id" : "mod_b::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-mod_b-Debug-e4808b9448f54d940352.json",
-					"name" : "mod_b",
+					"id" : "pchapp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-pchapp-Debug-c0597caa161771436161.json",
+					"name" : "pchapp",
 					"projectIndex" : 0
 				}
 			]

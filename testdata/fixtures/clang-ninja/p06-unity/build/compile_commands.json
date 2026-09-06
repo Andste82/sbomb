@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/clang -g -o CMakeFiles/unity.dir/Unity/unity_0_c.c.o -c /__fixture_build__/CMakeFiles/unity.dir/Unity/unity_0_c.c",
+  "file": "/__fixture_build__/CMakeFiles/unity.dir/Unity/unity_0_c.c",
+  "output": "CMakeFiles/unity.dir/Unity/unity_0_c.c.o"
+}
+]

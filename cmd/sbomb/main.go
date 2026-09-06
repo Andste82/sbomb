@@ -573,6 +573,8 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 			Findings:   res.Findings,
 			Adapters:   generated.Adapters,
 			Chains:     reportChains,
+
+			HeaderNarrowing: narrowingForReport(generated.HeaderNarrowing),
 		})
 		if strings.EqualFold(reportFormat, "markdown") {
 			text = report.RenderMarkdown(policyConfig.Profile, res.Findings, res.ExitCode)
@@ -693,4 +695,14 @@ func loadEvidenceGraph(buildDir string) (*evidence.Graph, error) {
 		return graph, nil
 	}
 	return nil, fmt.Errorf("no evidence graph found in %s", buildDir)
+}
+
+// narrowingForReport carries the DWARF narrowing counts across the package
+// boundary; the report package must not depend on the generator.
+func narrowingForReport(counts []generate.NarrowingCount) []report.Narrowing {
+	out := make([]report.Narrowing, 0, len(counts))
+	for _, entry := range counts {
+		out = append(out, report.Narrowing{Component: entry.Component, Count: entry.Count, Headers: entry.Headers})
+	}
+	return out
 }

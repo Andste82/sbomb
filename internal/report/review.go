@@ -23,6 +23,18 @@ type ReviewInput struct {
 	// Chains selects how much evidence is rendered: all, unresolved or none
 	// (section 34 point 9).
 	Chains string
+	// HeaderNarrowing reports, per component, how many headers the DWARF
+	// header set excluded that the dependency files had named. Section 4.4
+	// requires this to be visible: narrowing that nobody can audit is
+	// indistinguishable from losing evidence.
+	HeaderNarrowing []Narrowing
+}
+
+// Narrowing is one component's share of the headers DWARF narrowing removed.
+type Narrowing struct {
+	Component string
+	Count     int
+	Headers   []string
 }
 
 // RenderReview produces the deterministic review report of section 34. The
@@ -102,6 +114,21 @@ func RenderReview(in ReviewInput) string {
 		line(&b, "  license", licenseSummary(component))
 		line(&b, "  detected by", valueOrDash(component.DetectedBy))
 		line(&b, "  files", fmt.Sprintf("%d", fileCounts[component.ID]))
+	}
+
+	// 4b. What the DWARF header set excluded (section 4.4).
+	section(&b, "Header narrowing")
+	if len(in.HeaderNarrowing) == 0 {
+		line(&b, "headers excluded by DWARF narrowing", "0")
+	}
+	for _, entry := range in.HeaderNarrowing {
+		fmt.Fprintf(&b, "- %s\n", entry.Component)
+		line(&b, "  headers excluded by DWARF narrowing", fmt.Sprintf("%d", entry.Count))
+		if in.Chains == "all" {
+			for _, header := range entry.Headers {
+				fmt.Fprintf(&b, "    %s\n", header)
+			}
+		}
 	}
 
 	// 5. Unresolved items.

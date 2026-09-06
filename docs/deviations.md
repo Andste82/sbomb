@@ -76,12 +76,76 @@ is met in substance: validation is in-process, pure Go, cgo-free and needs no
 network. The draft named in the specification is simply not the one CycloneDX
 publishes.
 
-## D7 — Grouping components are anchor-derived for now
+## D7 — Four of the eight component-mapping strategies are implemented
 
-Section 19.2 lists eight component-mapping strategies. Only the last one --
-the anchor root itself -- is implemented, so every used file belongs to exactly
-one named component but the names come from anchors rather than from curated
-configuration, package-manager metadata or submodule boundaries. The earlier
-strategies are roadmap phase 4; until then a component carries no version,
-supplier or purl, and `UNKNOWN_VERSION` and `MISSING_SUPPLIER` are not yet
-emitted.
+Section 19.2 lists eight component-mapping strategies. Implemented are the
+curated configuration (1), the nearest directory carrying package metadata (6),
+the anchor root (7) and the `unknown:` fallback with a review flag (8).
+
+Not yet implemented are the package-manager strategies (2-5): Conan, vcpkg, CPM
+and FetchContent. Until they exist, a dependency that a package manager
+installed is named from its anchor or its manifest directory rather than from
+the manager's own metadata, and its version and supplier have to come from
+curated configuration. That is roadmap phase 7.
+
+## D8 — DWARF carries no inclusion depth
+
+Section 14.4 asks for `sbomb:evidence:header:directInclude` "where the source
+distinguishes direct from transitive inclusion (DWARF line table, MSVC
+`/showIncludes` nesting depth)". The DWARF line-table file table does not carry
+inclusion depth: it is a flat list of files, and DWARF 5 adds no depth field.
+
+The property is therefore not emitted from DWARF evidence. It will become
+available with the MSVC `/showIncludes` adapter, whose nesting depth is
+explicit. Asserting directness from a flat list would be a guess, and the
+property would then mean nothing.
+
+## D9 — "DWARF is available for the CU" means it names a header
+
+Section 4.4 narrows the depfile header set against the DWARF set "when DWARF is
+available for the CU". Taken as "the unit has a line program", that rule
+deletes evidence rather than refining it, because toolchains disagree about
+what belongs in the line-table file table:
+
+| Build | Unit | File table |
+|---|---|---|
+| gcc 13.3 | `main.c` | names `crypto.h` |
+| gcc 13.3 | `crypto.c` | names no header, though it includes `crypto.h` |
+| clang 18.1 | either | names only the primary source |
+| gcc 13.3 | unity aggregation | names the three aggregated sources, no header |
+
+A file table that names no header carries no header evidence, so this
+implementation treats such a unit as *not covered*: it falls back to the
+dependency file and emits `HEADER_EVIDENCE_FALLBACK`. Without that reading,
+`p02-static` built with clang loses `crypto.h` entirely -- a project-owned
+header that both the dependency file and the source demonstrably use.
+
+## D10 — The precompiled header set comes from the compile command
+
+Section 14.5 says every translation unit of a target depends on the entire PCH
+header set, but does not say how the set is discovered. With CMake and GCC:
+
+* the dependency file of an ordinary unit does not name `cmake_pch.h` at all;
+* the PCH header set appears only in the dependency information of
+  `cmake_pch.h.gch`, which is not an object and never reaches the linker;
+* `compile_commands.json` records `-include .../cmake_pch.h` for every unit.
+
+The forced-include flag is therefore the per-unit evidence, and the generated
+aggregation header is parsed for its `#include` directives -- the same
+deterministic, execution-free parse section 17.1 permits for unity sources.
+
+"Reached only via the PCH" is decided by asking whether any compilation unit's
+debug information shows the header contributing. A header the build forces in
+and nothing uses appears in every dependency file and in no line table, which is
+exactly the case `pchHeaders=exclude` is meant to remove.
+
+## D11 — `pchHeaders=annotate-only` marks the evidence weak
+
+Section 14.5 gives `pchHeaders` the values `include` (default), `annotate-only`
+and `exclude`, and defines only the last. Both of the others include the
+header, so the difference has to be in the annotation. Under `annotate-only`
+the header-dependency edge is additionally recorded with strength `weak`, which
+makes it visible to `failOnWeakEvidence` without removing anything. Under
+`include` the edge keeps strength `derived` and carries only the
+`sbomb:evidence:header:viaPch` property and the lower confidence that
+section 14.5 prescribes.

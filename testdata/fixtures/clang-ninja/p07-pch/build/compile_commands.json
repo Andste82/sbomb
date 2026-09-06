@@ -1,0 +1,20 @@
+[
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/clang -g -Winvalid-pch -fpch-instantiate-templates -Xclang -emit-pch -Xclang -include -Xclang /__fixture_build__/CMakeFiles/pchapp.dir/cmake_pch.h -x c-header -o CMakeFiles/pchapp.dir/cmake_pch.h.pch -c /__fixture_build__/CMakeFiles/pchapp.dir/cmake_pch.h.c",
+  "file": "/__fixture_build__/CMakeFiles/pchapp.dir/cmake_pch.h.c",
+  "output": "CMakeFiles/pchapp.dir/cmake_pch.h.pch"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/clang -g -Winvalid-pch -Xclang -include-pch -Xclang /__fixture_build__/CMakeFiles/pchapp.dir/cmake_pch.h.pch -Xclang -include -Xclang /__fixture_build__/CMakeFiles/pchapp.dir/cmake_pch.h -o CMakeFiles/pchapp.dir/main.c.o -c /__fixture_src__/main.c",
+  "file": "/__fixture_src__/main.c",
+  "output": "CMakeFiles/pchapp.dir/main.c.o"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/clang -g -Winvalid-pch -Xclang -include-pch -Xclang /__fixture_build__/CMakeFiles/pchapp.dir/cmake_pch.h.pch -Xclang -include -Xclang /__fixture_build__/CMakeFiles/pchapp.dir/cmake_pch.h -o CMakeFiles/pchapp.dir/helper.c.o -c /__fixture_src__/helper.c",
+  "file": "/__fixture_src__/helper.c",
+  "output": "CMakeFiles/pchapp.dir/helper.c.o"
+}
+]

@@ -30,6 +30,21 @@ They are applied before the document is written, and every exclusion they cause
 is counted and reported. No other policy setting may remove anything from the
 SBOM.
 
+## Header evidence
+
+`--header-evidence` chooses which source decides the header set:
+
+| Value | Behaviour |
+|---|---|
+| `dwarf-preferred` (default) | The DWARF line-table file table decides for every compilation unit that names at least one header. Units it does not cover fall back to dependency files and report `HEADER_EVIDENCE_FALLBACK`. |
+| `union` | Both sets are kept. The largest SBOM, and the most conservative. |
+| `depfiles` | Dependency files only. For builds that ship stripped artifacts. |
+
+Under `dwarf-preferred` a header the dependency file names but no compilation
+unit does is excluded. It is never dropped silently: the review report counts
+it per component under `== Header narrowing ==`, and `--report-chains all`
+names every one of them.
+
 ## Waivers
 
 A waiver file suppresses a finding deterministically. A waived finding still

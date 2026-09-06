@@ -392,3 +392,43 @@ func (g *Graph) detectCycle() bool {
 	}
 	return false
 }
+
+// Downgrade applies one confidence downgrade of section 8.7 to every edge the
+// predicate selects and records the reason. Downgrades are cumulative and floor
+// at unknown; the reason list is kept sorted so that two runs of the same build
+// produce the same evidence dump. It returns how many edges were affected.
+func (g *Graph) Downgrade(reason string, match func(domain.Edge) bool) int {
+	if reason == "" || match == nil {
+		return 0
+	}
+	var affected int
+	for _, edge := range g.edges {
+		if !match(*edge) || slices.Contains(edge.Downgrades, reason) {
+			continue
+		}
+		edge.Confidence = edge.Confidence.Downgrade()
+		edge.Downgrades = append(edge.Downgrades, reason)
+		sort.Strings(edge.Downgrades)
+		affected++
+	}
+	return affected
+}
+
+// SetEdgeAttribute records an attribute on every edge the predicate selects.
+func (g *Graph) SetEdgeAttribute(name, value string, match func(domain.Edge) bool) int {
+	if name == "" || match == nil {
+		return 0
+	}
+	var affected int
+	for _, edge := range g.edges {
+		if !match(*edge) {
+			continue
+		}
+		if edge.Attributes == nil {
+			edge.Attributes = map[string]string{}
+		}
+		edge.Attributes[name] = value
+		affected++
+	}
+	return affected
+}

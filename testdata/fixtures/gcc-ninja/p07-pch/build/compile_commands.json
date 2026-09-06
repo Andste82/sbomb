@@ -1,0 +1,20 @@
+[
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/cc -g -Winvalid-pch -x c-header -include /__fixture_build__/CMakeFiles/pchapp.dir/cmake_pch.h -o CMakeFiles/pchapp.dir/cmake_pch.h.gch -c /__fixture_build__/CMakeFiles/pchapp.dir/cmake_pch.h.c",
+  "file": "/__fixture_build__/CMakeFiles/pchapp.dir/cmake_pch.h.c",
+  "output": "CMakeFiles/pchapp.dir/cmake_pch.h.gch"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/cc -g -Winvalid-pch -include /__fixture_build__/CMakeFiles/pchapp.dir/cmake_pch.h -o CMakeFiles/pchapp.dir/main.c.o -c /__fixture_src__/main.c",
+  "file": "/__fixture_src__/main.c",
+  "output": "CMakeFiles/pchapp.dir/main.c.o"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/cc -g -Winvalid-pch -include /__fixture_build__/CMakeFiles/pchapp.dir/cmake_pch.h -o CMakeFiles/pchapp.dir/helper.c.o -c /__fixture_src__/helper.c",
+  "file": "/__fixture_src__/helper.c",
+  "output": "CMakeFiles/pchapp.dir/helper.c.o"
+}
+]

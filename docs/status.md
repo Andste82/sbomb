@@ -61,6 +61,13 @@
   are applied before output, as section 33.3 requires, and toolchain and system
   components hang under a synthetic `build-environment` component. The review
   report has the nine sections of section 34.
+- **Header evidence in full (roadmap phase 6).** DWARF line tables are the
+  primary header source, dependency files the fallback, selected by
+  `--header-evidence` in the three modes of section 4.4; narrowing is counted
+  per component in the review report. Headers are classified into the seven
+  classes of section 14.4 from the implicit include directories the toolchain
+  reports. Precompiled headers, unity builds, LTO confidence downgrades and
+  section garbage collection are handled (sections 14.5, 17.1, 17.3, 4.5).
 
 ## Known Gaps
 
@@ -71,16 +78,21 @@
 - **Introspection is not implemented.** Section 9.2 allows a fixed allowlist
   of commands behind `--allow-introspection`; without it, git-derived versions,
   `ninja -t deps` and toolchain probing are unavailable. Roadmap phase 7.
-- **DWARF evidence is unused.** Section 11.4 makes it the primary header
-  source and a strong object-to-source strategy; the adapter exists and is
-  tested but is not called. Roadmap phase 6.
+- **DWARF is not yet an object-to-source strategy.** It is wired as the primary
+  header source (section 11.4 point 2), but strategy 6 of section 13.2 -- the
+  compilation-unit name of an object that still carries debug info -- is not
+  used, because the earlier strategies resolve every object in the corpus.
+- **`sbomb:evidence:header:directInclude` is never set.** DWARF carries no
+  inclusion depth; see deviation D8.
 
 ## Next Work
 
 The critical path is complete: the tool produces an evidence-based, validated,
 CRA-field-complete SBOM and gates on it. What remains adds coverage and depth.
 
-Roadmap phase 6: header evidence in full. DWARF line tables as the primary
-source with depfiles as the fallback (section 4.4), the seven header classes of
-section 14.4, and the special cases -- precompiled headers, unity builds, LTO
-confidence, section garbage collection.
+Roadmap phase 7: adapter breadth. Package managers (Conan, FetchContent, vcpkg,
+CPM) fill strategies 2 through 5 of section 19.2 and supply version, supplier
+and licence without curated configuration. `internal/exec` with the allowlist of
+section 9.2 is the prerequisite for git-derived versions, `ninja -t deps` and
+toolchain probing. Then response-file expansion (section 9.3), packaging and
+images (section 18), and the ESP-IDF adapter.

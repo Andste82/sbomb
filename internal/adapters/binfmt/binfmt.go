@@ -31,11 +31,16 @@ type FileReference struct {
 }
 
 type CompilationUnit struct {
-	Name      string
-	CompDir   string
-	Source    string
-	Headers   []FileReference
+	Name    string
+	CompDir string
+	Source  string
+	Headers []FileReference
+	// DebugInfo says the compilation unit was found in the debug information.
 	DebugInfo bool
+	// LineTable says the unit carried a line program. Without one the unit
+	// contributes no header evidence, which section 4.4 must distinguish from
+	// a unit that genuinely included nothing.
+	LineTable bool
 }
 
 type Result struct {
@@ -143,26 +148,7 @@ func compilationUnits(data *dwarf.Data) []CompilationUnit {
 		name, _ := entry.Val(dwarf.AttrName).(string)
 		compDir, _ := entry.Val(dwarf.AttrCompDir).(string)
 		unit := CompilationUnit{Name: name, CompDir: compDir, Source: resolvePath(compDir, name), DebugInfo: true}
-		lineReader, err := data.LineReader(entry)
-		if err == nil {
-			seen := map[string]bool{}
-			for {
-				var line dwarf.LineEntry
-				if err := lineReader.Next(&line); err != nil {
-					break
-				}
-				if line.File == nil {
-					continue
-				}
-				path := resolvePath(compDir, line.File.Name)
-				if path == "" || path == unit.Source || seen[path] {
-					continue
-				}
-				seen[path] = true
-				unit.Headers = append(unit.Headers, FileReference{Path: path})
-			}
-		}
-		sort.Slice(unit.Headers, func(i, j int) bool { return unit.Headers[i].Path < unit.Headers[j].Path })
+		unit.Headers, unit.LineTable = lineTableFiles(data, entry, compDir, unit.Source)
 		units = append(units, unit)
 	}
 	sort.Slice(units, func(i, j int) bool {
@@ -172,6 +158,43 @@ func compilationUnits(data *dwarf.Data) []CompilationUnit {
 		return units[i].Name < units[j].Name
 	})
 	return units
+}
+
+// lineTableFiles reads the line-table file table of one compilation unit
+// (section 11.4 point 2). The file table is the right source, not the line
+// entries: a header that contributes only declarations produces no line entry
+// at all, so walking entries reports it as absent from a unit that plainly
+// included it.
+func lineTableFiles(data *dwarf.Data, entry *dwarf.Entry, compDir, source string) ([]FileReference, bool) {
+	lineReader, err := data.LineReader(entry)
+	if err != nil || lineReader == nil {
+		return nil, false
+	}
+	seen := map[string]bool{}
+	headers := make([]FileReference, 0)
+	for index, file := range lineReader.Files() {
+		// Entry 0 is not a header: DWARF 5 defines it as the primary source
+		// file and DWARF 4 leaves it unused. Clang emits nothing else, and its
+		// entry 0 does not even resolve to the path the unit was compiled
+		// from, so taking it would invent a file that never existed.
+		if index == 0 || file == nil {
+			continue
+		}
+		if strings.ContainsAny(file.Name, "<>") {
+			// Synthetic entries such as "<built-in>" name no file.
+			continue
+		}
+		path := resolvePath(compDir, file.Name)
+		if path == "" || path == source || seen[path] {
+			continue
+		}
+		seen[path] = true
+		// DWARF records no inclusion depth, so directness cannot be asserted
+		// here; section 14.4 asks for it only where the source distinguishes it.
+		headers = append(headers, FileReference{Path: path})
+	}
+	sort.Slice(headers, func(i, j int) bool { return headers[i].Path < headers[j].Path })
+	return headers, true
 }
 
 func elfBuildID(f *elf.File) string {
