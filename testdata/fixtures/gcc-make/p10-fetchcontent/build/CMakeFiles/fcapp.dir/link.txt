@@ -1,0 +1,1 @@
+/usr/bin/cc -g -Wl,-Map=/__fixture_build__/fcapp.map -Wl,--dependency-file=/__fixture_build__/fcapp.d CMakeFiles/fcapp.dir/main.c.o -o fcapp  _deps/tinylog-build/libtinylog.a 

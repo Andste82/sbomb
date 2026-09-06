@@ -2,7 +2,21 @@
 
 ## Unreleased
 
-### Introspection gateway and response files (roadmap phase 7)
+### Package managers, introspection and response files (roadmap phase 7)
+
+- `internal/adapters/pkgmanager` implements strategy 2 of section 19.2: a
+  dependency a package manager installed becomes its own component, named and
+  versioned by the manager rather than by a directory layout. The FetchContent
+  adapter is the first, and it works with introspection off -- the tag and the
+  repository come from the populate script CMake generates -- and improves with
+  it, where the checkout's own git metadata reports the exact describe output
+  and a dirty tree. Version confidence follows section 20.3, the purl is the
+  generic form of section 20.4 carrying repository and commit, and the licence
+  comes from the dependency's own file. No supplier is invented: section 20.5
+  forbids deriving one from a repository host.
+- Adapters never add a file to the used set. Discovery stays evidence-based, so
+  a dependency that was populated but never linked does not appear.
+
 
 - `internal/exec` is the only place sbomb can start a process. It carries the
   fixed allowlist of section 9.2, exact argument shapes with named slots, no

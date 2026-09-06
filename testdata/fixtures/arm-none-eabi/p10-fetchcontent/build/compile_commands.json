@@ -1,0 +1,14 @@
+[
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/arm-none-eabi-gcc -I/__fixture_build__/_deps/tinylog-src -mcpu=cortex-m4 -mthumb -ffreestanding -g -o CMakeFiles/fcapp.dir/main.c.obj -c /__fixture_src__/main.c",
+  "file": "/__fixture_src__/main.c",
+  "output": "CMakeFiles/fcapp.dir/main.c.obj"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/arm-none-eabi-gcc -I/__fixture_build__/_deps/tinylog-src -mcpu=cortex-m4 -mthumb -ffreestanding -g -o _deps/tinylog-build/CMakeFiles/tinylog.dir/tinylog.c.obj -c /__fixture_build__/_deps/tinylog-src/tinylog.c",
+  "file": "/__fixture_build__/_deps/tinylog-src/tinylog.c",
+  "output": "_deps/tinylog-build/CMakeFiles/tinylog.dir/tinylog.c.obj"
+}
+]

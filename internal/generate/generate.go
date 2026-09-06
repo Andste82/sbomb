@@ -14,6 +14,7 @@ import (
 	"github.com/example/sbomb/internal/adapters/cmakeapi"
 	"github.com/example/sbomb/internal/adapters/compiledb"
 	"github.com/example/sbomb/internal/adapters/manifest"
+	"github.com/example/sbomb/internal/adapters/pkgmanager"
 	"github.com/example/sbomb/internal/anchors"
 	"github.com/example/sbomb/internal/buildinfo"
 	"github.com/example/sbomb/internal/config"
@@ -341,6 +342,36 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		anchorRoots[anchor.Key] = anchor.Root
 	}
 	resolver := newComponentResolver(cfg, b.physical, anchorRoots, logger)
+	// Section 21: package managers improve what is known about the files the
+	// evidence chain already reached. They never add a file to the used set,
+	// which is why this runs after the reachability filter, not before it.
+	runner := &exec.Runner{
+		Features: options.Introspection,
+		Anchors:  anchorRootList(anchorResult),
+		Log: func(record exec.Record) {
+			logger.Info("Introspection: %s (%s)", strings.Join(record.Argv, " "), record.Duration.Round(time.Millisecond))
+		},
+	}
+	packages, packageFindings := pkgmanager.Discover(pkgmanager.Options{
+		BuildDir:  buildDir,
+		SourceDir: cfg.Project.Root,
+		Runner:    runner,
+	})
+	findings = append(findings, packageFindings...)
+	for _, entry := range packages {
+		logger.Info("Package %s %s from %s at %s", entry.Name, entry.Version, entry.Manager, entry.Root)
+	}
+	resolver.setPackages(packages, func(root string) string {
+		// The adapters report a root below the build directory being read.
+		// Identity is computed against the logical build root (section 7.6),
+		// so the physical prefix has to come off first, exactly as it does for
+		// every other path the adapters hand over.
+		if relative, err := filepath.Rel(buildDir, root); err == nil && !strings.HasPrefix(relative, "..") {
+			root = relative
+		}
+		canonical, _ := b.identify(root)
+		return canonical
+	})
 	narrowing := narrowingByComponent(resolver, outcome.narrowed)
 	document, findings := buildDocument(cfg, resolver, deliverables, used, findings, run)
 	writer, err := sbomwriter.Get("cyclonedx-json", "1.6")
@@ -536,6 +567,18 @@ func componentRoots(cfg config.Config) []headers.ComponentRoot {
 			SDK:       component.Type == "sdk",
 			External:  component.Type != "sdk",
 		})
+	}
+	return roots
+}
+
+// anchorRootList is the set of directories introspection may be pointed at.
+// Section 9.2 requires every path argument to lie inside one of them.
+func anchorRootList(result *anchors.Result) []string {
+	roots := make([]string, 0)
+	for _, anchor := range result.Registry.Anchors() {
+		if anchor.Root != "" {
+			roots = append(roots, anchor.Root)
+		}
 	}
 	return roots
 }

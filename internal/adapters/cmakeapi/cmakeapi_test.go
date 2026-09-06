@@ -210,8 +210,8 @@ func TestEveryFixtureReplyParses(t *testing.T) {
 			parsed++
 		}
 	}
-	if parsed != 45 {
-		t.Errorf("parsed %d fixture replies, want 45", parsed)
+	if parsed != 50 {
+		t.Errorf("parsed %d fixture replies, want 50", parsed)
 	}
 }
 

@@ -1,0 +1,14 @@
+[
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/cc  -I/__fixture_build__/_deps/tinylog-src -g -o CMakeFiles/fcapp.dir/main.c.o -c /__fixture_src__/main.c",
+  "file": "/__fixture_src__/main.c",
+  "output": "CMakeFiles/fcapp.dir/main.c.o"
+},
+{
+  "directory": "/__fixture_build__/_deps/tinylog-build",
+  "command": "/usr/bin/cc  -I/__fixture_build__/_deps/tinylog-src -g -o CMakeFiles/tinylog.dir/tinylog.c.o -c /__fixture_build__/_deps/tinylog-src/tinylog.c",
+  "file": "/__fixture_build__/_deps/tinylog-src/tinylog.c",
+  "output": "_deps/tinylog-build/CMakeFiles/tinylog.dir/tinylog.c.o"
+}
+]

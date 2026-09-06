@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/example/sbomb/internal/adapters/pkgmanager"
 	"github.com/example/sbomb/internal/anchors"
 	"github.com/example/sbomb/internal/componentmap"
 	"github.com/example/sbomb/internal/config"
@@ -35,6 +36,17 @@ type componentResolver struct {
 	projectName string
 	anchorRoots map[string]string
 	logger      *Logger
+	// packages are what the package-manager adapters proved, keyed by the
+	// canonical identity prefix their root corresponds to. This is strategy 2
+	// of section 19.2, which outranks everything except curated configuration.
+	packages []resolvedPackage
+}
+
+// resolvedPackage is one package-manager result expressed in identity terms,
+// so that mapping a file needs no filesystem access.
+type resolvedPackage struct {
+	prefix string
+	pkg    pkgmanager.Package
 }
 
 func newComponentResolver(cfg config.Config, physical map[string]string, anchorRoots map[string]string, logger *Logger) *componentResolver {
@@ -75,6 +87,14 @@ func (r *componentResolver) resolve(file domain.UsedFile) (id, name, componentTy
 		return "component:" + mapped.Name, mapped.Name, componentTypeOrDefault(mapped.Type), string(anchors.ScopeThirdParty), "curated"
 	}
 
+	// Strategy 2: exact package-manager metadata. A manager states the name,
+	// the version and often the licence, which is better evidence than any
+	// directory layout, so it comes before every heuristic below.
+	if found, ok := r.packageFor(file); ok {
+		return "component:" + found.pkg.Name, found.pkg.Name, "library",
+			string(anchors.ScopeThirdParty), found.pkg.Manager
+	}
+
 	anchorKey := string(file.ID.Anchor)
 	kind, anchorName, _ := strings.Cut(anchorKey, ":")
 
@@ -105,6 +125,45 @@ func (r *componentResolver) resolve(file domain.UsedFile) (id, name, componentTy
 	}
 	unknown := "unknown:" + anchorKey + "/" + segment
 	return unknown, unknown, "library", string(anchors.ScopeUnknown), "unresolved"
+}
+
+// setPackages records what the package-manager adapters found, expressed as
+// canonical identity prefixes. The longest prefix wins, so a package nested
+// inside another maps to the inner one (section 19.2).
+func (r *componentResolver) setPackages(packages []pkgmanager.Package, identify func(string) string) {
+	r.packages = make([]resolvedPackage, 0, len(packages))
+	for _, entry := range packages {
+		prefix := identify(entry.Root)
+		if prefix == "" {
+			continue
+		}
+		r.packages = append(r.packages, resolvedPackage{prefix: prefix, pkg: entry})
+	}
+	sort.Slice(r.packages, func(i, j int) bool {
+		return len(r.packages[i].prefix) > len(r.packages[j].prefix)
+	})
+}
+
+// packageFor finds the package a file belongs to, matching on whole path
+// segments so that a sibling directory with a shared prefix cannot claim it.
+func (r *componentResolver) packageFor(file domain.UsedFile) (resolvedPackage, bool) {
+	canonical := file.ID.Canonical()
+	for _, entry := range r.packages {
+		if canonical == entry.prefix || strings.HasPrefix(canonical, entry.prefix+"/") {
+			return entry, true
+		}
+	}
+	return resolvedPackage{}, false
+}
+
+// packageByName finds the package behind a component, for enrichment.
+func (r *componentResolver) packageByName(name string) (pkgmanager.Package, bool) {
+	for _, entry := range r.packages {
+		if entry.pkg.Name == name {
+			return entry.pkg, true
+		}
+	}
+	return pkgmanager.Package{}, false
 }
 
 // nearestPackageRoot walks up from a file looking for a package manifest,
@@ -147,13 +206,19 @@ func componentTypeOrDefault(value string) string {
 func (r *componentResolver) enrichComponent(component *domain.Component, files []domain.UsedFile) []domain.Finding {
 	findings := []domain.Finding{}
 	curated, hasCurated := r.curatedByID[component.ID]
+	managed, isManaged := r.packageByName(component.Name)
 
-	// Version (section 20.2).
+	// Version (section 20.2): curated first, then exact package-manager
+	// metadata, then what curated versionFrom permits.
 	switch {
 	case hasCurated && curated.Version != "":
 		component.Version = curated.Version
 		component.VersionSource = "curated"
 		component.VersionConf = domain.ConfidenceHigh
+	case isManaged && managed.Version != "":
+		component.Version = managed.Version
+		component.VersionSource = managed.VersionSource
+		component.VersionConf = managed.VersionConfidence
 	case hasCurated && len(curated.VersionFrom) > 0:
 		root := r.componentRoot(files)
 		if value, source, confidence, ok := version.Resolve(*component, root, curated.VersionFrom); ok {
@@ -170,6 +235,8 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 	// from a repository URL host is explicitly forbidden.
 	if hasCurated && curated.Supplier != "" {
 		component.Supplier = curated.Supplier
+	} else if isManaged && managed.Supplier != "" {
+		component.Supplier = managed.Supplier
 	}
 	if component.Supplier == "" {
 		findings = append(findings, componentFinding("MISSING_SUPPLIER", domain.SeverityWarning, component,
@@ -180,8 +247,22 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 	// PURL (section 20.4): only when a package type and name can be asserted.
 	if hasCurated && curated.PURL != "" {
 		component.PURL = curated.PURL
+	} else if isManaged && managed.PURL != "" {
+		component.PURL = managed.PURL
 	} else if kind, name, ok := purlFromAnchor(component.ID); ok {
 		component.PURL = version.PURL(kind, name, component.Version)
+	}
+	if isManaged {
+		// Section 20.5: the repository URL belongs in externalReferences, and
+		// it is emitted only because the manager recorded it -- never as a
+		// stand-in for a supplier.
+		component.Properties = addProperty(component.Properties, "sbomb:component:vcsUrl", managed.VCSURL)
+		if managed.Commit != "" {
+			component.Properties = addProperty(component.Properties, "sbomb:component:vcsCommit", managed.Commit)
+		}
+		if managed.Dirty {
+			component.Properties = addProperty(component.Properties, "sbomb:component:vcsDirty", "true")
+		}
 	}
 	if component.PURL == "" {
 		findings = append(findings, componentFinding("UNKNOWN_PURL", domain.SeverityInfo, component,

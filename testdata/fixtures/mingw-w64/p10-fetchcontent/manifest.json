@@ -1,0 +1,10 @@
+{
+  "buildRoot": "/__fixture_build__",
+  "generatedAt": "2026-09-05T00:00:00Z",
+  "generator": "Ninja",
+  "host": "linux",
+  "project": "p10-fetchcontent",
+  "sourceRoot": "/__fixture_src__",
+  "toolchain": "mingw-w64",
+  "toolchainVersion": "x86_64-w64-mingw32-gcc (GCC) 13-win32"
+}

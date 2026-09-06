@@ -2,7 +2,10 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "dup"
+			"path" : "fcapp.exe"
+		},
+		{
+			"path" : "fcapp.pdb"
 		}
 	],
 	"backtrace" : 2,
@@ -29,7 +32,7 @@
 			{
 				"command" : 1,
 				"file" : 1,
-				"line" : 6,
+				"line" : 12,
 				"parent" : 0
 			},
 			{
@@ -53,7 +56,7 @@
 			{
 				"command" : 4,
 				"file" : 1,
-				"line" : 7,
+				"line" : 13,
 				"parent" : 0
 			}
 		]
@@ -64,7 +67,14 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "-mcpu=cortex-m4 -mthumb -ffreestanding -g"
+					"fragment" : "-g"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 5,
+					"path" : "/__fixture_build__/_deps/tinylog-src"
 				}
 			],
 			"language" : "C",
@@ -78,14 +88,10 @@
 	[
 		{
 			"backtrace" : 5,
-			"id" : "mod_b::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 5,
-			"id" : "mod_a::@6890427a1f51a3e7e1df"
+			"id" : "tinylog::@753e26d000368cd72846"
 		}
 	],
-	"id" : "dup::@6890427a1f51a3e7e1df",
+	"id" : "fcapp::@6890427a1f51a3e7e1df",
 	"install" : 
 	{
 		"destinations" : 
@@ -105,38 +111,37 @@
 		"commandFragments" : 
 		[
 			{
-				"fragment" : "-mcpu=cortex-m4 -mthumb -ffreestanding -g",
+				"fragment" : "-g",
 				"role" : "flags"
 			},
 			{
-				"fragment" : "-nostdlib -nostartfiles -e main",
-				"role" : "flags"
-			},
-			{
-				"backtrace" : 4,
-				"fragment" : "-Wl,-Map=/__fixture_build__/dup.map",
+				"fragment" : "",
 				"role" : "flags"
 			},
 			{
 				"backtrace" : 4,
-				"fragment" : "-Wl,--dependency-file=/__fixture_build__/dup.d",
+				"fragment" : "-Wl,-Map=/__fixture_build__/fcapp.exe.map",
+				"role" : "flags"
+			},
+			{
+				"backtrace" : 4,
+				"fragment" : "-Wl,--dependency-file=/__fixture_build__/fcapp.exe.d",
 				"role" : "flags"
 			},
 			{
 				"backtrace" : 5,
-				"fragment" : "libmod_a.a",
+				"fragment" : "_deps/tinylog-build/libtinylog.a",
 				"role" : "libraries"
 			},
 			{
-				"backtrace" : 5,
-				"fragment" : "libmod_b.a",
+				"fragment" : "-lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32",
 				"role" : "libraries"
 			}
 		],
 		"language" : "C"
 	},
-	"name" : "dup",
-	"nameOnDisk" : "dup",
+	"name" : "fcapp",
+	"nameOnDisk" : "fcapp.exe",
 	"paths" : 
 	{
 		"build" : ".",

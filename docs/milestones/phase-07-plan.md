@@ -42,7 +42,7 @@ depth limit 8 (`RSP_DEPTH_EXCEEDED`), GNU quoting on POSIX and MSVC quoting on
 Windows toolchains, total expanded size bounded at 64 MiB. Without this, large
 link lines and most Windows builds are simply unreadable.
 
-### 7c — Package-manager adapters (§21, §19.2 strategies 2 and 4)
+### 7c — Package-manager adapters (FetchContent done) (§21, §19.2 strategies 2 and 4)
 
 `internal/adapters/pkgmanager` with one interface and one implementation per
 manager. Priority by real-world coverage: Conan and FetchContent first, then
@@ -78,3 +78,24 @@ step needs that capture first. Assessed at the end rather than faked.
 * Section garbage collection and LTO are exercised by corpus fixtures rather
   than by unit tests alone.
 * Full gate green throughout.
+
+
+## Noted while working
+
+**The corpus does not regenerate byte-for-byte.** Two runs of `regen.sh` with no
+source change produce a diff of roughly 150 files: CMake names its File API
+index `index-<wall-clock timestamp>.json`, the codemodel reply carries a
+content hash that moves with it, and `.ninja_deps` is a binary log of
+modification times. The committed corpus is therefore a captured artifact
+rather than a reproducible one, which makes reviewing a real corpus change
+harder than it should be. `regen.sh --check` verifies completeness, not byte
+equality, so nothing is claiming otherwise -- but normalizing the index
+filename and the deps log belongs in phase 8 alongside the other determinism
+work.
+
+**Conan, vcpkg and CPM are not implemented.** Neither tool is installed in the
+container, and writing a parser against a remembered file format is the exact
+failure this project spent phase 0 diagnosing. Conan can be installed from
+PyPI and a local recipe needs no network, so a real fixture is reachable; it
+costs a Dockerfile change, a CI change and a regen.sh change, which is its own
+piece of work. FetchContent needed none of that, which is why it went first.

@@ -25,7 +25,7 @@ BUILD_ROOT=${SBOMB_FIXTURE_BUILD:-/__fixture_build__}
 # when the corpus is rebuilt against a new toolchain.
 FIXTURE_DATE="2026-09-05"
 
-PROJECTS=(p01-hello p02-static p03-dupnames p04-generated p05-headeronly p06-unity p07-pch p08-gcsections p09-lto)
+PROJECTS=(p01-hello p02-static p03-dupnames p04-generated p05-headeronly p06-unity p07-pch p08-gcsections p09-lto p10-fetchcontent)
 
 # name|generator|toolchain file (empty for native)
 TOOLCHAINS=(
@@ -138,6 +138,21 @@ generate_one() {
   cp "$projects_dir/common.cmake" "$SRC_ROOT/"
   cp -r "$projects_dir/$project/." "$SRC_ROOT/"
 
+  # A dependency directory becomes a git repository with a fixed identity and
+  # a fixed date, so its commit hash is the same on every regeneration. Without
+  # that the corpus would churn on every run and the FetchContent evidence
+  # would not be reproducible.
+  local dep
+  for dep in "$SRC_ROOT"/dep/*/; do
+    [[ -d "$dep" ]] || continue
+    git -C "$dep" init -q -b main
+    git -C "$dep" -c user.name=sbomb -c user.email=fixtures@sbomb.invalid add -A
+    GIT_AUTHOR_DATE="${FIXTURE_DATE}T00:00:00Z" GIT_COMMITTER_DATE="${FIXTURE_DATE}T00:00:00Z" \
+      git -C "$dep" -c user.name=sbomb -c user.email=fixtures@sbomb.invalid \
+        commit -qm "fixture dependency" --no-gpg-sign
+    git -C "$dep" tag -f v1.2.0 >/dev/null
+  done
+
   mkdir -p "$BUILD_ROOT/.cmake/api/v1/query/client-sbomb"
   cat > "$BUILD_ROOT/.cmake/api/v1/query/client-sbomb/query.json" <<'QUERY'
 {"requests":[{"kind":"codemodel","version":2},{"kind":"cache","version":2},{"kind":"cmakeFiles","version":1},{"kind":"toolchains","version":1}]}
@@ -189,6 +204,18 @@ QUERY
                \( -name build.make -o -name link.txt -o -name compiler_depend.make \
                   -o -name 'objects*.rsp' -o -name '*.o.d' \) -type f | sort)
   fi
+
+  # FetchContent evidence: the generated populate script names the repository
+  # and the tag, and the licence file of the populated dependency is what the
+  # component licence is read from (sections 21 and 22.2).
+  while IFS= read -r found; do
+    harvest "$found" "$build_out/${found#"$BUILD_ROOT"/}"
+  done < <(find "$BUILD_ROOT/_deps" -maxdepth 5 \
+             \( -name '*-populate-gitclone.cmake' -o -name '*-populate-gitinfo.txt' \) \
+             -type f 2>/dev/null | sort)
+  while IFS= read -r found; do
+    harvest "$found" "$build_out/${found#"$BUILD_ROOT"/}"
+  done < <(find "$BUILD_ROOT/_deps" -maxdepth 2 -name 'LICENSE*' -type f 2>/dev/null | sort)
 
   # Build-tree sources the compiler consumed. A unity build compiles a
   # generated aggregation file and a precompiled header aggregates a header

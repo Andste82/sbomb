@@ -37,16 +37,16 @@ func TestFixtureProvenancePresent(t *testing.T) {
 
 func TestNoThirdPartySourceCommitted(t *testing.T) {
 	root := filepath.Join("..", "..", "testdata", "fixtures")
-	var foundBadDir bool
 	if err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 		if d.IsDir() {
-			name := d.Name()
-			if name == "include" || name == "src" || strings.HasSuffix(name, "-src") {
-				foundBadDir = true
-			}
+			// Nothing is decided by a directory name: CMake writes a "src"
+			// directory of stamp files for every populated dependency, and
+			// FetchContent writes a "<name>-src" whose licence file is
+			// required evidence for section 22.2. What the rule forbids is
+			// source code, and that is checked file by file below.
 			return nil
 		}
 		info, err := d.Info()
@@ -56,12 +56,12 @@ func TestNoThirdPartySourceCommitted(t *testing.T) {
 		if info.Size() > 256*1024 {
 			t.Fatalf("fixture file too large: %s (%d bytes)", path, info.Size())
 		}
+		if isSourceExtension(path) && !generatedIntoTheBuildTree(path) {
+			t.Errorf("fixture tree contains source code: %s", path)
+		}
 		return nil
 	}); err != nil {
 		t.Fatalf("walking fixture tree: %v", err)
-	}
-	if foundBadDir {
-		t.Fatal("fixture tree contains source directories that are disallowed")
 	}
 }
 
@@ -92,4 +92,24 @@ func TestFixgenIdempotent(t *testing.T) {
 	if strings.Contains(string(second), "/workspaces/sbomb") {
 		t.Fatal("sentinel rewriting failed to remove host path")
 	}
+}
+
+func isSourceExtension(path string) bool {
+	switch strings.ToLower(filepath.Ext(path)) {
+	case ".c", ".cc", ".cpp", ".cxx", ".h", ".hh", ".hpp", ".hxx", ".s", ".asm":
+		return true
+	}
+	return false
+}
+
+// generatedIntoTheBuildTree recognizes the source-shaped files a generator
+// wrote into the build tree. Those are evidence -- the unity aggregation file
+// and the precompiled-header glue are what sections 17.1 and 14.5 are read
+// from -- and are not part of anyone's source tree.
+func generatedIntoTheBuildTree(path string) bool {
+	slashed := filepath.ToSlash(path)
+	base := filepath.Base(slashed)
+	return strings.Contains(slashed, "/CMakeFiles/") ||
+		strings.HasPrefix(base, "cmake_pch.") ||
+		strings.HasPrefix(base, "unity_")
 }
