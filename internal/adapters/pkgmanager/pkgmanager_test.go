@@ -281,3 +281,56 @@ func TestVcpkgNoAssertionIsNotALicence(t *testing.T) {
 		t.Errorf("license = %q, want none", packages[0].License)
 	}
 }
+
+// Section 19.2 strategy 3: a submodule is a boundary the project declared, so
+// .gitmodules is read rather than guessed at from a directory layout.
+func TestSubmoduleBoundariesComeFromGitmodules(t *testing.T) {
+	source := t.TempDir()
+	content := `[submodule "dep/mbedtls"]
+	path = dep/mbedtls
+	url = git@github.com:Mbed-TLS/mbedtls.git
+[submodule "dep/tinycbor"]
+	path = dep/tinycbor
+	url = https://user:secret@example.invalid/tinycbor.git
+`
+	if err := os.WriteFile(filepath.Join(source, ".gitmodules"), []byte(content), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	packages, findings := Discover(Options{SourceDir: source, Context: context.Background()})
+	if len(packages) != 2 {
+		t.Fatalf("packages = %#v", packages)
+	}
+	byName := map[string]Package{}
+	for _, entry := range packages {
+		byName[entry.Name] = entry
+	}
+	if got := byName["mbedtls"].VCSURL; got != "https://github.com/Mbed-TLS/mbedtls" {
+		t.Errorf("scp-like url normalized to %q", got)
+	}
+	if got := byName["tinycbor"].VCSURL; indexOf(got, "secret") >= 0 {
+		t.Errorf("a credential survived normalization: %q", got)
+	}
+	if byName["mbedtls"].Root != filepath.Join(source, "dep", "mbedtls") {
+		t.Errorf("root = %q", byName["mbedtls"].Root)
+	}
+	// .gitmodules records neither a tag nor a commit, and section 20.1 forbids
+	// guessing one, so this has to be reported rather than filled in.
+	var unknown int
+	for _, finding := range findings {
+		if finding.ID == "UNKNOWN_VERSION" {
+			unknown++
+		}
+	}
+	if unknown != 2 {
+		t.Errorf("UNKNOWN_VERSION reported %d time(s), want one per submodule", unknown)
+	}
+}
+
+// Section 19.4: git metadata may describe a component but must never expand
+// the used-file set. Adapters only annotate; the reachability filter decides.
+func TestNoGitmodulesMeansNoPackages(t *testing.T) {
+	packages, findings := Discover(Options{SourceDir: t.TempDir(), Context: context.Background()})
+	if len(packages) != 0 || len(findings) != 0 {
+		t.Errorf("packages = %#v, findings = %#v", packages, findings)
+	}
+}

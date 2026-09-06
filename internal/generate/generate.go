@@ -187,7 +187,10 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	if projectRootForIdentity == "." {
 		projectRootForIdentity = ""
 	}
-	if projectRootForIdentity == "" && replyModel == nil {
+	if projectRootForIdentity == "" && replyModel != nil {
+		projectRootForIdentity = replyModel.SourceRoot
+	}
+	if projectRootForIdentity == "" {
 		projectRootForIdentity = absolutePath(".")
 	}
 	// Package managers are consulted before the anchors are assembled, because
@@ -202,8 +205,11 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		},
 	}
 	packages, packageFindings := pkgmanager.Discover(pkgmanager.Options{
-		BuildDir:  buildDir,
-		SourceDir: cfg.Project.Root,
+		BuildDir: buildDir,
+		// The source root the File API reports, not the configured one: a run
+		// without a configuration file still has to find .gitmodules, and the
+		// build system knows where it configured from.
+		SourceDir: projectRootForIdentity,
 		Runner:    runner,
 	})
 	findings = append(findings, packageFindings...)

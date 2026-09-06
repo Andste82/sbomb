@@ -15,7 +15,7 @@ it. Everything after it is largely independent and can be done in any order.
 
 ## Steps
 
-### 7-0 — Close the Phase 6 verification gap
+### 7-0 — Close the Phase 6 verification gap — done
 
 Section garbage collection and the LTO downgrade are covered by unit tests
 only: no fixture project builds with `--gc-sections` or `-flto`, so
@@ -24,7 +24,7 @@ projects gain the flags, so both features are exercised against real linker
 and compiler output. This is the same gap class that phase 0 diagnosed as the
 root cause of everything it found.
 
-### 7a — `internal/exec` (§9.2)
+### 7a — `internal/exec` — done (§9.2)
 
 A single gateway for the fixed allowlist of introspection commands. Off by
 default; enabled by `--allow-introspection` or `build.introspection.*`.
@@ -35,14 +35,14 @@ default; enabled by `--allow-introspection` or `build.introspection.*`.
 * when introspection is off, callers degrade and emit an informational finding
   naming the evidence they could not obtain.
 
-### 7b — Response files (§9.3)
+### 7b — Response files — done (§9.3)
 
 `@file` and `.rsp` expansion in compile and link command lines: recursive with
 depth limit 8 (`RSP_DEPTH_EXCEEDED`), GNU quoting on POSIX and MSVC quoting on
 Windows toolchains, total expanded size bounded at 64 MiB. Without this, large
 link lines and most Windows builds are simply unreadable.
 
-### 7c — Package-manager adapters (FetchContent done) (§21, §19.2 strategies 2 and 4)
+### 7c — Package-manager adapters — done (§21, §19.2 strategy 2)
 
 `internal/adapters/pkgmanager` with one interface and one implementation per
 manager. Priority by real-world coverage: Conan and FetchContent first, then
@@ -50,7 +50,7 @@ vcpkg and CPM. Each supplies component name, version, purl, licence hint and
 root path, and registers an anchor. None of them may add a file to the used
 set -- discovery stays evidence-based (§21 opening paragraph).
 
-### 7d — Git metadata and submodule boundaries (§19.4, §20.2)
+### 7d — Git metadata and submodule boundaries — done (§19.4, §20.2)
 
 Submodule boundaries as component boundaries, git-derived versions behind
 `versionFrom`, normalized repository URLs with credentials stripped,

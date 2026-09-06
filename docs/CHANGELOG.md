@@ -25,6 +25,14 @@
   what makes a `bom-ref` portable: a Conan cache path contains a random
   component, so without an anchor the identity of every file in an installed
   dependency would differ from machine to machine.
+- Git submodules are component boundaries (strategy 3 of section 19.2), read
+  from `.gitmodules` because that is where the project declares them. Without
+  introspection the boundary and the repository URL are known and the version
+  is reported missing, since `.gitmodules` records neither a tag nor a commit
+  and section 20.1 forbids guessing one; with `--allow-introspection=git` the
+  checkout answers for itself. A submodule that nothing links does not become a
+  component: section 19.4 lets git metadata describe a component but never
+  expand the used-file set.
 - Licence resolution follows section 22.2 in order: an SPDX identifier in a
   used file, then what the manager declared or placed in the package, then a
   licence file found by walking the component root.

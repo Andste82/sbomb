@@ -78,6 +78,7 @@ var adapters = []Adapter{
 	conan{},
 	vcpkg{},
 	fetchContent{},
+	submodule{},
 }
 
 // Discover runs every adapter and returns the union, sorted by name so the
