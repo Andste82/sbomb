@@ -2,15 +2,15 @@
 
 # sbomb
 
-**An evidence-based SBOM generator for CMake builds.** It produces a CycloneDX
-1.6 document describing what actually went into a build artifact — not what
-happens to be lying around in the source tree.
+**An evidence-based SBOM generator that reconstructs the software composition
+of CMake build artifacts.** It follows the build's own evidence backwards from
+the final artifact instead of inferring it from the source tree, and writes
+what it finds as CycloneDX 1.6.
 
-sbomb starts at a final deliverable — a firmware image, an executable, a
-library — and follows the build's own evidence backwards: link inputs, archive
-members, object files, translation units, sources, headers, generated files. A
-file appears in the SBOM when there is a chain of evidence connecting it to
-that artifact, and not otherwise.
+The chain runs from a firmware image, an executable or a library through link
+inputs, archive members, object files, translation units, sources, headers and
+generated files. A file appears in the SBOM when there is a chain of evidence
+connecting it to that artifact, and not otherwise.
 
 That is the whole idea, and it is what makes the output usable for compliance
 work under the EU Cyber Resilience Act and BSI TR-03183-2, where the question
