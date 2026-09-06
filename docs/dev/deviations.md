@@ -373,3 +373,50 @@ named because the licence text genuinely does not distinguish them; and the
 rest deviate from the SPDX text in ways SPDX does not declare, such as the
 older Apache LICENSE saying `brackets "{}"` where the current text says
 `brackets "[]"`.
+
+## D19 — Licenses found in a file are evidence, not a conclusion
+
+Section 22.7 lists five reason codes for NOASSERTION, and none of them fits the
+commonest reason a licence file resolves to nothing: it holds *two* licences.
+"Dual licensed under MIT or Apache-2.0" is two complete texts one after the
+other with a sentence in between. Compared as a whole the file is neither, so
+every technique of section 22.3 returns nothing — the worst possible answer,
+because both licences are plainly there. Measured over 142 real licence files,
+18 were of this shape and a further 15 held one licence with other material
+around it.
+
+Two claims have to be kept apart:
+
+* **Which licence texts are present.** Establishable, and each one found is a
+  complete text matched end to end — not a weaker match, a weaker *claim*.
+* **How they relate.** Whether both apply or the recipient chooses is written
+  in the prose between them. Reading that is the keyword heuristic section 22.3
+  forbids, and getting it wrong is a compliance error rather than a cosmetic
+  one.
+
+Section 22.4 already requires evidence and assumption to be distinguishable,
+and CycloneDX 1.6 models exactly this: `component.evidence.licenses` for what
+was observed, `component.licenses` for what applies. So the licences found go
+to the first, the second stays NOASSERTION with the new reason code
+`license-composition-unresolved`, and the finding names them so a reviewer
+knows what the question is. Curating `components[].license` fills in the
+conclusion, and because the observation sits beside it the assertion can be
+checked rather than believed.
+
+The two forms are not interchangeable, which is the point: CycloneDX's
+`licenseChoice` is a choice between a *list of licences* and a *tuple of
+exactly one expression*. A list says which are present; an expression says how
+they combine. An observation can only make the first statement.
+
+**One thing the implementation had to get right.** Locating a licence inside a
+larger file uses the template between its first and last fixed words, not the
+whole template. BSD-3-Clause opens with the copyright variable, and an
+unanchored search takes the earliest start that can work: the match began up to
+a thousand characters before the licence did, swallowed the end of the licence
+before it, and the two then overlapped so only one survived. A licence is
+located by its fixed words; the variable material at its edges is not part of
+the search.
+
+**Measured, on the same 142 files.** Of the 51 that no whole-file technique
+resolved, 8 now yield several licences as evidence and 15 yield one; 28 still
+yield nothing, being bespoke agreements or pointers to a licence elsewhere.

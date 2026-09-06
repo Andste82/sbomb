@@ -69,6 +69,15 @@ type entry struct {
 	once     sync.Once
 	pattern  *regexp.Regexp
 	compiled error
+
+	// The same expression without the whole-text anchors, for locating the
+	// licence inside a larger file (observe.go).
+	looseOnce    sync.Once
+	loosePattern *regexp.Regexp
+	looseErr     error
+
+	spanOnce  sync.Once
+	spanValue int
 }
 
 var (

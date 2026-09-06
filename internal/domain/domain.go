@@ -139,9 +139,14 @@ type Component struct {
 	Root          *FileID
 	Scope         string
 	Licenses      []LicenseFinding
-	DetectedBy    string
-	Properties    map[string][]string
-	Files         []FileID
+	// LicenseEvidence is what was observed rather than concluded: the
+	// complete licence texts found in the component's files. Section 22.4
+	// requires evidence and assumption to be distinguishable, and CycloneDX
+	// carries it in component.evidence.licenses.
+	LicenseEvidence []LicenseFinding
+	DetectedBy      string
+	Properties      map[string][]string
+	Files           []FileID
 }
 
 type LicenseFinding struct {

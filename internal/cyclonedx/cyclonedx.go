@@ -82,6 +82,10 @@ type Property struct {
 type Evidence struct {
 	Identity    []IdentityEvidence `json:"identity,omitempty"`
 	Occurrences []Occurrence       `json:"occurrences,omitempty"`
+	// Licenses are the licence texts observed in the component's files. They
+	// are not the component's licence: what applies is in Component.Licenses,
+	// and stays NOASSERTION until somebody concludes it.
+	Licenses []License `json:"licenses,omitempty"`
 }
 
 type IdentityEvidence struct {

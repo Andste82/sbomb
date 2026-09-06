@@ -319,6 +319,10 @@ func (r *componentResolver) resolveComponentLicense(component *domain.Component,
 	// the package manager declared or placed in the package (3 and 4), then a
 	// licence file found by walking the component root (5).
 	var fromFiles domain.LicenseFinding
+	// observed holds the complete licence texts found in a file that is not
+	// itself one licence -- two of them one after the other, or one with
+	// material around it. It is evidence, never a conclusion.
+	var observed []domain.LicenseFinding
 	for _, file := range files {
 		path := r.physical[file.ID.Canonical()]
 		if path == "" {
@@ -330,7 +334,11 @@ func (r *componentResolver) resolveComponentLicense(component *domain.Component,
 		}
 		if found := license.ResolveFromText(string(data), path); found.Expression != "" {
 			fromFiles = found
+			observed = nil
 			break
+		}
+		if len(observed) == 0 {
+			observed = license.ObserveFindings(string(data), path)
 		}
 	}
 	if fromFiles.Expression == "" {
@@ -342,6 +350,9 @@ func (r *componentResolver) resolveComponentLicense(component *domain.Component,
 		if found, ok := r.licenseFromComponentRoot(files); ok {
 			fromFiles = found
 		}
+	}
+	if fromFiles.Expression == "" && len(observed) == 0 {
+		observed = r.licenseEvidenceFromComponentRoot(files)
 	}
 
 	switch {
@@ -364,8 +375,26 @@ func (r *componentResolver) resolveComponentLicense(component *domain.Component,
 			return findings
 		}
 		component.Licenses = []domain.LicenseFinding{effective}
+		component.LicenseEvidence = observed
 	case fromFiles.Expression != "":
 		component.Licenses = []domain.LicenseFinding{fromFiles}
+	case len(observed) > 0:
+		// The file holds complete licence texts without being one of them.
+		// Which licences are present is recorded; whether they apply together
+		// or the recipient chooses is written in the prose between them, and
+		// reading that would be the keyword heuristic section 22.3 forbids.
+		component.LicenseEvidence = observed
+		component.Licenses = []domain.LicenseFinding{{
+			Name:     "NOASSERTION",
+			Evidence: "unknown",
+			Reason:   license.ReasonLicenseCompositionUnresolved,
+		}}
+		component.Properties = addProperty(component.Properties, "sbomb:license:review", "true")
+		component.Properties = addProperty(component.Properties, "sbomb:license:reason", license.ReasonLicenseCompositionUnresolved)
+		findings = append(findings, componentFinding("UNKNOWN_LICENSE", domain.SeverityWarning, component,
+			fmt.Sprintf("the licence file contains the text of %s, but is not any one of them; how they combine is not machine-readable",
+				strings.Join(licenseNames(observed), " and ")),
+			"Read the file and record the relationship in components[].license, for example \"MIT OR Apache-2.0\"."))
 	default:
 		component.Licenses = []domain.LicenseFinding{{
 			Name:     "NOASSERTION",
@@ -438,6 +467,34 @@ func (r *componentResolver) licenseFromComponentRoot(files []domain.UsedFile) (d
 		}
 	}
 	return domain.LicenseFinding{}, false
+}
+
+// licenseEvidenceFromComponentRoot observes the licence texts in the component
+// root's licence file when nothing there resolved to one licence.
+func (r *componentResolver) licenseEvidenceFromComponentRoot(files []domain.UsedFile) []domain.LicenseFinding {
+	root := r.componentRoot(files)
+	if root == "" {
+		return nil
+	}
+	for _, name := range recognizedLicenseFiles {
+		data, err := os.ReadFile(filepath.Join(root, name))
+		if err != nil {
+			continue
+		}
+		if observed := license.ObserveFindings(string(data), name); len(observed) > 0 {
+			return observed
+		}
+	}
+	return nil
+}
+
+// licenseNames lists the identifiers of a set of observations, for a message.
+func licenseNames(findings []domain.LicenseFinding) []string {
+	names := make([]string, 0, len(findings))
+	for _, finding := range findings {
+		names = append(names, finding.Expression)
+	}
+	return names
 }
 
 // recognizedLicenseFiles is the exhaustive list of section 22.3.

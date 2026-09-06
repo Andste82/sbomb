@@ -9,6 +9,7 @@ import (
 	"github.com/example/sbomb/internal/adapters/gobin"
 	"github.com/example/sbomb/internal/cyclonedx"
 	"github.com/example/sbomb/internal/domain"
+	"github.com/example/sbomb/internal/license"
 	"github.com/example/sbomb/internal/sbomwriter"
 )
 
@@ -337,5 +338,67 @@ func TestTheEvidenceGraphHoldsItsInvariants(t *testing.T) {
 func TestAssembleRefusesEmptyEvidence(t *testing.T) {
 	if _, err := Assemble(nil, "app", Options{}); err == nil {
 		t.Fatal("assembling nothing should be an error")
+	}
+}
+
+// iscText is the ISC licence with its copyright filled in, used as the second
+// licence of a dual-licensed file.
+const iscText = `ISC License
+
+Copyright (c) 2026 Somebody
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+`
+
+// A dual-licensed module: two complete licence texts in one file. What is in
+// the file can be stated; how the two relate cannot, because that is written
+// in the sentence between them.
+func TestADualLicensedModuleReportsBothAsEvidenceAndConcludesNothing(t *testing.T) {
+	dual := "This module is dual licensed. Use it under either licence below.\n\n" +
+		mitText + "\n\n=== or ===\n\n" + iscText
+	root := vendorTree(t, "example.com/one", "v1.0.0", dual)
+
+	result, err := Assemble(linked(
+		gobin.Module{Path: "example.com/one", Version: "v1.0.0"},
+	), "app", Options{ModuleDir: root, Reproducible: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	component := componentByID(t, result.Document, "component:go/example.com/one")
+
+	if got := component.Licenses[0].Expression; got != "" {
+		t.Errorf("concluded %q from a file holding two licences", got)
+	}
+	if component.Licenses[0].Reason != license.ReasonLicenseCompositionUnresolved {
+		t.Errorf("reason = %q, want %q", component.Licenses[0].Reason, license.ReasonLicenseCompositionUnresolved)
+	}
+	observed := make([]string, 0, len(component.LicenseEvidence))
+	for _, finding := range component.LicenseEvidence {
+		observed = append(observed, finding.Expression)
+	}
+	if len(observed) != 2 || observed[0] != "MIT" || observed[1] != "ISC" {
+		t.Fatalf("evidence = %v, want [MIT ISC]", observed)
+	}
+
+	// The finding has to name them, or a reviewer has to open the file to
+	// learn what the question even is.
+	var message string
+	for _, finding := range result.Findings {
+		if finding.ID == "UNKNOWN_LICENSE" && finding.Subject.Ref == component.ID {
+			message = finding.Message
+		}
+	}
+	if !strings.Contains(message, "MIT") || !strings.Contains(message, "ISC") {
+		t.Errorf("the finding does not name both licences: %q", message)
 	}
 }

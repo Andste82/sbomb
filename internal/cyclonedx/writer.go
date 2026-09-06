@@ -223,6 +223,12 @@ func componentToCyclone(component domain.Component, ref string) Component {
 		out.Supplier = &OrganizationalEntity{Name: component.Supplier}
 	}
 	out.Licenses = licensesToCyclone(component.Licenses)
+	// Observed, not concluded. A licence file holding two complete texts says
+	// which licences are present and nothing about how they relate, so the
+	// finding goes here and out.Licenses stays NOASSERTION until curated.
+	if observed := observedLicensesToCyclone(component.LicenseEvidence); len(observed) > 0 {
+		out.Evidence = &Evidence{Licenses: observed}
+	}
 	out.Properties = append(out.Properties, propertiesFromMap(component.Properties)...)
 	if component.Scope != "" {
 		out.Properties = append(out.Properties, Property{Name: "sbomb:component:scope", Value: component.Scope})
@@ -301,6 +307,26 @@ func runProperties(run sbomwriter.RunMetadata) []Property {
 	}
 	// Volatile run properties are omitted in reproducible mode (section 29).
 	return properties
+}
+
+// observedLicensesToCyclone renders licence evidence as a list of licence
+// identifiers rather than as an expression.
+//
+// The two are not interchangeable: CycloneDX's licenseChoice is a choice, and
+// its expression form is a tuple of exactly one. That is the point. An
+// expression states how licences combine, which is what an observation cannot
+// say; a list states which are present, which is what it can.
+func observedLicensesToCyclone(findings []domain.LicenseFinding) []License {
+	licenses := make([]License, 0, len(findings))
+	for _, finding := range findings {
+		switch {
+		case finding.SPDXID != "":
+			licenses = append(licenses, License{License: &LicenseIdentifier{ID: finding.SPDXID}})
+		case finding.Name != "":
+			licenses = append(licenses, License{License: &LicenseIdentifier{Name: finding.Name}})
+		}
+	}
+	return licenses
 }
 
 func licensesToCyclone(findings []domain.LicenseFinding) []License {

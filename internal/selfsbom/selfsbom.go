@@ -228,6 +228,7 @@ func productComponent(artifactName string, binary *gobin.Binary, options Options
 	licenceFinding, licenceFindings := licences.forProduct(component.ID, binary.Main.Path)
 	component.Licenses = []domain.LicenseFinding{licenceFinding}
 	annotateLicence(&component, licenceFinding)
+	component.LicenseEvidence = licences.observed[component.ID]
 	findings = append(findings, licenceFindings...)
 
 	findings = append(findings, missingComponentHash(component.ID, "")...)
@@ -280,6 +281,7 @@ func moduleComponent(recorded gobin.Module, licences *licenceSource) (domain.Com
 	licenceFinding, licenceFindings := licences.forModule(component.ID, effective)
 	component.Licenses = []domain.LicenseFinding{licenceFinding}
 	annotateLicence(&component, licenceFinding)
+	component.LicenseEvidence = licences.observed[component.ID]
 	findings = append(findings, licenceFindings...)
 
 	findings = append(findings, missingComponentHash(component.ID, effective.Sum)...)
@@ -318,6 +320,7 @@ func standardLibraryComponent(binary *gobin.Binary, licences *licenceSource) (do
 	licenceFinding, licenceFindings := licences.forStandardLibrary(component.ID)
 	component.Licenses = []domain.LicenseFinding{licenceFinding}
 	annotateLicence(&component, licenceFinding)
+	component.LicenseEvidence = licences.observed[component.ID]
 	findings = append(findings, licenceFindings...)
 
 	findings = append(findings, missingComponentHash(component.ID, "")...)
@@ -379,6 +382,18 @@ type licenceSource struct {
 	vendored map[string]govendor.Module
 	// vendorErr is why the vendor tree could not be read, if it could not.
 	vendorErr error
+	// observed collects the licence texts found in a file that is not itself
+	// one licence, keyed by component.
+	observed map[string][]domain.LicenseFinding
+}
+
+// licenceNames lists the identifiers of a set of observations, for a message.
+func licenceNames(findings []domain.LicenseFinding) []string {
+	names := make([]string, 0, len(findings))
+	for _, finding := range findings {
+		names = append(names, finding.Expression)
+	}
+	return names
 }
 
 func newLicenceSource(options Options, binary *gobin.Binary, findings *[]domain.Finding) *licenceSource {
@@ -387,6 +402,7 @@ func newLicenceSource(options Options, binary *gobin.Binary, findings *[]domain.
 		goroot:    options.GOROOT,
 		bounds:    options.Limits,
 		curated:   options.Licenses,
+		observed:  map[string][]domain.LicenseFinding{},
 	}
 	if options.ModuleDir == "" {
 		return source
@@ -488,6 +504,17 @@ func (s *licenceSource) detect(componentID, dir string) (domain.LicenseFinding, 
 		}
 		finding := license.ResolveFromText(string(data), s.label(path))
 		if finding.Expression == "" {
+			// The file may still hold complete licence texts without being any
+			// one of them -- two licences one after the other. Which ones are
+			// present is recorded as evidence; how they combine is not.
+			if observed := license.ObserveFindings(string(data), s.label(path)); len(observed) > 0 {
+				s.observed[componentID] = observed
+				finding.Reason = license.ReasonLicenseCompositionUnresolved
+				return finding, []domain.Finding{componentFinding("UNKNOWN_LICENSE", domain.SeverityWarning, componentID,
+					fmt.Sprintf("%s contains the text of %s but is not any one of them; how they combine is not machine-readable",
+						name, strings.Join(licenceNames(observed), " and ")),
+					"Read the file and pass --license <module>=<SPDX expression>.")}
+			}
 			// The file is there and unrecognized. Saying so is more useful
 			// than saying nothing was found: the remedy is different. Exact
 			// text matching cannot see through a filled-in copyright holder or

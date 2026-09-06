@@ -246,3 +246,59 @@ func TestWriterIsRegisteredUnderItsFormatIdentifier(t *testing.T) {
 		t.Error("an unregistered format should be rejected")
 	}
 }
+
+// A licence file holding two complete texts says which licences are present
+// and nothing about how they relate. CycloneDX keeps those apart: the finding
+// goes to component.evidence.licenses, and the component's own licence stays
+// NOASSERTION until somebody concludes it.
+func TestObservedLicensesAreEvidenceNotConclusion(t *testing.T) {
+	document := &sbomwriter.Document{
+		Product: domain.Component{ID: "product", Name: "app", Type: "application"},
+		Components: []domain.Component{{
+			ID:   "component:dual",
+			Name: "dual",
+			Type: "library",
+			Licenses: []domain.LicenseFinding{{
+				Name:     "NOASSERTION",
+				Evidence: "unknown",
+				Reason:   "license-composition-unresolved",
+			}},
+			LicenseEvidence: []domain.LicenseFinding{
+				{Expression: "MIT", SPDXID: "MIT"},
+				{Expression: "Apache-2.0", SPDXID: "Apache-2.0"},
+			},
+		}},
+		Relations: []sbomwriter.Relation{{From: "product", To: []string{"component:dual"}}},
+		Run:       sbomwriter.RunMetadata{ToolName: "sbomb", ToolVendor: "sbomb", ToolVersion: "test"},
+	}
+
+	data, err := MarshalDocument(document, sbomwriter.Options{SpecVersion: "1.6", Reproducible: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Both layers, because a consumer runs a schema check on this.
+	if err := Validate(data); err != nil {
+		t.Fatalf("validate: %v", err)
+	}
+
+	var bom BOM
+	if err := json.Unmarshal(data, &bom); err != nil {
+		t.Fatal(err)
+	}
+	var subject *Component
+	for index := range bom.Components {
+		if bom.Components[index].Name == "dual" {
+			subject = &bom.Components[index]
+		}
+	}
+	if subject == nil {
+		t.Fatal("the component is not in the document")
+	}
+	if subject.Evidence == nil || len(subject.Evidence.Licenses) != 2 {
+		t.Fatalf("evidence.licenses = %+v, want two", subject.Evidence)
+	}
+	// The observation must not have leaked into the concluded licence.
+	if len(subject.Licenses) != 1 || subject.Licenses[0].License == nil || subject.Licenses[0].License.Name != "NOASSERTION" {
+		t.Errorf("licenses = %+v, want a single NOASSERTION", subject.Licenses)
+	}
+}

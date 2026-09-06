@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+### A file with two licences in it says so
+
+- The commonest reason a licence file resolved to nothing was that it holds
+  *two* licences: "dual licensed under MIT or Apache-2.0" is two complete texts
+  one after the other. Compared as a whole the file is neither, so every
+  technique returned nothing — while both licences were plainly there. Of 142
+  real licence files, 18 were of this shape and 15 more held one licence with
+  other material around it.
+- sbomb now records which licence texts a file contains as
+  `component.evidence.licenses`, and leaves `component.licenses` at NOASSERTION
+  with the new reason `license-composition-unresolved`. Whether both apply or
+  the recipient may choose is written in the prose between them; reading that
+  would be the keyword heuristic the specification forbids. The finding names
+  the licences, so a reviewer knows what to decide, and curating
+  `components[].license` fills in the conclusion beside the evidence that
+  supports it. Deviation D19; section 22.7 gains the reason code.
+- Of the 51 files no whole-file technique resolved, 23 now carry licence
+  evidence.
+
 ### Licences with a filled-in copyright holder are recognized
 
 - The digest table of section 22.3 technique 2 only ever matched a verbatim

@@ -17,6 +17,12 @@ const (
 	ReasonConflictingEvidence     = "conflicting-evidence"
 	ReasonComponentUnresolved     = "component-unresolved"
 	ReasonScannerInconclusive     = "scanner-inconclusive"
+	// ReasonLicenseCompositionUnresolved reports a file that contains one or
+	// more complete licence texts without being one of them: two licences one
+	// after the other, or a licence with material around it. Which licences
+	// are present is recorded as evidence; how they compose is stated in the
+	// prose between them and is not machine-decidable (deviation D19).
+	ReasonLicenseCompositionUnresolved = "license-composition-unresolved"
 )
 
 // The detection techniques of section 22.3, recorded so that a reviewer can

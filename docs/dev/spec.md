@@ -1031,7 +1031,9 @@ NOASSERTION           -> unknown
 
 ### 22.7 NOASSERTION
 
-Used when no reliable assertion is possible. Never invent a license from weak similarity. Every NOASSERTION MUST carry `sbomb:license:review=true` and `sbomb:license:reason=<reason-code>` from: `no-evidence`, `license-text-unrecognized`, `conflicting-evidence`, `component-unresolved`, `scanner-inconclusive`.
+Used when no reliable assertion is possible. Never invent a license from weak similarity. Every NOASSERTION MUST carry `sbomb:license:review=true` and `sbomb:license:reason=<reason-code>` from: `no-evidence`, `license-text-unrecognized`, `conflicting-evidence`, `component-unresolved`, `scanner-inconclusive`, `license-composition-unresolved`.
+
+`license-composition-unresolved` reports a file that contains one or more complete license texts without being any one of them — two licenses one after the other, or a license with other material around it. The licenses found are recorded as observation in `component.evidence.licenses`; how they combine is stated in the prose between them and is not decidable by the permitted techniques, so `component.licenses` stays NOASSERTION until curated. Added by deviation D19.
 
 ### 22.8 Level Separation
 

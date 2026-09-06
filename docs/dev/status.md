@@ -90,13 +90,14 @@
   used, because the earlier strategies resolve every object in the corpus.
 - **`sbomb:evidence:header:directInclude` is never set.** DWARF carries no
   inclusion depth; see deviation D8.
-- **Licence detection stops at one verbatim licence.** Measured over 142
-  distinct real licence files, 32 match by digest and 55 more by SPDX template
-  (deviation D18); the remaining 55 are mostly not a single verbatim licence at
-  all -- dual licensing, a licence behind a preamble, bespoke agreements,
-  pointers elsewhere -- where NOASSERTION is the right answer. A file that
-  contains two licences is not resolved into an expression, and nothing in the
-  permitted techniques would let it be.
+- **Licence detection.** Measured over 142 distinct real licence files: 32
+  conclude by digest, 55 more by SPDX template (deviation D18), 4 name two
+  candidates that the licence text genuinely does not distinguish
+  (`-only`/`-or-later`), and 23 carry licence evidence without a conclusion
+  because the file holds more than one licence or a licence with material
+  around it (deviation D19). The remaining 28 hold no known licence text at
+  all -- bespoke agreements, pointers to a licence elsewhere -- where
+  NOASSERTION is the right answer.
 
 ## Next Work
 
