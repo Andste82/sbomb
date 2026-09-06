@@ -48,5 +48,12 @@ The milestones above describe what to build. The phase plans below record what
 was actually built, in the order the work was done, together with the defects
 each phase uncovered. They are the working state of the roadmap.
 
+- [phase-00-plan.md](phase-00-plan.md) - Gate and fixtures — complete
+- [phase-01-plan.md](phase-01-plan.md) - The anchor model — complete
+- [phase-02-plan.md](phase-02-plan.md) - The through-line: the graph as the only source of truth — complete
+- [phase-03-plan.md](phase-03-plan.md) - CycloneDX binding and validation — complete
+- [phase-04-plan.md](phase-04-plan.md) - Components, versions, licences — complete
+- [phase-05-plan.md](phase-05-plan.md) - Arming the policy model — complete
 - [phase-06-plan.md](phase-06-plan.md) - Header evidence in full — complete
 - [phase-07-plan.md](phase-07-plan.md) - Adapter breadth — complete, ESP-IDF parked
+- [phase-08-plan.md](phase-08-plan.md) - Hardening — in progress
