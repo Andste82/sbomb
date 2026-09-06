@@ -93,9 +93,53 @@ equality, so nothing is claiming otherwise -- but normalizing the index
 filename and the deps log belongs in phase 8 alongside the other determinism
 work.
 
-**Conan, vcpkg and CPM are not implemented.** Neither tool is installed in the
-container, and writing a parser against a remembered file format is the exact
-failure this project spent phase 0 diagnosing. Conan can be installed from
-PyPI and a local recipe needs no network, so a real fixture is reachable; it
-costs a Dockerfile change, a CI change and a regen.sh change, which is its own
-piece of work. FetchContent needed none of that, which is why it went first.
+**Conan, vcpkg and CPM are not implemented yet, but they are no longer
+blocked.** The tools are in the image now, and each was verified to produce
+real evidence offline from a local package. What the adapters will read, taken
+from actual probe builds rather than from memory:
+
+*Conan 2* -- `conan create` of a local recipe and `conan install` of a
+consumer, no network:
+
+| File | Carries |
+|---|---|
+| `<build>/<name>-config-version.cmake` | `set(PACKAGE_VERSION "0.6.1")` |
+| `<build>/<name>-release-<arch>-data.cmake` | `set(<name>_PACKAGE_FOLDER_RELEASE "...")` -- the package root |
+| `<package root>/licenses/LICENSE` | the licence file, where section 22.2 point 5 expects it |
+| `<package root>/conaninfo.txt` | settings and options |
+
+purl per section 20.4: `pkg:conan/<name>@<version>`.
+
+*vcpkg* -- an overlay port whose source is a local directory, installed with
+`VCPKG_FORCE_SYSTEM_BINARIES=1`, no network. It writes a complete SPDX
+document per package:
+
+```
+installed/<triplet>/share/<name>/vcpkg.spdx.json
+  packages[0].name / .versionInfo / .licenseConcluded
+  packages[0].externalRefs[0].referenceLocator
+      = "pkg:vcpkg/tinyfmt@2.1.0?triplet=x64-linux"
+installed/<triplet>/share/<name>/vcpkg_abi_info.txt
+installed/vcpkg/status            (Package/Version/Depends per entry)
+```
+
+The purl is stated outright, so nothing has to be constructed.
+
+*CPM* -- builds on FetchContent and writes the same
+`_deps/<name>-subbuild/.../<name>-populate-gitclone.cmake`, so the existing
+FetchContent adapter already recognizes a CPM dependency. `cpm-package-lock.cmake`
+adds declared versions when the project uses `CPMDeclarePackage`.
+
+
+## Tooling in the image
+
+`.devcontainer/Dockerfile` installs Conan 2.32.0, west 1.5.0, vcpkg (pinned to
+a commit) and CPM.cmake 0.43.1 with a checksum -- 131 MB in total. Every
+version is pinned because the fixture corpus is generated from these tools, and
+an unpinned one would make the corpus unreproducible.
+
+ESP-IDF is behind `--build-arg WITH_ESP_IDF=1`, off by default, because it adds
+2.1 GB: 659 MB of sources and 1.4 GB of toolchains. It also needs
+`libusb-1.0-0`, which is now in the apt list: without it the openocd
+post-install check fails and `install.sh` aborts before it finishes, leaving
+the environment unusable.
