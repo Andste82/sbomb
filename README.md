@@ -38,6 +38,21 @@ Concretely:
 evidence chain, the strategies behind each step, and where sbomb refuses to
 guess.
 
+## Relation to Syft and similar tools
+
+[Syft](https://anchore.com/syft/) and its kin describe **packages**: they read
+package metadata out of an image or a filesystem and are very good at it. Use
+them for the container your application ships in.
+
+sbomb describes **one compiled artifact**, from the build's own evidence. That
+matters where package metadata does not exist — a vendored SDK, a git
+submodule, a `FetchContent` dependency are just directories — and where
+package granularity is too coarse: only the linker map knows that eleven of
+`libcrypto.a`'s four hundred object files reached your firmware.
+
+They are complementary, not alternatives. On a Linux product you will likely
+want both.
+
 ## Requirements
 
 A CMake project built with **Ninja**, **Ninja Multi-Config** or **Unix

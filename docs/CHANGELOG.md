@@ -11,7 +11,9 @@ were rewritten against the actual command line, configuration and behaviour,
 and every example in them was run.
 
 `docs/architecture.md` is new: how the evidence chain works, what backs each
-step, and where sbomb refuses to guess, with diagrams.
+step, and where sbomb refuses to guess, with diagrams. The README says in three
+sentences how sbomb relates to Syft and its kin, because anyone who finds it
+will ask.
 
 Several configuration keys turned out to be accepted and then ignored --
 `output.*`, `generators[]`, `components[].cdxType` and `.upstream`. They are
