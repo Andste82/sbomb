@@ -13,34 +13,39 @@
 - Milestone 14: deterministic serialization, `SOURCE_DATE_EPOCH` handling,
   injectable POSIX/Windows path flavors, cross-architecture hash comparison
   in CI. Native Windows execution remains unverified.
-- Adapters exist and are unit-tested for the CMake File API, Ninja, Make,
-  compile databases, depfiles, linker maps, DWARF/ELF/PE and archives.
+- Milestone 03: the CMake File API adapter reads a real reply directory. It
+  resolves the index, follows the per-target reply files, and exposes the
+  source and build roots, the toolchain layout and the install rules.
+- Section 7 anchors: a registry with the registration order of section 7.4,
+  longest-prefix matching at segment boundaries, flavor-dependent case rules,
+  the abs fallback with UNANCHORED_FILE, and --redact-unanchored-paths.
+  toolchain: anchors come from toolchains-v1, sysroot: from the cache or
+  --sysroot, extern:/sdk:/pkg: from the configuration.
+- Section 24 scope classification: toolchain and system files are separated
+  from project code using the compiler-reported implicit include and link
+  directories, and are excluded from the SBOM by default.
+- Adapters exist and are unit-tested for Ninja, compile databases, depfiles,
+  linker maps, DWARF/ELF/PE and archives.
 
 ## Known Gaps
 
 The single most important one:
 
-- **Only two adapters are reachable from the binary.** `go list -deps ./cmd/sbomb`
-  resolves 14 of 33 packages. The CMake File API, Ninja, DWARF, map-parser,
-  inventory, component-mapping and version packages are built and tested but
-  never called by `internal/generate`, so the evidence they can produce does
-  not reach the SBOM. Closing this is the subject of roadmap phases 1-3.
-
-Concrete defects found while building the real corpus:
-
-- `cmakeapi.ParseReplyDir` expects the reply files to be named
-  `codemodel-v2.json`, `cache-v2.json` and `toolchains-v1.json`. Real CMake
-  writes content-addressed names such as `codemodel-v2-07769b617595cce5ba84.json`
-  and lists them in `index-*.json`. The adapter cannot read a real build
-  directory and must learn index-based discovery.
-- The evidence graph is populated in parallel with the component list rather
-  than being the source it is derived from, so there is no reachability filter
-  from artifact to file -- the central premise of section 4.
+- **The evidence graph is not the source of the output.** It is populated in
+  parallel with the component list rather than being what the component list
+  is derived from, so there is no reachability filter from artifact to file --
+  the central premise of section 4. Consequently `unused.c` still appears in
+  the `p02-static` SBOM even though its archive member is provably never
+  extracted by the linker.
+- **Link evidence is still unread.** The linker dependency file, the map and
+  DWARF are parsed by tested packages that `internal/generate` never calls, so
+  17 of 30 packages are reachable from the binary. The anchors can classify
+  toolchain and system paths, but nothing feeds those paths in yet.
 
 ## Next Work
 
-Roadmap phase 1: complete the anchor model (section 7). Only `project`,
-`build` and `abs` exist; `toolchain:`, `sysroot:`, `extern:`, `sdk:` and
-`pkg:` are missing, and without them the real link evidence -- roughly four
-fifths of which is toolchain and system paths -- cannot be classified per
-section 24.
+Roadmap phase 2: make the evidence graph the single source of the output.
+Resolve the configured artifact, read link evidence in the preference order of
+section 11.2 (with deviation D1: the map supplies archive members, the
+dependency file does not), resolve objects to sources, and derive the used-file
+set from reachability rather than from whatever the adapters happened to see.

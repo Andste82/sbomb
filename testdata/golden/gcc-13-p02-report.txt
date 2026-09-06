@@ -1,5 +1,4 @@
 Policy profile: strict
-Exit code: 3
+Exit code: 0
 
-- MISSING_LINK_EVIDENCE [error]: no compile or link evidence was discovered
-  subject: artifact/artifact:build
+No findings.

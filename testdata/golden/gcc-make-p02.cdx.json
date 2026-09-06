@@ -2,7 +2,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "version": 1,
-  "serialNumber": "urn:uuid:34ebcaf0-35fe-51cd-aeea-7a8768a5b285",
+  "serialNumber": "urn:uuid:f9666115-d105-592a-a90c-63ae7d27af12",
   "metadata": {
     "tools": [
       {
@@ -16,7 +16,7 @@
     {
       "type": "file",
       "name": "crypto.c",
-      "bom-ref": "file:project:__fixture_src__/crypto.c",
+      "bom-ref": "file:project:crypto.c",
       "licenses": [
         {
           "license": {
@@ -25,6 +25,10 @@
         }
       ],
       "properties": [
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
         {
           "name": "sbomb:license:evidence",
           "value": "unknown"
@@ -35,14 +39,14 @@
         },
         {
           "name": "sbomb:path:canonical",
-          "value": "project:__fixture_src__/crypto.c"
+          "value": "project:crypto.c"
         }
       ]
     },
     {
       "type": "file",
       "name": "main.c",
-      "bom-ref": "file:project:__fixture_src__/main.c",
+      "bom-ref": "file:project:main.c",
       "licenses": [
         {
           "license": {
@@ -51,6 +55,10 @@
         }
       ],
       "properties": [
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
         {
           "name": "sbomb:license:evidence",
           "value": "unknown"
@@ -61,14 +69,14 @@
         },
         {
           "name": "sbomb:path:canonical",
-          "value": "project:__fixture_src__/main.c"
+          "value": "project:main.c"
         }
       ]
     },
     {
       "type": "file",
       "name": "unused.c",
-      "bom-ref": "file:project:__fixture_src__/unused.c",
+      "bom-ref": "file:project:unused.c",
       "licenses": [
         {
           "license": {
@@ -77,6 +85,10 @@
         }
       ],
       "properties": [
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
         {
           "name": "sbomb:license:evidence",
           "value": "unknown"
@@ -87,20 +99,20 @@
         },
         {
           "name": "sbomb:path:canonical",
-          "value": "project:__fixture_src__/unused.c"
+          "value": "project:unused.c"
         }
       ]
     }
   ],
   "dependencies": [
     {
-      "ref": "file:project:__fixture_src__/crypto.c"
+      "ref": "file:project:crypto.c"
     },
     {
-      "ref": "file:project:__fixture_src__/main.c"
+      "ref": "file:project:main.c"
     },
     {
-      "ref": "file:project:__fixture_src__/unused.c"
+      "ref": "file:project:unused.c"
     }
   ]
 }

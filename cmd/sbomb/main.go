@@ -128,6 +128,7 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 	reviewReportPath := ""
 	reportFormat := "text"
 	pathFlavor := ""
+	redactUnanchored := false
 	for i := 0; i < len(args); i++ {
 		switch {
 		case args[i] == "--verbose" || args[i] == "-v":
@@ -170,6 +171,8 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 			output = strings.TrimPrefix(args[i], "--output=")
 		case args[i] == "--reproducible":
 			repro = true
+		case args[i] == "--redact-unanchored-paths":
+			redactUnanchored = true
 		case args[i] == "--path-flavor":
 			if i+1 >= len(args) {
 				return 1, "", "missing value for --path-flavor\n"
@@ -269,9 +272,10 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 		return 1, logBuf.String(), "invalid value for --path-flavor: " + pathFlavor + "\n"
 	}
 	generated, err := generate.RunWithOptions(loadedCfg, buildDir, repro, generate.Options{
-		PathFlavor: flavor,
-		Verbosity:  verbosity,
-		LogWriter:  logWriter,
+		PathFlavor:            flavor,
+		Verbosity:             verbosity,
+		LogWriter:             logWriter,
+		RedactUnanchoredPaths: redactUnanchored,
 	})
 	if err != nil {
 		return 2, logBuf.String(), err.Error() + "\n"

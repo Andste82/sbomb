@@ -2,6 +2,38 @@
 
 ## Unreleased
 
+### Anchors and scope
+
+- Added the section 7 anchor model: a registry with the registration order of
+  section 7.4, longest-prefix matching at path-segment boundaries,
+  case-sensitive matching under the POSIX flavor and case-insensitive under
+  Windows, and the `abs` fallback with an `UNANCHORED_FILE` finding.
+  `--redact-unanchored-paths` replaces unanchored identities with a digest.
+- `toolchain:` anchors are registered from `toolchains-v1`, `sysroot:` from the
+  cache or a `--sysroot` compile flag, and `extern:`/`sdk:`/`pkg:` from the
+  configuration's `anchors[]`.
+- Files are classified by origin scope and carry `sbomb:component:scope`.
+  Toolchain and system files are excluded from the SBOM by default per section
+  24.1, using the compiler-reported implicit include and link directories
+  rather than a hardcoded path list. The dynamic loader in `/lib64` is covered
+  by a conventional-root fallback, because no compiler reports that directory.
+- Relative paths are now resolved against the directory they were recorded
+  against -- a compile database entry against its `directory` field -- instead
+  of being left unanchored.
+- Identity uses the logical build path from the evidence (section 7.6) rather
+  than the directory the evidence happens to be read from.
+
+### Fixed
+
+- `cmakeapi.ParseReplyDir` could not read a real reply directory. It expected
+  the filenames `codemodel-v2.json`, `cache-v2.json` and `toolchains-v1.json`,
+  while CMake writes content-addressed names listed in `index-*.json`, and it
+  read `targets[]` from the codemodel although target detail lives in one file
+  per target. It now follows the index, loads each target file, and exposes the
+  source and build roots, install rules, link fragments and the implicit
+  include and link directories. Reply filenames are rejected unless they are
+  plain names, so a crafted index cannot read outside the reply directory.
+
 ### Fixture corpus
 
 - The golden corpus is now generated from real toolchain output.

@@ -13,9 +13,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/example/sbomb/internal/adapters/cmakeapi"
 	"github.com/example/sbomb/internal/adapters/compiledb"
 	makeadapter "github.com/example/sbomb/internal/adapters/make"
 	"github.com/example/sbomb/internal/adapters/manifest"
+	"github.com/example/sbomb/internal/anchors"
 	"github.com/example/sbomb/internal/buildinfo"
 	"github.com/example/sbomb/internal/config"
 	"github.com/example/sbomb/internal/cyclonedx"
@@ -43,6 +45,9 @@ type Options struct {
 	PathFlavor pathmodel.Flavor
 	Verbosity  int
 	LogWriter  io.Writer
+	// RedactUnanchoredPaths replaces the identity of files that match no
+	// anchor with a digest, per specification section 7.5.
+	RedactUnanchoredPaths bool
 }
 
 type Logger struct {
@@ -135,20 +140,103 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		logger.Info("Discovered %d compile command(s) in compile_commands.json", len(commands))
 	}
 
+	// The CMake File API is the authoritative source for the project and build
+	// roots and for the toolchain layout (sections 10.2 and 24.4).
+	var replyModel *cmakeapi.Model
+	if replyDir, discoverErr := cmakeapi.DiscoverReplyDir(buildDir); discoverErr == nil {
+		model, parseErr := cmakeapi.ParseReplyDir(replyDir)
+		if parseErr == nil {
+			replyModel = model
+			logger.Info("Read CMake File API reply: %d configuration(s), %d toolchain(s)", len(model.Configurations), len(model.Toolchains))
+		} else {
+			logger.Info("CMake File API reply could not be read: %v", parseErr)
+			findings = append(findings, domain.Finding{ID: "CMAKE_FILE_API_UNAVAILABLE", Severity: domain.SeverityWarning, Subject: domain.Subject{Kind: "build", Ref: buildDir}, Message: parseErr.Error()})
+		}
+	} else {
+		logger.Info("No CMake File API reply in '%s'", buildDir)
+		findings = append(findings, domain.Finding{ID: "CMAKE_FILE_API_UNAVAILABLE", Severity: domain.SeverityWarning, Subject: domain.Subject{Kind: "build", Ref: buildDir}, Message: "no CMake File API reply directory was found"})
+	}
+
+	compileFlags := make([]string, 0)
+	for _, command := range commands {
+		compileFlags = append(compileFlags, command.Arguments...)
+	}
+	// Identity uses the logical build path -- the path as it appeared in the
+	// build evidence (section 7.6) -- not the directory the evidence is being
+	// read from now. Configuration wins, then what the File API recorded, then
+	// the directory on the command line made absolute.
+	buildRootForIdentity := cfg.Build.Dir
+	if buildRootForIdentity == "" && replyModel != nil {
+		buildRootForIdentity = replyModel.BuildRoot
+	}
+	if buildRootForIdentity == "" {
+		buildRootForIdentity = absolutePath(buildDir)
+	}
+	projectRootForIdentity := cfg.Project.Root
+	if projectRootForIdentity == "." {
+		projectRootForIdentity = ""
+	}
+	if projectRootForIdentity == "" && replyModel == nil {
+		projectRootForIdentity = absolutePath(".")
+	}
+
+	anchorResult, err := anchors.Assemble(anchors.Options{
+		Flavor:        options.PathFlavor,
+		ProjectRoot:   projectRootForIdentity,
+		BuildRoot:     buildRootForIdentity,
+		ConfigAnchors: cfg.Anchors,
+		Model:         replyModel,
+		CompileFlags:  compileFlags,
+		Redact:        options.RedactUnanchoredPaths,
+	})
+	if err != nil {
+		return Result{}, fmt.Errorf("assemble anchors: %w", err)
+	}
+	findings = append(findings, anchorResult.Findings...)
+	for _, anchor := range anchorResult.Registry.Anchors() {
+		logger.Debug("Anchor %s -> %s (from %s)", anchor.Key, anchor.Root, anchor.Source)
+	}
+	logger.Info("Registered %d anchor(s)", len(anchorResult.Registry.Anchors()))
+
 	seen := map[string]bool{}
 	componentSeen := map[string]bool{}
-	addComponent := func(path string) {
-		canonical := pathmodel.ResolveWithFlavor(path, projectRoot, buildDir, options.PathFlavor)
+	excludedByScope := map[anchors.Scope]int{}
+
+	// identify resolves a path to its portable identity and origin scope.
+	identify := func(base, path string) (string, anchors.Scope) {
+		id, scope := anchorResult.ScopeOfPath(base, path)
+		return id.Canonical(), scope
+	}
+
+	addComponent := func(base, path string) {
+		id, scope := anchorResult.ScopeOfPath(base, path)
+		canonical := id.Canonical()
 		if componentSeen[canonical] {
 			return
 		}
 		componentSeen[canonical] = true
-		logger.Debug("Discovered component file '%s' (canonical: '%s')", path, canonical)
-		components = append(components, fileComponent(canonical, path, options.PathFlavor, logger))
+		if id.Anchor == domain.AnchorKey(pathmodel.AnchorAbs) {
+			findings = append(findings, anchors.UnanchoredFinding(id))
+		}
+		if !anchors.IncludedByDefault(scope) {
+			// Toolchain and system files are evidence, not project
+			// dependencies (section 24.1). Their omission is counted and
+			// reported rather than silent.
+			excludedByScope[scope]++
+			logger.Debug("Excluded %s file '%s' from the SBOM", scope, canonical)
+			return
+		}
+		logger.Debug("Discovered component file '%s' (canonical: '%s', scope: %s)", path, canonical, scope)
+		components = append(components, fileComponent(canonical, path, scope, options.PathFlavor, logger))
 	}
 
 	for _, command := range commands {
-		rel := pathmodel.ResolveWithFlavor(command.File, projectRoot, buildDir, options.PathFlavor)
+		// Compile database entries are relative to their own directory field.
+		base := command.Directory
+		if base == "" {
+			base = buildDir
+		}
+		rel, _ := identify(base, command.File)
 		if seen[rel] {
 			continue
 		}
@@ -156,16 +244,17 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		sourceID := domain.NodeID(rel)
 		objectRef := command.Output
 		if objectRef == "" {
-			objectRef = rel + ".o"
+			objectRef = command.File + ".o"
 		}
-		objectID := domain.NodeID("object:" + pathmodel.ResolveWithFlavor(objectRef, projectRoot, buildDir, options.PathFlavor))
+		objectCanonical, _ := identify(base, objectRef)
+		objectID := domain.NodeID("object:" + objectCanonical)
 		logger.Trace("CompileDB entry: file='%s', output='%s'", command.File, command.Output)
 		graph.AddNode(domain.Node{ID: objectID, Kind: domain.NodeObject})
 		graph.AddNode(domain.Node{ID: sourceID, Kind: domain.NodeSource})
 		graph.AddEdge(domain.Edge{From: artifactID, To: objectID, Type: "compile-output", Strength: "linked", Confidence: domain.ConfidenceMedium, Source: "compile_commands", Adapter: "compiledb"})
 		graph.AddEdge(domain.Edge{From: objectID, To: sourceID, Type: "compile", Strength: "derived", Confidence: domain.ConfidenceHigh, Source: "compile_commands", Adapter: "compiledb"})
 		logger.Debug("Added compile graph edges: %s -> %s -> %s", artifactID, objectID, sourceID)
-		addComponent(command.File)
+		addComponent(base, command.File)
 	}
 
 	if len(commands) == 0 {
@@ -175,7 +264,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 			for _, target := range makeBuild.Targets {
 				logger.Debug("Processing Make target in directory '%s' with %d link input(s)", target.Directory, len(target.LinkInputs))
 				for _, input := range target.LinkInputs {
-					canonical := pathmodel.ResolveWithFlavor(input, projectRoot, buildDir, options.PathFlavor)
+					canonical, _ := identify(buildDir, input)
 					objectID := domain.NodeID("object:" + canonical)
 					kind := domain.NodeObject
 					if strings.HasSuffix(input, ".a") || strings.HasSuffix(input, ".lib") {
@@ -184,25 +273,25 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 					graph.AddNode(domain.Node{ID: objectID, Kind: kind})
 					graph.AddEdge(domain.Edge{From: artifactID, To: objectID, Type: "link", Strength: "linked", Confidence: domain.ConfidenceHigh, Source: filepath.Join(target.Directory, "link.txt"), Adapter: "make"})
 					if source, ok := target.ObjectSources[input]; ok {
-						sourceCanonical := pathmodel.ResolveWithFlavor(source, projectRoot, buildDir, options.PathFlavor)
+						sourceCanonical, _ := identify(buildDir, source)
 						sourceID := domain.NodeID(sourceCanonical)
 						graph.AddNode(domain.Node{ID: sourceID, Kind: domain.NodeSource})
 						graph.AddEdge(domain.Edge{From: objectID, To: sourceID, Type: "source-mapping", Strength: "derived", Confidence: domain.ConfidenceHigh, Source: filepath.Join(target.Directory, "build.make"), Adapter: "make"})
 						logger.Debug("Make source mapping: %s -> %s", input, source)
-						addComponent(source)
+						addComponent(buildDir, source)
 					}
 					for _, dependency := range target.ObjectDeps[input] {
 						if dependency == target.ObjectSources[input] {
 							continue
 						}
-						dependencyCanonical := pathmodel.ResolveWithFlavor(dependency, projectRoot, buildDir, options.PathFlavor)
+						dependencyCanonical, _ := identify(buildDir, dependency)
 						dependencyID := domain.NodeID(dependencyCanonical)
 						graph.AddNode(domain.Node{ID: dependencyID, Kind: domain.NodeHeader})
 						graph.AddEdge(domain.Edge{From: objectID, To: dependencyID, Type: "include", Strength: "derived", Confidence: domain.ConfidenceMedium, Source: target.CompilerDepend, Adapter: "make"})
 						logger.Trace("Make header dependency for '%s': '%s'", input, dependency)
-						addComponent(dependency)
+						addComponent(buildDir, dependency)
 					}
-					addComponent(input)
+					addComponent(buildDir, input)
 				}
 			}
 		} else {
@@ -213,6 +302,18 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	if (len(commands) == 0 && !hasMakeLinkEvidence(buildDir)) || !hasLinkEvidence(buildDir) {
 		logger.Info("Link evidence check: missing compile or link evidence")
 		findings = append(findings, domain.Finding{ID: "MISSING_LINK_EVIDENCE", Severity: domain.SeverityError, Subject: domain.Subject{Kind: "artifact", Ref: string(artifactID)}, Message: "no compile or link evidence was discovered"})
+	}
+
+	for _, scope := range []anchors.Scope{anchors.ScopeToolchain, anchors.ScopeSystem} {
+		if count := excludedByScope[scope]; count > 0 {
+			logger.Info("Excluded %d %s file(s) from the SBOM (section 24.1 default)", count, scope)
+			findings = append(findings, domain.Finding{
+				ID:       "DYNAMIC_DEPENDENCIES_IGNORED",
+				Severity: domain.SeverityInfo,
+				Subject:  domain.Subject{Kind: "build", Ref: buildDir},
+				Message:  fmt.Sprintf("%d %s file(s) were excluded by the default inclusion policy", count, scope),
+			})
+		}
 	}
 
 	logger.Info("Sorting %d component(s) deterministically...", len(components))
@@ -237,8 +338,11 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	return Result{Graph: graph, Findings: findings, BOM: bom}, nil
 }
 
-func fileComponent(canonical, path string, flavor pathmodel.Flavor, logger *Logger) cyclonedx.Component {
-	component := cyclonedx.Component{Type: "file", Name: pathmodel.Base(path, flavor), BomRef: "file:" + canonical, Properties: []cyclonedx.Property{{Name: "sbomb:path:canonical", Value: canonical}}}
+func fileComponent(canonical, path string, scope anchors.Scope, flavor pathmodel.Flavor, logger *Logger) cyclonedx.Component {
+	component := cyclonedx.Component{Type: "file", Name: pathmodel.Base(path, flavor), BomRef: "file:" + canonical, Properties: []cyclonedx.Property{
+		{Name: "sbomb:path:canonical", Value: canonical},
+		{Name: "sbomb:component:scope", Value: string(scope)},
+	}}
 	data, err := os.ReadFile(path)
 	if err == nil {
 		hash := sha256.Sum256(data)
@@ -286,6 +390,15 @@ func resolveLicense(path string, data []byte, readErr error, logger *Logger) dom
 	}
 	logger.Trace("License for '%s': NOASSERTION (reason: %s)", path, license.ReasonNoEvidence)
 	return domain.LicenseFinding{Name: "NOASSERTION", Evidence: "unknown", Reason: license.ReasonNoEvidence}
+}
+
+// absolutePath makes a path absolute without failing: an anchor root that
+// stayed relative would match nothing.
+func absolutePath(path string) string {
+	if absolute, err := filepath.Abs(path); err == nil {
+		return absolute
+	}
+	return path
 }
 
 func buildTimestamp() string {
