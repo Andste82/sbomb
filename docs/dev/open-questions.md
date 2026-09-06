@@ -25,4 +25,13 @@ available from the committed artifacts, so this may not need resolving.
 
 ## Q3 — Which compilation database entry wins for a unity or PCH object?
 
-Not yet reached; deferred to the compile-evidence work.
+**Answered by construction.** The compile database is indexed by the `output`
+it names, not by its `file`, and a compilation has exactly one output. So there
+is no contest: the entry for a unity object is the one whose output is that
+object, and the sources it stands for are recovered separately from the
+generated unity file itself (section 17.1). Forced includes, which is where a
+precompiled header shows up, are keyed the same way.
+
+Strategies are tried in a fixed order and the first mapping for an object wins;
+a later strategy disagreeing is reported as `OBJECT_SOURCE_MAPPING_CONFLICT`
+rather than silently overwritten.
