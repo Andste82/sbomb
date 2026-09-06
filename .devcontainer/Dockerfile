@@ -47,6 +47,12 @@ RUN update-alternatives --install /usr/bin/cc cc /usr/bin/gcc 100 \
     && update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++ 100 \
     && update-alternatives --install /usr/bin/ld ld /usr/bin/ld.bfd 100
 
+# --- Node.js LTS + Claude Code ------------------------------------------------
+RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
+    && rm -rf /var/lib/apt/lists/* \
+    && npm install -g @anthropic-ai/claude-code
+
 ENV CGO_ENABLED=0
 
 WORKDIR /workspaces/sbomb
