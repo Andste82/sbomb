@@ -1,6 +1,6 @@
 # Deviations
 
-Deviations from `sbomb-spec-v3.1.md`, recorded per specification section 0.2.
+Deviations from `spec.md`, recorded per specification section 0.2.
 Each entry states what the specification assumes, what was observed, and what
 the implementation does instead.
 
@@ -206,3 +206,23 @@ and whether a path escapes every anchor is decided where the anchors are known
 
 The defect was invisible because the manifest adapter was parsed for
 validation only and never wired into the graph.
+
+
+## D15 — Four finding identifiers were missing from appendix A
+
+The catalogue in appendix A listed 48 identifiers. The implementation emits
+four the specification never defined, although its normative text requires the
+behaviour behind three of them:
+
+| Identifier | Required by |
+|---|---|
+| `WEAK_EVIDENCE` | §8.4, and `policy.failOnWeakEvidence` appears in three profile tables -- a gate with no finding to gate on |
+| `INTERNAL_INVARIANT_VIOLATION` | §8.8 and §28.4, both of which mandate exit 70 |
+| `MISSING_COMPILE_EVIDENCE` | §14.1: the absence of a compile database has to be reportable |
+| `MALFORMED_BINARY` | §11.4 covers a stripped artifact but not an unparsable one |
+
+They were added to appendix A rather than removed from the implementation. The
+gap was invisible until `tools/findingsdoc` began cross-checking the three sets
+that have to agree: what the specification defines, what the code emits, and
+what the user documentation lists. `go run ./tools/findingsdoc --check` runs in
+CI, so it cannot reopen.

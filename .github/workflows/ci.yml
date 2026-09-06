@@ -79,6 +79,19 @@ jobs:
             exit 1
           fi
 
+  # The findings catalogue in the user documentation is generated from appendix
+  # A and annotated with what the code emits. Unlike the SPDX list this depends
+  # on nothing external, so drift is a fault and blocks the pull request.
+  findings-catalogue:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Findings catalogue is current
+        run: go run ./tools/findingsdoc --check
+
   # The SPDX license list changes upstream, so drift here is information, not
   # a reason to block a pull request. It is checked separately for that reason.
   spdx-drift:

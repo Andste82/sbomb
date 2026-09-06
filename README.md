@@ -226,7 +226,7 @@ This makes it usable both for downstream software inventory and for internal eng
 - `sbomb schema`: print embedded configuration and findings schemas
 - `sbomb version`: print tool version information
 
-For a complete description of the normative behavior, see [docs/dev/sbomb-spec-v3.1.md](docs/dev/sbomb-spec-v3.1.md).
+For a complete description of the normative behavior, see [docs/dev/spec.md](docs/dev/spec.md).
 
 ## License
 

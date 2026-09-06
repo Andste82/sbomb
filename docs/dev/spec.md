@@ -1991,6 +1991,10 @@ Severity shown is the default and may be changed via `policy.severityOverrides`.
 | `MISSING_COMPONENT_HASH` | warning | `failOnMissingComponentHash` | Component has no hash for its deployable form (CRA/BSI field) |
 | `CRA_FIELD_INCOMPLETE` | error | `cra` profile | Aggregate: one or more §1.5(1) fields missing on some component |
 | `SECTION_GC_INFO_UNAVAILABLE` | info | — | `sectionGarbageCollection` requested but the evidence source does not report discarded sections |
+| `WEAK_EVIDENCE` | warning | `failOnWeakEvidence` | The only evidence for a file is a textual fallback source (§8.4) |
+| `MISSING_COMPILE_EVIDENCE` | warning | — | No compile database was found, so object-to-source mapping loses a strategy (§14.1) |
+| `MALFORMED_BINARY` | info | — | An artifact could not be parsed as ELF or PE, so no debug-info evidence was read (§11.4) |
+| `INTERNAL_INVARIANT_VIOLATION` | error | always (exit 70) | A graph invariant of §8.8 or a `bom-ref` uniqueness assertion of §28.4 failed |
 
 An implementation MUST NOT emit a finding ID that is not in this table without also adding it to the table and to `docs/findings.md`.
 

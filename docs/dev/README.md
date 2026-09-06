@@ -19,18 +19,24 @@ CGO_ENABLED=1 go test ./... -race       # the race detector needs cgo (deviation
 go test -tags e2e ./test/...            # end-to-end, needs a real toolchain
 tools/fixtures/regen.sh --check         # the committed corpus is complete
 scripts/determinism-check.sh            # two runs produce the same bytes
+go run ./tools/findingsdoc --check      # the findings catalogue matches the code
 ```
 
 ## What is here
 
 | Document | Contents |
 |---|---|
-| [sbomb-spec-v3.1.md](sbomb-spec-v3.1.md) | The normative specification. Section numbers referenced throughout the code and the commit messages point here. |
+| [spec.md](spec.md) | The normative specification. Section numbers referenced throughout the code and the commit messages point here. |
 | [milestones/](milestones/) | The milestone plan extracted from section 41, plus the per-phase plans that record what was built and why. |
 | [status.md](status.md) | What is implemented and what the known gaps are. |
 | [deviations.md](deviations.md) | Where the implementation departs from the specification, and what was observed that forced it. Recorded per section 0.2. |
 | [open-questions.md](open-questions.md) | What the specification does not settle and which affects output. Recorded rather than guessed at. |
 | [dependencies.md](dependencies.md) | Every third-party module, what it does, and what removing it would cost. |
+
+The findings catalogue in `docs/findings.md` is generated from appendix A of the
+specification and annotated with what the code emits, by
+`go run ./tools/findingsdoc`. Adding a finding therefore means adding it to
+appendix A as well; CI refuses the pull request otherwise.
 
 ## Two habits worth keeping
 

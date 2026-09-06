@@ -1,6 +1,6 @@
 # Milestones
 
-These files are extracted from [the specification](../sbomb-spec-v3.1.md#41-milestones) to support focused implementation work.
+These files are extracted from [the specification](../spec.md#41-milestones) to support focused implementation work.
 
 ## Rules
 
