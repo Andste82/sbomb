@@ -97,13 +97,23 @@
 
 ## Next Work
 
-Roadmap phase 8: hardening. The performance budget of section 31 measured
-against the `large` fixture rather than assumed -- nothing has ever run at
-scale, and the fixture generator exists but no test invokes it. The parser
-limits of section 30 as one configurable policy instead of eighteen hardcoded
-ones, with the two missing flags `--max-input-size` and `--strict-symlinks`.
-Fuzzing extended to what phases 6 and 7 added. Windows determinism executed on
-a Windows runner rather than simulated through a path flavor. And a self-SBOM
-produced from evidence: `release.sh` currently writes a fabricated
-`compile_commands.json` naming one file, which is exactly the guessing this
-tool exists to refuse.
+Roadmap phase 8 is four steps of six done: the performance budget is measured
+and met, the parser limits of section 30 are one policy with the two flags that
+were missing, the parsers of phases 6 and 7 are fuzzed, and determinism is
+checked on Windows rather than declared unverified. See
+[milestones/phase-08-plan.md](milestones/phase-08-plan.md).
+
+Two remain:
+
+* **8e, an honest self-SBOM.** `scripts/release.sh` fabricated one and it is
+  removed (deviation D16), so a release currently ships binaries and checksums
+  and no SBOM. Go emits neither a compile database nor a linker map, so
+  deriving one needs an evidence source of its own; `go list -deps -json` is
+  the obvious candidate.
+* **8f, corpus reproducibility.** Two regenerations of an unchanged corpus
+  differ in about 150 files, because CMake names its File API index by wall
+  clock and `.ninja_deps` records modification times.
+
+One smaller item is open inside section 30: point 7 requires
+`--redact-unanchored-paths` to apply equally to the SBOM, the findings JSON and
+the review report. That is assumed rather than verified.

@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+### Bounded parsers, and fuzzing for the newest ones
+
+- `internal/limits` holds the four bounds of section 30 in one place. Eighteen
+  files each had their own before, which is how they came to disagree about
+  what "the maximum line length" is.
+- `--max-input-size` and `--strict-symlinks` exist. The first refuses a file
+  before allocating for it; the second refuses a path whose final component is
+  a symbolic link, with `O_NOFOLLOW` so the kernel decides rather than a check
+  that something can race.
+- Six new fuzz targets, fourteen in total, covering everything phases 6 and 7
+  added. Two defects on the first run: the response-file tokenizers replaced
+  every non-UTF-8 byte with U+FFFD, so a Latin-1 or code-page path would have
+  entered the SBOM under a name matching no file; and `#include ""` produced an
+  empty path that was then identified as a file.
+
 ### The smoke test checks the release, not itself
 
 `action-smoke` fed the released binary a `compile_commands.json` naming
