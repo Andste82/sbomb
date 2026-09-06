@@ -1,6 +1,11 @@
 # Configuration
 
-Configuration is JSON. The minimum useful project and build settings are:
+sbomb runs without a configuration file. You add one when you need to name the
+deliverable explicitly, curate component metadata for the CRA fields, give
+external directories a portable identity, or pin a policy.
+
+The file is JSON, `sbomb.json` by default, selected with `--config`. **Unknown
+keys are an error**, so a typo cannot silently disable a policy gate.
 
 ```json
 {
@@ -10,7 +15,96 @@ Configuration is JSON. The minimum useful project and build settings are:
 }
 ```
 
-External directories are given stable, portable identities with `anchors`:
+`project.name` is the only required field. Relative paths are resolved from
+`project.root`.
+
+`sbomb schema` prints the current schema document.
+
+## `project`
+
+Describes the product the SBOM is about. These values become the root component.
+
+| Field | Meaning |
+|---|---|
+| `name` | **Required.** The product name |
+| `version` | Product version |
+| `supplier` | The supplier, which BSI TR-03183-2 requires |
+| `license` | SPDX expression for the product itself |
+| `type` | CycloneDX component type; derived from the artifact's role when absent |
+| `root` | Source root; defaults to the current directory |
+
+## `build`
+
+| Field | Meaning |
+|---|---|
+| `dir` | The build directory; `--build-dir` overrides it |
+| `config` | Which configuration to read for a multi-config generator, e.g. `Debug` |
+| `introspection` | Which subprocess groups may run — see below |
+
+sbomb runs no subprocesses at all unless you allow them, group by group:
+
+```json
+{"build": {"introspection": {"git": true, "ninja": true}}}
+```
+
+The groups are `cmake`, `ninja`, `git`, `osPackages` and `compiler`. Each
+permits a small, fixed set of argument shapes and nothing else; a command line
+is never assembled from a string. `--allow-introspection` turns them all on for
+one run. Everything works without them — introspection only adds evidence that
+would otherwise be missing.
+
+## `artifacts`
+
+The final deliverables. This is the entry point of the whole evidence chain.
+
+```json
+{
+  "artifacts": [
+    {
+      "path": "build/debug/firmware.elf",
+      "role": "firmware",
+      "map": "build/debug/firmware.map",
+      "linkDepfile": "build/debug/firmware.d"
+    }
+  ]
+}
+```
+
+| Field | Meaning |
+|---|---|
+| `path` | Path to the built artifact |
+| `role` | `application` (default), `library`, `firmware`, `bootloader`, `image`, `filesystem`, `data`, `package` |
+| `map` | Linker map, when it is not beside the artifact |
+| `linkDepfile` | Link dependency file, when it is not beside the artifact |
+
+When `artifacts` is absent, sbomb asks the CMake File API which targets produce
+artifacts and uses those. Discovery is deterministic: it never picks "the
+newest" or "the largest" binary in the build directory. If nothing is found the
+run fails with `MISSING_FINAL_DELIVERABLE`; if a configured artifact does not
+exist, with `MISSING_ARTIFACT`.
+
+`discovery.excludeTargetPatterns` narrows automatic discovery. It has no effect
+on configured artifacts:
+
+```json
+{"discovery": {"excludeTargetPatterns": ["*test*", "*example*"]}}
+```
+
+## `mode`
+
+`single` (default) expects exactly one deliverable. When automatic discovery
+finds several, the run stops with `AMBIGUOUS_FINAL_DELIVERABLE` rather than
+picking one.
+
+`assembly` says that is expected — a firmware image alongside its bootloader —
+and lets discovery proceed.
+
+## `anchors`
+
+Every file identity is an anchor plus a relative path, so that the same build
+on two machines produces the same document. The project root, the build root,
+the compiler installation and the sysroot are anchored automatically from what
+CMake reports. Everything else you name:
 
 ```json
 {
@@ -21,17 +115,20 @@ External directories are given stable, portable identities with `anchors`:
 }
 ```
 
-A bare key becomes an `extern:` anchor, so `shared` identifies files as
-`extern:shared:<relative path>`. Keys that already name a kind -- `sdk:`,
-`pkg:`, `toolchain:`, `sysroot:`, `extern:` -- are used verbatim. The project
-and build roots, the compiler installation and the sysroot are anchored
-automatically from the CMake File API. Files under no anchor are identified by
-absolute path and reported as `UNANCHORED_FILE`; `--redact-unanchored-paths`
-replaces those paths with a digest.
+A bare key becomes an `extern:` anchor, so files under `/opt/shared` are
+identified as `extern:shared:<relative path>`. A key that already names a kind
+— `sdk:`, `pkg:`, `toolchain:`, `sysroot:`, `extern:` — is used verbatim.
 
-Components carry the metadata the CRA requires. Nothing here is guessed: a
-version, a supplier or a license that no authorized source supplies is reported
-as missing rather than inferred from a directory name.
+Files under no anchor keep their absolute path and are reported as
+`UNANCHORED_FILE`. `--redact-unanchored-paths` replaces those paths with a
+digest, in the SBOM, the findings and the review report alike.
+
+## `components`
+
+Groups files into the components the SBOM reports, and supplies the metadata
+compliance asks for. **Nothing here is guessed:** a version, supplier or licence
+that no authorized source provides is reported as missing rather than inferred
+from a directory name or a repository URL.
 
 ```json
 {
@@ -42,19 +139,202 @@ as missing rather than inferred from a directory name.
       "type": "library",
       "version": "3.5.0",
       "supplier": "Trusted Firmware",
-      "license": "Apache-2.0"
+      "license": "Apache-2.0",
+      "purl": "pkg:generic/mbedtls@3.5.0"
     }
   ]
 }
 ```
 
-Files are mapped to components in the priority order of the specification:
-curated entries first, then the nearest ancestor directory carrying a package
-manifest (`conanfile.txt`, `vcpkg.json`, `idf_component.yml`, `Cargo.toml`,
-`west.yml`), then the anchor root, and finally an explicit `unknown:` component
-that is flagged for review. A file is never dropped because its component could
-not be determined.
+| Field | Meaning |
+|---|---|
+| `path` | Directory whose files belong to this component |
+| `match` | Glob alternative to `path` |
+| `name` | Component name |
+| `type` | Component type |
+| `version` | Version, as an assertion |
+| `versionFrom` | Where to read the version instead — see below |
+| `supplier` | Supplier |
+| `license` | SPDX expression |
+| `purl` | Package URL |
 
-Use `sbomb schema` for the current schema document. `--policy` selects a
-policy profile independently of the JSON configuration. Relative project and
-artifact paths are resolved from the configured project root.
+`path` selects a directory; `match` selects by glob instead. Use one or the
+other.
+
+`versionFrom` names authorized sources, tried in order:
+
+| Rule | Reads |
+|---|---|
+| `"git"` | The nearest git tag in the component root |
+| `"commit"` | The commit hash |
+| `"header:<file>:<macro>"` | A version macro from a header, e.g. `"header:include/mbedtls/version.h:MBEDTLS_VERSION_STRING"` |
+
+`git` and `commit` need the `git` introspection group.
+
+Files are mapped to components in a fixed priority order: these curated entries
+first, then package-manager metadata (vcpkg, Conan, FetchContent, git
+submodules), then the nearest ancestor directory holding a package manifest
+(`conanfile.txt`, `vcpkg.json`, `idf_component.yml`, `Cargo.toml`, `west.yml`),
+then the anchor root, and finally an explicit `unknown:` component flagged for
+review. **A file is never dropped because its component could not be
+determined.**
+
+## `manifests`
+
+Extra package manifests to read for component identity, beyond those found
+next to the files themselves:
+
+```json
+{"manifests": ["deps/conanfile.txt"]}
+```
+
+## `policy`
+
+Policy has two separable halves. **Scope** decides what belongs in the
+document; **gates** decide whether the run passes. Two profiles with the same
+scope produce the same document — a verdict never changes the content.
+
+```json
+{
+  "policy": {
+    "profile": "cra",
+    "headerEvidence": "dwarf-preferred",
+    "includeAssets": true,
+    "failOnStaleBuildArtifacts": true,
+    "waiversFile": "sbomb-waivers.json"
+  }
+}
+```
+
+### Profiles
+
+| Profile | Character |
+|---|---|
+| `lenient` | For an unprepared project: missing hashes, unresolved sources and stale artifacts do not fail |
+| `default` | Fails on missing file hashes, unresolved sources of linked objects and stale artifacts |
+| `cra` | The Cyber Resilience Act fields, gated |
+| `strict` | Every gate on, header evidence `union`, linker scripts included |
+
+`profileOverlay: "host-linux"` adds distribution libraries as separate
+components — noise on an embedded target, correct on a host build.
+
+### Gates
+
+Each is a boolean and each has a `--fail-on-…` flag:
+
+`failOnUnknownComponent`, `failOnUnknownLicense`, `failOnUnknownVersion`,
+`failOnMissingSupplier`, `failOnMissingHash`, `failOnMissingComponentHash`,
+`failOnMissingSourceForLinkedObject`, `failOnStaleBuildArtifacts`,
+`failOnReviewRequired`, `failOnWeakEvidence`, `failOnMissingHeaderEvidence`,
+`failOnUnanchoredFile`, `allowMissingLinkEvidence`.
+
+### Scope
+
+| Setting | Values | Default |
+|---|---|---|
+| `headerEvidence` | `dwarf-preferred`, `union`, `depfiles` | `dwarf-preferred` |
+| `includeSystemHeaders` | boolean | `false` |
+| `includeToolchainRuntime` | `separate-component`, `report-only`, `exclude` | `separate-component` |
+| `includeLinkerScripts` | boolean | `false` |
+| `includeGeneratedIntermediateFiles` | boolean | `false` |
+| `includeAssets` | boolean | `true` |
+| `includeTransientBuildArtifacts` | boolean | `false` |
+| `systemLibraries` | `exclude`, `separate-component`, `report-only` | `exclude` |
+| `pchHeaders` | `include`, `exclude`, `annotate-only` | `include` |
+| `sectionGarbageCollection` | `ignore`, `annotate`, `exclude` | `ignore` |
+| `prebuiltLibrariesRequireMapping` | boolean | `true` |
+| `staleToleranceSeconds` | integer | `5` |
+
+`severityOverrides` maps a finding identifier to `error`, `warning` or `info`
+when your process disagrees with the default severity.
+
+### Precedence
+
+Command line, then profile, then this file, then the built-in default. Because
+every gate in the file is a tri-state, a configuration can turn a profile's
+gate *off* as well as on — and `--fail-on-x=false` can do the same from the
+command line.
+
+## Waivers
+
+A finding you have judged and accepted belongs in a waiver, with a reason and
+an expiry — not in a permanently loosened gate.
+
+```json
+[
+  {
+    "id": "UNKNOWN_LICENSE",
+    "subject": "component:go/example.com/one",
+    "reason": "Vendor confirmed BSD-3-Clause by mail, ticket SEC-412",
+    "approvedBy": "a.steinbart",
+    "expires": "2027-01-31"
+  }
+]
+```
+
+`id` accepts `*` for any finding. An expired waiver stops suppressing and is
+reported as `WAIVER_EXPIRED`; one that matches nothing is reported as
+`WAIVER_UNUSED`, so the file cannot quietly rot.
+
+Select it with `--waivers <file>` or `policy.waiversFile`.
+
+## `output`
+
+The output settings are read from the command line, not from this block:
+`--format`, `--reproducible`. The only format is `cyclonedx-json` at
+specification version 1.6, and files are hashed with SHA-256.
+
+## Accepted but not yet acted on
+
+These keys are valid — the schema accepts them and a file containing them
+loads — but nothing reads them yet. They are listed so that a configuration
+using them is not mistaken for one that has an effect.
+
+| Key | Status |
+|---|---|
+| `output.format`, `output.specVersion`, `output.reproducible`, `output.hashAlgorithms` | Use the command-line flags |
+| `generators[]` | Generated files are recognized from the build graph; declaring them adds nothing |
+| `components[].cdxType`, `components[].upstream` | Not rendered into the document |
+
+## A worked example
+
+```json
+{
+  "schemaVersion": 3,
+  "project": {
+    "name": "example-firmware",
+    "type": "firmware",
+    "version": "1.4.2",
+    "supplier": "Example Org",
+    "license": "Proprietary",
+    "root": "."
+  },
+  "build": {"dir": "build/debug", "config": "Debug"},
+  "mode": "single",
+  "artifacts": [
+    {"path": "build/debug/firmware.elf", "role": "firmware"}
+  ],
+  "anchors": [
+    {"key": "sdk:vendor", "path": "/opt/vendor-sdk"}
+  ],
+  "components": [
+    {
+      "path": "dep/mbedtls",
+      "name": "mbedtls",
+      "version": "3.5.0",
+      "supplier": "Trusted Firmware",
+      "license": "Apache-2.0"
+    },
+    {
+      "path": "src/bootloader",
+      "name": "bootloader",
+      "versionFrom": ["git"]
+    }
+  ],
+  "policy": {
+    "profile": "cra",
+    "includeAssets": true,
+    "waiversFile": "sbomb-waivers.json"
+  }
+}
+```

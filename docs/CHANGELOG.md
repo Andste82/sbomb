@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+### The user documentation describes the tool that exists
+
+The README documented a dozen flags that were never implemented --
+`--source-dir`, `--mode`, `--spec-version`, `--jobs`, `--log-level`, `--map`
+and more -- and omitted most of the ones that are. All three user documents
+were rewritten against the actual command line, configuration and behaviour,
+and every example in them was run.
+
+`docs/architecture.md` is new: how the evidence chain works, what backs each
+step, and where sbomb refuses to guess, with diagrams.
+
+Several configuration keys turned out to be accepted and then ignored --
+`output.*`, `generators[]`, `components[].cdxType` and `.upstream`. They are
+listed as such in `docs/configuration.md` rather than described as if they
+worked.
+
+
 ### smoke-test runs again
 
 `release: published` never fired it: GitHub does not start workflows from

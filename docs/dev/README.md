@@ -47,6 +47,28 @@ specification and annotated with what the code emits, by
 `go run ./tools/findingsdoc`. Adding a finding therefore means adding it to
 appendix A as well; CI refuses the pull request otherwise.
 
+## The development container
+
+`.devcontainer/Dockerfile` installs the package managers the adapters read,
+every version pinned, because the fixture corpus is generated from them and an
+unpinned tool would make it unreproducible.
+
+| Tool | Version | Where |
+|---|---|---|
+| Conan | 2.32.0 | `/opt/pkgtools`, on `PATH` |
+| west | 1.5.0 | `/opt/pkgtools`, on `PATH` |
+| vcpkg | pinned commit | `/opt/vcpkg`, `$VCPKG_ROOT` |
+| CPM.cmake | 0.43.1, checksum verified | `/opt/cpm/CPM.cmake`, `$CPM_PATH` |
+
+`VCPKG_FORCE_SYSTEM_BINARIES=1` is set so vcpkg uses the cmake and ninja the
+image pins rather than downloading its own. All four resolve a dependency from
+a local directory without network access, which is what keeps the corpus
+reproducible.
+
+ESP-IDF is not installed by default: it adds 2.1 GB against 131 MB for
+everything else. Build the image with `--build-arg WITH_ESP_IDF=1` when the
+ESP-IDF fixture has to be produced or refreshed.
+
 ## Two habits worth keeping
 
 **Record, do not guess.** When the specification is silent or reality

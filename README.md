@@ -2,258 +2,237 @@
 
 # sbomb
 
-An evidence-based SBOM generator for CMake that traces precise build evidence to ensure CRA compliance according to BSI TR-03183.
+**An evidence-based SBOM generator for CMake builds.** It produces a CycloneDX
+1.6 document describing what actually went into a build artifact — not what
+happens to be lying around in the source tree.
 
-sbomb is a tool for generating machine-readable software bills of materials from real build evidence instead of guessing from a source tree. It starts from configured final deliverables such as firmware images, executables, libraries, or package artifacts and follows the evidence chain through link inputs, archives, object files, translation units, headers, and generated files to determine exactly which files and components were actually used.
+sbomb starts at a final deliverable — a firmware image, an executable, a
+library — and follows the build's own evidence backwards: link inputs, archive
+members, object files, translation units, sources, headers, generated files. A
+file appears in the SBOM when there is a chain of evidence connecting it to
+that artifact, and not otherwise.
 
-This makes it suitable for regulated embedded and firmware projects where provenance matters: you want a CycloneDX SBOM that reflects the concrete build, not a broad repository inventory.
+That is the whole idea, and it is what makes the output usable for compliance
+work under the EU Cyber Resilience Act and BSI TR-03183-2, where the question
+is not *what is in the repository* but *what did you ship*.
 
-## Why sbomb exists
+## What makes it different
 
-The core question sbomb answers is:
+A repository scanner reports your tests, your examples, all forty drivers in
+the vendored SDK and the package-manager cache. Your firmware contains a
+fraction of that. sbomb describes the fraction.
 
-> Which source files, headers, generated files, libraries, binaries, assets, and software components demonstrably contributed to this concrete build artifact?
+Concretely:
 
-The tool is intentionally evidence-based. It does not include files just because they exist on disk. A file is included only when there is a valid evidence chain to a final deliverable. That means unused sources, examples, tests, SDK trees, package-manager caches, and unrelated files are excluded unless they are proven to contribute to the shipped output.
+- A static library on the link line contributes **only the members the linker
+  actually extracted**, read from the linker map.
+- A header contributes only if the compiler actually read it. sbomb prefers the
+  DWARF line table over dependency files, because a dependency file lists
+  headers an `#ifdef` skipped — being generous is right for rebuild triggers
+  and wrong for a bill of materials.
+- Nothing is inferred from a filename, a directory name or a repository URL.
+  What cannot be established is reported as a finding and stays visible in the
+  document.
 
-## Primary use cases
+[docs/architecture.md](docs/architecture.md) explains the machinery: the
+evidence chain, the strategies behind each step, and where sbomb refuses to
+guess.
 
-### 1. CRA and BSI TR-03183 compliance
+## Requirements
 
-sbomb is designed to support compliance work under the EU Cyber Resilience Act and the BSI TR-03183 SBOM requirements. It emits CycloneDX 1.6 data with the required component metadata, dependency relationships, hashes, and evidence properties needed for downstream review and audit.
+A CMake project built with **Ninja**, **Ninja Multi-Config** or **Unix
+Makefiles**, configured with `CMAKE_EXPORT_COMPILE_COMMANDS=ON`. GCC and Clang
+are supported, including cross-compilation to bare-metal ARM and to Windows
+through mingw-w64.
 
-### 2. Embedded firmware and CMake projects
+sbomb itself is a single static executable with no runtime dependencies, and it
+never accesses the network.
 
-The tool targets CMake-based builds, including Ninja, Ninja Multi-Config, Unix Makefiles, and NMake Makefiles. It is especially useful for firmware, bootloader, and embedded software projects where build graphs are complex and the final product contains many generated and external inputs.
+## Quick start
 
-### 3. Accurate software provenance
+```bash
+# 1. Build with the evidence sbomb needs
+cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+      -DCMAKE_EXE_LINKER_FLAGS="-Wl,-Map=build/app.map"
+cmake --build build
 
-Rather than scanning a repository and inferring dependencies, sbomb traces what actually reached the final artifact. This gives you a realistic SBOM for the built product and helps distinguish:
+# 2. Describe what you built
+sbomb generate --build-dir build --output build/app.cdx.json
+```
 
-- used source and header files
-- generated configuration and asset files
-- link inputs, archives, and libraries
-- external components and package metadata
-- toolchain/runtime dependencies when relevant
+The linker map is what lets sbomb see inside static archives. The bundled CMake
+module adds the right flags for you — see
+[docs/getting-started.md](docs/getting-started.md).
 
-### 4. Auditable build evidence
+## Commands
 
-sbomb can expose the evidence graph and explain why a file or component is present in the SBOM. This is useful for engineering reviews, release sign-off, and dispute resolution when the build output needs to be traced back to the origin files.
+| Command | Purpose |
+|---|---|
+| `sbomb generate` | Produce the SBOM and evaluate policy |
+| `sbomb explain` | Show why a file or component is in the SBOM |
+| `sbomb validate` | Check an existing CycloneDX document |
+| `sbomb evidence` | Dump the evidence graph without writing an SBOM |
+| `sbomb self` | Describe a Go binary from the record its linker embedded |
+| `sbomb schema` | Print the embedded configuration or CycloneDX schema |
+| `sbomb version` | Print the tool version |
 
-### 5. Policy and review workflows
-
-The tool can validate output against policy profiles, fail on stale build artifacts, missing hashes, missing suppliers, or review-required conditions, and emit machine-readable findings. This makes it useful in CI pipelines and controlled release processes.
-
-## How sbomb works
-
-sbomb follows a simple flow:
-
-1. Identify the final deliverable(s) to analyze.
-2. Read build metadata from the CMake File API, linker maps, dependency files, and compile evidence.
-3. Build an evidence graph linking deliverables to linked objects, archives, source files, generated files, and headers.
-4. Filter the graph to only those files with valid chain evidence.
-5. Emit a CycloneDX SBOM and optional review report, findings, and evidence dump.
-
-This is a deliberate contrast to broad source-tree scanning: repository presence is not evidence by itself.
-
-## How to use sbomb
-
-### Generate an SBOM
+### generate
 
 ```bash
 sbomb generate \
-  --source-dir . \
   --build-dir build/debug \
   --config sbomb.json \
   --output build/debug/app.cdx.json \
-  --policy strict
+  --review-report build/debug/review.txt \
+  --policy cra
 ```
 
-This produces a CycloneDX JSON SBOM for the configured artifact or discovered deliverable. In single-artifact mode, a single output file is generated; in assembly mode, the product is treated as a combined artifact set.
+`--build-dir` is the only required flag; `sbomb.json` is picked up
+automatically when it is present.
 
-### Explain a file or component
+Alongside the SBOM the run always writes `evidence.json` into the build
+directory: the complete graph, every edge with its strength, its confidence and
+where it came from.
+
+### explain
 
 ```bash
-sbomb explain --build-dir build/debug --file dep/mbedtls/include/mbedtls/aes.h
+sbomb explain --build-dir build/debug --file project:src/main.c
 sbomb explain --build-dir build/debug --component mbedtls
-sbomb explain --build-dir build/debug --bom-ref file:project:src/main.cpp
+sbomb explain --build-dir build/debug --bom-ref file:project:src/main.c
 ```
 
-This prints the evidence chains connecting the selected item back to the final deliverable. It is useful when reviewing why a file appears in the SBOM or when debugging a missing or unexpected dependency.
+Prints the evidence chains from the selected item back to the deliverable. This
+is the answer to "why is this here?" — and, when it prints nothing, to "why is
+this *not* here?".
 
-### Validate an existing SBOM
+### validate
 
 ```bash
 sbomb validate --input build/debug/app.cdx.json
 ```
 
-This checks whether the generated CycloneDX document conforms to the expected structure and policy expectations.
+Runs both layers: the official CycloneDX JSON Schema, and the semantic checks a
+schema cannot express — a closed dependency graph, unique references, well-formed
+purls.
 
-### Describe a Go binary
-
-```bash
-sbomb self dist/sbomb-linux-amd64 \
-  --output dist/sbomb-linux-amd64.cdx.json \
-  --version 0.9.0 \
-  --module-dir . \
-  --goroot "$(go env GOROOT)" \
-  --reproducible
-```
-
-This writes a CycloneDX document for a Go executable from the module record its
-linker embedded: every module that was linked in, at the version and with the
-`go.sum` hash that ended up in the artifact. It reads the binary and nothing
-else -- no `go` subprocess, no network, no source-tree scan -- so it also works
-on a cross-compiled binary for a platform the host cannot run.
-
-`--module-dir` adds licence evidence from a vendor directory, but only for
-modules whose vendored version matches what the binary records. `--license
-<module>=<SPDX expression>` curates a licence that exact text matching cannot
-recognize; a curated value that contradicts the licence text is reported as a
-conflict rather than silently preferred.
-
-sbomb uses this on its own releases: every published binary ships the SBOM of
-itself beside it.
-
-### Inspect evidence and schemas
+### self
 
 ```bash
-sbomb evidence --build-dir build/debug --output evidence.json
-sbomb schema --config
+sbomb self dist/sbomb-linux-amd64 --output dist/sbomb-linux-amd64.cdx.json \
+  --version 1.2.3 --module-dir . --goroot "$(go env GOROOT)" --reproducible
 ```
 
-These commands expose internal evidence data or print the embedded configuration schema for the tool.
+Describes a Go executable from the module record its linker embedded: every
+module linked in, at the version and with the `go.sum` hash that reached the
+artifact. It reads the binary and nothing else — no subprocess, no network, no
+source tree — so it also works on a cross-compiled binary for a platform the
+host cannot run. Every sbomb release ships the SBOM of itself beside each
+binary, produced this way.
 
-### Print version information
+## Flags
 
-```bash
-sbomb version
-```
+**Where things are**
 
-## CLI arguments and common flags
+| Flag | Meaning |
+|---|---|
+| `--build-dir <dir>` | The CMake build directory. Required. |
+| `--config <file>` | Configuration file; defaults to `sbomb.json` if present |
+| `--output <file>` | Where to write the SBOM |
 
-The `generate` command is the primary entry point. The most important arguments are:
+**What comes out**
 
-- `--source-dir`: project source directory; defaults to the current directory.
-- `--build-dir`: required build directory containing the CMake build output and generated metadata.
-- `--config`: path to a sbomb JSON configuration file; defaults to `sbomb.json` if present.
-- `--output`: output file path for a single artifact.
-- `--output-dir`: output directory for multiple artifacts in single mode.
-- `--mode`: selects `single` or `assembly` mode.
-- `--config-name`: build configuration name for multi-config generators.
-- `--policy`: policy profile such as `default`, `strict`, `lenient`, or a custom JSON profile.
-- `--format`: output format; currently `cyclonedx-json`.
-- `--spec-version`: CycloneDX version; currently `1.6`.
-- `--map`: explicit linker map path.
-- `--link-depfile`: linker dependency file path.
-- `--compile-commands`: explicit `compile_commands.json` path.
-- `--buildgraph`: explicit build graph file such as `build.ninja`.
-- `--allow-introspection`: enables limited introspection commands for build metadata collection.
-- `--allow-cmake-regenerate`: allows `cmake -S -B` regeneration when File API data is not yet available.
-- `--reproducible`: omits timestamps for reproducible output.
-- `--header-evidence`: chooses how header evidence is resolved: `dwarf-preferred`, `union`, or `depfiles`.
-- `--waivers`: path to waiver definitions.
-- `--log-level`: verbosity (`error`, `warn`, `info`, `debug`, `trace`).
-- `--jobs`: number of worker threads.
-- `--max-input-size`: maximum parser input size.
+| Flag | Meaning |
+|---|---|
+| `--findings-json <file>` | Machine-readable diagnostics |
+| `--review-report <file>` | Human-readable review report |
+| `--report-format text\|markdown` | Report rendering; default `text` |
+| `--report-chains all` | Include the full evidence chains in the report |
+| `--format cyclonedx-json` | Output format; the only one so far |
+| `--reproducible` | Omit the timestamp and derive a stable serial number |
 
-Other flags control inclusion policies such as system headers, toolchain runtime, linker scripts, assets, runtime libraries, and fail-on conditions. Flags that start with `--include-*` or `--fail-on-*` override the corresponding policy value.
+**Policy**
 
-## Configuration model
+| Flag | Meaning |
+|---|---|
+| `--policy lenient\|default\|cra\|strict` | Profile; default `default` |
+| `--profile-overlay host-linux` | Report distribution libraries as components |
+| `--header-evidence dwarf-preferred\|union\|depfiles` | Which header evidence governs |
+| `--waivers <file>` | Waivers, each with a reason and an expiry |
+| `--fail-on-<gate>[=false]` | Turn one gate on or off, whatever the profile says |
+| `--include-<scope>[=false]` | Turn one scope option on or off |
+| `--system-libraries=`, `--pch-headers=`, `--section-garbage-collection=`, `--include-toolchain-runtime=` | Scope options taking a value, e.g. `--system-libraries=separate-component` |
 
-sbomb is configured through a JSON file that can define project metadata, build roots, artifact selection, anchors, policies, and output details. The configuration file is the primary way to define the final deliverables and to control what should be included or treated as review-required.
+**Paths and limits**
 
-Example structure:
+| Flag | Meaning |
+|---|---|
+| `--path-flavor posix\|windows` | Path comparison rules; defaults to the host's |
+| `--redact-unanchored-paths` | Replace paths outside every anchor with a digest |
+| `--strict-symlinks` | Refuse a path whose final component is a symbolic link |
+| `--max-input-size=<size>` | Input ceiling, e.g. `2G`, `512M`; default 2 GiB |
+| `--allow-introspection[=groups]` | Permit the fixed subprocess allowlist; off by default |
+| `-v`, `-vv`, `-vvv` | Verbosity |
+
+## Exit codes
+
+| Code | Meaning |
+|---|---|
+| 0 | SBOM written, policy passed |
+| 1 | Usage or configuration error |
+| 2 | Evidence could not be collected |
+| 3 | Policy failed |
+| 4 | CycloneDX validation failed |
+
+Exit code 3 still writes the SBOM. It means the document was produced and
+something in it needs a person.
+
+## Configuration
+
+Everything works without a configuration file. You need one to name the
+deliverable explicitly, to curate component metadata, or to give external
+directories a portable identity:
 
 ```json
 {
-  "schemaVersion": 3,
   "project": {
     "name": "example-firmware",
-    "type": "firmware",
-    "root": ".",
     "version": "1.4.2",
     "supplier": "Example Org",
-    "license": "Proprietary"
+    "type": "firmware",
+    "root": "."
   },
-  "build": {
-    "dir": "build/debug",
-    "config": "Debug"
-  },
-  "mode": "single",
-  "artifacts": [
+  "build": {"dir": "build/debug"},
+  "artifacts": [{"path": "build/debug/firmware.elf", "role": "application"}],
+  "components": [
     {
-      "path": "build/debug/firmware.elf",
-      "role": "application"
+      "path": "dep/mbedtls",
+      "name": "mbedtls",
+      "version": "3.5.0",
+      "supplier": "Trusted Firmware",
+      "license": "Apache-2.0"
     }
   ],
-  "policy": {
-    "profile": "cra",
-    "headerEvidence": "dwarf-preferred",
-    "failOnStaleBuildArtifacts": true,
-    "includeAssets": true
-  },
-  "output": {
-    "format": "cyclonedx-json",
-    "specVersion": "1.6",
-    "reproducible": false,
-    "hashAlgorithms": ["sha256"]
-  }
+  "policy": {"profile": "cra"}
 }
 ```
 
-### Key configuration sections
+Unknown keys are an error, so a typo cannot silently disable a policy gate.
+[docs/configuration.md](docs/configuration.md) covers every section.
 
-- `project`: identifies the product and root metadata.
-- `build`: defines the build directory and selected build configuration.
-- `mode`: selects single-artifact or assembly mode.
-- `anchors`: maps named roots such as external dependency directories to stable anchor keys.
-- `artifacts`: final deliverables to analyze.
-- `discovery`: optimization and exclusion rules for automatically discovered build outputs.
-- `components`: curated component metadata such as version, supplier, license, and upstream URL.
-- `generators`: generated file mappings.
-- `policy`: review policy, inclusion toggles, evidence handling, and fail conditions.
-- `output`: output format and reproducibility options.
+## Documentation
 
-### Default behavior and constraints
+| Document | Contents |
+|---|---|
+| [Getting started](docs/getting-started.md) | First run, CMake integration, what to build with |
+| [Architecture](docs/architecture.md) | How the evidence chain works and what backs each step |
+| [Configuration](docs/configuration.md) | The JSON file, anchors, components, policy |
+| [Findings](docs/findings.md) | Every diagnostic identifier and what it means |
+| [CI](docs/ci.md) | The GitHub Action and the release workflow |
+| [Windows](docs/windows.md) | Notes for Windows hosts |
 
-- Final deliverables must be explicitly configured or deterministically discovered.
-- Automatic discovery is only used when `artifacts` is absent or empty.
-- If no deliverable is found, the run fails with `MISSING_FINAL_DELIVERABLE`.
-- If a configured artifact does not exist, the run fails with `MISSING_ARTIFACT`.
-- Multi-config builds require a selected configuration if more than one exists.
-- Unknown keys in configuration are treated as an error, so typos cannot silently disable a policy gate.
-
-## Output and review
-
-sbomb writes CycloneDX JSON as its primary output and can additionally emit:
-
-- a review report for human-readable audit output
-- machine-readable findings
-- an evidence graph dump
-- documentation of unresolved or excluded chains
-
-This makes it usable both for downstream software inventory and for internal engineering review before release.
-
-## Typical workflow
-
-1. Configure the project root, build directory, and final artifact(s).
-2. Generate the SBOM from the build tree.
-3. Review findings and evidence chains.
-4. Validate the output against policy or compliance requirements.
-5. Integrate the generation step into CI or release automation.
-
-## Subcommands summary
-
-- `sbomb generate`: produce SBOM(s) and evaluate policy
-- `sbomb explain`: explain inclusion of a file or component
-- `sbomb validate`: validate an generated CycloneDX SBOM
-- `sbomb self`: describe a Go binary from the module record its linker embedded
-- `sbomb evidence`: dump evidence graph details
-- `sbomb schema`: print embedded configuration and findings schemas
-- `sbomb version`: print tool version information
-
-For a complete description of the normative behavior, see [docs/dev/spec.md](docs/dev/spec.md).
+The normative specification, the recorded deviations from it and the
+development notes are under [docs/dev](docs/dev/).
 
 ## License
 
@@ -262,6 +241,6 @@ sbomb is distributed under the MIT license; see [LICENSE](LICENSE).
 It has three third-party Go dependencies, all under permissive licenses
 compatible with MIT, which is why `vendor/` is committed and redistributed with
 the source; what each one is for is recorded in
-[docs/dev/dependencies.md](docs/dev/dependencies.md). The SPDX license texts
-that `internal/license` matches against are digests of the official SPDX list,
-not copies of the texts, and are regenerated by `tools/spdxgen`.
+[docs/dev/dependencies.md](docs/dev/dependencies.md). The SPDX licence data
+`internal/license` matches against consists of digests and templates from the
+official SPDX list, regenerated by `tools/spdxgen`.

@@ -5,7 +5,8 @@ is only relevant to working *on* sbomb is under [dev/](dev/).
 
 | Document | Read it when |
 |---|---|
-| [getting-started.md](getting-started.md) | Building the CLI and pointing it at a build directory for the first time |
+| [getting-started.md](getting-started.md) | First run: what your build must produce, the CMake integration, reading the result |
+| [architecture.md](architecture.md) | Understanding how the evidence chain works and what backs each step |
 | [configuration.md](configuration.md) | Writing the configuration file: artifacts, anchors, curated components |
 | [findings.md](findings.md) | A run failed and you need to know why, which flag changes it, and how to waive one |
 | [ci.md](ci.md) | Adding sbomb to a GitHub workflow |

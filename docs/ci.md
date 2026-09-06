@@ -5,15 +5,29 @@ release, verifies its SHA-256 checksum, and invokes the same CLI used locally.
 It does not implement discovery itself.
 
 ```yaml
-- uses: example/sbomb/.github/actions/sbomb@v0.0.0
+- uses: Andste82/sbomb/.github/actions/sbomb@v0.10.0
   with:
-    version: v0.0.0
+    version: v0.10.0
+    build-dir: build
     config: sbomb.json
+    policy: cra
     output: artifacts/sbomb.cdx.json
 ```
 
-Build evidence must exist before the action runs. The action should be called
-after the project build or after `cmake --build build --target sbomb` setup.
+| Input | Default | Meaning |
+|---|---|---|
+| `version` | — | Release tag to download |
+| `build-dir` | the workspace | The CMake build directory |
+| `config` | — | Configuration file |
+| `policy` | `default` | Policy profile |
+| `output` | `sbomb.cdx.json` | Where the document goes |
+| `reproducible` | `false` | Omit the timestamp |
+| `path-flavor` | the host's | Pin to `posix` when comparing across platforms |
+| `token` | `${{ github.token }}` | Needed while the repository is private; pass `""` to download anonymously |
+| `repository` | this repository | Where the release lives |
+
+Build evidence must exist before the action runs, so call it after the project
+build.
 
 While this repository is private its release assets are not downloadable
 without credentials, and an unauthenticated request answers 404 rather than

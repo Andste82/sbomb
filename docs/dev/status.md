@@ -99,6 +99,13 @@
   all -- bespoke agreements, pointers to a licence elsewhere -- where
   NOASSERTION is the right answer.
 
+- **Some configuration keys are accepted and then ignored.** `output.format`,
+  `output.specVersion`, `output.reproducible` and `output.hashAlgorithms` are
+  parsed and never read -- the output settings come from the command line only,
+  so a file asking for reproducible output does not get it. The same is true of
+  `generators[]`, `components[].cdxType` and `components[].upstream`.
+  `docs/configuration.md` says so; wiring them is the fix.
+
 ## Next Work
 
 Roadmap phase 8 is complete. The performance budget is measured and met, the
