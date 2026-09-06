@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 jobs:
-  determinism:
+  hash:
     strategy:
       # Milestone 14 recorded that there was no Windows runner. That was true
       # of the host it was written for and is not true of this one, so the
@@ -28,26 +28,26 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: Run deterministic fixture check
+      - name: Two runs, one hash
         # bash on the Windows runner too: the script is the same one developers
         # run, and rewriting it per platform would test something else.
         shell: bash
         run: scripts/determinism-check.sh > "determinism-${{ matrix.target }}.txt"
-      - name: Upload deterministic hash
+      - name: Keep the hash
         uses: actions/upload-artifact@v4
         with:
           name: determinism-${{ matrix.target }}
           path: determinism-${{ matrix.target }}.txt
 
   compare:
-    needs: determinism
+    needs: hash
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
         with:
           pattern: determinism-*
           merge-multiple: true
-      - name: Compare architecture hashes
+      - name: Every platform agrees
         shell: bash
         run: |
           set -euo pipefail

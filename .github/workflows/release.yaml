@@ -17,7 +17,7 @@ permissions:
   contents: write
 
 jobs:
-  release:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -33,15 +33,15 @@ jobs:
       # The gate runs on every push already; these are the two properties that
       # are specific to a release and would otherwise be claimed rather than
       # checked.
-      - name: Release binaries are reproducible
+      - name: Reproducible
         run: scripts/release.sh --check-reproducible
 
-      - name: Build release artifacts
+      - name: Build
         env:
           VERSION: ${{ inputs.tag || github.ref_name }}
         run: scripts/release.sh build
 
-      - name: The version in the binary matches the tag
+      - name: Version matches the tag
         env:
           VERSION: ${{ inputs.tag || github.ref_name }}
         run: |
@@ -53,7 +53,7 @@ jobs:
             exit 1
           fi
 
-      - name: Checksums cover every artifact
+      - name: Checksums cover everything
         env:
           VERSION: ${{ inputs.tag || github.ref_name }}
         run: |
@@ -67,7 +67,7 @@ jobs:
       # exactly the guessing this tool exists to refuse; shipping it would put
       # a false bill of materials next to the binary it describes. It is
       # attached once it is derived from evidence -- roadmap phase 8, step 8e.
-      - name: Publish the release
+      - name: Create the release
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ inputs.tag || github.ref_name }}

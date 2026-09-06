@@ -17,15 +17,15 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: Build without network (vendored)
+      - name: Builds without network
         run: go build -mod=vendor ./...
-      - name: go build
+      - name: Builds
         run: go build ./...
-      - name: go vet
+      - name: Vets clean
         run: go vet ./...
-      - name: go test
+      - name: Tests pass
         run: go test ./...
-      - name: gofmt
+      - name: Formatted
         run: |
           # Only our own packages; vendor/ is third-party source.
           unformatted=$(gofmt -l $(go list -f '{{.Dir}}' ./...))
@@ -47,24 +47,24 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: go test -race
+      - name: No data races
         run: go test -race ./...
 
   # The fixture corpus is a committed golden artifact. CI verifies that it is
   # complete and free of host paths; regenerating it needs the pinned
   # toolchains of the devcontainer and is therefore a developer task.
-  fixtures:
+  corpus:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: Corpus is complete
+      - name: Complete
         run: tools/fixtures/regen.sh --check
-      - name: Corpus contains no host paths
+      - name: Free of host paths
         run: go test ./tools/fixtures/...
-      - name: Corpus is unchanged by the test suite
+      - name: Unchanged by the test suite
         run: |
           go test ./... > /dev/null
           if ! git diff --quiet -- testdata/fixtures; then
@@ -83,14 +83,14 @@ jobs:
   # every push because it costs seconds. The 50 000 unit row needs a 200 MB map
   # and a minute of wall time, so it is run on demand:
   #   go test -tags perf ./test/perf/ -timeout 15m
-  performance:
+  performance-budget:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: Performance budget, 10 000 translation units
+      - name: 10 000 translation units within budget
         run: go test -tags perf ./test/perf/ -timeout 10m -units 10000 -map-bytes 41943040
 
   # The findings catalogue in the user documentation is generated from appendix
@@ -103,7 +103,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: Findings catalogue is current
+      - name: Matches the code and the specification
         run: go run ./tools/findingsdoc --check
 
   # The SPDX license list changes upstream, so drift here is information, not
@@ -116,17 +116,17 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: Embedded license table matches the SPDX list
+      - name: Matches the upstream SPDX list
         run: go run -mod=mod ./tools/spdxgen --check
 
   # The end-to-end CMake integration is behind a build tag because it needs a
   # real cmake on PATH.
-  e2e:
+  end-to-end:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: go test -tags e2e
+      - name: Against a real toolchain
         run: go test -tags e2e ./test/...
