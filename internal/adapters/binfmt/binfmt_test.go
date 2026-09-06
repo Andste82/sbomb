@@ -110,3 +110,12 @@ func TestLineTableFileTableYieldsDeclarationOnlyHeaders(t *testing.T) {
 		t.Errorf("crypto.h is not among the headers of main.c: %v", main.Headers)
 	}
 }
+
+func writeTemp(t *testing.T, data []byte) string {
+	t.Helper()
+	path := filepath.Join(t.TempDir(), "artifact")
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	return path
+}

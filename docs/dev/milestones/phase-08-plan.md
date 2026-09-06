@@ -29,7 +29,7 @@ hashing, BOM serialization, graph construction and depfile parsing; map
 parsing, which §31 names, has none -- and it grew in phase 7 from reading a few
 blocks to reading every line of the memory map.
 
-### 8b — Parser limits as one policy (§30)
+### 8b — Parser limits as one policy (§30) — done
 
 Limits exist in eighteen places, each parser inventing its own. §30 wants one:
 max line 1 MiB, max 100 000 tokens per line, `--max-input-size` (default
@@ -38,7 +38,7 @@ and `--strict-symlinks` (§30.5, `O_NOFOLLOW`). §30.7 -- redaction applying
 equally to the SBOM, the findings JSON and the review report -- is to be
 verified rather than assumed.
 
-### 8c — Fuzzing what phases 6 and 7 added
+### 8c — Fuzzing what phases 6 and 7 added — done
 
 Ten fuzz targets exist, all older than phase 6. Nothing fuzzes the DWARF file
 table reader, the two response-file tokenizers, the unity and PCH include
@@ -117,3 +117,43 @@ both fixed:
 Map parsing, which section 31 names and which had no benchmark, turned out not
 to be the bottleneck at all: 94.6 MB/s, so about two seconds for a 200 MB map.
 It has a benchmark now regardless, because the section requires one.
+
+
+## 8b result
+
+`internal/limits` holds the bounds of section 30 in one place: 1 MiB per line,
+100 000 tokens per line, a 2 GiB default input ceiling and depth 64. Its zero
+value is the specified default, so a caller with no opinion still gets them.
+`limits.Scanner` replaced the four hand-rolled bounded scanners the parsers of
+phases 6 and 7 had grown.
+
+The two flags section 30 names and nothing implemented now exist:
+
+* `--max-input-size` (accepts `2G`, `512M`, or plain bytes) refuses a file
+  before allocating for it rather than after.
+* `--strict-symlinks` refuses a path whose final component is a symbolic link.
+  `Stat` uses `Lstat` and `Open` passes `O_NOFOLLOW`, so the kernel decides and
+  the window between checking and opening is closed.
+
+Hashing goes through it, which is where a symbolic link out of every anchor
+would otherwise be followed.
+
+## 8c result
+
+Six fuzz targets for what phases 6 and 7 added, bringing the total to fourteen:
+the two response-file tokenizers, response-file expansion, the unity and PCH
+include parsers, package discovery across all four managers, and binary
+inspection over arbitrary bytes.
+
+Two defects, both on the first run:
+
+* **The response-file tokenizers corrupted non-UTF-8 paths.** They iterated
+  runes, so a byte that is not valid UTF-8 became U+FFFD -- one byte in, three
+  out. A Latin-1 filename or a Windows path in the local code page would have
+  entered the SBOM under a name that matches no file. Every character these
+  tokenizers act on is ASCII, so they iterate bytes now.
+* **`#include ""` yielded an empty include path**, which the caller joined with
+  the including file's directory and identified as a file. An empty target
+  names nothing and is refused.
+
+`scripts/fuzz-all.sh` runs all fourteen.

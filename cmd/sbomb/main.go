@@ -17,6 +17,7 @@ import (
 	"github.com/example/sbomb/internal/evidence"
 	"github.com/example/sbomb/internal/exec"
 	"github.com/example/sbomb/internal/generate"
+	"github.com/example/sbomb/internal/limits"
 	"github.com/example/sbomb/internal/pathmodel"
 	"github.com/example/sbomb/internal/policy"
 	"github.com/example/sbomb/internal/report"
@@ -334,6 +335,7 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 	redactUnanchored := false
 	allowIntrospection := false
 	var introspectionGroups []string
+	var bounds limits.Config
 	for i := 0; i < len(args); i++ {
 		switch {
 		case args[i] == "--verbose" || args[i] == "-v":
@@ -378,6 +380,15 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 			repro = true
 		case args[i] == "--redact-unanchored-paths":
 			redactUnanchored = true
+		case args[i] == "--strict-symlinks":
+			bounds.StrictSymlinks = true
+		case strings.HasPrefix(args[i], "--max-input-size="):
+			value := strings.TrimPrefix(args[i], "--max-input-size=")
+			size, parseErr := parseSize(value)
+			if parseErr != nil {
+				return 1, "", fmt.Sprintf("invalid --max-input-size %q: %v\n", value, parseErr)
+			}
+			bounds.MaxInput = size
 		case args[i] == "--allow-introspection":
 			allowIntrospection = true
 		case strings.HasPrefix(args[i], "--allow-introspection="):
@@ -539,6 +550,7 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 		RedactUnanchoredPaths: redactUnanchored,
 		Policy:                policyConfig,
 		Introspection:         introspection,
+		Limits:                bounds,
 	})
 	if err != nil {
 		return exitCodeFor(err, 2), logBuf.String(), err.Error() + "\n"
@@ -761,4 +773,32 @@ func resolveIntrospection(cfg config.Config, allowAll bool, groups []string) (ex
 		}
 	}
 	return features, nil
+}
+
+// parseSize reads a byte count, with the suffixes a person writing a limit on
+// a command line reaches for. Section 30 states --max-input-size in bytes; the
+// suffixes are a convenience, not a second syntax.
+func parseSize(value string) (int64, error) {
+	trimmed := strings.TrimSpace(value)
+	if trimmed == "" {
+		return 0, fmt.Errorf("empty")
+	}
+	multiplier := int64(1)
+	switch {
+	case strings.HasSuffix(trimmed, "GiB"), strings.HasSuffix(trimmed, "G"):
+		multiplier = 1 << 30
+	case strings.HasSuffix(trimmed, "MiB"), strings.HasSuffix(trimmed, "M"):
+		multiplier = 1 << 20
+	case strings.HasSuffix(trimmed, "KiB"), strings.HasSuffix(trimmed, "K"):
+		multiplier = 1 << 10
+	}
+	digits := strings.TrimRight(trimmed, "GiBMK")
+	number, err := strconv.ParseInt(digits, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	if number <= 0 {
+		return 0, fmt.Errorf("must be positive")
+	}
+	return number * multiplier, nil
 }

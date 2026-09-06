@@ -25,6 +25,7 @@ import (
 	"github.com/example/sbomb/internal/headers"
 	"github.com/example/sbomb/internal/inventory"
 	"github.com/example/sbomb/internal/license"
+	"github.com/example/sbomb/internal/limits"
 	"github.com/example/sbomb/internal/pathmodel"
 	"github.com/example/sbomb/internal/policy"
 	"github.com/example/sbomb/internal/sbomwriter"
@@ -79,6 +80,9 @@ type Options struct {
 	// is off unless the caller turned it on; an adapter that needs a command
 	// it may not run degrades and says which evidence it could not obtain.
 	Introspection exec.Features
+	// Limits is the parser policy of section 30. The zero value is the
+	// specified default, so a caller with no opinion still gets the bounds.
+	Limits limits.Config
 }
 
 type Logger struct {
@@ -313,7 +317,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		})
 	}
 	used = inventory.MergeUsedFiles(used)
-	used, hashFindings := hashUsedFiles(used, b.physical, logger)
+	used, hashFindings := hashUsedFiles(used, b.physical, options.Limits, logger)
 	findings = append(findings, hashFindings...)
 
 	// Staleness: the hashes describe the files as they are now, which is only

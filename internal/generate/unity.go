@@ -1,12 +1,12 @@
 package generate
 
 import (
-	"bufio"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/example/sbomb/internal/domain"
+	"github.com/example/sbomb/internal/limits"
 )
 
 // maxUnityFileBytes bounds what the unity parser will read (section 30). A
@@ -53,8 +53,7 @@ func unityIncludes(path string) ([]string, bool) {
 	defer file.Close()
 
 	includes := make([]string, 0)
-	scanner := bufio.NewScanner(file)
-	scanner.Buffer(make([]byte, 0, 64*1024), 1<<20)
+	scanner := limits.Scanner(file)
 	inBlockComment := false
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
@@ -99,13 +98,15 @@ func includedPath(line string) (string, bool) {
 		return "", false
 	}
 	rest = strings.TrimSpace(strings.TrimPrefix(rest, "include"))
+	// An empty target names no file. Left in, it would be joined with the
+	// including file's directory and identified as one.
 	switch {
 	case strings.HasPrefix(rest, "\""):
-		if end := strings.Index(rest[1:], "\""); end >= 0 {
+		if end := strings.Index(rest[1:], "\""); end > 0 {
 			return rest[1 : 1+end], true
 		}
 	case strings.HasPrefix(rest, "<"):
-		if end := strings.Index(rest, ">"); end > 0 {
+		if end := strings.Index(rest, ">"); end > 1 {
 			return rest[1:end], true
 		}
 	}

@@ -1,13 +1,13 @@
 package pkgmanager
 
 import (
-	"bufio"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 
 	"github.com/example/sbomb/internal/domain"
+	"github.com/example/sbomb/internal/limits"
 )
 
 // submodule reads .gitmodules, which is strategy 3 of section 19.2: a git
@@ -126,8 +126,7 @@ func parseGitmodules(path string) ([]gitmoduleEntry, error) {
 
 	entries := make([]gitmoduleEntry, 0)
 	var current *gitmoduleEntry
-	scanner := bufio.NewScanner(file)
-	scanner.Buffer(make([]byte, 0, 64*1024), 1<<20)
+	scanner := limits.Scanner(file)
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
 		if line == "" || strings.HasPrefix(line, "#") || strings.HasPrefix(line, ";") {

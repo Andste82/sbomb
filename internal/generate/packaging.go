@@ -1,7 +1,6 @@
 package generate
 
 import (
-	"bufio"
 	"errors"
 	"os"
 	"path/filepath"
@@ -12,6 +11,7 @@ import (
 	"github.com/example/sbomb/internal/config"
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/evidence"
+	"github.com/example/sbomb/internal/limits"
 )
 
 // Section 18. A firmware image contains inputs the compiler and linker never
@@ -219,8 +219,7 @@ func readInstallManifest(path string) (manifest.Manifest, bool) {
 	defer file.Close()
 
 	inputs := make([]manifest.Input, 0)
-	scanner := bufio.NewScanner(file)
-	scanner.Buffer(make([]byte, 0, 64*1024), 1<<20)
+	scanner := limits.Scanner(file)
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
 		if line == "" {

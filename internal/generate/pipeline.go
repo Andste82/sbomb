@@ -16,6 +16,7 @@ import (
 	"github.com/example/sbomb/internal/evidence"
 	"github.com/example/sbomb/internal/headers"
 	"github.com/example/sbomb/internal/inventory"
+	"github.com/example/sbomb/internal/limits"
 	"github.com/example/sbomb/internal/policy"
 )
 
@@ -594,7 +595,7 @@ func unresolvedObjects(graph *evidence.Graph, used []domain.Node, anchorResult *
 // hashUsedFiles reads and hashes the files the SBOM will contain. Only
 // evidence-selected files are read; the source tree is never walked
 // (section 23).
-func hashUsedFiles(files []domain.UsedFile, physical map[string]string, logger *Logger) ([]domain.UsedFile, []domain.Finding) {
+func hashUsedFiles(files []domain.UsedFile, physical map[string]string, bounds limits.Config, logger *Logger) ([]domain.UsedFile, []domain.Finding) {
 	findings := []domain.Finding{}
 	for index := range files {
 		canonical := files[index].ID.Canonical()
@@ -603,7 +604,9 @@ func hashUsedFiles(files []domain.UsedFile, physical map[string]string, logger *
 			files[index].Missing = true
 			continue
 		}
-		info, err := os.Stat(path)
+		// Section 30.4 and 30.5: a file the evidence names may be a symbolic
+		// link out of every anchor, and hashing it would follow the link.
+		info, err := bounds.Stat(path)
 		if err != nil {
 			files[index].Missing = true
 			logger.Debug("File '%s' is not readable: %v", path, err)

@@ -140,7 +140,7 @@ func Tokenize(content string, quoting Quoting) []string {
 func tokenizeGNU(content string) []string {
 	var args []string
 	var current strings.Builder
-	var quote rune
+	var quote byte
 	var started bool
 	var escaped bool
 
@@ -151,28 +151,34 @@ func tokenizeGNU(content string) []string {
 			started = false
 		}
 	}
-	for _, r := range content {
+	// Bytes, not runes. A path in a build tree is an arbitrary byte string --
+	// a Latin-1 filename, a Windows path in the local code page -- and
+	// decoding it as UTF-8 would replace what it cannot decode with U+FFFD,
+	// turning the file's name into one that matches nothing. Every character
+	// this tokenizer acts on is ASCII, so bytes are also all it needs.
+	for index := 0; index < len(content); index++ {
+		c := content[index]
 		switch {
 		case escaped:
-			current.WriteRune(r)
+			current.WriteByte(c)
 			started = true
 			escaped = false
-		case r == '\\':
+		case c == '\\':
 			escaped = true
 			started = true
 		case quote != 0:
-			if r == quote {
+			if c == quote {
 				quote = 0
 			} else {
-				current.WriteRune(r)
+				current.WriteByte(c)
 			}
-		case r == '"' || r == '\'':
-			quote = r
+		case c == '"' || c == '\'':
+			quote = c
 			started = true
-		case r == ' ' || r == '\t' || r == '\n' || r == '\r':
+		case c == ' ' || c == '\t' || c == '\n' || c == '\r':
 			flush()
 		default:
-			current.WriteRune(r)
+			current.WriteByte(c)
 			started = true
 		}
 	}
@@ -197,7 +203,7 @@ func tokenizeMSVC(content string) []string {
 			count /= 2
 		}
 		for i := 0; i < count; i++ {
-			current.WriteRune('\\')
+			current.WriteByte('\\')
 		}
 		backslashes = 0
 	}
@@ -208,26 +214,28 @@ func tokenizeMSVC(content string) []string {
 			started = false
 		}
 	}
-	for _, r := range content {
+	// Bytes for the same reason as the GNU tokenizer above.
+	for index := 0; index < len(content); index++ {
+		c := content[index]
 		switch {
-		case r == '\\':
+		case c == '\\':
 			backslashes++
 			started = true
-		case r == '"':
+		case c == '"':
 			odd := backslashes%2 == 1
 			flushBackslashes(true)
 			started = true
 			if odd {
-				current.WriteRune('"')
+				current.WriteByte('"')
 			} else {
 				inQuotes = !inQuotes
 			}
-		case !inQuotes && (r == ' ' || r == '\t' || r == '\n' || r == '\r'):
+		case !inQuotes && (c == ' ' || c == '\t' || c == '\n' || c == '\r'):
 			flushBackslashes(false)
 			flush()
 		default:
 			flushBackslashes(false)
-			current.WriteRune(r)
+			current.WriteByte(c)
 			started = true
 		}
 	}

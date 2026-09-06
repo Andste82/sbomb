@@ -1,7 +1,6 @@
 package generate
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -10,6 +9,7 @@ import (
 
 	"github.com/example/sbomb/internal/adapters/binfmt"
 	"github.com/example/sbomb/internal/domain"
+	"github.com/example/sbomb/internal/limits"
 )
 
 // dwarfEvidence is what the debug information of the deliverables says: which
@@ -276,8 +276,7 @@ func pchIncludes(path string) []string {
 	defer file.Close()
 
 	includes := make([]string, 0)
-	scanner := bufio.NewScanner(file)
-	scanner.Buffer(make([]byte, 0, 64*1024), 1<<20)
+	scanner := limits.Scanner(file)
 	for scanner.Scan() {
 		if included, ok := includedPath(strings.TrimSpace(scanner.Text())); ok {
 			includes = append(includes, included)
