@@ -252,6 +252,7 @@ silently disable a policy gate.
 | [Architecture](docs/architecture.md) | How the evidence chain works and what backs each step |
 | [Configuration](docs/configuration.md) | The JSON file, anchors, components, policy |
 | [Findings](docs/findings.md) | Every diagnostic identifier and what it means |
+| [Properties](docs/properties.md) | The `sbomb:` properties a document carries |
 | [CI](docs/ci.md) | The GitHub Action and the release workflow |
 | [Windows](docs/windows.md) | Notes for Windows hosts |
 

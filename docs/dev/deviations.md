@@ -563,3 +563,24 @@ It found one on its first run: the documentation described an artifact role
 `bootloader`, `library`, `filesystem`, `image`, `package`, `data` and `other`;
 `firmware` is the CycloneDX *type* that `bootloader`, `image` and `filesystem`
 produce.
+
+## D26 — The property catalogue is checked, and two properties are renamed in it
+
+Appendix B lists the properties an sbomb document may carry, and nothing
+checked it. Both directions had drifted: eleven properties were written into
+documents with no catalogue entry, so a consumer meeting `sbomb:go:moduleSum`
+had nowhere to look it up; and thirty-nine were catalogued and never written,
+describing a document sbomb does not produce.
+
+`tools/propertydoc` closes the first direction the way `tools/findingsdoc`
+closes it for findings: a property the code writes and the appendix does not
+define fails the build. The second is handled the same way as the reserved
+findings — the generated table in `docs/properties.md` marks each entry
+`emitted` or `reserved`, so the catalogue stays whole rather than becoming a
+snapshot of one version.
+
+Two names in the appendix were not the ones the writer uses. The appendix said
+`sbomb:file:path` and `sbomb:file:headerClass`; documents carry
+`sbomb:path:canonical` and `sbomb:evidence:header:class`. The names in shipped
+documents win — renaming them would break a consumer that already reads them —
+so the appendix is corrected rather than the code.

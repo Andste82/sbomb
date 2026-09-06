@@ -9,6 +9,7 @@ is only relevant to working *on* sbomb is under [dev/](dev/).
 | [architecture.md](architecture.md) | Understanding how the evidence chain works and what backs each step |
 | [configuration.md](configuration.md) | Writing the configuration file: artifacts, anchors, curated components |
 | [findings.md](findings.md) | A run failed and you need to know why, which flag changes it, and how to waive one |
+| [properties.md](properties.md) | Reading the `sbomb:` properties in a generated document |
 | [ci.md](ci.md) | Adding sbomb to a GitHub workflow |
 | [windows.md](windows.md) | Analysing a Windows build, or analysing one from Linux |
 | [CHANGELOG.md](CHANGELOG.md) | What changed between releases |

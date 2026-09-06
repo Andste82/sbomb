@@ -2016,6 +2016,7 @@ All properties are namespaced `sbomb:`. Booleans are the strings `"true"`/`"fals
 
 ```
 sbomb:run:toolVersion            sbomb:run:specVersion
+sbomb:run:timestamp              sbomb:run:sourceDateEpoch
 sbomb:run:policyProfile          sbomb:run:mode
 sbomb:run:reproducible           sbomb:run:adapters        (repeated, sorted)
 sbomb:build:generator            sbomb:build:config
@@ -2050,12 +2051,21 @@ sbomb:cdx:archiveProperty        (archive | no-archive)          [BSI TR-03183-2
 sbomb:cdx:structuredProperty     (structured | unstructured)     [BSI TR-03183-2]
 ```
 
+**Go binary components (`sbomb self`)**
+
+```
+sbomb:go:module                  sbomb:go:mainPackage
+sbomb:go:toolchain               sbomb:go:moduleSum
+sbomb:go:goos                    sbomb:go:goarch
+sbomb:go:replaces                (module@version the linker substituted)
+```
+
 **File components**
 
 ```
-sbomb:file:path                  sbomb:file:anchor
+sbomb:path:canonical             sbomb:file:anchor
 sbomb:file:role                  sbomb:file:class
-sbomb:file:headerClass           sbomb:file:size
+sbomb:evidence:header:class      sbomb:file:size
 sbomb:file:missing               sbomb:file:resolvedTarget
 sbomb:evidence:type              (repeated, sorted)
 sbomb:evidence:source            (repeated, sorted)
@@ -2076,6 +2086,11 @@ sbomb:evidence:header:narrowedByDwarf
 sbomb:cdx:executableProperty     sbomb:cdx:archiveProperty
 sbomb:cdx:structuredProperty
 ```
+
+`sbomb:file:path` and `sbomb:file:headerClass` were the earlier names of
+`sbomb:path:canonical` and `sbomb:evidence:header:class`. The names the writer
+uses are the ones documents carry, so they are the ones recorded here
+(deviation D26).
 
 Property values MUST NOT contain absolute paths. Every path-valued property uses canonical form (§7.7).
 

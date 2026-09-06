@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+### The property catalogue is checked too
+
+Appendix B lists the `sbomb:` properties a document may carry, and nothing
+checked it. Eleven were written into documents with no catalogue entry, so a
+consumer meeting `sbomb:go:moduleSum` had nowhere to look it up; thirty-nine
+were catalogued and never written.
+
+`tools/propertydoc` does for properties what `tools/findingsdoc` does for
+findings: emitting one the appendix does not define fails the build, and
+`docs/properties.md` is generated from the appendix and marks each entry
+`emitted` or `reserved`. Deviation D26; two catalogue entries are renamed to
+the names documents actually carry.
+
+`docs/properties.md` is new user documentation: what the properties are for,
+how to read a licence answer from the four that describe it, and the three BSI
+TR-03183-2 properties every component gets.
+
+
 ### `sbomb schema` describes the configuration the tool actually reads
 
 The published schema was written by hand and had drifted: it named five of the

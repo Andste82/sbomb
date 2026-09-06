@@ -52,7 +52,7 @@ than which command it runs.
 | | | `race` | No data races, with cgo enabled |
 | | | `corpus` | Fixture corpus complete, free of host paths, unchanged by the tests |
 | | | `performance-budget` | 10 000 translation units within the budget of section 31 |
-| | | `documentation` | `docs/findings.md` matches the code and the specification, and every documented configuration loads |
+| | | `documentation` | The findings and property catalogues match the code and the specification, and every documented configuration loads |
 | | | `spdx-drift` | Embedded licence digests and templates match the upstream SPDX list (informational) |
 | | | `end-to-end` | The CMake integration against a real toolchain |
 | `determinism` | push, pull request | `hash` | Two runs on one platform produce one hash — linux/amd64, linux/arm64, windows/amd64 |

@@ -106,8 +106,10 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: Matches the code and the specification
+      - name: Findings match the code and the specification
         run: go run ./tools/findingsdoc --check
+      - name: Properties match the code and the specification
+        run: go run ./tools/propertydoc --check
       - name: Documented configurations load
         run: go run ./tools/docexamples
 

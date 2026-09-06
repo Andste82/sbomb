@@ -20,6 +20,7 @@ go test -tags e2e ./test/...            # end-to-end, needs a real toolchain
 tools/fixtures/regen.sh --check         # the committed corpus is complete
 scripts/determinism-check.sh            # two runs produce the same bytes
 go run ./tools/findingsdoc --check      # the findings catalogue matches the code
+go run ./tools/propertydoc --check      # the property catalogue matches the code
 go run ./tools/docexamples             # the documented configurations load
 ```
 
@@ -43,10 +44,11 @@ scripts/release.sh build                # the release artifacts and their SBOMs
 | [open-questions.md](open-questions.md) | What the specification does not settle and which affects output. Recorded rather than guessed at. |
 | [dependencies.md](dependencies.md) | Every third-party module, what it does, and what removing it would cost. |
 
-The findings catalogue in `docs/findings.md` is generated from appendix A of the
-specification and annotated with what the code emits, by
-`go run ./tools/findingsdoc`. Adding a finding therefore means adding it to
-appendix A as well; CI refuses the pull request otherwise.
+Two catalogues in the user documentation are generated from the specification
+and annotated with what the code does: `docs/findings.md` from appendix A by
+`go run ./tools/findingsdoc`, and `docs/properties.md` from appendix B by
+`go run ./tools/propertydoc`. Adding a finding or a property therefore means
+adding it to the appendix as well; CI refuses the pull request otherwise.
 
 ## The development container
 
