@@ -28,6 +28,14 @@ inputs:
     description: CycloneDX output path
     required: false
     default: sbomb.cdx.json
+  path-flavor:
+    description: >
+      Path comparison flavor (posix or windows). Empty means the host's, which
+      is what a build on that host wants. Pin it when a document produced on
+      Windows has to be byte-identical to one produced on Linux: the flavors
+      differ in case sensitivity, so the same evidence otherwise yields two
+      different documents by design (section 7.3).
+    required: false
   token:
     description: >
       Token used to download the release. Needed only while the repository is
@@ -76,9 +84,11 @@ runs:
         SBOMB_CONFIG: ${{ inputs.config }}
         SBOMB_POLICY: ${{ inputs.policy }}
         SBOMB_OUTPUT: ${{ inputs.output }}
+        SBOMB_PATH_FLAVOR: ${{ inputs.path-flavor }}
       run: |
         set -euo pipefail
         args=(generate --build-dir "$SBOMB_BUILD_DIR" --output "$SBOMB_OUTPUT" --policy "$SBOMB_POLICY")
         if [[ -n "$SBOMB_CONFIG" ]]; then args+=(--config "$SBOMB_CONFIG"); fi
+        if [[ -n "$SBOMB_PATH_FLAVOR" ]]; then args+=(--path-flavor "$SBOMB_PATH_FLAVOR"); fi
         if [[ "$SBOMB_REPRODUCIBLE" == "true" ]]; then args+=(--reproducible); fi
         "$RUNNER_TEMP/sbomb/$SBOMB_ASSET" "${args[@]}"

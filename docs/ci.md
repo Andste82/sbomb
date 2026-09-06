@@ -22,6 +22,11 @@ defaulting to `${{ github.token }}`, and downloads with `gh` when it has one.
 Pass `token: ""` to download anonymously, which is what a consumer of a public
 release wants.
 
+`path-flavor` is empty by default, which means the host's. Pin it to `posix`
+when a document produced on a Windows runner has to be byte-identical to one
+produced on Linux: the flavors differ in case sensitivity, so the same evidence
+otherwise yields two different documents by design (section 7.3).
+
 ## Workflows
 
 A job never repeats the name of its workflow, and says what it checks rather

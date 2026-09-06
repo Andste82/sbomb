@@ -50,6 +50,11 @@ jobs:
           config: testdata/config/portable.json
           policy: lenient
           reproducible: "true"
+          # The compare job below holds the two platforms to the same bytes, and
+          # that only means anything with the flavor pinned: the default is the
+          # host's, and the flavors differ in case sensitivity, so the same
+          # evidence yields two different documents on purpose (section 7.3).
+          path-flavor: posix
           output: smoke.cdx.json
 
       # The property the whole tool exists for: p02-static compiles unused.c

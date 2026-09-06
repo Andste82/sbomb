@@ -15,6 +15,12 @@ release asset answers 404 -- indistinguishable from a missing tag. The
 composite action takes a `token`, defaulting to `${{ github.token }}`, and
 downloads with `gh` when it has one.
 
+Past that, the two platforms produced different documents -- correctly. The
+path flavor defaults to the host's and the flavors differ in case sensitivity,
+so comparing bytes across platforms only means something with it pinned, which
+is what `scripts/determinism-check.sh` has always done and the smoke test did
+not. The action takes a `path-flavor` now.
+
 ## 0.9.0
 
 ### Regenerating the fixture corpus is a no-op again
