@@ -20,11 +20,11 @@ This document is written so that an implementing agent can work top-to-bottom wi
 
 ### 0.2 Rules for the Implementing Agent
 
-1. **Never** invent behaviour that is not specified. If this document is silent on something that affects output, stop and record it as an open question in `docs/open-questions.md`; do not guess.
+1. **Never** invent behaviour that is not specified. If this document is silent on something that affects output, stop and record it as an open question in `docs/dev/open-questions.md`; do not guess.
 2. **Never** skip a milestone's tests. A milestone is complete only when its acceptance commands return the specified exit codes on a clean checkout.
 3. **Never** implement a later milestone's behaviour early. Each milestone must be a shippable state of the repository.
 4. Every milestone MUST end with `go build ./... && go vet ./... && go test ./...` succeeding.
-5. Any deviation from this specification MUST be recorded in `docs/deviations.md` with a rationale.
+5. Any deviation from this specification MUST be recorded in `docs/dev/deviations.md` with a rationale.
 
 ### 0.3 Terminology Shortcuts
 
@@ -1674,7 +1674,7 @@ Third-party Go modules are permitted. The binding constraints are instead:
 1. **Single static executable.** Every release binary MUST build with `CGO_ENABLED=0` and run with no runtime dependency beyond the kernel. Any module requiring cgo is disqualified.
 2. **No network at runtime.** A module that performs network I/O in the code paths used is disqualified.
 3. **Vendored and pinned.** `go.mod`, `go.sum`, and `vendor/` are committed. Builds MUST work with `-mod=vendor` and no network.
-4. **Justified.** Each direct dependency is listed in `docs/dependencies.md` with what it does and what removing it would cost.
+4. **Justified.** Each direct dependency is listed in `docs/dev/dependencies.md` with what it does and what removing it would cost.
 5. **Determinism is the implementation's responsibility, not the library's.** Where a library's serialization order is not guaranteed, the writer MUST impose the ordering of §29 itself before handing data to the library, and the golden tests MUST prove byte-stability.
 
 Recommended direct dependencies:
@@ -1894,7 +1894,7 @@ Both MUST be stable, sorted, and independent of the CycloneDX writer, so that in
 
 ## 41. Milestones
 
-The milestone plan is maintained in the dedicated markdown files under [docs/milestones/README.md](milestones/README.md) and the per-milestone entries linked there.
+The milestone plan is maintained in the dedicated markdown files under [docs/dev/milestones/README.md](milestones/README.md) and the per-milestone entries linked there.
 
 This specification intentionally does not duplicate the detailed milestone text; the milestone documents are the canonical source for scope, acceptance criteria, and implementation sequencing.
 

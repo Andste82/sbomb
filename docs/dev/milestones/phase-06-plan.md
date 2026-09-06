@@ -127,6 +127,6 @@ Three defects, all invisible to hand-written test data:
    construct could be tested against real generator output at all.
 
 And three places where the specification had to be interpreted rather than
-followed literally, each recorded in `docs/deviations.md`: D8 (DWARF carries no
+followed literally, each recorded in `docs/dev/deviations.md`: D8 (DWARF carries no
 inclusion depth), D9 (what "DWARF is available for the CU" has to mean), D10
 (where the precompiled header set comes from) and D11 (`annotate-only`).

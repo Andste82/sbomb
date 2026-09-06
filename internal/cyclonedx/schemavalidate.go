@@ -20,7 +20,7 @@ var errorPrinter = message.NewPrinter(language.English)
 // The official CycloneDX schemas, embedded so that validation needs no
 // network at runtime (specification sections 30.8 and 32.5). They are
 // draft-07, not the draft 2020-12 that section 32.5 assumes; see
-// docs/deviations.md D6.
+// docs/dev/deviations.md D6.
 //
 //go:embed schema/*.json
 var schemaFS embed.FS

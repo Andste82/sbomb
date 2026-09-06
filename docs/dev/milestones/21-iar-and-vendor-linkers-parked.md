@@ -4,7 +4,7 @@
 
 **Goal (when unparked):** support toolchains that cannot be obtained or executed in CI.
 
-**Constraint (important for an implementing agent):** IAR, ARMCC, and most vendor toolchains require commercial licenses and cannot be installed by an agent. This milestone is therefore **fixture-driven only**. The agent MUST NOT attempt to download or install these toolchains. If the required fixtures are absent, the milestone is blocked and the agent MUST record that in `docs/status.md` rather than fabricating fixtures.
+**Constraint (important for an implementing agent):** IAR, ARMCC, and most vendor toolchains require commercial licenses and cannot be installed by an agent. This milestone is therefore **fixture-driven only**. The agent MUST NOT attempt to download or install these toolchains. If the required fixtures are absent, the milestone is blocked and the agent MUST record that in `docs/dev/status.md` rather than fabricating fixtures.
 
 **Deliverables:** `internal/adapters/linkers/iar` (ILINK map + `.d` output); an `experimental` marker on the adapter; documentation of how a user contributes a fixture (`docs/contributing-fixtures.md`) including a redaction checklist.
 

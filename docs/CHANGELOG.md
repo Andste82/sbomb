@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### Documentation split by audience
+
+`docs/` now holds what someone running sbomb on their own build needs: getting
+started, the configuration format, what findings mean and how to waive them,
+the GitHub action, Windows, and this changelog. Everything that is only
+relevant to working on sbomb moved to `docs/dev/`: the specification, the
+milestone plan and phase plans, the recorded deviations, the open questions and
+the dependency rationale. Both directories gained an index.
+
+The universal gate was stated in two places that had already drifted apart --
+the milestone index listed four commands, the one actually run has nine. It is
+stated once now, in `docs/dev/README.md`, which is what CI points at.
+
 ### Package managers, introspection and response files (roadmap phase 7)
 
 - `internal/adapters/pkgmanager` implements strategy 2 of section 19.2: a
@@ -243,7 +256,7 @@ sbomb is released under the MIT license.
 - Added `sbomb validate --input <file>` and `sbomb evidence --build-dir <dir>`,
   and `sbomb schema --cyclonedx` prints the embedded schema.
 - `vendor/` is committed and `go build -mod=vendor` is verified in CI, so a
-  build needs no network (section 37.3). `docs/dependencies.md` records what
+  build needs no network (section 37.3). `docs/dev/dependencies.md` records what
   each direct dependency does and what removing it would cost.
 
 ### Fixed

@@ -29,7 +29,7 @@ file alone when member-level resolution is required, and section 12's
 
 ## D2 — The race detector requires cgo
 
-The universal gate in `docs/milestones/README.md` requires `go test ./... -race`.
+The universal gate in `docs/dev/README.md` requires `go test ./... -race`.
 The race detector needs cgo, while section 37.1 requires release binaries to
 build with `CGO_ENABLED=0`, which is also the devcontainer default.
 

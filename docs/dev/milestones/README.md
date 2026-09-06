@@ -2,22 +2,16 @@
 
 These files are extracted from [the specification](../sbomb-spec-v3.1.md#41-milestones) to support focused implementation work.
 
-## Universal Gate
+## Rules
 
-Every milestone must satisfy:
-
-```text
-go build ./...
-go vet ./...
-CGO_ENABLED=1 go test ./... -race     # the race detector needs cgo (docs/deviations.md D2)
-gofmt -l . | wc -l   ->  0
-```
+The gate every change has to pass is in [../README.md](../README.md); it is
+stated once so the two cannot drift apart. Beyond it, a milestone must:
 
 - Keep the repository shippable; `cmd/sbomb` must build and `sbomb version` must work.
 - Add at least one golden or table-driven test per new behaviour.
 - Do not implement behaviour belonging to a later milestone.
-- Update `docs/CHANGELOG.md` and `docs/status.md`.
-- Record unspecified decisions in `docs/open-questions.md` rather than guessing.
+- Update `docs/CHANGELOG.md` and `docs/dev/status.md`.
+- Record unspecified decisions in `docs/dev/open-questions.md` rather than guessing.
 
 Milestones 0-16 are the core track and must be implemented in order. Milestones 17, 19, and 20 are adapter tracks and may be implemented after Milestone 16. Milestones 18 and 21 are parked and must not be started until explicitly unparked.
 
@@ -47,3 +41,12 @@ Milestones 0-16 are the core track and must be implemented in order. Milestones 
 - [21-iar-and-vendor-linkers-parked.md](21-iar-and-vendor-linkers-parked.md) - Milestone 21 — IAR and Vendor Linkers — **PARKED**
 
 The original specification remains authoritative if this extracted directory ever drifts.
+
+## Phase plans
+
+The milestones above describe what to build. The phase plans below record what
+was actually built, in the order the work was done, together with the defects
+each phase uncovered. They are the working state of the roadmap.
+
+- [phase-06-plan.md](phase-06-plan.md) - Header evidence in full — complete
+- [phase-07-plan.md](phase-07-plan.md) - Adapter breadth — complete, ESP-IDF parked

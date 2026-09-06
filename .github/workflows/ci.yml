@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 jobs:
-  # The universal gate from docs/milestones/README.md. Every milestone must
+  # The universal gate from docs/dev/README.md. Every milestone must
   # leave the repository in a state where all four of these succeed.
   gate:
     runs-on: ubuntu-latest

@@ -9,7 +9,7 @@
 //
 // Map evidence matters more than specification section 11.2 suggests: GNU ld
 // does not list extracted archive members in its dependency file, only the
-// archive, so member-level attribution comes from here (docs/deviations.md D1).
+// archive, so member-level attribution comes from here (docs/dev/deviations.md D1).
 package mapparser
 
 import (
