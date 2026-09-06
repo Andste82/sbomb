@@ -1,7 +1,11 @@
-_demo
+# Anchored deliberately. An unanchored "sbomb" matches every path component of
+# that name, which silently swallowed the whole cmd/sbomb directory: three test
+# files were never committed, and CI failed on them for weeks while the local
+# tree was green.
+/sbomb
+/_demo
+/dist/
 .env
-sbomb
-dist/
 
 # Devcontainer-local Claude Code state; not part of the project.
 .devcontainer/.claude-config/
