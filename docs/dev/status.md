@@ -118,9 +118,13 @@ outputs contain the paths.
 
 What is left is not phase work:
 
-* **No release has ever been published.** `v0.7.0` and `v0.8.0` are tags with
-  no release behind them, so `smoke-test` downloads a 404. Either run
-  `release.yaml` by `workflow_dispatch` on an existing tag or cut a new one.
-  It is an outward-facing action and therefore a decision, not a task.
 * **ESP-IDF (milestone 20) is parked**, at the point where it was parked in
-  phase 7.
+  phase 7, as are MSVC (18) and the vendor linkers (21).
+* **The repository is private.** A release asset cannot be downloaded without
+  credentials, and an unauthenticated request answers 404 rather than 403 --
+  which reads like a missing tag. The composite action carries a token for
+  that reason; going public would make it unnecessary.
+
+Releases are published from `v0.9.0` onward; `v0.7.0` and `v0.8.0` are tags
+with nothing behind them. Cutting one is written down in
+`.claude/skills/release`.
