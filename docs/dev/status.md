@@ -97,12 +97,13 @@
 
 ## Next Work
 
-The critical path is complete: the tool produces an evidence-based, validated,
-CRA-field-complete SBOM and gates on it. What remains adds coverage and depth.
-
-Roadmap phase 7: adapter breadth. Package managers (Conan, FetchContent, vcpkg,
-CPM) fill strategies 2 through 5 of section 19.2 and supply version, supplier
-and licence without curated configuration. `internal/exec` with the allowlist of
-section 9.2 is the prerequisite for git-derived versions, `ninja -t deps` and
-toolchain probing. Then response-file expansion (section 9.3), packaging and
-images (section 18), and the ESP-IDF adapter.
+Roadmap phase 8: hardening. The performance budget of section 31 measured
+against the `large` fixture rather than assumed -- nothing has ever run at
+scale, and the fixture generator exists but no test invokes it. The parser
+limits of section 30 as one configurable policy instead of eighteen hardcoded
+ones, with the two missing flags `--max-input-size` and `--strict-symlinks`.
+Fuzzing extended to what phases 6 and 7 added. Windows determinism executed on
+a Windows runner rather than simulated through a path flavor. And a self-SBOM
+produced from evidence: `release.sh` currently writes a fabricated
+`compile_commands.json` naming one file, which is exactly the guessing this
+tool exists to refuse.

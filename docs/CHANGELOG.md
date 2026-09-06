@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+## 0.8.0 - 2026-09-06
+
+Roadmap phase 7 is complete: sbomb reads what package managers recorded, so a
+dependency Conan, vcpkg, FetchContent or CPM installed becomes its own
+component with the manager's name, version, purl and licence -- without a line
+of curated configuration. Git submodules are component boundaries, and package
+and image manifests make what a firmware image contains part of the SBOM.
+
+Two corrections in this release matter more than the new adapters. Licence
+detection matched 1 of 160 real licence files and now matches 93. And section
+garbage collection and the LTO confidence downgrade, shipped in 0.7.0 with unit
+tests only, are exercised against real linker output -- which is how three
+defects in them came out.
+
+What 1.0.0 still needs is the hardening of phase 8: the performance budget of
+section 31 measured rather than assumed, the parser limits of section 30 as one
+policy, and a self-SBOM produced from evidence rather than fabricated.
+
 ### A findings catalogue that cannot drift
 
 `docs/findings.md` explained how findings work and named none of them. It now
