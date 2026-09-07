@@ -22,10 +22,25 @@ files out of libcrypto".
 
 ## Getting sbomb
 
-Download a release and check it before running it:
+```bash
+curl -fsSL https://andste82.github.io/sbomb/install.sh | sh
+```
+
+Windows, in PowerShell:
+
+```powershell
+irm https://andste82.github.io/sbomb/install.ps1 | iex
+```
+
+That takes the latest release for your platform and verifies it against the
+release's `SHA256SUMS` before installing — there is no way to skip that check.
+`--version v0.11.0` pins a release, `--bin-dir` chooses where it lands, and
+`--with-sbom` puts the release's own CycloneDX document beside the binary.
+
+Or do it by hand, which is the same four steps:
 
 ```bash
-VERSION=v0.10.0
+VERSION=v0.11.0
 BASE=https://github.com/Andste82/sbomb/releases/download/$VERSION
 curl -fLO "$BASE/sbomb-linux-amd64"
 curl -fLO "$BASE/SHA256SUMS"
@@ -72,7 +87,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/path/to/sbomb/cmake")
 include(Sbomb)
 
 add_executable(app src/main.c)
-sbomb_enable(TARGET app POLICY cra CONFIG "${CMAKE_SOURCE_DIR}/sbomb.json")
+sbomb_enable(TARGET app POLICY lenient CONFIG "${CMAKE_SOURCE_DIR}/sbomb.json")
 ```
 
 ```bash
@@ -81,8 +96,31 @@ cmake --build build
 cmake --build build --target sbomb     # produces the SBOMs
 ```
 
+**Start with `lenient`.** The target fails the build when the policy fails,
+because a policy that cannot stop anything is decoration — and a first run on
+an unprepared project has findings, which is the tool working rather than the
+tool breaking. `lenient` lets you see the answer first. Work upwards from
+there, as [Choosing a policy](#choosing-a-policy) describes; `POLICY cra` on a
+project whose components have no supplier, licence or version will fail, and is
+meant to.
+
 `sbomb_enable` may be called for several targets. Each gets its own
 `sbomb-<target>` target, and the aggregate `sbomb` target builds all of them.
+
+That gives **one document per target**. A product made of several deliverables
+— a bootloader and a firmware image that ship together — is a different thing,
+and belongs in one assembly document: set `mode` to `assembly` and list them
+under `artifacts[]`. See
+[docs/configuration.md](configuration.md#artifacts).
+
+Two things the module does that are worth knowing:
+
+* It sets `CMAKE_EXPORT_COMPILE_COMMANDS=ON` in the cache, because sbomb needs
+  the compile database and a build configured without it has no evidence to
+  read.
+* The `sbomb-<target>` target re-runs `cmake` before generating, so that the
+  File API reply matches the tree as it is now rather than as it was when you
+  last configured.
 
 **The normal build never runs sbomb.** The targets are excluded from `all`, so
 `cmake --build build` stays exactly as fast as it was; the SBOM is produced
@@ -156,9 +194,9 @@ and an expiry, not in a permanently loosened gate.
 Use the composite action, or call the binary. Either way, build first:
 
 ```yaml
-- uses: Andste82/sbomb/.github/actions/sbomb@v0.10.0
+- uses: Andste82/sbomb/.github/actions/sbomb@v0.11.0
   with:
-    version: v0.10.0
+    version: v0.11.0
     build-dir: build
     config: sbomb.json
     policy: cra
