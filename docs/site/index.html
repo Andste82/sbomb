@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Install sbomb</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0 auto; padding: 3rem 1.25rem; max-width: 42rem; line-height: 1.6;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  h1 { font-size: 1.6rem; margin-bottom: 0.25rem; }
+  p.lead { margin-top: 0; opacity: 0.8; }
+  h2 { font-size: 1rem; margin-top: 2rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.7; }
+  pre {
+    overflow-x: auto; padding: 0.85rem 1rem; border-radius: 6px;
+    background: #f4f4f5; border: 1px solid #e4e4e7;
+  }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.9rem; }
+  footer { margin-top: 3rem; font-size: 0.9rem; opacity: 0.75; }
+  a { color: inherit; }
+  @media (prefers-color-scheme: dark) {
+    pre { background: #18181b; border-color: #27272a; }
+  }
+</style>
+</head>
+<body>
+<h1>sbomb</h1>
+<p class="lead">
+  An evidence-based SBOM generator that reconstructs the software composition of
+  CMake build artifacts.
+</p>
+
+<h2>Install</h2>
+<pre><code>curl -fsSL https://andste82.github.io/sbomb/install.sh | sh</code></pre>
+
+<p>Windows, in PowerShell:</p>
+<pre><code>irm https://andste82.github.io/sbomb/install.ps1 | iex</code></pre>
+
+<h2>A particular version</h2>
+<pre><code>curl -fsSL https://andste82.github.io/sbomb/install.sh | sh -s -- --version v0.11.0</code></pre>
+
+<p>
+  Both scripts verify the download against the release's
+  <code>SHA256SUMS</code> before installing it, and neither offers a way to skip
+  that. Pass <code>--with-sbom</code> to install the release's own CycloneDX
+  document beside the binary.
+</p>
+
+<h2>Read it first</h2>
+<p>
+  Piping a script from the network into a shell is worth being suspicious of.
+  These are short and plain:
+  <a href="install.sh">install.sh</a> and <a href="install.ps1">install.ps1</a>.
+  They are published from the repository by a workflow, so what is served here
+  is what is in the tree.
+</p>
+
+<footer>
+  <a href="https://github.com/Andste82/sbomb">Source and releases on GitHub</a>
+  &middot; MIT
+</footer>
+</body>
+</html>

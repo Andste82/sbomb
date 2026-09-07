@@ -137,3 +137,58 @@ jobs:
           go-version-file: go.mod
       - name: Against a real toolchain
         run: go test -tags e2e ./test/...
+
+  # The install script is the first thing a new user runs, so it is tested the
+  # way they run it: against the real published release, on the platforms it
+  # claims to support. Anything less tests a mock of the thing that breaks.
+  install-script:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clean, and parses as POSIX sh
+        if: runner.os == 'Linux'
+        run: |
+          sh -n install.sh
+          shellcheck install.sh
+      - name: Installs the latest release
+        run: |
+          set -eu
+          ./install.sh --bin-dir "$PWD/latest-bin" --with-sbom
+          "$PWD/latest-bin/sbomb" version
+          test -s "$PWD/latest-bin/sbomb.cdx.json"
+      - name: Installs a pinned version, with and without the v
+        run: |
+          set -eu
+          ./install.sh --version v0.11.0 --bin-dir "$PWD/pinned-bin"
+          "$PWD/pinned-bin/sbomb" version | grep -q '0\.11\.0'
+          ./install.sh --version 0.11.0 --bin-dir "$PWD/bare-bin"
+          "$PWD/bare-bin/sbomb" version | grep -q '0\.11\.0'
+      - name: Refuses a release that does not exist
+        run: |
+          set -eu
+          if ./install.sh --version v0.0.0-nope --bin-dir "$PWD/nope-bin" 2>/dev/null; then
+            echo "the installer accepted a release that does not exist" >&2
+            exit 1
+          fi
+          test ! -e "$PWD/nope-bin/sbomb"
+
+  install-script-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Installs the latest release
+        shell: pwsh
+        run: |
+          ./install.ps1 -BinDir "$PWD/bin" -WithSbom
+          & "$PWD/bin/sbomb.exe" version
+          if (-not (Test-Path "$PWD/bin/sbomb.cdx.json")) { throw "no SBOM installed" }
+      - name: Installs a pinned version
+        shell: pwsh
+        run: |
+          ./install.ps1 -Version 0.11.0 -BinDir "$PWD/pinned"
+          $reported = & "$PWD/pinned/sbomb.exe" version
+          if ($reported -notmatch '0\.11\.0') { throw "reported $reported" }
