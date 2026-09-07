@@ -395,6 +395,41 @@ jobs:
           fi
           says "is not a boolean"
 
+          # The cache path. Everything above verifies what arrives; these check
+          # what is already there, which used to be nobody's job after the
+          # first configure.
+          ca="-DSBOMB_FETCH_TLS_CAINFO=$work/srv.pem"
+          cached="$work/bt/_sbomb/v9.9.9/sbomb-linux-amd64"
+
+          echo "8) a second configure re-hashes the cached binary"
+          run $ca
+          cmake -DSBOMB_FETCH_VERSION=v9.9.9 $ca -P "$work/run.cmake" \
+            > "$work/out.txt" 2>&1
+          says "still matches its digest"
+
+          echo "9) a tampered cached binary is discarded and fetched again"
+          echo tampered > "$cached"
+          cmake -DSBOMB_FETCH_VERSION=v9.9.9 $ca -P "$work/run.cmake" \
+            > "$work/out.txt" 2>&1
+          says "discarding the cached sbomb-linux-amd64"
+          says "checksum verified"
+          grep -q "stand-in binary" "$cached"
+
+          echo "10) same, with a pin and no SHA256SUMS to lean on"
+          run $ca -DSBOMB_FETCH_SHA256="$bin_sha"
+          echo tampered > "$cached"
+          cmake -DSBOMB_FETCH_VERSION=v9.9.9 $ca -DSBOMB_FETCH_SHA256="$bin_sha" \
+            -P "$work/run.cmake" > "$work/out.txt" 2>&1
+          says "discarding the cached sbomb-linux-amd64"
+          grep -q "stand-in binary" "$cached"
+
+          echo "11) nothing to check against: not trusted either"
+          run $ca
+          rm -f "$work/bt/_sbomb/v9.9.9/SHA256SUMS"
+          cmake -DSBOMB_FETCH_VERSION=v9.9.9 $ca -P "$work/run.cmake" \
+            > "$work/out.txt" 2>&1
+          says "there is nothing left to check it against"
+
   install-script-windows:
     runs-on: windows-latest
     steps:

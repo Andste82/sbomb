@@ -104,6 +104,65 @@ function(_sbomb_expect_digest value origin out_digest)
   set(${out_digest} "${_digest}" PARENT_SCOPE)
 endfunction()
 
+# _sbomb_digest_from_sums reads the digest a SHA256SUMS file gives for one
+# asset, and leaves out_digest empty when it names none.
+#
+# One function rather than the same regex twice: the download path and the
+# cache check ask the same question, and a checksum read two slightly different
+# ways is a bug waiting for the day the two drift apart.
+function(_sbomb_digest_from_sums sums_file asset out_digest)
+  set(${out_digest} "" PARENT_SCOPE)
+  if(NOT EXISTS "${sums_file}")
+    return()
+  endif()
+  file(READ "${sums_file}" _sums)
+  string(REPLACE "." "\\." _pattern "${asset}")
+  # CMake's regex flavour has no bounded repetition, so the digest is matched
+  # as "one or more hex digits" rather than as exactly sixty-four of them.
+  # Requiring the line to end right after the name is what keeps
+  # sbomb-linux-amd64 from matching sbomb-linux-amd64.cdx.json.
+  if(_sums MATCHES "([0-9a-f]+)[ \t]+\\*?${_pattern}[\r\n]")
+    set(${out_digest} "${CMAKE_MATCH_1}" PARENT_SCOPE)
+  endif()
+endfunction()
+
+# _sbomb_cached_ok says whether a binary already in the build tree still is
+# what it was, and why not when it is not.
+#
+# It never reaches the network: the pin, or the SHA256SUMS fetched beside the
+# binary the first time, is enough to re-hash against.
+function(_sbomb_cached_ok binary dir asset out_ok out_reason)
+  set(${out_ok} FALSE PARENT_SCOPE)
+  set(${out_reason} "" PARENT_SCOPE)
+
+  if(SBOMB_FETCH_SHA256)
+    _sbomb_expect_digest("${SBOMB_FETCH_SHA256}" "SBOMB_FETCH_SHA256" _expected)
+  else()
+    # The stored list is only worth reading once it has been held to the pin,
+    # where there is one -- otherwise a tampered pair would agree with itself.
+    if(SBOMB_FETCH_SHA256SUMS AND EXISTS "${dir}/SHA256SUMS")
+      _sbomb_expect_digest("${SBOMB_FETCH_SHA256SUMS}" "SBOMB_FETCH_SHA256SUMS" _want)
+      file(SHA256 "${dir}/SHA256SUMS" _got)
+      if(NOT _got STREQUAL _want)
+        set(${out_reason} "the SHA256SUMS beside it no longer matches SBOMB_FETCH_SHA256SUMS" PARENT_SCOPE)
+        return()
+      endif()
+    endif()
+    _sbomb_digest_from_sums("${dir}/SHA256SUMS" "${asset}" _expected)
+    if(NOT _expected)
+      set(${out_reason} "there is nothing left to check it against" PARENT_SCOPE)
+      return()
+    endif()
+  endif()
+
+  file(SHA256 "${binary}" _actual)
+  if(NOT _actual STREQUAL _expected)
+    set(${out_reason} "its digest is ${_actual}, not ${_expected}" PARENT_SCOPE)
+    return()
+  endif()
+  set(${out_ok} TRUE PARENT_SCOPE)
+endfunction()
+
 # _sbomb_cainfo answers which CA bundle to use, and where it was named.
 #
 # The cache variable first, then CMake's own CMAKE_TLS_CAINFO, then the two
@@ -265,6 +324,25 @@ function(sbomb_fetch_binary)
   set(_binary "${_dir}/${_asset}")
   set(_base "https://github.com/${SBOMB_FETCH_REPOSITORY}/releases/download/${SBOMB_FETCH_VERSION}")
 
+  # A binary that is already there is checked again before it is used.
+  #
+  # The download verifies what arrives, but that was some earlier configure.
+  # From the second one on nothing looked at the file at all, so "the download
+  # is checked against SHA256SUMS, and there is no option to skip that" quietly
+  # stopped being true for every run but the first. Re-hashing costs
+  # milliseconds and reaches no network.
+  if(EXISTS "${_binary}")
+    _sbomb_cached_ok("${_binary}" "${_dir}" "${_asset}" _cached_ok _cached_why)
+    if(_cached_ok)
+      message(STATUS "sbomb: the cached ${_asset} still matches its digest")
+    else()
+      # Removed, not refused: the next block fetches it again and verifies it,
+      # which is a better answer than making the caller clean the build tree.
+      message(STATUS "sbomb: discarding the cached ${_asset}, ${_cached_why}")
+      file(REMOVE "${_binary}")
+    endif()
+  endif()
+
   if(NOT EXISTS "${_binary}")
     file(MAKE_DIRECTORY "${_dir}")
 
@@ -329,19 +407,13 @@ function(sbomb_fetch_binary)
         message(STATUS "sbomb: SHA256SUMS matches the pinned digest")
       endif()
 
-      # Compare the digest of what arrived against the line for this asset, so
-      # that a matching line for some other file proves nothing.
-      file(READ "${_dir}/SHA256SUMS" _sums)
-      string(REPLACE "." "\\." _pattern "${_asset}")
-      # CMake's regex flavour has no bounded repetition, so the digest is
-      # matched as "one or more hex digits" rather than as exactly sixty-four
-      # of them. Requiring the line to end right after the name is what keeps
-      # sbomb-linux-amd64 from matching sbomb-linux-amd64.cdx.json.
-      if(NOT _sums MATCHES "([0-9a-f]+)[ \t]+\\*?${_pattern}[\r\n]")
+      # The digest for this asset, so that a matching line for some other file
+      # proves nothing.
+      _sbomb_digest_from_sums("${_dir}/SHA256SUMS" "${_asset}" _expected)
+      if(NOT _expected)
         file(REMOVE "${_binary}.part")
         message(FATAL_ERROR "sbomb: SHA256SUMS names no checksum for ${_asset}")
       endif()
-      set(_expected "${CMAKE_MATCH_1}")
       set(_expected_from "the release's SHA256SUMS")
     endif()
 
