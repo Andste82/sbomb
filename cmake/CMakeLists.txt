@@ -5,7 +5,7 @@
 #
 #   include(FetchContent)
 #   FetchContent_Declare(sbomb
-#     URL https://github.com/Andste82/sbomb/releases/download/v0.12.0/sbomb-cmake.tar.gz)
+#     URL https://github.com/Andste82/sbomb/releases/download/v0.13.0/sbomb-cmake.tar.gz)
 #   FetchContent_MakeAvailable(sbomb)
 #
 #   add_executable(app src/main.c)

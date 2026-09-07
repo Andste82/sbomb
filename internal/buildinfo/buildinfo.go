@@ -8,7 +8,7 @@ package buildinfo
 // -ldflags "-X github.com/example/sbomb/internal/buildinfo.Version=<version>",
 // which derives it from the git tag, so a build from a working tree reports
 // the version of the last release plus its distance from it.
-var Version = "0.12.0"
+var Version = "0.13.0"
 
 // Name is the tool name recorded as the SBOM creator.
 const Name = "sbomb"
