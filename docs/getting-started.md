@@ -151,9 +151,11 @@ Two things the module does that are worth knowing:
 * It sets `CMAKE_EXPORT_COMPILE_COMMANDS=ON` in the cache, because sbomb needs
   the compile database and a build configured without it has no evidence to
   read.
-* The `sbomb-<target>` target re-runs `cmake` before generating, so that the
-  File API reply matches the tree as it is now rather than as it was when you
-  last configured.
+* The `sbomb-<target>` target re-runs `cmake` before generating. That is not
+  cosmetic: `CMAKE_EXPORT_COMPILE_COMMANDS` set during a configure reaches the
+  cache, but the compile database only appears on the *next* one, and without
+  it objects cannot be traced to sources. It also refreshes the File API reply,
+  so the document describes the tree as it is now.
 
 **The normal build never runs sbomb.** The targets are excluded from `all`, so
 `cmake --build build` stays exactly as fast as it was; the SBOM is produced
@@ -177,9 +179,10 @@ because passing a configuration nobody wrote turns a run that would have worked
 on defaults into a failure.
 
 On CMake 3.27 and later the File API query is filed for the run that is
-happening, so a single configure is enough. Below that the query is only seen
-by the next run, and the SBOM target re-configures the project before
-generating; the module does that for you either way.
+happening, so a reply exists after a single configure; below that the query is
+only seen by the next run. Either way the SBOM target re-configures, so both
+end up with a reply and a compile database — the module handles the difference
+for you.
 
 ## Reading the result
 
