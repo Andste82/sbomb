@@ -43,11 +43,20 @@ function(sbomb_enable)
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Export compile commands for sbomb" FORCE)
 
-  # CMake 3.27 can file the File API query for the run that is happening, so
-  # the reply is on disk when this configure ends. Before that the query is
-  # only seen by the *next* run, which is why the older path has the SBOM
-  # target re-configure the project before generating.
-  set(_sbomb_reconfigure "")
+  # The SBOM target re-configures before it generates, and that is not
+  # optional. CMAKE_EXPORT_COMPILE_COMMANDS set here reaches the cache, but the
+  # generator of *this* run has already been decided: the compile database
+  # appears on the next configure and not on this one. Without it objects
+  # cannot be traced to sources, which is most of what sbomb does.
+  #
+  # It also refreshes the File API reply, so a document describes the tree as
+  # it is rather than as it was when somebody last configured by hand.
+  set(_sbomb_reconfigure
+    COMMAND "${CMAKE_COMMAND}" -S "${CMAKE_SOURCE_DIR}" -B "${CMAKE_BINARY_DIR}" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON)
+
+  # CMake 3.27 can file the File API query for the run that is happening, so a
+  # single configure already leaves a reply. Before that the query is only seen
+  # by the next run -- which the re-configure above provides either way.
   if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.27")
     cmake_file_api(
       QUERY
@@ -61,8 +70,6 @@ function(sbomb_enable)
     file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/.cmake/api/v1/query/client-sbomb")
     file(WRITE "${CMAKE_BINARY_DIR}/.cmake/api/v1/query/client-sbomb/query.json"
       "{\"requests\":[{\"kind\":\"codemodel\",\"version\":2},{\"kind\":\"cache\",\"version\":2},{\"kind\":\"cmakeFiles\",\"version\":1},{\"kind\":\"toolchains\",\"version\":1}]}\n")
-    set(_sbomb_reconfigure
-      COMMAND "${CMAKE_COMMAND}" -S "${CMAKE_SOURCE_DIR}" -B "${CMAKE_BINARY_DIR}" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON)
   endif()
 
   # Only a target that is actually linked can carry linker flags. A static or

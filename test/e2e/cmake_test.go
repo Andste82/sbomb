@@ -40,8 +40,22 @@ func TestCMakeTargetRunsSbombOnlyOnDemand(t *testing.T) {
 	if output, err := run(root, "cmake", "-S", src, "-B", build, "-DSBOMB_EXECUTABLE="+sbomb); err != nil {
 		t.Fatalf("cmake configure: %v\n%s", err, output)
 	}
-	if _, err := os.Stat(filepath.Join(build, ".cmake", "api", "v1", "query", "client-sbomb", "query.json")); err != nil {
-		t.Fatalf("CMake File API query was not written: %v", err)
+	// The module has to arrange for a File API reply, and there are two ways
+	// depending on the CMake it is run with. From 3.27 cmake_file_api() files
+	// the query for the configure that is happening, so the reply is already
+	// there; below that the query is written by hand and only the next run
+	// sees it, which is why the SBOM target re-configures. Asserting the
+	// mechanism would pin whichever one this machine happens to take, so what
+	// is asserted is that one of them did its job.
+	queried := false
+	if entries, globErr := filepath.Glob(filepath.Join(build, ".cmake", "api", "v1", "reply", "index-*.json")); globErr == nil && len(entries) > 0 {
+		queried = true
+	}
+	if _, err := os.Stat(filepath.Join(build, ".cmake", "api", "v1", "query", "client-sbomb", "query.json")); err == nil {
+		queried = true
+	}
+	if !queried {
+		t.Fatal("the module neither filed a File API query nor produced a reply")
 	}
 	if output, err := run(root, "cmake", "--build", build); err != nil {
 		t.Fatalf("ordinary build: %v\n%s", err, output)
@@ -57,6 +71,12 @@ func TestCMakeTargetRunsSbombOnlyOnDemand(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(build, "sbom", "app.cdx.json")); err != nil {
 		t.Fatalf("sbomb target did not produce SBOM: %v", err)
+	}
+	// By now the reply must exist on either path: it is what the query was
+	// for, and without it sbomb knows no targets, anchors or toolchain.
+	replies, err := filepath.Glob(filepath.Join(build, ".cmake", "api", "v1", "reply", "index-*.json"))
+	if err != nil || len(replies) == 0 {
+		t.Fatalf("no File API reply after the sbomb target ran: %v", err)
 	}
 }
 
