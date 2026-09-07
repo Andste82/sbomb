@@ -211,6 +211,35 @@ jobs:
           test -s "$work/build/sbom/app.cdx.json"
           # The binary it fetched has to be the one for this host, and verified.
           test -x "$work/build/_sbomb/v0.11.0/sbomb-linux-amd64"
+      - name: Without CONFIG, and without a default file, no --config is passed
+        run: |
+          set -euo pipefail
+          work="$RUNNER_TEMP/noconfig"
+          mkdir -p "$work/src"
+          echo 'int main(void){return 0;}' > "$work/src/main.c"
+          cat > "$work/CMakeLists.txt" <<EOF
+          cmake_minimum_required(VERSION 3.20)
+          project(noconfig C)
+          list(APPEND CMAKE_MODULE_PATH "$PWD/cmake")
+          include(Sbomb)
+          add_executable(app src/main.c)
+          add_library(stat STATIC src/main.c)
+          sbomb_enable(TARGET app POLICY lenient)
+          sbomb_enable(TARGET stat POLICY lenient)
+          EOF
+          cmake -S "$work" -B "$work/build" \
+            -DSBOMB_EXECUTABLE="$PWD/dist/0.11.0/sbomb-linux-amd64" > "$work/configure.txt"
+          # A cache default that leaks in when nobody asked for it turns every
+          # project without that file into a build failure.
+          if grep -q -- '--config' "$work/build/CMakeFiles/sbomb-app.dir/build.make"; then
+            echo "a configuration was passed although none was named" >&2
+            exit 1
+          fi
+          # A static library is archived, not linked, and carries no linker flags.
+          grep -q "a STATIC_LIBRARY carries no linker flags" "$work/configure.txt"
+          cmake --build "$work/build"
+          cmake --build "$work/build" --target sbomb
+          test -s "$work/build/sbom/app.cdx.json"
       - name: A bundle with no version says so instead of guessing
         run: |
           set -euo pipefail

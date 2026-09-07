@@ -166,7 +166,20 @@ when you ask for it.
 | `SBOMB_LINK_EVIDENCE` | `ON` | Add the linker map and dependency-file flags |
 
 Linker flags are probed before use, so a toolchain that does not support them
-produces a status message rather than a broken link.
+produces a status message rather than a broken link. They are added only to
+targets that are linked: a static or object library is archived, and an
+imported target belongs to somebody else's build, so both are reported and
+skipped rather than silently carrying a flag that does nothing.
+
+`CONFIG` is used when you name it. When you do not, `SBOMB_DEFAULT_CONFIG`
+applies — `${CMAKE_SOURCE_DIR}/sbomb.json` — but **only if that file exists**,
+because passing a configuration nobody wrote turns a run that would have worked
+on defaults into a failure.
+
+On CMake 3.27 and later the File API query is filed for the run that is
+happening, so a single configure is enough. Below that the query is only seen
+by the next run, and the SBOM target re-configures the project before
+generating; the module does that for you either way.
 
 ## Reading the result
 
