@@ -5,9 +5,9 @@ release, verifies its SHA-256 checksum, and invokes the same CLI used locally.
 It does not implement discovery itself.
 
 ```yaml
-- uses: Andste82/sbomb/.github/actions/sbomb@v0.10.0
+- uses: Andste82/sbomb/.github/actions/sbomb@v0.11.0
   with:
-    version: v0.10.0
+    version: v0.11.0
     build-dir: build
     config: sbomb.json
     policy: cra
