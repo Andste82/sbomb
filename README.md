@@ -78,8 +78,13 @@ irm https://andste82.github.io/sbomb/install.ps1 | iex
 The latest release, for your platform. A particular one:
 
 ```bash
-curl -fsSL https://andste82.github.io/sbomb/install.sh | sh -s -- --version v0.13.0
+curl -fsSL https://andste82.github.io/sbomb/install.sh | sh -s -- --version <sbomb-version>
 ```
+
+`<sbomb-version>` is a release tag, as written on the
+[releases page](https://github.com/Andste82/sbomb/releases) — `v` and all.
+The documentation names no particular one on purpose: a version written out
+here is a version that goes stale the next time one is cut.
 
 Both scripts verify the download against the release's `SHA256SUMS` before
 installing it, and neither offers a way to skip that — a tool whose argument is
@@ -101,7 +106,7 @@ a matching binary:
 ```cmake
 include(FetchContent)
 FetchContent_Declare(sbomb
-  URL        https://github.com/Andste82/sbomb/releases/download/v0.13.0/sbomb-cmake.tar.gz
+  URL        https://github.com/Andste82/sbomb/releases/download/<sbomb-version>/sbomb-cmake.tar.gz
   URL_HASH   SHA256=<the sbomb-cmake.tar.gz line from the release's SHA256SUMS>
   TLS_VERIFY ON)
 FetchContent_MakeAvailable(sbomb)

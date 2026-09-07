@@ -113,6 +113,26 @@ jobs:
       - name: Documented configurations load
         run: go run ./tools/docexamples
 
+      # A version written into the documentation is a version that is wrong one
+      # release later, and it was: the FetchContent example pointed at a
+      # release that never carried the asset it named. The documentation says
+      # <sbomb-version> instead, and this is what keeps it that way. The
+      # changelog is the exception -- there a version is the subject.
+      - name: The documentation pins no version
+        run: |
+          set -euo pipefail
+          files=$(git ls-files \
+            'README.md' 'docs/*.md' 'docs/**/*.md' 'docs/site/*.html' \
+            'install.sh' 'install.ps1' 'cmake/*.cmake' 'cmake/CMakeLists.txt' \
+            | grep -v 'docs/CHANGELOG.md' | grep -v '^docs/dev/')
+          # A release tag, not any three numbers: x.y.z preceded by v or by the
+          # start of a word, so "CMake 3.24" and "CycloneDX 1.6" are untouched.
+          if grep -nE 'v[0-9]+\.[0-9]+\.[0-9]+' $files; then
+            echo "::error::a release version is written out above; use <sbomb-version>" >&2
+            exit 1
+          fi
+          echo "no release version is written into the documentation"
+
   # The SPDX license list changes upstream, so drift here is information, not
   # a reason to block a pull request. It is checked separately for that reason.
   spdx-drift:

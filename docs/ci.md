@@ -4,10 +4,15 @@ The composite action at `.github/actions/sbomb/action.yaml` downloads a pinned
 release, verifies its SHA-256 checksum, and invokes the same CLI used locally.
 It does not implement discovery itself.
 
+`<sbomb-version>` is a release tag, as written on the
+[releases page](https://github.com/Andste82/sbomb/releases) — `v` and all.
+The documentation names no particular one on purpose: a version written out
+here is a version that goes stale the next time one is cut.
+
 ```yaml
-- uses: Andste82/sbomb/.github/actions/sbomb@v0.13.0
+- uses: Andste82/sbomb/.github/actions/sbomb@<sbomb-version>
   with:
-    version: v0.13.0
+    version: <sbomb-version>
     build-dir: build
     config: sbomb.json
     policy: cra

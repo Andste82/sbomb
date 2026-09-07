@@ -5,10 +5,10 @@ include_guard(GLOBAL)
 # This file is meaningful inside the `sbomb-cmake.tar.gz` release asset, where
 # the release script has substituted the version below. A copy taken from the
 # source tree still carries the placeholder, and then the version has to be
-# named explicitly with -DSBOMB_FETCH_VERSION=v0.13.0.
+# named explicitly with -DSBOMB_FETCH_VERSION=<the release tag>.
 
 set(SBOMB_FETCH_VERSION "@SBOMB_VERSION@"
-    CACHE STRING "sbomb release to fetch, e.g. v0.13.0")
+    CACHE STRING "sbomb release to fetch, named as a release tag")
 set(SBOMB_FETCH_REPOSITORY "Andste82/sbomb"
     CACHE STRING "Repository the release is fetched from")
 
@@ -206,7 +206,7 @@ function(sbomb_fetch_binary)
     message(FATAL_ERROR
       "sbomb: this bundle carries no version. It is meant to be fetched as the "
       "sbomb-cmake.tar.gz asset of a release; from a source checkout, pass "
-      "-DSBOMB_FETCH_VERSION=v0.13.0 or -DSBOMB_EXECUTABLE=<path>.")
+      "-DSBOMB_FETCH_VERSION=<the release tag> or -DSBOMB_EXECUTABLE=<path>.")
   endif()
 
   _sbomb_host_asset(_asset)

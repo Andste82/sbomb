@@ -2,7 +2,7 @@
 # Install sbomb.
 #
 #   curl -fsSL https://andste82.github.io/sbomb/install.sh | sh
-#   curl -fsSL https://andste82.github.io/sbomb/install.sh | sh -s -- --version v0.13.0
+#   curl -fsSL https://andste82.github.io/sbomb/install.sh | sh -s -- --version <sbomb-version>
 #
 # The checksum check is not optional and there is no flag to skip it. A tool
 # whose whole argument is that you should be able to verify what you were given
@@ -22,7 +22,8 @@ Install sbomb, an evidence-based SBOM generator for CMake build artifacts.
 
 Usage: install.sh [options]
 
-  --version <v>   Release to install, e.g. v0.13.0 or 0.13.0. Default: latest.
+  --version <v>   Release to install, with or without the leading v.
+                  Default: latest.
   --bin-dir <d>   Where to put the binary. Default: /usr/local/bin if it is
                   writable, otherwise ~/.local/bin.
   --with-sbom     Also install the release's own CycloneDX document beside the
@@ -106,7 +107,7 @@ if [ "$version" = "latest" ]; then
 		sed -n 's#.*/releases/tag/##p')
 	[ -n "$tag" ] || fail "could not work out the latest version; pass --version to name one"
 else
-	# A tag is written v0.13.0; accepting 0.13.0 as well saves a support round.
+	# A tag carries a leading v; accepting it without saves a support round.
 	case "$version" in
 	v*) tag="$version" ;;
 	*) tag="v$version" ;;
