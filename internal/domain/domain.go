@@ -145,8 +145,26 @@ type Component struct {
 	// carries it in component.evidence.licenses.
 	LicenseEvidence []LicenseFinding
 	DetectedBy      string
-	Properties      map[string][]string
-	Files           []FileID
+	// VCS is the repository a package manager recorded for this component. It
+	// is a resolved fact rather than a rendered property: CycloneDX has a
+	// field for it (externalReferences), so the writer decides how to say it.
+	VCS *VCSRecord
+	// EnvironmentProvided says the target expects this component to be there
+	// rather than carrying it: a system library the artifact links against
+	// dynamically. It is not the same as system scope, which says only where
+	// the files live -- a system archive linked statically is bundled into the
+	// artifact and is not provided by anything.
+	EnvironmentProvided bool
+	Properties          map[string][]string
+	Files               []FileID
+}
+
+// VCSRecord is where a component's source is kept, as the manager recorded it.
+// It is never a stand-in for a supplier (section 20.5).
+type VCSRecord struct {
+	URL    string
+	Commit string
+	Dirty  bool
 }
 
 type LicenseFinding struct {

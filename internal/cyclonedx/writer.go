@@ -166,6 +166,15 @@ func (Writer) Build(document *sbomwriter.Document, options sbomwriter.Options) (
 	if !options.Reproducible {
 		metadata.Timestamp = document.Run.Timestamp
 	}
+	if options.TLP != "" {
+		// 1.6 has nowhere to put this. Dropping it silently would make a
+		// configured distribution constraint disappear from the document it
+		// was meant to constrain, so the caller is told instead.
+		if !supportsDistributionConstraints(specVersion) {
+			return BOM{}, fmt.Errorf("a TLP classification needs CycloneDX 1.7; this document is %s", specVersion)
+		}
+		metadata.DistributionConstraints = &DistributionConstraints{TLP: options.TLP}
+	}
 
 	bom := BOM{
 		BomFormat:    "CycloneDX",
@@ -292,6 +301,11 @@ func componentToCyclone(component domain.Component, ref, specVersion string) Com
 	if observed := observedLicensesToCyclone(component.LicenseEvidence, specVersion); len(observed) > 0 {
 		out.Evidence = &Evidence{Licenses: observed}
 	}
+	// 1.7 can say that the environment provides a component; 1.6 cannot, and
+	// leaves the fact to sbomb:component:scope and the build-environment
+	// grouping of section 24.2, which both versions carry.
+	out.IsExternal = component.EnvironmentProvided && externalComponentsAllowed(specVersion)
+	out.ExternalReferences, out.Properties = vcsToCyclone(component.VCS, specVersion)
 	out.Properties = append(out.Properties, propertiesFromMap(component.Properties)...)
 	if component.Scope != "" {
 		out.Properties = append(out.Properties, Property{Name: "sbomb:component:scope", Value: component.Scope})
@@ -405,9 +419,69 @@ func observedLicensesToCyclone(findings []domain.LicenseFinding, specVersion str
 	return licenses
 }
 
+// vcsToCyclone renders a component's repository record, and returns the
+// external references and the component properties that carry it.
+//
+// The URL goes to externalReferences at both versions: CycloneDX has had the
+// `vcs` reference type since well before 1.6, and a standard field beats a
+// property in the sbomb namespace wherever the standard has one. That is why
+// this is not gated on the version, and why the 1.6 output moved when it
+// landed.
+//
+// The commit and the dirty flag have no standard field of their own. 1.7 gives
+// external references a property bag, which is where they belong -- beside the
+// URL they qualify rather than loose on the component. At 1.6 there is no such
+// bag, so they stay component properties. That difference is the one thing
+// here the version decides.
+func vcsToCyclone(record *domain.VCSRecord, specVersion string) ([]ExternalReference, []Property) {
+	if record == nil {
+		return nil, nil
+	}
+	qualifiers := make([]Property, 0, 2)
+	if record.Commit != "" {
+		qualifiers = append(qualifiers, Property{Name: "sbomb:component:vcsCommit", Value: record.Commit})
+	}
+	if record.Dirty {
+		qualifiers = append(qualifiers, Property{Name: "sbomb:component:vcsDirty", Value: "true"})
+	}
+	if record.URL == "" {
+		// Nothing to hang a reference on; the qualifiers are all there is.
+		return nil, qualifiers
+	}
+	reference := ExternalReference{URL: record.URL, Type: "vcs"}
+	if referencePropertiesAllowed(specVersion) {
+		reference.Properties = qualifiers
+		qualifiers = nil
+	}
+	return []ExternalReference{reference}, qualifiers
+}
+
+// referencePropertiesAllowed reports whether an external reference may carry a
+// property bag. 1.7 introduced it.
+func referencePropertiesAllowed(specVersion string) bool { return specVersion != Version16 }
+
+// externalComponentsAllowed reports whether a component may be marked as
+// provided by the environment. 1.7 introduced isExternal.
+//
+// No versionRange goes with it. The schema permits one only alongside
+// isExternal, and it has to be a vers range; DT_NEEDED records a soname and
+// nothing more, and deriving a range from whatever the build host happens to
+// have installed would describe that host rather than the product.
+func externalComponentsAllowed(specVersion string) bool { return specVersion != Version16 }
+
 // mixedLicenseChoiceAllowed reports whether one licenses array may hold both
 // licence objects and SPDX expressions. Only 1.6 forbids it.
 func mixedLicenseChoiceAllowed(specVersion string) bool { return specVersion != Version16 }
+
+// supportsDistributionConstraints reports whether metadata may carry a TLP
+// classification. 1.7 introduced it.
+func supportsDistributionConstraints(specVersion string) bool { return specVersion != Version16 }
+
+// SupportsDistributionConstraints is the exported form, for the command line
+// to refuse a configured TLP before any work is done rather than at the write.
+func SupportsDistributionConstraints(specVersion string) bool {
+	return supportsDistributionConstraints(specVersion)
+}
 
 // isCompoundExpression reports whether an SPDX expression states a relation
 // between licences rather than naming one. "MIT" is not compound and is better

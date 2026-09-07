@@ -50,12 +50,45 @@ version given" becomes a version. `sbomwriter.DetectFormat` and the `Detector`
 interface are what `validate` uses, and are the seam a second format will
 arrive through.
 
-The `citations`, `component.isExternal`, `externalReference.properties` and
-`metadata.distributionConstraints` structures that 1.7 adds are not emitted.
-Each is independently useful and lands on its own terms; `citations` in
-particular offers a standard vocabulary for the evidence attribution sbomb
-already records in `sbomb:` properties, and deserves its own look before the
-tool commits to it.
+### A standard field beats a property in the sbomb namespace
+
+Where CycloneDX specifies a field for something sbomb records, the specified
+field now carries it. Three of the structures 1.7 adds are emitted on that
+basis, and one change reaches 1.6 as well.
+
+**The repository URL is an external reference, at both versions.** The code
+already said so — "the repository URL belongs in externalReferences", in
+`components.go` — and then wrote `sbomb:component:vcsUrl`, because sbomb
+emitted no external references at all. It does now, as a reference of type
+`vcs`; that type predates 1.6, so the change is not gated on a version and the
+1.6 output moved deliberately. `sbomb:component:vcsUrl` is removed from
+appendix B rather than left as a name nothing writes.
+
+**`sbomb:component:vcsCommit` and `vcsDirty` qualify that URL**, and 1.7 gives
+external references a property bag to put them in, beside the thing they
+describe. At 1.6 they stay on the component, which is the only place there is.
+
+**`component.isExternal`** marks a component the target expects to find rather
+than to carry. System scope alone is not enough to claim that: a system archive
+linked statically ends up inside the artifact, so the mark needs a shared
+library among the component's files as evidence that the environment really
+does provide it. No `versionRange` goes with it — `DT_NEEDED` records a soname,
+and deriving a range from whatever the build host has installed would describe
+that host rather than the product.
+
+**`metadata.distributionConstraints.tlp`** is written when `output.tlp` is set,
+and never otherwise. Nothing infers it from `--redact-unanchored-paths`: a TLP
+marking states what the recipient may do, which redaction does not. There is no
+default, because the schema annotates one — an absent constraint has to mean
+sbomb was not told, not that the document may travel. Setting it at 1.6, which
+cannot carry it, is a usage error rather than a silent omission.
+
+`citations` is still not emitted, and the reason is now a finding rather than
+an appetite. `evidence.identity` cannot carry a licence technique: its `field`
+enum admits identity fields only, and its `methods[].technique` vocabulary does
+not contain the SPDX techniques of §22.3. So `sbomb:license:technique` has no
+standard field at either version and stays a property — correctly, since it
+records something the standard does not model.
 
 ### A prebuilt library's sources are named, not left opaque
 

@@ -291,6 +291,7 @@ Select it with `--waivers <file>` or `policy.waiversFile`.
 |---|---|---|
 | `format` | `cyclonedx-json` | `cyclonedx-json` |
 | `specVersion` | `1.6`, `1.7` | `1.6` |
+| `tlp` | `CLEAR`, `GREEN`, `AMBER`, `AMBER_AND_STRICT`, `RED` | none |
 | `reproducible` | boolean | `false` |
 
 `reproducible` omits the timestamp and derives the serial number from the
@@ -322,13 +323,33 @@ moves once anything in it does. A document written at 1.6 is structurally valid
 at 1.7 with only `specVersion` changed — 1.7 is additive over 1.6, with nothing
 removed and the same required top-level fields.
 
-One 1.7-only difference exists and appears only when the evidence calls for
-it. `component.evidence.licenses` may mix SPDX expressions with licence
-identifiers at 1.7, where 1.6 admits a list of one kind or the other; sbomb
-emits an expression there when an observation carries a relation between
-licences rather than naming one (see [D19](dev/deviations.md)). Observation
-today yields bare identifiers, which are written identically at both versions,
-so this raises the ceiling rather than changing current output.
+Four differences are 1.7-only, and each appears only when the evidence calls
+for it:
+
+| 1.7 | At 1.6 instead |
+|---|---|
+| `component.evidence.licenses` may mix SPDX expressions with licence identifiers — see [D19](dev/deviations.md) | licence identifiers only |
+| `component.isExternal` marks a library the environment provides | `sbomb:component:scope` and the build-environment grouping |
+| `sbomb:component:vcsCommit` / `vcsDirty` sit on the repository reference they qualify | the same properties on the component |
+| `metadata.distributionConstraints.tlp`, when `tlp` is set | setting `tlp` is refused, rather than silently dropped |
+
+Everything else is written identically at both versions.
+
+### The repository URL, and where things live
+
+Where CycloneDX specifies a field for something sbomb records, the specified
+field carries it. The repository URL is therefore an `externalReferences` entry
+of type `vcs` rather than a `sbomb:component:vcsUrl` property — and because that
+reference type predates 1.6, **that change applies to 1.6 documents too**.
+
+### `tlp`
+
+`tlp` marks how widely the document may be shared, using the Traffic Light
+Protocol. Nothing infers it: a TLP marking states what the recipient may do,
+which is not something a tool concludes from how the document was produced —
+`--redact-unanchored-paths` says paths were removed and nothing more. There is
+no default either. An absent constraint means sbomb was not told, not that the
+document may be shared freely.
 
 `sbomb validate` needs no version: it reads what the document declares and
 checks it against the matching embedded schema, including a 1.7 document

@@ -177,10 +177,31 @@ func groupFilesByComponent(resolver *componentResolver, files []domain.UsedFile)
 			return group.files[i].ID.Canonical() < group.files[j].ID.Canonical()
 		})
 		findings = append(findings, resolver.enrichComponent(&group.component, group.files)...)
+		group.component.EnvironmentProvided = environmentProvided(group.component, group.files)
 		groups = append(groups, *group)
 	}
 	sortFindings(findings)
 	return groups, findings
+}
+
+// environmentProvided decides whether the target expects this component to be
+// present rather than carrying it.
+//
+// Two things have to hold, and system scope alone is only the first. The files
+// have to live where the distribution keeps them, and the artifact has to link
+// against them dynamically -- a system archive linked statically ends up inside
+// the artifact, and calling that "provided by the environment" would be false.
+// A shared library among the component's files is the evidence for the second.
+func environmentProvided(component domain.Component, files []domain.UsedFile) bool {
+	if component.Scope != string(anchors.ScopeSystem) {
+		return false
+	}
+	for _, file := range files {
+		if file.Class == domain.FileClassSharedLibrary {
+			return true
+		}
+	}
+	return false
 }
 
 func scopeForAnchorKind(kind string) string {

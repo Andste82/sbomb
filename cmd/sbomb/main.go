@@ -664,6 +664,13 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 	if specVersion != "" {
 		loadedCfg.Output.SpecVersion = specVersion
 	}
+	// A configured TLP that the chosen version cannot carry is a usage error,
+	// caught here rather than after a full discovery run.
+	if _, resolved, resolveErr := sbomwriter.Resolve("cyclonedx-json", loadedCfg.Output.SpecVersion); resolveErr == nil {
+		if loadedCfg.Output.TLP != "" && !cyclonedx.SupportsDistributionConstraints(resolved) {
+			return 1, logBuf.String(), fmt.Sprintf("output.tlp needs CycloneDX 1.7; this run writes %s\n", resolved)
+		}
+	}
 	loadedCfg.Manifests = append(loadedCfg.Manifests, imageManifests...)
 
 	// The scope options of section 33.1 are discovery settings, so the policy

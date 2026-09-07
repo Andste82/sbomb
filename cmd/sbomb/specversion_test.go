@@ -68,12 +68,16 @@ func TestBothVersionsAreDeterministic(t *testing.T) {
 	}
 }
 
-// TestTheTwoVersionsDifferOnlyInSayingSo is the claim the issue rests on: 1.7
-// is additive, so the same evidence produces the same document apart from what
-// the version itself decides. A field that appeared at 1.7 for this corpus
-// would be output changing with the version beyond what the version requires,
-// and would have to be a deliberate, documented difference rather than one
-// discovered here.
+// TestTheTwoVersionsDifferOnlyInSayingSo holds §28.1 against this corpus: a
+// document may not change shape with the version beyond what the version
+// requires.
+//
+// Four 1.7-only differences are permitted and documented in §28.1, and this
+// build produces none of them here: the corpus has no compound licence
+// expression, no dynamically linked system library, no package-manager
+// repository record and no configured TLP. So for this corpus the two
+// documents must still differ only in saying which version they are, and a new
+// difference appearing is either a bug or an undocumented decision.
 //
 // Three things legitimately differ: specVersion, the property that records it,
 // and the serial number -- which is a digest of the canonical document and so

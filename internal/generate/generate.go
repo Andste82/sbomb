@@ -414,7 +414,11 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	if err != nil {
 		return Result{Graph: graph, Findings: findings}, err
 	}
-	bom, err := writer.(cyclonedx.Writer).Build(document, sbomwriter.Options{SpecVersion: specVersion, Reproducible: reproducible})
+	bom, err := writer.(cyclonedx.Writer).Build(document, sbomwriter.Options{
+		SpecVersion:  specVersion,
+		TLP:          cfg.Output.TLP,
+		Reproducible: reproducible,
+	})
 	if err != nil {
 		return Result{Graph: graph, Findings: findings}, &ExitError{
 			Code: 70,
