@@ -127,6 +127,22 @@ git -c credential.helper='!f(){ echo "username=x-access-token"; echo "password=$
 git -c credential.helper='!f(){ echo "username=x-access-token"; echo "password=$GITHUB_TOKEN"; }; f' push origin v0.10.0
 ```
 
+**The tagged commit has to reach `main` unchanged.** If the release goes
+through a branch and a pull request, merge it so that the commit keeps its
+hash: a merge commit, or a fast-forward. **Never rebase or squash a pull
+request that carries the release commit** — that writes a new commit with the
+same content, the tag stays behind on the old one, and `main` no longer
+contains the tag at all:
+
+```bash
+git describe --tags origin/main   # must name the release just cut
+```
+
+If it names the release before it, the tag is off the branch. Do not move a
+published tag to repair it: the assets were built from the commit the tag names,
+and after a rebase the two trees are not even the same. Cut the next release
+from `main` instead and let it settle there.
+
 ## 6. Verify what CI actually published
 
 Three workflows run on the tag: `ci`, `determinism` and `release`. `release`
@@ -179,6 +195,14 @@ Each of these cost a release, and each is now checked above.
 - **An unauthenticated asset download answers 404, not 403,** while the
   repository is private — which reads like a missing tag. The composite action
   takes a token for that reason.
+- **v0.13.0 ended up tagged on a commit that is not on `main`.** The release
+  went out from a branch, and the pull request that brought it to `main` was
+  merged with rebase. The content arrived; the commit did not. `git describe`
+  on `main` answered `v0.12.0-5-g…`, so `main` believed the last release was
+  the one before. Worse, the rebase put another commit underneath, so the
+  tagged tree and `main`'s tree differ in `cmake/SbombFetch.cmake` — a file
+  that ships inside `sbomb-cmake.tar.gz`. Moving the tag would have made it
+  name content the published asset does not contain. Hence the check in step 5.
 
 ## Not part of a release
 
