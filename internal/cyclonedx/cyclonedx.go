@@ -113,17 +113,26 @@ type Evidence struct {
 	Licenses []License `json:"licenses,omitempty"`
 }
 
+// IdentityEvidence substantiates one identity field of a component: what it
+// was concluded to be, and how that conclusion was reached.
 type IdentityEvidence struct {
-	Field      string   `json:"field"`
-	Value      string   `json:"value"`
-	Confidence float64  `json:"confidence,omitempty"`
-	Methods    []Method `json:"methods,omitempty"`
+	Field string `json:"field"`
+	// ConcludedValue is the value settled on. The schema has no "value" here
+	// -- that name belongs to a method -- and forbids unknown properties, so
+	// spelling it any other way makes the document invalid.
+	ConcludedValue string   `json:"concludedValue,omitempty"`
+	Confidence     float64  `json:"confidence,omitempty"`
+	Methods        []Method `json:"methods,omitempty"`
 }
 
+// Method is one way the evidence was obtained. Both technique and confidence
+// are required: confidence carries no omitempty, because a method of
+// confidence 0 is a statement and dropping the field would make the document
+// invalid rather than modest.
 type Method struct {
 	Technique  string  `json:"technique"`
 	Value      string  `json:"value,omitempty"`
-	Confidence float64 `json:"confidence,omitempty"`
+	Confidence float64 `json:"confidence"`
 }
 
 type Occurrence struct {
@@ -203,7 +212,7 @@ func canonicalizeBOM(bom *BOM) {
 		if bom.Components[i].Evidence != nil {
 			sort.SliceStable(bom.Components[i].Evidence.Identity, func(a, b int) bool {
 				if bom.Components[i].Evidence.Identity[a].Field == bom.Components[i].Evidence.Identity[b].Field {
-					return bom.Components[i].Evidence.Identity[a].Value < bom.Components[i].Evidence.Identity[b].Value
+					return bom.Components[i].Evidence.Identity[a].ConcludedValue < bom.Components[i].Evidence.Identity[b].ConcludedValue
 				}
 				return bom.Components[i].Evidence.Identity[a].Field < bom.Components[i].Evidence.Identity[b].Field
 			})

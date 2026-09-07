@@ -932,7 +932,17 @@ Every grouping component MUST have either a resolved `version` or an explicit `U
 | Header macro | medium |
 | None | unknown |
 
-Recorded as property `sbomb:version:confidence` and `sbomb:version:source`.
+Published as `component.evidence.identity` with `field: "version"`: the value in `concludedValue`, the confidence above as the numeric `confidence`, and the source as one method — its `technique` from the closed CycloneDX vocabulary, its `value` the exact source string, since three sources share `manifest-analysis` and only the value says which manifest. §28.1 gives the specified field precedence, and `evidence.identity` predates 1.6, so this is written at both specification versions.
+
+| `VersionSource` | `technique` |
+|---|---|
+| `curated` | `attestation` |
+| `conan`, `vcpkg`, `fetchcontent` | `manifest-analysis` |
+| `header` | `source-code-analysis` |
+| `go-build-info` | `binary-analysis` |
+| `git`, `git-describe`, `git-commit`, anything unmapped | `other` |
+
+A version with no recorded source produces no identity evidence. An unmapped source becomes `other` rather than the nearest-looking technique: a guess presented as a measurement is worse than an honest `other`.
 
 ### 20.4 PURL Construction
 
@@ -2079,7 +2089,6 @@ sbomb:component:scope            (project | third-party | sdk | toolchain | syst
 sbomb:component:headerOnly
 sbomb:component:vcsCommit        sbomb:component:vcsTag
 sbomb:component:vcsDirty
-sbomb:version:source             sbomb:version:confidence
 sbomb:license:source             sbomb:license:evidenceClass
 sbomb:license:confidence         sbomb:license:review
 sbomb:license:reason             sbomb:license:conflictingValue
