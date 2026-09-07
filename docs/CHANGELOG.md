@@ -36,6 +36,13 @@ with `TLS_VERIFY ON` rejects it: the verification working, not breaking.
 already set up for curl or OpenSSL needs nothing. Which bundle is in use, and
 which of the four named it, is printed before the download.
 
+`CMAKE_TLS_CAINFO` is read by both downloads — CMake's own for the bundle, and
+sbomb's for the binary — so one setting covers the pair, and the documentation
+leads with that rather than with the two separate knobs. It has to be joined by
+`CMAKE_TLS_VERIFY=ON`, which is the half that is easy to leave out and silent
+when left out: `FetchContent` checks no certificate unless asked, and the CA is
+then simply unused.
+
 Naming a CA adds trust rather than replacing it — the system store is still
 consulted — so this makes an intercepted connection work without narrowing the
 download to one authority. Turning the verification off remains impossible, and
