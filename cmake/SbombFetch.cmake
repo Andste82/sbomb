@@ -22,6 +22,50 @@ set(SBOMB_FETCH_REPOSITORY "Andste82/sbomb"
 set(SBOMB_FETCH_TLS_CAINFO "" CACHE FILEPATH
     "CA bundle used to verify the download, e.g. the root a TLS-intercepting proxy re-signs with")
 
+# Whether the peer is verified, for sbomb's downloads alone.
+#
+# CMAKE_TLS_VERIFY covers every download in the project. This covers ours, so
+# the two can differ: a project that has to fetch something else unverified
+# does not have to fetch sbomb unverified as well. Empty means "not set here",
+# which is why it is a STRING and not a BOOL -- a BOOL cache entry cannot tell
+# "off" from "nobody said".
+set(SBOMB_FETCH_TLS_VERIFY "" CACHE STRING
+    "Verify the TLS peer for sbomb's downloads; empty falls back to CMAKE_TLS_VERIFY, then ON")
+
+# _sbomb_tls_verify answers whether to verify, and who decided.
+#
+# Same shape as _sbomb_cainfo: our variable first, CMake's next, a default
+# last. The value is normalised here rather than passed on as it was typed --
+# file(DOWNLOAD) rejects an empty TLS_VERIFY with "missing bool value", which
+# points at this file and reads like a bug in it rather than an empty -D.
+function(_sbomb_tls_verify out_value out_origin)
+  if(NOT "${SBOMB_FETCH_TLS_VERIFY}" STREQUAL "")
+    set(_raw "${SBOMB_FETCH_TLS_VERIFY}")
+    set(_origin "SBOMB_FETCH_TLS_VERIFY")
+  elseif(DEFINED CMAKE_TLS_VERIFY AND NOT "${CMAKE_TLS_VERIFY}" STREQUAL "")
+    set(_raw "${CMAKE_TLS_VERIFY}")
+    set(_origin "CMAKE_TLS_VERIFY")
+  else()
+    set(${out_value} ON PARENT_SCOPE)
+    set(${out_origin} "the default" PARENT_SCOPE)
+    return()
+  endif()
+
+  # An allow-list, not if(${_raw}): a bare string in if() is taken as a
+  # variable name and expanded, so a typo would quietly become "off".
+  string(TOUPPER "${_raw}" _upper)
+  if(_upper MATCHES "^(1|ON|YES|TRUE|Y)$")
+    set(${out_value} ON PARENT_SCOPE)
+  elseif(_upper MATCHES "^(0|OFF|NO|FALSE|N)$")
+    set(${out_value} OFF PARENT_SCOPE)
+  else()
+    message(FATAL_ERROR
+      "sbomb: ${_origin} is not a boolean: got '${_raw}'. "
+      "Use ON or OFF.")
+  endif()
+  set(${out_origin} "${_origin}" PARENT_SCOPE)
+endfunction()
+
 # Pinning: naming the digest the caller expects, rather than taking the one the
 # release hands over beside the file.
 #
@@ -114,11 +158,8 @@ endfunction()
 # later.
 function(_sbomb_download url out_file what out_error)
   _sbomb_cainfo(_ca _ca_origin)
-  if(DEFINED CMAKE_TLS_VERIFY)
-    set(_tls TLS_VERIFY "${CMAKE_TLS_VERIFY}")
-  else()
-    set(_tls TLS_VERIFY ON)
-  endif()
+  _sbomb_tls_verify(_verify _verify_origin)
+  set(_tls TLS_VERIFY ${_verify})
   if(_ca)
     list(APPEND _tls TLS_CAINFO "${_ca}")
   endif()
@@ -231,6 +272,24 @@ function(sbomb_fetch_binary)
     _sbomb_cainfo(_ca _ca_origin)
     if(_ca)
       message(STATUS "sbomb: verifying the connection against ${_ca} (${_ca_origin})")
+    endif()
+
+    # Said out loud, and once. Verification that is off without anybody being
+    # told is the state this whole file exists to avoid, and the pin is the
+    # only thing that still holds when the transport is not trusted.
+    _sbomb_tls_verify(_verify _verify_origin)
+    if(NOT _verify)
+      if(SBOMB_FETCH_SHA256 OR SBOMB_FETCH_SHA256SUMS)
+        message(STATUS
+          "sbomb: TLS peer verification is off (${_verify_origin}); the pinned "
+          "digest is what the download is held to")
+      else()
+        message(WARNING
+          "sbomb: TLS peer verification is off (${_verify_origin}). SHA256SUMS "
+          "then arrives over the same unverified connection as the binary it "
+          "vouches for, so the check shows only that the two agree, not who "
+          "sent them. Pin SBOMB_FETCH_SHA256 or SBOMB_FETCH_SHA256SUMS.")
+      endif()
     endif()
 
     _sbomb_download("${_base}/${_asset}" "${_binary}.part" "${_asset}" _error)
