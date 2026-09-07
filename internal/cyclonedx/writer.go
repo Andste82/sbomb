@@ -463,7 +463,10 @@ func techniqueForVersionSource(source string) string {
 	case "curated":
 		// Declared by whoever wrote the configuration, not derived.
 		return "attestation"
-	case "conan", "vcpkg", "fetchcontent":
+	case "conan", "vcpkg", "fetchcontent", "cmake":
+		// cmake is CMAKE_PROJECT_VERSION, read from the File API cache: the
+		// build system's own manifest, in the same sense as a package
+		// manager's.
 		return "manifest-analysis"
 	case "header":
 		return "source-code-analysis"

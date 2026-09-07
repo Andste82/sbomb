@@ -102,11 +102,19 @@ func TestTheSchemaRefusesWhatTheLoaderRefuses(t *testing.T) {
 		{"an unknown artifact role", `{"project":{"name":"a"},"artifacts":[{"path":"p","role":"widget"}]}`},
 		{"an unknown output format", `{"project":{"name":"a"},"output":{"format":"spdx-json"}}`},
 		{"no project at all", `{"build":{"dir":"b"}}`},
-		{"a project without a name", `{"project":{"root":"."}}`},
 	} {
 		if err := checkAgainstSchema(t, schema, bad.body); err == nil {
 			t.Errorf("%s: accepted by the schema", bad.why)
 		}
+	}
+
+	// And it must accept what the loader accepts. project.name stopped being
+	// required when the build system became a source for it: CMake states it,
+	// and section 6.1 makes the deliverable the root of a single-artifact
+	// document anyway. A schema still demanding it would send a reader looking
+	// for a field the loader no longer wants.
+	if err := checkAgainstSchema(t, schema, `{"project":{"root":"."},"build":{"dir":"b"}}`); err != nil {
+		t.Errorf("a project without a name was rejected: %v", err)
 	}
 }
 

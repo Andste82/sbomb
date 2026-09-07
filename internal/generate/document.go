@@ -4,6 +4,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/example/sbomb/internal/adapters/cmakeapi"
 	"github.com/example/sbomb/internal/anchors"
 	"github.com/example/sbomb/internal/config"
 	"github.com/example/sbomb/internal/domain"
@@ -29,6 +30,7 @@ func isBuildEnvironment(scope string) bool {
 // them (sections 19 and 28.5).
 func buildDocument(
 	cfg config.Config,
+	versionSource string,
 	resolver *componentResolver,
 	deliverables []Deliverable,
 	files []domain.UsedFile,
@@ -36,7 +38,7 @@ func buildDocument(
 	run sbomwriter.RunMetadata,
 ) (*sbomwriter.Document, []domain.Finding) {
 	document := &sbomwriter.Document{
-		Product: productComponent(cfg, deliverables),
+		Product: productComponent(cfg, versionSource, deliverables),
 		Files:   files,
 		Run:     run,
 	}
@@ -85,9 +87,49 @@ func buildDocument(
 	return document, findings
 }
 
+// projectFromCMake fills the product's name and version from what the build
+// system already recorded, when the configuration named neither.
+//
+// The File API cache carries CMAKE_PROJECT_NAME and CMAKE_PROJECT_VERSION
+// because project() was called with them, so this is evidence rather than an
+// assertion, and it saves writing the same two facts twice. Precedence is the
+// one section 32.2 states everywhere else: a configured value wins, and this
+// only fills a gap.
+//
+// It returns where the version came from, so that the document can say so
+// rather than presenting a curated value and a read one as the same claim.
+func projectFromCMake(cfg *config.Config, model *cmakeapi.Model) string {
+	source := ""
+	if cfg.Project.Version != "" {
+		source = "curated"
+	}
+	if model == nil {
+		return source
+	}
+	// The name only in assembly mode. Section 6.1 says the root component of a
+	// single-artifact document is the deliverable, and the deliverable is not
+	// the project: a build of firmware.elf describes firmware.elf, whatever
+	// the enclosing project() is called. Section 6.2 is where project.name is
+	// the root, and that is where reading it from the build system saves
+	// writing it twice.
+	//
+	// CMAKE_PROJECT_NAME is the top-level project. In a super-build that is
+	// the outermost one, which is the product an assembly document is about.
+	if cfg.Mode == "assembly" && cfg.Project.Name == "" {
+		cfg.Project.Name = model.Cache["CMAKE_PROJECT_NAME"]
+	}
+	if cfg.Project.Version == "" {
+		if version := model.Cache["CMAKE_PROJECT_VERSION"]; version != "" {
+			cfg.Project.Version = version
+			source = "cmake"
+		}
+	}
+	return source
+}
+
 // productComponent describes what the SBOM is about. In single-artifact mode
 // the root component is the deliverable itself (section 6.1).
-func productComponent(cfg config.Config, deliverables []Deliverable) domain.Component {
+func productComponent(cfg config.Config, versionSource string, deliverables []Deliverable) domain.Component {
 	name := cfg.Project.Name
 	if name == "" && len(deliverables) > 0 {
 		name = baseName(deliverables[0].EvidencePath)
@@ -108,6 +150,13 @@ func productComponent(cfg config.Config, deliverables []Deliverable) domain.Comp
 		Version:  cfg.Project.Version,
 		Type:     componentType,
 		Supplier: cfg.Project.Supplier,
+	}
+	// A version is worth as much as its source, and the product's source was
+	// never recorded: the document carried the string and nothing about where
+	// it came from. It reaches evidence.identity from here.
+	if product.Version != "" && versionSource != "" {
+		product.VersionSource = versionSource
+		product.VersionConf = domain.ConfidenceHigh
 	}
 	if cfg.Project.License != "" {
 		product.Licenses = []domain.LicenseFinding{{Expression: cfg.Project.License, Evidence: "curated"}}

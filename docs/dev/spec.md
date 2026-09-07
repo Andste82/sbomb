@@ -237,13 +237,15 @@ Each configured artifact MUST exist and be readable, otherwise `MISSING_ARTIFACT
 
 One SBOM per configured final deliverable. The root component is the deliverable.
 
+Its name is `project.name` when the configuration gives one, otherwise the deliverable's own basename. `CMAKE_PROJECT_NAME` MUST NOT be used here: the project is not the deliverable, and a build of `firmware.elf` describes `firmware.elf` whatever the enclosing `project()` is called. §6.2 is where the project's name is the root's.
+
 Output naming: if `--output` is given and there is exactly one artifact, that path is used. If there is more than one artifact in single mode, `--output-dir` MUST be given, and files are written as `<output-dir>/<artifact-basename-without-extension>.cdx.json`. **[Resolves a v2.0 contradiction: `--output` alone with multiple artifacts is a usage error, exit 1.]**
 
 ### 6.2 Product Assembly Mode
 
 Selected by `mode: "assembly"` in configuration or `--mode assembly`.
 
-One SBOM describes all configured artifacts as one product. The root component is the product (`project.name`, `project.type`). Each artifact appears as a CycloneDX component of type matching its role, with `bom-ref` per §28.4, and is a direct dependency of the root.
+One SBOM describes all configured artifacts as one product. The root component is the product (`project.name`, `project.type`). `project.name` MAY be read from `CMAKE_PROJECT_NAME` when the configuration gives none: it is the build system's own statement of what the product is called, and requiring it to be typed a second time is a chance for the two to disagree. A configured value wins. Each artifact appears as a CycloneDX component of type matching its role, with `bom-ref` per §28.4, and is a direct dependency of the root.
 
 ### 6.3 File Sharing Across Artifacts in Assembly Mode
 
@@ -924,6 +926,7 @@ Every grouping component MUST have either a resolved `version` or an explicit `U
 | Source | Confidence |
 |---|---|
 | Curated | high |
+| `CMAKE_PROJECT_VERSION` | high |
 | Package-manager | high |
 | SDK metadata | high |
 | Git tag (clean tree, exact tag) | high |
@@ -937,7 +940,7 @@ Published as `component.evidence.identity` with `field: "version"`: the value in
 | `VersionSource` | `technique` |
 |---|---|
 | `curated` | `attestation` |
-| `conan`, `vcpkg`, `fetchcontent` | `manifest-analysis` |
+| `cmake`, `conan`, `vcpkg`, `fetchcontent` | `manifest-analysis` |
 | `header` | `source-code-analysis` |
 | `go-build-info` | `binary-analysis` |
 | `git`, `git-describe`, `git-commit`, anything unmapped | `other` |

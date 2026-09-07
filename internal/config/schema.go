@@ -52,10 +52,11 @@ var enums = map[string][]string{
 }
 
 // required are the fields `validate` and `Load` insist on, by path.
+// project.name is deliberately absent: the build system states it, and in
+// single-artifact mode the deliverable is the root component anyway.
 var required = map[string][]string{
-	"":        {"project"},
-	"project": {"name"},
-	"build":   {"dir"},
+	"":      {"project"},
+	"build": {"dir"},
 }
 
 // Schema returns the JSON Schema of the configuration file.
