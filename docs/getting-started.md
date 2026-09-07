@@ -77,7 +77,40 @@ sbomb generate --build-dir build --output build/app.cdx.json
 sbomb finds the map and the dependency file next to the artifact. If they sit
 somewhere else, name them in the configuration under `artifacts[]`.
 
-## The CMake integration
+## The CMake integration, without installing anything
+
+If the project would rather fetch sbomb than have everyone install it, the
+release ships a CMake bundle. One `FetchContent_Declare` gives you the module
+*and* a binary for whoever is building:
+
+```cmake
+include(FetchContent)
+FetchContent_Declare(sbomb
+  URL https://github.com/Andste82/sbomb/releases/download/v0.11.0/sbomb-cmake.tar.gz)
+FetchContent_MakeAvailable(sbomb)
+
+add_executable(app src/main.c)
+sbomb_enable(TARGET app POLICY lenient)
+```
+
+```bash
+cmake -S . -B build
+cmake --build build
+cmake --build build --target sbomb
+```
+
+The binary is downloaded at configure time into the build tree and **verified
+against the release's `SHA256SUMS`**, which is not optional. It is fetched for
+the machine running the build, not for the target: a firmware project
+cross-compiling to bare-metal ARM still gets the binary for the developer's
+laptop.
+
+The URL pins the version, so everyone on the project runs the same tool and a
+build from two years from now runs the same one again. `-DSBOMB_EXECUTABLE=…`
+overrides the whole thing when somebody already has sbomb, and nothing is
+downloaded then.
+
+## The CMake integration, with sbomb already installed
 
 The bundled module sets the flags, files the File API query and adds a target
 that produces the SBOM on demand:

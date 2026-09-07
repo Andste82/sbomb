@@ -102,6 +102,12 @@ jobs:
             printf 'module evidence its linker recorded.\n\n'
             printf 'Verify a download against `SHA256SUMS` before running it:\n\n'
             printf '```\nsha256sum --check --ignore-missing SHA256SUMS\n```\n\n'
+            printf 'Or install it, checksum included:\n\n'
+            printf '```\ncurl -fsSL https://andste82.github.io/sbomb/install.sh | sh\n```\n\n'
+            printf '`sbomb-cmake.tar.gz` is the CMake bundle. FetchContent it and a\n'
+            printf 'CMake project has `sbomb_enable` and a matching binary at once:\n\n'
+            printf '```\nFetchContent_Declare(sbomb URL %s/%s/sbomb-cmake.tar.gz)\n```\n\n' \
+              "https://github.com/${GITHUB_REPOSITORY}/releases/download" "$VERSION"
             printf 'See docs/CHANGELOG.md for what changed.\n'
           } > "$notes"
           gh release create "$VERSION" \
@@ -117,6 +123,7 @@ jobs:
             dist/"${VERSION#v}"/sbomb-darwin-amd64.cdx.json \
             dist/"${VERSION#v}"/sbomb-darwin-arm64 \
             dist/"${VERSION#v}"/sbomb-darwin-arm64.cdx.json \
+            dist/"${VERSION#v}"/sbomb-cmake.tar.gz \
             dist/"${VERSION#v}"/SHA256SUMS
 
   # Called rather than triggered: the release exists by now, and a workflow

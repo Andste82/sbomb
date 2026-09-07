@@ -176,6 +176,58 @@ jobs:
           fi
           test ! -e "$PWD/nope-bin/sbomb"
 
+  # The other way in: FetchContent pulls the CMake bundle, which fetches the
+  # binary for the host and defines sbomb_enable. Tested against a bundle built
+  # here rather than a published one, so the path is checked before a release
+  # carries it -- the binary it downloads is the real published release.
+  cmake-fetchcontent:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build the bundle
+        run: VERSION=v0.11.0 scripts/release.sh build
+      - name: A consumer project fetches it and produces an SBOM
+        run: |
+          set -euo pipefail
+          work="$RUNNER_TEMP/consumer"
+          mkdir -p "$work/src"
+          echo 'int main(void){return 0;}' > "$work/src/main.c"
+          echo '{"project":{"name":"fc-demo"},"build":{"dir":"build"}}' > "$work/sbomb.json"
+          cat > "$work/CMakeLists.txt" <<EOF
+          cmake_minimum_required(VERSION 3.24)
+          project(fc_demo C)
+          include(FetchContent)
+          FetchContent_Declare(sbomb URL file://$PWD/dist/0.11.0/sbomb-cmake.tar.gz)
+          FetchContent_MakeAvailable(sbomb)
+          add_executable(app src/main.c)
+          sbomb_enable(TARGET app POLICY lenient CONFIG "\${CMAKE_SOURCE_DIR}/sbomb.json")
+          EOF
+          cmake -S "$work" -B "$work/build"
+          cmake --build "$work/build"
+          cmake --build "$work/build" --target sbomb
+          test -s "$work/build/sbom/app.cdx.json"
+          # The binary it fetched has to be the one for this host, and verified.
+          test -x "$work/build/_sbomb/v0.11.0/sbomb-linux-amd64"
+      - name: A bundle with no version says so instead of guessing
+        run: |
+          set -euo pipefail
+          work="$RUNNER_TEMP/unversioned"
+          mkdir -p "$work"
+          cat > "$work/CMakeLists.txt" <<EOF
+          cmake_minimum_required(VERSION 3.19)
+          project(unversioned C)
+          include("$PWD/cmake/SbombFetch.cmake")
+          sbomb_fetch_binary()
+          EOF
+          if cmake -S "$work" -B "$work/build" 2>"$work/err.txt"; then
+            echo "the source-tree bundle fetched something without a version" >&2
+            exit 1
+          fi
+          grep -q "carries no version" "$work/err.txt"
+
   install-script-windows:
     runs-on: windows-latest
     steps:
