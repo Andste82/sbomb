@@ -13,7 +13,7 @@ not understand them can ignore them; one that does can audit the answer.
 ## Catalogue
 
 <!-- BEGIN GENERATED CATALOGUE -->
-This build writes 34 of the 74 properties below. The rest are specified and
+This build writes 34 of the 72 properties below. The rest are specified and
 reserved: they describe evidence this version does not yet record, and no
 document sbomb writes will contain them. They are listed and marked so that the
 table is the whole catalogue rather than a snapshot of one version.
@@ -92,8 +92,6 @@ table is the whole catalogue rather than a snapshot of one version.
 | `sbomb:run:specVersion` | Run-level (on `metadata.properties`) | — | emitted |
 | `sbomb:run:timestamp` | Run-level (on `metadata.properties`) | — | emitted |
 | `sbomb:run:toolVersion` | Run-level (on `metadata.properties`) | — | emitted |
-| `sbomb:version:confidence` | Grouping components | — | reserved |
-| `sbomb:version:source` | Grouping components | — | reserved |
 <!-- END GENERATED CATALOGUE -->
 
 The table is generated from appendix B of the specification by
@@ -122,6 +120,14 @@ catalogue's second column says. Two move at CycloneDX 1.7:
 repository URL, and 1.7 gives external references a property bag, so at that
 version they sit on the `vcs` reference rather than on the component. At 1.6,
 where references have no such bag, they stay on the component.
+
+Where a version came from is not a property either. It is
+`component.evidence.identity` with `field: "version"` — the value in
+`concludedValue`, the confidence as a number, and the source as one method
+whose `value` names it exactly. `sbomb:version:source` and
+`sbomb:version:confidence` are gone from the catalogue: they were listed and
+never written, and the answer now has a specified field to live in, at both
+specification versions.
 
 The URL itself is not a property at all. CycloneDX specifies
 `externalReferences` of type `vcs` for it, and a specified field takes

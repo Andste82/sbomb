@@ -298,8 +298,10 @@ func componentToCyclone(component domain.Component, ref, specVersion string) Com
 	// Observed, not concluded. A licence file holding two complete texts says
 	// which licences are present and nothing about how they relate, so the
 	// finding goes here and out.Licenses stays NOASSERTION until curated.
-	if observed := observedLicensesToCyclone(component.LicenseEvidence, specVersion); len(observed) > 0 {
-		out.Evidence = &Evidence{Licenses: observed}
+	observed := observedLicensesToCyclone(component.LicenseEvidence, specVersion)
+	identity := versionIdentityEvidence(component)
+	if len(observed) > 0 || len(identity) > 0 {
+		out.Evidence = &Evidence{Licenses: observed, Identity: identity}
 	}
 	// 1.7 can say that the environment provides a component; 1.6 cannot, and
 	// leaves the fact to sbomb:component:scope and the build-environment
@@ -417,6 +419,61 @@ func observedLicensesToCyclone(findings []domain.LicenseFinding, specVersion str
 		}
 	}
 	return licenses
+}
+
+// versionIdentityEvidence says where the component's version came from.
+//
+// sbomb has always worked this out and never published it: the source and its
+// confidence went to the review report and nowhere else, while the document
+// carried a bare version string a consumer could not weigh. CycloneDX has a
+// field for exactly this claim, and it has had it since 1.5 -- so this is
+// written at both specification versions, per section 28.1.
+//
+// A component with a version but no recorded source produces nothing. That is
+// not a gap to fill with a guess: a claim about how a value was established is
+// worth less than nothing when it is invented.
+func versionIdentityEvidence(component domain.Component) []IdentityEvidence {
+	if component.Version == "" || component.VersionSource == "" {
+		return nil
+	}
+	confidence := component.VersionConf.Float()
+	return []IdentityEvidence{{
+		Field:          "version",
+		ConcludedValue: component.Version,
+		Confidence:     confidence,
+		Methods: []Method{{
+			Technique: techniqueForVersionSource(component.VersionSource),
+			// The exact source stays here. The technique vocabulary is closed
+			// and coarse -- three of sbomb's sources share manifest-analysis --
+			// so the field that survives the mapping is the one that says
+			// which manifest.
+			Value:      component.VersionSource,
+			Confidence: confidence,
+		}},
+	}}
+}
+
+// techniqueForVersionSource maps a version source onto the closed technique
+// vocabulary of CycloneDX. Anything unrecognised is "other", which is a
+// vocabulary entry rather than a failure: claiming the nearest-looking
+// technique for a source nobody has mapped would be a guess presented as a
+// measurement.
+func techniqueForVersionSource(source string) string {
+	switch source {
+	case "curated":
+		// Declared by whoever wrote the configuration, not derived.
+		return "attestation"
+	case "conan", "vcpkg", "fetchcontent":
+		return "manifest-analysis"
+	case "header":
+		return "source-code-analysis"
+	case "go-build-info":
+		return "binary-analysis"
+	default:
+		// git, git-describe, git-commit and anything added later. Repository
+		// metadata is none of the listed techniques.
+		return "other"
+	}
 }
 
 // vcsToCyclone renders a component's repository record, and returns the

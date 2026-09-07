@@ -2,6 +2,38 @@
 
 ## Unreleased
 
+### A version now says where it came from
+
+sbomb has always worked out which source supplied a component's version and how
+much that source is worth — a conan manifest, a `git describe`, a macro in a
+header, a line somebody typed into the configuration — and then published
+neither. `sbomb:version:source` and `sbomb:version:confidence` were in the
+catalogue and marked `reserved`: listed, and never written. The only place the
+answer surfaced was the human review report, so a consumer reading the document
+saw a bare version string with no way to weigh it.
+
+It is now `component.evidence.identity` with `field: "version"`: the value in
+`concludedValue`, the confidence as a number, and the source as one method. The
+`technique` vocabulary is closed and coarse — three of sbomb's sources are all
+`manifest-analysis` — so the exact source stays in the method's `value`, which
+is the field that survives the mapping. A source nobody has mapped becomes
+`other` rather than the nearest-looking technique, and a version with no
+recorded source produces no evidence at all: a claim about how a value was
+established is worth less than nothing when it is invented.
+
+`evidence.identity` predates 1.6, so this is written at both specification
+versions and the two reserved property names are removed from appendix B.
+
+**Two bugs came out with it.** The `IdentityEvidence` and `Method` types were
+already declared, and `canonicalizeBOM` already sorted them; nothing had ever
+filled them in, so nothing had ever checked them. `IdentityEvidence.Value`
+serialised as `"value"`, which the schema does not have and, with
+`additionalProperties: false`, does not allow — the field is `concludedValue`.
+And `Method.Confidence` carried `omitempty` although `confidence` is required
+on a method, so a method of confidence 0 would have dropped it. Dead structure
+is bad enough; dead structure that is wrong hands the bug to whoever uses it
+first.
+
 ### CycloneDX 1.7 is available, and 1.6 stays the default
 
 `--spec-version 1.7`, or `output.specVersion` in the configuration file, writes
