@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+### A cached binary is checked again before it is used
+
+`sbomb_fetch_binary` skipped everything once the binary was in the build tree.
+The download verified what arrived, but that was some earlier configure: from
+the second one on nothing looked at the file at all, so "the download is
+checked against SHA256SUMS, and there is no option to skip that" was true of
+the first run and of no other.
+
+It is re-hashed now, against the pin where there is one and otherwise against
+the `SHA256SUMS` fetched beside it the first time. No network is involved. A
+file that no longer matches is discarded and fetched again rather than refused,
+because making the caller clean the build tree is a worse answer than fixing
+it. So is a file with nothing left to check it against — an unverifiable binary
+is not a usable one.
+
+Reading the digest for one asset out of `SHA256SUMS` is one function now,
+called by the download path and the cache check alike. The same question asked
+by two slightly different regexes is a bug waiting for the day they drift.
+
 ### The TLS check can be steered for sbomb alone
 
 `CMAKE_TLS_VERIFY` covers every download a project makes. `SBOMB_FETCH_TLS_VERIFY`
