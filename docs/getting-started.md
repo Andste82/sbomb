@@ -34,13 +34,13 @@ irm https://andste82.github.io/sbomb/install.ps1 | iex
 
 That takes the latest release for your platform and verifies it against the
 release's `SHA256SUMS` before installing — there is no way to skip that check.
-`--version v0.12.0` pins a release, `--bin-dir` chooses where it lands, and
+`--version v0.13.0` pins a release, `--bin-dir` chooses where it lands, and
 `--with-sbom` puts the release's own CycloneDX document beside the binary.
 
 Or do it by hand, which is the same four steps:
 
 ```bash
-VERSION=v0.12.0
+VERSION=v0.13.0
 BASE=https://github.com/Andste82/sbomb/releases/download/$VERSION
 curl -fLO "$BASE/sbomb-linux-amd64"
 curl -fLO "$BASE/SHA256SUMS"
@@ -86,7 +86,7 @@ release ships a CMake bundle. One `FetchContent_Declare` gives you the module
 ```cmake
 include(FetchContent)
 FetchContent_Declare(sbomb
-  URL https://github.com/Andste82/sbomb/releases/download/v0.12.0/sbomb-cmake.tar.gz)
+  URL https://github.com/Andste82/sbomb/releases/download/v0.13.0/sbomb-cmake.tar.gz)
 FetchContent_MakeAvailable(sbomb)
 
 add_executable(app src/main.c)
@@ -117,7 +117,7 @@ code:
 
 | | Fetched by | Verified by |
 |---|---|---|
-| `sbomb-cmake.tar.gz` (the modules, 5 KB) | CMake's `FetchContent` | whatever you tell `FetchContent_Declare` |
+| `sbomb-cmake.tar.gz` (the modules, 7 KB) | CMake's `FetchContent` | whatever you tell `FetchContent_Declare` |
 | the sbomb binary (6.6 MB) | sbomb's own `SbombFetch.cmake` | always, against `SHA256SUMS` |
 
 CMake does **not** verify a `FetchContent` download by default — its
@@ -127,7 +127,7 @@ through to `ExternalProject_Add`:
 
 ```cmake
 FetchContent_Declare(sbomb
-  URL      https://github.com/Andste82/sbomb/releases/download/v0.12.0/sbomb-cmake.tar.gz
+  URL      https://github.com/Andste82/sbomb/releases/download/v0.13.0/sbomb-cmake.tar.gz
   URL_HASH SHA256=<the sbomb-cmake.tar.gz line from the release's SHA256SUMS>
   TLS_VERIFY ON)
 ```
@@ -161,7 +161,7 @@ set(CMAKE_TLS_CAINFO "/etc/ssl/certs/corporate-root.pem")
 
 include(FetchContent)
 FetchContent_Declare(sbomb
-  URL      https://github.com/Andste82/sbomb/releases/download/v0.12.0/sbomb-cmake.tar.gz
+  URL      https://github.com/Andste82/sbomb/releases/download/v0.13.0/sbomb-cmake.tar.gz
   URL_HASH SHA256=<the sbomb-cmake.tar.gz line from the release's SHA256SUMS>)
 FetchContent_MakeAvailable(sbomb)
 ```
@@ -341,9 +341,9 @@ and an expiry, not in a permanently loosened gate.
 Use the composite action, or call the binary. Either way, build first:
 
 ```yaml
-- uses: Andste82/sbomb/.github/actions/sbomb@v0.12.0
+- uses: Andste82/sbomb/.github/actions/sbomb@v0.13.0
   with:
-    version: v0.12.0
+    version: v0.13.0
     build-dir: build
     config: sbomb.json
     policy: cra
