@@ -1,0 +1,70 @@
+name: pages
+
+# The install scripts live in the repository and are served from GitHub Pages.
+# Publishing them from here rather than linking at raw.githubusercontent.com
+# keeps the install URL stable across branch renames and repository layout, and
+# means the served copy cannot drift from the tree: it is generated, never
+# edited.
+on:
+  push:
+    branches: [main]
+    paths:
+      - install.sh
+      - install.ps1
+      - docs/site/**
+      - .github/workflows/pages.yaml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One publish at a time, and a newer commit wins. A queued older run would
+# otherwise be able to serve a script the tree has already moved past.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # What is served is what is in the tree, assembled here and nowhere else.
+      - name: Assemble the site
+        run: |
+          set -euo pipefail
+          mkdir -p site
+          cp docs/site/index.html site/
+          cp install.sh install.ps1 site/
+          # A shell fetched with curl must arrive as bytes, not as a rendered
+          # page; .nojekyll stops Pages from touching what it does not own.
+          touch site/.nojekyll
+          ls -l site
+
+      # A broken install script is worse than a broken feature: it is the first
+      # thing a new user runs. Both are checked before either is published.
+      - name: The shell script parses and is clean
+        run: |
+          sh -n install.sh
+          shellcheck install.sh
+
+      - name: The PowerShell script parses
+        shell: pwsh
+        run: |
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path ./install.ps1), [ref]$null, [ref]$errors) | Out-Null
+          if ($errors) { $errors | ForEach-Object { Write-Error $_ }; exit 1 }
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v4

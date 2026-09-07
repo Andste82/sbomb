@@ -63,6 +63,37 @@ through mingw-w64.
 sbomb itself is a single static executable with no runtime dependencies, and it
 never accesses the network.
 
+## Install
+
+```bash
+curl -fsSL https://andste82.github.io/sbomb/install.sh | sh
+```
+
+Windows, in PowerShell:
+
+```powershell
+irm https://andste82.github.io/sbomb/install.ps1 | iex
+```
+
+The latest release, for your platform. A particular one:
+
+```bash
+curl -fsSL https://andste82.github.io/sbomb/install.sh | sh -s -- --version v0.11.0
+```
+
+Both scripts verify the download against the release's `SHA256SUMS` before
+installing it, and neither offers a way to skip that — a tool whose argument is
+that you should be able to check what you were given has no business handing
+you a binary it did not check itself. `--with-sbom` installs the release's own
+CycloneDX document beside the binary.
+
+They are short and worth reading before you pipe them anywhere:
+[install.sh](install.sh), [install.ps1](install.ps1). What the site serves is
+published from this tree by a workflow, so the two cannot drift.
+
+Or take the binary and its checksum straight from the
+[releases page](https://github.com/Andste82/sbomb/releases).
+
 ## Quick start
 
 ```bash
