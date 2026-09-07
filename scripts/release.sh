@@ -54,6 +54,29 @@ check_reproducible() {
   cmp "$first" "$second"
 }
 
+# build_cmake_bundle writes sbomb-cmake.tar.gz: the CMake module, the fetcher
+# with this release's version substituted into it, and the CMakeLists.txt that
+# FetchContent_MakeAvailable adds. Deterministic: fixed ownership, fixed mtime
+# and a sorted member order, so two builds of one tag produce one archive.
+build_cmake_bundle() {
+  bundle_dir="$output_dir/.cmake-bundle"
+  rm -rf "$bundle_dir"
+  mkdir -p "$bundle_dir"
+  cp "$root_dir/cmake/CMakeLists.txt" "$root_dir/cmake/Sbomb.cmake" "$bundle_dir/"
+  # The tag, not the bare version: $version has had its leading v stripped for
+  # the ldflags, and the download URL is built from the tag.
+  sed "s/@SBOMB_VERSION@/v$version/" "$root_dir/cmake/SbombFetch.cmake" > "$bundle_dir/SbombFetch.cmake"
+  if grep -q '@SBOMB_VERSION@' "$bundle_dir/SbombFetch.cmake"; then
+    printf 'release.sh: the version placeholder survived substitution\n' >&2
+    exit 1
+  fi
+  (cd "$bundle_dir" && tar \
+    --sort=name --owner=0 --group=0 --numeric-owner \
+    --mtime="@${SOURCE_DATE_EPOCH:-0}" \
+    -czf "$output_dir/sbomb-cmake.tar.gz" CMakeLists.txt Sbomb.cmake SbombFetch.cmake)
+  rm -rf "$bundle_dir"
+}
+
 case "${1:-build}" in
   --check-reproducible)
     check_reproducible
@@ -71,6 +94,11 @@ case "${1:-build}" in
     for binary in "$output_dir"/sbomb-*; do
       write_self_sbom "$binary"
     done
+    # The CMake bundle, built after the SBOMs so the loop above does not see it
+    # and before SHA256SUMS so that it is covered like everything else. It is
+    # what FetchContent pulls in: the module, and a fetcher pinned to this
+    # version, so a consumer gets sbomb_enable and a matching binary at once.
+    build_cmake_bundle
     (cd "$output_dir" && sha256sum sbomb-* > SHA256SUMS)
     ;;
   *)

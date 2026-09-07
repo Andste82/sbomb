@@ -94,6 +94,23 @@ published from this tree by a workflow, so the two cannot drift.
 Or take the binary and its checksum straight from the
 [releases page](https://github.com/Andste82/sbomb/releases).
 
+For a CMake project that would rather fetch sbomb than have everyone install
+it, the release ships a CMake bundle — one declaration gives you the module and
+a matching binary:
+
+```cmake
+include(FetchContent)
+FetchContent_Declare(sbomb
+  URL https://github.com/Andste82/sbomb/releases/download/v0.11.0/sbomb-cmake.tar.gz)
+FetchContent_MakeAvailable(sbomb)
+
+sbomb_enable(TARGET app POLICY lenient)
+```
+
+The binary is fetched for the machine running the build, checked against
+`SHA256SUMS`, and pinned by the URL. See
+[docs/getting-started.md](docs/getting-started.md).
+
 ## Quick start
 
 ```bash

@@ -78,9 +78,10 @@ VERSION=v0.10.0 scripts/release.sh build
 ls dist/0.10.0/
 ```
 
-Expect **eleven** files: five binaries — linux/amd64, linux/arm64,
-windows/amd64, darwin/amd64, darwin/arm64 — a `.cdx.json` beside each, and
-`SHA256SUMS` covering all ten. Check the self-SBOM is not empty of licences:
+Expect **twelve** files: five binaries — linux/amd64, linux/arm64,
+windows/amd64, darwin/amd64, darwin/arm64 — a `.cdx.json` beside each,
+`sbomb-cmake.tar.gz` (the CMake bundle FetchContent pulls, with this version
+substituted into its fetcher), and `SHA256SUMS` covering all eleven. Check the self-SBOM is not empty of licences:
 
 ```bash
 python3 -c "
@@ -144,7 +145,7 @@ for r in json.load(sys.stdin)['workflow_runs'][:8]:
 "
 ```
 
-Then confirm the release carries all eleven assets:
+Then confirm the release carries all twelve assets:
 
 ```bash
 curl -sS -H "Authorization: Bearer $GITHUB_TOKEN" \
