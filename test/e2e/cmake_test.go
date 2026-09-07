@@ -29,7 +29,11 @@ func TestCMakeTargetRunsSbombOnlyOnDemand(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	write("CMakeLists.txt", "cmake_minimum_required(VERSION 3.20)\nproject(p01 C)\nadd_executable(app main.c)\ninclude(\""+filepath.Join(root, "cmake", "Sbomb.cmake")+"\")\nsbomb_enable(TARGET app)\n")
+	// The include comes above the target, which is the documented order and
+	// the one that matters: CMAKE_EXPORT_COMPILE_COMMANDS has to be set before
+	// the generator processes a target, or the compile database appears only
+	// on the next configure.
+	write("CMakeLists.txt", "cmake_minimum_required(VERSION 3.20)\nproject(p01 C)\ninclude(\""+filepath.Join(root, "cmake", "Sbomb.cmake")+"\")\nadd_executable(app main.c)\nsbomb_enable(TARGET app)\n")
 	write("main.c", "int main(void) { return 0; }\n")
 	sbomb := filepath.Join(work, "sbomb")
 	command := exec.Command("go", "build", "-o", sbomb, "./cmd/sbomb")

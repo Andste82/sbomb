@@ -18,6 +18,34 @@ set(SBOMB_OUTPUT_DIR "${CMAKE_BINARY_DIR}/sbom" CACHE PATH "Directory for sbomb 
 set(SBOMB_DEFAULT_CONFIG "${CMAKE_SOURCE_DIR}/sbomb.json"
     CACHE FILEPATH "Configuration used when sbomb_enable is called without CONFIG")
 
+# Set here, at include() time, and not inside sbomb_enable.
+#
+# That is the whole reason the SBOM target used to re-configure the project.
+# The generator decides whether to record a compile command when it processes
+# the target, so switching this on afterwards -- which is when sbomb_enable
+# runs, since the target has to exist before it can be named -- reaches the
+# cache and misses the run: the compile database appeared only on the *next*
+# configure. Set before any target is defined, one configure is enough.
+#
+# It follows that `include(Sbomb)` belongs above the targets it will be asked
+# about. Below them, this arrives too late again, sbomb finds no compile
+# database and says so with MISSING_COMPILE_EVIDENCE.
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Export compile commands for sbomb" FORCE)
+
+# Being too late is silent otherwise: the build succeeds, the SBOM is written,
+# and it is quietly worse because no object could be traced to a source. Say so
+# at the moment it can still be moved.
+get_property(_sbomb_existing_targets DIRECTORY PROPERTY BUILDSYSTEM_TARGETS)
+if(_sbomb_existing_targets)
+  message(WARNING
+    "sbomb: include(Sbomb) comes after ${_sbomb_existing_targets}. "
+    "CMAKE_EXPORT_COMPILE_COMMANDS then arrives too late for this run and "
+    "compile_commands.json will be missing until the next configure, which "
+    "costs sbomb the object-to-source evidence. Move the include above the "
+    "targets.")
+endif()
+unset(_sbomb_existing_targets)
+
 function(sbomb_enable)
   cmake_parse_arguments(SBOMB "" "TARGET;CONFIG;POLICY" "" ${ARGN})
 
@@ -40,23 +68,14 @@ function(sbomb_enable)
     return()
   endif()
 
-  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-  set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Export compile commands for sbomb" FORCE)
-
-  # The SBOM target re-configures before it generates, and that is not
-  # optional. CMAKE_EXPORT_COMPILE_COMMANDS set here reaches the cache, but the
-  # generator of *this* run has already been decided: the compile database
-  # appears on the next configure and not on this one. Without it objects
-  # cannot be traced to sources, which is most of what sbomb does.
+  # CMake 3.27 files the File API query for the run that is happening, so one
+  # configure leaves a reply and the SBOM target has nothing to prepare.
   #
-  # It also refreshes the File API reply, so a document describes the tree as
-  # it is rather than as it was when somebody last configured by hand.
-  set(_sbomb_reconfigure
-    COMMAND "${CMAKE_COMMAND}" -S "${CMAKE_SOURCE_DIR}" -B "${CMAKE_BINARY_DIR}" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON)
-
-  # CMake 3.27 can file the File API query for the run that is happening, so a
-  # single configure already leaves a reply. Before that the query is only seen
-  # by the next run -- which the re-configure above provides either way.
+  # Below that the query is only read at the *start* of a run, so it takes
+  # effect on the next one. There the target still re-configures, because a
+  # reply that never arrives is not a degraded answer but no answer: sbomb
+  # would know no targets, no anchors and no toolchain.
+  set(_sbomb_reconfigure "")
   if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.27")
     cmake_file_api(
       QUERY
@@ -70,6 +89,8 @@ function(sbomb_enable)
     file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/.cmake/api/v1/query/client-sbomb")
     file(WRITE "${CMAKE_BINARY_DIR}/.cmake/api/v1/query/client-sbomb/query.json"
       "{\"requests\":[{\"kind\":\"codemodel\",\"version\":2},{\"kind\":\"cache\",\"version\":2},{\"kind\":\"cmakeFiles\",\"version\":1},{\"kind\":\"toolchains\",\"version\":1}]}\n")
+    set(_sbomb_reconfigure
+      COMMAND "${CMAKE_COMMAND}" -S "${CMAKE_SOURCE_DIR}" -B "${CMAKE_BINARY_DIR}")
   endif()
 
   # Only a target that is actually linked can carry linker flags. A static or
