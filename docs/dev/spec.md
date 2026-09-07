@@ -895,6 +895,8 @@ Git repository boundaries MAY be used as component boundaries. Git metadata MAY 
 
 Git URLs MUST be normalized: `git@host:org/repo.git` → `https://host/org/repo`, credentials stripped. If the working tree is dirty, property `sbomb:component:vcsDirty=true` is set and `VCS_DIRTY` is emitted (informational).
 
+The repository URL MUST be written as an external reference of type `vcs`, not as a property: CycloneDX specifies a field for it and §28.1 gives the specified field precedence. It is emitted at both specification versions. `sbomb:component:vcsCommit` and `sbomb:component:vcsDirty` qualify that URL and sit in the reference's property bag at 1.7, where external references have one, and on the component at 1.6. Neither is ever a stand-in for a supplier.
+
 ---
 
 ## 20. Version and PURL Resolution
@@ -1209,7 +1211,20 @@ CycloneDX **1.7** MAY be written on request, via `--spec-version 1.7` or `output
 
 1.7 is additive over 1.6: 108 definitions against 91, nothing removed, the same required top-level fields, and JSON Schema draft-07 in both, so D6 is unaffected. A document written at 1.6 is therefore structurally valid at 1.7 with only `specVersion` changed.
 
-**A document MUST NOT change shape with the version beyond what the version requires.** A field that 1.7 permits and 1.6 forbids MAY be emitted at 1.7 only, and that difference MUST be documented rather than discovered. Exactly one such difference exists today: `component.evidence.licenses` MAY mix SPDX expressions with licence identifiers at 1.7, which 1.6's `licenseChoice` forbids (D19). The `citations`, `component.isExternal`, `externalReference.properties` and `metadata.distributionConstraints` structures 1.7 adds are not emitted.
+**A standard field beats a property in the `sbomb:` namespace.** Where CycloneDX specifies a field for something this tool records, the specified field carries it. Where that field exists at 1.6 as well, it is emitted at **both** versions rather than gated behind 1.7; the version decides only what the version alone can express.
+
+**A document MUST NOT change shape with the version beyond what the version requires.** A field that 1.7 permits and 1.6 forbids MAY be emitted at 1.7 only, and every such difference MUST be documented here rather than discovered. They are:
+
+| 1.7-only | Instead, at 1.6 |
+|---|---|
+| `component.evidence.licenses` MAY mix SPDX expressions with licence identifiers, which 1.6's `licenseChoice` forbids (D19) | licence identifiers only |
+| `component.isExternal` marks a component the environment provides | `sbomb:component:scope` and the build-environment grouping of §24.2, which both versions carry |
+| `externalReference.properties` carries `sbomb:component:vcsCommit` and `sbomb:component:vcsDirty` beside the repository URL they qualify | the same properties on the component |
+| `metadata.distributionConstraints.tlp`, written only when `output.tlp` is set | a TLP cannot be written; setting `output.tlp` at 1.6 is a usage error rather than a silent omission |
+
+`component.externalReferences` is **not** in that table: the `vcs` reference type predates 1.6, so the repository URL is emitted at both versions and `sbomb:component:vcsUrl` is removed from appendix B.
+
+The `citations` structure is not emitted. `evidence.identity` cannot carry a licence technique — its `field` enum admits identity fields only, and its `methods[].technique` vocabulary does not include the SPDX techniques of §22.3 — so `sbomb:license:technique` has no standard field and remains a property.
 
 Both schemas MUST be embedded, so that `validate` can check either — including a document this tool did not write (§32.5).
 
@@ -2061,7 +2076,7 @@ sbomb:artifact:correlation       (correlated | uncorrelated | mismatch)
 ```
 sbomb:component:detectedBy       sbomb:component:root
 sbomb:component:scope            (project | third-party | sdk | toolchain | system)
-sbomb:component:headerOnly       sbomb:component:vcsUrl
+sbomb:component:headerOnly
 sbomb:component:vcsCommit        sbomb:component:vcsTag
 sbomb:component:vcsDirty
 sbomb:version:source             sbomb:version:confidence

@@ -203,10 +203,13 @@ func productComponent(artifactName string, binary *gobin.Binary, options Options
 	// product's own sources: not "these files were present" but "this commit
 	// was built".
 	if revision, ok := binary.Setting("vcs.revision"); ok && revision != "" {
-		component.Properties["sbomb:component:vcsCommit"] = []string{revision}
+		component.VCS = &domain.VCSRecord{Commit: revision}
 	}
 	if modified, ok := binary.Setting("vcs.modified"); ok && modified == "true" {
-		component.Properties["sbomb:component:vcsDirty"] = []string{"true"}
+		if component.VCS == nil {
+			component.VCS = &domain.VCSRecord{}
+		}
+		component.VCS.Dirty = true
 		findings = append(findings, componentFinding("VCS_DIRTY", domain.SeverityWarning, component.ID,
 			"the binary was built from a working tree with uncommitted changes",
 			"Commit or stash the changes and rebuild before releasing."))

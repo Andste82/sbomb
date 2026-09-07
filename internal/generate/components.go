@@ -269,14 +269,11 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 	}
 	if isManaged {
 		// Section 20.5: the repository URL belongs in externalReferences, and
-		// it is emitted only because the manager recorded it -- never as a
-		// stand-in for a supplier.
-		component.Properties = addProperty(component.Properties, "sbomb:component:vcsUrl", managed.VCSURL)
-		if managed.Commit != "" {
-			component.Properties = addProperty(component.Properties, "sbomb:component:vcsCommit", managed.Commit)
-		}
-		if managed.Dirty {
-			component.Properties = addProperty(component.Properties, "sbomb:component:vcsDirty", "true")
+		// it is recorded only because the manager recorded it -- never as a
+		// stand-in for a supplier. Where it goes in the document is the
+		// writer's decision, so the fact is handed over rather than rendered.
+		if managed.VCSURL != "" || managed.Commit != "" || managed.Dirty {
+			component.VCS = &domain.VCSRecord{URL: managed.VCSURL, Commit: managed.Commit, Dirty: managed.Dirty}
 		}
 	}
 	if component.PURL == "" {

@@ -57,7 +57,12 @@ type Document struct {
 // SpecVersion means the writer's DefaultVersion; it is never a licence to
 // guess.
 type Options struct {
-	SpecVersion  string
+	SpecVersion string
+	// TLP is the Traffic Light Protocol classification the document carries,
+	// empty when it carries none. It is a distribution constraint on the
+	// document rather than a fact about the build, which is why it is a
+	// serialization choice and not part of the Document.
+	TLP          string
 	Reproducible bool
 }
 

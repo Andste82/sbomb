@@ -32,10 +32,19 @@ type BOM struct {
 }
 
 type Metadata struct {
-	Timestamp  string     `json:"timestamp,omitempty"`
-	Tools      []Tool     `json:"tools,omitempty"`
-	Component  *Component `json:"component,omitempty"`
-	Properties []Property `json:"properties,omitempty"`
+	Timestamp string     `json:"timestamp,omitempty"`
+	Tools     []Tool     `json:"tools,omitempty"`
+	Component *Component `json:"component,omitempty"`
+	// DistributionConstraints is CycloneDX 1.7 and later. It is written only
+	// when the configuration sets it; an absent constraint is silence, not
+	// permission to share.
+	DistributionConstraints *DistributionConstraints `json:"distributionConstraints,omitempty"`
+	Properties              []Property               `json:"properties,omitempty"`
+}
+
+// DistributionConstraints governs how widely the document may be shared.
+type DistributionConstraints struct {
+	TLP string `json:"tlp,omitempty"`
 }
 
 type Tool struct {
@@ -45,16 +54,30 @@ type Tool struct {
 }
 
 type Component struct {
-	Type       string                `json:"type,omitempty"`
-	Name       string                `json:"name,omitempty"`
-	Version    string                `json:"version,omitempty"`
-	BomRef     string                `json:"bom-ref,omitempty"`
-	PURL       string                `json:"purl,omitempty"`
-	Supplier   *OrganizationalEntity `json:"supplier,omitempty"`
-	Hashes     []Hash                `json:"hashes,omitempty"`
-	Licenses   []License             `json:"licenses,omitempty"`
-	Properties []Property            `json:"properties,omitempty"`
-	Evidence   *Evidence             `json:"evidence,omitempty"`
+	Type     string                `json:"type,omitempty"`
+	Name     string                `json:"name,omitempty"`
+	Version  string                `json:"version,omitempty"`
+	BomRef   string                `json:"bom-ref,omitempty"`
+	PURL     string                `json:"purl,omitempty"`
+	Supplier *OrganizationalEntity `json:"supplier,omitempty"`
+	// IsExternal is CycloneDX 1.7 and later: the environment is expected to
+	// provide this component rather than the assembly carrying it.
+	IsExternal         bool                `json:"isExternal,omitempty"`
+	Hashes             []Hash              `json:"hashes,omitempty"`
+	Licenses           []License           `json:"licenses,omitempty"`
+	ExternalReferences []ExternalReference `json:"externalReferences,omitempty"`
+	Properties         []Property          `json:"properties,omitempty"`
+	Evidence           *Evidence           `json:"evidence,omitempty"`
+}
+
+// ExternalReference points at something about the component that lives
+// elsewhere -- its repository, for one. Properties on a reference are
+// CycloneDX 1.7 and later.
+type ExternalReference struct {
+	URL        string     `json:"url"`
+	Type       string     `json:"type"`
+	Comment    string     `json:"comment,omitempty"`
+	Properties []Property `json:"properties,omitempty"`
 }
 
 type OrganizationalEntity struct {
@@ -168,6 +191,15 @@ func canonicalizeBOM(bom *BOM) {
 			}
 			return bom.Components[i].Properties[a].Name < bom.Components[i].Properties[b].Name
 		})
+		sort.SliceStable(bom.Components[i].ExternalReferences, func(a, b int) bool {
+			if bom.Components[i].ExternalReferences[a].Type == bom.Components[i].ExternalReferences[b].Type {
+				return bom.Components[i].ExternalReferences[a].URL < bom.Components[i].ExternalReferences[b].URL
+			}
+			return bom.Components[i].ExternalReferences[a].Type < bom.Components[i].ExternalReferences[b].Type
+		})
+		for j := range bom.Components[i].ExternalReferences {
+			sortProperties(bom.Components[i].ExternalReferences[j].Properties)
+		}
 		if bom.Components[i].Evidence != nil {
 			sort.SliceStable(bom.Components[i].Evidence.Identity, func(a, b int) bool {
 				if bom.Components[i].Evidence.Identity[a].Field == bom.Components[i].Evidence.Identity[b].Field {
@@ -221,6 +253,16 @@ func canonicalizeBOM(bom *BOM) {
 			return bom.Properties[a].Value < bom.Properties[b].Value
 		}
 		return bom.Properties[a].Name < bom.Properties[b].Name
+	})
+}
+
+// sortProperties orders a property bag by name, then value, in place.
+func sortProperties(properties []Property) {
+	sort.SliceStable(properties, func(a, b int) bool {
+		if properties[a].Name == properties[b].Name {
+			return properties[a].Value < properties[b].Value
+		}
+		return properties[a].Name < properties[b].Name
 	})
 }
 
@@ -548,6 +590,18 @@ func validateProperties(bom BOM) error {
 		for _, p := range comp.Properties {
 			if err := validatePropertyName(p.Name); err != nil {
 				return fmt.Errorf("component %q: %w", comp.BomRef, err)
+			}
+		}
+		// A property bag on an external reference is still a property bag; the
+		// catalogue of appendix B governs it exactly as it governs the others.
+		for _, reference := range comp.ExternalReferences {
+			if reference.URL == "" || reference.Type == "" {
+				return fmt.Errorf("component %q has an external reference without a url or type", comp.BomRef)
+			}
+			for _, p := range reference.Properties {
+				if err := validatePropertyName(p.Name); err != nil {
+					return fmt.Errorf("component %q external reference %q: %w", comp.BomRef, reference.Type, err)
+				}
 			}
 		}
 	}

@@ -305,6 +305,184 @@ func TestDetectReadsTheDocumentsOwnClaims(t *testing.T) {
 	}
 }
 
+// TestEnvironmentProvidedBecomesIsExternalAt17 pins that a component the
+// target expects to find rather than to carry is said in the standard field
+// where the version has one, and that 1.6 is untouched — there the fact is
+// still carried by sbomb:component:scope and the build-environment grouping.
+func TestEnvironmentProvidedBecomesIsExternalAt17(t *testing.T) {
+	document := func() *sbomwriter.Document {
+		return &sbomwriter.Document{
+			Product: domain.Component{ID: "product", Name: "app", Type: "application"},
+			Components: []domain.Component{
+				{ID: "component:libc", Name: "libc", Type: "library", Scope: "system", EnvironmentProvided: true},
+				{ID: "component:own", Name: "own", Type: "library", Scope: "project"},
+			},
+			Relations: []sbomwriter.Relation{{From: "product", To: []string{"component:libc", "component:own"}}},
+			Run:       sbomwriter.RunMetadata{ToolName: "sbomb", ToolVendor: "sbomb", ToolVersion: "0.0.0-test"},
+		}
+	}
+
+	for _, testCase := range []struct {
+		specVersion string
+		want        bool
+	}{
+		{Version16, false},
+		{Version17, true},
+	} {
+		t.Run(testCase.specVersion, func(t *testing.T) {
+			data, err := MarshalDocument(document(), sbomwriter.Options{
+				SpecVersion: testCase.specVersion, Reproducible: true,
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := Validate(data); err != nil {
+				t.Fatalf("document is not valid: %v", err)
+			}
+			if got := componentNamed(t, data, "libc").IsExternal; got != testCase.want {
+				t.Errorf("libc isExternal = %v, want %v", got, testCase.want)
+			}
+			// A component the product carries is never external, at any version.
+			if componentNamed(t, data, "own").IsExternal {
+				t.Error("a project component was marked as provided by the environment")
+			}
+			// No versionRange goes with it; a soname is not a vers range.
+			if bytes.Contains(data, []byte("versionRange")) {
+				t.Error("a version range was invented for an external component")
+			}
+		})
+	}
+}
+
+// TestTheRepositoryGoesToExternalReferences pins the rule that a standard
+// field beats a property in the sbomb namespace. The URL is a `vcs` external
+// reference at both versions -- CycloneDX has had the type since before 1.6,
+// so this is not a 1.7 feature and is not gated on one. Only the commit and
+// the dirty flag move, because only they need the property bag 1.7 added to
+// external references.
+func TestTheRepositoryGoesToExternalReferences(t *testing.T) {
+	document := func() *sbomwriter.Document {
+		return &sbomwriter.Document{
+			Product: domain.Component{ID: "product", Name: "app", Type: "application"},
+			Components: []domain.Component{{
+				ID:   "component:vendored",
+				Name: "vendored",
+				Type: "library",
+				VCS: &domain.VCSRecord{
+					URL:    "https://example.org/org/repo",
+					Commit: "0123456789abcdef0123456789abcdef01234567",
+					Dirty:  true,
+				},
+			}},
+			Relations: []sbomwriter.Relation{{From: "product", To: []string{"component:vendored"}}},
+			Run:       sbomwriter.RunMetadata{ToolName: "sbomb", ToolVendor: "sbomb", ToolVersion: "0.0.0-test"},
+		}
+	}
+
+	for _, testCase := range []struct {
+		specVersion           string
+		wantOnReference       int
+		wantOnComponent       int
+		wantReferenceProperty bool
+	}{
+		{Version16, 0, 2, false},
+		{Version17, 2, 0, true},
+	} {
+		t.Run(testCase.specVersion, func(t *testing.T) {
+			data, err := MarshalDocument(document(), sbomwriter.Options{
+				SpecVersion: testCase.specVersion, Reproducible: true,
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := Validate(data); err != nil {
+				t.Fatalf("document is not valid: %v", err)
+			}
+			component := componentNamed(t, data, "vendored")
+
+			if len(component.ExternalReferences) != 1 {
+				t.Fatalf("externalReferences = %+v, want exactly one", component.ExternalReferences)
+			}
+			reference := component.ExternalReferences[0]
+			if reference.Type != "vcs" || reference.URL != "https://example.org/org/repo" {
+				t.Errorf("reference = %+v", reference)
+			}
+			if got := len(reference.Properties); got != testCase.wantOnReference {
+				t.Errorf("properties on the reference = %d, want %d", got, testCase.wantOnReference)
+			}
+
+			// The URL must be gone from the component's own properties at both
+			// versions: it is said once, in the standard field.
+			vcsProperties := 0
+			for _, property := range component.Properties {
+				if property.Name == "sbomb:component:vcsUrl" {
+					t.Error("the repository URL is still a sbomb: property")
+				}
+				if strings.HasPrefix(property.Name, "sbomb:component:vcs") {
+					vcsProperties++
+				}
+			}
+			if vcsProperties != testCase.wantOnComponent {
+				t.Errorf("vcs properties on the component = %d, want %d", vcsProperties, testCase.wantOnComponent)
+			}
+		})
+	}
+}
+
+func componentNamed(t *testing.T, data []byte, name string) Component {
+	t.Helper()
+	var bom BOM
+	if err := json.Unmarshal(data, &bom); err != nil {
+		t.Fatal(err)
+	}
+	for _, component := range bom.Components {
+		if component.Name == name {
+			return component
+		}
+	}
+	t.Fatalf("component %q is not in the document", name)
+	return Component{}
+}
+
+// TestTLPIsWrittenOnlyWhenAskedAndOnlyAt17 pins all three halves of the
+// distribution-constraint decision: nothing is written unless configured, what
+// is written validates, and a version that cannot carry it says so instead of
+// dropping it.
+func TestTLPIsWrittenOnlyWhenAskedAndOnlyAt17(t *testing.T) {
+	silent, err := (Writer{}).Build(sampleDocument(), sbomwriter.Options{SpecVersion: Version17, Reproducible: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if silent.Metadata.DistributionConstraints != nil {
+		t.Error("a TLP was written without being configured; absence must mean silence")
+	}
+
+	marked, err := MarshalDocument(sampleDocument(), sbomwriter.Options{
+		SpecVersion: Version17, TLP: "AMBER", Reproducible: true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := Validate(marked); err != nil {
+		t.Fatalf("a document with a TLP is not valid: %v", err)
+	}
+	var bom BOM
+	if err := json.Unmarshal(marked, &bom); err != nil {
+		t.Fatal(err)
+	}
+	if bom.Metadata.DistributionConstraints == nil || bom.Metadata.DistributionConstraints.TLP != "AMBER" {
+		t.Errorf("distributionConstraints = %+v", bom.Metadata.DistributionConstraints)
+	}
+
+	// 1.6 has nowhere to put it, and dropping it silently would lose a
+	// constraint somebody set on purpose.
+	if _, err := (Writer{}).Build(sampleDocument(), sbomwriter.Options{
+		SpecVersion: Version16, TLP: "AMBER", Reproducible: true,
+	}); err == nil {
+		t.Error("a TLP at 1.6 was accepted and silently dropped")
+	}
+}
+
 // TestACompoundExpressionInEvidenceNeedsSeventeen is the one place where 1.7
 // lets sbomb say something 1.6 forbids (deviation D19).
 //

@@ -97,8 +97,13 @@ type Policy struct {
 // wants that of every run, not only of the ones where somebody remembered the
 // flag. --reproducible still forces it on for a single run.
 type Output struct {
-	Format       string `json:"format,omitempty"`
-	SpecVersion  string `json:"specVersion,omitempty"`
+	Format      string `json:"format,omitempty"`
+	SpecVersion string `json:"specVersion,omitempty"`
+	// TLP is the Traffic Light Protocol classification the document carries,
+	// and it is written only when it is set. Nothing infers it: a TLP marking
+	// states what the recipient may do with the document, which is not
+	// something a tool may conclude from how the document was produced.
+	TLP          string `json:"tlp,omitempty"`
 	Reproducible bool   `json:"reproducible,omitempty"`
 }
 
@@ -215,6 +220,9 @@ func validate(cfg Config) error {
 		return err
 	}
 	if err := checkOutputEnum("specVersion", cfg.Output.SpecVersion); err != nil {
+		return err
+	}
+	if err := checkOutputEnum("tlp", cfg.Output.TLP); err != nil {
 		return err
 	}
 	return nil

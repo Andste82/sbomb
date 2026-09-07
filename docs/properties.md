@@ -13,7 +13,7 @@ not understand them can ignore them; one that does can audit the answer.
 ## Catalogue
 
 <!-- BEGIN GENERATED CATALOGUE -->
-This build writes 35 of the 75 properties below. The rest are specified and
+This build writes 34 of the 74 properties below. The rest are specified and
 reserved: they describe evidence this version does not yet record, and no
 document sbomb writes will contain them. They are listed and marked so that the
 table is the whole catalogue rather than a snapshot of one version.
@@ -42,7 +42,6 @@ table is the whole catalogue rather than a snapshot of one version.
 | `sbomb:component:vcsCommit` | Grouping components | — | emitted |
 | `sbomb:component:vcsDirty` | Grouping components | — | emitted |
 | `sbomb:component:vcsTag` | Grouping components | — | reserved |
-| `sbomb:component:vcsUrl` | Grouping components | — | emitted |
 | `sbomb:evidence:artifacts` | File components | repeated, sorted bom-refs | emitted |
 | `sbomb:evidence:confidence` | File components | highest present | reserved |
 | `sbomb:evidence:downgrades` | File components | repeated, sorted | reserved |
@@ -114,6 +113,21 @@ every component sbomb writes:
 
 They are derived from the file class, not asserted: a source file is
 structured, an archive is an archive, a firmware image is executable.
+
+## Where a property sits
+
+Most properties sit on the component or on `metadata.properties`, as the
+catalogue's second column says. Two move at CycloneDX 1.7:
+`sbomb:component:vcsCommit` and `sbomb:component:vcsDirty` qualify the
+repository URL, and 1.7 gives external references a property bag, so at that
+version they sit on the `vcs` reference rather than on the component. At 1.6,
+where references have no such bag, they stay on the component.
+
+The URL itself is not a property at all. CycloneDX specifies
+`externalReferences` of type `vcs` for it, and a specified field takes
+precedence over one in the `sbomb:` namespace — at both versions, since that
+reference type predates 1.6. `sbomb:component:vcsUrl` is therefore gone from
+the catalogue rather than merely unused.
 
 ## Reading a licence answer
 
