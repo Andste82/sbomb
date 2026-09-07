@@ -136,16 +136,48 @@ FetchContent_Declare(sbomb
 
 A proxy that re-signs TLS presents its own certificate, and the binary download
 then fails with `SSL peer certificate or SSH remote key was not OK` — the
-verification working, not breaking. Name the CA it re-signs with:
+verification working, not breaking.
+
+Both downloads read `CMAKE_TLS_CAINFO`, so naming the CA once covers the pair.
+On the command line, leaving the project's `CMakeLists.txt` exactly as above:
 
 ```bash
-cmake -S . -B build -DSBOMB_FETCH_TLS_CAINFO=/etc/ssl/certs/corporate-root.pem
+cmake -S . -B build \
+  -DCMAKE_TLS_VERIFY=ON \
+  -DCMAKE_TLS_CAINFO=/etc/ssl/certs/corporate-root.pem
 ```
 
-`CMAKE_TLS_CAINFO`, `SSL_CERT_FILE` and `CURL_CA_BUNDLE` are consulted in that
-order after it, so a machine already set up for curl or OpenSSL usually needs
-nothing. For the bundle download add `TLS_CAINFO` to `FetchContent_Declare`
-beside `TLS_VERIFY ON`, or set `-DCMAKE_TLS_CAINFO=…`, which both reach.
+Or in the project itself, so nobody has to remember the flags:
+
+```cmake
+cmake_minimum_required(VERSION 3.24)
+project(device C)
+
+# Both downloads: the bundle, which CMake fetches, and the binary, which sbomb
+# fetches. Named before FetchContent_Declare, because that is when the bundle's
+# download is set up.
+set(CMAKE_TLS_VERIFY ON)
+set(CMAKE_TLS_CAINFO "/etc/ssl/certs/corporate-root.pem")
+
+include(FetchContent)
+FetchContent_Declare(sbomb
+  URL      https://github.com/Andste82/sbomb/releases/download/v0.12.0/sbomb-cmake.tar.gz
+  URL_HASH SHA256=<the sbomb-cmake.tar.gz line from the release's SHA256SUMS>)
+FetchContent_MakeAvailable(sbomb)
+```
+
+**`CMAKE_TLS_VERIFY=ON` is the half that is easy to leave out**, and leaving it
+out is silent: `FetchContent` checks no certificate unless asked, so the CA is
+then simply unused and an intercepted bundle download succeeds unverified. It
+also turns verification on for every other `FetchContent` download in the
+project, which is the point — but it can surface a dependency that has been
+arriving unchecked until now.
+
+To keep the setting to sbomb alone, name the CA on each side instead: pass
+`TLS_VERIFY ON` and `TLS_CAINFO` to `FetchContent_Declare` for the bundle, and
+`-DSBOMB_FETCH_TLS_CAINFO=…` for the binary. That variable is consulted first,
+before `CMAKE_TLS_CAINFO`, `SSL_CERT_FILE` and `CURL_CA_BUNDLE` — so a machine
+already set up for curl or OpenSSL usually needs nothing at all.
 
 Note that naming a CA *adds* trust rather than replacing it: the system store is
 still consulted, so this makes the intercepted connection work — it does not
