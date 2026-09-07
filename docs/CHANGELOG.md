@@ -1,6 +1,132 @@
 # Changelog
 
-## Unreleased
+## 0.12.0
+
+### One command installs sbomb
+
+```bash
+curl -fsSL https://andste82.github.io/sbomb/install.sh | sh
+```
+
+```powershell
+irm https://andste82.github.io/sbomb/install.ps1 | iex
+```
+
+It takes the latest release for the platform it is running on, verifies it, and
+puts it where the shell will find it. `--version` pins a release, `--bin-dir`
+chooses where it lands, and `--with-sbom` fetches the release's own CycloneDX
+document beside the binary, so the thing you just installed can be audited with
+the thing you just installed.
+
+**The checksum check has no off switch.** Not a flag that defaults to on: there
+is no flag. A tool whose whole argument is that you should be able to verify
+what you were given cannot hand you a binary it did not verify itself. The
+digest is compared against the line for *that asset* in `SHA256SUMS`, so a
+matching line for some other file proves nothing, and a release carrying no
+`SHA256SUMS` is refused rather than installed unchecked.
+
+`latest` is resolved from where `/releases/latest` redirects to, not from the
+API. The API is rate limited per IP for unauthenticated callers, which a shared
+CI runner or an office behind one address will hit through no fault of its own
+— and an installer that fails because somebody else installed too often is not
+an installer. The redirect has no such limit and needs no token.
+
+Two smaller refusals. The script never runs `sudo` on your behalf: it takes
+`/usr/local/bin` where that is writable and `~/.local/bin` where it is not,
+because a script fetched from the network does not get to decide it is root.
+And a platform the release does not carry is told so by name, rather than
+through a 404 on a URL that could never have existed.
+
+Both scripts are served from GitHub Pages, assembled from the tree by the
+`pages` workflow and never edited in place, so the install URL survives a
+branch rename and the served copy cannot drift from the repository. Both are
+checked before either is published — `sh -n` and `shellcheck` for one, the
+PowerShell parser for the other — because a broken install script is worse than
+a broken feature: it is the first thing a new user runs.
+
+### CMake fetches sbomb itself
+
+A release now carries a twelfth asset, `sbomb-cmake.tar.gz`, and it is the
+whole integration:
+
+```cmake
+include(FetchContent)
+FetchContent_Declare(sbomb
+  URL https://github.com/Andste82/sbomb/releases/download/v0.12.0/sbomb-cmake.tar.gz)
+FetchContent_MakeAvailable(sbomb)
+
+add_executable(app src/main.c)
+sbomb_enable(TARGET app POLICY lenient)
+```
+
+One declaration gives both halves at once: `sbomb_enable`, since CMake
+functions are global once defined, and a binary that matches it. Until now the
+module was a file to vendor and the binary a thing to install separately, which
+is two versions to keep in step and no way to notice when they drift.
+
+The bundle fetches the binary for the **host**, not for the target. sbomb reads
+a build tree and runs wherever cmake runs: a firmware project cross-compiling
+to bare-metal ARM still needs the binary for the developer's laptop, and
+`CMAKE_SYSTEM_PROCESSOR` there names the microcontroller. The download is
+checked against the release's `SHA256SUMS`, with no option to skip it for the
+same reason the install scripts have none, and lands under `_sbomb/<version>`
+in the build tree — renamed into place only once verified, so an interrupted
+configure cannot leave a half-written binary that the next run treats as
+cached. A path the caller has already put in `SBOMB_EXECUTABLE` wins, and then
+nothing is fetched at all.
+
+Fetching happens at `MakeAvailable` rather than inside `sbomb_enable`, so a
+configure either has the tool or has failed, and no target is defined that
+would fail later for a reason the configure already knew.
+
+The version lives in the asset. The release script substitutes it into the
+fetcher while building the bundle and stops if the placeholder survives; a copy
+taken from the source tree still carries the placeholder and says so, instead
+of guessing which version to download. The archive is deterministic — sorted
+members, fixed ownership and mtime — and `SHA256SUMS` covers it like everything
+else in the release.
+
+### The CMake module configures once, and says when it was included too late
+
+`sbomb_enable` used to switch on `CMAKE_EXPORT_COMPILE_COMMANDS` itself, and
+that is the whole reason the `sbomb-<target>` target had to re-run cmake before
+it could generate anything. The generator decides whether to record a compile
+command when it processes a target, so setting the variable afterwards — which
+is when `sbomb_enable` runs, since a target must exist before it can be named —
+reaches the cache and misses the run, and the compile database turns up only on
+the *next* configure. It is set at `include(Sbomb)` time now, before any target
+is defined, and one configure is enough.
+
+It follows that `include(Sbomb)` belongs above the targets it will be asked
+about, and being below them is otherwise silent: the build succeeds, the
+document is written, and it is quietly worse because no object could be traced
+back to a source. The module warns about it at the moment the include can still
+be moved.
+
+On CMake 3.27 and above the File API query is filed with `cmake_file_api()`,
+which takes effect in the run that is happening, so the SBOM target has nothing
+to prepare and the re-configure is gone. Below 3.27 a query is read only at the
+*start* of a run, so it takes effect on the next one — there the target still
+re-configures, because a reply that never arrives is not a degraded answer but
+no answer: sbomb would know no targets, no anchors and no toolchain.
+
+**A default configuration file, without a cache variable that leaks into
+projects that have none.** `sbomb_enable` with no `CONFIG` now uses
+`${CMAKE_SOURCE_DIR}/sbomb.json` when that file is really there, and passes
+nothing when it is not, because naming a file that does not exist turns a run
+which would have worked on defaults into a failure. The cache variable is
+called `SBOMB_DEFAULT_CONFIG` and not `SBOMB_CONFIG` on purpose:
+`cmake_parse_arguments` leaves `SBOMB_CONFIG` undefined when the caller passed
+no `CONFIG`, and an undefined normal variable lets a cache variable of the same
+name show through — so a cache `SBOMB_CONFIG` would have been passed as
+`--config` exactly as though somebody had asked for it, and every project
+without that file would fail at build time on a configuration it never named.
+
+**Linker evidence only where a linker runs.** A static or object library is
+archived rather than linked, and an imported target is somebody else's build;
+`target_link_options` on either is at best ignored. Those targets are skipped
+with a line that says so, rather than appearing to have been given evidence
+flags that never took.
 
 ### The project's name and version are not written twice
 
@@ -33,6 +159,26 @@ are not the same claim: `CMAKE_PROJECT_VERSION` appears in
 `evidence.identity` as `manifest-analysis` with `cmake` as the method's value,
 beside conan, vcpkg and fetchcontent. The product's version had carried no
 source at all until now.
+
+### The getting-started page works when followed
+
+Checked by building a project against the module rather than by reading it. The
+CMake example said `POLICY cra`, which is the release-gating profile: it fails
+on `MISSING_SUPPLIER`, `UNKNOWN_LICENSE` and `UNKNOWN_VERSION`, which every
+component of an uncurated project trips, and the custom target turns that exit
+code into a build error. A reader following the page from the top reached a red
+build with no explanation, while two sections further down the same page told
+them to start with `lenient`. The example says `lenient` now, and says why the
+target fails when the policy does: a policy that cannot stop anything is
+decoration.
+
+Three things a reader meets and the page did not mention are in it now — that
+the compile database is switched on for them, what the `sbomb-<target>` target
+does before generating, and that `sbomb_enable` per target gives one document
+per target, where a product made of several deliverables is an assembly
+document instead, which is `mode` and `artifacts[]` in the configuration and
+not the CMake module. The install section leads with the install script and
+keeps the manual route below it, being the same four steps written out.
 
 ## 0.11.0
 

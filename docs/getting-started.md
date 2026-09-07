@@ -34,13 +34,13 @@ irm https://andste82.github.io/sbomb/install.ps1 | iex
 
 That takes the latest release for your platform and verifies it against the
 release's `SHA256SUMS` before installing — there is no way to skip that check.
-`--version v0.11.0` pins a release, `--bin-dir` chooses where it lands, and
+`--version v0.12.0` pins a release, `--bin-dir` chooses where it lands, and
 `--with-sbom` puts the release's own CycloneDX document beside the binary.
 
 Or do it by hand, which is the same four steps:
 
 ```bash
-VERSION=v0.11.0
+VERSION=v0.12.0
 BASE=https://github.com/Andste82/sbomb/releases/download/$VERSION
 curl -fLO "$BASE/sbomb-linux-amd64"
 curl -fLO "$BASE/SHA256SUMS"
@@ -86,7 +86,7 @@ release ships a CMake bundle. One `FetchContent_Declare` gives you the module
 ```cmake
 include(FetchContent)
 FetchContent_Declare(sbomb
-  URL https://github.com/Andste82/sbomb/releases/download/v0.11.0/sbomb-cmake.tar.gz)
+  URL https://github.com/Andste82/sbomb/releases/download/v0.12.0/sbomb-cmake.tar.gz)
 FetchContent_MakeAvailable(sbomb)
 
 add_executable(app src/main.c)
@@ -245,9 +245,9 @@ and an expiry, not in a permanently loosened gate.
 Use the composite action, or call the binary. Either way, build first:
 
 ```yaml
-- uses: Andste82/sbomb/.github/actions/sbomb@v0.11.0
+- uses: Andste82/sbomb/.github/actions/sbomb@v0.12.0
   with:
-    version: v0.11.0
+    version: v0.12.0
     build-dir: build
     config: sbomb.json
     policy: cra

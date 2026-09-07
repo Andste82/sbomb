@@ -78,7 +78,7 @@ irm https://andste82.github.io/sbomb/install.ps1 | iex
 The latest release, for your platform. A particular one:
 
 ```bash
-curl -fsSL https://andste82.github.io/sbomb/install.sh | sh -s -- --version v0.11.0
+curl -fsSL https://andste82.github.io/sbomb/install.sh | sh -s -- --version v0.12.0
 ```
 
 Both scripts verify the download against the release's `SHA256SUMS` before
@@ -101,7 +101,7 @@ a matching binary:
 ```cmake
 include(FetchContent)
 FetchContent_Declare(sbomb
-  URL https://github.com/Andste82/sbomb/releases/download/v0.11.0/sbomb-cmake.tar.gz)
+  URL https://github.com/Andste82/sbomb/releases/download/v0.12.0/sbomb-cmake.tar.gz)
 FetchContent_MakeAvailable(sbomb)
 
 sbomb_enable(TARGET app POLICY lenient)

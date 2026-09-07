@@ -4,14 +4,14 @@
 
 .DESCRIPTION
     irm https://andste82.github.io/sbomb/install.ps1 | iex
-    &([scriptblock]::Create((irm https://andste82.github.io/sbomb/install.ps1))) -Version v0.11.0
+    &([scriptblock]::Create((irm https://andste82.github.io/sbomb/install.ps1))) -Version v0.12.0
 
     The checksum check is not optional and there is no switch to skip it. A
     tool whose whole argument is that you should be able to verify what you
     were given cannot hand you a binary it did not verify itself.
 
 .PARAMETER Version
-    Release to install, e.g. v0.11.0 or 0.11.0. Default: latest.
+    Release to install, e.g. v0.12.0 or 0.12.0. Default: latest.
 
 .PARAMETER BinDir
     Where to put sbomb.exe. Default: %LOCALAPPDATA%\sbomb\bin.
@@ -68,7 +68,7 @@ if ($Version -eq 'latest') {
 } elseif ($Version.StartsWith('v')) {
     $tag = $Version
 } else {
-    # A tag is written v0.11.0; accepting 0.11.0 as well saves a support round.
+    # A tag is written v0.12.0; accepting 0.12.0 as well saves a support round.
     $tag = "v$Version"
 }
 
