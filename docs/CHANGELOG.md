@@ -1,5 +1,43 @@
 # Changelog
 
+## Unreleased
+
+### The TLS check can be steered for sbomb alone
+
+`CMAKE_TLS_VERIFY` covers every download a project makes. `SBOMB_FETCH_TLS_VERIFY`
+covers ours, and is consulted first, so the two can differ: a project that has
+to fetch something else unverified does not have to fetch sbomb unverified as
+well. Unset, both, the answer is `ON` — the default does not move.
+
+It is the same shape the CA already had, where `SBOMB_FETCH_TLS_CAINFO` comes
+before `CMAKE_TLS_CAINFO`. Until now the pair was lopsided: you could say whom
+to trust for sbomb alone, but not whether to check.
+
+The value is read as a boolean and refused when it is not one, naming the
+variable and what was expected. `if(${value})` would have been the short way
+and the wrong one: a bare string in `if()` is taken as a variable name and
+expanded, so a typo would quietly have become "off". An empty
+`CMAKE_TLS_VERIFY` is now treated as "not set" rather than passed on, where it
+reached `file(DOWNLOAD)` as `missing bool value for TLS_VERIFY` — an error
+pointing into this file, for a value the caller left empty.
+
+**Switching it off is never silent.** With nothing pinned it warns, because
+`SHA256SUMS` then arrives over the same unverified connection as the binary it
+vouches for: the checksum still runs, but it can only show that the two agree,
+not who sent them. With `SBOMB_FETCH_SHA256` or `SBOMB_FETCH_SHA256SUMS` set it
+says so quietly instead — a pinned digest is the one thing an untrusted
+transport cannot supply, and it is what the download is held to.
+
+The documentation said "there is no switch to turn the verification off, and
+none is planned". There is one, so that sentence is gone and the section says
+what it costs and what to pin instead.
+
+Seven cases run in CI against a self-signed HTTPS server, which is an
+intercepting proxy in miniature: verified by default, accepted with the
+certificate named, accepted and warned about when off, accepted quietly when
+off and pinned, ours winning over CMake's, an empty value not disabling
+anything, and a non-boolean refused.
+
 ## 0.13.0
 
 ### The fetched binary can be verified against something the network did not say

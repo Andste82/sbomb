@@ -188,9 +188,24 @@ Note that naming a CA *adds* trust rather than replacing it: the system store is
 still consulted, so this makes the intercepted connection work — it does not
 narrow the download to that one authority.
 
-There is no switch to turn the verification off, and none is planned. The
-checksum is what makes the download defensible, and `SHA256SUMS` arrives over
-the same connection as the binary it vouches for.
+### Turning the check off, if you must
+
+`-DSBOMB_FETCH_TLS_VERIFY=OFF` switches off peer verification for sbomb's own
+download, and nothing else in the project. It is consulted before
+`CMAKE_TLS_VERIFY`, which does the same for every download there is, so the two
+can differ: a project that has to fetch something else unverified does not have
+to fetch sbomb unverified as well. Unset, both, the answer is `ON`.
+
+**What it costs, stated plainly.** `SHA256SUMS` then arrives over the same
+unverified connection as the binary it vouches for. The checksum still runs,
+but it can only show that the two agree — not who sent them. Whoever could
+substitute one could substitute both.
+
+So if you turn it off, pin the digest: `SBOMB_FETCH_SHA256` or
+`SBOMB_FETCH_SHA256SUMS` below. A pinned value is the one thing an untrusted
+transport cannot supply, and it is what the download is held to instead. sbomb
+warns when verification is off and nothing is pinned, and says so quietly when
+something is.
 
 ### Pinning the digest yourself
 

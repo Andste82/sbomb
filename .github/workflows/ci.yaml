@@ -300,6 +300,101 @@ jobs:
           fi
           grep -q "carries no version" "$work/err.txt"
 
+      # A self-signed certificate over HTTPS is a TLS-intercepting proxy in
+      # miniature: the download fails for exactly the reason it would there.
+      # Everything about naming a CA, and about switching the check off, is
+      # decided by whether this server is accepted.
+      - name: TLS verification, and the ways it is steered
+        run: |
+          set -euo pipefail
+          work="$RUNNER_TEMP/tls"
+          mkdir -p "$work/rel/v9.9.9"
+          printf 'stand-in binary\n' > "$work/rel/v9.9.9/sbomb-linux-amd64"
+          ( cd "$work/rel/v9.9.9" && sha256sum sbomb-linux-amd64 > SHA256SUMS )
+          bin_sha=$(cut -d' ' -f1 < "$work/rel/v9.9.9/SHA256SUMS")
+
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 \
+            -keyout "$work/srv.key" -out "$work/srv.pem" \
+            -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost" 2>/dev/null
+
+          # Only the base URL is redirected; the logic under test is the real one.
+          sed 's#https://github.com/${SBOMB_FETCH_REPOSITORY}/releases/download/#https://localhost:8443/#' \
+            cmake/SbombFetch.cmake > "$work/UnderTest.cmake"
+          grep -q 'https://localhost:8443/' "$work/UnderTest.cmake"
+
+          python3 - "$work" <<'PY' &
+          import http.server, ssl, os, sys
+          root = sys.argv[1]
+          os.chdir(os.path.join(root, 'rel'))
+          ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+          ctx.load_cert_chain(os.path.join(root, 'srv.pem'), os.path.join(root, 'srv.key'))
+          httpd = http.server.HTTPServer(('127.0.0.1', 8443), http.server.SimpleHTTPRequestHandler)
+          httpd.socket = ctx.wrap_socket(httpd.socket, server_side=True)
+          httpd.serve_forever()
+          PY
+          srv=$!
+          trap 'kill $srv 2>/dev/null || true' EXIT
+          sleep 3
+
+          cat > "$work/run.cmake" <<EOF
+          set(CMAKE_BINARY_DIR "$work/bt")
+          set(CMAKE_HOST_SYSTEM_NAME "Linux")
+          set(CMAKE_HOST_SYSTEM_PROCESSOR "x86_64")
+          include("$work/UnderTest.cmake")
+          sbomb_fetch_binary()
+          EOF
+
+          run() {
+            rm -rf "$work/bt"; mkdir -p "$work/bt"
+            cmake -DSBOMB_FETCH_VERSION=v9.9.9 "$@" -P "$work/run.cmake" \
+              > "$work/out.txt" 2>&1 && return 0 || return 1
+          }
+
+          # CMake wraps warning and error text, so a phrase can arrive split
+          # across lines. Every assertion is made against the flattened output;
+          # matching the raw file passes and fails for the wrong reasons.
+          says() {
+            tr '\n' ' ' < "$work/out.txt" | tr -s ' ' | grep -q "$1"
+          }
+
+          echo "1) nothing set: the peer is verified, so this must fail"
+          if run; then echo "an unverified peer was accepted by default" >&2; exit 1; fi
+          says "SSL peer certificate"
+
+          echo "2) the certificate named: accepted"
+          run -DSBOMB_FETCH_TLS_CAINFO="$work/srv.pem"
+          says "checksum verified"
+
+          echo "3) SBOMB_FETCH_TLS_VERIFY=OFF: accepted, and warned about"
+          run -DSBOMB_FETCH_TLS_VERIFY=OFF
+          says "TLS peer verification is off"
+          says "Pin SBOMB_FETCH_SHA256"
+
+          echo "4) off, but pinned: no warning, the pin is what holds"
+          run -DSBOMB_FETCH_TLS_VERIFY=OFF -DSBOMB_FETCH_SHA256="$bin_sha"
+          says "the pinned digest is what the download is held to"
+          if says "CMake Warning"; then
+            echo "a pinned download still warned" >&2; exit 1
+          fi
+
+          echo "5) ours beats CMake's: ON wins over CMAKE_TLS_VERIFY=OFF"
+          if run -DSBOMB_FETCH_TLS_VERIFY=ON -DCMAKE_TLS_VERIFY=OFF; then
+            echo "SBOMB_FETCH_TLS_VERIFY=ON did not win" >&2; exit 1
+          fi
+          says "SSL peer certificate"
+
+          echo "6) an empty CMAKE_TLS_VERIFY is not a bool value"
+          if run -DCMAKE_TLS_VERIFY=; then
+            echo "an empty value disabled verification" >&2; exit 1
+          fi
+          says "SSL peer certificate"
+
+          echo "7) a value that is neither: refused as such"
+          if run -DSBOMB_FETCH_TLS_VERIFY=banana; then
+            echo "a non-boolean was accepted" >&2; exit 1
+          fi
+          says "is not a boolean"
+
   install-script-windows:
     runs-on: windows-latest
     steps:
