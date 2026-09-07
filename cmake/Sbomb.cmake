@@ -6,6 +6,18 @@ set(SBOMB_LINK_EVIDENCE ON CACHE BOOL "Enable linker evidence flags for sbomb")
 set(SBOMB_EXECUTABLE "sbomb" CACHE FILEPATH "Path to the sbomb executable")
 set(SBOMB_OUTPUT_DIR "${CMAKE_BINARY_DIR}/sbom" CACHE PATH "Directory for sbomb output")
 
+# The configuration used when sbomb_enable is called without CONFIG, and only
+# when it exists.
+#
+# It is deliberately not called SBOMB_CONFIG. cmake_parse_arguments leaves
+# SBOMB_CONFIG undefined when the caller passed no CONFIG, and an undefined
+# normal variable lets a cache variable of the same name show through -- so a
+# cache SBOMB_CONFIG would be passed as --config exactly as though the caller
+# had asked for it, and every project without that file would fail at build
+# time on a configuration it never named.
+set(SBOMB_DEFAULT_CONFIG "${CMAKE_SOURCE_DIR}/sbomb.json"
+    CACHE FILEPATH "Configuration used when sbomb_enable is called without CONFIG")
+
 function(sbomb_enable)
   cmake_parse_arguments(SBOMB "" "TARGET;CONFIG;POLICY" "" ${ARGN})
 
@@ -22,6 +34,7 @@ function(sbomb_enable)
     return()
   endif()
   get_target_property(_sbomb_type "${SBOMB_TARGET}" TYPE)
+  get_target_property(_sbomb_imported "${SBOMB_TARGET}" IMPORTED)
   if(_sbomb_type STREQUAL "INTERFACE_LIBRARY")
     message(WARNING "sbomb_enable ignored for INTERFACE library ${SBOMB_TARGET}")
     return()
@@ -29,11 +42,34 @@ function(sbomb_enable)
 
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Export compile commands for sbomb" FORCE)
-  file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/.cmake/api/v1/query/client-sbomb")
-  file(WRITE "${CMAKE_BINARY_DIR}/.cmake/api/v1/query/client-sbomb/query.json"
-    "{\"requests\":[{\"kind\":\"codemodel\",\"version\":2},{\"kind\":\"cache\",\"version\":2},{\"kind\":\"cmakeFiles\",\"version\":1},{\"kind\":\"toolchains\",\"version\":1}]}\n")
 
-  if(SBOMB_LINK_EVIDENCE)
+  # CMake 3.27 can file the File API query for the run that is happening, so
+  # the reply is on disk when this configure ends. Before that the query is
+  # only seen by the *next* run, which is why the older path has the SBOM
+  # target re-configure the project before generating.
+  set(_sbomb_reconfigure "")
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.27")
+    cmake_file_api(
+      QUERY
+      API_VERSION 1
+      CODEMODEL 2
+      CACHE 2
+      CMAKEFILES 1
+      TOOLCHAINS 1
+    )
+  else()
+    file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/.cmake/api/v1/query/client-sbomb")
+    file(WRITE "${CMAKE_BINARY_DIR}/.cmake/api/v1/query/client-sbomb/query.json"
+      "{\"requests\":[{\"kind\":\"codemodel\",\"version\":2},{\"kind\":\"cache\",\"version\":2},{\"kind\":\"cmakeFiles\",\"version\":1},{\"kind\":\"toolchains\",\"version\":1}]}\n")
+    set(_sbomb_reconfigure
+      COMMAND "${CMAKE_COMMAND}" -S "${CMAKE_SOURCE_DIR}" -B "${CMAKE_BINARY_DIR}" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON)
+  endif()
+
+  # Only a target that is actually linked can carry linker flags. A static or
+  # object library is archived rather than linked, and an imported target is
+  # somebody else's build; target_link_options on either is at best ignored.
+  if(SBOMB_LINK_EVIDENCE AND NOT _sbomb_imported
+      AND _sbomb_type MATCHES "^(EXECUTABLE|SHARED_LIBRARY|MODULE_LIBRARY)$")
     get_property(_sbomb_language TARGET "${SBOMB_TARGET}" PROPERTY LINKER_LANGUAGE)
     if(NOT _sbomb_language)
       set(_sbomb_language C)
@@ -50,18 +86,33 @@ function(sbomb_enable)
     else()
       message(STATUS "sbomb: linker dependency-file flag unsupported; skipping link dependency evidence for ${SBOMB_TARGET}")
     endif()
+  elseif(SBOMB_LINK_EVIDENCE)
+    message(STATUS "sbomb: no linker evidence for ${SBOMB_TARGET}; a ${_sbomb_type} carries no linker flags")
+  endif()
+
+  # SBOMB_CONFIG is the parsed argument and nothing else. The default is
+  # consulted only when the caller named none, and only when it is really
+  # there: passing --config for a file that does not exist turns a run that
+  # would have worked on defaults into a failure.
+  set(_sbomb_config "${SBOMB_CONFIG}")
+  if(_sbomb_config)
+    if(NOT EXISTS "${_sbomb_config}")
+      message(WARNING "sbomb_enable: CONFIG ${_sbomb_config} does not exist; the SBOM target will fail until it does")
+    endif()
+  elseif(EXISTS "${SBOMB_DEFAULT_CONFIG}")
+    set(_sbomb_config "${SBOMB_DEFAULT_CONFIG}")
   endif()
 
   set(_sbomb_command "${SBOMB_EXECUTABLE}" generate --build-dir "${CMAKE_BINARY_DIR}" --output "${SBOMB_OUTPUT_DIR}/${SBOMB_TARGET}.cdx.json")
-  if(SBOMB_CONFIG)
-    list(APPEND _sbomb_command --config "${SBOMB_CONFIG}")
+  if(_sbomb_config)
+    list(APPEND _sbomb_command --config "${_sbomb_config}")
   endif()
   if(SBOMB_POLICY)
     list(APPEND _sbomb_command --policy "${SBOMB_POLICY}")
   endif()
   add_custom_target("sbomb-${SBOMB_TARGET}"
     COMMAND "${CMAKE_COMMAND}" -E make_directory "${SBOMB_OUTPUT_DIR}"
-    COMMAND "${CMAKE_COMMAND}" -S "${CMAKE_SOURCE_DIR}" -B "${CMAKE_BINARY_DIR}" -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+    ${_sbomb_reconfigure}
     COMMAND ${_sbomb_command}
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
     DEPENDS "${SBOMB_TARGET}"
