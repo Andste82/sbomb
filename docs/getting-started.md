@@ -110,6 +110,70 @@ build from two years from now runs the same one again. `-DSBOMB_EXECUTABLE=…`
 overrides the whole thing when somebody already has sbomb, and nothing is
 downloaded then.
 
+### Two downloads, not one
+
+It matters where the knobs are, because the two halves are fetched by different
+code:
+
+| | Fetched by | Verified by |
+|---|---|---|
+| `sbomb-cmake.tar.gz` (the modules, 5 KB) | CMake's `FetchContent` | whatever you tell `FetchContent_Declare` |
+| the sbomb binary (6.6 MB) | sbomb's own `SbombFetch.cmake` | always, against `SHA256SUMS` |
+
+CMake does **not** verify a `FetchContent` download by default — its
+`TLS_VERIFY` is off unless asked, and it checks no digest unless given one. So
+the bundle deserves both, and `FetchContent_Declare` passes them straight
+through to `ExternalProject_Add`:
+
+```cmake
+FetchContent_Declare(sbomb
+  URL      https://github.com/Andste82/sbomb/releases/download/v0.12.0/sbomb-cmake.tar.gz
+  URL_HASH SHA256=<the sbomb-cmake.tar.gz line from the release's SHA256SUMS>
+  TLS_VERIFY ON)
+```
+
+### Behind a TLS-intercepting proxy
+
+A proxy that re-signs TLS presents its own certificate, and the binary download
+then fails with `SSL peer certificate or SSH remote key was not OK` — the
+verification working, not breaking. Name the CA it re-signs with:
+
+```bash
+cmake -S . -B build -DSBOMB_FETCH_TLS_CAINFO=/etc/ssl/certs/corporate-root.pem
+```
+
+`CMAKE_TLS_CAINFO`, `SSL_CERT_FILE` and `CURL_CA_BUNDLE` are consulted in that
+order after it, so a machine already set up for curl or OpenSSL usually needs
+nothing. For the bundle download add `TLS_CAINFO` to `FetchContent_Declare`
+beside `TLS_VERIFY ON`, or set `-DCMAKE_TLS_CAINFO=…`, which both reach.
+
+Note that naming a CA *adds* trust rather than replacing it: the system store is
+still consulted, so this makes the intercepted connection work — it does not
+narrow the download to that one authority.
+
+There is no switch to turn the verification off, and none is planned. The
+checksum is what makes the download defensible, and `SHA256SUMS` arrives over
+the same connection as the binary it vouches for.
+
+### Pinning the digest yourself
+
+That last sentence is the limit of the default: unpinned, the download is trust
+on first use, because whoever could substitute the binary could substitute the
+list beside it. A digest from somewhere the network cannot reach — the release
+notes, an audit, a colleague — closes that:
+
+```bash
+# One value that covers every platform: the digest of SHA256SUMS itself.
+cmake -S . -B build -DSBOMB_FETCH_SHA256SUMS=<digest of SHA256SUMS>
+
+# Or pin this host's binary directly. SHA256SUMS is then not fetched at all.
+cmake -S . -B build -DSBOMB_FETCH_SHA256=<digest of sbomb-linux-amd64>
+```
+
+Both values are the ones published in the release's own `SHA256SUMS`. A
+mismatch names which of the two it was checked against, and a mistyped digest
+is refused as a mistyped digest rather than reported as a mismatch.
+
 ## The CMake integration, with sbomb already installed
 
 The bundled module sets the flags, files the File API query and adds a target
