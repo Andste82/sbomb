@@ -151,11 +151,13 @@ Two things the module does that are worth knowing:
 * It sets `CMAKE_EXPORT_COMPILE_COMMANDS=ON` in the cache, because sbomb needs
   the compile database and a build configured without it has no evidence to
   read.
-* The `sbomb-<target>` target re-runs `cmake` before generating. That is not
-  cosmetic: `CMAKE_EXPORT_COMPILE_COMMANDS` set during a configure reaches the
-  cache, but the compile database only appears on the *next* one, and without
-  it objects cannot be traced to sources. It also refreshes the File API reply,
-  so the document describes the tree as it is now.
+* **`include(Sbomb)` belongs above the targets.** It switches
+  `CMAKE_EXPORT_COMPILE_COMMANDS` on, and the generator decides whether to
+  record a compile command when it processes a target — so below them the
+  setting arrives too late, `compile_commands.json` appears only on the next
+  configure, and sbomb loses the object-to-source evidence. The module warns
+  when it is included after a target rather than letting the SBOM come out
+  quietly worse.
 
 **The normal build never runs sbomb.** The targets are excluded from `all`, so
 `cmake --build build` stays exactly as fast as it was; the SBOM is produced
@@ -179,10 +181,10 @@ because passing a configuration nobody wrote turns a run that would have worked
 on defaults into a failure.
 
 On CMake 3.27 and later the File API query is filed for the run that is
-happening, so a reply exists after a single configure; below that the query is
-only seen by the next run. Either way the SBOM target re-configures, so both
-end up with a reply and a compile database — the module handles the difference
-for you.
+happening, so one configure leaves a reply and the SBOM target does nothing but
+run sbomb. Below 3.27 the query is only read at the start of a run, so it takes
+effect on the next one; there the target re-configures once, because a reply
+that never arrives is not a worse answer but no answer at all.
 
 ## Reading the result
 
