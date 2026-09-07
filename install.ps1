@@ -43,12 +43,27 @@ if ($arch -ne 'AMD64') {
     Fail "no Windows release for $arch; sbomb publishes windows-amd64, and linux/darwin through install.sh"
 }
 
+# "latest" is resolved from where /releases/latest redirects to, not from the
+# API. The API is rate limited per IP for unauthenticated callers, which a
+# shared CI runner or an office behind one address will hit through no fault of
+# its own -- and an installer that fails because somebody else installed too
+# often is not an installer. The redirect has no such limit and needs no token.
 if ($Version -eq 'latest') {
+    $location = $null
     try {
-        $release = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases/latest" -Headers @{ 'User-Agent' = 'sbomb-install' }
-        $tag = $release.tag_name
+        # Windows PowerShell returns the 3xx response here...
+        $response = Invoke-WebRequest -Uri "https://github.com/$repo/releases/latest" `
+            -UseBasicParsing -MaximumRedirection 0 -ErrorAction Stop
+        $location = $response.Headers.Location
     } catch {
-        Fail "could not work out the latest version from the GitHub API: $_"
+        # ...and PowerShell 7 throws it instead. Both carry the same header.
+        $location = $_.Exception.Response.Headers.Location
+    }
+    $location = [string]$location
+    if ($location -match '/releases/tag/(.+)$') {
+        $tag = $Matches[1]
+    } else {
+        Fail 'could not work out the latest version; pass -Version to name one'
     }
 } elseif ($Version.StartsWith('v')) {
     $tag = $Version

@@ -96,14 +96,15 @@ linux-amd64 | linux-arm64 | darwin-amd64 | darwin-arm64) ;;
 	;;
 esac
 
-# "latest" is resolved through the API rather than the /releases/latest
-# redirect, so that the tag is known before anything is downloaded and can be
-# reported when a download fails.
+# "latest" is resolved from where /releases/latest redirects to, not from the
+# API. The API is rate limited per IP for unauthenticated callers, which a
+# shared CI runner or an office behind one address will hit through no fault of
+# its own -- and an installer that fails because somebody else installed too
+# often is not an installer. The redirect has no such limit and needs no token.
 if [ "$version" = "latest" ]; then
-	tag=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" |
-		sed -n 's/.*"tag_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' |
-		head -n 1)
-	[ -n "$tag" ] || fail "could not work out the latest version from the GitHub API"
+	tag=$(curl -fsSLI -o /dev/null -w '%{url_effective}' "https://github.com/$REPO/releases/latest" |
+		sed -n 's#.*/releases/tag/##p')
+	[ -n "$tag" ] || fail "could not work out the latest version; pass --version to name one"
 else
 	# A tag is written v0.11.0; accepting 0.11.0 as well saves a support round.
 	case "$version" in
