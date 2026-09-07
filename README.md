@@ -101,14 +101,19 @@ a matching binary:
 ```cmake
 include(FetchContent)
 FetchContent_Declare(sbomb
-  URL https://github.com/Andste82/sbomb/releases/download/v0.12.0/sbomb-cmake.tar.gz)
+  URL        https://github.com/Andste82/sbomb/releases/download/v0.12.0/sbomb-cmake.tar.gz
+  URL_HASH   SHA256=<the sbomb-cmake.tar.gz line from the release's SHA256SUMS>
+  TLS_VERIFY ON)
 FetchContent_MakeAvailable(sbomb)
 
 sbomb_enable(TARGET app POLICY lenient)
 ```
 
 The binary is fetched for the machine running the build, checked against
-`SHA256SUMS`, and pinned by the URL. See
+`SHA256SUMS`, and pinned by the URL. `URL_HASH` and `TLS_VERIFY` are on the
+declaration because CMake verifies neither by default — that download is
+CMake's, not sbomb's. Behind a TLS-intercepting proxy, name the CA with
+`-DSBOMB_FETCH_TLS_CAINFO=…`. See
 [docs/getting-started.md](docs/getting-started.md).
 
 ## Quick start

@@ -1,5 +1,61 @@
 # Changelog
 
+## Unreleased
+
+### The fetched binary can be verified against something the network did not say
+
+The download has always been checked against the release's `SHA256SUMS`, and
+that stays the default. It catches a truncated transfer and a swapped asset,
+but it is trust on first use: the list travels beside the file it vouches for,
+so whoever could substitute one could substitute the other.
+
+`SBOMB_FETCH_SHA256SUMS` pins the list, which covers every platform with one
+value, and `SBOMB_FETCH_SHA256` pins this host's binary — and when the binary
+is pinned, `SHA256SUMS` is not fetched at all, because a list downloaded beside
+the file can only confirm what the same connection already supplied and cannot
+outrank a value that came from elsewhere. Both are the digests the release
+already publishes.
+
+A mistyped digest is refused as a mistyped digest, naming the variable and what
+was expected. It would otherwise arrive as a checksum mismatch, which reads as
+though the download had been tampered with — the one message that must not be
+spent on a typo. A mismatch now also says which of the two it was checked
+against.
+
+The same applies one level up, to the bundle `FetchContent` pulls, and there
+the answer is CMake's rather than ours: `FetchContent` verifies nothing by
+default — `TLS_VERIFY` is off unless asked and no digest is checked unless
+given — so the documented example now carries `URL_HASH` and `TLS_VERIFY ON`.
+
+### A CA bundle can be named, for networks that intercept TLS
+
+A proxy that re-signs TLS presents its own certificate, and `file(DOWNLOAD)`
+with `TLS_VERIFY ON` rejects it: the verification working, not breaking.
+`SBOMB_FETCH_TLS_CAINFO` names the CA it re-signs with, and `CMAKE_TLS_CAINFO`,
+`SSL_CERT_FILE` and `CURL_CA_BUNDLE` are consulted after it, so a machine
+already set up for curl or OpenSSL needs nothing. Which bundle is in use, and
+which of the four named it, is printed before the download.
+
+Naming a CA adds trust rather than replacing it — the system store is still
+consulted — so this makes an intercepted connection work without narrowing the
+download to one authority. Turning the verification off remains impossible, and
+a CA file that does not exist is refused up front rather than as a download
+failure per file.
+
+### A failed download says what failed
+
+`sbomb: the release has no SHA256SUMS, so the download cannot be verified` was
+printed for *any* failure fetching that file — a claim about the release, made
+on the evidence of a refused request, which sent whoever read it to look in the
+wrong place. It happened for real: three CI jobs pulled one release at the same
+moment, one was throttled, and the build reported a missing file that was there
+all along.
+
+libcurl's own message is reported now, as the download of the binary beside it
+already did, and a certificate failure with no CA named suggests naming one.
+Each download is attempted three times with a growing pause, because a single
+refused request is not an answer about anything.
+
 ## 0.12.0
 
 ### One command installs sbomb
