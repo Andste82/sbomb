@@ -403,7 +403,14 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		return domain.FileID{Anchor: anchorOf(canonical), RelPath: relOf(canonical)}
 	})
 	narrowing := narrowingByComponent(resolver, outcome.narrowed)
-	document, findings := buildDocument(cfg, resolver, deliverables, used, findings, run)
+	// The build system already says what the project is called and which
+	// version it is; writing that into the configuration a second time is a
+	// chance for the two to disagree. A configured value still wins.
+	projectVersionSource := projectFromCMake(&cfg, replyModel)
+	if projectVersionSource == "cmake" {
+		logger.Info("Project version %q read from CMAKE_PROJECT_VERSION", cfg.Project.Version)
+	}
+	document, findings := buildDocument(cfg, projectVersionSource, resolver, deliverables, used, findings, run)
 	// The configuration names the serialization; an empty value is the
 	// writer's default rather than a guess made here (section 32.2).
 	format := cfg.Output.Format

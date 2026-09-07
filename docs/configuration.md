@@ -17,8 +17,8 @@ not ignored.
 }
 ```
 
-`project.name` is the only required field. Relative paths are resolved from
-`project.root`.
+`build.dir` is the only required field, and `--build-dir` supplies it too.
+Relative paths are resolved from `project.root`.
 
 `sbomb schema` prints the current schema document.
 
@@ -28,12 +28,31 @@ Describes the product the SBOM is about. These values become the root component.
 
 | Field | Meaning |
 |---|---|
-| `name` | **Required.** The product name |
-| `version` | Product version |
+| `name` | The product name. Optional — see below |
+| `version` | Product version. Optional — see below |
 | `supplier` | The supplier, which BSI TR-03183-2 requires |
 | `license` | SPDX expression for the product itself |
 | `type` | CycloneDX component type; derived from the artifact's role when absent |
 | `root` | Source root; defaults to the current directory |
+
+### Neither name nor version has to be written twice
+
+The build system already states both, and sbomb reads them from the CMake File
+API rather than making you repeat them. A configured value always wins; this
+only fills a gap.
+
+* **`version`** comes from `CMAKE_PROJECT_VERSION` — what `project(… VERSION …)`
+  declared. The document then says where it came from, in
+  `evidence.identity`, so a read version and a curated one are not the same
+  claim.
+* **`name`** comes from `CMAKE_PROJECT_NAME`, and only in `assembly` mode.
+  In single-artifact mode the root component is the deliverable itself
+  ([§6.1](dev/spec.md)), so the artifact's own name is used and the project's
+  name would be the wrong answer.
+
+Without a File API reply there is nothing to read — the bundled CMake module
+files the query that produces one. Then `name` falls back to the deliverable,
+and `version` is simply absent, which `UNKNOWN_VERSION` reports.
 
 ## `build`
 

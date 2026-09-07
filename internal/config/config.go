@@ -169,9 +169,13 @@ func Load(path string) (Config, error) {
 	if err := validate(cfg); err != nil {
 		return Config{}, err
 	}
-	if cfg.Project.Name == "" {
-		return Config{}, fmt.Errorf("missing required field: project.name")
-	}
+	// project.name is not required. It used to be, and that forced every
+	// configuration to repeat something the build already knows: CMake states
+	// it as CMAKE_PROJECT_NAME, and in single-artifact mode section 6.1 makes
+	// the deliverable itself the root component, so the name was never needed
+	// there in the first place. What a document is about is still always
+	// answered -- by the configuration, then the build system, then the
+	// deliverable -- just not by insisting the answer be typed out here.
 	if cfg.Build.Dir == "" {
 		return Config{}, fmt.Errorf("missing required field: build.dir")
 	}

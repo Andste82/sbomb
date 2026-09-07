@@ -1,5 +1,39 @@
 # Changelog
 
+## Unreleased
+
+### The project's name and version are not written twice
+
+A CMake project already declares both — `project(device VERSION 1.4.2)` — and
+sbomb made you say them again in `sbomb.json`. Two places for one fact is a
+chance for the two to disagree, and the loader *insisted* on `project.name`, so
+there was no way to avoid it.
+
+Both now come from the CMake File API when the configuration gives none. This
+is read rather than passed: the values are in the cache reply sbomb already
+parses, two lines from where `CMAKE_GENERATOR` and `CMAKE_BUILD_TYPE` are read,
+so the manual route gets them as readily as the bundled module and no new
+command-line surface exists to keep in step. A flag would also have been a
+claim by the caller, and the point of reading it is that it is evidence.
+
+`project.name` is no longer a required field. What a document describes is
+still always answered — configuration, then build system, then the deliverable
+— just not by insisting the answer be typed out.
+
+**The name only in assembly mode.** §6.1 says the root component of a
+single-artifact document is the deliverable, and the deliverable is not the
+project: a build of `firmware.elf` describes `firmware.elf` whatever the
+enclosing `project()` is called. Taking `CMAKE_PROJECT_NAME` there would have
+renamed the root component, and its `bom-ref` with it, in every document whose
+configuration named nothing. §6.2 is where `project.name` is the root's, and
+that is where it is read.
+
+The version is recorded with its source, so a read version and a curated one
+are not the same claim: `CMAKE_PROJECT_VERSION` appears in
+`evidence.identity` as `manifest-analysis` with `cmake` as the method's value,
+beside conan, vcpkg and fetchcontent. The product's version had carried no
+source at all until now.
+
 ## 0.11.0
 
 ### A version now says where it came from
