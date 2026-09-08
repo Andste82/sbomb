@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.16.0
 
 ### `sbomb_enable` takes MAP, DEPFILE and OUTPUT — and they now do something
 
