@@ -24,6 +24,29 @@ func TestLoadValidFile(t *testing.T) {
 	}
 }
 
+// build.dir is optional. It names what the build root is called, which the
+// CMake File API already answers; --build-dir says where to read, which the
+// CLI always supplies. Requiring it in the file forced every configuration to
+// repeat whichever build directory happened to be current.
+func TestLoadAcceptsAConfigurationWithoutBuildDir(t *testing.T) {
+	tmp := t.TempDir()
+	cfgPath := filepath.Join(tmp, "sbomb.json")
+	if err := os.WriteFile(cfgPath, []byte(`{"project":{"name":"demo","root":"."}}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := Load(cfgPath)
+	if err != nil {
+		t.Fatalf("Load() error = %v, want a configuration without build.dir to load", err)
+	}
+	// And it stays empty rather than being filled in with a guess: an empty
+	// value is what lets the File API's own build root anchor the document.
+	// Defaulting it to the configuration file's directory would re-anchor
+	// every file under the build root against a directory nobody built in.
+	if cfg.Build.Dir != "" {
+		t.Errorf("Build.Dir = %q, want it left empty for the File API to answer", cfg.Build.Dir)
+	}
+}
+
 func TestLoadRejectsUnknownKey(t *testing.T) {
 	tmp := t.TempDir()
 	cfgPath := filepath.Join(tmp, "sbomb.json")

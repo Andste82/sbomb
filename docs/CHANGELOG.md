@@ -1,5 +1,25 @@
 # Changelog
 
+## Unreleased
+
+### `build.dir` is optional
+
+The configuration file no longer has to name the build directory. `--build-dir`
+already says which directory to read, and a configuration shared across
+`build/debug`, `build/release` and the rest should not have to repeat whichever
+one is current.
+
+What `build.dir` does is easy to misread, so the documentation now says it:
+`--build-dir` is where sbomb reads, `build.dir` is what the build root is
+*called* — the name every file identity under it is anchored against. Left out,
+that name comes from the CMake File API, which is the build system's own answer
+and the portable one. Set to something the evidence does not record, it
+re-anchors files and changes which of them reach the document.
+
+The `policy` section of the documentation also gained what it was missing: a
+table of what actually differs between the four profiles, and one line per gate
+saying when it fails.
+
 ## 0.16.0
 
 ### `sbomb_enable` takes MAP, DEPFILE and OUTPUT — and they now do something
