@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/example/sbomb/internal/adapters/cmakeapi"
+	"github.com/example/sbomb/internal/adapters/pkgmanager"
 	"github.com/example/sbomb/internal/anchors"
 	"github.com/example/sbomb/internal/config"
 	"github.com/example/sbomb/internal/domain"
@@ -653,5 +654,258 @@ func TestASystemLibrarySaysWhatIsMissingAboutIt(t *testing.T) {
 		if !reported[id] {
 			t.Errorf("a system library reached the document without %s; the gap has to be named", id)
 		}
+	}
+}
+
+// identityFor is the callback setPackages uses to turn a path into an
+// identity. The tests state the mapping outright instead of going through the
+// anchor registry, so that what is under test is the resolver and not the path
+// model. Registering a root and looking a listed file up differ only in what
+// they record, which is nothing here, so both sides get the same table.
+func identityFor(byPath map[string]domain.FileID) packagePaths {
+	resolve := func(path string) domain.FileID { return byPath[path] }
+	return packagePaths{register: resolve, lookup: resolve}
+}
+
+// FetchContent puts the checkout in _deps/<name>-src and everything CMake
+// generated for the package -- a configure_file header, the libraries built
+// from it -- in _deps/<name>-build. While only the checkout was a root, such a
+// generated header fell through to the project component, which reports it as
+// the manufacturer's own code.
+func TestAFileUnderASecondPackageRootBelongsToThePackage(t *testing.T) {
+	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
+		map[string]string{}, map[string]string{}, nil)
+	resolver.setPackages([]pkgmanager.Package{{
+		Name:      "tinylog",
+		Roots:     []string{"/bd/_deps/tinylog-src", "/bd/_deps/tinylog-build"},
+		Manager:   "fetchcontent",
+		AnchorKey: "pkg:fetchcontent/tinylog",
+	}}, identityFor(map[string]domain.FileID{
+		"/bd/_deps/tinylog-src":   fileID("pkg:fetchcontent/tinylog", ""),
+		"/bd/_deps/tinylog-build": fileID("build", "_deps/tinylog-build"),
+	}))
+
+	generated := domain.UsedFile{ID: fileID("build", "_deps/tinylog-build/tinylog_config.h")}
+	_, name, _, _, detectedBy := resolver.resolve(generated)
+	if name != "tinylog" || detectedBy != "fetchcontent" {
+		t.Fatalf("resolve() = (%s, %s), want the package the build tree belongs to", name, detectedBy)
+	}
+
+	// The component still begins at the checkout: that is where the licence
+	// and the version are, and a root on the build tree would move both.
+	component := domain.Component{ID: "component:tinylog", Name: "tinylog"}
+	root := resolver.resolveRoot(&component, []domain.UsedFile{generated})
+	if root.Source != "package-manager" || root.ID.Canonical() != "pkg:fetchcontent/tinylog:" {
+		t.Errorf("root = %q from %q, want the checkout", root.ID.Canonical(), root.Source)
+	}
+}
+
+// A vcpkg triplet tree merges every port into one include and one lib
+// directory, so no root can separate them -- but vcpkg listed each file it
+// installed, and a list beats a prefix.
+func TestAnExactFileClaimBeatsALongerRootOfAnotherPackage(t *testing.T) {
+	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
+		map[string]string{}, map[string]string{}, nil)
+	resolver.setPackages([]pkgmanager.Package{
+		{
+			Name:    "tinyfmt",
+			Roots:   []string{"/bd/vcpkg_installed/x64-linux/share/tinyfmt"},
+			Files:   []string{"/bd/vcpkg_installed/x64-linux/include/tinyfmt.h"},
+			Manager: "vcpkg",
+		},
+		{
+			// A package whose root is a longer prefix of the same file. Only
+			// the exact claim keeps the header with the port that installed it.
+			Name:    "umbrella",
+			Roots:   []string{"/bd/vcpkg_installed/x64-linux/include"},
+			Manager: "vcpkg",
+		},
+	}, identityFor(map[string]domain.FileID{
+		"/bd/vcpkg_installed/x64-linux/share/tinyfmt":     fileID("build", "vcpkg_installed/x64-linux/share/tinyfmt"),
+		"/bd/vcpkg_installed/x64-linux/include":           fileID("build", "vcpkg_installed/x64-linux/include"),
+		"/bd/vcpkg_installed/x64-linux/include/tinyfmt.h": fileID("build", "vcpkg_installed/x64-linux/include/tinyfmt.h"),
+	}))
+
+	header := domain.UsedFile{ID: fileID("build", "vcpkg_installed/x64-linux/include/tinyfmt.h")}
+	if _, name, _, _, detectedBy := resolver.resolve(header); name != "tinyfmt" || detectedBy != "vcpkg" {
+		t.Errorf("resolve() = (%s, %s), want the port that installed the header", name, detectedBy)
+	}
+}
+
+// A package's file list names everything the manager installed, of which the
+// build used a few. Resolving those paths must not record them: the callback
+// that registers a path also remembers where its bytes are, and a triplet tree
+// of a hundred thousand files would then be carried around for the sake of the
+// three that were used (section 31).
+func TestListedFilesAreLookedUpButNotRegistered(t *testing.T) {
+	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
+		map[string]string{}, map[string]string{}, nil)
+	byPath := map[string]domain.FileID{
+		"/bd/vcpkg_installed/x64-linux/share/tinyfmt":     fileID("build", "vcpkg_installed/x64-linux/share/tinyfmt"),
+		"/bd/vcpkg_installed/x64-linux/include/tinyfmt.h": fileID("build", "vcpkg_installed/x64-linux/include/tinyfmt.h"),
+	}
+	registered := []string{}
+	resolver.setPackages([]pkgmanager.Package{{
+		Name:    "tinyfmt",
+		Roots:   []string{"/bd/vcpkg_installed/x64-linux/share/tinyfmt"},
+		Files:   []string{"/bd/vcpkg_installed/x64-linux/include/tinyfmt.h"},
+		Manager: "vcpkg",
+	}}, packagePaths{
+		register: func(path string) domain.FileID {
+			registered = append(registered, path)
+			return byPath[path]
+		},
+		lookup: func(path string) domain.FileID { return byPath[path] },
+	})
+
+	if len(registered) != 1 || registered[0] != "/bd/vcpkg_installed/x64-linux/share/tinyfmt" {
+		t.Errorf("registered = %v, want the root alone", registered)
+	}
+	// The claim still has to work: the header is looked up, only not recorded.
+	header := domain.UsedFile{ID: fileID("build", "vcpkg_installed/x64-linux/include/tinyfmt.h")}
+	if _, name, _, _, _ := resolver.resolve(header); name != "tinyfmt" {
+		t.Errorf("resolve() = %s, want the port that installed the header", name)
+	}
+}
+
+// Two managers claiming one file said two things, and two statements are no
+// statement. The file falls through to the strategies below rather than being
+// awarded to whichever package was read first.
+func TestAFileTwoPackagesClaimIsMappedByNeither(t *testing.T) {
+	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
+		map[string]string{}, map[string]string{}, nil)
+	resolver.setPackages([]pkgmanager.Package{
+		{Name: "left", Roots: []string{"/bd/left"}, Files: []string{"/bd/shared/util.h"}, Manager: "vcpkg"},
+		{Name: "right", Roots: []string{"/bd/right"}, Files: []string{"/bd/shared/util.h"}, Manager: "vcpkg"},
+	}, identityFor(map[string]domain.FileID{
+		"/bd/left":          fileID("build", "left"),
+		"/bd/right":         fileID("build", "right"),
+		"/bd/shared/util.h": fileID("build", "shared/util.h"),
+	}))
+
+	contested := domain.UsedFile{ID: fileID("build", "shared/util.h")}
+	if _, name, _, _, detectedBy := resolver.resolve(contested); name != "firmware" {
+		t.Errorf("resolve() = (%s, %s), want the file to fall through to the anchor", name, detectedBy)
+	}
+}
+
+// Section 19.2: the longest prefix wins, so a package nested inside another
+// keeps its own files. Several roots per package make equal-length prefixes
+// ordinary, which is why the order is total and not merely longest-first.
+func TestTheInnerOfTwoNestedPackagesStillWins(t *testing.T) {
+	build := func() *componentResolver {
+		resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
+			map[string]string{}, map[string]string{}, nil)
+		resolver.setPackages([]pkgmanager.Package{
+			{Name: "outer", Roots: []string{"/src/dir"}, Manager: "submodule"},
+			{Name: "inner", Roots: []string{"/src/dir/inner"}, Manager: "submodule"},
+		}, identityFor(map[string]domain.FileID{
+			"/src/dir":       fileID("project", "dir"),
+			"/src/dir/inner": fileID("project", "dir/inner"),
+		}))
+		return resolver
+	}
+	file := domain.UsedFile{ID: fileID("project", "dir/inner/inner.c")}
+	first, _, _, _, _ := build().resolve(file)
+	second, _, _, _, _ := build().resolve(file)
+	if first != "component:inner" || second != first {
+		t.Errorf("resolve() = %q then %q, want component:inner both times", first, second)
+	}
+}
+
+// A dependency that was installed but never linked is correctly absent from
+// the document. Until now it was absent without a word, and "why is the
+// library I installed not in the SBOM" had no answer in the findings.
+func TestAPackageNoUsedFileBelongsToIsReported(t *testing.T) {
+	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
+		map[string]string{}, map[string]string{}, nil)
+	resolver.setPackages([]pkgmanager.Package{
+		{Name: "linked", Roots: []string{"/bd/linked"}, Manager: "conan"},
+		{Name: "installed-only", Roots: []string{"/bd/installed-only"}, Manager: "conan"},
+	}, identityFor(map[string]domain.FileID{
+		"/bd/linked":         fileID("build", "linked"),
+		"/bd/installed-only": fileID("build", "installed-only"),
+	}))
+
+	findings := resolver.unusedPackageFindings([]domain.UsedFile{
+		{ID: fileID("build", "linked/aes.c")},
+	})
+	if len(findings) != 1 {
+		t.Fatalf("findings = %+v, want one", findings)
+	}
+	if findings[0].ID != "PACKAGE_NOT_LINKED" || findings[0].Subject.Ref != "installed-only" {
+		t.Errorf("finding = %+v, want PACKAGE_NOT_LINKED for installed-only", findings[0])
+	}
+	if findings[0].Severity != domain.SeverityInfo {
+		t.Errorf("severity = %q, want info: leaving the package out is correct", findings[0].Severity)
+	}
+}
+
+// A package whose files the configuration assigned to some other component is
+// linked all the same. Deciding this from resolve() would call it unused,
+// because curated configuration answers before the package manager does.
+func TestACuratedlyMappedPackageIsNotReportedAsUnlinked(t *testing.T) {
+	cfg := config.Config{
+		Project:    config.Project{Name: "firmware"},
+		Components: []config.Component{{Path: "vendor", Name: "vendor-blob"}},
+	}
+	resolver := newComponentResolver(cfg, map[string]string{}, map[string]string{}, nil)
+	resolver.setPackages([]pkgmanager.Package{
+		{Name: "tinycbor", Roots: []string{"/src/vendor/tinycbor"}, Manager: "conan"},
+	}, identityFor(map[string]domain.FileID{
+		"/src/vendor/tinycbor": fileID("project", "vendor/tinycbor"),
+	}))
+
+	file := domain.UsedFile{ID: fileID("project", "vendor/tinycbor/cbor.c")}
+	if _, name, _, _, _ := resolver.resolve(file); name != "vendor-blob" {
+		t.Fatalf("component name = %q, want the curated one", name)
+	}
+	if findings := resolver.unusedPackageFindings([]domain.UsedFile{file}); len(findings) != 0 {
+		t.Errorf("findings = %+v, want none: the package's file was used", findings)
+	}
+}
+
+// A vcpkg port keeps a directory of its own for its copyright file and for
+// nothing else; every header and library it installed sits in the shared
+// triplet tree. Whether such a port was linked is therefore only answerable
+// from the list it wrote, and asking its roots alone would report a port as
+// unused while one of its headers is in the document.
+func TestAPackageLinkedOnlyThroughItsFileListIsNotReportedAsUnlinked(t *testing.T) {
+	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
+		map[string]string{}, map[string]string{}, nil)
+	resolver.setPackages([]pkgmanager.Package{{
+		Name:    "tinyfmt",
+		Roots:   []string{"/bd/vcpkg_installed/x64-linux/share/tinyfmt"},
+		Files:   []string{"/bd/vcpkg_installed/x64-linux/include/tinyfmt.h"},
+		Manager: "vcpkg",
+	}}, identityFor(map[string]domain.FileID{
+		"/bd/vcpkg_installed/x64-linux/share/tinyfmt":     fileID("build", "vcpkg_installed/x64-linux/share/tinyfmt"),
+		"/bd/vcpkg_installed/x64-linux/include/tinyfmt.h": fileID("build", "vcpkg_installed/x64-linux/include/tinyfmt.h"),
+	}))
+
+	header := domain.UsedFile{ID: fileID("build", "vcpkg_installed/x64-linux/include/tinyfmt.h")}
+	if findings := resolver.unusedPackageFindings([]domain.UsedFile{header}); len(findings) != 0 {
+		t.Errorf("findings = %+v, want none: the port's own list names the used header", findings)
+	}
+}
+
+// A package is one dependency however many roots it has, so it is worth one
+// finding at most. One per root would say the same thing about the same
+// missing component twice.
+func TestAPackageWithSeveralRootsIsReportedOnce(t *testing.T) {
+	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
+		map[string]string{}, map[string]string{}, nil)
+	resolver.setPackages([]pkgmanager.Package{{
+		Name:    "tinylog",
+		Roots:   []string{"/bd/_deps/tinylog-src", "/bd/_deps/tinylog-build"},
+		Manager: "fetchcontent",
+	}}, identityFor(map[string]domain.FileID{
+		"/bd/_deps/tinylog-src":   fileID("build", "_deps/tinylog-src"),
+		"/bd/_deps/tinylog-build": fileID("build", "_deps/tinylog-build"),
+	}))
+
+	findings := resolver.unusedPackageFindings([]domain.UsedFile{{ID: fileID("project", "src/main.c")}})
+	if len(findings) != 1 || findings[0].Subject.Ref != "tinylog" {
+		t.Errorf("findings = %+v, want a single PACKAGE_NOT_LINKED for tinylog", findings)
 	}
 }

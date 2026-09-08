@@ -52,8 +52,10 @@ func (a conan) Discover(options Options) ([]Package, []domain.Finding) {
 			// Section 20.3: a package manager states an exact declared version.
 			found.VersionConfidence = domain.ConfidenceHigh
 		}
-		found.Root = a.packageFolder(options.BuildDir, name)
-		if found.Root == "" {
+		if folder := a.packageFolder(options.BuildDir, name); folder != "" {
+			found.Roots = []string{folder}
+		}
+		if found.Root() == "" {
 			// Without a package folder the files of this dependency cannot be
 			// mapped to it, so the entry would name a component owning nothing.
 			findings = append(findings, domain.Finding{
@@ -63,7 +65,7 @@ func (a conan) Discover(options Options) ([]Package, []domain.Finding) {
 			})
 			continue
 		}
-		found.LicenseFile = a.licenseFile(found.Root)
+		found.LicenseFile = a.licenseFile(found.Root())
 		found.PURL = "pkg:conan/" + name
 		if found.Version != "" {
 			found.PURL += "@" + found.Version

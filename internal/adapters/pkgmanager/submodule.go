@@ -69,7 +69,7 @@ func (a submodule) Discover(options Options) ([]Package, []domain.Finding) {
 
 			found := Package{
 				Name:      name,
-				Root:      submoduleRoot,
+				Roots:     []string{submoduleRoot},
 				Manager:   a.Manager(),
 				AnchorKey: anchorKey,
 				VCSURL:    NormalizeVCSURL(entry.url),
@@ -105,12 +105,12 @@ func (submodule) refineFromGit(options Options, found *Package, findings *[]doma
 	if options.Runner == nil || !options.Runner.Features.Git {
 		return
 	}
-	if remote, err := options.Runner.Run(options.Context, "git", "-C", found.Root, "config", "--get", "remote.origin.url"); err == nil {
+	if remote, err := options.Runner.Run(options.Context, "git", "-C", found.Root(), "config", "--get", "remote.origin.url"); err == nil {
 		if u := strings.TrimSpace(string(remote)); u != "" {
 			found.VCSURL = NormalizeVCSURL(u)
 		}
 	}
-	described, err := options.Runner.Run(options.Context, "git", "-C", found.Root,
+	described, err := options.Runner.Run(options.Context, "git", "-C", found.Root(),
 		"describe", "--tags", "--always", "--dirty")
 	if err != nil {
 		return
@@ -129,7 +129,7 @@ func (submodule) refineFromGit(options Options, found *Package, findings *[]doma
 	} else {
 		found.VersionConfidence = domain.ConfidenceMedium
 	}
-	if commit, err := options.Runner.Run(options.Context, "git", "-C", found.Root, "rev-parse", "HEAD"); err == nil {
+	if commit, err := options.Runner.Run(options.Context, "git", "-C", found.Root(), "rev-parse", "HEAD"); err == nil {
 		found.Commit = strings.TrimSpace(string(commit))
 	}
 	if found.Dirty {

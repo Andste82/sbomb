@@ -257,9 +257,15 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	findings = append(findings, packageFindings...)
 	packageAnchors := make([]anchors.PackageAnchor, 0, len(packages))
 	for _, entry := range packages {
-		logger.Info("Package %s %s from %s at %s", entry.Name, entry.Version, entry.Manager, entry.Root)
-		if entry.AnchorKey != "" && entry.Root != "" {
-			packageAnchors = append(packageAnchors, anchors.PackageAnchor{Key: entry.AnchorKey, Root: entry.Root})
+		logger.Info("Package %s %s from %s at %s", entry.Name, entry.Version, entry.Manager, entry.Root())
+		// Exactly one anchor per package, on the identity root. Section 7.2
+		// gives a package a single version-free key, so a second key for a
+		// second root would name a package that does not exist -- and
+		// registering one key twice aborts the whole run. A package's further
+		// roots need no key of their own: they lie inside the build tree and
+		// are already identified portably through the build anchor.
+		if entry.AnchorKey != "" && entry.Root() != "" {
+			packageAnchors = append(packageAnchors, anchors.PackageAnchor{Key: entry.AnchorKey, Root: entry.Root()})
 		}
 	}
 
@@ -446,16 +452,27 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	// the run's anchors and its log, and a second one would be a second truth
 	// about what sbomb is allowed to execute.
 	resolver.setIntrospection(runner, ctx)
-	resolver.setPackages(packages, func(root string) domain.FileID {
-		// A root below the build directory being read has to be expressed in
-		// the logical build root first (section 7.6), exactly as every other
-		// path the adapters hand over. A root outside it -- a package cache --
-		// is already absolute and resolves against its own anchor.
-		if relative, err := filepath.Rel(buildDir, root); err == nil && !strings.HasPrefix(relative, "..") {
-			root = relative
+	// A path below the build directory being read has to be expressed in the
+	// logical build root first (section 7.6), exactly as every other path the
+	// adapters hand over. A path outside it -- a package cache -- is already
+	// absolute and resolves against its own anchor.
+	logical := func(path string) string {
+		if relative, err := filepath.Rel(buildDir, path); err == nil && !strings.HasPrefix(relative, "..") {
+			return relative
 		}
-		canonical, _ := b.identify(root)
-		return domain.FileID{Anchor: anchorOf(canonical), RelPath: relOf(canonical)}
+		return path
+	}
+	resolver.setPackages(packages, packagePaths{
+		register: func(root string) domain.FileID {
+			canonical, _ := b.identify(logical(root))
+			return domain.FileID{Anchor: anchorOf(canonical), RelPath: relOf(canonical)}
+		},
+		// A file a manager merely listed is looked up, never registered: the
+		// list names everything the package installed, and identify would put
+		// every one of those paths in the physical map for good.
+		lookup: func(file string) domain.FileID {
+			return b.identityOf(logical(file))
+		},
 	})
 	if replyModel != nil {
 		resolver.setTargets(targetsByFile(replyModel, b))

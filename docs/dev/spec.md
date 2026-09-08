@@ -885,6 +885,8 @@ Strategy 6 recognizes a directory as a component root by the files it carries: `
 
 **Longest matching path prefix wins** within a strategy. A directory named `vendor/`, `dep/`, `sdk/`, or `third_party/` does not by itself define a component.
 
+Strategy 2 works on two kinds of statement, and the more precise one decides first. A manager that records **which files it installed** (§21) names them outright, and that lookup outranks any prefix: inside a vcpkg triplet tree every port's headers land in the same `include/` directory, where no root can tell them apart. Only then do the package **roots** decide. A package MAY have several roots — FetchContent populates `_deps/<name>-src` with the checkout and `_deps/<name>-build` with what CMake generated for it, and both are the package — but exactly one of them is the *identity* root: the one the anchor of §7.2 names and the one the component root, the licence file and any VCS question refer to. A file two packages both claim belongs to neither; two statements are no statement, and choosing between them would be a guess.
+
 **The component root is a resolved fact, not a recomputation.** Every mapped component has a root, settled by the same strategy that named it: the curated `components[].path`, the package-manager root, the marker directory strategy 6 stopped at, or the anchor root when the anchor *is* the component. The deepest common directory of the component's *used* files is the last resort, and using it emits `COMPONENT_ROOT_UNRESOLVED` (info) — because that directory moves with whichever files the linker kept, so a licence or a version read from it would move too. The resolved root is published as `sbomb:component:root`.
 
 ### 19.3 Unknown Components
@@ -987,13 +989,17 @@ Adapters and their evidence files:
 | Adapter | Read |
 |---|---|
 | Conan | `conanbuildinfo.json` / `conan_toolchain.cmake` / `conandata.yml` / `<build>/conan/*.json`, package root layout |
-| vcpkg | `vcpkg.json`, `vcpkg-configuration.json`, `<vcpkg-root>/installed/<triplet>/share/<pkg>/vcpkg_abi_info.txt`, `CONTROL`/`vcpkg.json` in port |
+| vcpkg | `vcpkg.json`, `vcpkg-configuration.json`, `<vcpkg-root>/installed/<triplet>/share/<pkg>/vcpkg_abi_info.txt`, `CONTROL`/`vcpkg.json` in port, `<vcpkg-root>/installed/vcpkg/info/<pkg>_<version>_<triplet>.list` |
 | CPM.cmake | `CPM` cache directory layout, `cpm-package-lock.cmake` |
 | FetchContent | File API + `_deps/<name>-src` layout + Git metadata |
 | ESP-IDF component manager | `idf_component.yml`, `dependencies.lock` |
 | Zephyr west | `west.yml`, `.west/config` |
 
-Each adapter registers anchors (§7.4) and supplies component name, version, purl, license hint, and root path. Adapters MUST NOT add files to the used set.
+Each adapter registers anchors (§7.4) and supplies component name, version, purl, license hint, and root paths. An adapter registers **one** anchor per package, on the identity root: §7.2 gives a package a single version-free key, and a second key would name a package that does not exist.
+
+An adapter MAY also supply the list of files the manager itself recorded as belonging to the package, where such a record exists — vcpkg writes one per package under `installed/vcpkg/info/`. That list is used for mapping only (§19.2 strategy 2), and it is subject to the bounds of §30: a list that breaches them is refused whole and reported as `INPUT_LIMIT_EXCEEDED`, while a list that is simply absent is not reported, because it improves an attribution that works without it.
+
+Adapters MUST NOT add files to the used set. A package that no used file belongs to is therefore correctly absent from the document — it was installed but never linked, so it is not part of the product — but its absence MUST be reported as `PACKAGE_NOT_LINKED` (info) rather than passing in silence.
 
 ---
 
@@ -2035,6 +2041,7 @@ Severity shown is the default and may be changed via `policy.severityOverrides`.
 | `PCH_HEADERS_EXCLUDED` | info | — | Headers removed by `pchHeaders=exclude` |
 | `MISSING_GENERATOR_INPUT_EVIDENCE` | warning | — | Generated file used, generator inputs unknown |
 | `MISSING_PACKAGE_EVIDENCE` | warning | — | Package/image artifact without a manifest |
+| `PACKAGE_NOT_LINKED` | info | — | A package manager installed this dependency, but no used file belongs to it |
 | `STALE_BUILD_EVIDENCE` | error | `failOnStaleBuildArtifacts` | Timestamps or hashes indicate a stale build |
 | `STALE_CMAKE_CONFIGURATION` | warning | `failOnStaleBuildArtifacts` | CMake inputs newer than the File API reply |
 | `UNKNOWN_COMPONENT` | warning | `failOnUnknownComponent` | File could not be mapped to a component |

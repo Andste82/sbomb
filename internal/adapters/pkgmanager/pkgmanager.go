@@ -1,7 +1,8 @@
 // Package pkgmanager reads what a package manager recorded about the
 // dependencies it installed (specification section 21). It supplies component
-// names, versions, purls, supplier and licence hints, and the root directory of
-// each package.
+// names, versions, purls, supplier and licence hints, the root directories of
+// each package, and -- where a manager keeps such a record -- the files it
+// installed for it.
 //
 // One rule governs the whole package: an adapter here may never add a file to
 // the used set. Discovery stays evidence-based -- a dependency that was
@@ -19,9 +20,21 @@ import (
 
 // Package is one dependency a manager installed.
 type Package struct {
-	// Name and Root identify the component; Root is where its files live.
-	Name string
-	Root string
+	// Name and Roots identify the component; the roots are the directories its
+	// files live in. The first one is the identity root -- the anchor, the
+	// licence file and any git question all refer to it -- and the others are
+	// further trees the same manager filled for this package, such as the
+	// build tree FetchContent generates beside the checkout.
+	Name  string
+	Roots []string
+
+	// Files are the paths the manager itself records as belonging to the
+	// package. That is a statement the manager wrote down, not a conclusion
+	// drawn from a layout, so it outranks matching a path against a root --
+	// vcpkg merges every package into one triplet tree, where no root can tell
+	// them apart. It never widens the used set: a file listed here is mapped
+	// only when the evidence chain reached it anyway.
+	Files []string
 
 	Version           string
 	VersionSource     string
@@ -48,6 +61,16 @@ type Package struct {
 	Manager string
 	// AnchorKey is the anchor this package should be registered under.
 	AnchorKey string
+}
+
+// Root is the identity root, or the empty string for a package that names
+// none. Nearly every caller wants that one root, and saying so here keeps them
+// from spelling out which element of Roots carries the identity.
+func (p Package) Root() string {
+	if len(p.Roots) == 0 {
+		return ""
+	}
+	return p.Roots[0]
 }
 
 // Options is what every adapter needs to look around.
@@ -95,10 +118,15 @@ func Discover(options Options) ([]Package, []domain.Finding) {
 		found, adapterFindings := adapter.Discover(options)
 		findings = append(findings, adapterFindings...)
 		for _, entry := range found {
-			if entry.Root == "" || claimed[entry.Root] {
+			if entry.Root() == "" || claimed[entry.Root()] {
 				continue
 			}
-			claimed[entry.Root] = true
+			// Every root is marked, not only the identity one, so that a later
+			// adapter cannot claim a tree an earlier package already covers as
+			// a package of its own.
+			for _, root := range entry.Roots {
+				claimed[root] = true
+			}
 			packages = append(packages, entry)
 		}
 	}
@@ -106,7 +134,7 @@ func Discover(options Options) ([]Package, []domain.Finding) {
 		if packages[i].Name != packages[j].Name {
 			return packages[i].Name < packages[j].Name
 		}
-		return packages[i].Root < packages[j].Root
+		return packages[i].Root() < packages[j].Root()
 	})
 	return packages, findings
 }

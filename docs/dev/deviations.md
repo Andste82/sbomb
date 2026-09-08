@@ -786,3 +786,74 @@ detail for whoever does that work: on a host build with `/usr/bin/cc`, the
 toolchain anchor root is `/usr`, so `/usr/lib/...` is classified `toolchain`
 rather than `system` and is decided by `includeToolchainRuntime`, not by
 `systemLibraries`.
+
+
+## D31 — A package knows several roots, vcpkg proves its files, and one more identifier was missing from appendix A
+
+Three gaps in §19.2 strategy 2 and §21, closed together because they are the
+same gap seen from three sides: a package could say only one thing about where
+it lives, so the evidence it had went unused.
+
+**A package had exactly one root.** For FetchContent that root is
+`_deps/<name>-src`, while everything CMake generated for the package — a
+`configure_file` header, the libraries built from the checkout — is in
+`_deps/<name>-build`. Such a file matched no package and fell through to the
+project component, which reports it as the manufacturer's own code. A package
+now carries a list of roots, of which the first is the identity: the anchor,
+the component root, the licence file and every `git -C` refer to it. §19.2 and
+§21 are amended to say so.
+
+Only the identity root becomes an anchor. §7.2 gives a package one version-free
+key; a second key such as `pkg:fetchcontent/<name>-build` would name a package
+that does not exist, and registering one key twice aborts the run. The further
+roots lie inside the build tree and are already identified portably through the
+build anchor.
+
+**vcpkg's own file list was never read.** vcpkg merges every port into one
+triplet tree: all headers in `include/`, all libraries in `lib/`. No root can
+separate them, so the best metadata in the whole project — `vcpkg.spdx.json`,
+with name, version, purl, licence and supplier — never reached the header that
+used it, and the file fell through to the licence heuristic or the build
+anchor. vcpkg writes one list per package under
+`installed/vcpkg/info/<name>_<version>_<triplet>.list`, and reading it turns a
+path guess into a lookup. That list is added to the §21 evidence table.
+
+This is not the directory scan architecture.md refuses, and not the one D30
+rejected for dpkg. There the file lists had to be walked in the thousands
+looking for a path; here one list is addressed by the package's own name, the
+same shape as the `share/*/vcpkg.spdx.json` glob the adapter has always used to
+find the packages in the first place.
+
+The list's format is **not verifiable in this repository**: there is no vcpkg
+fixture, and there is no network. The unit tests therefore write the format they
+assume, which makes them a test of that assumption and not of vcpkg. The
+implementation is defensive to match: a missing `info` directory, no matching
+list, or two matching lists all leave the attribution exactly as it was and the
+document unchanged, without a finding of their own — the list improves an
+attribution that works without it, so its absence is not evidence the run
+expected. The findings are not unchanged, though: without a list a port's files
+are again matched against `share/<name>`, which the headers and libraries the
+build used are not under, so the package reaches no used file and
+`PACKAGE_NOT_LINKED` below reports it — precisely the case the list exists to
+fix. A list that *is* found but breaches a bound of §30 is a different matter
+and reports `INPUT_LIMIT_EXCEEDED`; it is refused
+whole rather than in part, because a truncated list would attribute some of a
+package's files and leave the rest to the heuristics with nothing to say which
+is which. Like the Conan package root of D13, the path is covered by unit tests
+rather than by the corpus, which takes in no foreign installation tree.
+
+**`PACKAGE_NOT_LINKED` was missing from appendix A.** A package that no used
+file belongs to is correctly absent from the document — it was installed but
+never linked, so it is not part of the product — but it was absent in silence,
+and "why is the library I installed not in my SBOM" had no answer in the
+findings. None of the 54 identifiers covered it: `PREBUILT_LIBRARY_UNMAPPED`
+means a library with no mapping, `COMPONENT_ROOT_UNRESOLVED` a root that had to
+be guessed. As in D15, the identifier is added to appendix A rather than removed
+from the implementation. Severity is info and there is no gate, because the
+omission is correct behaviour; only the silence was not.
+
+One consequence to watch: a Conan or vcpkg install tree carries transitive
+dependencies of which few are linked, so a real project's findings file grows by
+one info per unlinked package. If that becomes noise, the alternative is one
+aggregate finding per manager naming the packages in `detail` — but no name may
+disappear in the process.

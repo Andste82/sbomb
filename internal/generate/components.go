@@ -53,9 +53,15 @@ type componentResolver struct {
 	anchorRoots map[string]string
 	logger      *Logger
 	// packages are what the package-manager adapters proved, keyed by the
-	// canonical identity prefix their root corresponds to. This is strategy 2
+	// canonical identity prefix their roots correspond to. This is strategy 2
 	// of section 19.2, which outranks everything except curated configuration.
+	// A package with several roots has one entry per root.
 	packages []resolvedPackage
+	// packageFiles maps a file identity to the package that names that exact
+	// file in its own installed-file list. A manager that says "this file is
+	// mine" is the same strategy 2 evidence as its root, only precise, so it
+	// is consulted before any prefix.
+	packageFiles map[string]resolvedPackage
 	// targets maps a file identity to the CMake target that owns it, and
 	// curatedByTarget maps a target name to the component the configuration
 	// assigns it to. Together they are strategy 5.
@@ -70,12 +76,17 @@ type componentResolver struct {
 // resolvedPackage is one package-manager result expressed in identity terms,
 // so that mapping a file needs no filesystem access.
 type resolvedPackage struct {
-	// id is the package root as an identity. Matching happens on the anchor
+	// id is one package root as an identity. Matching happens on the anchor
 	// and the relative path separately: a package that received its own anchor
 	// has an empty relative path, and string surgery on the canonical form
 	// would have to special-case that.
 	id  domain.FileID
 	pkg pkgmanager.Package
+	// primary marks the entry made from the package's identity root. It is the
+	// one that answers where the component begins; a further root -- the build
+	// tree beside a FetchContent checkout, say -- holds files of the package
+	// but is not the place its licence or its version is read from.
+	primary bool
 }
 
 func newComponentResolver(cfg config.Config, physical map[string]string, anchorRoots map[string]string, logger *Logger) *componentResolver {
@@ -202,32 +213,100 @@ func (r *componentResolver) resolve(file domain.UsedFile) (id, name, componentTy
 	return unknown, unknown, "library", string(anchors.ScopeUnknown), "unresolved"
 }
 
+// packagePaths is how setPackages turns the paths an adapter reported into
+// identities. A root and a listed file are resolved differently on purpose:
+// register also records where a root's bytes are, because later steps read
+// them, while a listed file is only a claim -- most of what a package manager
+// installed no evidence chain ever reached -- and recording those would grow
+// the physical map with the size of the installation tree rather than with the
+// number of used files (section 31).
+type packagePaths struct {
+	register func(string) domain.FileID
+	lookup   func(string) domain.FileID
+}
+
 // setPackages records what the package-manager adapters found, expressed as
 // canonical identity prefixes. The longest prefix wins, so a package nested
-// inside another maps to the inner one (section 19.2).
-func (r *componentResolver) setPackages(packages []pkgmanager.Package, identify func(string) domain.FileID) {
+// inside another maps to the inner one (section 19.2). Every root of a package
+// becomes an entry, because a package's files need not all live under one of
+// them -- FetchContent puts the checkout in _deps/<name>-src and everything
+// CMake generated for it in _deps/<name>-build, and both are the package.
+func (r *componentResolver) setPackages(packages []pkgmanager.Package, paths packagePaths) {
 	r.packages = make([]resolvedPackage, 0, len(packages))
+	r.packageFiles = map[string]resolvedPackage{}
+	// A file two packages both name is dropped rather than given to one of
+	// them, exactly as setTargets does for two targets: two statements are no
+	// statement, and choosing between them would be a guess.
+	contested := map[string]bool{}
 	for _, entry := range packages {
-		id := identify(entry.Root)
-		if id.Anchor == "" {
+		var identity resolvedPackage
+		for index, root := range entry.Roots {
+			id := paths.register(root)
+			if id.Anchor == "" {
+				continue
+			}
+			// A path that is its own anchor root comes back with "." as the
+			// relative part; the package then covers everything under the anchor.
+			if id.RelPath == "." || id.RelPath == "/" {
+				id.RelPath = ""
+			}
+			r.logger.Debug("Package %s maps to identity %s", entry.Name, id.Canonical())
+			resolved := resolvedPackage{id: id, pkg: entry, primary: index == 0}
+			if resolved.primary {
+				identity = resolved
+			}
+			r.packages = append(r.packages, resolved)
+		}
+		if identity.id.Anchor == "" {
 			continue
 		}
-		// A path that is its own anchor root comes back with "." as the
-		// relative part; the package then covers everything under the anchor.
-		if id.RelPath == "." || id.RelPath == "/" {
-			id.RelPath = ""
+		for _, file := range entry.Files {
+			id := paths.lookup(file)
+			if id.Anchor == "" {
+				continue
+			}
+			key := id.Canonical()
+			if other, claimed := r.packageFiles[key]; claimed && other.pkg.Name != entry.Name {
+				r.logger.Debug("File %s is claimed by both %s and %s, so neither gets it",
+					key, other.pkg.Name, entry.Name)
+				contested[key] = true
+				continue
+			}
+			r.packageFiles[key] = identity
 		}
-		r.logger.Debug("Package %s maps to identity %s", entry.Name, id.Canonical())
-		r.packages = append(r.packages, resolvedPackage{id: id, pkg: entry})
 	}
+	for key := range contested {
+		delete(r.packageFiles, key)
+	}
+	// The order has to be total, not merely longest-first: with several entries
+	// per package two roots of equal length are ordinary, and a comparison that
+	// calls them equal would let the sort decide which package a file belongs
+	// to differently on the next run.
 	sort.Slice(r.packages, func(i, j int) bool {
-		return len(r.packages[i].id.RelPath) > len(r.packages[j].id.RelPath)
+		a, b := r.packages[i], r.packages[j]
+		if len(a.id.RelPath) != len(b.id.RelPath) {
+			return len(a.id.RelPath) > len(b.id.RelPath)
+		}
+		if a.id.Anchor != b.id.Anchor {
+			return a.id.Anchor < b.id.Anchor
+		}
+		if a.id.RelPath != b.id.RelPath {
+			return a.id.RelPath < b.id.RelPath
+		}
+		return a.pkg.Name < b.pkg.Name
 	})
 }
 
-// packageFor finds the package a file belongs to, matching on whole path
-// segments so that a sibling directory with a shared prefix cannot claim it.
+// packageFor finds the package a file belongs to. A manager that listed the
+// file by name is asked first: that is a record of what it installed, while a
+// root is only where it usually puts things -- and inside a vcpkg triplet tree
+// every package shares the same include and lib directories, so the root can
+// answer nothing there. Only then do the roots decide, matching on whole path
+// segments so that a sibling directory with a shared prefix cannot claim a file.
 func (r *componentResolver) packageFor(file domain.UsedFile) (resolvedPackage, bool) {
+	if entry, claimed := r.packageFiles[file.ID.Canonical()]; claimed {
+		return entry, true
+	}
 	for _, entry := range r.packages {
 		if file.ID.Anchor != entry.id.Anchor {
 			continue
@@ -240,6 +319,43 @@ func (r *componentResolver) packageFor(file domain.UsedFile) (resolvedPackage, b
 		}
 	}
 	return resolvedPackage{}, false
+}
+
+// unusedPackageFindings reports every package that no used file belongs to.
+// Leaving it out of the document is correct -- a dependency that was installed
+// but never linked is not part of the product -- but until now it happened
+// without a word, and "the SBOM does not list the library I installed" has to
+// be answerable from the findings rather than from the source.
+func (r *componentResolver) unusedPackageFindings(files []domain.UsedFile) []domain.Finding {
+	if len(r.packages) == 0 {
+		return nil
+	}
+	// Whether a package was reached is asked of packageFor alone, not of
+	// resolve: a file that curated configuration or a CMake target assigned
+	// elsewhere still belongs to the package, and calling such a package
+	// unlinked would be false.
+	linked := map[string]bool{}
+	for _, file := range files {
+		if entry, ok := r.packageFor(file); ok {
+			linked[entry.pkg.Name] = true
+		}
+	}
+	findings := []domain.Finding{}
+	reported := map[string]bool{}
+	for _, entry := range r.packages {
+		name := entry.pkg.Name
+		if name == "" || linked[name] || reported[name] {
+			continue
+		}
+		reported[name] = true
+		findings = append(findings, domain.Finding{
+			ID: "PACKAGE_NOT_LINKED", Severity: domain.SeverityInfo,
+			Subject: domain.Subject{Kind: "component", Ref: name},
+			Message: fmt.Sprintf("%s installed this dependency, but no used file belongs to it, so it is not part of the product and not in this document",
+				entry.pkg.Manager),
+		})
+	}
+	return findings
 }
 
 // packageByName finds the package behind a component, for enrichment.
@@ -650,10 +766,13 @@ func (r *componentResolver) resolveRoot(component *domain.Component, files []dom
 		}
 	}
 
-	// Strategy 2: the package manager stated where its package lives.
+	// Strategy 2: the package manager stated where its package lives. Only the
+	// identity root answers this: the further roots hold files of the package,
+	// but the licence and the version are read from the checkout, not from the
+	// tree the build wrote beside it.
 	for _, entry := range r.packages {
-		if entry.pkg.Name == component.Name && entry.pkg.Root != "" {
-			return componentRootResult{ID: entry.id, Physical: entry.pkg.Root, Source: "package-manager"}
+		if entry.primary && entry.pkg.Name == component.Name && entry.pkg.Root() != "" {
+			return componentRootResult{ID: entry.id, Physical: entry.pkg.Root(), Source: "package-manager"}
 		}
 	}
 

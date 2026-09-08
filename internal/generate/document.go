@@ -229,6 +229,10 @@ func groupFilesByComponent(resolver *componentResolver, files []domain.UsedFile)
 		group.component.EnvironmentProvided = environmentProvided(group.component, group.files)
 		groups = append(groups, *group)
 	}
+	// Which packages reached no component at all is only decidable once every
+	// file has been mapped, and here the complete set is at hand. The findings
+	// join the others before the sort, so their order is the same on every run.
+	findings = append(findings, resolver.unusedPackageFindings(files)...)
 	sortFindings(findings)
 	return groups, findings
 }
