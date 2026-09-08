@@ -4,6 +4,8 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/example/sbomb/internal/exec"
@@ -74,7 +76,7 @@ func TestAPackageIsFoundWithoutItsCheckedOutSources(t *testing.T) {
 	if len(packages) != 1 || packages[0].Name != "tinylog" {
 		t.Fatalf("packages = %#v", packages)
 	}
-	if !filepath.IsAbs(packages[0].Root) && packages[0].Root == "" {
+	if !filepath.IsAbs(packages[0].Root()) && packages[0].Root() == "" {
 		t.Error("the package has no root to map files against")
 	}
 }
@@ -194,8 +196,8 @@ func TestConanReadsVersionRootAndLicence(t *testing.T) {
 	if found.Name != "tinycbor" || found.Version != "0.6.1" {
 		t.Errorf("name/version = %q/%q", found.Name, found.Version)
 	}
-	if found.Root != packageRoot {
-		t.Errorf("root = %q, want the package folder the data file names", found.Root)
+	if found.Root() != packageRoot {
+		t.Errorf("root = %q, want the package folder the data file names", found.Root())
 	}
 	if found.PURL != "pkg:conan/tinycbor@0.6.1" {
 		t.Errorf("purl = %q", found.PURL)
@@ -310,8 +312,8 @@ func TestSubmoduleBoundariesComeFromGitmodules(t *testing.T) {
 	if got := byName["tinycbor"].VCSURL; indexOf(got, "secret") >= 0 {
 		t.Errorf("a credential survived normalization: %q", got)
 	}
-	if byName["mbedtls"].Root != filepath.Join(source, "dep", "mbedtls") {
-		t.Errorf("root = %q", byName["mbedtls"].Root)
+	if byName["mbedtls"].Root() != filepath.Join(source, "dep", "mbedtls") {
+		t.Errorf("root = %q", byName["mbedtls"].Root())
 	}
 	// .gitmodules records neither a tag nor a commit, and section 20.1 forbids
 	// guessing one, so this has to be reported rather than filled in.
@@ -361,8 +363,8 @@ func TestRecursiveSubmoduleDiscovery(t *testing.T) {
 	}
 	if got, ok := byName["mbedtls"]; !ok {
 		t.Errorf("expected mbedtls package")
-	} else if got.Root != filepath.Join(nestedDir, "components", "mbedtls", "mbedtls") {
-		t.Errorf("mbedtls Root = %q, want %q", got.Root, filepath.Join(nestedDir, "components", "mbedtls", "mbedtls"))
+	} else if got.Root() != filepath.Join(nestedDir, "components", "mbedtls", "mbedtls") {
+		t.Errorf("mbedtls Root = %q, want %q", got.Root(), filepath.Join(nestedDir, "components", "mbedtls", "mbedtls"))
 	}
 }
 
@@ -372,5 +374,314 @@ func TestNoGitmodulesMeansNoPackages(t *testing.T) {
 	packages, findings := Discover(Options{SourceDir: t.TempDir(), Context: context.Background()})
 	if len(packages) != 0 || len(findings) != 0 {
 		t.Errorf("packages = %#v, findings = %#v", packages, findings)
+	}
+}
+
+// A FetchContent dependency is two directories, not one: the checkout and the
+// tree CMake filled for it. A header written by configure_file exists only in
+// the second, and while the checkout was the only root such a header belonged
+// to no package at all.
+func TestFetchContentClaimsTheBuildTreeBesideTheCheckout(t *testing.T) {
+	build := t.TempDir()
+	writePopulate(t, build, "tinylog", "https://example.com/tinylog.git", "v1.4.0")
+	buildTree := filepath.Join(build, "_deps", "tinylog-build")
+	if err := os.MkdirAll(buildTree, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	packages, _ := Discover(Options{BuildDir: build, Context: context.Background()})
+	if len(packages) != 1 {
+		t.Fatalf("packages = %#v", packages)
+	}
+	found := packages[0]
+	if found.Root() != filepath.Join(build, "_deps", "tinylog-src") {
+		t.Errorf("identity root = %q, want the checkout", found.Root())
+	}
+	if len(found.Roots) != 2 || found.Roots[1] != buildTree {
+		t.Errorf("roots = %q, want the checkout and the build tree", found.Roots)
+	}
+}
+
+// A directory nobody built is not evidence, so a package without a build tree
+// claims none.
+func TestFetchContentWithoutABuildTreeHasOneRoot(t *testing.T) {
+	build := t.TempDir()
+	writePopulate(t, build, "tinylog", "https://example.com/tinylog.git", "v1.4.0")
+
+	packages, _ := Discover(Options{BuildDir: build, Context: context.Background()})
+	if len(packages) != 1 {
+		t.Fatalf("packages = %#v", packages)
+	}
+	if len(packages[0].Roots) != 1 {
+		t.Errorf("roots = %q, want only the checkout", packages[0].Roots)
+	}
+}
+
+// writeVcpkgFileList writes the list vcpkg keeps of everything a package
+// installed. Its entries are relative to the install directory, so they begin
+// with the triplet, and a directory is listed with a trailing slash.
+func writeVcpkgFileList(t *testing.T, buildDir, triplet, name, version string, entries []string) string {
+	t.Helper()
+	dir := filepath.Join(buildDir, "vcpkg_installed", "vcpkg", "info")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(dir, name+"_"+version+"_"+triplet+".list")
+	var contents strings.Builder
+	for _, entry := range entries {
+		contents.WriteString(entry)
+		contents.WriteString("\n")
+	}
+	if err := os.WriteFile(path, []byte(contents.String()), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	return path
+}
+
+// Inside a triplet tree every package shares include/ and lib/, so the layout
+// cannot say which header belongs to which port. The list vcpkg wrote when it
+// installed the package can, and it is read back as absolute paths.
+func TestVcpkgReadsTheFilesItInstalled(t *testing.T) {
+	build := t.TempDir()
+	writeVcpkg(t, build, "x64-linux", "tinyfmt", "2.1.0", "MIT", "pkg:vcpkg/tinyfmt@2.1.0")
+	writeVcpkgFileList(t, build, "x64-linux", "tinyfmt", "2.1.0", []string{
+		"x64-linux/",
+		"x64-linux/include/",
+		"x64-linux/include/tinyfmt.h",
+		"x64-linux/lib/libtinyfmt.a",
+	})
+
+	packages, findings := Discover(Options{BuildDir: build, Context: context.Background()})
+	if len(packages) != 1 {
+		t.Fatalf("packages = %#v", packages)
+	}
+	installed := filepath.Join(build, "vcpkg_installed", "x64-linux")
+	want := []string{
+		filepath.Join(installed, "include", "tinyfmt.h"),
+		filepath.Join(installed, "lib", "libtinyfmt.a"),
+	}
+	if len(packages[0].Files) != len(want) {
+		t.Fatalf("files = %q, want %q", packages[0].Files, want)
+	}
+	for i, path := range want {
+		if packages[0].Files[i] != path {
+			t.Errorf("file %d = %q, want %q", i, packages[0].Files[i], path)
+		}
+	}
+	for _, finding := range findings {
+		if finding.ID == "INPUT_LIMIT_EXCEEDED" {
+			t.Errorf("a readable list reported %s", finding.ID)
+		}
+	}
+}
+
+// A list entry that is absolute or walks upwards names a file outside the
+// install tree, which no install list may do (section 30.3).
+func TestVcpkgRefusesAListEntryThatLeavesTheInstallTree(t *testing.T) {
+	build := t.TempDir()
+	writeVcpkg(t, build, "x64-linux", "tinyfmt", "2.1.0", "MIT", "pkg:vcpkg/tinyfmt@2.1.0")
+	writeVcpkgFileList(t, build, "x64-linux", "tinyfmt", "2.1.0", []string{
+		"x64-linux/../../../etc/passwd",
+		"/etc/shadow",
+		"x64-linux/include/tinyfmt.h",
+	})
+
+	packages, _ := Discover(Options{BuildDir: build, Context: context.Background()})
+	if len(packages) != 1 {
+		t.Fatalf("packages = %#v", packages)
+	}
+	want := filepath.Join(build, "vcpkg_installed", "x64-linux", "include", "tinyfmt.h")
+	if len(packages[0].Files) != 1 || packages[0].Files[0] != want {
+		t.Errorf("files = %q, want only %q", packages[0].Files, want)
+	}
+}
+
+// A list that breaches a bound of section 30 is refused whole and reported.
+// The package survives it: the SPDX document proved it, and only the precise
+// attribution of its files is lost.
+func TestVcpkgReportsAFileListOverTheLimit(t *testing.T) {
+	build := t.TempDir()
+	writeVcpkg(t, build, "x64-linux", "tinyfmt", "2.1.0", "MIT", "pkg:vcpkg/tinyfmt@2.1.0")
+	entries := make([]string, 0, maxFileListEntries+1)
+	for i := 0; i <= maxFileListEntries; i++ {
+		entries = append(entries, "x64-linux/include/header"+strconv.Itoa(i)+".h")
+	}
+	path := writeVcpkgFileList(t, build, "x64-linux", "tinyfmt", "2.1.0", entries)
+
+	packages, findings := Discover(Options{BuildDir: build, Context: context.Background()})
+	if len(packages) != 1 {
+		t.Fatalf("packages = %#v", packages)
+	}
+	if len(packages[0].Files) != 0 {
+		t.Errorf("files = %d, want none: a partial list attributes some files and hides the rest", len(packages[0].Files))
+	}
+	if packages[0].Root() != filepath.Join(build, "vcpkg_installed", "x64-linux", "share", "tinyfmt") {
+		t.Errorf("root = %q, want the share directory the package keeps", packages[0].Root())
+	}
+	var reported bool
+	for _, finding := range findings {
+		if finding.ID == "INPUT_LIMIT_EXCEEDED" && finding.Subject.Ref == path {
+			reported = true
+		}
+	}
+	if !reported {
+		t.Error("a list over the limit was skipped silently")
+	}
+}
+
+// The list is an improvement, not an expectation. A tree without one behaves
+// exactly as it did before and says nothing about it.
+func TestVcpkgWithoutAFileListReportsNothing(t *testing.T) {
+	build := t.TempDir()
+	writeVcpkg(t, build, "x64-linux", "tinyfmt", "2.1.0", "MIT", "pkg:vcpkg/tinyfmt@2.1.0")
+
+	packages, findings := Discover(Options{BuildDir: build, Context: context.Background()})
+	if len(packages) != 1 || len(packages[0].Files) != 0 {
+		t.Fatalf("packages = %#v", packages)
+	}
+	for _, finding := range findings {
+		if finding.ID == "INPUT_LIMIT_EXCEEDED" {
+			t.Errorf("a tree with no file list reported %s", finding.ID)
+		}
+	}
+}
+
+// Two lists for one port mean two versions of it are installed beside each
+// other. Which of them the build used is not written down anywhere, so neither
+// list is read: picking one would be a guess about which files are whose.
+func TestTwoFileListsForOnePortLeaveBothUnread(t *testing.T) {
+	build := t.TempDir()
+	writeVcpkg(t, build, "x64-linux", "tinyfmt", "2.1.0", "MIT", "pkg:vcpkg/tinyfmt@2.1.0")
+	writeVcpkgFileList(t, build, "x64-linux", "tinyfmt", "2.1.0", []string{"x64-linux/include/tinyfmt.h"})
+	writeVcpkgFileList(t, build, "x64-linux", "tinyfmt", "2.0.0", []string{"x64-linux/include/tinyfmt.h"})
+
+	packages, findings := Discover(Options{BuildDir: build, Context: context.Background()})
+	if len(packages) != 1 {
+		t.Fatalf("packages = %#v", packages)
+	}
+	if len(packages[0].Files) != 0 {
+		t.Errorf("files = %q, want none: two lists are two answers", packages[0].Files)
+	}
+	if len(findings) != 0 {
+		t.Errorf("findings = %#v, want none: the package is known either way", findings)
+	}
+}
+
+// A triplet tree is only described by the list belonging to it. A list written
+// for another triplet names files that are not in this tree at all, so it is
+// not the record of what is installed here.
+func TestAFileListOfAnotherTripletIsNotRead(t *testing.T) {
+	build := t.TempDir()
+	writeVcpkg(t, build, "x64-linux", "tinyfmt", "2.1.0", "MIT", "pkg:vcpkg/tinyfmt@2.1.0")
+	writeVcpkgFileList(t, build, "arm64-osx", "tinyfmt", "2.1.0", []string{"arm64-osx/include/tinyfmt.h"})
+
+	packages, _ := Discover(Options{BuildDir: build, Context: context.Background()})
+	if len(packages) != 1 {
+		t.Fatalf("packages = %#v", packages)
+	}
+	if len(packages[0].Files) != 0 {
+		t.Errorf("files = %q, want none: the list describes a different triplet", packages[0].Files)
+	}
+}
+
+// Section 30 bounds a parser by what it reads, not only by what it produces.
+// A list past the byte limit is refused before it is opened, and the package
+// keeps the root and the metadata its SPDX document proved.
+func TestVcpkgRefusesAFileListOverTheByteLimit(t *testing.T) {
+	build := t.TempDir()
+	writeVcpkg(t, build, "x64-linux", "tinyfmt", "2.1.0", "MIT", "pkg:vcpkg/tinyfmt@2.1.0")
+	// Enough entries to pass the byte limit while staying under the entry
+	// limit, so that it is the size of the file that is being refused and not
+	// the number of names in it, which has a test of its own.
+	entries := make([]string, 0, maxFileListEntries)
+	padding := strings.Repeat("d", 80)
+	for i := 0; len(entries)*(len(padding)+26) <= maxFileListBytes; i++ {
+		entries = append(entries, "x64-linux/include/"+padding+"/header"+strconv.Itoa(i)+".h")
+	}
+	if len(entries) >= maxFileListEntries {
+		t.Fatalf("the list needs %d entries to pass the byte limit, which is past the entry limit", len(entries))
+	}
+	path := writeVcpkgFileList(t, build, "x64-linux", "tinyfmt", "2.1.0", entries)
+
+	packages, findings := Discover(Options{BuildDir: build, Context: context.Background()})
+	if len(packages) != 1 {
+		t.Fatalf("packages = %#v", packages)
+	}
+	if got := len(packages[0].Files); got != 0 {
+		t.Errorf("files = %d, want none: a list past the limit is not read at all", got)
+	}
+	if packages[0].Version != "2.1.0" {
+		t.Errorf("version = %q, want the one the SPDX document states", packages[0].Version)
+	}
+	var reported bool
+	for _, finding := range findings {
+		if finding.ID == "INPUT_LIMIT_EXCEEDED" && finding.Subject.Ref == path {
+			reported = true
+		}
+	}
+	if !reported {
+		t.Error("a list over the byte limit was skipped silently")
+	}
+}
+
+// Git introspection may be allowed and still answer nothing -- here the
+// checkout lies outside every registered anchor, so the runner refuses the
+// command before a process exists. The package has to survive that with the
+// evidence the files already gave it, roots included.
+func TestAGitQueryThatIsRefusedLeavesThePackageIntact(t *testing.T) {
+	build := t.TempDir()
+	writePopulate(t, build, "tinylog", "https://example.invalid/org/tinylog.git", "v1.4.0")
+	if err := os.MkdirAll(filepath.Join(build, "_deps", "tinylog-build"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	// Git is on, but no anchor is registered, so every path argument is
+	// outside them and no command runs.
+	runner := &exec.Runner{Features: exec.Features{Git: true}}
+
+	packages, _ := Discover(Options{BuildDir: build, Runner: runner, Context: context.Background()})
+	if len(packages) != 1 {
+		t.Fatalf("packages = %#v", packages)
+	}
+	found := packages[0]
+	if found.Version != "1.4.0" || found.VersionSource != "fetchcontent" {
+		t.Errorf("version = %q from %q, want the one the populate script states", found.Version, found.VersionSource)
+	}
+	if len(found.Roots) != 2 {
+		t.Errorf("roots = %q, want the checkout and the build tree", found.Roots)
+	}
+	if found.Commit != "" {
+		t.Errorf("commit = %q, want none: no command answered", found.Commit)
+	}
+	if records := runner.Records(); len(records) != 0 {
+		t.Errorf("commands ran = %v, want none: a path outside every anchor is refused before a process exists", records)
+	}
+}
+
+// Every root of a package is claimed, not only the identity one. Otherwise a
+// later adapter would offer the build tree of a FetchContent dependency as a
+// package in its own right, and the same files would belong to two components.
+func TestASecondRootIsNotOfferedAsAPackageOfItsOwn(t *testing.T) {
+	build := t.TempDir()
+	writePopulate(t, build, "tinylog", "https://example.invalid/org/tinylog.git", "v1.4.0")
+	buildTree := filepath.Join(build, "_deps", "tinylog-build")
+	if err := os.MkdirAll(buildTree, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	// An in-source build, so that .gitmodules is read from the same directory
+	// the build tree lies in, and declares the very tree FetchContent filled.
+	gitmodules := "[submodule \"tinylog-build\"]\n\tpath = _deps/tinylog-build\n" +
+		"\turl = https://example.invalid/org/other.git\n"
+	if err := os.WriteFile(filepath.Join(build, ".gitmodules"), []byte(gitmodules), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	packages, _ := Discover(Options{BuildDir: build, SourceDir: build, Context: context.Background()})
+	for _, found := range packages {
+		if found.Root() == buildTree {
+			t.Errorf("%s claims %q, which the FetchContent package already covers", found.Manager, found.Root())
+		}
+	}
+	if len(packages) != 1 || packages[0].Name != "tinylog" {
+		t.Fatalf("packages = %#v, want the FetchContent dependency alone", packages)
 	}
 }

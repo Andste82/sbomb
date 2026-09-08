@@ -134,6 +134,49 @@ The `policy` section of the documentation also gained what it was missing: a
 table of what actually differs between the four profiles, and one line per gate
 saying when it fails.
 
+### A package now knows every directory it lives in, and vcpkg proves its files
+
+A package used to know exactly one directory, and everything that did not lie
+under it belonged to somebody else. For FetchContent that directory is
+`_deps/<name>-src`, while every file CMake generated for the package — a header
+written by `configure_file`, the libraries built from the checkout — is in
+`_deps/<name>-build`. Such a file matched no package at all and came out as the
+manufacturer's own code. A package now carries a list of directories, and both
+of those are on it. The first one remains the identity: the anchor, the
+component root, the licence file and every `git` question still refer to the
+checkout, so a version is never read out of a build tree. Only that first root
+becomes an anchor, because a package has one key and a second one would name a
+package that does not exist.
+
+vcpkg had the worst version of the same problem and the best evidence to fix it
+with. It merges every port into one triplet tree — all headers in `include/`,
+all libraries in `lib/` — so the `share/<name>` directory that is the package
+by layout contains none of the files anybody uses. In practice the prefix never
+matched: a used vcpkg header fell through to the licence heuristic or to the
+build anchor, and `vcpkg.spdx.json`, which states the name, the version, the
+purl, the licence and the supplier outright, never reached the file it was
+about. vcpkg also writes down every file it installed, one list per package
+under `installed/vcpkg/info/`, and that list is now read. A header is no longer
+matched against a directory it was never in; it is looked up in the record of
+what was installed. Where there is no such list the document is exactly what it
+was — the list improves an attribution that works without it. The findings do
+change there: a vcpkg package whose files the `share/<name>` prefix never
+matches now says so, as the `PACKAGE_NOT_LINKED` below. A list that is there
+but breaches a parser bound of §30 is refused whole, with
+`INPUT_LIMIT_EXCEEDED` naming it, rather than attributing half a package.
+
+A file two packages both claim goes to neither, the same rule two CMake targets
+sharing a source already met: two statements are no statement.
+
+### A dependency that was installed but never linked is now said out loud
+
+`PACKAGE_NOT_LINKED` (info) is new. A package no used file belongs to is
+correctly missing from the document — installed is not linked, and only what
+the deliverable contains is in the SBOM — but until now it went missing without
+a word, and "why is the library I installed not in my SBOM" had no answer
+except reading the source. It fails nothing and gates nothing; it says what was
+left out and which manager installed it.
+
 ## 0.16.0
 
 ### `sbomb_enable` takes MAP, DEPFILE and OUTPUT — and they now do something

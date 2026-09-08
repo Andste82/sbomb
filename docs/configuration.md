@@ -289,6 +289,19 @@ holding a package manifest (`conanfile.txt`, `vcpkg.json`, `idf_component.yml`,
 flagged for review. **A file is never dropped because its component could not be
 determined.**
 
+Package-manager metadata answers in two ways, the precise one first. Where a
+manager wrote down which files it installed — vcpkg keeps such a list per
+package — the file is looked up in that record; only otherwise is its path
+matched against the package's directories. A package may have more than one:
+FetchContent puts the checkout in `_deps/<name>-src` and everything CMake
+generated for the package in `_deps/<name>-build`, and both belong to it. A file
+that two packages claim belongs to neither and falls through to the strategies
+below.
+
+A dependency a manager installed but nothing linked is not part of your product
+and is not in the document. That is not silent: it reports `PACKAGE_NOT_LINKED`
+(info), which fails nothing and names what was left out.
+
 A directory carrying its own licence file is treated as a distinct component,
 which is how a library copied into the source tree is recognized when it has no
 package manifest. Your own top-level licence is not a boundary: the search

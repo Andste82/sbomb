@@ -68,10 +68,19 @@ func (a fetchContent) Discover(options Options) ([]Package, []domain.Finding) {
 	packages := make([]Package, 0, len(names))
 	findings := make([]domain.Finding, 0)
 	for _, name := range names {
-		root := filepath.Join(depsDir, name+"-src")
+		// The checkout is the identity: git and the licence file are there, and
+		// it is what the anchor names. The build tree beside it belongs to the
+		// same package too -- a header CMake wrote with configure_file, and the
+		// libraries built from the checkout, live there and nowhere else -- so
+		// it is a second root rather than a second package. It is claimed only
+		// when it exists, because a directory nobody built is not evidence.
+		roots := []string{filepath.Join(depsDir, name+"-src")}
+		if buildTree := filepath.Join(depsDir, name+"-build"); dirExists(buildTree) {
+			roots = append(roots, buildTree)
+		}
 		found := Package{
 			Name:      name,
-			Root:      root,
+			Roots:     roots,
 			Manager:   a.Manager(),
 			AnchorKey: "pkg:fetchcontent/" + name,
 		}
@@ -132,7 +141,7 @@ func (fetchContent) refineFromGit(options Options, found *Package, findings *[]d
 	if options.Runner == nil || !options.Runner.Features.Git {
 		return
 	}
-	described, err := options.Runner.Run(options.Context, "git", "-C", found.Root,
+	described, err := options.Runner.Run(options.Context, "git", "-C", found.Root(),
 		"describe", "--tags", "--always", "--dirty")
 	if err != nil {
 		return
@@ -152,10 +161,10 @@ func (fetchContent) refineFromGit(options Options, found *Package, findings *[]d
 		// evidence than an exact tag.
 		found.VersionConfidence = domain.ConfidenceMedium
 	}
-	if commit, err := options.Runner.Run(options.Context, "git", "-C", found.Root, "rev-parse", "HEAD"); err == nil {
+	if commit, err := options.Runner.Run(options.Context, "git", "-C", found.Root(), "rev-parse", "HEAD"); err == nil {
 		found.Commit = strings.TrimSpace(string(commit))
 	}
-	if remote, err := options.Runner.Run(options.Context, "git", "-C", found.Root,
+	if remote, err := options.Runner.Run(options.Context, "git", "-C", found.Root(),
 		"config", "--get", "remote.origin.url"); err == nil {
 		if value := strings.TrimSpace(string(remote)); value != "" {
 			found.VCSURL = NormalizeVCSURL(value)

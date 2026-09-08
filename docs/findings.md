@@ -14,7 +14,7 @@ same build produce identical output.
 
 <!-- BEGIN GENERATED CATALOGUE -->
 
-This build emits 43 of the 54 identifiers below. The rest are specified and
+This build emits 45 of the 55 identifiers below. The rest are specified and
 reserved: they describe evidence this version does not yet read, and a run will
 never report them. They are listed and marked so that the table is the whole
 catalogue rather than a snapshot of one version.
@@ -33,7 +33,7 @@ catalogue rather than a snapshot of one version.
 | `DEBUG_INFO_UNAVAILABLE` | info | — | Artifact stripped or no DWARF | emitted |
 | `DYNAMIC_DEPENDENCIES_IGNORED` | info | — | Artifact has `DT_NEEDED`/imports while `systemLibraries=exclude` | emitted |
 | `HEADER_EVIDENCE_FALLBACK` | info | — | A CU had no DWARF coverage; depfile used instead | emitted |
-| `INPUT_LIMIT_EXCEEDED` | warning | — | A parser limit of §30 was reached | reserved |
+| `INPUT_LIMIT_EXCEEDED` | warning | — | A parser limit of §30 was reached | emitted |
 | `INTERNAL_INVARIANT_VIOLATION` | error | always (exit 70) | A graph invariant of §8.8 or a `bom-ref` uniqueness assertion of §28.4 failed | emitted |
 | `LICENSE_CONFLICT` | warning | `failOnReviewRequired` | Conflicting license evidence | emitted |
 | `LINKED_OBJECT_SOURCE_UNRESOLVED` | warning | `failOnMissingSourceForLinkedObject` | Object could not be mapped to a source | emitted |
@@ -54,6 +54,7 @@ catalogue rather than a snapshot of one version.
 | `MISSING_SUPPLIER` | warning | `failOnMissingSupplier` | Component has no supplier/creator (CRA/BSI field) | emitted |
 | `NINJA_DEPS_UNAVAILABLE` | info | — | `ninja -t deps` not permitted or failed | emitted |
 | `OBJECT_SOURCE_MAPPING_CONFLICT` | info | — | Two strategies disagreed; higher priority used | reserved |
+| `PACKAGE_NOT_LINKED` | info | — | A package manager installed this dependency, but no used file belongs to it | emitted |
 | `PCH_HEADERS_EXCLUDED` | info | — | Headers removed by `pchHeaders=exclude` | emitted |
 | `PREBUILT_LIBRARY_UNMAPPED` | warning | `prebuiltLibrariesRequireMapping` | Prebuilt library has no component mapping | emitted |
 | `REPRODUCIBLE_MODE_OMITS_TIMESTAMP` | info | — | `--reproducible` output lacks `metadata.timestamp`; not a CRA deliverable | emitted |

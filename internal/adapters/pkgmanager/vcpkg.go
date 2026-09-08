@@ -1,6 +1,7 @@
 package pkgmanager
 
 import (
+	"bufio"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -8,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/example/sbomb/internal/domain"
+	"github.com/example/sbomb/internal/limits"
 )
 
 // vcpkg reads the SPDX document vcpkg writes for every package it installs
@@ -18,7 +20,14 @@ type vcpkg struct{}
 
 func (vcpkg) Manager() string { return "vcpkg" }
 
-const maxSPDXBytes = 8 << 20
+// The bounds of section 30 for the two files this adapter reads. The SPDX
+// document is one package's metadata; a file list can name every header of a
+// large library, so it is bounded by entries as well as by bytes.
+const (
+	maxSPDXBytes       = 8 << 20
+	maxFileListBytes   = 8 << 20
+	maxFileListEntries = 100_000
+)
 
 // spdxDocument is the part of vcpkg.spdx.json this adapter reads.
 type spdxDocument struct {
@@ -43,18 +52,24 @@ func (a vcpkg) Discover(options Options) ([]Package, []domain.Finding) {
 	findings := make([]domain.Finding, 0)
 	seen := map[string]bool{}
 
-	for _, root := range roots {
-		matches, err := filepath.Glob(filepath.Join(root, "share", "*", "vcpkg.spdx.json"))
+	for _, tree := range roots {
+		matches, err := filepath.Glob(filepath.Join(tree.root, "share", "*", "vcpkg.spdx.json"))
 		if err != nil {
 			continue
 		}
 		sort.Strings(matches)
 		for _, path := range matches {
-			found, ok := a.readPackage(path, root)
+			found, ok := a.readPackage(path, tree.root)
 			if !ok || seen[found.Name] {
 				continue
 			}
 			seen[found.Name] = true
+			// What the package installed is a list vcpkg wrote itself, so the
+			// headers and libraries in the shared triplet tree can be looked up
+			// instead of guessed from a path.
+			files, listFindings := a.installedFiles(tree, found.Name)
+			found.Files = files
+			findings = append(findings, listFindings...)
 			if found.Version == "" {
 				findings = append(findings, domain.Finding{
 					ID: "UNKNOWN_VERSION", Severity: domain.SeverityWarning,
@@ -68,11 +83,21 @@ func (a vcpkg) Discover(options Options) ([]Package, []domain.Finding) {
 	return packages, findings
 }
 
+// installTree is one per-triplet install tree. The base and the triplet are
+// kept apart from the joined path because the per-package file lists live
+// beside the triplet trees, under base/vcpkg/info, and name their entries with
+// the triplet in front.
+type installTree struct {
+	base    string
+	triplet string
+	root    string
+}
+
 // installRoots finds the per-triplet install trees. vcpkg puts them under
 // vcpkg_installed in manifest mode and under an --x-install-root otherwise, so
 // both shapes are searched, one directory deep.
-func (vcpkg) installRoots(buildDir string) []string {
-	roots := make([]string, 0)
+func (vcpkg) installRoots(buildDir string) []installTree {
+	roots := make([]installTree, 0)
 	for _, base := range []string{
 		filepath.Join(buildDir, "vcpkg_installed"),
 		filepath.Join(buildDir, "installed"),
@@ -83,12 +108,107 @@ func (vcpkg) installRoots(buildDir string) []string {
 		}
 		for _, entry := range entries {
 			if entry.IsDir() && entry.Name() != "vcpkg" {
-				roots = append(roots, filepath.Join(base, entry.Name()))
+				roots = append(roots, installTree{
+					base:    base,
+					triplet: entry.Name(),
+					root:    filepath.Join(base, entry.Name()),
+				})
 			}
 		}
 	}
-	sort.Strings(roots)
+	sort.Slice(roots, func(i, j int) bool { return roots[i].root < roots[j].root })
 	return roots
+}
+
+// installedFiles reads the list vcpkg wrote when it installed the package.
+// This is the only evidence that separates one package from another inside a
+// triplet tree: every port's headers land in the same include directory and
+// every library in the same lib directory, so a path prefix cannot tell them
+// apart, while the list names each file outright.
+//
+// A missing list is not a finding. It improves an attribution that already
+// works without it, and the run should not report evidence it never required.
+func (vcpkg) installedFiles(tree installTree, name string) ([]string, []domain.Finding) {
+	// vcpkg names the list <name>_<version>_<triplet>.list. The version is not
+	// matched: the port version and the version in the SPDX document need not
+	// be spelled the same, and a wrong guess would silently read nothing.
+	matches, err := filepath.Glob(filepath.Join(tree.base, "vcpkg", "info", name+"_*_"+tree.triplet+".list"))
+	if err != nil || len(matches) != 1 {
+		// Two lists mean two versions of one port are installed side by side.
+		// Choosing between them would be a guess, so neither is read.
+		return nil, nil
+	}
+	path := matches[0]
+	info, err := os.Stat(path)
+	if err != nil {
+		return nil, nil
+	}
+	if info.Size() > maxFileListBytes {
+		return nil, []domain.Finding{fileListLimitFinding(path,
+			"the vcpkg file list is larger than the parser limit of section 30, so the package's files were not read from it")}
+	}
+	handle, err := os.Open(path)
+	if err != nil {
+		return nil, nil
+	}
+	defer handle.Close()
+
+	scanner := bufio.NewScanner(handle)
+	scanner.Buffer(make([]byte, limits.InitialBuffer), limits.MaxLine)
+	files := make([]string, 0)
+	prefix := tree.triplet + "/"
+	for scanner.Scan() {
+		if len(files) >= maxFileListEntries {
+			// The list is refused whole rather than in part: a truncated list
+			// would attribute some of the package's files and quietly leave the
+			// rest to the heuristics, with nothing to say which is which.
+			return nil, []domain.Finding{fileListLimitFinding(path,
+				"the vcpkg file list names more entries than the parser limit of section 30, so the package's files were not read from it")}
+		}
+		entry := strings.TrimSpace(strings.TrimSuffix(scanner.Text(), "\r"))
+		// A directory entry ends in a slash and names no file.
+		if entry == "" || strings.HasSuffix(entry, "/") {
+			continue
+		}
+		relative, ok := strings.CutPrefix(entry, prefix)
+		if !ok || relative == "" {
+			continue
+		}
+		// Section 30.3: a listed path that is absolute or walks upwards would
+		// name a file outside the install tree, which no install list may do.
+		if filepath.IsAbs(relative) || strings.HasPrefix(relative, "/") || pathEscapes(relative) {
+			continue
+		}
+		files = append(files, filepath.Join(tree.root, filepath.FromSlash(relative)))
+	}
+	if err := scanner.Err(); err != nil {
+		return nil, []domain.Finding{fileListLimitFinding(path,
+			"the vcpkg file list could not be read to its end, so the package's files were not read from it")}
+	}
+	sort.Strings(files)
+	return files, nil
+}
+
+// pathEscapes reports whether a slash-separated relative path leaves the
+// directory it is relative to.
+func pathEscapes(relative string) bool {
+	for _, segment := range strings.Split(relative, "/") {
+		if segment == ".." {
+			return true
+		}
+	}
+	return false
+}
+
+// fileListLimitFinding reports a list that was found but could not be used.
+// The subject is the list itself, not the component: what could not be read is
+// a piece of evidence, and the package is still known without it.
+func fileListLimitFinding(path, message string) domain.Finding {
+	return domain.Finding{
+		ID: "INPUT_LIMIT_EXCEEDED", Severity: domain.SeverityWarning,
+		Subject: domain.Subject{Kind: "evidence", Ref: path},
+		Message: message,
+	}
 }
 
 func (a vcpkg) readPackage(path, root string) (Package, bool) {
@@ -117,10 +237,11 @@ func (a vcpkg) readPackage(path, root string) (Package, bool) {
 		VersionConfidence: domain.ConfidenceHigh,
 		Manager:           a.Manager(),
 		AnchorKey:         "pkg:vcpkg/" + entry.Name,
-		// The share directory is what belongs to this package and holds its
-		// copyright file; headers and libraries are merged into the triplet
-		// tree and cannot be attributed to one package from the layout alone.
-		Root: filepath.Join(root, "share", entry.Name),
+		// The share directory is what belongs to this package by layout and
+		// holds its copyright file; headers and libraries are merged into the
+		// triplet tree and cannot be attributed to one package from the layout
+		// alone, which is what the installed file list answers instead.
+		Roots: []string{filepath.Join(root, "share", entry.Name)},
 	}
 	if found.Version == "" {
 		found.VersionSource = ""
@@ -142,7 +263,7 @@ func (a vcpkg) readPackage(path, root string) (Package, bool) {
 	if found.PURL == "" && found.Version != "" {
 		found.PURL = "pkg:vcpkg/" + entry.Name + "@" + found.Version
 	}
-	if copyright := filepath.Join(found.Root, "copyright"); fileExists(copyright) {
+	if copyright := filepath.Join(found.Root(), "copyright"); fileExists(copyright) {
 		found.LicenseFile = copyright
 	}
 	return found, true
@@ -160,4 +281,9 @@ func firstNonNoAssertion(values ...string) string {
 func fileExists(path string) bool {
 	info, err := os.Stat(path)
 	return err == nil && !info.IsDir()
+}
+
+func dirExists(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && info.IsDir()
 }
