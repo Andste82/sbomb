@@ -233,23 +233,14 @@ Files are grouped into components in a fixed priority order. The first strategy
 that answers wins, and each one is a stronger statement than the one below it.
 
 ```mermaid
-flowchart TB
-    F["used file"]
-    S1{"named in the<br/>configuration"}
-    S2{"claimed by a<br/>package manager"}
-    S3{"in a target the<br/>configuration maps"}
-    S4{"below a<br/>marker directory"}
-    S5{"below an<br/>anchor root"}
-    OK["the component"]
-    U["unknown:<br/>kept, flagged for review"]
-
-    F --> S1
-    S1 -->|no| S2
-    S2 -->|no| S3
-    S3 -->|no| S4
-    S4 -->|no| S5
-    S5 -->|no| U
-    S1 -->|yes| OK
+flowchart LR
+    F["used file"] --> S1
+    S1{"named in the<br/>configuration"} -->|no| S2{"claimed by a<br/>package manager"}
+    S2 -->|no| S3{"in a mapped<br/>CMake target"}
+    S3 -->|no| S4{"below a<br/>marker directory"}
+    S4 -->|no| S5{"below an<br/>anchor root"}
+    S5 -->|no| U["unknown:<br/>kept, flagged for review"]
+    S1 -->|yes| OK["the component"]
     S2 -->|yes| OK
     S3 -->|yes| OK
     S4 -->|yes| OK
