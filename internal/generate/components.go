@@ -444,10 +444,13 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 		component.Version = curated.Version
 		component.VersionSource = "curated"
 		component.VersionConf = domain.ConfidenceHigh
-	case isManaged && managed.Version != "":
-		component.Version = managed.Version
-		component.VersionSource = managed.VersionSource
-		component.VersionConf = managed.VersionConfidence
+	case isManaged && managed.Version.Value != "":
+		// Several files of one manager can state a version; what is published
+		// here is the claim that won its ranking (section 21.1), so the source
+		// beside the version names the origin the value really came from.
+		component.Version = managed.Version.Value
+		component.VersionSource = managed.Version.Source
+		component.VersionConf = managed.Version.Confidence
 	case hasCurated && len(curated.VersionFrom) > 0:
 		if resolved, ok := version.Resolve(curated.VersionFrom, rootInfo.Physical,
 			version.Options{Runner: r.runner, Context: r.ctx}); ok {
@@ -481,8 +484,8 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 	// from a repository URL host is explicitly forbidden.
 	if hasCurated && curated.Supplier != "" {
 		component.Supplier = curated.Supplier
-	} else if isManaged && managed.Supplier != "" {
-		component.Supplier = managed.Supplier
+	} else if isManaged && managed.Supplier.Value != "" {
+		component.Supplier = managed.Supplier.Value
 	}
 	if component.Supplier == "" {
 		findings = append(findings, componentFinding("MISSING_SUPPLIER", domain.SeverityWarning, component,
@@ -493,8 +496,8 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 	// PURL (section 20.4): only when a package type and name can be asserted.
 	if hasCurated && curated.PURL != "" {
 		component.PURL = curated.PURL
-	} else if isManaged && managed.PURL != "" {
-		component.PURL = managed.PURL
+	} else if isManaged && managed.PURL.Value != "" {
+		component.PURL = managed.PURL.Value
 	} else if kind, name, ok := purlFromAnchor(component.ID); ok {
 		component.PURL = version.PURL(kind, name, component.Version)
 	}
@@ -660,9 +663,13 @@ func (r *componentResolver) licenseFromPackageManager(name string) (domain.Licen
 	if !ok {
 		return domain.LicenseFinding{}, false
 	}
-	if managed.License != "" {
+	if managed.License.Value != "" {
+		// The claim knows which file stated the expression, but a licence
+		// finding's Source names the file a licence text was read from, and no
+		// text was read here. Publishing the manifest's name there would say
+		// something the evidence does not support.
 		return domain.LicenseFinding{
-			Expression: managed.License,
+			Expression: managed.License.Value,
 			Evidence:   "component-level",
 			Confidence: domain.ConfidenceHigh,
 		}, true

@@ -47,16 +47,16 @@ func TestFetchContentReadsNameVersionAndRepository(t *testing.T) {
 		t.Fatalf("packages = %#v", packages)
 	}
 	found := packages[0]
-	if found.Name != "tinylog" || found.Version != "1.2.0" {
-		t.Errorf("name/version = %q/%q", found.Name, found.Version)
+	if found.Name != "tinylog" || found.Version.Value != "1.2.0" {
+		t.Errorf("name/version = %q/%q", found.Name, found.Version.Value)
 	}
-	if found.VersionSource != "fetchcontent" || found.VersionConfidence != "high" {
-		t.Errorf("version source = %q, confidence = %q", found.VersionSource, found.VersionConfidence)
+	if found.Version.Source != "fetchcontent" || found.Version.Confidence != "high" {
+		t.Errorf("version source = %q, confidence = %q", found.Version.Source, found.Version.Confidence)
 	}
 	if found.VCSURL != "https://example.invalid/org/tinylog" {
 		t.Errorf("vcs url = %q, want the .git suffix removed", found.VCSURL)
 	}
-	if found.Supplier != "" {
+	if found.Supplier.Value != "" {
 		t.Error("a supplier was invented; section 20.5 forbids deriving it from a repository host")
 	}
 	if len(findings) != 0 {
@@ -87,7 +87,7 @@ func TestAPopulatedDependencyWithNoTagIsReported(t *testing.T) {
 		t.Fatal(err)
 	}
 	packages, findings := Discover(Options{BuildDir: build, Context: context.Background()})
-	if len(packages) != 1 || packages[0].Version != "" {
+	if len(packages) != 1 || packages[0].Version.Value != "" {
 		t.Fatalf("packages = %#v", packages)
 	}
 	var reported bool
@@ -110,7 +110,7 @@ func TestTheAdapterWorksWithIntrospectionDisabled(t *testing.T) {
 		Runner:   &exec.Runner{},
 		Context:  context.Background(),
 	})
-	if len(packages) != 1 || packages[0].Version != "1.2.0" {
+	if len(packages) != 1 || packages[0].Version.Value != "1.2.0" {
 		t.Fatalf("packages = %#v", packages)
 	}
 }
@@ -193,14 +193,14 @@ func TestConanReadsVersionRootAndLicence(t *testing.T) {
 		t.Fatalf("packages = %#v (findings %#v)", packages, findings)
 	}
 	found := packages[0]
-	if found.Name != "tinycbor" || found.Version != "0.6.1" {
-		t.Errorf("name/version = %q/%q", found.Name, found.Version)
+	if found.Name != "tinycbor" || found.Version.Value != "0.6.1" {
+		t.Errorf("name/version = %q/%q", found.Name, found.Version.Value)
 	}
 	if found.Root() != packageRoot {
 		t.Errorf("root = %q, want the package folder the data file names", found.Root())
 	}
-	if found.PURL != "pkg:conan/tinycbor@0.6.1" {
-		t.Errorf("purl = %q", found.PURL)
+	if found.PURL.Value != "pkg:conan/tinycbor@0.6.1" {
+		t.Errorf("purl = %q", found.PURL.Value)
 	}
 	if found.LicenseFile == "" {
 		t.Error("the licence Conan copied into the package was not found")
@@ -258,11 +258,11 @@ func TestVcpkgTakesThePurlItStates(t *testing.T) {
 		t.Fatalf("packages = %#v", packages)
 	}
 	found := packages[0]
-	if found.PURL != "pkg:vcpkg/tinyfmt@2.1.0?triplet=x64-linux" {
-		t.Errorf("purl = %q, want the one vcpkg wrote", found.PURL)
+	if found.PURL.Value != "pkg:vcpkg/tinyfmt@2.1.0?triplet=x64-linux" {
+		t.Errorf("purl = %q, want the one vcpkg wrote", found.PURL.Value)
 	}
-	if found.Version != "2.1.0" || found.License != "MIT" {
-		t.Errorf("version/license = %q/%q", found.Version, found.License)
+	if found.Version.Value != "2.1.0" || found.License.Value != "MIT" {
+		t.Errorf("version/license = %q/%q", found.Version.Value, found.License.Value)
 	}
 	if found.LicenseFile == "" {
 		t.Error("the copyright file vcpkg writes was not found")
@@ -279,8 +279,8 @@ func TestVcpkgNoAssertionIsNotALicence(t *testing.T) {
 	if len(packages) != 1 {
 		t.Fatalf("packages = %#v", packages)
 	}
-	if packages[0].License != "" {
-		t.Errorf("license = %q, want none", packages[0].License)
+	if packages[0].License.Value != "" {
+		t.Errorf("license = %q, want none", packages[0].License.Value)
 	}
 }
 
@@ -610,8 +610,8 @@ func TestVcpkgRefusesAFileListOverTheByteLimit(t *testing.T) {
 	if got := len(packages[0].Files); got != 0 {
 		t.Errorf("files = %d, want none: a list past the limit is not read at all", got)
 	}
-	if packages[0].Version != "2.1.0" {
-		t.Errorf("version = %q, want the one the SPDX document states", packages[0].Version)
+	if packages[0].Version.Value != "2.1.0" {
+		t.Errorf("version = %q, want the one the SPDX document states", packages[0].Version.Value)
 	}
 	var reported bool
 	for _, finding := range findings {
@@ -643,8 +643,8 @@ func TestAGitQueryThatIsRefusedLeavesThePackageIntact(t *testing.T) {
 		t.Fatalf("packages = %#v", packages)
 	}
 	found := packages[0]
-	if found.Version != "1.4.0" || found.VersionSource != "fetchcontent" {
-		t.Errorf("version = %q from %q, want the one the populate script states", found.Version, found.VersionSource)
+	if found.Version.Value != "1.4.0" || found.Version.Source != "fetchcontent" {
+		t.Errorf("version = %q from %q, want the one the populate script states", found.Version.Value, found.Version.Source)
 	}
 	if len(found.Roots) != 2 {
 		t.Errorf("roots = %q, want the checkout and the build tree", found.Roots)

@@ -857,3 +857,58 @@ dependencies of which few are linked, so a real project's findings file grows by
 one info per unlinked package. If that becomes noise, the alternative is one
 aggregate finding per manager naming the packages in `detail` — but no name may
 disappear in the process.
+
+## D32 — Package metadata carries its origin, and the checkout outranks every declaration
+
+§21 asked adapters to supply a name, a version, a purl, a licence hint and root
+paths, and said nothing about where any of those values came from. The
+implementation matched: `version` alone recorded a source and a confidence,
+while licence, supplier and purl were bare strings.
+
+That is enough only while exactly one file describes a package. It never was.
+FetchContent already has two origins for a version — the tag in the generated
+populate script and `git describe` in the checkout — and the code resolved them
+by assignment order: `refineFromGit` overwrote whatever the script had said.
+The right answer, by accident, for a reason nothing wrote down. Adding a third
+origin, such as the manifest of the manager next door, would have been a guess
+about which assignment should come last.
+
+§21.1 is therefore added: each metadata value carries its origin and that
+origin's rank, the highest rank wins, and equal ranks keep the value found
+first. The specification had no such ordering — §19.2 orders mapping
+strategies, §20.2 orders version sources, §22.2 orders licence evidence, and
+none of them says which of two files describing one package to believe.
+
+**Rank is not confidence, and this is the whole point of a separate ordering.**
+§20.3 already grades how sure the tool is of a value. A tag in a generated
+script is an exact declaration and rates high; a `git describe` with distance
+rates medium. Ordering by confidence would publish the tag and contradict the
+tree it claims to describe. Rank asks the other question — how authoritative is
+the place this came from — and answers it the other way round.
+
+**The working copy is ranked above every declared origin**, which is one rank
+more than the four the origins themselves suggest. Without it the FetchContent
+tag would beat `git describe` and the versions in the corpus would change: this
+change is a change of data structure and nothing else, and every fixture
+document and findings file is byte-identical to the release before it. The rank
+is not a device to preserve output, though. A tag says which revision was asked
+for; the checkout says which one is there, and whether someone has since edited
+it. §19.4 already treats git metadata as the authority on a checkout.
+
+**vcpkg's `vcpkg.spdx.json` is ranked as installed state, not as a bundled
+SBOM.** vcpkg writes that document itself while installing; rank 4 is reserved
+for an SBOM the upstream shipped inside its own package, which nothing reads
+today. The distinction changes no output now and decides a winner as soon as
+something does read one.
+
+Contributions that lose are kept rather than dropped, and nothing reads them in
+this release. Reporting that two origins disagreed is the next step, and a
+report needs the loser: a value that was overwritten and forgotten cannot be
+named later. Discovery is the only time they are collected, because packages
+are copied by value once discovery returns.
+
+One thing this deliberately does not do: when two *managers* claim the same
+directory, `Discover` still drops the second package whole instead of merging
+its claims into the first. Two managers claiming one tree disagree about who
+installed the package, not about what its version is, and folding the loser's
+metadata in would describe a package the winning manager never installed.

@@ -47,10 +47,17 @@ func (a conan) Discover(options Options) ([]Package, []domain.Finding) {
 			AnchorKey: "pkg:conan/" + name,
 		}
 		if version, ok := firstSubmatch(path, conanVersionPattern); ok {
-			found.Version = version
-			found.VersionSource = "conan"
-			// Section 20.3: a package manager states an exact declared version.
-			found.VersionConfidence = domain.ConfidenceHigh
+			// CMakeDeps writes this file while installing, so it states the
+			// version that was resolved and put on disk, not the requirement
+			// the recipe asked for: that is install state, not a declaration.
+			found.Take(FieldVersion, Claim{
+				Value:  version,
+				Source: "conan",
+				Rank:   RankInstallState,
+				// Section 20.3: a package manager states an exact declared
+				// version.
+				Confidence: domain.ConfidenceHigh,
+			})
 		}
 		if folder := a.packageFolder(options.BuildDir, name); folder != "" {
 			found.Roots = []string{folder}
@@ -66,11 +73,15 @@ func (a conan) Discover(options Options) ([]Package, []domain.Finding) {
 			continue
 		}
 		found.LicenseFile = a.licenseFile(found.Root())
-		found.PURL = "pkg:conan/" + name
-		if found.Version != "" {
-			found.PURL += "@" + found.Version
+		// The purl is built after the version so that it names the version that
+		// won, and it inherits that claim's standing because it is the same
+		// statement in another shape.
+		purl := "pkg:conan/" + name
+		if found.Version.Value != "" {
+			purl += "@" + found.Version.Value
 		}
-		if found.Version == "" {
+		found.Take(FieldPURL, Claim{Value: purl, Source: a.Manager(), Rank: RankInstallState})
+		if found.Version.Value == "" {
 			findings = append(findings, domain.Finding{
 				ID: "UNKNOWN_VERSION", Severity: domain.SeverityWarning,
 				Subject: domain.Subject{Kind: "component", Ref: name},

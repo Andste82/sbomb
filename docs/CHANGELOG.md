@@ -14,6 +14,29 @@ PDB parsing remains out of scope. MSVC header evidence therefore comes from
 `/showIncludes`, Ninja dependencies or MSBuild TLogs, and a build may report
 `DEBUG_INFO_UNAVAILABLE` where a DWARF-based build would provide debug evidence.
 
+### Package metadata now says where each value came from
+
+A package manager's version, licence, supplier and purl were bare strings, and
+only the version recorded a source. That worked because, in practice, exactly
+one file supplied each value — except for FetchContent, which has two origins
+for a version and settled them by which line of code ran last. Nothing said
+which origin should win, so nothing could say which one had.
+
+Each of the four values now carries its origin and that origin's rank, the
+strongest origin wins, and equally strong origins keep whichever was found
+first. The ranking is separate from the confidence the document already
+publishes: a manifest can state a version exactly and still describe a revision
+that is no longer checked out, so the checkout itself outranks every
+declaration. Values that lost are kept rather than dropped, so that a later
+release can report the disagreement instead of silently picking a side.
+
+Nothing in the output moves. Every fixture document and findings file is
+byte-identical to what the code produced before this change; this is the data
+structure the next step needs, put in place on its own so that it can be
+reviewed on its own.
+`docs/dev/spec.md` §21.1 states the ranking, and deviation D32 says why it was
+needed and why the checkout sits above the declarations.
+
 ### The introspection allowlist now describes what sbomb can actually do
 
 The allowlist held fifteen command shapes. Three of them were reachable: the

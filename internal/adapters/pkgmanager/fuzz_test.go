@@ -48,8 +48,16 @@ func FuzzDiscover(f *testing.F) {
 			if entry.Name == "" {
 				t.Fatal("a package without a name was returned")
 			}
-			if entry.PURL != "" && len(entry.PURL) < 5 {
-				t.Fatalf("implausible purl %q", entry.PURL)
+			if entry.PURL.Value != "" && len(entry.PURL.Value) < 5 {
+				t.Fatalf("implausible purl %q", entry.PURL.Value)
+			}
+			// A claim with an origin but no value would publish identity
+			// evidence for a version nobody stated, which is the one shape
+			// Take exists to make impossible.
+			for _, claim := range []Claim{entry.Version, entry.License, entry.Supplier, entry.PURL} {
+				if claim.Value == "" && (claim.Source != "" || claim.Rank != RankNone) {
+					t.Fatalf("a claim named an origin but no value: %#v", claim)
+				}
 			}
 		}
 	})
