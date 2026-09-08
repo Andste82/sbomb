@@ -71,6 +71,16 @@ type command struct {
 // `ninja -t deps` -- rewriting the build directory it was only asked to read;
 // deviation D29 records what was measured. An allowlist entry no code reaches
 // is not a capability held in reserve, it is a permission granted for nothing.
+//
+// Two further shapes, `dpkg -S <path>` and `rpm -qf <path>`, are gone for a
+// different reason: the permitted shape does not answer the question the
+// osPackages group promised. `dpkg -S` names a package and an architecture,
+// never a version and never a supplier, so a component built from its answer
+// would still carry UNKNOWN_VERSION and MISSING_SUPPLIER. A system library
+// also lies outside the anchors its caller registers, which are the project
+// and build trees being read, so the path check would refuse the call before
+// it started. Deviation D30 records the measurement and what would have to
+// change first.
 var allowlist = []command{
 	{Name: "ninja", Fixed: []string{"-C", "", "-t", "commands", ""}, PathSlots: []int{1}, Feature: "ninja"},
 	{Name: "ninja", Fixed: []string{"-C", "", "-t", "inputs", ""}, PathSlots: []int{1}, Feature: "ninja"},
@@ -78,9 +88,6 @@ var allowlist = []command{
 	{Name: "git", Fixed: []string{"-C", "", "rev-parse", "HEAD"}, PathSlots: []int{1}, Feature: "git"},
 	{Name: "git", Fixed: []string{"-C", "", "describe", "--tags", "--always", "--dirty"}, PathSlots: []int{1}, Feature: "git"},
 	{Name: "git", Fixed: []string{"-C", "", "config", "--get", "remote.origin.url"}, PathSlots: []int{1}, Feature: "git"},
-
-	{Name: "dpkg", Fixed: []string{"-S", ""}, PathSlots: []int{1}, Feature: "osPackages"},
-	{Name: "rpm", Fixed: []string{"-qf", ""}, PathSlots: []int{1}, Feature: "osPackages"},
 }
 
 // compilerProbes are the argument shapes permitted for any compiler. The
@@ -95,15 +102,14 @@ var compilerProbes = [][]string{
 // Features says which introspection groups are enabled. All of them are off
 // unless the caller turns them on, per section 9.2.
 type Features struct {
-	Ninja      bool
-	Git        bool
-	OSPackages bool
-	Compiler   bool
+	Ninja    bool
+	Git      bool
+	Compiler bool
 }
 
 // Enabled reports whether any introspection at all was allowed.
 func (f Features) Enabled() bool {
-	return f.Ninja || f.Git || f.OSPackages || f.Compiler
+	return f.Ninja || f.Git || f.Compiler
 }
 
 func (f Features) enabled(feature string) bool {
@@ -112,8 +118,6 @@ func (f Features) enabled(feature string) bool {
 		return f.Ninja
 	case "git":
 		return f.Git
-	case "osPackages":
-		return f.OSPackages
 	case "compiler":
 		return f.Compiler
 	}
@@ -343,7 +347,7 @@ func equalArgs(a, b []string) bool {
 // Allowlist returns every permitted command shape, for documentation and for
 // the tests that hold the table against section 9.2.
 func Allowlist() []string {
-	return AllowlistFor(Features{Ninja: true, Git: true, OSPackages: true, Compiler: true})
+	return AllowlistFor(Features{Ninja: true, Git: true, Compiler: true})
 }
 
 // AllowlistFor returns the command shapes the enabled groups permit. A shape

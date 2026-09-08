@@ -195,9 +195,9 @@ func TestTheCMakeIntrospectionGroupIsGone(t *testing.T) {
 		t.Error("the published schema still offers the group")
 	}
 
-	// The four groups that do have a caller keep working, so this is a
+	// The three groups that do have a caller keep working, so this is a
 	// removal and not a regression of the block as a whole.
-	body = `{"project":{"name":"a"},"build":{"dir":"b","introspection":{"ninja":true,"git":true,"osPackages":true,"compiler":true}}}`
+	body = `{"project":{"name":"a"},"build":{"dir":"b","introspection":{"ninja":true,"git":true,"compiler":true}}}`
 	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -206,7 +206,39 @@ func TestTheCMakeIntrospectionGroupIsGone(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !cfg.Build.Introspection.Ninja || !cfg.Build.Introspection.Git ||
-		!cfg.Build.Introspection.OSPackages || !cfg.Build.Introspection.Compiler {
+		!cfg.Build.Introspection.Compiler {
 		t.Errorf("introspection block did not survive loading: %+v", cfg.Build.Introspection)
+	}
+}
+
+// build.introspection.osPackages promised the distribution package a system
+// library belongs to, and nothing behind it could answer that. There was no
+// system-library adapter, and the two shapes on the allowlist could not have
+// fed one: `dpkg -S` names a package and an architecture, never a version and
+// never a supplier, and the file it would be asked about lies outside every
+// anchor a runner is given. Deviation D30 records the measurement.
+func TestTheOSPackagesIntrospectionGroupIsGone(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "sbomb.json")
+	// Alone, and beside the groups that do have a caller: a key that promises
+	// something has to be refused whatever it keeps company with, or a reader
+	// takes the surviving neighbours as proof that all of them were read.
+	for _, body := range []string{
+		`{"project":{"name":"a"},"build":{"dir":"b","introspection":{"osPackages":true}}}`,
+		`{"project":{"name":"a"},"build":{"dir":"b","introspection":{"osPackages":false}}}`,
+		`{"project":{"name":"a"},"build":{"dir":"b","introspection":{"git":true,"osPackages":true}}}`,
+	} {
+		if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		if _, loadErr := Load(path); loadErr == nil {
+			t.Errorf("%s: a group nothing can run was accepted as a configuration key", body)
+		} else if !strings.Contains(loadErr.Error(), "osPackages") {
+			// The reader has to learn which key ended the run, not only that
+			// one did.
+			t.Errorf("%s: the error does not name the key: %v", body, loadErr)
+		}
+	}
+	if strings.Contains(Schema(), "osPackages") {
+		t.Error("the published schema still offers the group")
 	}
 }

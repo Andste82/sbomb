@@ -104,7 +104,8 @@
   were removed rather than built (deviation D22). The `cmake` introspection
   group returns with `--allow-cmake-regenerate` and was removed until then,
   because without it no allowed command can produce a File API reply
-  (deviation D29).
+  (deviation D29). The `osPackages` group is removed as well and returns with
+  the system-library adapter that would call it (deviation D30).
 - **`sbomb:evidence:header:directInclude` is never set.** DWARF carries no
   inclusion depth; see deviation D8.
 - **Licence detection.** Measured over 142 distinct real licence files: 32
