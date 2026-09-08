@@ -26,6 +26,20 @@ var packageMetadataFiles = []string{
 	"west.yml",
 }
 
+// licenseBoundaryFiles mark a directory as the root of a distinct component
+// even when it carries no package manifest. A library that was simply copied
+// into the source tree usually has nothing else: no conanfile, no vcpkg.json,
+// and a CMakeLists.txt that cannot be read without interpreting CMake.
+//
+// NOTICE and COPYRIGHT are deliberately absent. They are attribution material,
+// not a licence grant, and a directory that carries only a NOTICE is not
+// thereby a separate work.
+var licenseBoundaryFiles = []string{
+	"LICENSE", "LICENSE.txt", "LICENSE.md",
+	"LICENCE", "LICENCE.txt", "LICENCE.md",
+	"COPYING", "COPYING.txt", "COPYING.md",
+}
+
 // componentResolver maps used files onto components, following the priority
 // order of section 19.2. Only strategies 1, 6, 7 and 8 exist so far; package
 // managers, SDK layouts and submodule boundaries are later work (D7).
@@ -40,6 +54,11 @@ type componentResolver struct {
 	// canonical identity prefix their root corresponds to. This is strategy 2
 	// of section 19.2, which outranks everything except curated configuration.
 	packages []resolvedPackage
+	// targets maps a file identity to the CMake target that owns it, and
+	// curatedByTarget maps a target name to the component the configuration
+	// assigns it to. Together they are strategy 5.
+	targets         map[string]string
+	curatedByTarget map[string]config.Component
 }
 
 // resolvedPackage is one package-manager result expressed in identity terms,
@@ -56,17 +75,20 @@ type resolvedPackage struct {
 func newComponentResolver(cfg config.Config, physical map[string]string, anchorRoots map[string]string, logger *Logger) *componentResolver {
 	rules := make([]componentmap.Rule, 0, len(cfg.Components))
 	curatedByID := make(map[string]config.Component, len(cfg.Components))
+	curatedByTarget := map[string]config.Component{}
 	for _, entry := range cfg.Components {
-		name := entry.Name
-		if name == "" {
-			name = filepath.Base(strings.TrimSuffix(entry.Path, "/"))
+		name := componentNameFor(entry)
+		if entry.Path != "" || entry.Match != "" {
+			rules = append(rules, componentmap.Rule{
+				Path:  entry.Path,
+				Match: entry.Match,
+				Name:  name,
+				Type:  entry.Type,
+			})
 		}
-		rules = append(rules, componentmap.Rule{
-			Path:  entry.Path,
-			Match: entry.Match,
-			Name:  name,
-			Type:  entry.Type,
-		})
+		for _, target := range entry.Targets {
+			curatedByTarget[target] = entry
+		}
 		curatedByID["component:"+name] = entry
 	}
 	projectName := cfg.Project.Name
@@ -74,13 +96,37 @@ func newComponentResolver(cfg config.Config, physical map[string]string, anchorR
 		projectName = "project"
 	}
 	return &componentResolver{
-		curated:     componentmap.NewMapper(rules),
-		curatedByID: curatedByID,
-		physical:    physical,
-		projectName: projectName,
-		anchorRoots: anchorRoots,
-		logger:      logger,
+		curated:         componentmap.NewMapper(rules),
+		curatedByID:     curatedByID,
+		curatedByTarget: curatedByTarget,
+		physical:        physical,
+		projectName:     projectName,
+		anchorRoots:     anchorRoots,
+		logger:          logger,
 	}
+}
+
+// componentNameFor is the name a configured component carries: the stated one,
+// else the last segment of its path, else the first target it names. A
+// component configured by target alone has no path to be named after.
+func componentNameFor(entry config.Component) string {
+	if entry.Name != "" {
+		return entry.Name
+	}
+	if entry.Path != "" {
+		return filepath.Base(strings.TrimSuffix(entry.Path, "/"))
+	}
+	if len(entry.Targets) > 0 {
+		return entry.Targets[0]
+	}
+	return ""
+}
+
+// setTargets records which CMake target owns which file, for strategy 5. A
+// file two targets both claim is left out: the build system said two things,
+// and picking one would be a guess.
+func (r *componentResolver) setTargets(byFile map[string]string) {
+	r.targets = byFile
 }
 
 // resolve names the component a file belongs to and records which strategy
@@ -97,6 +143,17 @@ func (r *componentResolver) resolve(file domain.UsedFile) (id, name, componentTy
 	if found, ok := r.packageFor(file); ok {
 		return "component:" + found.pkg.Name, found.pkg.Name, "library",
 			string(anchors.ScopeThirdParty), found.pkg.Manager
+	}
+
+	// Strategy 5: an explicit CMake target named in the configuration. The
+	// File API states which sources a target owns, so this is the build
+	// system's own answer rather than an inference about a directory layout.
+	if target, owned := r.targets[file.ID.Canonical()]; owned {
+		if entry, mapped := r.curatedByTarget[target]; mapped {
+			name := componentNameFor(entry)
+			return "component:" + name, name, componentTypeOrDefault(entry.Type),
+				string(anchors.ScopeThirdParty), "cmake-target:" + target
+		}
 	}
 
 	anchorKey := string(file.ID.Anchor)
@@ -191,12 +248,24 @@ func (r *componentResolver) nearestPackageRoot(file domain.UsedFile) (root, mani
 	boundary := r.anchorRoots[string(file.ID.Anchor)]
 	dir := filepath.Dir(path)
 	for depth := 0; depth < 64 && dir != "" && dir != "/" && dir != "."; depth++ {
+		atBoundary := boundary != "" && filepath.Clean(dir) == filepath.Clean(boundary)
 		for _, name := range packageMetadataFiles {
 			if info, err := os.Stat(filepath.Join(dir, name)); err == nil && !info.IsDir() {
 				return dir, name, true
 			}
 		}
-		if boundary != "" && filepath.Clean(dir) == filepath.Clean(boundary) {
+		// A licence file marks a boundary too, but never at the anchor root
+		// itself: a project's own top-level licence describes the project, not
+		// a dependency inside it, and treating it as a marker would rename the
+		// project's own component after its directory.
+		if !atBoundary {
+			for _, name := range licenseBoundaryFiles {
+				if info, err := os.Stat(filepath.Join(dir, name)); err == nil && !info.IsDir() {
+					return dir, name, true
+				}
+			}
+		}
+		if atBoundary {
 			return "", "", false
 		}
 		parent := filepath.Dir(dir)
@@ -223,6 +292,21 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 	curated, hasCurated := r.curatedByID[component.ID]
 	managed, isManaged := r.packageByName(component.Name)
 
+	// Where the component begins (section 19.2). Settled once, here, because
+	// the licence file and the version header are both read from it.
+	rootInfo := r.resolveRoot(component, files)
+	if rootInfo.ID.Anchor != "" {
+		root := rootInfo.ID
+		component.Root = &root
+		component.Properties = addProperty(component.Properties, "sbomb:component:root", root.Canonical())
+	}
+	if rootInfo.Source == rootSourceUsedFiles {
+		findings = append(findings, componentFinding("COMPONENT_ROOT_UNRESOLVED", domain.SeverityInfo, component,
+			"no configuration, package manager or marker file named this component's root, so it was taken to be the deepest common directory of the files that were used",
+			"Add components[].path for this component, or place a licence file at its root."))
+	}
+	r.logger.Debug("Component '%s': root %s (%s)", component.Name, rootInfo.ID.Canonical(), rootInfo.Source)
+
 	// Version (section 20.2): curated first, then exact package-manager
 	// metadata, then what curated versionFrom permits.
 	switch {
@@ -235,8 +319,7 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 		component.VersionSource = managed.VersionSource
 		component.VersionConf = managed.VersionConfidence
 	case hasCurated && len(curated.VersionFrom) > 0:
-		root := r.componentRoot(files)
-		if value, source, confidence, ok := version.Resolve(*component, root, curated.VersionFrom); ok {
+		if value, source, confidence, ok := version.Resolve(*component, rootInfo.Physical, curated.VersionFrom); ok {
 			component.Version, component.VersionSource, component.VersionConf = value, source, confidence
 		}
 	}
@@ -282,7 +365,7 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 	}
 
 	// Licenses (section 22.2).
-	licenseFindings := r.resolveComponentLicense(component, files, curated, hasCurated)
+	licenseFindings := r.resolveComponentLicense(component, files, curated, hasCurated, rootInfo.Physical)
 	findings = append(findings, licenseFindings...)
 
 	// A component with no hashable file cannot carry a component hash
@@ -309,7 +392,7 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 // resolveComponentLicense applies the priority order of section 22.2, limited
 // to the sources that exist today: curated configuration, an SPDX identifier
 // in a used file, and a recognized license file in the component root.
-func (r *componentResolver) resolveComponentLicense(component *domain.Component, files []domain.UsedFile, curated config.Component, hasCurated bool) []domain.Finding {
+func (r *componentResolver) resolveComponentLicense(component *domain.Component, files []domain.UsedFile, curated config.Component, hasCurated bool, root string) []domain.Finding {
 	findings := []domain.Finding{}
 
 	// Section 22.2 in order: an SPDX identifier in a used file (2), then what
@@ -344,12 +427,12 @@ func (r *componentResolver) resolveComponentLicense(component *domain.Component,
 		}
 	}
 	if fromFiles.Expression == "" {
-		if found, ok := r.licenseFromComponentRoot(files); ok {
+		if found, ok := r.licenseFromComponentRoot(root); ok {
 			fromFiles = found
 		}
 	}
 	if fromFiles.Expression == "" && len(observed) == 0 {
-		observed = r.licenseEvidenceFromComponentRoot(files)
+		observed = r.licenseEvidenceFromComponentRoot(root)
 	}
 
 	switch {
@@ -450,8 +533,7 @@ func (r *componentResolver) licenseFromPackageManager(name string) (domain.Licen
 // licenseFromComponentRoot looks for a recognized license file, but only in
 // the component root itself. Section 22.1 forbids scanning the repository for
 // license files outside mapped component roots.
-func (r *componentResolver) licenseFromComponentRoot(files []domain.UsedFile) (domain.LicenseFinding, bool) {
-	root := r.componentRoot(files)
+func (r *componentResolver) licenseFromComponentRoot(root string) (domain.LicenseFinding, bool) {
 	if root == "" {
 		return domain.LicenseFinding{}, false
 	}
@@ -468,8 +550,7 @@ func (r *componentResolver) licenseFromComponentRoot(files []domain.UsedFile) (d
 
 // licenseEvidenceFromComponentRoot observes the licence texts in the component
 // root's licence file when nothing there resolved to one licence.
-func (r *componentResolver) licenseEvidenceFromComponentRoot(files []domain.UsedFile) []domain.LicenseFinding {
-	root := r.componentRoot(files)
+func (r *componentResolver) licenseEvidenceFromComponentRoot(root string) []domain.LicenseFinding {
 	if root == "" {
 		return nil
 	}
@@ -500,6 +581,131 @@ var recognizedLicenseFiles = []string{
 	"LICENCE", "LICENCE.txt", "LICENCE.md",
 	"COPYING", "COPYING.txt", "COPYING.md",
 	"NOTICE", "COPYRIGHT",
+}
+
+// componentRootResult is where a component begins, and how that was
+// established. Section 19.2 makes the root a resolved fact: the licence file
+// and the version header live there, so a root that moves with whichever files
+// the linker happened to keep makes both of them move with it.
+type componentRootResult struct {
+	// ID is the root as an identity, for sbomb:component:root. A property
+	// never carries an absolute path.
+	ID domain.FileID
+	// Physical is where the bytes are, for reading a licence or a version.
+	Physical string
+	// Source names the strategy that settled it, for the review report.
+	Source string
+}
+
+// rootSourceUsedFiles is the last resort: the deepest common directory of the
+// files that were used. It is a guess, and it is the only value of Source that
+// makes COMPONENT_ROOT_UNRESOLVED fire.
+const rootSourceUsedFiles = "used-files"
+
+// resolveRoot settles where a component begins, following the same priority
+// order that named it (section 19.2). Each branch mirrors one strategy, so the
+// root and the name can never come from two different places.
+func (r *componentResolver) resolveRoot(component *domain.Component, files []domain.UsedFile) componentRootResult {
+	if len(files) == 0 {
+		return componentRootResult{Source: rootSourceUsedFiles}
+	}
+
+	// Strategy 1: the configured path is the root by definition.
+	if rule, ok := r.curated.Match(files[0].ID); ok && rule.Path != "" {
+		id := domain.FileID{Anchor: files[0].ID.Anchor, RelPath: strings.Trim(filepath.ToSlash(rule.Path), "/")}
+		if physical := r.physicalForRoot(id, files); physical != "" {
+			return componentRootResult{ID: id, Physical: physical, Source: "curated"}
+		}
+	}
+
+	// Strategy 2: the package manager stated where its package lives.
+	for _, entry := range r.packages {
+		if entry.pkg.Name == component.Name && entry.pkg.Root != "" {
+			return componentRootResult{ID: entry.id, Physical: entry.pkg.Root, Source: "package-manager"}
+		}
+	}
+
+	// Strategy 6: the marker the mapping walk already found. It walked up from
+	// the file and stopped at the anchor; this only reads back its answer,
+	// which until now was reduced to the directory's base name.
+	for _, file := range files {
+		root, marker, found := r.nearestPackageRoot(file)
+		if !found {
+			continue
+		}
+		if id, ok := identityForRoot(file.ID, r.physical[file.ID.Canonical()], root); ok {
+			return componentRootResult{ID: id, Physical: root, Source: "marker:" + marker}
+		}
+	}
+
+	// Strategy 7: the component is the anchor, so the anchor root is its root.
+	if strings.HasPrefix(component.DetectedBy, "anchor:") {
+		key := component.ID
+		switch strings.TrimPrefix(component.DetectedBy, "anchor:") {
+		case "project", "build":
+			key = "project"
+		}
+		if root := r.anchorRoots[key]; root != "" {
+			return componentRootResult{ID: domain.FileID{Anchor: domain.AnchorKey(key)}, Physical: root, Source: "anchor"}
+		}
+	}
+
+	// Nothing named a root, so the files have to. This is where a component
+	// whose sources sit in src/ loses its licence file, and the finding says
+	// so rather than leaving it to be discovered.
+	physical := r.componentRoot(files)
+	id, _ := identityForRoot(files[0].ID, r.physical[files[0].ID.Canonical()], physical)
+	return componentRootResult{ID: id, Physical: physical, Source: rootSourceUsedFiles}
+}
+
+// physicalForRoot maps a root identity to a directory on disk, by trimming
+// from one of the component's files the part that lies below the root.
+func (r *componentResolver) physicalForRoot(root domain.FileID, files []domain.UsedFile) string {
+	prefix := root.RelPath
+	for _, file := range files {
+		if file.ID.Anchor != root.Anchor {
+			continue
+		}
+		rel := strings.Trim(file.ID.RelPath, "/")
+		if prefix != "" && !strings.HasPrefix(rel, prefix+"/") && rel != prefix {
+			continue
+		}
+		physical := r.physical[file.ID.Canonical()]
+		if physical == "" {
+			continue
+		}
+		below := strings.TrimPrefix(strings.TrimPrefix(rel, prefix), "/")
+		depth := 0
+		if below != "" {
+			depth = len(strings.Split(below, "/"))
+		}
+		dir := physical
+		for i := 0; i < depth; i++ {
+			dir = filepath.Dir(dir)
+		}
+		return dir
+	}
+	return ""
+}
+
+// identityForRoot expresses a directory as an identity, by dropping from a
+// file of the component as many trailing segments as the directory drops from
+// that file's physical path. Both paths share those segments, so no assumption
+// about either root is needed.
+func identityForRoot(file domain.FileID, physical, root string) (domain.FileID, bool) {
+	if physical == "" || root == "" {
+		return domain.FileID{}, false
+	}
+	rel, err := filepath.Rel(root, physical)
+	if err != nil || rel == "." || strings.HasPrefix(rel, "..") {
+		return domain.FileID{}, false
+	}
+	below := strings.Split(filepath.ToSlash(rel), "/")
+	segments := strings.Split(strings.Trim(file.RelPath, "/"), "/")
+	if len(segments) < len(below) {
+		return domain.FileID{}, false
+	}
+	return domain.FileID{Anchor: file.Anchor, RelPath: strings.Join(segments[:len(segments)-len(below)], "/")}, true
 }
 
 // componentRoot is the deepest directory containing every file of a component,

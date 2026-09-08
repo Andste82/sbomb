@@ -33,7 +33,12 @@ func NewMapper(rules []Rule) *Mapper {
 	return &Mapper{rules: out}
 }
 
-func (m *Mapper) MapFile(fileID domain.FileID) (domain.Component, bool) {
+// Match reports the rule that claims a file, longest match winning. The rule
+// itself is returned rather than only the component it names, because the
+// rule's Path is where the component begins -- and section 19.2 wants that
+// root as a fact rather than as something recomputed later from whichever
+// files the linker happened to keep.
+func (m *Mapper) Match(fileID domain.FileID) (Rule, bool) {
 	path := normalizeRelPath(fileID.RelPath)
 	best := Rule{}
 	bestLen := -1
@@ -47,7 +52,12 @@ func (m *Mapper) MapFile(fileID domain.FileID) (domain.Component, bool) {
 			bestLen = matchLen
 		}
 	}
-	if best.Name != "" {
+	return best, best.Name != ""
+}
+
+func (m *Mapper) MapFile(fileID domain.FileID) (domain.Component, bool) {
+	best, matched := m.Match(fileID)
+	if matched {
 		return domain.Component{
 			ID:         best.Name,
 			Name:       best.Name,

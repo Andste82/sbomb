@@ -105,6 +105,15 @@ func (b *builder) identify(path string) (string, anchors.Scope) {
 	return canonical, scope
 }
 
+// identityOf resolves a path to its identity without recording it. Registering
+// a path that no evidence chain reached would put it in the physical map and,
+// when it anchors nowhere, emit UNANCHORED_FILE for a file that is not in the
+// SBOM at all.
+func (b *builder) identityOf(path string) domain.FileID {
+	id, _ := b.anchors.ScopeOfPath(b.logicalBuild, b.logicalFor(path))
+	return id
+}
+
 // scopeOfCanonical reports the origin scope of an identity that has already
 // been resolved. ScopeOfPath must not be used for this: it resolves a *path*,
 // and handing it a canonical identity silently re-anchors the string against

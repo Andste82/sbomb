@@ -2,7 +2,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "version": 1,
-  "serialNumber": "urn:uuid:cf7f0abc-9793-5341-b7b2-0e7d7563c681",
+  "serialNumber": "urn:uuid:6f59d86b-6e60-52e2-bdf0-77af555993e5",
   "metadata": {
     "tools": [
       {
@@ -81,6 +81,10 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "anchor:project"
+        },
+        {
+          "name": "sbomb:component:root",
+          "value": "project:"
         },
         {
           "name": "sbomb:component:scope",

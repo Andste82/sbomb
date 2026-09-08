@@ -402,6 +402,9 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		canonical, _ := b.identify(root)
 		return domain.FileID{Anchor: anchorOf(canonical), RelPath: relOf(canonical)}
 	})
+	if replyModel != nil {
+		resolver.setTargets(targetsByFile(replyModel, b))
+	}
 	narrowing := narrowingByComponent(resolver, outcome.narrowed)
 	// The build system already says what the project is called and which
 	// version it is; writing that into the configuration a second time is a
@@ -564,6 +567,40 @@ func buildTimestamp() string {
 		}
 	}
 	return time.Now().UTC().Format(time.RFC3339)
+}
+
+// targetsByFile records which CMake target owns which file, for strategy 5 of
+// section 19.2. The File API states it; nothing here infers anything.
+//
+// A file two targets both list is dropped rather than assigned to one of them.
+// That happens for a source compiled into two targets, and the build system
+// having said two things is not a licence to pick one.
+func targetsByFile(model *cmakeapi.Model, b *builder) map[string]string {
+	byFile := map[string]string{}
+	contested := map[string]bool{}
+	for _, configuration := range model.Configurations {
+		for _, target := range configuration.Targets {
+			for _, source := range target.Sources {
+				path := source.Path
+				if !filepath.IsAbs(path) {
+					path = filepath.Join(model.SourceRoot, path)
+				}
+				canonical := b.identityOf(path).Canonical()
+				if canonical == "" {
+					continue
+				}
+				if owner, seen := byFile[canonical]; seen && owner != target.Name {
+					contested[canonical] = true
+					continue
+				}
+				byFile[canonical] = target.Name
+			}
+		}
+	}
+	for canonical := range contested {
+		delete(byFile, canonical)
+	}
+	return byFile
 }
 
 // narrowingByComponent groups the headers DWARF narrowing removed by the

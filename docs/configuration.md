@@ -176,6 +176,7 @@ from a directory name or a repository URL.
 |---|---|
 | `path` | Directory whose files belong to this component |
 | `match` | Glob alternative to `path` |
+| `targets` | CMake targets whose sources belong to this component |
 | `name` | Component name |
 | `type` | Component type |
 | `version` | Version, as an assertion |
@@ -186,6 +187,24 @@ from a directory name or a repository URL.
 
 `path` selects a directory; `match` selects by glob instead. Use one or the
 other.
+
+`targets` selects by CMake target, which is what the build system itself says
+rather than what the directory layout suggests:
+
+```json
+{
+  "components": [
+    { "targets": ["mbedcrypto", "mbedx509"], "name": "mbedtls", "license": "Apache-2.0" }
+  ]
+}
+```
+
+The sources of those targets become this component wherever they live, so a
+dependency whose files are spread over several directories needs one entry
+rather than one rule per directory. A source that two targets both compile is
+left unmapped and falls through to the next strategy: the build system said two
+things, and choosing one of them would be a guess. `path` still wins over
+`targets` when both would claim a file.
 
 `versionFrom` names authorized sources, tried in order:
 
@@ -199,11 +218,28 @@ other.
 
 Files are mapped to components in a fixed priority order: these curated entries
 first, then package-manager metadata (vcpkg, Conan, FetchContent, git
-submodules), then the nearest ancestor directory holding a package manifest
-(`conanfile.txt`, `vcpkg.json`, `idf_component.yml`, `Cargo.toml`, `west.yml`),
-then the anchor root, and finally an explicit `unknown:` component flagged for
-review. **A file is never dropped because its component could not be
+submodules), then a configured CMake target, then the nearest ancestor directory
+holding a package manifest (`conanfile.txt`, `vcpkg.json`, `idf_component.yml`,
+`Cargo.toml`, `west.yml`) **or a licence file** (`LICENSE`, `LICENCE`,
+`COPYING`), then the anchor root, and finally an explicit `unknown:` component
+flagged for review. **A file is never dropped because its component could not be
 determined.**
+
+A directory carrying its own licence file is treated as a distinct component,
+which is how a library copied into the source tree is recognized when it has no
+package manifest. Your own top-level licence is not a boundary: the search
+stops at the anchor root, so a dependency can never be given the project's
+licence. `NOTICE` and `COPYRIGHT` mark nothing — they are attribution material
+rather than a licence grant.
+
+Every mapped component also has a **root**, published as
+`sbomb:component:root`. It comes from the same strategy that named the
+component: the configured `path`, the package-manager root, the directory a
+marker file was found in, or the anchor root. Only when none of those applies is
+it taken to be the deepest common directory of the files that were used, and
+that case reports `COMPONENT_ROOT_UNRESOLVED` — a root derived from the used
+files moves when the linker keeps a different set, and a licence or version read
+from it would move with it.
 
 ## `manifests`
 

@@ -140,8 +140,13 @@ func (s *StringList) UnmarshalJSON(data []byte) error {
 }
 
 type Component struct {
-	Path        string     `json:"path,omitempty"`
-	Match       string     `json:"match,omitempty"`
+	Path  string `json:"path,omitempty"`
+	Match string `json:"match,omitempty"`
+	// Targets names CMake targets whose sources belong to this component.
+	// Strategy 5 of section 19.2: the build system states which sources a
+	// target owns, so a target name is evidence, where a path prefix is a
+	// promise somebody has to keep in step with the directory layout.
+	Targets     StringList `json:"targets,omitempty"`
 	Name        string     `json:"name,omitempty"`
 	Type        string     `json:"type,omitempty"`
 	Version     string     `json:"version,omitempty"`
