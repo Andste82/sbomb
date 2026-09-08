@@ -626,3 +626,32 @@ func TestVersionFromGitBlamesThePermissionOnlyWhenItIsMissing(t *testing.T) {
 		t.Error("no UNKNOWN_VERSION finding for a component that ended up without a version")
 	}
 }
+
+// The osPackages group promised to name the distribution package behind a
+// system library, and nothing implemented it (deviation D30). What a reader
+// gets instead has to be the honest gap rather than silence, so this pins what
+// a system library actually reports: no version, no supplier, no purl, and a
+// finding for each. It is also the measure the group would have to beat before
+// it comes back -- `dpkg -S` answers a name and an architecture, so a component
+// built from it would still raise two of these three.
+func TestASystemLibrarySaysWhatIsMissingAboutIt(t *testing.T) {
+	resolver := newComponentResolver(config.Config{}, map[string]string{}, map[string]string{}, nil)
+	component := domain.Component{ID: "anchor:sysroot", Name: "sysroot"}
+
+	findings := resolver.enrichComponent(&component,
+		[]domain.UsedFile{{ID: fileID("sysroot", "usr/lib/x86_64-linux-gnu/libssl.so.3")}})
+
+	if component.Version != "" || component.Supplier != "" || component.PURL != "" {
+		t.Fatalf("version = %q, supplier = %q, purl = %q; nothing may be invented for a system library",
+			component.Version, component.Supplier, component.PURL)
+	}
+	reported := map[string]bool{}
+	for _, finding := range findings {
+		reported[finding.ID] = true
+	}
+	for _, id := range []string{"UNKNOWN_VERSION", "MISSING_SUPPLIER", "UNKNOWN_PURL"} {
+		if !reported[id] {
+			t.Errorf("a system library reached the document without %s; the gap has to be named", id)
+		}
+	}
+}

@@ -97,7 +97,6 @@ anchored.
 | `git` | `rev-parse HEAD`, `describe --tags --always --dirty`, `config --get remote.origin.url`, each with `-C <dir>` | The version, commit, repository URL and dirty state of a dependency fetched by `FetchContent` or checked out as a submodule, and the `"git"` and `"commit"` rules of `components[].versionFrom`. Without it those components have no version and `UNKNOWN_VERSION` says so |
 | `ninja` | `-C <build-dir> -t commands <target>`, `-t inputs <target>` | Two fallbacks: the compile lines when there is no `compile_commands.json`, and the objects an archive was built from when `build.ninja` does not say. Both read `build.ninja` including the `include`/`subninja` files sbomb's own parser does not follow |
 | `compiler` | `<compiler> --version`, `-dumpmachine`, `-print-search-dirs` | The compiler's installation directory as a toolchain anchor and the implicit link directories, when the File API reported no toolchain. Not the implicit *include* directories: `-print-search-dirs` names none, so those still come from the File API alone |
-| `osPackages` | `dpkg -S <path>`, `rpm -qf <path>` | Which distribution package a system library belongs to |
 
 **A command is always the second source.** Each group replaces a file, and it is
 asked only when that file is missing or cannot be read; with the file in place
@@ -117,13 +116,16 @@ against ninja 1.11, which truncates a damaged log and deletes one whose header
 it does not accept. sbomb reads a build directory; it does not repair one. The
 log is written while ninja builds, so building again is what brings it back.
 
-`osPackages` has no caller yet; there is no system-library adapter. It stays
-listed because the allowlist is the security boundary and it is worth knowing
-what it permits.
-
 Commands the specification lists that are gone rather than idle: the whole
 `cmake` group, `ninja --version`, `ninja -t deps` and `git status --porcelain`.
-Deviation D29 records what was measured about each.
+Deviation D29 records what was measured about each. The `osPackages` group went
+the same way, with `dpkg -S <path>` and `rpm -qf <path>`: there is no
+system-library adapter, and those shapes could not feed one — `dpkg -S` names a
+package and an architecture, never a version and never a supplier, and the
+system path it would be asked about lies outside every anchor. A distribution
+library therefore still reaches the document with `UNKNOWN_VERSION`,
+`MISSING_SUPPLIER` and `UNKNOWN_PURL`, which is what it did before. Deviation
+D30 records the measurement and the three conditions for the group's return.
 
 ## `artifacts`
 

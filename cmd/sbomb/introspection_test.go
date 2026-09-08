@@ -12,23 +12,29 @@ import (
 
 // resolveIntrospection is the only place a group name becomes a permission, so
 // it is where a group that no longer exists has to be refused. "cmake" was
-// accepted here and enabled two commands nothing could call.
+// accepted here and enabled two commands nothing could call; "osPackages" was
+// accepted and enabled two more.
 func TestResolveIntrospectionKnowsOnlyTheGroupsThatCanRun(t *testing.T) {
-	if _, err := resolveIntrospection(config.Config{}, false, []string{"cmake"}); err == nil {
-		t.Error("a group with no command behind it was accepted")
-	} else if strings.Contains(err.Error(), "cmake, ") {
-		t.Errorf("the error offers the removed group as a choice: %v", err)
+	for _, group := range []string{"cmake", "osPackages", "os-packages"} {
+		_, err := resolveIntrospection(config.Config{}, false, []string{group})
+		if err == nil {
+			t.Errorf("%q: a group with no command behind it was accepted", group)
+			continue
+		}
+		if strings.Contains(err.Error(), group+",") || strings.Contains(err.Error(), " "+group+")") {
+			t.Errorf("the error offers the removed group as a choice: %v", err)
+		}
 	}
 	if _, err := resolveIntrospection(config.Config{}, false, []string{"nonsense"}); err == nil {
 		t.Error("an unknown group was accepted")
 	}
 
-	features, err := resolveIntrospection(config.Config{}, false, []string{"git", "ninja", "osPackages", "compiler"})
+	features, err := resolveIntrospection(config.Config{}, false, []string{"git", "ninja", "compiler"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if features != (exec.Features{Ninja: true, Git: true, OSPackages: true, Compiler: true}) {
-		t.Errorf("features = %+v; the four remaining groups have to stay reachable", features)
+	if features != (exec.Features{Ninja: true, Git: true, Compiler: true}) {
+		t.Errorf("features = %+v; the three remaining groups have to stay reachable", features)
 	}
 
 	// The default of section 9.2 is off, whatever the build directory holds.
@@ -80,5 +86,33 @@ func TestTheIntrospectionLineNamesOnlyTheEnabledGroup(t *testing.T) {
 		if strings.Contains(line, absent) {
 			t.Errorf("the line names %q, which this run may not start: %q", absent, line)
 		}
+	}
+}
+
+// --allow-introspection without a value is the widest permission the CLI can
+// grant, so it is where a group with no caller stayed visible longest: the
+// bare flag announced `dpkg -S <arg>` and `rpm -qf <arg>`, two commands the
+// run could never have started against a system library, because a runner's
+// anchors are the project and the build tree. The widest permission now names
+// only what a caller exists for.
+func TestTheWidestPermissionNamesOnlyCommandsWithACaller(t *testing.T) {
+	features, err := resolveIntrospection(config.Config{}, true, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if features != (exec.Features{Ninja: true, Git: true, Compiler: true}) {
+		t.Errorf("features = %+v; the bare flag grants the three groups that have a caller", features)
+	}
+	announced := strings.Join(exec.AllowlistFor(features), "; ")
+	for _, absent := range []string{"dpkg", "rpm", "cmake"} {
+		if strings.Contains(announced, absent) {
+			t.Errorf("the widest permission announces %q, which nothing can call: %s", absent, announced)
+		}
+	}
+	// A configuration file cannot widen it either: the removed group is not a
+	// field any more, so the only way in would be a key the loader refuses.
+	fromConfig, err := resolveIntrospection(config.Config{}, false, nil)
+	if err != nil || fromConfig.Enabled() {
+		t.Errorf("resolved = %+v, err = %v; an empty configuration enables nothing", fromConfig, err)
 	}
 }

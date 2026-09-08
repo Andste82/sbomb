@@ -50,7 +50,7 @@ func TestGitRulesProduceNothingWithoutIntrospection(t *testing.T) {
 	options := map[string]Options{
 		"no runner":     {},
 		"zero runner":   {Runner: &exec.Runner{}, Context: context.Background()},
-		"another group": {Runner: &exec.Runner{Features: exec.Features{OSPackages: true}, Anchors: []string{root}}, Context: context.Background()},
+		"another group": {Runner: &exec.Runner{Features: exec.Features{Ninja: true}, Anchors: []string{root}}, Context: context.Background()},
 	}
 	for _, rule := range []string{"git", "commit"} {
 		for name, option := range options {

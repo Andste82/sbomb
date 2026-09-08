@@ -44,14 +44,31 @@ build directory reads it; it does not repair it. The command is gone from the
 allowlist with the rest. The finding is only raised for a Ninja build; a
 Makefiles tree has no deps log to miss.
 
-Five shapes are removed rather than left idle: `cmake --version`,
-`cmake -E capabilities`, `ninja --version`, `ninja -t deps` and
-`git status --porcelain`, and with them the whole `cmake` group —
-`build.introspection.cmake` is now an unknown configuration key. A File API
-reply is written while CMake configures, and configuring is a build command, so
-there was never a permitted fallback for the cmake group to be. The dirty state
-already comes from the `-dirty` suffix of `git describe`, which runs anyway.
-Deviation D29 has the reasoning and the condition for their return.
+Seven shapes are removed rather than left idle: `cmake --version`,
+`cmake -E capabilities`, `ninja --version`, `ninja -t deps`,
+`git status --porcelain`, `dpkg -S <path>` and `rpm -qf <path>`, and with them
+two whole groups — `build.introspection.cmake` and
+`build.introspection.osPackages` are now unknown configuration keys, and
+`--allow-introspection=cmake` and `=osPackages` end the run instead of enabling
+anything. A File API reply is written while CMake configures, and configuring is
+a build command, so there was never a permitted fallback for the cmake group to
+be. The dirty state already comes from the `-dirty` suffix of `git describe`,
+which runs anyway.
+
+The `osPackages` group promised the distribution package behind a system
+library, and nothing was behind it: no system-library adapter, and no way to
+build one from those two shapes. Measured on Ubuntu 24.04, `dpkg -S` names a
+package and an architecture — no version, no supplier — so the component it
+could have produced would still carry `UNKNOWN_VERSION` and `MISSING_SUPPLIER`;
+and the system path it would be asked about lies outside every anchor a runner
+is given, so the call would be refused before it started. Nothing a run reports
+changes: a distribution library already came out with `UNKNOWN_VERSION`,
+`MISSING_SUPPLIER` and `UNKNOWN_PURL`, and still does. The gap was never silent
+and is no quieter now. `policy.systemLibraries` is untouched; it decides
+inclusion, not origin.
+
+Deviations D29 and D30 have the reasoning and the conditions for their
+return.
 
 One rule was loosened to make the compiler group reachable at all: a compiler
 probe no longer requires an absolute compiler path to lie inside a registered

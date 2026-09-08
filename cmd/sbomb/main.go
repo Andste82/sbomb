@@ -921,13 +921,12 @@ func narrowingForReport(counts []generate.NarrowingCount) []report.Narrowing {
 // them, and a comma-separated value enables the named ones.
 func resolveIntrospection(cfg config.Config, allowAll bool, groups []string) (exec.Features, error) {
 	features := exec.Features{
-		Ninja:      cfg.Build.Introspection.Ninja,
-		Git:        cfg.Build.Introspection.Git,
-		OSPackages: cfg.Build.Introspection.OSPackages,
-		Compiler:   cfg.Build.Introspection.Compiler,
+		Ninja:    cfg.Build.Introspection.Ninja,
+		Git:      cfg.Build.Introspection.Git,
+		Compiler: cfg.Build.Introspection.Compiler,
 	}
 	if allowAll {
-		return exec.Features{Ninja: true, Git: true, OSPackages: true, Compiler: true}, nil
+		return exec.Features{Ninja: true, Git: true, Compiler: true}, nil
 	}
 	for _, group := range groups {
 		switch strings.TrimSpace(group) {
@@ -936,12 +935,10 @@ func resolveIntrospection(cfg config.Config, allowAll bool, groups []string) (ex
 			features.Ninja = true
 		case "git":
 			features.Git = true
-		case "osPackages", "os-packages":
-			features.OSPackages = true
 		case "compiler":
 			features.Compiler = true
 		default:
-			return exec.Features{}, fmt.Errorf("unknown introspection group %q (ninja, git, osPackages, compiler)", group)
+			return exec.Features{}, fmt.Errorf("unknown introspection group %q (ninja, git, compiler)", group)
 		}
 	}
 	return features, nil

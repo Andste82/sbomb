@@ -38,10 +38,9 @@ type Build struct {
 	// Introspection enables the command allowlist of section 9.2, group by
 	// group. Everything is off unless set here or by --allow-introspection.
 	Introspection struct {
-		Ninja      bool `json:"ninja,omitempty"`
-		Git        bool `json:"git,omitempty"`
-		OSPackages bool `json:"osPackages,omitempty"`
-		Compiler   bool `json:"compiler,omitempty"`
+		Ninja    bool `json:"ninja,omitempty"`
+		Git      bool `json:"git,omitempty"`
+		Compiler bool `json:"compiler,omitempty"`
 	} `json:"introspection,omitempty"`
 }
 

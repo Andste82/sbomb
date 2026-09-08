@@ -710,3 +710,79 @@ therefore fills `ImplicitLinkDirs` (§24.1) and registers a `toolchain:` anchor;
 The `-E -v -x c++ /dev/null` that §24.4 names for those directories would need a
 new allowlist shape *and* reading stderr, which the runner discards on purpose;
 both widen the boundary and are not part of this change.
+
+## D30 — The `osPackages` group is removed with the two shapes behind it
+
+§9.2 permits `dpkg -S <path>` and `rpm -qf <path>` "only when systemLibraries
+adapter enabled", and §24.3 describes what they would buy: a distribution
+library attributed to its package, with the purl
+`pkg:deb/<distro>/<name>@<version>?arch=<arch>` or `pkg:rpm/...`. There is no
+such adapter, and D29 has just removed five other shapes for exactly that
+reason — an allowlist entry no code reaches is a permission granted for
+nothing. These two were overlooked in that pass. They are removed now, together
+with `build.introspection.osPackages` and the `osPackages` group of
+`--allow-introspection`, which is now an unknown group and an unknown
+configuration key. The example configuration object in §9.2 still shows
+`"osPackages": false` beside `"cmake": false`; both keys are refused by the
+loader, so that example cannot be copied as it stands.
+
+Unlike the cmake group, this one is a real gap rather than a redundancy: no
+file-based route answers "which package owns this library" either. So the
+question was not whether the feature is wanted but whether the permitted shapes
+can deliver it. Three findings say they cannot, and each would have to be
+settled before the group comes back.
+
+* **The shape does not answer the question.** Measured on Ubuntu 24.04, dpkg
+  1.22.6: `dpkg -S /usr/lib/x86_64-linux-gnu/libssl.so.3` prints
+  `libssl3t64:amd64: /usr/lib/x86_64-linux-gnu/libssl.so.3` — a package name and
+  an architecture, no version and no supplier. The version needs a second,
+  different shape, `dpkg-query -W -f='${Version}' <package>` (measured:
+  `3.0.13-0ubuntu3.15`), and the `<distro>` namespace of the purl needs
+  `/etc/os-release`. `rpm -qf` does return an NVRA, so name and version, but no
+  supplier — and §24.3 names `rpm -qf --qf ...` for it, a third shape §9.2 does
+  not list. An adapter built strictly on the allowlisted shapes would produce a
+  component that still carries `UNKNOWN_VERSION` and `MISSING_SUPPLIER`: more
+  processes, the same findings.
+* **The runner would refuse the call.** A runner's anchors are the project root,
+  the build root and the build directory (`generate.go`), and §9.2 requires a
+  path argument to lie inside one of them. A system library lies outside all
+  three by definition, so every such call ends in `ErrPathOutsideAnchors`.
+  Reaching it means putting toolchain and sysroot roots into the subprocess path
+  boundary — for `/usr/bin/cc` that root is `/usr`, so the boundary would move
+  from the build tree to the machine. That boundary is what makes "no shell,
+  fixed shapes, paths inside an anchor" worth stating; widening it in passing,
+  for a feature that only runs under a policy overlay that is not the default,
+  is the wrong order. If it is widened, it is its own decision with its own
+  entry here.
+* **Nothing can express the mapping.** All eight §19.2 strategies assign a file
+  to a component by prefix or root — `packageFor` matches whole path segments
+  against a package root — while an OS package owns files scattered across the
+  filesystem. It would need a new strategy and a new `sbomb:component:detectedBy`
+  value, plus namespace and qualifier support in `version.PURL`, which builds
+  only `pkg:<type>/<name>@<version>`. That is a new abstraction, and the data
+  above does not carry it.
+
+A file-based substitute was considered and rejected. The dpkg file lists live in
+`/var/lib/dpkg/info/*.list`, so reading them means walking a directory of
+thousands of files looking for a path — a scan, and architecture.md does not
+accept a scan as evidence. The rpm database is not readable without a new
+dependency.
+
+The gap this leaves is not silent, and was not silent before: a system library
+that reaches the document already gets `UNKNOWN_VERSION` (warning),
+`MISSING_SUPPLIER` (warning) and `UNKNOWN_PURL` (info) from `enrichComponent`. A
+fourth finding announcing that a disabled group did not run would be a second
+voice saying the one thing.
+
+`policy.systemLibraries` is untouched. It decides whether a distribution library
+is included, excluded or reported, it says only that, and the code does it. It
+never claimed to say where the library came from.
+
+The group comes back when three things are true: one shape per package manager
+that answers name, version, architecture and supplier in a single call; a
+decided answer to whether system paths belong inside the subprocess anchor
+boundary; and a mapping strategy that can express one package per file. One
+detail for whoever does that work: on a host build with `/usr/bin/cc`, the
+toolchain anchor root is `/usr`, so `/usr/lib/...` is classified `toolchain`
+rather than `system` and is decided by `includeToolchainRuntime`, not by
+`systemLibraries`.

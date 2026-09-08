@@ -17,7 +17,7 @@ import (
 )
 
 func allIntrospection() exec.Features {
-	return exec.Features{Ninja: true, Git: true, OSPackages: true, Compiler: true}
+	return exec.Features{Ninja: true, Git: true, Compiler: true}
 }
 
 func findingsWithID(findings []domain.Finding, id string) []domain.Finding {

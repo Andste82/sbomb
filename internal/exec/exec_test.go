@@ -3,13 +3,15 @@ package exec
 import (
 	"context"
 	"errors"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 )
 
 func allFeatures() Features {
-	return Features{Ninja: true, Git: true, OSPackages: true, Compiler: true}
+	return Features{Ninja: true, Git: true, Compiler: true}
 }
 
 // The required default of section 9.2: nothing runs unless the caller asked.
@@ -163,10 +165,10 @@ func TestTimeoutIsApplied(t *testing.T) {
 
 func TestAllowlistIsExhaustiveAndStable(t *testing.T) {
 	entries := Allowlist()
-	// Seven table shapes and three compiler probes. Five of the shapes section
-	// 9.2 lists were removed because nothing could call them; deviation D29
-	// says why, and this number is what keeps them from creeping back.
-	if len(entries) != 10 {
+	// Five table shapes and three compiler probes. Seven of the shapes section
+	// 9.2 lists were removed because nothing could call them; deviations D29
+	// and D30 say why, and this number is what keeps them from creeping back.
+	if len(entries) != 8 {
 		t.Errorf("allowlist has %d entries; section 9.2 lists a fixed set", len(entries))
 	}
 	for _, entry := range entries {
@@ -197,12 +199,15 @@ func TestAllowlistForNamesOnlyTheEnabledGroups(t *testing.T) {
 	}
 }
 
-// The five shapes deviation D29 removed, spelled the way the allowlist spelled
-// them. Nothing could call any of them: no code asked cmake for its version or
-// its capabilities, no code asked ninja for a version, and `git status
-// --porcelain` answered a question the `--dirty` suffix of `git describe`
-// already answers. They were a standing permission granted for nothing, and
-// this test is what keeps them from being granted again.
+// The seven shapes deviations D29 and D30 removed, spelled the way the
+// allowlist spelled them. Nothing could call any of them: no code asked cmake
+// for its version or its capabilities, no code asked ninja for a version, and
+// `git status --porcelain` answered a question the `--dirty` suffix of `git
+// describe` already answers. `dpkg -S` and `rpm -qf` had no system-library
+// adapter behind them, and the shapes could not have built one: they name a
+// package, not a version and not a supplier. They were a standing permission
+// granted for nothing, and this test is what keeps them from being granted
+// again.
 func TestTheShapesNothingCouldCallAreRefused(t *testing.T) {
 	runner := &Runner{Features: allFeatures(), Anchors: []string{"/"}, Exists: func(string) bool { return true }}
 	for _, argv := range [][]string{
@@ -211,6 +216,8 @@ func TestTheShapesNothingCouldCallAreRefused(t *testing.T) {
 		{"ninja", "--version"},
 		{"git", "-C", ".", "status", "--porcelain"},
 		{"ninja", "-C", ".", "-t", "deps"},
+		{"dpkg", "-S", "/usr/lib/libc.so.6"},
+		{"rpm", "-qf", "/usr/lib/libc.so.6"},
 	} {
 		if _, err := runner.Run(context.Background(), argv[0], argv[1:]...); !errors.Is(err, ErrNotAllowed) {
 			t.Errorf("%v: err = %v, want ErrNotAllowed", argv, err)
@@ -240,13 +247,6 @@ func TestNoGroupNamesAnotherGroupsShapes(t *testing.T) {
 			}
 		}
 	}
-	// The osPackages group is the one whose two shapes have different program
-	// names, so it is checked by exclusion rather than by prefix.
-	for _, entry := range AllowlistFor(Features{OSPackages: true}) {
-		if !strings.HasPrefix(entry, "dpkg ") && !strings.HasPrefix(entry, "rpm ") {
-			t.Errorf("AllowlistFor(osPackages) names %q", entry)
-		}
-	}
 }
 
 // The compiler probes are gated by their own group, like every other shape.
@@ -258,11 +258,73 @@ func TestCompilerProbesNeedTheirOwnGroup(t *testing.T) {
 		}
 	}
 	// Another group being on is not this group being on.
-	runner = Runner{Features: Features{Ninja: true, Git: true, OSPackages: true}}
+	runner = Runner{Features: Features{Ninja: true, Git: true}}
 	if _, err := runner.RunCompilerProbe(context.Background(), "/usr/bin/cc", "--version"); !errors.Is(err, ErrDisabled) {
 		t.Errorf("err = %v, want the compiler group to gate its own probes", err)
 	}
 	if len(runner.Records()) != 0 {
 		t.Errorf("%d process(es) were created with the compiler group off", len(runner.Records()))
+	}
+}
+
+// The osPackages group was a permission that reached a real process: with the
+// group on, `dpkg -S <path>` passed the shape check, passed the path check for
+// any file inside an anchor, and was started. No adapter ever asked for it, so
+// the permission bought nothing and the risk was carried anyway. This holds
+// the group gone from every direction at once -- the announced table and the
+// execution path, for every combination of the groups that remain, with the
+// path present, the path missing, and no group on at all.
+func TestNoCombinationOfGroupsCanQueryAPackageManager(t *testing.T) {
+	// A file that really exists inside the anchor, so nothing but the absent
+	// allowlist entry can be what refuses the call.
+	anchor := t.TempDir()
+	present := filepath.Join(anchor, "libfoo.so.1")
+	if err := os.WriteFile(present, []byte("\x7fELF"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	missing := filepath.Join(anchor, "gone.so")
+
+	for _, features := range []Features{
+		{},
+		{Ninja: true},
+		{Git: true},
+		{Compiler: true},
+		{Ninja: true, Git: true},
+		{Ninja: true, Compiler: true},
+		{Git: true, Compiler: true},
+		allFeatures(),
+	} {
+		for _, entry := range AllowlistFor(features) {
+			if strings.HasPrefix(entry, "dpkg ") || strings.HasPrefix(entry, "rpm ") {
+				t.Errorf("AllowlistFor(%+v) names %q, which no code can call", features, entry)
+			}
+		}
+		var logged []Record
+		runner := &Runner{
+			Features: features,
+			Anchors:  []string{anchor},
+			Log:      func(r Record) { logged = append(logged, r) },
+		}
+		for _, argv := range [][]string{
+			{"dpkg", "-S", present},
+			{"dpkg", "-S", missing},
+			{"rpm", "-qf", present},
+			{"rpm", "-qf", missing},
+		} {
+			// With every group off nothing runs at all, which is the default
+			// of section 9.2; with any group on it is the shape itself that is
+			// unknown, so the answer does not depend on the file.
+			want := ErrNotAllowed
+			if !features.Enabled() {
+				want = ErrDisabled
+			}
+			if _, err := runner.Run(context.Background(), argv[0], argv[1:]...); !errors.Is(err, want) {
+				t.Errorf("%+v %v: err = %v, want %v", features, argv, err, want)
+			}
+		}
+		if len(runner.Records()) != 0 || len(logged) != 0 {
+			t.Errorf("%+v: %d process(es) created, %d logged; no group may start a package query",
+				features, len(runner.Records()), len(logged))
+		}
 	}
 }
