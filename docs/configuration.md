@@ -16,11 +16,10 @@ not ignored.
 }
 ```
 
-`build.dir` is not required in the file: `--build-dir` already supplies it, and
-a configuration meant to be shared across build directories (`build/debug`,
-`build/release`, ...) does not have to repeat whichever one is current. Set
-`build.dir` only when the configuration is meant to name one build
-specifically. Relative paths are resolved from `project.root`.
+`build.dir` is not required: `--build-dir` says which directory to read, and a
+configuration shared across `build/debug`, `build/release` and the rest should
+not have to name whichever one is current. Leave it out unless you need what it
+actually does — see below.
 
 `sbomb schema` prints the current schema document.
 
@@ -60,21 +59,49 @@ and `version` is simply absent, which `UNKNOWN_VERSION` reports.
 
 | Field | Meaning |
 |---|---|
-| `dir` | The build directory; `--build-dir` overrides it |
+| `dir` | What the build root is **called** — not where it is read from. Optional |
 | `config` | Which configuration to read for a multi-config generator, e.g. `Debug` |
 | `introspection` | Which subprocess groups may run — see below |
+
+`dir` and `--build-dir` are not two ways to say the same thing. `--build-dir`
+is where sbomb reads; `dir` is the name every file identity under the build
+root is anchored against.
+
+Left out, that name comes from the CMake File API — the build system's own
+answer, and the portable one. Set it and you override that, so a value that
+does not match what the evidence records will re-anchor files and change which
+of them end up in the document. Set it only when the build directory has moved
+since it was built and you need to name the root the evidence knows.
+
+Relative paths are resolved from `project.root`.
 
 sbomb runs no subprocesses at all unless you allow them, group by group:
 
 ```json
-{"build": {"introspection": {"git": true, "ninja": true}}}
+{"build": {"introspection": {"git": true}}}
 ```
 
-The groups are `cmake`, `ninja`, `git`, `osPackages` and `compiler`. Each
-permits a small, fixed set of argument shapes and nothing else; a command line
-is never assembled from a string. `--allow-introspection` turns them all on for
-one run. Everything works without them — introspection only adds evidence that
-would otherwise be missing.
+`--allow-introspection` turns every group on for one run. Everything works
+without them: introspection only adds evidence that would otherwise be missing,
+and an adapter that is not allowed to ask degrades and says so in a finding.
+
+Each group permits a fixed set of argument shapes and nothing else. There is no
+shell, and no command line is ever assembled from a string — the paths are
+filled into fixed slots and must lie inside a registered anchor.
+
+| Group | What it may run | What it buys |
+|---|---|---|
+| `git` | `rev-parse HEAD`, `describe --tags --always --dirty`, `config --get remote.origin.url`, `status --porcelain`, each with `-C <dir>` | The version, commit, repository URL and dirty state of a dependency fetched by `FetchContent` or checked out as a submodule. Without it those components have no version and `UNKNOWN_VERSION` says so |
+| `ninja` | `-C <build-dir> -t deps`, `-t commands <target>`, `-t inputs <target>`, `--version` | Header evidence from the deps log when the `.ninja_deps` file cannot be read directly |
+| `cmake` | `--version`, `-E capabilities` | Which File API kinds this CMake supports, for regenerating a missing reply |
+| `compiler` | `<compiler> --version`, `-dumpmachine`, `-print-search-dirs` | The compiler's own include and library directories, for telling a system header from yours |
+| `osPackages` | `dpkg -S <path>`, `rpm -qf <path>` | Which distribution package a system library belongs to |
+
+**Only `git` is used today.** The other four groups are allowlisted and nothing
+calls them yet: the File API already reports the compiler's directories, the
+deps log is read from the file, and there is no system-library adapter. They are
+listed because the allowlist is the security boundary and it is worth knowing
+what it permits — not because turning them on changes anything right now.
 
 ## `artifacts`
 
@@ -99,6 +126,13 @@ The final deliverables. This is the entry point of the whole evidence chain.
 | `role` | `application` (default), `bootloader`, `library`, `filesystem`, `image`, `package`, `data`, `other` |
 | `map` | Linker map, when it is not beside the artifact |
 | `linkDepfile` | Link dependency file, when it is not beside the artifact |
+
+Leave `map` and `linkDepfile` out and sbomb looks beside the artifact. Name
+them and it looks only there: a path you wrote down is a statement, not a hint,
+and reading some other file instead would put evidence in the document you did
+not ask for. A named file that is not there stops the run with
+`CONFIGURED_EVIDENCE_MISSING`. `--map` and `--link-depfile` do the same from the
+command line.
 
 The role decides the CycloneDX type of the root component: `bootloader`,
 `image` and `filesystem` produce `firmware`, `library` produces `library`,
@@ -272,45 +306,91 @@ scope produce the same document — a verdict never changes the content.
 
 ### Profiles
 
-| Profile | Character |
-|---|---|
-| `lenient` | For an unprepared project: missing hashes, unresolved sources and stale artifacts do not fail |
-| `default` | Fails on missing file hashes, unresolved sources of linked objects and stale artifacts |
-| `cra` | The Cyber Resilience Act fields, gated |
-| `strict` | Every gate on, header evidence `union`, linker scripts included |
+Four profiles. `strict` is the engineering profile, `cra` the compliance one —
+`cra` is deliberately **not** the strictest: it insists on the fields the
+regulation asks for and tolerates weak evidence, because the CRA is about
+documenting components rather than proving build provenance. A project can run
+both in CI and gate the release on `cra` alone.
 
-`profileOverlay: "host-linux"` adds distribution libraries as separate
-components — noise on an embedded target, correct on a host build.
+Only the rows that differ are listed; everything else is the same in all four.
+
+| | `lenient` | `default` | `cra` | `strict` |
+|---|:--:|:--:|:--:|:--:|
+| **Fails on** | | | | |
+| missing file hash | – | ✓ | ✓ | ✓ |
+| object with no source | – | ✓ | ✓ | ✓ |
+| stale build artifacts | – | ✓ | ✓ | ✓ |
+| unknown component | – | – | ✓ | ✓ |
+| unknown licence | – | – | ✓ | ✓ |
+| unknown version | – | – | ✓ | ✓ |
+| missing supplier | – | – | ✓ | ✓ |
+| missing component hash | – | – | ✓ | ✓ |
+| review required | – | – | – | ✓ |
+| weak evidence | – | – | – | ✓ |
+| missing header evidence | – | – | – | ✓ |
+| unanchored file | – | – | – | ✓ |
+| no link evidence at all | – | ✓ | ✓ | ✓ |
+| **Content** | | | | |
+| `headerEvidence` | dwarf-preferred | dwarf-preferred | dwarf-preferred | **union** |
+| `includeToolchainRuntime` | report-only | separate-component | separate-component | separate-component |
+| `includeLinkerScripts` | – | – | – | ✓ |
+| `sectionGarbageCollection` | ignore | ignore | ignore | **annotate** |
+| `prebuiltLibrariesRequireMapping` | – | ✓ | ✓ | ✓ |
+
+The four *Content* rows are why two profiles can produce different documents.
+Everything above them only decides whether the run passes.
+
+**Start with `lenient`.** A first run on an unprepared project has findings —
+that is the tool working. Work upwards from there.
+
+`profileOverlay: "host-linux"` changes one thing: `systemLibraries` becomes
+`separate-component`, so distribution libraries appear in the document. Noise on
+an embedded target, correct on a host build. Combine it, do not replace:
+`--policy cra --profile-overlay host-linux`.
 
 ### Gates
 
-Each is a boolean and each has a `--fail-on-…` flag:
+Each is a boolean with a matching `--fail-on-…` flag. Each names the findings
+that make the run fail.
 
-`failOnUnknownComponent`, `failOnUnknownLicense`, `failOnUnknownVersion`,
-`failOnMissingSupplier`, `failOnMissingHash`, `failOnMissingComponentHash`,
-`failOnMissingSourceForLinkedObject`, `failOnStaleBuildArtifacts`,
-`failOnReviewRequired`, `failOnWeakEvidence`, `failOnMissingHeaderEvidence`,
-`failOnUnanchoredFile`, `allowMissingLinkEvidence`.
-
-### Scope
-
-| Setting | Values | Default |
-|---|---|---|
-| `headerEvidence` | `dwarf-preferred`, `union`, `depfiles` | `dwarf-preferred` |
-| `includeSystemHeaders` | boolean | `false` |
-| `includeToolchainRuntime` | `separate-component`, `report-only`, `exclude` | `separate-component` |
-| `includeLinkerScripts` | boolean | `false` |
-| `includeGeneratedIntermediateFiles` | boolean | `false` |
-| `includeAssets` | boolean | `true` |
-| `includeTransientBuildArtifacts` | boolean | `false` |
-| `systemLibraries` | `exclude`, `separate-component`, `report-only` | `exclude` |
-| `pchHeaders` | `include`, `exclude`, `annotate-only` | `include` |
-| `sectionGarbageCollection` | `ignore`, `annotate`, `exclude` | `ignore` |
-| `prebuiltLibrariesRequireMapping` | boolean | `true` |
-| `staleToleranceSeconds` | integer | `5` |
+| Gate | Fails when |
+|---|---|
+| `failOnUnknownComponent` | a used file could not be mapped to any component |
+| `failOnUnknownLicense` | a component's licence is NOASSERTION |
+| `failOnUnknownVersion` | no authorized source supplied a component's version |
+| `failOnMissingSupplier` | a component has no supplier — a BSI TR-03183-2 field |
+| `failOnMissingHash` | a used file could not be read, so it has no hash |
+| `failOnMissingComponentHash` | a component has no hashable file at all |
+| `failOnMissingSourceForLinkedObject` | an object could not be traced back to a source |
+| `failOnStaleBuildArtifacts` | the evidence does not describe the artifact that is there |
+| `failOnReviewRequired` | something needs a human: a licence conflict, a dirty tree, an unclassified header |
+| `failOnWeakEvidence` | a file rests only on a textual fallback, or LTO left no usable chain |
+| `failOnMissingHeaderEvidence` | a translation unit contributed no header evidence |
+| `failOnUnanchoredFile` | a file matched no anchor and would carry an absolute path |
+| `allowMissingLinkEvidence` | inverted: **permits** a run in which no link evidence source succeeded |
 
 `severityOverrides` maps a finding identifier to `error`, `warning` or `info`
 when your process disagrees with the default severity.
+
+### Scope
+
+These decide what is in the document. Changing one changes the output, so two
+runs that differ here are not comparable.
+
+| Setting | Values (default first) | What it changes |
+|---|---|---|
+| `headerEvidence` | `dwarf-preferred`, `union`, `depfiles` | Which headers count as used. DWARF knows which ones emitted code; a dependency file also lists those an `#ifdef` skipped |
+| `includeSystemHeaders` | `false`, `true` | Headers from the sysroot and the compiler's own directories |
+| `includeToolchainRuntime` | `separate-component`, `report-only`, `exclude` | `libgcc`, `libstdc++` and friends: their own component, a finding only, or nothing |
+| `includeLinkerScripts` | `false`, `true` | Linker scripts and memory layout files |
+| `includeGeneratedIntermediateFiles` | `false`, `true` | Files a generator produced only to be consumed again |
+| `includeAssets` | `true`, `false` | Fonts, images and blobs that packaging embedded |
+| `includeTransientBuildArtifacts` | `false`, `true` | Objects and archives that exist only during the build |
+| `systemLibraries` | `exclude`, `separate-component`, `report-only` | Libraries the distribution provides |
+| `pchHeaders` | `include`, `exclude`, `annotate-only` | Headers that arrived through a precompiled header |
+| `sectionGarbageCollection` | `ignore`, `annotate`, `exclude` | Objects the linker discarded with `--gc-sections`: keep them, mark them, or drop them |
+| `prebuiltLibrariesRequireMapping` | `true`, `false` | Whether a prebuilt library without a component mapping is an error |
+| `staleToleranceSeconds` | `5` | How much clock skew counts as "not stale" |
 
 ### Precedence
 

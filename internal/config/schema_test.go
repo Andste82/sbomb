@@ -116,6 +116,18 @@ func TestTheSchemaRefusesWhatTheLoaderRefuses(t *testing.T) {
 	if err := checkAgainstSchema(t, schema, `{"project":{"root":"."},"build":{"dir":"b"}}`); err != nil {
 		t.Errorf("a project without a name was rejected: %v", err)
 	}
+
+	// build.dir went the same way, and for the same reason: --build-dir
+	// supplies it, and a configuration shared across build/debug and
+	// build/release should not have to name whichever one is current.
+	//
+	// The build section has to be present for this to test anything: a
+	// required key inside an object says nothing about a document that has no
+	// such object, so a configuration omitting `build` entirely passed even
+	// while build.dir was required.
+	if err := checkAgainstSchema(t, schema, `{"project":{"name":"a"},"build":{"config":"Debug"}}`); err != nil {
+		t.Errorf("a build section without dir was rejected: %v", err)
+	}
 }
 
 // Every section the loader knows has to appear in the schema. Generating it
