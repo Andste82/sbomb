@@ -1,6 +1,7 @@
 package generate
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -12,6 +13,7 @@ import (
 	"github.com/example/sbomb/internal/componentmap"
 	"github.com/example/sbomb/internal/config"
 	"github.com/example/sbomb/internal/domain"
+	"github.com/example/sbomb/internal/exec"
 	"github.com/example/sbomb/internal/license"
 	"github.com/example/sbomb/internal/version"
 )
@@ -59,6 +61,10 @@ type componentResolver struct {
 	// assigns it to. Together they are strategy 5.
 	targets         map[string]string
 	curatedByTarget map[string]config.Component
+	// runner and ctx are how a versionFrom rule reaches git. The zero value
+	// runs nothing, which is what a run without introspection must do.
+	runner *exec.Runner
+	ctx    context.Context
 }
 
 // resolvedPackage is one package-manager result expressed in identity terms,
@@ -127,6 +133,14 @@ func componentNameFor(entry config.Component) string {
 // and picking one would be a guess.
 func (r *componentResolver) setTargets(byFile map[string]string) {
 	r.targets = byFile
+}
+
+// setIntrospection hands over the runner a versionFrom rule may ask git with.
+// It is the run's own runner, carrying its anchors and its log, so that every
+// command sbomb starts is bounded and recorded in one place (section 9.2).
+func (r *componentResolver) setIntrospection(runner *exec.Runner, ctx context.Context) {
+	r.runner = runner
+	r.ctx = ctx
 }
 
 // resolve names the component a file belongs to and records which strategy
@@ -319,14 +333,32 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 		component.VersionSource = managed.VersionSource
 		component.VersionConf = managed.VersionConfidence
 	case hasCurated && len(curated.VersionFrom) > 0:
-		if value, source, confidence, ok := version.Resolve(*component, rootInfo.Physical, curated.VersionFrom); ok {
-			component.Version, component.VersionSource, component.VersionConf = value, source, confidence
+		if resolved, ok := version.Resolve(curated.VersionFrom, rootInfo.Physical,
+			version.Options{Runner: r.runner, Context: r.ctx}); ok {
+			component.Version = resolved.Version
+			component.VersionSource = resolved.Source
+			component.VersionConf = resolved.Confidence
+			if resolved.Dirty {
+				// A version read out of a modified tree does not identify the
+				// content it names, so it is published with that fact beside
+				// it rather than as if the tree were clean.
+				findings = append(findings, componentFinding("VCS_DIRTY", domain.SeverityInfo, component,
+					"the component's checkout has uncommitted changes, so its version does not identify its content",
+					"Commit or stash the changes before generating a deliverable SBOM."))
+			}
 		}
 	}
 	if component.Version == "" {
+		message := "no authorized source supplied a version"
+		remediation := "Add components[].version, or components[].versionFrom naming where the version can be read."
+		if hasCurated && needsGitIntrospection(curated.VersionFrom) && (r.runner == nil || !r.runner.Features.Git) {
+			// The rule named git, and git was never asked. Saying so is the
+			// difference between a missing version and a missing permission.
+			message = "the component's versionFrom names git, but git introspection is off; run with --allow-introspection=git to read the version from the checkout"
+			remediation = "Enable git introspection, or set components[].version for this component."
+		}
 		findings = append(findings, componentFinding("UNKNOWN_VERSION", domain.SeverityWarning, component,
-			"no authorized source supplied a version",
-			"Add components[].version, or components[].versionFrom naming where the version can be read."))
+			message, remediation))
 	}
 
 	// Supplier (section 20.5): curated or package metadata only. Deriving it
@@ -756,6 +788,17 @@ func purlFromAnchor(componentID string) (kind, name string, ok bool) {
 		return "", "", false
 	}
 	return packageType, packageName, true
+}
+
+// needsGitIntrospection reports whether any of the rules can only be answered
+// by asking git, so that a missing version can name the permission it lacked.
+func needsGitIntrospection(rules []string) bool {
+	for _, rule := range rules {
+		if rule == "git" || rule == "commit" {
+			return true
+		}
+	}
+	return false
 }
 
 func componentFinding(id string, severity domain.Severity, component *domain.Component, message, remediation string) domain.Finding {

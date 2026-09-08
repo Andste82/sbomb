@@ -1,6 +1,7 @@
 package generate
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,6 +12,7 @@ import (
 	"github.com/example/sbomb/internal/config"
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/evidence"
+	"github.com/example/sbomb/internal/exec"
 	"github.com/example/sbomb/internal/pathmodel"
 )
 
@@ -520,5 +522,107 @@ func TestASourceTwoTargetsShareIsNotMapped(t *testing.T) {
 	}
 	if byFile["project:main.c"] != "app" {
 		t.Errorf("main.c maps to %q, want app", byFile["project:main.c"])
+	}
+}
+
+// TestVersionFromReachesTheDocument nails down the whole chain: the rule list
+// is read from the configuration, applied at the component root, and the
+// result becomes the component's version. Before the rule list was passed to
+// version.Resolve explicitly it never was -- the field it was read from was
+// never filled -- so versionFrom had no effect at all.
+func TestVersionFromReachesTheDocument(t *testing.T) {
+	root := t.TempDir()
+	dep := filepath.Join(root, "dep")
+	if err := os.MkdirAll(filepath.Join(dep, "include"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dep, "include", "version.h"),
+		[]byte("#define MBEDTLS_VERSION_STRING \"3.5.0\"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	source := filepath.Join(dep, "aes.c")
+	if err := os.WriteFile(source, []byte("int aes(void){return 0;}\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	cfg := config.Config{Components: []config.Component{{
+		Path: "dep", Name: "mbedtls",
+		VersionFrom: config.StringList{"header:include/version.h:MBEDTLS_VERSION_STRING"},
+	}}}
+	file := domain.UsedFile{ID: fileID("project", "dep/aes.c")}
+	resolver := newComponentResolver(cfg, map[string]string{file.ID.Canonical(): source}, map[string]string{}, nil)
+	component := domain.Component{ID: "component:mbedtls", Name: "mbedtls"}
+
+	findings := resolver.enrichComponent(&component, []domain.UsedFile{file})
+
+	if component.Version != "3.5.0" || component.VersionSource != "header" {
+		t.Fatalf("version = %q from %q, want 3.5.0 from the header rule", component.Version, component.VersionSource)
+	}
+	for _, finding := range findings {
+		if finding.ID == "UNKNOWN_VERSION" {
+			t.Errorf("a component whose versionFrom resolved still reported UNKNOWN_VERSION")
+		}
+	}
+}
+
+// TestVersionFromGitWithoutIntrospectionSaysWhatIsMissing pins the honest
+// failure: no runner means no version, and the finding names the permission
+// rather than leaving the reader to guess why the rule did nothing.
+func TestVersionFromGitWithoutIntrospectionSaysWhatIsMissing(t *testing.T) {
+	cfg := config.Config{Components: []config.Component{{
+		Path: "dep", Name: "mbedtls", VersionFrom: config.StringList{"git"},
+	}}}
+	resolver := newComponentResolver(cfg, map[string]string{}, map[string]string{}, nil)
+	component := domain.Component{ID: "component:mbedtls", Name: "mbedtls"}
+
+	findings := resolver.enrichComponent(&component, []domain.UsedFile{{ID: fileID("project", "dep/aes.c")}})
+
+	if component.Version != "" {
+		t.Fatalf("version = %q; without introspection the git rule must produce nothing", component.Version)
+	}
+	var reported bool
+	for _, finding := range findings {
+		if finding.ID != "UNKNOWN_VERSION" {
+			continue
+		}
+		reported = true
+		if !strings.Contains(finding.Message, "--allow-introspection=git") {
+			t.Errorf("UNKNOWN_VERSION message = %q, want the missing permission named", finding.Message)
+		}
+	}
+	if !reported {
+		t.Error("no UNKNOWN_VERSION finding for a component whose only version rule could not be tried")
+	}
+}
+
+// TestVersionFromGitBlamesThePermissionOnlyWhenItIsMissing keeps that finding
+// truthful in the other direction: with the git group enabled, a rule that
+// still produced nothing -- here because the component root lies outside every
+// registered anchor -- must not tell the reader to enable what is already on.
+func TestVersionFromGitBlamesThePermissionOnlyWhenItIsMissing(t *testing.T) {
+	cfg := config.Config{Components: []config.Component{{
+		Path: "dep", Name: "mbedtls", VersionFrom: config.StringList{"git"},
+	}}}
+	resolver := newComponentResolver(cfg, map[string]string{}, map[string]string{}, nil)
+	resolver.setIntrospection(&exec.Runner{Features: exec.Features{Git: true}}, context.Background())
+	component := domain.Component{ID: "component:mbedtls", Name: "mbedtls"}
+
+	findings := resolver.enrichComponent(&component, []domain.UsedFile{{ID: fileID("project", "dep/aes.c")}})
+
+	if component.Version != "" {
+		t.Fatalf("version = %q; git answered nothing, so nothing may be published", component.Version)
+	}
+	var reported bool
+	for _, finding := range findings {
+		if finding.ID != "UNKNOWN_VERSION" {
+			continue
+		}
+		reported = true
+		if strings.Contains(finding.Message, "--allow-introspection=git") {
+			t.Errorf("UNKNOWN_VERSION message = %q, but git introspection was enabled", finding.Message)
+		}
+	}
+	if !reported {
+		t.Error("no UNKNOWN_VERSION finding for a component that ended up without a version")
 	}
 }

@@ -129,7 +129,6 @@ type Component struct {
 	BomRef        string
 	Name          string
 	Version       string
-	VersionFrom   []string
 	VersionSource string
 	VersionConf   Confidence
 	Type          string

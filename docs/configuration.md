@@ -91,7 +91,7 @@ filled into fixed slots and must lie inside a registered anchor.
 
 | Group | What it may run | What it buys |
 |---|---|---|
-| `git` | `rev-parse HEAD`, `describe --tags --always --dirty`, `config --get remote.origin.url`, `status --porcelain`, each with `-C <dir>` | The version, commit, repository URL and dirty state of a dependency fetched by `FetchContent` or checked out as a submodule. Without it those components have no version and `UNKNOWN_VERSION` says so |
+| `git` | `rev-parse HEAD`, `describe --tags --always --dirty`, `config --get remote.origin.url`, `status --porcelain`, each with `-C <dir>` | The version, commit, repository URL and dirty state of a dependency fetched by `FetchContent` or checked out as a submodule, and the `"git"` and `"commit"` rules of `components[].versionFrom`. Without it those components have no version and `UNKNOWN_VERSION` says so |
 | `ninja` | `-C <build-dir> -t deps`, `-t commands <target>`, `-t inputs <target>`, `--version` | Header evidence from the deps log when the `.ninja_deps` file cannot be read directly |
 | `cmake` | `--version`, `-E capabilities` | Which File API kinds this CMake supports, for regenerating a missing reply |
 | `compiler` | `<compiler> --version`, `-dumpmachine`, `-print-search-dirs` | The compiler's own include and library directories, for telling a system header from yours |
@@ -246,11 +246,15 @@ things, and choosing one of them would be a guess. `path` still wins over
 
 | Rule | Reads |
 |---|---|
-| `"git"` | The nearest git tag in the component root |
-| `"commit"` | The commit hash |
-| `"header:<file>:<macro>"` | A version macro from a header, e.g. `"header:include/mbedtls/version.h:MBEDTLS_VERSION_STRING"` |
+| `"git"` | `git describe --tags --always --dirty` in the component root. A leading `v` is dropped, and a `-dirty` tree also reports `VCS_DIRTY`. An exact tag on a clean tree is high confidence; a tag with distance, a dirty tree, or a bare commit abbreviation is medium |
+| `"commit"` | `git rev-parse HEAD` in the component root, written as `0.0.0-git.<first twelve characters>`. A commit names the content, not a release, so it is never tried unless the rule asks for it |
+| `"header:<file>:<macro>"` | A version macro from a header, e.g. `"header:include/mbedtls/version.h:MBEDTLS_VERSION_STRING"`. Reads a file, needs no introspection |
 
-`git` and `commit` need the `git` introspection group.
+`git` and `commit` need the `git` introspection group. Without it neither rule
+is attempted, no version is invented, and `UNKNOWN_VERSION` says that the rule
+named git and git was never asked. The component root must also lie inside a
+registered anchor, because that is where a path handed to a subprocess is
+allowed to point.
 
 Files are mapped to components in a fixed priority order: these curated entries
 first, then package-manager metadata (vcpkg, Conan, FetchContent, git

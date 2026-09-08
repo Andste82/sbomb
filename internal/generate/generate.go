@@ -1,6 +1,7 @@
 package generate
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -403,6 +404,10 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		anchorRoots[anchor.Key] = anchor.Root
 	}
 	resolver := newComponentResolver(cfg, b.physical, anchorRoots, logger)
+	// The same runner the package-manager adapters used: it already carries
+	// the run's anchors and its log, and a second one would be a second truth
+	// about what sbomb is allowed to execute.
+	resolver.setIntrospection(runner, context.Background())
 	resolver.setPackages(packages, func(root string) domain.FileID {
 		// A root below the build directory being read has to be expressed in
 		// the logical build root first (section 7.6), exactly as every other
