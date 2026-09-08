@@ -566,6 +566,8 @@ The tool MUST attempt sources in this order and merge all that succeed:
 4. **Linker trace output** (`-Wl,-t`, `link /VERBOSE:LIB`) (§11.6).
 5. **Reconstructed link command line** from File API / Ninja / MSBuild, with response files expanded.
 
+A path named in configuration (`artifacts[].map`, `artifacts[].linkDepfile`) or on the command line (`--map`, `--link-depfile`) is **not** a hint. If it does not exist, the tool MUST emit `CONFIGURED_EVIDENCE_MISSING` and exit 2 rather than fall back to the locations beside the artifact: reading a different file than the one the caller named would put evidence in the document that nobody asked for.
+
 If none succeed: `MISSING_LINK_EVIDENCE`, severity `error`, exit code 2 unless `policy.allowMissingLinkEvidence` is true.
 
 ### 11.3 Linker Dependency File
@@ -2014,6 +2016,7 @@ Severity shown is the default and may be changed via `policy.severityOverrides`.
 | `MISSING_FINAL_DELIVERABLE` | error | always (exit 1) | No artifact configured or discovered |
 | `AMBIGUOUS_FINAL_DELIVERABLE` | error | always (exit 1) | Discovery found several candidates |
 | `MISSING_ARTIFACT` | error | always (exit 2) | Configured artifact does not exist |
+| `CONFIGURED_EVIDENCE_MISSING` | error | always (exit 2) | A configured linker map or link dependency file does not exist |
 | `AMBIGUOUS_BUILD_CONFIG` | error | always (exit 1) | Multi-config build without `--config-name` |
 | `AMBIGUOUS_ADAPTER_SELECTION` | error | always (exit 1) | Two incompatible adapters both detected |
 | `MISSING_LINK_EVIDENCE` | error | `allowMissingLinkEvidence` | No link evidence source succeeded |

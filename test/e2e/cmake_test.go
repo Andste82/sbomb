@@ -129,6 +129,142 @@ func TestWindowsPathFlavorWithHostileBuildPath(t *testing.T) {
 	}
 }
 
+// MAP says "the build already produces this, here it is". The module must
+// therefore not add a linker flag of its own -- that would put -Wl,-Map= on
+// the link line twice, with the command-line order deciding which file wins --
+// and it has to tell sbomb where the file is, or the map is written and never
+// read.
+//
+// The silent version of this failure is what the test exists for: without the
+// path being passed, sbomb looks beside the artifact, finds nothing, and
+// produces an SBOM that is quietly missing its archive-member evidence.
+func TestMapNamedByTheProjectIsUsedAndNotSetTwice(t *testing.T) {
+	if _, err := exec.LookPath("cmake"); err != nil {
+		t.Skip("cmake is not installed")
+	}
+	root := filepath.Clean(filepath.Join(filepath.Dir(mustThisFile(t)), "..", ".."))
+	work := t.TempDir()
+	src := filepath.Join(work, "src")
+	build := filepath.Join(work, "build")
+	if err := os.MkdirAll(src, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	write := func(name, contents string) {
+		t.Helper()
+		if err := os.WriteFile(filepath.Join(src, name), []byte(contents), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	// A toolchain file that produces the map itself, which is the situation
+	// MAP exists for.
+	write("toolchain.cmake", "set(CMAKE_EXE_LINKER_FLAGS_INIT \"-Wl,-Map=${CMAKE_BINARY_DIR}/own.map\")\n")
+	write("CMakeLists.txt", "cmake_minimum_required(VERSION 3.20)\nproject(mapped C)\n"+
+		"include(\""+filepath.Join(root, "cmake", "Sbomb.cmake")+"\")\n"+
+		"add_executable(app main.c)\n"+
+		"sbomb_enable(TARGET app POLICY lenient MAP \"${CMAKE_BINARY_DIR}/own.map\")\n")
+	write("main.c", "int main(void) { return 0; }\n")
+
+	sbomb := filepath.Join(work, "sbomb")
+	command := exec.Command("go", "build", "-o", sbomb, "./cmd/sbomb")
+	command.Dir = root
+	if output, err := command.CombinedOutput(); err != nil {
+		t.Fatalf("go build: %v\n%s", err, output)
+	}
+	if output, err := run(root, "cmake", "-S", src, "-B", build,
+		"-DCMAKE_TOOLCHAIN_FILE="+filepath.Join(src, "toolchain.cmake"),
+		"-DSBOMB_EXECUTABLE="+sbomb); err != nil {
+		t.Fatalf("cmake configure: %v\n%s", err, output)
+	}
+	if output, err := run(root, "cmake", "--build", build); err != nil {
+		t.Fatalf("ordinary build: %v\n%s", err, output)
+	}
+	if _, err := os.Stat(filepath.Join(build, "own.map")); err != nil {
+		t.Fatalf("the toolchain file's map was not produced: %v", err)
+	}
+
+	// The SBOM run must read that map. -v puts the adapter's answer on stderr.
+	output, err := run(root, sbomb, "generate", "--build-dir", build, "--policy", "lenient",
+		"--map", filepath.Join(build, "own.map"),
+		"--output", filepath.Join(work, "app.cdx.json"), "-v")
+	if err != nil {
+		t.Fatalf("generate with the named map: %v\n%s", err, output)
+	}
+	if !strings.Contains(string(output), "Linker map") {
+		t.Errorf("the named map was not read:\n%s", output)
+	}
+
+	// And the module must not have added a second -Wl,-Map=. Where the link
+	// command is written down depends on the generator, so both are tried
+	// rather than pinning one -- and not finding either is a reason to say so,
+	// not to skip the assertions already made above.
+	linkCommand := ""
+	for _, candidate := range []string{
+		filepath.Join(build, "build.ninja"),
+		filepath.Join(build, "CMakeFiles", "app.dir", "link.txt"),
+	} {
+		if contents, readErr := os.ReadFile(candidate); readErr == nil {
+			linkCommand = string(contents)
+			break
+		}
+	}
+	if linkCommand == "" {
+		t.Log("neither build.ninja nor link.txt was found; the duplicate-flag check did not run")
+		return
+	}
+	if count := strings.Count(linkCommand, "-Wl,-Map="); count != 1 {
+		t.Errorf("-Wl,-Map= appears %d times on the link line, want 1", count)
+	}
+}
+
+// A path nobody produces is a wrong answer, not a missing one, and the build
+// has to stop rather than write an SBOM without the evidence it was told about.
+func TestAMapThatNothingProducesFailsTheSbombTarget(t *testing.T) {
+	if _, err := exec.LookPath("cmake"); err != nil {
+		t.Skip("cmake is not installed")
+	}
+	root := filepath.Clean(filepath.Join(filepath.Dir(mustThisFile(t)), "..", ".."))
+	work := t.TempDir()
+	src := filepath.Join(work, "src")
+	build := filepath.Join(work, "build")
+	if err := os.MkdirAll(src, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	write := func(name, contents string) {
+		t.Helper()
+		if err := os.WriteFile(filepath.Join(src, name), []byte(contents), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	write("CMakeLists.txt", "cmake_minimum_required(VERSION 3.20)\nproject(absent C)\n"+
+		"include(\""+filepath.Join(root, "cmake", "Sbomb.cmake")+"\")\n"+
+		"add_executable(app main.c)\n"+
+		"sbomb_enable(TARGET app POLICY lenient MAP \"${CMAKE_BINARY_DIR}/nobody-writes-this.map\")\n")
+	write("main.c", "int main(void) { return 0; }\n")
+
+	sbomb := filepath.Join(work, "sbomb")
+	command := exec.Command("go", "build", "-o", sbomb, "./cmd/sbomb")
+	command.Dir = root
+	if output, err := command.CombinedOutput(); err != nil {
+		t.Fatalf("go build: %v\n%s", err, output)
+	}
+	if output, err := run(root, "cmake", "-S", src, "-B", build, "-DSBOMB_EXECUTABLE="+sbomb); err != nil {
+		t.Fatalf("cmake configure: %v\n%s", err, output)
+	}
+	if output, err := run(root, "cmake", "--build", build); err != nil {
+		t.Fatalf("ordinary build: %v\n%s", err, output)
+	}
+	output, err := run(root, "cmake", "--build", build, "--target", "sbomb")
+	if err == nil {
+		t.Fatalf("the sbomb target succeeded although the named map is not there:\n%s", output)
+	}
+	if !strings.Contains(string(output), "CONFIGURED_EVIDENCE_MISSING") {
+		t.Errorf("the failure did not name the finding:\n%s", output)
+	}
+	if _, statErr := os.Stat(filepath.Join(build, "sbom", "app.cdx.json")); statErr == nil {
+		t.Error("an SBOM was written although the named evidence was missing")
+	}
+}
+
 func mustThisFile(t *testing.T) string {
 	t.Helper()
 	_, file, _, ok := runtime.Caller(0)

@@ -3,6 +3,7 @@ package generate
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -271,5 +272,64 @@ func TestFileComponentResolvesSPDXAndNearestLicense(t *testing.T) {
 	nearest := fileLicenses(licensedFile, nil)
 	if len(nearest) != 1 || nearest[0].Expression != "MIT" {
 		t.Fatalf("nearest license was not resolved: %#v", nearest)
+	}
+}
+
+// A map or dependency file named in configuration is a statement, not a hint.
+// Falling back to the locations beside the artifact would put evidence in the
+// document that the caller did not name, so the run stops instead.
+func TestNamedEvidenceThatIsNotThereStopsTheRun(t *testing.T) {
+	present := filepath.Join(t.TempDir(), "app.map")
+	if err := os.WriteFile(present, []byte("Memory Configuration\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	cases := []struct {
+		name          string
+		mapPath       string
+		depfilePath   string
+		wantExitError bool
+	}{
+		{name: "nothing named", wantExitError: false},
+		{name: "map is there", mapPath: present, wantExitError: false},
+		{name: "map is not", mapPath: filepath.Join(t.TempDir(), "absent.map"), wantExitError: true},
+		{name: "depfile is not", depfilePath: filepath.Join(t.TempDir(), "absent.d"), wantExitError: true},
+	}
+	for _, testCase := range cases {
+		t.Run(testCase.name, func(t *testing.T) {
+			err := requireConfiguredEvidence(testCase.mapPath, testCase.depfilePath)
+			if !testCase.wantExitError {
+				if err != nil {
+					t.Fatalf("requireConfiguredEvidence() = %v, want nil", err)
+				}
+				return
+			}
+			var exit *ExitError
+			if !errors.As(err, &exit) {
+				t.Fatalf("requireConfiguredEvidence() = %v, want an ExitError", err)
+			}
+			if exit.Code != 2 {
+				t.Errorf("exit code = %d, want 2 as for a configured artifact that is not there", exit.Code)
+			}
+			if exit.Finding.ID != "CONFIGURED_EVIDENCE_MISSING" || exit.Finding.Severity != domain.SeverityError {
+				t.Errorf("finding = %s/%s", exit.Finding.ID, exit.Finding.Severity)
+			}
+			// The path has to be in the finding, or the message cannot be acted on.
+			named := testCase.mapPath
+			if named == "" {
+				named = testCase.depfilePath
+			}
+			if exit.Finding.Subject.Ref != named {
+				t.Errorf("subject = %q, want the path that was named", exit.Finding.Subject.Ref)
+			}
+		})
+	}
+}
+
+// A directory is not a map file, and treating it as one would fail later and
+// less clearly.
+func TestNamedEvidenceThatIsADirectoryIsRefused(t *testing.T) {
+	if err := requireConfiguredEvidence(t.TempDir(), ""); err == nil {
+		t.Error("a directory was accepted as a linker map")
 	}
 }

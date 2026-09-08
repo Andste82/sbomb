@@ -1,5 +1,39 @@
 # Changelog
 
+## Unreleased
+
+### `sbomb_enable` takes MAP, DEPFILE and OUTPUT — and they now do something
+
+`MAP` and `DEPFILE` exist for projects whose toolchain file already sets
+`-Wl,-Map=` and the link dependency file. They mean *the build already produces
+this, here it is*.
+
+Two things were missing for that to work. The module still added its own linker
+flag beside the project's, so `-Wl,-Map=` stood on the link line twice and the
+command-line order decided which file won. And the path was never passed on:
+sbomb looks beside the artifact and nowhere else unless told, so the map was
+written and never read — the SBOM lost its archive-member evidence silently,
+which is the part that separates it from a repository scan.
+
+Now a named path means the module adds no flag and hands the path to sbomb.
+
+### A named evidence file that is not there is an error
+
+`--map`, `--link-depfile`, `artifacts[].map` and `artifacts[].linkDepfile` used
+to fall back to the locations beside the artifact when the path they named did
+not exist — silently, exit 0. A path somebody wrote down is a statement, not a
+hint, and reading a different file than the one it names puts evidence in the
+document that nobody asked for.
+
+It is `CONFIGURED_EVIDENCE_MISSING` and exit code 2 now, the same treatment a
+configured artifact that does not exist has always had.
+
+Whether such a path is right cannot be established while CMake is configuring:
+a flag can reach the link line through a wrapper, a response file, or an
+overridden link rule, and none of that is visible to a module scanning the
+flags. So it is checked where the answer is certain — the file exists when the
+SBOM is built, or it does not.
+
 ## 0.15.0
 
 ### A vendored library is a component again

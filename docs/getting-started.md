@@ -253,6 +253,32 @@ there, as [Choosing a policy](#choosing-a-policy) describes; `POLICY cra` on a
 project whose components have no supplier, licence or version will fail, and is
 meant to.
 
+`sbomb_enable` takes:
+
+| Option | Meaning |
+|---|---|
+| `TARGET` | The target to describe. Required. |
+| `POLICY` | Policy profile for the run |
+| `CONFIG` | Configuration file; without it `sbomb.json` beside the project is used when it exists |
+| `OUTPUT` | Where to write the document, instead of `<build>/sbom/<target>.cdx.json` |
+| `MAP` | Where the linker map **already is** |
+| `DEPFILE` | Where the link dependency file **already is** |
+
+`MAP` and `DEPFILE` say *the build already produces this, here it is* — not
+*write it here*. They exist for projects whose toolchain file sets
+`-Wl,-Map=` itself: sbomb then adds no flag of its own, because two flags on
+one link line means the command-line order decides which file wins.
+
+Without them the module sets the flags and sbomb looks for the files beside the
+artifact, which is what you want unless somebody already arranged otherwise.
+
+A named file that is not there stops the run with
+`CONFIGURED_EVIDENCE_MISSING` and exit code 2. Whether the path is right cannot
+be checked while CMake is configuring — a flag can reach the link line through
+a wrapper, a response file or an overridden link rule, and none of that is
+visible from the module — so it is checked where the answer is certain: the
+file is there when the SBOM is built, or it is not.
+
 `sbomb_enable` may be called for several targets. Each gets its own
 `sbomb-<target>` target, and the aggregate `sbomb` target builds all of them.
 
