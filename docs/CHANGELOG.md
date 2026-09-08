@@ -4,9 +4,10 @@
 
 ### The introspection allowlist now describes what sbomb can actually do
 
-The allowlist held fifteen command shapes. Four of them were reachable: the
-three `git` forms a package-manager adapter uses, and the compiler probes that
-nothing called. Everything else was a permission granted for nothing — and
+The allowlist held fifteen command shapes. Three of them were reachable: the
+`git` forms a package-manager adapter uses. Everything else was a permission
+granted for nothing, the compiler probes included — nothing called those, and
+the path rule below had to be loosened before anything could. And
 `sbomb generate -v --allow-introspection` printed the whole table, so the log
 named commands the run could never start.
 
