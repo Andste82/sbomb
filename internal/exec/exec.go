@@ -65,19 +65,19 @@ type command struct {
 // The shapes are exact: a caller supplies values for the empty slots and
 // nothing else, so no untrusted string is ever interpolated into an argument
 // that the program parses as an option.
+//
+// Five shapes section 9.2 lists are absent, because nothing can call them
+// without guessing, running a build command, or -- in the case of
+// `ninja -t deps` -- rewriting the build directory it was only asked to read;
+// deviation D29 records what was measured. An allowlist entry no code reaches
+// is not a capability held in reserve, it is a permission granted for nothing.
 var allowlist = []command{
-	{Name: "cmake", Fixed: []string{"--version"}, Feature: "cmake"},
-	{Name: "cmake", Fixed: []string{"-E", "capabilities"}, Feature: "cmake"},
-
-	{Name: "ninja", Fixed: []string{"-C", "", "-t", "deps"}, PathSlots: []int{1}, Feature: "ninja"},
 	{Name: "ninja", Fixed: []string{"-C", "", "-t", "commands", ""}, PathSlots: []int{1}, Feature: "ninja"},
 	{Name: "ninja", Fixed: []string{"-C", "", "-t", "inputs", ""}, PathSlots: []int{1}, Feature: "ninja"},
-	{Name: "ninja", Fixed: []string{"--version"}, Feature: "ninja"},
 
 	{Name: "git", Fixed: []string{"-C", "", "rev-parse", "HEAD"}, PathSlots: []int{1}, Feature: "git"},
 	{Name: "git", Fixed: []string{"-C", "", "describe", "--tags", "--always", "--dirty"}, PathSlots: []int{1}, Feature: "git"},
 	{Name: "git", Fixed: []string{"-C", "", "config", "--get", "remote.origin.url"}, PathSlots: []int{1}, Feature: "git"},
-	{Name: "git", Fixed: []string{"-C", "", "status", "--porcelain"}, PathSlots: []int{1}, Feature: "git"},
 
 	{Name: "dpkg", Fixed: []string{"-S", ""}, PathSlots: []int{1}, Feature: "osPackages"},
 	{Name: "rpm", Fixed: []string{"-qf", ""}, PathSlots: []int{1}, Feature: "osPackages"},
@@ -95,7 +95,6 @@ var compilerProbes = [][]string{
 // Features says which introspection groups are enabled. All of them are off
 // unless the caller turns them on, per section 9.2.
 type Features struct {
-	CMake      bool
 	Ninja      bool
 	Git        bool
 	OSPackages bool
@@ -104,13 +103,11 @@ type Features struct {
 
 // Enabled reports whether any introspection at all was allowed.
 func (f Features) Enabled() bool {
-	return f.CMake || f.Ninja || f.Git || f.OSPackages || f.Compiler
+	return f.Ninja || f.Git || f.OSPackages || f.Compiler
 }
 
 func (f Features) enabled(feature string) bool {
 	switch feature {
-	case "cmake":
-		return f.CMake
 	case "ninja":
 		return f.Ninja
 	case "git":
@@ -125,7 +122,8 @@ func (f Features) enabled(feature string) bool {
 
 // Record is what one invocation is remembered by. Section 9.2 requires every
 // executed command to be logged; keeping the records lets the review report
-// state exactly which programs ran.
+// state exactly which programs ran, which is what makes a run that consulted a
+// process distinguishable from one that read nothing but files.
 type Record struct {
 	Argv     []string
 	Duration time.Duration
@@ -196,10 +194,35 @@ func (r *Runner) RunCompilerProbe(ctx context.Context, compiler string, args ...
 	if !permitted {
 		return nil, fmt.Errorf("%w: %s %s", ErrNotAllowed, compiler, strings.Join(args, " "))
 	}
-	if err := r.checkPath(compiler); err != nil && filepath.IsAbs(compiler) {
+	if err := r.checkProgram(compiler); err != nil {
 		return nil, err
 	}
 	return r.run(ctx, compiler, args)
+}
+
+// checkProgram validates the program a compiler probe names. Section 9.2 binds
+// path *arguments* to the registered anchors; the program is not an argument,
+// and a compiler almost never lies inside the project or the build tree.
+// Demanding containment here refused "/usr/bin/cc" while permitting the bare
+// name "cc" that PATH resolves to the same binary -- it turned down the exact
+// statement and accepted the vague one, and left the compiler group with
+// nothing it could actually run. What is still required is that the file
+// exists, so a probe never reaches PATH lookup with a path that was meant.
+func (r *Runner) checkProgram(path string) error {
+	if path == "" {
+		return fmt.Errorf("%w: empty path", ErrPathOutsideAnchors)
+	}
+	if !filepath.IsAbs(path) {
+		return nil
+	}
+	exists := r.Exists
+	if exists == nil {
+		exists = defaultExists
+	}
+	if !exists(path) {
+		return fmt.Errorf("%w: %s does not exist", ErrPathOutsideAnchors, path)
+	}
+	return nil
 }
 
 func (r *Runner) run(ctx context.Context, name string, args []string) ([]byte, error) {
@@ -317,11 +340,21 @@ func equalArgs(a, b []string) bool {
 	return true
 }
 
-// Allowlist returns the permitted command shapes, for documentation and for
-// the schema subcommand.
+// Allowlist returns every permitted command shape, for documentation and for
+// the tests that hold the table against section 9.2.
 func Allowlist() []string {
+	return AllowlistFor(Features{Ninja: true, Git: true, OSPackages: true, Compiler: true})
+}
+
+// AllowlistFor returns the command shapes the enabled groups permit. A shape
+// whose group is off cannot run, so naming it would describe a capability this
+// run does not have.
+func AllowlistFor(features Features) []string {
 	out := make([]string, 0, len(allowlist)+len(compilerProbes))
 	for _, entry := range allowlist {
+		if !features.enabled(entry.Feature) {
+			continue
+		}
 		parts := append([]string{entry.Name}, entry.Fixed...)
 		for index, part := range parts {
 			if part == "" {
@@ -330,8 +363,10 @@ func Allowlist() []string {
 		}
 		out = append(out, strings.Join(parts, " "))
 	}
-	for _, probe := range compilerProbes {
-		out = append(out, "<compiler> "+strings.Join(probe, " "))
+	if features.Compiler {
+		for _, probe := range compilerProbes {
+			out = append(out, "<compiler> "+strings.Join(probe, " "))
+		}
 	}
 	sort.Strings(out)
 	return out

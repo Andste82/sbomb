@@ -1,6 +1,7 @@
 package generate
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -49,6 +50,11 @@ type Result struct {
 	// silent, so the count is carried out of the run even though the headers
 	// themselves are not in the document.
 	HeaderNarrowing []NarrowingCount
+	// Introspection is the argv of every command section 9.2 permitted this
+	// run to execute, in order. The review report prints it, so that a run
+	// which consulted a process is distinguishable from one that read only
+	// files.
+	Introspection []string
 }
 
 // NarrowingCount is one component's share of the headers DWARF narrowing
@@ -153,16 +159,62 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		findings = append(findings, domain.Finding{ID: "CMAKE_FILE_API_UNAVAILABLE", Severity: domain.SeverityWarning, Subject: domain.Subject{Kind: "build", Ref: buildDir}, Message: "no CMake File API reply directory was found"})
 	}
 
-	// 2. Compile evidence, needed both for object mappings and for the
+	// 2. The identity roots and the introspection gateway. Both depend on the
+	//    configuration and the reply alone, and both are needed before the
+	//    compile evidence is read: a build directory without a compile
+	//    database has one other source, and it is a command.
+	buildRootForIdentity := cfg.Build.Dir
+	if buildRootForIdentity == "" && replyModel != nil {
+		buildRootForIdentity = replyModel.BuildRoot
+	}
+	if buildRootForIdentity == "" {
+		buildRootForIdentity = absolutePath(buildDir)
+	}
+	projectRootForIdentity := cfg.Project.Root
+	if projectRootForIdentity == "." {
+		projectRootForIdentity = ""
+	}
+	if projectRootForIdentity == "" && replyModel != nil {
+		projectRootForIdentity = replyModel.SourceRoot
+	}
+	if projectRootForIdentity == "" {
+		projectRootForIdentity = absolutePath(".")
+	}
+	runner := &exec.Runner{
+		Features: options.Introspection,
+		Anchors:  []string{projectRootForIdentity, buildRootForIdentity, absolutePath(buildDir)},
+		Log: func(record exec.Record) {
+			logger.Info("Introspection: %s (%s)", strings.Join(record.Argv, " "), record.Duration.Round(time.Millisecond))
+		},
+	}
+	ctx := context.Background()
+
+	// 3. What is this SBOM about? (section 5) It is resolved here rather than
+	//    after the anchors because the compile-evidence fallback below needs
+	//    the deliverable to ask ninja about. Its outcome is still acted on
+	//    where it was, so a run that fails here reports everything the
+	//    adapters found on the way, exactly as before.
+	deliverables, deliverableFindings, deliverableErr := resolveDeliverables(cfg, buildDir, replyModel, logger)
+
+	// 4. Compile evidence, needed both for object mappings and for the
 	//    --sysroot flag the anchor model looks for.
 	compilePath := filepath.Join(buildDir, "compile_commands.json")
+	commandStrategy := "compile-commands-json"
 	commands, err := compiledb.ParseFile(compilePath)
 	if err != nil {
 		if !os.IsNotExist(err) {
 			return Result{}, fmt.Errorf("parse compile database: %w", err)
 		}
 		logger.Info("compile_commands.json not found in '%s'", buildDir)
-		findings = append(findings, domain.Finding{ID: "MISSING_COMPILE_EVIDENCE", Severity: domain.SeverityWarning, Subject: domain.Subject{Kind: "build", Ref: buildSubject(cfg, buildDir)}, Message: "compile_commands.json was not found"})
+		// The file is the evidence; ninja is asked only in its absence, and
+		// only about the deliverables the run is actually about.
+		commands = ninjaCompileCommands(ctx, buildDir, deliverables, runner, logger)
+		// These lines come from the build graph, not from a compile database
+		// this directory does not have. Section 13.2 counts `ninja -t
+		// commands` as strategy 2, so the mappings they yield must say so
+		// rather than name a file the run never read.
+		commandStrategy = "ninja-buildgraph"
+		findings = append(findings, missingCompileEvidenceFinding(cfg, buildDir, runner, len(commands), hasNinjaBuildGraph(buildDir)))
 	} else {
 		logger.Info("Discovered %d compile command(s)", len(commands))
 	}
@@ -181,39 +233,19 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		}
 	}
 
-	// 3. Anchors, so that every path below has a portable identity.
+	// 5. Anchors, so that every path below has a portable identity.
 	compileFlags := make([]string, 0)
+	compilers := make([]string, 0)
 	for _, command := range commands {
 		compileFlags = append(compileFlags, command.Arguments...)
-	}
-	buildRootForIdentity := cfg.Build.Dir
-	if buildRootForIdentity == "" && replyModel != nil {
-		buildRootForIdentity = replyModel.BuildRoot
-	}
-	if buildRootForIdentity == "" {
-		buildRootForIdentity = absolutePath(buildDir)
-	}
-	projectRootForIdentity := cfg.Project.Root
-	if projectRootForIdentity == "." {
-		projectRootForIdentity = ""
-	}
-	if projectRootForIdentity == "" && replyModel != nil {
-		projectRootForIdentity = replyModel.SourceRoot
-	}
-	if projectRootForIdentity == "" {
-		projectRootForIdentity = absolutePath(".")
+		if len(command.Arguments) > 0 {
+			compilers = append(compilers, command.Arguments[0])
+		}
 	}
 	// Package managers are consulted before the anchors are assembled, because
 	// an installed dependency needs an anchor of its own (section 21): without
 	// one its files keep the absolute path of a package cache, which is
 	// neither portable nor the same on the next machine.
-	runner := &exec.Runner{
-		Features: options.Introspection,
-		Anchors:  []string{projectRootForIdentity, buildRootForIdentity, absolutePath(buildDir)},
-		Log: func(record exec.Record) {
-			logger.Info("Introspection: %s (%s)", strings.Join(record.Argv, " "), record.Duration.Round(time.Millisecond))
-		},
-	}
 	packages, packageFindings := pkgmanager.Discover(pkgmanager.Options{
 		BuildDir: buildDir,
 		// The source root the File API reports, not the configured one: a run
@@ -240,6 +272,11 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		Model:         replyModel,
 		CompileFlags:  compileFlags,
 		Redact:        options.RedactUnanchoredPaths,
+		// Only consulted when the reply named no toolchain at all; the
+		// compilers are the ones the compile evidence named, never a guess.
+		Runner:    runner,
+		Ctx:       ctx,
+		Compilers: toolchainCompilers(replyModel, compilers),
 	})
 	if err != nil {
 		return Result{}, fmt.Errorf("assemble anchors: %w", err)
@@ -249,23 +286,24 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		logger.Debug("Anchor %s -> %s (from %s)", anchor.Key, anchor.Root, anchor.Source)
 	}
 
-	// 4. What is this SBOM about? (section 5)
+	// 6. Was there a deliverable to be about? (section 5)
 	graph := evidence.New()
-	deliverables, deliverableFindings, err := resolveDeliverables(cfg, buildDir, replyModel, logger)
 	findings = append(findings, deliverableFindings...)
-	if err != nil {
+	if deliverableErr != nil {
 		var exit *ExitError
-		if errors.As(err, &exit) {
+		if errors.As(deliverableErr, &exit) {
 			findings = append(findings, exit.Finding)
-			return Result{Graph: graph, Findings: findings}, err
+			return Result{Graph: graph, Findings: findings}, deliverableErr
 		}
-		return Result{}, err
+		return Result{}, deliverableErr
 	}
 
-	// 5. Build the evidence graph from link and compile evidence.
+	// 7. Build the evidence graph from link and compile evidence.
 	b := newBuilder(graph, anchorResult, buildRootForIdentity, buildDir, logger)
+	b.setIntrospection(runner, ctx)
 	b.headerClass = headers.New(anchorResult.ImplicitIncludeDirs, toolchainRoots(anchorResult), componentRoots(cfg))
-	compile := collectCompileEvidence(buildDir, commands, logger)
+	compile := collectCompileEvidence(buildDir, commands, commandStrategy, logger)
+	findings = append(findings, compile.findings...)
 	mapPath, depfilePath := "", ""
 	if len(cfg.Artifacts) > 0 {
 		mapPath, depfilePath = cfg.Artifacts[0].Map, cfg.Artifacts[0].LinkDepfile
@@ -296,14 +334,14 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	findings = append(findings, outcome.findings...)
 	logger.Info("Evidence graph: %d node(s), %d edge(s) [%s]", len(graph.Nodes()), len(graph.Edges()), describeCounts(graph.Nodes()))
 
-	// 6. The reachability filter. This is what makes the output evidence-based
+	// 8. The reachability filter. This is what makes the output evidence-based
 	//    rather than a listing of everything the adapters happened to see.
 	reachable := usedFiles(graph, artifactIDs, outcome.excludedByGC)
 	logger.Info("Reachable from a deliverable: %d node(s) [%s]", len(reachable), describeCounts(reachable))
 	findings = append(findings, unresolvedObjects(graph, reachable, anchorResult)...)
 	findings = append(findings, evidenceQualityFindings(graph, reachable, anchorResult, options.Policy)...)
 
-	// 7. Inventory: scope filter, representation rules, hashing.
+	// 9. Inventory: scope filter, representation rules, hashing.
 	excludedByScope := map[anchors.Scope]int{}
 	used := make([]domain.UsedFile, 0, len(reachable))
 	for _, node := range reachable {
@@ -368,7 +406,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		}
 	}
 
-	// 8. Graph invariants must hold before anything is written (section 8.8).
+	// 10. Graph invariants must hold before anything is written (section 8.8).
 	if invariantErr := graph.CheckInvariants(); invariantErr != nil {
 		return Result{Graph: graph, Findings: findings}, &ExitError{
 			Code: 70,
@@ -379,7 +417,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		}
 	}
 
-	// 9. Hand the resolved facts to a writer.
+	// 11. Hand the resolved facts to a writer.
 	run := sbomwriter.RunMetadata{
 		ToolName:     buildinfo.Name,
 		ToolVendor:   buildinfo.Vendor,
@@ -407,7 +445,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	// The same runner the package-manager adapters used: it already carries
 	// the run's anchors and its log, and a second one would be a second truth
 	// about what sbomb is allowed to execute.
-	resolver.setIntrospection(runner, context.Background())
+	resolver.setIntrospection(runner, ctx)
 	resolver.setPackages(packages, func(root string) domain.FileID {
 		// A root below the build directory being read has to be expressed in
 		// the logical build root first (section 7.6), exactly as every other
@@ -477,7 +515,113 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	return Result{
 		Graph: graph, Findings: findings, Document: document, BOM: bom,
 		Adapters: adapterNames, HeaderNarrowing: narrowing,
+		Introspection: introspectionCommands(runner),
 	}, nil
+}
+
+// introspectionCommands is the argv of every command this run executed, in the
+// order it ran them. Section 9.2 requires each one to be logged; carrying them
+// out of the run is what lets the review report say which programs ran.
+//
+// Only the argv: a duration or a timestamp would make two runs over the same
+// build directory produce different reports, which section 34 forbids.
+func introspectionCommands(runner *exec.Runner) []string {
+	if runner == nil {
+		return nil
+	}
+	records := runner.Records()
+	out := make([]string, 0, len(records))
+	for _, record := range records {
+		out = append(out, strings.Join(record.Argv, " "))
+	}
+	return out
+}
+
+// ninjaCompileCommands is the section 9.2 fallback for a build directory with
+// no compile_commands.json: ninja knows the command line of every compilation
+// it runs. It is asked per deliverable, because that is the target the SBOM is
+// about, and only through the shared runner, so a disabled ninja group refuses
+// it before a process exists.
+func ninjaCompileCommands(ctx context.Context, buildDir string, deliverables []Deliverable, runner *exec.Runner, logger *Logger) []compiledb.Command {
+	// Not a Ninja build, or nothing to ask about: asking ninja about a
+	// Makefiles tree would be asking the wrong build system.
+	if runner == nil || len(deliverables) == 0 || !hasNinjaBuildGraph(buildDir) {
+		return nil
+	}
+	commands := make([]compiledb.Command, 0)
+	for _, deliverable := range deliverables {
+		target := deliverable.EvidencePath
+		if target == "" || filepath.IsAbs(target) {
+			// A deliverable outside the build directory is not a target ninja
+			// knows by that name.
+			continue
+		}
+		out, err := runner.Run(ctx, "ninja", "-C", buildDir, "-t", "commands", filepath.ToSlash(target))
+		if err != nil {
+			logger.Debug("`ninja -t commands %s` did not answer: %v", target, err)
+			continue
+		}
+		parsed, parseErr := compiledb.ParseNinjaCommands(bytes.NewReader(out), absolutePath(buildDir))
+		if parseErr != nil {
+			logger.Debug("`ninja -t commands %s` output could not be parsed: %v", target, parseErr)
+			continue
+		}
+		commands = append(commands, parsed...)
+	}
+	if len(commands) > 0 {
+		logger.Info("Read %d compile command(s) from `ninja -t commands` because compile_commands.json is absent", len(commands))
+	}
+	return commands
+}
+
+// missingCompileEvidenceFinding reports the compile database that was not
+// there, and says what the run did about it. Section 9.2 wants the missing
+// evidence named, not a silent degradation.
+func missingCompileEvidenceFinding(cfg config.Config, buildDir string, runner *exec.Runner, recovered int, ninjaBuild bool) domain.Finding {
+	finding := domain.Finding{
+		ID: "MISSING_COMPILE_EVIDENCE", Severity: domain.SeverityWarning,
+		Subject: domain.Subject{Kind: "build", Ref: buildSubject(cfg, buildDir)},
+		Message: "compile_commands.json was not found",
+	}
+	if recovered > 0 {
+		finding.Detail = map[string]any{"introspection": fmt.Sprintf("`ninja -t commands` supplied %d compile command(s) instead", recovered)}
+		return finding
+	}
+	// The group is only worth naming where there is a build graph for ninja to
+	// read; in a Makefiles tree it would promise an answer nothing can give.
+	if ninjaBuild && runner != nil && !runner.Features.Ninja {
+		finding.Remediation = "Set CMAKE_EXPORT_COMPILE_COMMANDS=ON, or pass --allow-introspection=ninja so that `ninja -t commands` may be asked for the compile lines instead."
+		return finding
+	}
+	finding.Remediation = "Set CMAKE_EXPORT_COMPILE_COMMANDS=ON so that the build writes a compile database."
+	return finding
+}
+
+// hasNinjaBuildGraph reports whether the build directory carries the graph
+// ninja reads. Both ninja fallbacks depend on it, and so does whether naming
+// the group as a remediation is honest.
+func hasNinjaBuildGraph(buildDir string) bool {
+	_, err := os.Stat(filepath.Join(buildDir, "build.ninja"))
+	return err == nil
+}
+
+// toolchainCompilers names the compilers the anchor probes may be run against.
+// The File API's own list comes first, because it is the build system's
+// statement; the compile database is the fallback, and it names the compiler
+// as the first word of every command line.
+func toolchainCompilers(model *cmakeapi.Model, fromCompileDB []string) []string {
+	if model != nil && len(model.Toolchains) > 0 {
+		out := make([]string, 0, len(model.Toolchains))
+		for _, toolchain := range model.Toolchains {
+			if toolchain.CompilerPath != "" {
+				out = append(out, toolchain.CompilerPath)
+			}
+		}
+		if len(out) > 0 {
+			return out
+		}
+	}
+	return fromCompileDB
 }
 
 // addProperty appends a value to a multi-valued property map.

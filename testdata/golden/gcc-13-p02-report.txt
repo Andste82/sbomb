@@ -6,6 +6,7 @@ build directory:       /__fixture_build__
 generator:             Ninja
 build configuration:   Debug
 adapters:              binfmt, depfiles, linker-depfile, linker-map, resolver
+introspection:         no command was executed
 reproducible:          true
 
 == Deliverable ==

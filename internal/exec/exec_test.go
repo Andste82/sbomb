@@ -9,7 +9,7 @@ import (
 )
 
 func allFeatures() Features {
-	return Features{CMake: true, Ninja: true, Git: true, OSPackages: true, Compiler: true}
+	return Features{Ninja: true, Git: true, OSPackages: true, Compiler: true}
 }
 
 // The required default of section 9.2: nothing runs unless the caller asked.
@@ -30,6 +30,9 @@ func TestOnlyTheAllowlistedShapesAreAccepted(t *testing.T) {
 		{"git", "-C", ".", "rev-parse", "--all"},
 		{"cmake", "--build", "."},
 		{"ninja", "-C", ".", "-t", "clean"},
+		// `-t deps` rewrites the log it fails to read, so it is not a read of
+		// the build directory at all (deviation D29).
+		{"ninja", "-C", ".", "-t", "deps"},
 		{"make", "all"},
 		{"sh", "-c", "echo hi"},
 		{"cmake", "--version", "extra"},
@@ -89,7 +92,7 @@ func TestEachFeatureGatesItsOwnCommands(t *testing.T) {
 		Anchors:  []string{"/"},
 		Exists:   func(string) bool { return true },
 	}
-	if _, err := runner.Run(context.Background(), "ninja", "-C", "/build", "-t", "deps"); !errors.Is(err, ErrDisabled) {
+	if _, err := runner.Run(context.Background(), "ninja", "-C", "/build", "-t", "inputs", "app"); !errors.Is(err, ErrDisabled) {
 		t.Errorf("err = %v, want ninja refused while only git is enabled", err)
 	}
 }
@@ -160,12 +163,106 @@ func TestTimeoutIsApplied(t *testing.T) {
 
 func TestAllowlistIsExhaustiveAndStable(t *testing.T) {
 	entries := Allowlist()
-	if len(entries) != 15 {
+	// Seven table shapes and three compiler probes. Five of the shapes section
+	// 9.2 lists were removed because nothing could call them; deviation D29
+	// says why, and this number is what keeps them from creeping back.
+	if len(entries) != 10 {
 		t.Errorf("allowlist has %d entries; section 9.2 lists a fixed set", len(entries))
 	}
 	for _, entry := range entries {
 		if strings.Contains(entry, "&&") || strings.Contains(entry, "|") {
 			t.Errorf("allowlist entry looks like a shell line: %q", entry)
 		}
+	}
+}
+
+// What the run reports it may do has to match what it may do: a group that is
+// off can start nothing, so naming its commands would describe a capability
+// this run does not have.
+func TestAllowlistForNamesOnlyTheEnabledGroups(t *testing.T) {
+	entries := AllowlistFor(Features{Git: true})
+	if len(entries) != 3 {
+		t.Fatalf("AllowlistFor(git) = %v; want the three git shapes", entries)
+	}
+	for _, entry := range entries {
+		if !strings.HasPrefix(entry, "git ") {
+			t.Errorf("AllowlistFor(git) names %q", entry)
+		}
+	}
+	if len(AllowlistFor(Features{})) != 0 {
+		t.Error("the zero value may run nothing, so it names nothing")
+	}
+	if len(AllowlistFor(Features{Compiler: true})) != len(compilerProbes) {
+		t.Error("the compiler group names exactly its probes")
+	}
+}
+
+// The five shapes deviation D29 removed, spelled the way the allowlist spelled
+// them. Nothing could call any of them: no code asked cmake for its version or
+// its capabilities, no code asked ninja for a version, and `git status
+// --porcelain` answered a question the `--dirty` suffix of `git describe`
+// already answers. They were a standing permission granted for nothing, and
+// this test is what keeps them from being granted again.
+func TestTheShapesNothingCouldCallAreRefused(t *testing.T) {
+	runner := &Runner{Features: allFeatures(), Anchors: []string{"/"}, Exists: func(string) bool { return true }}
+	for _, argv := range [][]string{
+		{"cmake", "--version"},
+		{"cmake", "-E", "capabilities"},
+		{"ninja", "--version"},
+		{"git", "-C", ".", "status", "--porcelain"},
+		{"ninja", "-C", ".", "-t", "deps"},
+	} {
+		if _, err := runner.Run(context.Background(), argv[0], argv[1:]...); !errors.Is(err, ErrNotAllowed) {
+			t.Errorf("%v: err = %v, want ErrNotAllowed", argv, err)
+		}
+	}
+	if len(runner.Records()) != 0 {
+		t.Errorf("%d process(es) were created for shapes no caller exists for", len(runner.Records()))
+	}
+}
+
+// Every group names only its own shapes, so what a run announces it may start
+// is what it may start. The whole table used to be printed whatever was on.
+func TestNoGroupNamesAnotherGroupsShapes(t *testing.T) {
+	prefixes := map[string]string{"ninja": "ninja ", "git": "git ", "compiler": "<compiler> "}
+	for group, features := range map[string]Features{
+		"ninja":    {Ninja: true},
+		"git":      {Git: true},
+		"compiler": {Compiler: true},
+	} {
+		entries := AllowlistFor(features)
+		if len(entries) == 0 {
+			t.Errorf("the %s group names nothing it may run", group)
+		}
+		for _, entry := range entries {
+			if !strings.HasPrefix(entry, prefixes[group]) {
+				t.Errorf("AllowlistFor(%s) names %q", group, entry)
+			}
+		}
+	}
+	// The osPackages group is the one whose two shapes have different program
+	// names, so it is checked by exclusion rather than by prefix.
+	for _, entry := range AllowlistFor(Features{OSPackages: true}) {
+		if !strings.HasPrefix(entry, "dpkg ") && !strings.HasPrefix(entry, "rpm ") {
+			t.Errorf("AllowlistFor(osPackages) names %q", entry)
+		}
+	}
+}
+
+// The compiler probes are gated by their own group, like every other shape.
+func TestCompilerProbesNeedTheirOwnGroup(t *testing.T) {
+	var runner Runner
+	for _, probe := range compilerProbes {
+		if _, err := runner.RunCompilerProbe(context.Background(), "/usr/bin/cc", probe...); !errors.Is(err, ErrDisabled) {
+			t.Errorf("%v: err = %v, want ErrDisabled", probe, err)
+		}
+	}
+	// Another group being on is not this group being on.
+	runner = Runner{Features: Features{Ninja: true, Git: true, OSPackages: true}}
+	if _, err := runner.RunCompilerProbe(context.Background(), "/usr/bin/cc", "--version"); !errors.Is(err, ErrDisabled) {
+		t.Errorf("err = %v, want the compiler group to gate its own probes", err)
+	}
+	if len(runner.Records()) != 0 {
+		t.Errorf("%d process(es) were created with the compiler group off", len(runner.Records()))
 	}
 }

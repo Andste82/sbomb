@@ -45,7 +45,6 @@ var enums = map[string][]string{
 	"policy.profileOverlay":            {"host-linux"},
 	"components.versionFrom":           nil, // free-form rules; see documentation
 	"discovery.excludeTargetPatterns":  nil,
-	"build.introspection.cmake":        nil,
 	"project.type":                     nil,
 	"components.type":                  nil,
 	"policy.severityOverrides.default": {"error", "warning", "info"},

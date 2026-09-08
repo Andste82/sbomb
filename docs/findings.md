@@ -14,7 +14,7 @@ same build produce identical output.
 
 <!-- BEGIN GENERATED CATALOGUE -->
 
-This build emits 42 of the 54 identifiers below. The rest are specified and
+This build emits 43 of the 54 identifiers below. The rest are specified and
 reserved: they describe evidence this version does not yet read, and a run will
 never report them. They are listed and marked so that the table is the whole
 catalogue rather than a snapshot of one version.
@@ -52,7 +52,7 @@ catalogue rather than a snapshot of one version.
 | `MISSING_LINK_EVIDENCE` | error | `allowMissingLinkEvidence` | No link evidence source succeeded | emitted |
 | `MISSING_PACKAGE_EVIDENCE` | warning | — | Package/image artifact without a manifest | emitted |
 | `MISSING_SUPPLIER` | warning | `failOnMissingSupplier` | Component has no supplier/creator (CRA/BSI field) | emitted |
-| `NINJA_DEPS_UNAVAILABLE` | info | — | `ninja -t deps` not permitted or failed | reserved |
+| `NINJA_DEPS_UNAVAILABLE` | info | — | `ninja -t deps` not permitted or failed | emitted |
 | `OBJECT_SOURCE_MAPPING_CONFLICT` | info | — | Two strategies disagreed; higher priority used | reserved |
 | `PCH_HEADERS_EXCLUDED` | info | — | Headers removed by `pchHeaders=exclude` | emitted |
 | `PREBUILT_LIBRARY_UNMAPPED` | warning | `prebuiltLibrariesRequireMapping` | Prebuilt library has no component mapping | emitted |
@@ -123,12 +123,27 @@ enables every group, `--allow-introspection=git,ninja` only the named ones.
 Every permitted invocation has an exact argument shape, runs without a shell,
 inherits nothing but `PATH`, times out after 30 seconds and has its output
 bounded at 64 MiB. A path passed to one of them must exist and lie inside a
-registered anchor. `sbomb generate -v --allow-introspection` prints the
-allowlist, and every executed command is logged.
+registered anchor. `sbomb generate -v --allow-introspection` prints what the
+enabled groups may start — not the whole table, because a group that is off can
+start nothing. Every executed command is logged, and the review report lists
+each one under `== Run ==`, so a run that consulted a process is
+distinguishable from one that read only files.
 
-When introspection is off and an adapter needs a command, the adapter degrades
-and emits an informational finding naming the evidence it could not obtain. It
-never guesses in place of the answer.
+A command is only ever the second source. Every group replaces a file that
+should have been there, and it is asked only when that file is missing or
+unreadable: with the file in place nothing is executed, whatever is enabled.
+
+When the file is missing and the group is off, the adapter degrades and emits a
+finding naming the evidence it could not obtain — `MISSING_COMPILE_EVIDENCE`
+for the compile lines, `ARCHIVE_MEMBERS_UNRESOLVED` for the objects behind an
+archive member, and `TOOLCHAIN_LAYOUT_UNKNOWN` for the toolchain layout. Each
+names the group that could have supplied the answer. None of them guesses in
+place of it.
+
+`NINJA_DEPS_UNAVAILABLE` is the one degradation with no group behind it. A Ninja
+deps log that cannot be read is named, but no permitted command can recover it:
+`ninja -t deps` reads the same file and rewrites it when it cannot. The log is
+written while ninja builds, and building again is what brings it back.
 
 ## Waivers
 

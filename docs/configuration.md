@@ -87,21 +87,43 @@ and an adapter that is not allowed to ask degrades and says so in a finding.
 
 Each group permits a fixed set of argument shapes and nothing else. There is no
 shell, and no command line is ever assembled from a string — the paths are
-filled into fixed slots and must lie inside a registered anchor.
+filled into fixed slots and must lie inside a registered anchor. The one
+exception is the compiler a probe runs: it is the program, not an argument, and
+it is whatever the build evidence named, so it must exist but need not be
+anchored.
 
 | Group | What it may run | What it buys |
 |---|---|---|
-| `git` | `rev-parse HEAD`, `describe --tags --always --dirty`, `config --get remote.origin.url`, `status --porcelain`, each with `-C <dir>` | The version, commit, repository URL and dirty state of a dependency fetched by `FetchContent` or checked out as a submodule, and the `"git"` and `"commit"` rules of `components[].versionFrom`. Without it those components have no version and `UNKNOWN_VERSION` says so |
-| `ninja` | `-C <build-dir> -t deps`, `-t commands <target>`, `-t inputs <target>`, `--version` | Header evidence from the deps log when the `.ninja_deps` file cannot be read directly |
-| `cmake` | `--version`, `-E capabilities` | Which File API kinds this CMake supports, for regenerating a missing reply |
-| `compiler` | `<compiler> --version`, `-dumpmachine`, `-print-search-dirs` | The compiler's own include and library directories, for telling a system header from yours |
+| `git` | `rev-parse HEAD`, `describe --tags --always --dirty`, `config --get remote.origin.url`, each with `-C <dir>` | The version, commit, repository URL and dirty state of a dependency fetched by `FetchContent` or checked out as a submodule, and the `"git"` and `"commit"` rules of `components[].versionFrom`. Without it those components have no version and `UNKNOWN_VERSION` says so |
+| `ninja` | `-C <build-dir> -t commands <target>`, `-t inputs <target>` | Two fallbacks: the compile lines when there is no `compile_commands.json`, and the objects an archive was built from when `build.ninja` does not say. Both read `build.ninja` including the `include`/`subninja` files sbomb's own parser does not follow |
+| `compiler` | `<compiler> --version`, `-dumpmachine`, `-print-search-dirs` | The compiler's installation directory as a toolchain anchor and the implicit link directories, when the File API reported no toolchain. Not the implicit *include* directories: `-print-search-dirs` names none, so those still come from the File API alone |
 | `osPackages` | `dpkg -S <path>`, `rpm -qf <path>` | Which distribution package a system library belongs to |
 
-**Only `git` is used today.** The other four groups are allowlisted and nothing
-calls them yet: the File API already reports the compiler's directories, the
-deps log is read from the file, and there is no system-library adapter. They are
+**A command is always the second source.** Each group replaces a file, and it is
+asked only when that file is missing or cannot be read; with the file in place
+nothing is executed, whatever you enabled. When the file is missing and the
+group is off, the run says which evidence it did not get:
+
+| Missing file | Group that replaces it | Finding when it is off |
+|---|---|---|
+| `compile_commands.json` | `ninja` | `MISSING_COMPILE_EVIDENCE` |
+| an archive's inputs, which `build.ninja` may hide behind a `subninja` | `ninja` | `ARCHIVE_MEMBERS_UNRESOLVED` |
+| CMake File API `toolchains-v1` | `compiler` | `TOOLCHAIN_LAYOUT_UNKNOWN` |
+
+One gap has no group behind it. A Ninja deps log that cannot be read is
+reported as `NINJA_DEPS_UNAVAILABLE`, and nothing can be enabled to recover it:
+`ninja -t deps` reads the same file and rewrites it when it cannot — measured
+against ninja 1.11, which truncates a damaged log and deletes one whose header
+it does not accept. sbomb reads a build directory; it does not repair one. The
+log is written while ninja builds, so building again is what brings it back.
+
+`osPackages` has no caller yet; there is no system-library adapter. It stays
 listed because the allowlist is the security boundary and it is worth knowing
-what it permits — not because turning them on changes anything right now.
+what it permits.
+
+Commands the specification lists that are gone rather than idle: the whole
+`cmake` group, `ninja --version`, `ninja -t deps` and `git status --porcelain`.
+Deviation D29 records what was measured about each.
 
 ## `artifacts`
 

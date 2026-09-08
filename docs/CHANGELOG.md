@@ -2,6 +2,75 @@
 
 ## Unreleased
 
+### The introspection allowlist now describes what sbomb can actually do
+
+The allowlist held fifteen command shapes. Four of them were reachable: the
+three `git` forms a package-manager adapter uses, and the compiler probes that
+nothing called. Everything else was a permission granted for nothing — and
+`sbomb generate -v --allow-introspection` printed the whole table, so the log
+named commands the run could never start.
+
+Three fallbacks are now wired, each strictly behind the file it replaces. With
+the file in place nothing is executed, whatever group is enabled:
+
+* no `compile_commands.json` → `ninja -t commands <deliverable>` for the compile
+  lines. A line that does not state its translation unit with an explicit
+  `-c <path>` is skipped rather than searched for something source-shaped. The
+  object→source mappings it yields are recorded as strategy 2 of §13.2, the
+  Ninja build graph, which is where the specification puts that command — the
+  evidence dump and the review report would otherwise name a compile database
+  that this build directory does not have.
+* `build.ninja` silent about an archive → `ninja -t inputs <archive>` for the
+  objects it was built from. That answer is transitive, so a nested archive can
+  report a member name twice; two candidates are no answer, and such a member
+  keeps `ARCHIVE_MEMBERS_UNRESOLVED` instead of being given the wrong object.
+* no `toolchains-v1` in the File API reply → the compiler probes for its
+  installation directory and its implicit link directories. Not for the implicit
+  *include* directories: `-print-search-dirs` reports none, so
+  `TOOLCHAIN_LAYOUT_UNKNOWN` still fires and now says what each way can answer.
+
+With the file missing and the group off, the run says which evidence it did not
+get, under the identifiers it already had, each with a remediation naming the
+group that could have supplied the answer.
+
+A fourth gap is now named that used to be swallowed whole: a Ninja deps log
+that cannot be read produced no log line, no finding and no error.
+`NINJA_DEPS_UNAVAILABLE` is emitted for the first time — it was specified and
+reserved — but with no group behind it, and this is the finding of this pass:
+`ninja -t deps` reads the same file sbomb reads, and when it cannot read it, it
+*rewrites* it. Measured against ninja 1.11, a log whose header it does not
+accept is deleted and a damaged one is truncated. A tool pointed at somebody's
+build directory reads it; it does not repair it. The command is gone from the
+allowlist with the rest. The finding is only raised for a Ninja build; a
+Makefiles tree has no deps log to miss.
+
+Five shapes are removed rather than left idle: `cmake --version`,
+`cmake -E capabilities`, `ninja --version`, `ninja -t deps` and
+`git status --porcelain`, and with them the whole `cmake` group —
+`build.introspection.cmake` is now an unknown configuration key. A File API
+reply is written while CMake configures, and configuring is a build command, so
+there was never a permitted fallback for the cmake group to be. The dirty state
+already comes from the `-dirty` suffix of `git describe`, which runs anyway.
+Deviation D29 has the reasoning and the condition for their return.
+
+One rule was loosened to make the compiler group reachable at all: a compiler
+probe no longer requires an absolute compiler path to lie inside a registered
+anchor, only to exist. The old rule refused `/usr/bin/cc` while permitting the
+bare name `cc`, which PATH resolves to the same binary — it turned down the
+exact statement and accepted the vague one. Path *arguments* are unchanged.
+
+The review report gained an `introspection` line per executed command under
+`== Run ==`, listing the argv and nothing else — a duration would break the
+byte-for-byte guarantee. A run that started no process says so.
+
+Two consequences worth expecting. A run with `--allow-introspection` can now
+find evidence a run without it does not, so two runs over one build directory
+with different groups produce different SBOMs; that is the point, and it was
+already true of the `git` group. And a build with no File API reply, run with
+`--allow-introspection=compiler`, gains a `toolchain:` anchor it did not have,
+which changes the canonical identity of the files beneath it and therefore which
+of them reach the document.
+
 ### `versionFrom` now reads what it promised to read
 
 `components[].versionFrom` accepted `"git"` and `"commit"`, and neither ever
