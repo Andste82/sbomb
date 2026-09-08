@@ -102,31 +102,31 @@ function(sbomb_enable)
     if(NOT _sbomb_language)
       set(_sbomb_language C)
     endif()
-    if(SBOMB_MAP)
-      set(_sbomb_map "${SBOMB_MAP}")
-      set(_sbomb_map_test "-Wl,-Map=${SBOMB_MAP}")
-    else()
-      set(_sbomb_map "$<TARGET_FILE:${SBOMB_TARGET}>.map")
-      set(_sbomb_map_test "-Wl,-Map=<TARGET_FILE>.map")
+    # MAP and DEPFILE say "the build already produces this, here it is" -- not
+    # "write it here". Projects that set the flags in a toolchain file own
+    # them, and adding ours beside theirs would put the option on the link line
+    # twice, with the command-line order deciding which file wins.
+    #
+    # So a named path is passed to sbomb and nothing else happens. Whether it
+    # is really there is not decided here: CMake offers too many ways to reach
+    # the link line -- wrappers, response files, an overridden link rule -- for
+    # a scan of the flags to answer it. sbomb checks the file itself and
+    # refuses to run without it (CONFIGURED_EVIDENCE_MISSING).
+    if(NOT SBOMB_MAP)
+      check_linker_flag(${_sbomb_language} "-Wl,-Map=<TARGET_FILE>.map" _sbomb_has_map)
+      if(_sbomb_has_map)
+        target_link_options("${SBOMB_TARGET}" PRIVATE "-Wl,-Map=$<TARGET_FILE:${SBOMB_TARGET}>.map")
+      else()
+        message(STATUS "sbomb: linker map flag unsupported; skipping map evidence for ${SBOMB_TARGET}")
+      endif()
     endif()
-    if(SBOMB_DEPFILE)
-      set(_sbomb_depfile "${SBOMB_DEPFILE}")
-      set(_sbomb_depfile_test "-Wl,--dependency-file=${SBOMB_DEPFILE}")
-    else()
-      set(_sbomb_depfile "$<TARGET_FILE:${SBOMB_TARGET}>.d")
-      set(_sbomb_depfile_test "-Wl,--dependency-file=<TARGET_FILE>.d")
-    endif()
-    check_linker_flag(${_sbomb_language} "${_sbomb_map_test}" _sbomb_has_map)
-    check_linker_flag(${_sbomb_language} "${_sbomb_depfile_test}" _sbomb_has_depfile)
-    if(_sbomb_has_map)
-      target_link_options("${SBOMB_TARGET}" PRIVATE "-Wl,-Map=${_sbomb_map}")
-    else()
-      message(STATUS "sbomb: linker map flag unsupported; skipping map evidence for ${SBOMB_TARGET}")
-    endif()
-    if(_sbomb_has_depfile)
-      target_link_options("${SBOMB_TARGET}" PRIVATE "-Wl,--dependency-file=${_sbomb_depfile}")
-    else()
-      message(STATUS "sbomb: linker dependency-file flag unsupported; skipping link dependency evidence for ${SBOMB_TARGET}")
+    if(NOT SBOMB_DEPFILE)
+      check_linker_flag(${_sbomb_language} "-Wl,--dependency-file=<TARGET_FILE>.d" _sbomb_has_depfile)
+      if(_sbomb_has_depfile)
+        target_link_options("${SBOMB_TARGET}" PRIVATE "-Wl,--dependency-file=$<TARGET_FILE:${SBOMB_TARGET}>.d")
+      else()
+        message(STATUS "sbomb: linker dependency-file flag unsupported; skipping link dependency evidence for ${SBOMB_TARGET}")
+      endif()
     endif()
   elseif(SBOMB_LINK_EVIDENCE)
     message(STATUS "sbomb: no linker evidence for ${SBOMB_TARGET}; a ${_sbomb_type} carries no linker flags")
@@ -161,6 +161,14 @@ function(sbomb_enable)
   endif()
   if(SBOMB_POLICY)
     list(APPEND _sbomb_command --policy "${SBOMB_POLICY}")
+  endif()
+  # Without these the option would name a path nobody acts on: sbomb looks
+  # beside the artifact and nowhere else unless it is told.
+  if(SBOMB_MAP)
+    list(APPEND _sbomb_command --map "${SBOMB_MAP}")
+  endif()
+  if(SBOMB_DEPFILE)
+    list(APPEND _sbomb_command --link-depfile "${SBOMB_DEPFILE}")
   endif()
   add_custom_target("sbomb-${SBOMB_TARGET}"
     COMMAND "${CMAKE_COMMAND}" -E make_directory "${_sbomb_output_dir}"

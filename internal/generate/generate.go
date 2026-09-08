@@ -277,6 +277,18 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	if options.LinkDepfilePath != "" {
 		depfilePath = options.LinkDepfilePath
 	}
+	// A named path that is not there is a wrong answer, not a missing one.
+	// Section 11.2 lets evidence be discovered beside the artifact, and that
+	// fallback is right when nobody said where to look -- but silently reading
+	// a different file than the one the caller named would make the document
+	// describe evidence nobody asked for.
+	if err := requireConfiguredEvidence(mapPath, depfilePath); err != nil {
+		var exit *ExitError
+		if errors.As(err, &exit) {
+			findings = append(findings, exit.Finding)
+		}
+		return Result{Graph: graph, Findings: findings}, err
+	}
 	outcome := buildEvidenceGraph(graph, b, deliverables, compile, buildDir, mapPath, depfilePath, cfg, options.Policy, logger)
 	artifactIDs := outcome.artifactIDs
 	findings = append(findings, b.Findings()...)
@@ -567,6 +579,38 @@ func buildTimestamp() string {
 		}
 	}
 	return time.Now().UTC().Format(time.RFC3339)
+}
+
+// requireConfiguredEvidence refuses a linker map or link dependency file that
+// was named and is not there.
+//
+// The paths reach here from --map and --link-depfile, and from artifacts[].map
+// and artifacts[].linkDepfile in the configuration. Either way somebody wrote
+// the path down, so its absence is a configuration error of the same kind as
+// MISSING_ARTIFACT rather than evidence that could not be collected.
+func requireConfiguredEvidence(mapPath, depfilePath string) error {
+	for _, named := range []struct{ kind, path, remediation string }{
+		{"linker map", mapPath, "Correct artifacts[].map or --map, or leave it unset and let sbomb look beside the artifact."},
+		{"link dependency file", depfilePath, "Correct artifacts[].linkDepfile or --link-depfile, or leave it unset and let sbomb look beside the artifact."},
+	} {
+		if named.path == "" {
+			continue
+		}
+		if info, err := os.Stat(named.path); err == nil && !info.IsDir() {
+			continue
+		}
+		return &ExitError{
+			Code: 2,
+			Finding: domain.Finding{
+				ID:          "CONFIGURED_EVIDENCE_MISSING",
+				Severity:    domain.SeverityError,
+				Subject:     domain.Subject{Kind: "configuration", Ref: named.path},
+				Message:     fmt.Sprintf("the configured %s does not exist", named.kind),
+				Remediation: named.remediation,
+			},
+		}
+	}
+	return nil
 }
 
 // targetsByFile records which CMake target owns which file, for strategy 5 of
