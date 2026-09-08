@@ -12,13 +12,15 @@ not ignored.
 ```json
 {
   "project": {"name": "app", "root": "."},
-  "build": {"dir": "build"},
   "artifacts": [{"path": "build/app", "role": "application"}]
 }
 ```
 
-`build.dir` is the only required field, and `--build-dir` supplies it too.
-Relative paths are resolved from `project.root`.
+`build.dir` is not required in the file: `--build-dir` already supplies it, and
+a configuration meant to be shared across build directories (`build/debug`,
+`build/release`, ...) does not have to repeat whichever one is current. Set
+`build.dir` only when the configuration is meant to name one build
+specifically. Relative paths are resolved from `project.root`.
 
 `sbomb schema` prints the current schema document.
 
