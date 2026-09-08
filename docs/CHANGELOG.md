@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+### `versionFrom` now reads what it promised to read
+
+`components[].versionFrom` accepted `"git"` and `"commit"`, and neither ever
+asked git. The first checked whether a `.git` directory existed and then
+returned the *directory path* as the version; the second returned the constant
+`0.0.0-git.000000000000`. Both reported success, so both would have suppressed
+the `UNKNOWN_VERSION` finding that exists to say a version could not be
+established — a placeholder published as a fact is the one thing this tool must
+not do.
+
+Worse, the rule list never arrived. It was read from a field of the component
+that nothing outside the tests ever filled, so `versionFrom` had no effect at
+all, `header:` included. The list is now passed in from the configuration where
+it is written.
+
+`"git"` runs `git describe --tags --always --dirty` at the component root and
+`"commit"` runs `git rev-parse HEAD`, both through the introspection gateway
+and only with `--allow-introspection=git`. Without that group neither rule is
+attempted and no value appears; `UNKNOWN_VERSION` then names the missing
+permission instead of leaving the reader to wonder. A tag from a modified
+working tree is published with `VCS_DIRTY` beside it, because such a version
+does not identify the content it names. The check that a component is a
+checkout is now git's answer rather than a `.git` *directory*, so submodules and
+linked worktrees — which carry a `.git` file — resolve like anything else.
+
+Two runs over the same build can now disagree when the checkouts differ. That
+is the point: the answer describes the tree that was built from.
+
 ### `build.dir` is optional
 
 The configuration file no longer has to name the build directory. `--build-dir`
