@@ -52,11 +52,13 @@ var enums = map[string][]string{
 }
 
 // required are the fields `validate` and `Load` insist on, by path.
-// project.name is deliberately absent: the build system states it, and in
-// single-artifact mode the deliverable is the root component anyway.
+// project.name and build.dir are deliberately absent: the build system
+// states both (CMAKE_PROJECT_NAME and CMAKE_BINARY_DIR, passed as
+// --build-dir), and in single-artifact mode the deliverable is the root
+// component anyway, so a configuration shared across build directories
+// (debug, release, ...) never has to repeat either one.
 var required = map[string][]string{
-	"":      {"project"},
-	"build": {"dir"},
+	"": {"project"},
 }
 
 // Schema returns the JSON Schema of the configuration file.

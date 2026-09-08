@@ -181,17 +181,16 @@ func Load(path string) (Config, error) {
 	// there in the first place. What a document is about is still always
 	// answered -- by the configuration, then the build system, then the
 	// deliverable -- just not by insisting the answer be typed out here.
-	if cfg.Build.Dir == "" {
-		return Config{}, fmt.Errorf("missing required field: build.dir")
-	}
+	//
+	// build.dir gets the same treatment for the same reason: CMake already
+	// states it as CMAKE_BINARY_DIR and passes it as --build-dir, and
+	// RunWithOptions falls back to that argument (and, failing that, the
+	// CMake File API reply) whenever cfg.Build.Dir is empty.
 	if cfg.Mode == "" {
 		cfg.Mode = "single"
 	}
 	if cfg.Project.Root == "" {
 		cfg.Project.Root = "."
-	}
-	if cfg.Build.Dir == "" {
-		cfg.Build.Dir = filepath.Dir(path)
 	}
 	if cfg.Policy.Profile == "" {
 		cfg.Policy.Profile = "default"
