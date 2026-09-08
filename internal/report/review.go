@@ -20,6 +20,11 @@ type ReviewInput struct {
 	Graph      *evidence.Graph
 	Findings   []domain.Finding
 	Adapters   []string
+	// Introspection is the argv of every command the run executed under
+	// section 9.2, in order. It belongs beside the adapters: which programs
+	// ran is part of how the evidence was obtained, and section 9.2 requires
+	// it to be visible rather than only logged.
+	Introspection []string
 	// Chains selects how much evidence is rendered: all, unresolved or none
 	// (section 34 point 9).
 	Chains string
@@ -62,6 +67,14 @@ func RenderReview(in ReviewInput) string {
 		adapters := append([]string{}, in.Adapters...)
 		sort.Strings(adapters)
 		line(&b, "adapters", strings.Join(adapters, ", "))
+	}
+	// The argv and nothing else: a duration or a timestamp here would make two
+	// runs over the same build directory produce different reports.
+	if len(in.Introspection) == 0 {
+		line(&b, "introspection", "no command was executed")
+	}
+	for _, command := range in.Introspection {
+		line(&b, "introspection", command)
 	}
 	line(&b, "reproducible", fmt.Sprintf("%t", in.Document.Run.Reproducible))
 

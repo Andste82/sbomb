@@ -699,7 +699,9 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 		return 1, logBuf.String(), err.Error() + "\n"
 	}
 	if introspection.Enabled() {
-		cliLogger.Info("Introspection enabled: %s", strings.Join(exec.Allowlist(), "; "))
+		// Only what the enabled groups may start: printing the whole table
+		// would name commands this run cannot run.
+		cliLogger.Info("Introspection enabled: %s", strings.Join(exec.AllowlistFor(introspection), "; "))
 	}
 
 	generated, err := generate.RunWithOptions(loadedCfg, buildDir, repro, generate.Options{
@@ -777,6 +779,8 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 			Findings:   res.Findings,
 			Adapters:   generated.Adapters,
 			Chains:     reportChains,
+
+			Introspection: generated.Introspection,
 
 			HeaderNarrowing: narrowingForReport(generated.HeaderNarrowing),
 		})
@@ -917,20 +921,17 @@ func narrowingForReport(counts []generate.NarrowingCount) []report.Narrowing {
 // them, and a comma-separated value enables the named ones.
 func resolveIntrospection(cfg config.Config, allowAll bool, groups []string) (exec.Features, error) {
 	features := exec.Features{
-		CMake:      cfg.Build.Introspection.CMake,
 		Ninja:      cfg.Build.Introspection.Ninja,
 		Git:        cfg.Build.Introspection.Git,
 		OSPackages: cfg.Build.Introspection.OSPackages,
 		Compiler:   cfg.Build.Introspection.Compiler,
 	}
 	if allowAll {
-		return exec.Features{CMake: true, Ninja: true, Git: true, OSPackages: true, Compiler: true}, nil
+		return exec.Features{Ninja: true, Git: true, OSPackages: true, Compiler: true}, nil
 	}
 	for _, group := range groups {
 		switch strings.TrimSpace(group) {
 		case "":
-		case "cmake":
-			features.CMake = true
 		case "ninja":
 			features.Ninja = true
 		case "git":
@@ -940,7 +941,7 @@ func resolveIntrospection(cfg config.Config, allowAll bool, groups []string) (ex
 		case "compiler":
 			features.Compiler = true
 		default:
-			return exec.Features{}, fmt.Errorf("unknown introspection group %q (cmake, ninja, git, osPackages, compiler)", group)
+			return exec.Features{}, fmt.Errorf("unknown introspection group %q (ninja, git, osPackages, compiler)", group)
 		}
 	}
 	return features, nil

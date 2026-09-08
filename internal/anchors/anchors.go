@@ -8,6 +8,7 @@
 package anchors
 
 import (
+	"context"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -15,6 +16,7 @@ import (
 	"github.com/example/sbomb/internal/adapters/cmakeapi"
 	"github.com/example/sbomb/internal/config"
 	"github.com/example/sbomb/internal/domain"
+	"github.com/example/sbomb/internal/exec"
 	"github.com/example/sbomb/internal/pathmodel"
 )
 
@@ -59,6 +61,16 @@ type Options struct {
 
 	// CompileFlags are compiler command-line fragments, scanned for --sysroot.
 	CompileFlags []string
+
+	// Runner and Ctx are the run's introspection gateway. They are used only
+	// when the File API reported no toolchain at all: with a reply in hand the
+	// answer is already there and no process is started (section 9.2).
+	Runner *exec.Runner
+	Ctx    context.Context
+
+	// Compilers are the compiler executables the build evidence named. They
+	// are what the compiler probes may be run against; nothing else is.
+	Compilers []string
 
 	// Redact replaces unanchored paths with a digest (section 7.5).
 	Redact bool
@@ -144,6 +156,7 @@ func Assemble(options Options) (*Result, error) {
 	}
 
 	// 5. Toolchain installation roots.
+	registeredToolchains := 0
 	if options.Model != nil {
 		for _, toolchain := range sortedToolchains(options.Model.Toolchains) {
 			root := cmakeapi.ToolchainRoot(toolchain.CompilerPath)
@@ -156,8 +169,43 @@ func Assemble(options Options) (*Result, error) {
 			if _, err := registry.Register(key, root, "toolchains-v1"); err != nil {
 				continue
 			}
+			registeredToolchains++
 			result.ImplicitIncludeDirs = append(result.ImplicitIncludeDirs, toolchain.ImplicitIncludeDirs...)
 			result.ImplicitLinkDirs = append(result.ImplicitLinkDirs, toolchain.ImplicitLinkDirs...)
+		}
+	}
+
+	// 5b. With no toolchains-v1 reply, the compiler itself can be asked where
+	//     it is installed and which directories it hands the linker (section
+	//     9.2). This runs only when the reply said nothing: one toolchain from
+	//     the File API and no process is started.
+	//
+	//     It answers less than the reply does. -print-search-dirs reports the
+	//     installation, the program and the library directories, and no
+	//     include directories at all, so ImplicitIncludeDirs stays empty and
+	//     TOOLCHAIN_LAYOUT_UNKNOWN below still fires. What it does supply is
+	//     the link directories section 24.1 recognises distribution libraries
+	//     by, and a toolchain anchor for the compiler's own files.
+	if registeredToolchains == 0 && options.Runner != nil && options.Runner.Features.Compiler {
+		ctx := options.Ctx
+		if ctx == nil {
+			ctx = context.Background()
+		}
+		for _, compiler := range uniqueCompilers(options.Compilers) {
+			probe, ok := probeCompiler(ctx, options.Runner, compiler)
+			if !ok {
+				continue
+			}
+			key := probe.anchorKey()
+			if err := pathmodel.ValidateAnchorKey(key); err != nil {
+				continue
+			}
+			// Two languages of one compiler installation share a root; the
+			// registry keeps the first and reports the duplicate as skipped.
+			if _, err := registry.Register(key, probe.Root, "compiler probe"); err != nil {
+				continue
+			}
+			result.ImplicitLinkDirs = append(result.ImplicitLinkDirs, probe.LinkDirs...)
 		}
 	}
 
@@ -180,11 +228,15 @@ func Assemble(options Options) (*Result, error) {
 	result.ImplicitLinkDirs = dedupeSorted(result.ImplicitLinkDirs)
 	if len(result.ImplicitIncludeDirs) == 0 {
 		result.Findings = append(result.Findings, domain.Finding{
-			ID:          "TOOLCHAIN_LAYOUT_UNKNOWN",
-			Severity:    domain.SeverityWarning,
-			Subject:     domain.Subject{Kind: "build", Ref: buildRoot},
-			Message:     "no implicit include directories are known; system headers are classified by path heuristics with low confidence",
-			Remediation: "Enable the CMake File API so that toolchains-v1 reports the compiler's own include directories.",
+			ID:       "TOOLCHAIN_LAYOUT_UNKNOWN",
+			Severity: domain.SeverityWarning,
+			Subject:  domain.Subject{Kind: "build", Ref: buildRoot},
+			Message:  "no implicit include directories are known; system headers are classified by path heuristics with low confidence",
+			// The compiler probes are named second and with what they can do,
+			// because -print-search-dirs reports library directories but no
+			// include directories: they narrow this gap without closing it.
+			Remediation: "Enable the CMake File API so that toolchains-v1 reports the compiler's own include directories. " +
+				"--allow-introspection=compiler supplies the implicit link directories only; the include directories come from the File API.",
 		})
 	}
 	return result, nil

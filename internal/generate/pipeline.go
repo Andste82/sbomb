@@ -42,6 +42,9 @@ type compileEvidence struct {
 	// lto records that a compile command asked for link-time optimization
 	// (section 17.2).
 	lto bool
+	// findings are what the compile-side adapters could not obtain, named
+	// rather than passed over in silence (section 9.2).
+	findings []domain.Finding
 }
 
 func newCompileEvidence() *compileEvidence {
@@ -169,7 +172,16 @@ func inspectObject(node domain.Node, b *builder, archives map[string][]archive.M
 // collectCompileEvidence gathers object-to-source mappings and header
 // dependencies from every adapter that can supply them, in the priority order
 // of section 13.2. The first strategy to claim an object wins.
-func collectCompileEvidence(buildDir string, commands []compiledb.Command, logger *Logger) *compileEvidence {
+//
+// commandStrategy names where the compile lines came from, because they have
+// two sources with two different standings: the compile database is strategy
+// 4, while the same lines printed by `ninja -t commands` are the build graph
+// itself and belong to strategy 2. The caller knows which it read; guessing
+// here would put a file name on evidence that never came from a file.
+func collectCompileEvidence(buildDir string, commands []compiledb.Command, commandStrategy string, logger *Logger) *compileEvidence {
+	if commandStrategy == "" {
+		commandStrategy = "compile-commands-json"
+	}
 	evidence := newCompileEvidence()
 	if parsed, err := makeadapter.Parse(buildDir); err == nil {
 		evidence.makeBuild = parsed
@@ -177,8 +189,12 @@ func collectCompileEvidence(buildDir string, commands []compiledb.Command, logge
 		logger.Debug("Makefiles adapter does not apply: %v", err)
 	}
 
-	// Strategy 2: the Ninja build graph names the source of every object.
+	// Strategy 2: the Ninja build graph names the source of every object. That
+	// the file opened is also what says this is a Ninja build, and a build that
+	// is not one has no deps log that could be missing.
+	ninjaBuild := false
 	if file, err := os.Open(filepath.Join(buildDir, "build.ninja")); err == nil {
+		ninjaBuild = true
 		parsed, parseErr := ninja.ParseFile(file)
 		file.Close()
 		if parseErr == nil {
@@ -200,9 +216,12 @@ func collectCompileEvidence(buildDir string, commands []compiledb.Command, logge
 	}
 
 	// Strategy 4: the compile database names the output of every compilation.
+	// When it was absent and `ninja -t commands` answered instead, the very
+	// same loop feeds strategy 2, which is where section 13.2 puts that
+	// command.
 	for _, command := range commands {
 		if command.Output != "" {
-			evidence.addSource(command.Output, command.File, "compile-commands-json")
+			evidence.addSource(command.Output, command.File, commandStrategy)
 		}
 		if hasLTOFlag(command.Arguments) {
 			evidence.lto = true
@@ -229,14 +248,42 @@ func collectCompileEvidence(buildDir string, commands []compiledb.Command, logge
 	}
 
 	// Ninja records the headers each compilation read in its own deps log.
-	if records, err := ninja.ParseDepsFile(filepath.Join(buildDir, ".ninja_deps")); err == nil {
-		for _, record := range records {
-			evidence.addHeaders(record.Output, record.Dependencies)
+	// A log that cannot be read used to be passed over in silence; it is now
+	// named. There is no command to fall back on: `ninja -t deps` reads the
+	// same file, and when it dislikes what it finds it rewrites it -- measured
+	// against ninja 1.11, which truncates a damaged log and deletes one whose
+	// header it does not accept. A tool pointed at somebody's build directory
+	// reads it; it does not repair it (deviation D29).
+	records, err := ninja.ParseDepsFile(filepath.Join(buildDir, ".ninja_deps"))
+	if err != nil {
+		if ninjaBuild {
+			evidence.findings = append(evidence.findings, ninjaDepsUnavailableFinding(buildDir, err))
 		}
-		logger.Debug("Ninja deps log contributed header evidence for %d object(s)", len(records))
+		return evidence
 	}
+	for _, record := range records {
+		evidence.addHeaders(record.Output, record.Dependencies)
+	}
+	logger.Debug("Ninja deps log contributed header evidence for %d object(s)", len(records))
 
 	return evidence
+}
+
+// ninjaDepsUnavailableFinding names the evidence that could not be obtained,
+// as section 9.2 requires of an adapter that degrades. Its remediation names
+// the only thing that helps: the log is written while ninja builds, and
+// nothing sbomb is allowed to run can reconstruct it.
+func ninjaDepsUnavailableFinding(buildDir string, fileErr error) domain.Finding {
+	return domain.Finding{
+		ID:       "NINJA_DEPS_UNAVAILABLE",
+		Severity: domain.SeverityInfo,
+		Subject:  domain.Subject{Kind: "build", Ref: buildDir},
+		Message: fmt.Sprintf("the Ninja deps log holding the headers each compilation read is unavailable: %v",
+			fileErr),
+		Remediation: "Build again so that ninja writes its deps log. It is the only record of which headers each " +
+			"compilation read, and no permitted command can recover it: `ninja -t deps` reads the same file and " +
+			"rewrites it when it cannot.",
+	}
 }
 
 // graphOutcome carries what the graph construction learned beyond the graph

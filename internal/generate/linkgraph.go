@@ -1,6 +1,7 @@
 package generate
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -13,6 +14,7 @@ import (
 	"github.com/example/sbomb/internal/anchors"
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/evidence"
+	"github.com/example/sbomb/internal/exec"
 	"github.com/example/sbomb/internal/headers"
 )
 
@@ -63,6 +65,15 @@ type builder struct {
 	// section 11.2 and the only link evidence a Makefiles build without map or
 	// dependency file offers.
 	reconstructedLinks map[string][]string
+
+	// runner and ctx are the run's own introspection gateway, used only where
+	// a file source has already failed to answer (section 9.2).
+	runner *exec.Runner
+	ctx    context.Context
+	// askedArchives remembers which archives were already put to `ninja -t
+	// inputs`, so that a second unresolved member of the same archive does not
+	// start a second process.
+	askedArchives map[string]bool
 }
 
 func newBuilder(graph *evidence.Graph, anchorResult *anchors.Result, logicalBuild, physicalBuild string, logger *Logger) *builder {
@@ -78,7 +89,16 @@ func newBuilder(graph *evidence.Graph, anchorResult *anchors.Result, logicalBuil
 		discardedObjects:   map[string]int{},
 		retainedObjects:    map[string]bool{},
 		reconstructedLinks: map[string][]string{},
+		askedArchives:      map[string]bool{},
 	}
+}
+
+// setIntrospection hands over the runner an archive fallback may ask ninja
+// with. It is the run's own runner, carrying its anchors and its log, so that
+// every command sbomb starts is bounded and recorded in one place (section 9.2).
+func (b *builder) setIntrospection(runner *exec.Runner, ctx context.Context) {
+	b.runner = runner
+	b.ctx = ctx
 }
 
 // recordReconstructedLink remembers the inputs of a link command recovered from
@@ -355,11 +375,18 @@ func (b *builder) addArchiveMember(artifactID domain.NodeID, input linkInput) {
 			Type: "archive-member", Strength: "linked", Confidence: domain.ConfidenceMedium,
 			Source: input.Source, Adapter: input.Adapter,
 		})
-		b.findings = append(b.findings, domain.Finding{
+		finding := domain.Finding{
 			ID: "ARCHIVE_MEMBERS_UNRESOLVED", Severity: domain.SeverityWarning,
 			Subject: domain.Subject{Kind: "file", Ref: string(memberID)},
 			Message: fmt.Sprintf("the extracted member %q could not be traced to an object in the build tree", input.Member),
-		})
+		}
+		// The archive's inputs have one other source, and naming it is only
+		// useful while it is still available: without a build graph for ninja
+		// to read, the command has nothing to answer from (section 9.2).
+		if b.runner != nil && !b.runner.Features.Ninja && b.hasNinjaGraph() {
+			finding.Remediation = "Pass --allow-introspection=ninja so that `ninja -t inputs` may be asked which objects the archive was built from."
+		}
+		b.findings = append(b.findings, finding)
 		return
 	}
 
@@ -386,6 +413,11 @@ func (b *builder) addArchiveMember(artifactID domain.NodeID, input linkInput) {
 // using the archive's declared inputs.
 func (b *builder) memberObject(archiveCanonical, member string) (string, bool) {
 	candidates := b.archiveInputs[archiveCanonical]
+	if len(candidates) == 0 {
+		// build.ninja did not name this archive, either because it could not
+		// be read or because it does not mention it. Only then is ninja asked.
+		candidates = b.ninjaArchiveInputs(archiveCanonical)
+	}
 	matches := make([]string, 0, 1)
 	for _, candidate := range candidates {
 		if filepath.Base(candidate) == member {
@@ -396,6 +428,67 @@ func (b *builder) memberObject(archiveCanonical, member string) (string, bool) {
 		return matches[0], true
 	}
 	return "", false
+}
+
+// ninjaArchiveInputs is the section 9.2 fallback for an archive whose inputs
+// build.ninja did not state: `ninja -t inputs <archive>` names them.
+//
+// Its answer is transitive -- an archive that pulls in another one reports the
+// second one's objects too -- which is safe here only because memberObject
+// insists on exactly one candidate per member name. An ambiguous answer
+// therefore degrades to ARCHIVE_MEMBERS_UNRESOLVED rather than to a wrong one.
+func (b *builder) ninjaArchiveInputs(archiveCanonical string) []string {
+	if b.runner == nil || b.askedArchives[archiveCanonical] || !b.hasNinjaGraph() {
+		return nil
+	}
+	b.askedArchives[archiveCanonical] = true
+	target := b.ninjaTarget(archiveCanonical)
+	if target == "" {
+		return nil
+	}
+	ctx := b.ctx
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	out, err := b.runner.Run(ctx, "ninja", "-C", b.physicalBuild, "-t", "inputs", target)
+	if err != nil {
+		b.logger.Debug("`ninja -t inputs %s` did not answer: %v", target, err)
+		return nil
+	}
+	objects := make([]string, 0)
+	for _, line := range strings.Split(string(out), "\n") {
+		input := strings.TrimSpace(strings.TrimSuffix(line, "\r"))
+		if strings.HasSuffix(input, ".o") || strings.HasSuffix(input, ".obj") {
+			objects = append(objects, input)
+		}
+	}
+	if len(objects) > 0 {
+		b.logger.Info("`ninja -t inputs %s` named %d object(s) build.ninja did not", target, len(objects))
+	}
+	b.archiveInputs[archiveCanonical] = objects
+	return objects
+}
+
+// hasNinjaGraph reports whether ninja has a build graph to be asked about
+// here. Without one the command would fail, and a remediation offering it
+// would promise an answer nothing can give.
+func (b *builder) hasNinjaGraph() bool {
+	return b.physicalBuild != "" && hasNinjaBuildGraph(b.physicalBuild)
+}
+
+// ninjaTarget names an archive the way ninja does: relative to the build
+// directory it was invoked in. A path that lies outside it is not a target of
+// this build, and asking about it would be asking about something else.
+func (b *builder) ninjaTarget(archiveCanonical string) string {
+	path := b.physical[archiveCanonical]
+	if path == "" || b.physicalBuild == "" {
+		return ""
+	}
+	relative, err := filepath.Rel(b.physicalBuild, path)
+	if err != nil || strings.HasPrefix(relative, "..") {
+		return ""
+	}
+	return filepath.ToSlash(relative)
 }
 
 // recordArchiveInputs remembers which objects an archive was built from, so

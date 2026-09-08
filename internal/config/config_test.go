@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -172,5 +173,40 @@ func TestAFullyPopulatedConfigurationStillLoads(t *testing.T) {
 	}
 	if !cfg.Output.Reproducible || cfg.Policy.Profile != "cra" || len(cfg.Components) != 1 {
 		t.Errorf("configuration did not survive loading: %+v", cfg)
+	}
+}
+
+// build.introspection.cmake was a switch that turned nothing on: the two cmake
+// shapes behind it could only have regenerated a File API reply, and
+// regenerating means configuring, which is a build command section 9.2
+// forbids. A setting that changes nothing is worse than an absent one, because
+// a reader believes it. The loader now refuses it like any other unknown
+// field, and the published schema does not offer it either.
+func TestTheCMakeIntrospectionGroupIsGone(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "sbomb.json")
+	body := `{"project":{"name":"a"},"build":{"dir":"b","introspection":{"cmake":true}}}`
+	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Load(path); err == nil {
+		t.Error("a group nothing can run was accepted as a configuration key")
+	}
+	if strings.Contains(Schema(), "cmake") {
+		t.Error("the published schema still offers the group")
+	}
+
+	// The four groups that do have a caller keep working, so this is a
+	// removal and not a regression of the block as a whole.
+	body = `{"project":{"name":"a"},"build":{"dir":"b","introspection":{"ninja":true,"git":true,"osPackages":true,"compiler":true}}}`
+	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !cfg.Build.Introspection.Ninja || !cfg.Build.Introspection.Git ||
+		!cfg.Build.Introspection.OSPackages || !cfg.Build.Introspection.Compiler {
+		t.Errorf("introspection block did not survive loading: %+v", cfg.Build.Introspection)
 	}
 }

@@ -642,3 +642,71 @@ already parsed, so mapping a component to a target name is evidence the build
 system states rather than a path prefix somebody has to keep in step with the
 directory layout. It is the only mapping strategy here that does not infer
 anything.
+
+## D29 — Five allowlisted commands are removed, and the compiler probe stops asking where the compiler lives
+
+§9.2 lists fifteen command shapes. Five of them could not be called by anything,
+and unlike the rest they could not be called *in principle*:
+
+* **`ninja -C <build-dir> -t deps`** — §9.2 names it as the example fallback and
+  `NINJA_DEPS_UNAVAILABLE` as its finding, so it was the one this pass most
+  expected to wire. It cannot be. The command reads `<build-dir>/.ninja_deps`,
+  which is the same file sbomb reads, so it can only add something when sbomb's
+  own parser fails — and that is exactly when it *writes*. Measured against
+  ninja 1.11: a log with a header ninja does not accept produces `bad deps log
+  signature or version; starting over` and the file is **deleted**; a log with a
+  good header and a damaged record produces `premature end of file; recovering`
+  and the file is **truncated and rewritten** (23 bytes in, 16 bytes out). With a
+  log sbomb can already read, the command adds nothing and leaves the file byte
+  for byte as it was. There is no case where it helps and no case where it is
+  read-only when it would. A tool pointed at a build directory it does not own
+  must leave it as it found it (D23), so the shape is gone; the missing evidence
+  is still named, which is more than the old code did — the read error was
+  swallowed entirely. `ninja -t inputs` and `ninja -t commands` were measured the
+  same way and touch nothing: they do not load the deps log at all.
+
+* **`cmake --version`, `cmake -E capabilities`** — their only specified purpose
+  is §10.1: learning which File API kinds this CMake supports, so that a missing
+  reply can be regenerated. The reply is written while CMake configures, and
+  configuring is a build command that §9.2 forbids. The way out is
+  `--allow-cmake-regenerate`, which is one of the absent flags (status.md). Until
+  it exists, the answer to "which kinds does this CMake support" is one no code
+  can act on: either the reply is there and is read, or it is not and
+  `CMAKE_FILE_API_UNAVAILABLE` says so. The whole `cmake` group goes with them,
+  including `build.introspection.cmake`, which is now an unknown configuration
+  key.
+* **`ninja --version`** — its use would be a version gate before `-t inputs`
+  (Ninja 1.10 and later). That gate is not built and should not be: a `-t inputs`
+  that fails is simply no answer, and spending a second process on asking whether
+  the first will be permitted doubles the process count to learn nothing.
+* **`git status --porcelain`** — the dirty state already arrives in the `-dirty`
+  suffix of `git describe --tags --always --dirty`, which runs at all three call
+  sites anyway. A second route to one answer is not more evidence, it is a second
+  truth that can disagree with the first; and its output grows with the working
+  tree while `describe` returns one line.
+
+They come back with the feature that needs them, not before: the `cmake` group
+belongs to `--allow-cmake-regenerate`, `ninja --version` to a version gate that
+someone can show is worth its process, and `ninja -t deps` to a ninja that can
+print a deps log without rewriting it.
+
+The compiler probes stay, and to make them reachable one rule changed.
+`RunCompilerProbe` used to require an *absolute* compiler path to lie inside a
+registered anchor. §9.2 binds path *arguments* to the anchors; the program is not
+an argument, and a compiler almost never lies in the project or the build tree —
+so the rule refused `/usr/bin/cc` while permitting the bare name `cc`, which PATH
+resolves to the same binary. It turned down the exact statement and accepted the
+vague one, and left the group with nothing it could run. The program must now
+exist; it need not be anchored. Every other bound is unchanged: the argv shape is
+one of three, there is no shell, the environment is `PATH` and `LC_ALL` only, and
+the invocation is recorded.
+
+What the probes then supply is less than the documentation used to claim.
+Measured against gcc 13.3.0, `-print-search-dirs` reports `install:`,
+`programs:` and `libraries:` and no include directories at all. The group
+therefore fills `ImplicitLinkDirs` (§24.1) and registers a `toolchain:` anchor;
+`ImplicitIncludeDirs` (§14.4) stays a matter for the File API, and
+`TOOLCHAIN_LAYOUT_UNKNOWN` keeps firing and now says what each way can answer.
+The `-E -v -x c++ /dev/null` that §24.4 names for those directories would need a
+new allowlist shape *and* reading stderr, which the runner discards on purpose;
+both widen the boundary and are not part of this change.
