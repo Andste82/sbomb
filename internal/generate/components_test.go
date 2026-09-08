@@ -6,8 +6,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/example/sbomb/internal/adapters/cmakeapi"
+	"github.com/example/sbomb/internal/anchors"
 	"github.com/example/sbomb/internal/config"
 	"github.com/example/sbomb/internal/domain"
+	"github.com/example/sbomb/internal/evidence"
+	"github.com/example/sbomb/internal/pathmodel"
 )
 
 func fileID(anchor, rel string) domain.FileID {
@@ -265,5 +269,256 @@ func TestPurlIsAssertedOnlyFromAPackageAnchor(t *testing.T) {
 	}
 	if !reported {
 		t.Error("UNKNOWN_PURL was not reported")
+	}
+}
+
+// mitText is a complete MIT licence with a named holder, so that resolution
+// succeeds and the tests below observe the root rather than a detection
+// failure.
+const mitText = `MIT License
+
+Copyright (c) 2024 Example Holder
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+`
+
+// write creates a file and the directories above it.
+func write(t *testing.T, path, contents string) {
+	t.Helper()
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// A library copied into the source tree has no package manifest and a
+// CMakeLists.txt nobody can read without interpreting CMake. Its licence file
+// is the only marker it reliably carries, and without it the library is not a
+// component at all -- it disappears into the manufacturer's own application.
+func TestLicenceFileMarksAComponentThatHasNoManifest(t *testing.T) {
+	root := t.TempDir()
+	write(t, filepath.Join(root, "third_party", "tinyjson", "LICENSE"), mitText)
+	write(t, filepath.Join(root, "third_party", "tinyjson", "include", "tinyjson.h"), "#pragma once\n")
+
+	file := domain.UsedFile{ID: fileID("project", "third_party/tinyjson/include/tinyjson.h")}
+	physical := map[string]string{
+		file.ID.Canonical(): filepath.Join(root, "third_party", "tinyjson", "include", "tinyjson.h"),
+	}
+	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
+		physical, map[string]string{"project": root}, nil)
+
+	_, name, _, _, detectedBy := resolver.resolve(file)
+	if name != "tinyjson" {
+		t.Fatalf("component name = %q, want tinyjson; the library was absorbed into the project", name)
+	}
+	if detectedBy != "package-metadata:LICENSE" {
+		t.Errorf("detectedBy = %q, want the licence file that decided it", detectedBy)
+	}
+}
+
+// The project's own top-level licence describes the project. Treating it as a
+// boundary would rename the project's component after its directory.
+func TestTheProjectsOwnLicenceIsNotABoundary(t *testing.T) {
+	root := t.TempDir()
+	write(t, filepath.Join(root, "LICENSE"), mitText)
+	write(t, filepath.Join(root, "src", "main.c"), "int main(void){return 0;}\n")
+
+	file := domain.UsedFile{ID: fileID("project", "src/main.c")}
+	physical := map[string]string{file.ID.Canonical(): filepath.Join(root, "src", "main.c")}
+	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
+		physical, map[string]string{"project": root}, nil)
+
+	_, name, _, _, detectedBy := resolver.resolve(file)
+	if name != "firmware" || detectedBy != "anchor:project" {
+		t.Errorf("resolve() = (%s, %s), want the project anchor", name, detectedBy)
+	}
+}
+
+// A NOTICE is attribution material, not a licence grant. A directory carrying
+// only one is not thereby a separate work.
+func TestNoticeAloneIsNotABoundary(t *testing.T) {
+	root := t.TempDir()
+	write(t, filepath.Join(root, "src", "vendorbits", "NOTICE"), "This product includes software.\n")
+	write(t, filepath.Join(root, "src", "vendorbits", "helper.c"), "void helper(void){}\n")
+
+	file := domain.UsedFile{ID: fileID("project", "src/vendorbits/helper.c")}
+	physical := map[string]string{file.ID.Canonical(): filepath.Join(root, "src", "vendorbits", "helper.c")}
+	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
+		physical, map[string]string{"project": root}, nil)
+
+	if _, name, _, _, _ := resolver.resolve(file); name != "firmware" {
+		t.Errorf("component name = %q, want firmware; a NOTICE must not define a component", name)
+	}
+}
+
+// The root is where the component begins, not where the surviving files
+// happen to sit. This is the defect that made a licence text depend on
+// --gc-sections.
+func TestComponentRootDoesNotFollowTheUsedFiles(t *testing.T) {
+	root := t.TempDir()
+	write(t, filepath.Join(root, "dep", "mit-lib", "LICENSE"), mitText)
+	for _, name := range []string{"a.c", "b.c", "c.c"} {
+		write(t, filepath.Join(root, "dep", "mit-lib", "src", name), "void f(void){}\n")
+	}
+
+	physical := map[string]string{}
+	all := []domain.UsedFile{}
+	for _, name := range []string{"a.c", "b.c", "c.c"} {
+		file := domain.UsedFile{ID: fileID("project", "dep/mit-lib/src/"+name)}
+		physical[file.ID.Canonical()] = filepath.Join(root, "dep", "mit-lib", "src", name)
+		all = append(all, file)
+	}
+	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
+		physical, map[string]string{"project": root}, nil)
+
+	// The linker keeping one source or all three must not move the root.
+	for _, files := range [][]domain.UsedFile{all[:1], all} {
+		component := &domain.Component{ID: "component:mit-lib", Name: "mit-lib", DetectedBy: "package-metadata:LICENSE"}
+		got := resolver.resolveRoot(component, files)
+		want := filepath.Join(root, "dep", "mit-lib")
+		if got.Physical != want {
+			t.Errorf("with %d used file(s): root = %q, want %q", len(files), got.Physical, want)
+		}
+		if got.ID.Canonical() != "project:dep/mit-lib" {
+			t.Errorf("with %d used file(s): root identity = %q", len(files), got.ID.Canonical())
+		}
+		if got.Source == rootSourceUsedFiles {
+			t.Errorf("with %d used file(s): the root was guessed from the used files", len(files))
+		}
+	}
+}
+
+// A licence at the component root resolves for a library whose sources sit one
+// level down. Before the root became a resolved fact this was NOASSERTION.
+func TestLicenceResolvesFromTheComponentRootNotTheSourceDirectory(t *testing.T) {
+	root := t.TempDir()
+	write(t, filepath.Join(root, "dep", "mit-lib", "LICENSE"), mitText)
+	write(t, filepath.Join(root, "dep", "mit-lib", "src", "a.c"), "void f(void){}\n")
+
+	file := domain.UsedFile{ID: fileID("project", "dep/mit-lib/src/a.c")}
+	physical := map[string]string{file.ID.Canonical(): filepath.Join(root, "dep", "mit-lib", "src", "a.c")}
+	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
+		physical, map[string]string{"project": root}, nil)
+
+	component := &domain.Component{ID: "component:mit-lib", Name: "mit-lib", DetectedBy: "package-metadata:LICENSE"}
+	resolver.enrichComponent(component, []domain.UsedFile{file})
+
+	if len(component.Licenses) == 0 || component.Licenses[0].Expression != "MIT" {
+		t.Fatalf("licences = %+v, want MIT read from the component root", component.Licenses)
+	}
+	if got := component.Properties["sbomb:component:root"]; len(got) != 1 || got[0] != "project:dep/mit-lib" {
+		t.Errorf("sbomb:component:root = %v, want [project:dep/mit-lib]", got)
+	}
+}
+
+// When nothing named a root, the fallback is used and says so. Silence would
+// leave a guessed root indistinguishable from a resolved one.
+func TestGuessedRootIsReported(t *testing.T) {
+	root := t.TempDir()
+	write(t, filepath.Join(root, "src", "main.c"), "int main(void){return 0;}\n")
+
+	file := domain.UsedFile{ID: fileID("abs", "opt/vendor/blob.c")}
+	physical := map[string]string{file.ID.Canonical(): filepath.Join(root, "src", "main.c")}
+	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
+		physical, map[string]string{"project": root}, nil)
+
+	component := &domain.Component{ID: "unknown:abs/opt", Name: "unknown:abs/opt", DetectedBy: "unresolved"}
+	findings := resolver.enrichComponent(component, []domain.UsedFile{file})
+
+	var reported bool
+	for _, finding := range findings {
+		if finding.ID == "COMPONENT_ROOT_UNRESOLVED" {
+			reported = true
+		}
+	}
+	if !reported {
+		t.Errorf("findings = %+v, want COMPONENT_ROOT_UNRESOLVED", findings)
+	}
+}
+
+// Strategy 5: the configuration names a CMake target, and the File API says
+// which sources that target owns. Nothing is inferred from where the files sit.
+func TestConfiguredCMakeTargetMapsItsSources(t *testing.T) {
+	file := domain.UsedFile{ID: fileID("project", "libs/crypto/aes.c")}
+	cfg := config.Config{
+		Project:    config.Project{Name: "firmware"},
+		Components: []config.Component{{Targets: config.StringList{"crypto"}, Type: "library"}},
+	}
+	resolver := newComponentResolver(cfg, map[string]string{}, map[string]string{}, nil)
+	resolver.setTargets(map[string]string{file.ID.Canonical(): "crypto"})
+
+	_, name, componentType, _, detectedBy := resolver.resolve(file)
+	if name != "crypto" || componentType != "library" {
+		t.Fatalf("resolve() = (%s, %s), want the component the target maps to", name, componentType)
+	}
+	if detectedBy != "cmake-target:crypto" {
+		t.Errorf("detectedBy = %q, want cmake-target:crypto", detectedBy)
+	}
+}
+
+// A curated path still outranks a target: section 19.2 puts configuration
+// first, and both are configuration, so the more specific statement wins.
+func TestCuratedPathOutranksATarget(t *testing.T) {
+	file := domain.UsedFile{ID: fileID("project", "libs/crypto/aes.c")}
+	cfg := config.Config{
+		Project: config.Project{Name: "firmware"},
+		Components: []config.Component{
+			{Targets: config.StringList{"crypto"}, Name: "by-target"},
+			{Path: "libs/crypto", Name: "by-path"},
+		},
+	}
+	resolver := newComponentResolver(cfg, map[string]string{}, map[string]string{}, nil)
+	resolver.setTargets(map[string]string{file.ID.Canonical(): "crypto"})
+
+	if _, name, _, _, _ := resolver.resolve(file); name != "by-path" {
+		t.Errorf("component name = %q, want by-path", name)
+	}
+}
+
+// A source two targets compile is left unmapped. The build system said two
+// things, and choosing one of them would be the guess this tool refuses.
+func TestASourceTwoTargetsShareIsNotMapped(t *testing.T) {
+	result, err := anchors.Assemble(anchors.Options{
+		Flavor: pathmodel.DefaultFlavor(), ProjectRoot: "/src", BuildRoot: "/bd",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	b := newBuilder(evidence.New(), result, "/bd", "/bd", NewLogger(0, nil))
+	model := &cmakeapi.Model{
+		SourceRoot: "/src",
+		Configurations: []cmakeapi.Configuration{{
+			Name: "Debug",
+			Targets: []cmakeapi.Target{
+				{Name: "app", Sources: []cmakeapi.Source{{Path: "shared.c"}, {Path: "main.c"}}},
+				{Name: "tests", Sources: []cmakeapi.Source{{Path: "shared.c"}}},
+			},
+		}},
+	}
+
+	byFile := targetsByFile(model, b)
+	if owner, mapped := byFile["project:shared.c"]; mapped {
+		t.Errorf("shared.c maps to %q; a contested source must stay unmapped", owner)
+	}
+	if byFile["project:main.c"] != "app" {
+		t.Errorf("main.c maps to %q, want app", byFile["project:main.c"])
 	}
 }

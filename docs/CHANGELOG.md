@@ -1,5 +1,64 @@
 # Changelog
 
+## Unreleased
+
+### A vendored library is a component again
+
+A library copied into the source tree has no `conanfile.txt` and no
+`vcpkg.json`, and its `CMakeLists.txt` cannot be read without interpreting
+CMake. Nothing marked it, so nothing found it: it fell through to the anchor
+root and became part of the manufacturer's own application component. It did
+not appear in the SBOM as a component at all, and no finding said so.
+
+A recognized licence file now marks a component boundary. It is an existence
+check and not a parse, and a directory carrying its own licence is a distinct
+work by convention. The search still stops at the anchor root, so a project's
+own top-level licence can never be claimed by a dependency, and the nearest
+marker wins, so a library vendored inside another library is split out rather
+than hidden in it.
+
+`NOTICE` and `COPYRIGHT` mark nothing. They are attribution material, not a
+licence grant.
+
+### The component root no longer depends on what the linker kept
+
+Where a component begins decided where its licence file and its version header
+were read from, and it was worked out separately from everything else: the
+deepest common directory of the files that were *used*. A library with three
+sources in `src/` of which the linker kept one had the root `src/`, so the
+`LICENSE` one level up was never opened, and the answer moved when
+`--gc-sections` moved it.
+
+The root is a resolved fact now, settled by the same strategy that named the
+component: the configured `path`, the package-manager root, the directory the
+marker file was found in, or the anchor root. It is published as
+`sbomb:component:root`. The common directory of the used files is the last
+resort, and taking it emits `COMPONENT_ROOT_UNRESOLVED`, because a guessed root
+should not look like a resolved one.
+
+Licences that were NOASSERTION only because the root was too deep now resolve,
+which is a change in output for anyone whose dependencies keep their sources in
+a subdirectory.
+
+### Components can be mapped by CMake target
+
+`components[].targets` names CMake targets whose sources belong to a component.
+The File API states which sources a target owns, so this is the build system's
+own answer rather than a path prefix somebody has to keep in step with the
+directory layout — useful where a dependency's files are spread over several
+directories.
+
+A source two targets both compile stays unmapped and falls through to the next
+strategy. The build system said two things; picking one would be a guess.
+
+### `CMakeLists.txt` is not a component marker, and will not be
+
+Section 19.2 listed it. Detecting `project()` means interpreting CMake —
+variables, `include()`, macros, `if()`, generated files — and the failure mode
+is the wrong one: a false positive invents a component, with an invented
+boundary, licence and name. Recorded as deviation D27, with the two signals
+that cover the same ground without interpreting anything.
+
 ## 0.14.0
 
 ### A cached binary is checked again before it is used

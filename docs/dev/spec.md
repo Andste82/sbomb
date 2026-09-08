@@ -875,7 +875,15 @@ Every used file MUST have exactly one **primary** grouping component. Mapping st
 7. Anchor root itself (e.g. everything under `pkg:conan/mbedtls` maps to that package).
 8. Unknown component.
 
+Strategy 6 recognizes a directory as a component root by the files it carries: `conanfile.py/txt`, `vcpkg.json`, `idf_component.yml`, `Cargo.toml`, `west.yml`, `CONTROL` — **and a recognized licence file** (`LICENSE`, `LICENCE`, `COPYING`, with the optional `.txt`/`.md` extension of §22.3). A directory that carries its own licence is a distinct work by convention, and for a library that was simply copied into the source tree it is the only marker there is. A licence file does **not** mark a boundary at the anchor root itself: a project's own top-level licence describes the project, not a dependency inside it.
+
+`NOTICE` and `COPYRIGHT` are not boundary markers. They are attribution material rather than a licence grant, and a directory carrying only a NOTICE is not thereby a separate work.
+
+`CMakeLists.txt` is **not** a marker, although it was listed as one in earlier drafts of this section; see deviation D22.
+
 **Longest matching path prefix wins** within a strategy. A directory named `vendor/`, `dep/`, `sdk/`, or `third_party/` does not by itself define a component.
+
+**The component root is a resolved fact, not a recomputation.** Every mapped component has a root, settled by the same strategy that named it: the curated `components[].path`, the package-manager root, the marker directory strategy 6 stopped at, or the anchor root when the anchor *is* the component. The deepest common directory of the component's *used* files is the last resort, and using it emits `COMPONENT_ROOT_UNRESOLVED` (info) — because that directory moves with whichever files the linker kept, so a licence or a version read from it would move too. The resolved root is published as `sbomb:component:root`.
 
 ### 19.3 Unknown Components
 
@@ -2027,6 +2035,7 @@ Severity shown is the default and may be changed via `policy.severityOverrides`.
 | `STALE_BUILD_EVIDENCE` | error | `failOnStaleBuildArtifacts` | Timestamps or hashes indicate a stale build |
 | `STALE_CMAKE_CONFIGURATION` | warning | `failOnStaleBuildArtifacts` | CMake inputs newer than the File API reply |
 | `UNKNOWN_COMPONENT` | warning | `failOnUnknownComponent` | File could not be mapped to a component |
+| `COMPONENT_ROOT_UNRESOLVED` | info | — | Component root fell back to the common directory of the used files |
 | `UNKNOWN_VERSION` | warning | `failOnUnknownVersion` | Component version could not be resolved |
 | `UNKNOWN_PURL` | info | — | No package type assertable |
 | `UNKNOWN_LICENSE` | warning | `failOnUnknownLicense` | Component license is NOASSERTION |

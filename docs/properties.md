@@ -13,7 +13,7 @@ not understand them can ignore them; one that does can audit the answer.
 ## Catalogue
 
 <!-- BEGIN GENERATED CATALOGUE -->
-This build writes 34 of the 72 properties below. The rest are specified and
+This build writes 35 of the 72 properties below. The rest are specified and
 reserved: they describe evidence this version does not yet record, and no
 document sbomb writes will contain them. They are listed and marked so that the
 table is the whole catalogue rather than a snapshot of one version.
@@ -37,7 +37,7 @@ table is the whole catalogue rather than a snapshot of one version.
 | `sbomb:cdx:structuredProperty` | Grouping components | structured | unstructured | emitted |
 | `sbomb:component:detectedBy` | Grouping components | — | emitted |
 | `sbomb:component:headerOnly` | Grouping components | — | reserved |
-| `sbomb:component:root` | Grouping components | — | reserved |
+| `sbomb:component:root` | Grouping components | — | emitted |
 | `sbomb:component:scope` | Grouping components | project | third-party | sdk | toolchain | system | emitted |
 | `sbomb:component:vcsCommit` | Grouping components | — | emitted |
 | `sbomb:component:vcsDirty` | Grouping components | — | emitted |

@@ -601,3 +601,44 @@ Two names in the appendix were not the ones the writer uses. The appendix said
 `sbomb:path:canonical` and `sbomb:evidence:header:class`. The names in shipped
 documents win — renaming them would break a consumer that already reads them —
 so the appendix is corrected rather than the code.
+
+## D27 — `CMakeLists.txt` is not a component-boundary marker
+
+Section 19.2 listed "`CMakeLists.txt` with `project()`" among the files that
+mark a directory as a component root. It is not implemented and should not be.
+
+Deciding whether a `CMakeLists.txt` calls `project()` means interpreting CMake.
+The call can come from a variable, from an `include()`, from a macro, from
+inside an `if()`, or from a file another step generated. There is no reliable
+static answer, and the failure mode is the wrong one for this tool: a false
+positive **invents** a component rather than missing one, and an invented
+component carries an invented boundary, an invented licence and an invented
+name into a document somebody signs.
+
+The bare existence of a `CMakeLists.txt` is no marker either, because every
+subdirectory of a CMake project has one; using it would turn `src/` and
+`src/drivers/` into components.
+
+Two signals cover the same case without interpreting anything:
+
+* **A recognized licence file** (§19.2). Existence check, no parsing. A
+  directory carrying its own licence is a distinct work by convention, and a
+  library copied into the source tree reliably has one even when it has no
+  package manifest.
+* **CMake targets**, which the File API reports directly
+  (`cmakeapi.Target.Sources`). That is CMake's own statement about which source
+  belongs to which target, not an inference about a text file.
+
+## D28 — Component-mapping strategies 4 and 5 are still open
+
+D7 records strategies 2 through 5 as closed and names them "Conan, vcpkg,
+FetchContent and git submodules". Those are strategies 2 and 3 of §19.2. The
+numbering in D7 is wrong: strategy 4 is the known SDK layout, which waits on
+the SDK adapter, and strategy 5 is the explicit CMake target mapping from
+configuration.
+
+Strategy 5 is worth having on its own merit. `cmakeapi.Target.Sources` is
+already parsed, so mapping a component to a target name is evidence the build
+system states rather than a path prefix somebody has to keep in step with the
+directory layout. It is the only mapping strategy here that does not infer
+anything.

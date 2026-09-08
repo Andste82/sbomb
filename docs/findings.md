@@ -14,7 +14,7 @@ same build produce identical output.
 
 <!-- BEGIN GENERATED CATALOGUE -->
 
-This build emits 40 of the 52 identifiers below. The rest are specified and
+This build emits 41 of the 53 identifiers below. The rest are specified and
 reserved: they describe evidence this version does not yet read, and a run will
 never report them. They are listed and marked so that the table is the whole
 catalogue rather than a snapshot of one version.
@@ -26,6 +26,7 @@ catalogue rather than a snapshot of one version.
 | `AMBIGUOUS_FINAL_DELIVERABLE` | error | always (exit 1) | Discovery found several candidates | emitted |
 | `ARCHIVE_MEMBERS_UNRESOLVED` | warning | — | Archive used, member-level detail unavailable | emitted |
 | `CMAKE_FILE_API_UNAVAILABLE` | warning | — | No reply directory and regeneration not permitted | emitted |
+| `COMPONENT_ROOT_UNRESOLVED` | info | — | Component root fell back to the common directory of the used files | emitted |
 | `CONFIG_DEPRECATED_OPTION` | warning | — | Deprecated configuration key used | reserved |
 | `CRA_FIELD_INCOMPLETE` | error | `cra` profile | Aggregate: one or more §1.5(1) fields missing on some component | reserved |
 | `DEBUG_INFO_UNAVAILABLE` | info | — | Artifact stripped or no DWARF | emitted |
