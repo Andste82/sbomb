@@ -71,7 +71,7 @@ func (a vcpkg) Discover(options Options) ([]Package, []domain.Finding) {
 			files, listFindings := a.installedFiles(tree, found.Name)
 			found.Files = files
 			findings = append(findings, listFindings...)
-			if found.Version == "" {
+			if found.Version.Value == "" {
 				findings = append(findings, domain.Finding{
 					ID: "UNKNOWN_VERSION", Severity: domain.SeverityWarning,
 					Subject: domain.Subject{Kind: "component", Ref: found.Name},
@@ -232,37 +232,46 @@ func (a vcpkg) readPackage(path, root string) (Package, bool) {
 		return Package{}, false
 	}
 	found := Package{
-		Name:              entry.Name,
-		Version:           entry.VersionInfo,
-		VersionSource:     "vcpkg",
-		VersionConfidence: domain.ConfidenceHigh,
-		Manager:           a.Manager(),
-		AnchorKey:         "pkg:vcpkg/" + entry.Name,
+		Name:      entry.Name,
+		Manager:   a.Manager(),
+		AnchorKey: "pkg:vcpkg/" + entry.Name,
 		// The share directory is what belongs to this package by layout and
 		// holds its copyright file; headers and libraries are merged into the
 		// triplet tree and cannot be attributed to one package from the layout
 		// alone, which is what the installed file list answers instead.
 		Roots: []string{filepath.Join(root, "share", entry.Name)},
 	}
-	if found.Version == "" {
-		found.VersionSource = ""
-		found.VersionConfidence = ""
-	}
+	// Everything below comes out of the one document vcpkg wrote when it
+	// installed the port, so all four claims share its standing. It is install
+	// state and not a bundled SBOM: vcpkg produced it, the upstream project did
+	// not ship it. The distinction is idle while nothing reads an upstream
+	// SBOM, and it decides the winner as soon as something does.
+	found.Take(FieldVersion, Claim{
+		Value: entry.VersionInfo, Source: "vcpkg", Rank: RankInstallState,
+		Confidence: domain.ConfidenceHigh,
+	})
 	// NOASSERTION is vcpkg saying it does not know, which is not a licence.
-	if declared := firstNonNoAssertion(entry.LicenseDeclared, entry.LicenseConcluded); declared != "" {
-		found.License = declared
-	}
-	if supplier := strings.TrimPrefix(entry.Supplier, "Organization: "); supplier != "" && supplier != "NOASSERTION" {
-		found.Supplier = supplier
+	found.Take(FieldLicense, Claim{
+		Value:  firstNonNoAssertion(entry.LicenseDeclared, entry.LicenseConcluded),
+		Source: "vcpkg", Rank: RankInstallState,
+	})
+	if supplier := strings.TrimPrefix(entry.Supplier, "Organization: "); supplier != "NOASSERTION" {
+		found.Take(FieldSupplier, Claim{Value: supplier, Source: "vcpkg", Rank: RankInstallState})
 	}
 	for _, reference := range entry.ExternalRefs {
 		if reference.ReferenceType == "purl" && reference.ReferenceLocator != "" {
-			found.PURL = reference.ReferenceLocator
+			found.Take(FieldPURL, Claim{Value: reference.ReferenceLocator, Source: "vcpkg", Rank: RankInstallState})
 			break
 		}
 	}
-	if found.PURL == "" && found.Version != "" {
-		found.PURL = "pkg:vcpkg/" + entry.Name + "@" + found.Version
+	// A purl of our own is a fallback for a document that stated none, not a
+	// second opinion about the one it did state, so it is only offered when
+	// nothing has claimed the field.
+	if found.PURL.Value == "" && found.Version.Value != "" {
+		found.Take(FieldPURL, Claim{
+			Value:  "pkg:vcpkg/" + entry.Name + "@" + found.Version.Value,
+			Source: a.Manager(), Rank: RankInstallState,
+		})
 	}
 	if copyright := filepath.Join(found.Root(), "copyright"); fileExists(copyright) {
 		found.LicenseFile = copyright

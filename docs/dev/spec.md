@@ -1001,6 +1001,30 @@ An adapter MAY also supply the list of files the manager itself recorded as belo
 
 Adapters MUST NOT add files to the used set. A package that no used file belongs to is therefore correctly absent from the document — it was installed but never linked, so it is not part of the product — but its absence MUST be reported as `PACKAGE_NOT_LINKED` (info) rather than passing in silence.
 
+### 21.1 Metadata Provenance
+
+**[New in v3.1.]**
+
+One package is often described by more than one file: a manifest, a lock file, a file list the manager wrote while installing, an SBOM the upstream shipped, the checkout itself. Each metadata value an adapter produces — `version`, `license`, `supplier`, `purl` — MUST therefore carry the origin it came from and the **rank** of that origin.
+
+Rank is a rank of origins, not a confidence. §20.3 says how sure the tool is about a value; rank says how authoritative the place it came from is. The two MUST NOT be merged, and no implementation may derive one from the other: a manifest may state a version exactly — high confidence — and still describe a revision that is no longer checked out, so it loses to a weaker but current answer.
+
+Ranks, strongest first:
+
+| Rank | Origin |
+|---|---|
+| 5 | The working copy itself, asked through introspection (§19.4) |
+| 4 | An SBOM the upstream shipped inside the package, at the package root |
+| 3 | The installed state the owning manager recorded: file list, lock file, resolved dependency, generated config |
+| 2 | The manifest the owning manager declares |
+| 1 | Any other manifest file in the same directory |
+
+The working copy outranks every declared origin because a declaration says what was asked for and the checkout says what is there, including edits made since. Curated configuration is not in this table: §20.2 puts it above all package-manager metadata, and that is unchanged.
+
+Where several origins contribute to one field, the document MUST publish the value of the highest-ranked contribution, and `VersionSource` (§20.3) MUST name that contribution's origin and not another. Where two contributions rank equally, the one found first wins, so that the same evidence always produces the same document. A contribution with no value is not a contribution and MUST be dropped rather than recorded as an origin: an origin without a value would publish identity evidence for a version nobody stated.
+
+Contributions that lost MUST be retained rather than discarded. They are what a report of two origins disagreeing is made of.
+
 ---
 
 ## 22. License Resolution

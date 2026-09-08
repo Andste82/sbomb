@@ -89,23 +89,37 @@ func (a fetchContent) Discover(options Options) ([]Package, []domain.Finding) {
 		if repository != "" {
 			found.VCSURL = NormalizeVCSURL(repository)
 		}
-		if tag != "" {
-			found.Version = strings.TrimPrefix(tag, "v")
-			found.VersionSource = "fetchcontent"
+		// CMake generated the populate script out of the declaration and then
+		// ran it, so the tag in it is the revision that was actually checked
+		// out, which is install state rather than the declaration itself.
+		found.Take(FieldVersion, Claim{
+			Value:  strings.TrimPrefix(tag, "v"),
+			Source: "fetchcontent",
+			Rank:   RankInstallState,
 			// The declared tag is exact package-manager metadata (section 20.3).
-			found.VersionConfidence = domain.ConfidenceHigh
-		}
+			Confidence: domain.ConfidenceHigh,
+		})
 
 		a.refineFromGit(options, &found, &findings)
 
-		if found.Version == "" {
+		if found.Version.Value == "" {
 			findings = append(findings, domain.Finding{
 				ID: "UNKNOWN_VERSION", Severity: domain.SeverityWarning,
 				Subject: domain.Subject{Kind: "component", Ref: name},
 				Message: "FetchContent populated this dependency but named no tag or commit for it",
 			})
 		}
-		found.PURL = GenericPURL(found.Name, found.Version, found.VCSURL, found.Commit)
+		// The purl restates whichever version claim won, so it is taken with
+		// that claim's standing; where no version was found it is still this
+		// adapter's own statement about the checkout it located.
+		purlRank := found.Version.Rank
+		if purlRank == RankNone {
+			purlRank = RankInstallState
+		}
+		found.Take(FieldPURL, Claim{
+			Value:  GenericPURL(found.Name, found.Version.Value, found.VCSURL, found.Commit),
+			Source: a.Manager(), Rank: purlRank,
+		})
 		packages = append(packages, found)
 	}
 	return packages, findings
@@ -152,15 +166,21 @@ func (fetchContent) refineFromGit(options Options, found *Package, findings *[]d
 	}
 	found.Dirty = strings.HasSuffix(value, "-dirty")
 	exact := !found.Dirty && !strings.Contains(value, "-g")
-	found.Version = strings.TrimPrefix(strings.TrimSuffix(value, "-dirty"), "v")
-	found.VersionSource = "git-describe"
-	if exact {
-		found.VersionConfidence = domain.ConfidenceHigh
-	} else {
+	confidence := domain.ConfidenceHigh
+	if !exact {
 		// Section 20.3: a describe with distance or a dirty tree is weaker
 		// evidence than an exact tag.
-		found.VersionConfidence = domain.ConfidenceMedium
+		confidence = domain.ConfidenceMedium
 	}
+	// The checkout outranks the generated script even when it answers with less
+	// confidence: the script says which revision was asked for, the checkout
+	// says which one is there now.
+	found.Take(FieldVersion, Claim{
+		Value:      strings.TrimPrefix(strings.TrimSuffix(value, "-dirty"), "v"),
+		Source:     "git-describe",
+		Rank:       RankObservedCheckout,
+		Confidence: confidence,
+	})
 	if commit, err := options.Runner.Run(options.Context, "git", "-C", found.Root(), "rev-parse", "HEAD"); err == nil {
 		found.Commit = strings.TrimSpace(string(commit))
 	}

@@ -75,7 +75,7 @@ func (a submodule) Discover(options Options) ([]Package, []domain.Finding) {
 				VCSURL:    NormalizeVCSURL(entry.url),
 			}
 			a.refineFromGit(options, &found, &findings)
-			if found.Version == "" {
+			if found.Version.Value == "" {
 				findings = append(findings, domain.Finding{
 					ID: "UNKNOWN_VERSION", Severity: domain.SeverityWarning,
 					Subject:     domain.Subject{Kind: "component", Ref: name},
@@ -83,7 +83,17 @@ func (a submodule) Discover(options Options) ([]Package, []domain.Finding) {
 					Remediation: "Enable git introspection, or set components[].version for this submodule.",
 				})
 			}
-			found.PURL = GenericPURL(found.Name, found.Version, found.VCSURL, found.Commit)
+			// The purl restates whichever version claim won, so it is taken
+			// with that claim's standing; without introspection there is no
+			// version and the purl rests on .gitmodules alone.
+			purlRank := found.Version.Rank
+			if purlRank == RankNone {
+				purlRank = RankDeclaredManifest
+			}
+			found.Take(FieldPURL, Claim{
+				Value:  GenericPURL(found.Name, found.Version.Value, found.VCSURL, found.Commit),
+				Source: a.Manager(), Rank: purlRank,
+			})
 			packages = append(packages, found)
 
 			if !visitedDirs[submoduleRoot] {
@@ -122,13 +132,19 @@ func (submodule) refineFromGit(options Options, found *Package, findings *[]doma
 	found.Dirty = strings.HasSuffix(value, "-dirty")
 	trimmed := strings.TrimSuffix(value, "-dirty")
 	exact := !found.Dirty && !strings.Contains(trimmed, "-g")
-	found.Version = strings.TrimPrefix(trimmed, "v")
-	found.VersionSource = "git-describe"
-	if exact {
-		found.VersionConfidence = domain.ConfidenceHigh
-	} else {
-		found.VersionConfidence = domain.ConfidenceMedium
+	confidence := domain.ConfidenceHigh
+	if !exact {
+		confidence = domain.ConfidenceMedium
 	}
+	// .gitmodules names no revision at all, so the checkout is the only origin
+	// there is for a version here -- and it would outrank a declaration anyway,
+	// because it reports what the tree holds rather than what was asked for.
+	found.Take(FieldVersion, Claim{
+		Value:      strings.TrimPrefix(trimmed, "v"),
+		Source:     "git-describe",
+		Rank:       RankObservedCheckout,
+		Confidence: confidence,
+	})
 	if commit, err := options.Runner.Run(options.Context, "git", "-C", found.Root(), "rev-parse", "HEAD"); err == nil {
 		found.Commit = strings.TrimSpace(string(commit))
 	}

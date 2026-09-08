@@ -269,7 +269,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	findings = append(findings, packageFindings...)
 	packageAnchors := make([]anchors.PackageAnchor, 0, len(packages))
 	for _, entry := range packages {
-		logger.Info("Package %s %s from %s at %s", entry.Name, entry.Version, entry.Manager, entry.Root())
+		logger.Info("Package %s %s from %s at %s", entry.Name, entry.Version.Value, entry.Manager, entry.Root())
 		// Exactly one anchor per package, on the identity root. Section 7.2
 		// gives a package a single version-free key, so a second key for a
 		// second root would name a package that does not exist -- and

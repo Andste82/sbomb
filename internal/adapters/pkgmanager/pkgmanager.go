@@ -36,20 +36,29 @@ type Package struct {
 	// only when the evidence chain reached it anyway.
 	Files []string
 
-	Version           string
-	VersionSource     string
-	VersionConfidence domain.Confidence
-
+	// Version, Supplier, License and PURL are claims rather than bare values:
+	// each carries the origin it came from and how strongly that origin counts
+	// (section 21.1). Several files can describe one package, and without the
+	// origin there is no way to say which of them the document published.
+	// Write them only through Take, never directly.
+	Version Claim
 	// Supplier is filled only when the manager states it. Section 20.5 forbids
 	// inferring it from a repository host.
-	Supplier string
+	Supplier Claim
 	// License is the manager's declared expression, which section 22.2 ranks
 	// above a licence file found in the component root.
-	License string
+	License Claim
+	PURL    Claim
+
+	// Superseded holds every claim that lost, with the field it was about. It
+	// is filled here and read nowhere in this release; reporting a disagreement
+	// between two origins is the next step, and dropping the losers now would
+	// leave nothing to report.
+	Superseded []Contribution
+
 	// LicenseFile is a licence file the manager itself placed in the package,
 	// which is stronger evidence than one found by walking a directory.
 	LicenseFile string
-	PURL        string
 
 	// VCSURL, Commit and Dirty describe the checkout, when the manager used
 	// one. The URL is normalized and stripped of credentials (section 19.4).
@@ -107,6 +116,13 @@ var adapters = []Adapter{
 // Discover runs every adapter and returns the union, sorted by name so the
 // result is deterministic. A package claimed by two managers keeps the first,
 // which is the order above.
+//
+// That is a rejection and not a merge, deliberately: the ranking of section
+// 21.1 orders the origins one manager knows about, and two managers claiming
+// one directory is a different problem -- they disagree about who owns the
+// package, not about what its version is. Folding the second one's claims into
+// the first would publish metadata for a package the winning manager never
+// installed.
 func Discover(options Options) ([]Package, []domain.Finding) {
 	if options.Context == nil {
 		options.Context = context.Background()
