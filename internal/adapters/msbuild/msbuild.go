@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"unicode/utf16"
@@ -82,6 +83,14 @@ func DecodeTLog(data []byte) (string, error) {
 	return string(utf16.Decode(units)), nil
 }
 
+func portableBaseStem(p string) string {
+	s := path.Base(strings.ReplaceAll(p, "\\", "/"))
+	if ext := path.Ext(s); ext != "" {
+		s = strings.TrimSuffix(s, ext)
+	}
+	return s
+}
+
 func parseTLog(text, name string, evidence *Evidence) {
 	pendingSource := ""
 	pendingSources := []string{}
@@ -151,7 +160,7 @@ func parseTLog(text, name string, evidence *Evidence) {
 		if len(pendingSources) > 0 && (strings.HasSuffix(lower, ".obj") || strings.HasSuffix(lower, ".res")) {
 			matchingSource := pendingSources[0]
 			for index, source := range pendingSources {
-				if strings.EqualFold(strings.TrimSuffix(filepath.Base(source), filepath.Ext(source)), strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))) {
+				if strings.EqualFold(portableBaseStem(source), portableBaseStem(path)) {
 					matchingSource = source
 					pendingSources = append(pendingSources[:index], pendingSources[index+1:]...)
 					break
