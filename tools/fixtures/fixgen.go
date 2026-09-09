@@ -16,23 +16,32 @@ const SentinelBuildRoot = "/__fixture_build__"
 var hostPathFragments = []string{
 	"/home/",
 	"/Users/",
+	"C:/Users/",
 	"C:\\Users",
 	"/workspaces/",
 	"/workspace/",
 }
 
 func Toolchains() []string {
-	return []string{"gcc-ninja", "gcc-make", "clang-ninja", "arm-none-eabi", "mingw-w64"}
+	return []string{"gcc-ninja", "gcc-make", "clang-ninja", "arm-none-eabi", "mingw-w64", "msvc-ninja"}
 }
 
 func Projects() []string {
-	return []string{"p01-hello", "p02-static", "p03-dupnames", "p04-generated", "p05-headeronly"}
+	return []string{"p01-hello", "p02-static", "p03-dupnames", "p04-generated", "p05-headeronly", "p06-unity", "p07-pch", "p08-gcsections", "p09-lto", "p10-fetchcontent", "p11-conan", "p12-assets", "p13-prebuilt"}
 }
 
 func AllPairs() [][2]string {
+	allowedToolchains := map[string]bool{
+		"gcc-ninja":   true,
+		"gcc-make":    true,
+		"clang-ninja": true,
+	}
 	pairs := make([][2]string, 0, len(Toolchains())*len(Projects()))
 	for _, toolchain := range Toolchains() {
 		for _, project := range Projects() {
+			if project == "p11-conan" && !allowedToolchains[toolchain] {
+				continue
+			}
 			pairs = append(pairs, [2]string{toolchain, project})
 		}
 	}

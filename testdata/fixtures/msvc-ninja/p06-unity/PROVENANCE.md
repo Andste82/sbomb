@@ -1,0 +1,8 @@
+# Provenance
+
+Toolchain: msvc-ninja
+Version: Microsoft (R) C/C++ Optimizing Compiler Version 19.34.31937 for x64
+Generator: Ninja
+Source: built from tools/fixtures/projects/p06-unity by tools/fixtures/regen.sh
+License: MIT (the repository licence; the fixture sources are part of it)
+Date: 2026-09-05

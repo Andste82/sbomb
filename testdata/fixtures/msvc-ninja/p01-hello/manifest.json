@@ -1,0 +1,10 @@
+{
+  "buildRoot": "C:/__fixture_build__",
+  "generatedAt": "2026-09-05T00:00:00Z",
+  "generator": "Ninja",
+  "host": "windows",
+  "project": "p01-hello",
+  "sourceRoot": "C:/__fixture_src__",
+  "toolchain": "msvc-ninja",
+  "toolchainVersion": "Microsoft (R) C/C++ Optimizing Compiler Version 19.34.31937 for x64"
+}

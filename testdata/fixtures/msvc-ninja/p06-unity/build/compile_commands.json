@@ -1,0 +1,8 @@
+[
+{
+  "directory": "C:/__fixture_build__",
+  "command": "C:\\PROGRA~2\\MICROS~3\\2022\\BUILDT~1\\VC\\Tools\\MSVC\\1434~1.319\\bin\\Hostx64\\x64\\cl.exe  /nologo /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd /FoCMakeFiles\\unity.dir\\Unity\\unity_0_c.c.obj /FdCMakeFiles\\unity.dir\\ /FS -c C:\\__fixture_build__\\CMakeFiles\\unity.dir\\Unity\\unity_0_c.c",
+  "file": "C:\\__fixture_build__\\CMakeFiles\\unity.dir\\Unity\\unity_0_c.c",
+  "output": "CMakeFiles\\unity.dir\\Unity\\unity_0_c.c.obj"
+}
+]

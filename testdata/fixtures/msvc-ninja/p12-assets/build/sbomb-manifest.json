@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "outputs": [
+    {
+      "path": "C:/__fixture_build__/filesystem.img",
+      "kind": "image",
+      "inputs": [
+        { "path": "C:/__fixture_build__/generated/config.bin", "role": "generated-asset",
+          "generatedFrom": ["assets/config.yaml"], "generator": "cmake -E copy" },
+        { "path": "C:/__fixture_src__/assets/index.html", "role": "asset" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-78a8bcc19c7b52865825.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "p03_dupnames",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "dup::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-dup-Debug-01cf88174c454e16cdae.json",
+					"name" : "dup",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "mod_a::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-mod_a-Debug-5a6b4d17d076fbdfd973.json",
+					"name" : "mod_a",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "mod_b::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-mod_b-Debug-edaf58b30641fcbec717.json",
+					"name" : "mod_b",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/__fixture_build__",
+		"source" : "C:/__fixture_src__"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}

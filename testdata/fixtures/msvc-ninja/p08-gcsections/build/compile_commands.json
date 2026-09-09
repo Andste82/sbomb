@@ -1,0 +1,20 @@
+[
+{
+  "directory": "C:/__fixture_build__",
+  "command": "C:\\PROGRA~2\\MICROS~3\\2022\\BUILDT~1\\VC\\Tools\\MSVC\\1434~1.319\\bin\\Hostx64\\x64\\cl.exe  /nologo /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd -ffunction-sections -fdata-sections /FoCMakeFiles\\gcapp.dir\\main.c.obj /FdCMakeFiles\\gcapp.dir\\ /FS -c C:\\__fixture_src__\\main.c",
+  "file": "C:\\__fixture_src__\\main.c",
+  "output": "CMakeFiles\\gcapp.dir\\main.c.obj"
+},
+{
+  "directory": "C:/__fixture_build__",
+  "command": "C:\\PROGRA~2\\MICROS~3\\2022\\BUILDT~1\\VC\\Tools\\MSVC\\1434~1.319\\bin\\Hostx64\\x64\\cl.exe  /nologo /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd -ffunction-sections -fdata-sections /FoCMakeFiles\\gcapp.dir\\live.c.obj /FdCMakeFiles\\gcapp.dir\\ /FS -c C:\\__fixture_src__\\live.c",
+  "file": "C:\\__fixture_src__\\live.c",
+  "output": "CMakeFiles\\gcapp.dir\\live.c.obj"
+},
+{
+  "directory": "C:/__fixture_build__",
+  "command": "C:\\PROGRA~2\\MICROS~3\\2022\\BUILDT~1\\VC\\Tools\\MSVC\\1434~1.319\\bin\\Hostx64\\x64\\cl.exe  /nologo /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd -ffunction-sections -fdata-sections /FoCMakeFiles\\gcapp.dir\\deadcode.c.obj /FdCMakeFiles\\gcapp.dir\\ /FS -c C:\\__fixture_src__\\deadcode.c",
+  "file": "C:\\__fixture_src__\\deadcode.c",
+  "output": "CMakeFiles\\gcapp.dir\\deadcode.c.obj"
+}
+]

@@ -23,8 +23,18 @@ projects_dir="$repo_root/tools/fixtures/projects"
 toolchains_dir="$repo_root/tools/fixtures/toolchains"
 corpus_dir="$repo_root/testdata/fixtures"
 
-SRC_ROOT=${SBOMB_FIXTURE_SRC:-/__fixture_src__}
-BUILD_ROOT=${SBOMB_FIXTURE_BUILD:-/__fixture_build__}
+fixture_host=linux
+case "$(uname -s)" in
+  MINGW*|MSYS*|CYGWIN*) fixture_host=windows ;;
+esac
+
+if [[ "$fixture_host" == windows ]]; then
+  SRC_ROOT=${SBOMB_FIXTURE_SRC:-C:/__fixture_src__}
+  BUILD_ROOT=${SBOMB_FIXTURE_BUILD:-C:/__fixture_build__}
+else
+  SRC_ROOT=${SBOMB_FIXTURE_SRC:-/__fixture_src__}
+  BUILD_ROOT=${SBOMB_FIXTURE_BUILD:-/__fixture_build__}
+fi
 # Package managers keep their caches outside both trees and record absolute
 # paths into the files they generate, so their root is a sentinel of its own.
 PKG_ROOT=${SBOMB_FIXTURE_PKG:-/__fixture_pkg__}
@@ -59,6 +69,7 @@ TOOLCHAINS=(
   "clang-ninja|Ninja|clang.cmake"
   "arm-none-eabi|Ninja|arm-none-eabi.cmake"
   "mingw-w64|Ninja|mingw-w64.cmake"
+  "msvc-ninja|Ninja|"
 )
 
 # Files above this size are refused: the corpus stores evidence, not payloads.
@@ -92,7 +103,7 @@ if [[ "${1:-}" == "--check" ]]; then
       fi
       # The prebuilt archive is the whole point of p13: without it there is
       # nothing for section 13.2 strategy 6 to read.
-      if [[ "$project" == p13-prebuilt && ! -e "$dir/build/prebuilt/libvendor.a" ]]; then
+      if [[ "$project" == p13-prebuilt && ! -e "$dir/build/prebuilt/libvendor.a" && ! -e "$dir/build/prebuilt/libvendor.lib" ]]; then
         log "missing $toolchain/$project prebuilt archive"
         missing=1
       fi
@@ -106,9 +117,12 @@ fi
 # --------------------------------------------------------------------------
 # Preconditions
 # --------------------------------------------------------------------------
-for tool in cmake ninja make go; do
+for tool in cmake ninja go; do
   command -v "$tool" >/dev/null || die "$tool is required to regenerate fixtures"
 done
+if [[ -z "$ONLY_TOOLCHAIN" || "$ONLY_TOOLCHAIN" != "msvc-ninja" ]]; then
+  command -v make >/dev/null || die "make is required to regenerate fixtures"
+fi
 
 # Built once rather than "go run" per fixture: the deps log normalizer runs for
 # every Ninja fixture, and there are dozens.
@@ -154,6 +168,11 @@ toolchain_version() {
     clang-ninja)        clang --version | head -1 ;;
     arm-none-eabi)      arm-none-eabi-gcc --version | head -1 ;;
     mingw-w64)          x86_64-w64-mingw32-gcc --version | head -1 ;;
+    msvc-ninja)
+      local compiler
+      compiler=$(command -v cl.exe)
+      "$compiler" 2>&1 | grep -m1 'Microsoft (R)'
+      ;;
   esac
 }
 
@@ -163,6 +182,11 @@ toolchain_available() {
     clang-ninja)        command -v clang && command -v ld.lld ;;
     arm-none-eabi)      command -v arm-none-eabi-gcc ;;
     mingw-w64)          command -v x86_64-w64-mingw32-gcc ;;
+    msvc-ninja)
+      local compiler
+      compiler=$(command -v cl.exe) || return 1
+      [[ -x "$compiler" && -x "$(dirname "$compiler")/link.exe" ]]
+      ;;
   esac >/dev/null 2>&1
 }
 
@@ -343,16 +367,23 @@ QUERY
   harvest_glob "$BUILD_ROOT/*.map" "$build_out"
   harvest_glob "$BUILD_ROOT/*.d" "$build_out"
   harvest_glob "$BUILD_ROOT/*.a" "$build_out"
+  harvest_glob "$BUILD_ROOT/*.lib" "$build_out"
   # Archives below the build root too. A prebuilt library a project ships does
   # not sit at the top level, and its members are the only place their own
   # source is named (section 13.2 strategy 6).
   while IFS= read -r found; do
     harvest "$found" "$build_out/${found#"$BUILD_ROOT"/}"
   done < <(find "$BUILD_ROOT" -mindepth 2 -maxdepth 3 -name '*.a' -type f ! -path '*/CMakeFiles/*' | sort)
+  while IFS= read -r found; do
+    harvest "$found" "$build_out/${found#"$BUILD_ROOT"/}"
+  done < <(find "$BUILD_ROOT" -mindepth 2 -maxdepth 3 -name '*.lib' -type f ! -path '*/CMakeFiles/*' | sort)
   harvest_glob "$BUILD_ROOT/*.exe" "$build_out"
   while IFS= read -r found; do
     harvest "$found" "$build_out/${found#"$BUILD_ROOT"/}"
   done < <(find "$BUILD_ROOT/CMakeFiles" -name '*.o' -type f | sort)
+  while IFS= read -r found; do
+    harvest "$found" "$build_out/${found#"$BUILD_ROOT"/}"
+  done < <(find "$BUILD_ROOT/CMakeFiles" -name '*.obj' -type f | sort)
 
   # Final deliverables: ELF/PE executables produced at the build root.
   while IFS= read -r found; do
@@ -367,7 +398,7 @@ QUERY
   "buildRoot": "$BUILD_ROOT",
   "generatedAt": "${FIXTURE_DATE}T00:00:00Z",
   "generator": "$generator",
-  "host": "linux",
+  "host": "$fixture_host",
   "project": "$project",
   "sourceRoot": "$SRC_ROOT",
   "toolchain": "$toolchain",

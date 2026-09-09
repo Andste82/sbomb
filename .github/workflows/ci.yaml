@@ -79,6 +79,32 @@ jobs:
             exit 1
           fi
 
+  # MSVC fixtures are generated on Windows because the compiler and linker
+  # evidence cannot be produced by the Linux corpus job. The committed files
+  # must be reproducible on the same runner class.
+  msvc-corpus:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Regenerate MSVC fixtures
+        shell: pwsh
+        run: |
+          $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+          $install = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          if (-not $install) { throw 'MSVC C++ tools were not found' }
+          $drive = $env:GITHUB_WORKSPACE.Substring(0, 1).ToLowerInvariant()
+          $directory = $env:GITHUB_WORKSPACE.Substring(2) -replace '\\', '/'
+          $bashWorkspace = "/$drive$directory"
+          $command = 'call "' + $install.Trim() + '\Common7\Tools\VsDevCmd.bat" -arch=x64 -host_arch=x64 & bash -lc "cd ' + $bashWorkspace + '; tools/fixtures/regen.sh --only msvc-ninja"'
+          cmd.exe /d /s /c $command
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Committed MSVC fixtures are reproducible
+        shell: pwsh
+        run: git diff --exit-code -- testdata/fixtures/msvc-ninja
+
   # Section 31 states a budget; this measures it. The 10 000 unit row runs on
   # every push because it costs seconds. The 50 000 unit row needs a 200 MB map
   # and a minute of wall time, so it is run on demand:
