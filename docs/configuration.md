@@ -95,7 +95,7 @@ anchored.
 
 | Group | What it may run | What it buys |
 |---|---|---|
-| `git` | `rev-parse HEAD`, `describe --tags --always --dirty`, `config --get remote.origin.url`, each with `-C <dir>` | The version, commit, repository URL and dirty state of a dependency fetched by `FetchContent` or checked out as a submodule, and the `"git"` and `"commit"` rules of `components[].versionFrom`. Without it those components have no version and `UNKNOWN_VERSION` says so |
+| `git` | `rev-parse HEAD`, `describe --tags --always --dirty`, `config --get remote.origin.url`, each with `-C <dir>` | The version, commit, repository URL and dirty state of a dependency fetched by `FetchContent`, checked out as a submodule or cloned by west, and the `"git"` and `"commit"` rules of `components[].versionFrom`. Without it those components have no version and `UNKNOWN_VERSION` says so. A west project outside your source and build trees cannot be asked at all — a path handed to a subprocess must lie inside a registered anchor — so in the usual Zephyr layout the manifest's own revision is what you get |
 | `ninja` | `-C <build-dir> -t commands <target>`, `-t inputs <target>` | Two fallbacks: the compile lines when there is no `compile_commands.json`, and the objects an archive was built from when `build.ninja` does not say. Both read `build.ninja` including the `include`/`subninja` files sbomb's own parser does not follow |
 | `compiler` | `<compiler> --version`, `-dumpmachine`, `-print-search-dirs` | The compiler's installation directory as a toolchain anchor and the implicit link directories, when the File API reported no toolchain. Not the implicit *include* directories: `-print-search-dirs` names none, so those still come from the File API alone |
 
@@ -283,7 +283,8 @@ allowed to point.
 
 Files are mapped to components in a fixed priority order: these curated entries
 first, then package-manager metadata (vcpkg, Conan, FetchContent and CPM.cmake,
-the ESP-IDF component manager, git submodules), then a configured CMake target,
+the ESP-IDF component manager, the west manifest of a Zephyr workspace, git
+submodules), then a configured CMake target,
 then the nearest ancestor directory holding a package manifest (`conanfile.txt`, `vcpkg.json`, `idf_component.yml`,
 `Cargo.toml`, `west.yml`) **or a licence file** (`LICENSE`, `LICENCE`,
 `COPYING`), then the anchor root, and finally an explicit `unknown:` component

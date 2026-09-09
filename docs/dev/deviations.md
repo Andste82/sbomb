@@ -1503,3 +1503,132 @@ file-local constants beside the existing ones. The element names read here —
 the format rather than from a schema in this tree: there is no CMSIS material
 here and no network. A real vendor descriptor should be captured as a fixture
 before this is called finished.
+
+---
+
+## D39 — The west manifest is read as a declaration, and where the workspace is decides everything else
+
+§19.2 strategy 2 and §21 both name west, and until now `west.yml` was only a
+strategy 6 marker file, which in a west workspace marks next to nothing: the
+manifest lies at `<topdir>/zephyr/west.yml`, strategy 6 walks upward from a used
+file only, and no file under `<topdir>/modules` has that directory among its
+ancestors. Such a file was therefore folded into the component the anchor stands
+for, with no name, version, repository or purl of its own; only a file inside
+the manifest repository itself got a component, under that repository's
+directory name. The adapter is
+`internal/adapters/pkgmanager/west.go`. Six things the specification leaves open
+had to be settled.
+
+**The workspace is found by `.west`, upwards, and by nothing else.** A west
+project's `path` is resolved against the workspace root — the directory holding
+`.west` — and not against the directory the manifest lies in; in the usual
+Zephyr layout those are `<topdir>` and `<topdir>/zephyr`, so resolving against
+the wrong one builds roots that do not exist. The workspace root is therefore
+established first, by stat-ing `<dir>/.west/config` at the source root and then
+at each directory above it, bounded by `limits.MaxDepth` and by the filesystem
+root. That upward walk is the one place this adapter looks above the project
+anchor, and it is defensible for the reason west itself walks up: an application
+in a workspace is a subdirectory of it. It lists no directory and opens one
+fixed relative path per level. It does walk to the filesystem root, so an
+ordinary CMake project built somewhere beneath an unrelated Zephyr workspace
+will have that workspace's manifest read; nothing wrong is published — a project
+nothing linked stays out of the document — but such a build can collect a
+`PACKAGE_NOT_LINKED` (info) per project of a workspace it has nothing to do
+with, and that is the price of finding the workspace the way west finds it. Where there is no `.west`, nothing is read at
+all, even where a `west.yml` lies beside the sources — a manifest repository
+nobody ran `west init` on has no projects on disk, and resolving its paths
+against a guessed root is the invented value §20.1 refuses.
+
+**Rank 2, not 3.** What `west.yml` states is what was asked for, which is
+§21.1's own definition of rank 2, the manifest the owning manager declares. Rank
+3 is the state the manager recorded after installing, and west records none: it
+writes no lock file and no per-project file list, so `Package.Files` stays
+empty and only the roots decide the mapping. Where introspection is allowed the
+checkout supersedes at rank 5, as everywhere else, and the manifest's claim is
+kept in `Superseded`.
+
+**A revision that is a commit becomes a commit, never a version.** §20.2 point 5
+publishes a SHA as a version only when `components[].versionFrom` asks for it,
+and a Zephyr manifest pins most of its projects to a full SHA. Such a revision
+goes into `Package.Commit`, where it reaches the purl's `vcs_url` qualifier and
+the `vcsCommit` property, and the component honestly reports `UNKNOWN_VERSION`.
+What counts as a commit is decided narrowly: a full SHA-1 or SHA-256 whatever
+its digits, and otherwise only a revision of at least seven hex characters with
+a letter among them. A tag of digits alone — `20240612`, the date convention —
+is the only version such a manifest states, and calling it a commit would throw
+it away. Anything else, including a branch name, is taken as a declared version
+with a leading `v` trimmed before a digit; publishing `main` as a version is the
+weakest point of this design, but it is a value the manifest states rather than
+one this tool invented, and §20.1 objects to the invention more than to the
+branch name.
+
+**`import:` is not followed.** A manifest may import another repository's, and
+west resolves that in memory without writing the result anywhere this tool could
+read; following it would mean reading manifests out of other people's trees for
+a list of projects. An application manifest that imports Zephyr's therefore
+yields the projects it states itself and no others. That is partial rather than
+wrong, and it is the common downstream layout, so it is said plainly here, in
+`status.md` and in the changelog.
+
+**Git introspection cannot reach a project outside the anchors.** The runner
+refuses a path argument outside the anchors registered for the run, which are
+the project root, the build root and the build directory, and those are fixed
+before `pkgmanager.Discover` is called. In the usual Zephyr layout the workspace
+root lies above the application, so every project root is outside them and every
+`git` call is refused before a process exists. The refusal is silent and
+harmless — the manifest's claims stand — and point 4 of this work therefore pays
+off only where the workspace root is at or below the source root. Widening the
+runner's anchors is not the fix and was not done here: a package anchor is
+registered after discovery for good reasons, and a subprocess reaching further
+than the trees being read is a decision of its own.
+
+**The format was checked against west itself, except for one file.** There is no
+Zephyr material in this repository and no fixture, but the development
+container pins west 1.5.0 (`docs/dev/README.md`), and the keys read —
+`manifest`, `defaults`, `remotes`, `projects`, and a project's `name`, `path`,
+`revision`, `url`, `remote` and `repo-path`, plus the `[manifest] path` and
+`file` of `.west/config` — were verified there against west's own
+`manifest-schema.yml`, `manifest.py` and `configuration.py`: `path` is
+"relative to the west installation root", the manifest lives at
+`topdir / manifest.path / manifest.file` with `west.yml` as the default file,
+the local config is `<topdir>/.west/config`, and west's resolver produces the
+same paths, URLs and revisions for the manifest the unit tests use as this
+adapter does. Two keys are deliberately not read: `self:`, because west gives
+the manifest repository no name but the word "manifest", and west's fallback
+revision `master`, because that is west's default rather than something the
+manifest declared. What could **not** be checked is `zephyr/module.yml`: it is
+Zephyr's file rather than west's, and nothing here documents it — that one key
+is knowledge of the format, exactly as D38's CMSIS element names were, and it is
+used only where it is a usable single segment. A real workspace should still be
+captured as a fixture before this is called finished. Two smaller consequences
+worth recording: a project
+directory that does not exist is silence rather than `MISSING_PACKAGE_EVIDENCE`,
+because west deliberately does not clone the projects whose groups are filtered
+out and a warning each would report the size of the manifest instead of the
+state of the build; and a real workspace declares dozens of projects, so a first
+run over one produces one `PACKAGE_NOT_LINKED` (info) per project nothing
+linked, which is correct and is a visible change in the length of the report.
+
+**The reader that made it possible.** `idfyaml.go` is now `yamlsubset.go`: it
+could not read a block sequence at all — it recorded the key as present and
+skipped the block — and `manifest.projects` is exactly that shape. It now reads
+a sequence whose items open a mapping, keeps every refusal it had, counts each
+sequence and each item toward the nesting bound, and bounds a sequence's length
+as well. A sequence of plain scalars is still not read, because no caller asks
+for one and a bare word with no key above it says nothing. The rename is
+mechanical, and it was made because leaving `west.yml` to be read by a function
+called `parseIDFYAML` would be worse than the diff.
+
+One consequence of that is a widening, not only a keeping: an item is now a
+mapping the reader walks, so a construct **inside** a sequence item — a
+duplicate key, a reserved indicator, an unterminated quote, a sequence nested in
+a sequence — now refuses the whole file where the old reader skipped the entire
+block and never saw it. `targets:` followed by `- a: 1` and `a: 2` parsed before
+and is refused now. No ESP-IDF file this tool has met is affected, and refusing
+is the direction this reader is allowed to move in, but it is a change to a
+shared reader and belongs written down rather than implied by "every refusal
+stands". The other end of the same shape is answered deliberately: a `projects:`
+that holds plain words rather than mappings parses into a sequence with no
+items, and west refuses the manifest with `EVIDENCE_UNREADABLE` instead of
+passing it over, because silence there would be indistinguishable from a
+workspace that declares nothing.

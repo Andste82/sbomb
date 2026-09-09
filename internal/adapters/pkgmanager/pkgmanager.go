@@ -127,6 +127,13 @@ var adapters = []Adapter{
 	// manager than by a bare .gitmodules line naming the same path, while the
 	// trees conan, vcpkg and FetchContent fill can never be managed_components.
 	espidf{},
+	// west comes before submodule for the same reason, and the position is
+	// behaviour again: west clones the projects of a Zephyr workspace itself,
+	// often as plain checkouts a .gitmodules line somewhere else happens to
+	// name too. A directory west put there is described by the manifest that
+	// asked for it -- with a name, a revision and a repository -- while
+	// .gitmodules states a path and a URL and nothing more.
+	west{},
 	submodule{},
 }
 

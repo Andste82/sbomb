@@ -94,6 +94,10 @@
   has no adapter of its own on purpose: it drives FetchContent, so the roots in
   the build tree are FetchContent's, and the lock CPM writes beside them is read
   as a second origin for the package the FetchContent adapter already found.
+  The west manifest of a Zephyr workspace is read as part of strategy 2 as well:
+  the workspace is found by its `.west` directory, and each project it declares
+  contributes a component root, the revision that was asked for and the
+  repository it came from (deviation D39).
   Section 24.3's file-based half exists as well: the pkg-config metadata a
   distribution installs beside a system library names that library's package and
   its version without a subprocess, wherever a policy lets system files into the
@@ -121,6 +125,15 @@
   reader (deviation D37) closes the file-based part of that gap and needs no
   permission; what still waits on the group is the licence, the supplier and the
   purl of a distribution package, none of which a `.pc` file states.
+- **A west manifest's `import:` is not followed.** west resolves an import in
+  memory and writes nothing down, so an application manifest that imports
+  Zephyr's yields the projects it states itself and no others. The coverage for
+  that layout is partial rather than wrong; see deviation D39.
+- **A west project outside the source and build trees cannot be asked what it
+  is.** The runner refuses a path outside the anchors of the run, and in the
+  usual Zephyr layout the workspace lies above the application, so git
+  introspection degrades to the manifest's own revision there. It is silent by
+  design -- no command runs -- and deviation D39 says what would have to change.
 - **`sbomb:evidence:header:directInclude` is never set.** DWARF carries no
   inclusion depth; see deviation D8.
 - **Licence detection.** Measured over 142 distinct real licence files: 32

@@ -36,6 +36,12 @@ run ./internal/adapters/pkgmanager FuzzIDFLock
 run ./internal/adapters/pkgmanager FuzzIDFManifest
 run ./internal/adapters/pkgmanager FuzzCPMLock
 
+# The manifest a Zephyr workspace declares and the config that names it. The
+# manifest decides where a component root lies, so a path out of it is joined
+# onto this machine's filesystem, and both are read by the reader written here.
+run ./internal/adapters/pkgmanager FuzzWestManifest
+run ./internal/adapters/pkgmanager FuzzWestConfig
+
 # The image manifest an embedded-Linux distribution build wrote about its image.
 # It comes out of no build tree this tool has ever seen, and both of its formats
 # are read by a parser written here.
