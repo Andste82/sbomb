@@ -285,11 +285,11 @@ func (a espidf) packageFor(managedDir string, component idfComponent) (Package, 
 	return found, findings, true
 }
 
-// readYAMLFile reads one bounded file through the subset reader of idfyaml.go.
+// readYAMLFile reads one bounded file through the subset reader of yamlsubset.go.
 // A file over its bound or one the reader refuses contributes nothing at all:
 // a value taken out of a file whose remainder could not be read would be
 // published with nothing behind it.
-func (espidf) readYAMLFile(path string, maxBytes int64, kind string, findings *[]domain.Finding) (*idfNode, bool) {
+func (espidf) readYAMLFile(path string, maxBytes int64, kind string, findings *[]domain.Finding) (*yamlNode, bool) {
 	info, err := os.Stat(path)
 	if err != nil {
 		return nil, false
@@ -305,7 +305,7 @@ func (espidf) readYAMLFile(path string, maxBytes int64, kind string, findings *[
 			fmt.Sprintf("the ESP-IDF %s could not be read, so nothing was taken from it", kind)))
 		return nil, false
 	}
-	document, err := parseIDFYAML(data)
+	document, err := parseYAMLSubset(data)
 	if err != nil {
 		*findings = append(*findings, idfEvidenceFinding("EVIDENCE_UNREADABLE", path,
 			fmt.Sprintf("the ESP-IDF %s holds %s, so nothing was taken from it", kind, err.Error())))

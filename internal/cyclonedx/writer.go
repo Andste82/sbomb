@@ -463,7 +463,7 @@ func techniqueForVersionSource(source string) string {
 	case "curated":
 		// Declared by whoever wrote the configuration, not derived.
 		return "attestation"
-	case "conan", "vcpkg", "fetchcontent", "cmake", "bundled-sbom", "idf", "cpm", "yocto", "buildroot", "pkg-config", "cmsis-pack":
+	case "conan", "vcpkg", "fetchcontent", "cmake", "bundled-sbom", "idf", "cpm", "yocto", "buildroot", "pkg-config", "cmsis-pack", "west":
 		// cmake is CMAKE_PROJECT_VERSION, read from the File API cache: the
 		// build system's own manifest, in the same sense as a package
 		// manager's. bundled-sbom is a document the upstream shipped inside
@@ -483,7 +483,10 @@ func techniqueForVersionSource(source string) string {
 		// a declaration read out of a file in exactly the same sense.
 		// cmsis-pack is the .pdsc descriptor an MCU vendor ships inside a
 		// CMSIS-Pack: the vendor's own declaration of the pack's release
-		// history, read out of a file like every manifest above it.
+		// history, read out of a file like every manifest above it. west is
+		// the manifest a Zephyr workspace declares -- the revision it asked
+		// for each of its projects -- which is a declaration read out of a
+		// file in exactly that sense.
 		return "manifest-analysis"
 	case "header":
 		return "source-code-analysis"

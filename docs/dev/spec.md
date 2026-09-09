@@ -966,7 +966,7 @@ Published as `component.evidence.identity` with `field: "version"`: the value in
 | `VersionSource` | `technique` |
 |---|---|
 | `curated` | `attestation` |
-| `cmake`, `conan`, `vcpkg`, `fetchcontent`, `bundled-sbom`, `idf`, `cpm`, `yocto`, `buildroot`, `pkg-config`, `cmsis-pack` | `manifest-analysis` |
+| `cmake`, `conan`, `vcpkg`, `fetchcontent`, `bundled-sbom`, `idf`, `cpm`, `yocto`, `buildroot`, `pkg-config`, `cmsis-pack`, `west` | `manifest-analysis` |
 | `header` | `source-code-analysis` |
 | `go-build-info` | `binary-analysis` |
 | `git`, `git-describe`, `git-commit`, anything unmapped | `other` |
@@ -982,7 +982,7 @@ A `purl` MUST be emitted when, and only when, a package type and name can be ass
 | Conan | `pkg:conan/<name>@<version>` (with `?channel=`/`?user=` when present) |
 | vcpkg | `pkg:vcpkg/<name>@<version>` |
 | ESP-IDF component manager | `pkg:idf/<namespace>/<name>@<version>` |
-| Git-derived (submodule, FetchContent, CPM) | `pkg:generic/<name>@<version>?vcs_url=git%2B<url>%40<commit>` |
+| Git-derived (submodule, FetchContent, CPM, west) | `pkg:generic/<name>@<version>?vcs_url=git%2B<url>%40<commit>` |
 | CMSIS-Pack | no purl; emit `UNKNOWN_PURL` (informational) |
 | Curated with explicit `purl` | verbatim |
 | Otherwise | no purl; emit `UNKNOWN_PURL` (informational) |

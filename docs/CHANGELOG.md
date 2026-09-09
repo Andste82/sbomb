@@ -14,6 +14,43 @@ PDB parsing remains out of scope. MSVC header evidence therefore comes from
 `/showIncludes`, Ninja dependencies or MSBuild TLogs, and a build may report
 `DEBUG_INFO_UNAVAILABLE` where a DWARF-based build would provide debug evidence.
 
+### A Zephyr workspace is read from the manifest west wrote
+
+Until now a Zephyr build hid its modules inside the application. A driver out of
+`modules/hal/nordic` got no component of its own at all: its files were counted
+as part of the component the application anchor stands for, so there was no
+name, no version, no repository and no purl telling that module apart from the
+code that linked it. The `west.yml` marker sbomb already knew could not help,
+because a workspace keeps its manifest at `<topdir>/zephyr/west.yml`, which lies
+above no module a build links — the marker fired only for a file inside the
+manifest repository itself, and such a file arrived under that repository's
+directory name and nothing more.
+
+sbomb reads the manifest now. It finds the workspace by its `.west` directory,
+walking up from your sources and looking nowhere else, reads the manifest that
+workspace names, and takes from it what west itself was told: the project's
+name, the directory it was cloned into, the revision that was asked for and the
+repository it came from. A project that ships a `zephyr/module.yml` is named the
+way the module names itself. The component carries `west` beside its version, so
+the document says where the answer came from, and a `pkg:generic` purl with the
+repository and, where there is one, the commit.
+
+**A project pinned to a commit gets no version, deliberately.** Zephyr manifests
+pin most projects to a full SHA, and a commit is not a version: it goes into the
+purl and into `vcsCommit`, and the component keeps `UNKNOWN_VERSION`. Where you
+allow git introspection the checkout answers instead of the manifest — but only
+for a project inside the trees sbomb is reading, which in the usual Zephyr
+layout, with the workspace above your application, is none of them.
+
+**Two honest limits.** A manifest that `import`s another repository's manifest
+is followed only as far as it states projects itself: west resolves an import in
+memory and writes nothing down, so a workspace built that way lists fewer
+projects than you may expect. And a real manifest declares dozens of projects
+while a build links a handful, so the report grows one `PACKAGE_NOT_LINKED`
+(info) for each project nothing linked — the same thing vcpkg has always said,
+and correct: a project that was cloned but never linked is not part of your
+product, so it is not in the document.
+
 ### An MCU vendor pack carries a version and a supplier at last
 
 A CMSIS pack is the way ARM silicon vendors ship their code, and until now a

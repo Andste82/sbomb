@@ -305,6 +305,23 @@ to a file rather than an SPDX expression — the licence keeps coming from that
 file. It adds no file and finds no pack: a pack lives in a cache outside your
 build tree, and nothing here goes looking for one.
 
+A **Zephyr workspace** is read from what west itself wrote down. The workspace
+is the directory holding `.west`, found by walking up from your sources and in
+no other way — the config in it names the repository the manifest was cloned
+into, and the manifest names each project, the directory west put it in and the
+revision that was asked for. Without a `.west` directory nothing is read at all,
+even where a `west.yml` lies beside your sources: a project's path means nothing
+without the workspace root it is measured from. A project pinned to a commit
+gets no version out of this, because a commit is not a version — the commit
+travels into the purl instead, and the component says `UNKNOWN_VERSION` — while
+with git introspection allowed the checkout answers in the manifest's place,
+where it lies inside the trees this tool is reading. A manifest that `import`s
+another repository's is followed only as far as it states projects itself: west
+resolves such an import in memory and writes nothing down, so the coverage for
+that layout is honestly partial. And here too a project west cloned that nothing
+links stays out of the document, with its absence reported rather than passed
+over.
+
 **A file is never dropped because its component could not be determined.** The
 last case is a real component with a real name, marked for review.
 

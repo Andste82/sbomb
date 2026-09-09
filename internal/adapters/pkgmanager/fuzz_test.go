@@ -349,3 +349,113 @@ func FuzzCMSISPack(f *testing.F) {
 		}
 	})
 }
+
+// The manifest a Zephyr workspace declares, with the module descriptor a
+// project ships beside it. Both are read by the reader written in this
+// repository, and what the manifest decides is not only a version but where a
+// component root lies -- a path out of somebody else's file, joined onto this
+// machine's.
+func FuzzWestManifest(f *testing.F) {
+	f.Add("manifest:\n  remotes:\n    - name: up\n      url-base: https://example.invalid/org\n"+
+		"  projects:\n    - name: hal\n      path: modules/hal\n      revision: v1.0.0\n      remote: up\n",
+		"name: hal_module\n")
+	f.Add("manifest:\n  projects:\n    - name: hal\n      path: ../../etc\n", "name: ../escape\n")
+	f.Add("manifest:\n  projects:\n    - path: modules/hal\n", "name: [\n")
+	f.Add("manifest:\n  projects:\n  - name: hal\n    url: https://u:p@example.invalid/org/hal.git\n", "")
+	f.Add("manifest:\n  projects: none\n", "")
+	f.Add("manifest:\n  projects:\n    - - a\n", "")
+	f.Add("", "")
+
+	f.Fuzz(func(t *testing.T, manifest, module string) {
+		topdir := t.TempDir()
+		write := func(path, content string) {
+			if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+				t.Skip(err)
+			}
+			if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
+				t.Skip(err)
+			}
+		}
+		write(filepath.Join(topdir, westDir, westConfigName), "[manifest]\npath = zephyr\nfile = west.yml\n")
+		write(filepath.Join(topdir, "zephyr", westManifestFile), manifest)
+		write(filepath.Join(topdir, "modules", "hal", westModuleDir, westModuleName), module)
+		source := filepath.Join(topdir, "app")
+		if err := os.MkdirAll(source, 0o755); err != nil {
+			t.Skip(err)
+		}
+		checkWestPackages(t, topdir, source)
+	})
+}
+
+// The config west writes when a workspace is initialised. It is the only
+// statement about where the manifest lies, so whatever it holds must end either
+// in a manifest inside the workspace or in nothing at all.
+func FuzzWestConfig(f *testing.F) {
+	f.Add("[manifest]\npath = zephyr\nfile = west.yml\n")
+	f.Add("[manifest]\npath = ../elsewhere\n")
+	f.Add("[manifest]\npath = /etc\nfile = passwd\n")
+	f.Add("[zephyr]\nbase = zephyr\n")
+	f.Add("[manifest]\npath = zephyr\npath = other\n")
+	f.Add("")
+
+	f.Fuzz(func(t *testing.T, config string) {
+		topdir := t.TempDir()
+		write := func(path, content string) {
+			if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+				t.Skip(err)
+			}
+			if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
+				t.Skip(err)
+			}
+		}
+		write(filepath.Join(topdir, westDir, westConfigName), config)
+		write(filepath.Join(topdir, "zephyr", westManifestFile),
+			"manifest:\n  projects:\n    - name: hal\n      path: modules/hal\n      revision: v1.0.0\n")
+		if err := os.MkdirAll(filepath.Join(topdir, "modules", "hal"), 0o755); err != nil {
+			t.Skip(err)
+		}
+		source := filepath.Join(topdir, "app")
+		if err := os.MkdirAll(source, 0o755); err != nil {
+			t.Skip(err)
+		}
+		checkWestPackages(t, topdir, source)
+	})
+}
+
+// checkWestPackages states what must hold whatever those files contain: a
+// package names a component and a directory inside the workspace, it carries a
+// purl of the type this adapter builds and no other, and it never records a
+// file -- west writes no file list, and inventing one would widen the used set.
+func checkWestPackages(t *testing.T, topdir, source string) {
+	t.Helper()
+	packages, findings := west{}.Discover(Options{SourceDir: source, Context: context.Background()})
+	for _, finding := range findings {
+		// A finding with no identifier reaches no catalogue, and one with no
+		// subject names nothing a reader could look at.
+		if finding.ID == "" || finding.Subject.Ref == "" {
+			t.Fatalf("a finding names no identifier or no subject: %#v", finding)
+		}
+	}
+	for _, entry := range packages {
+		if entry.Name == "" {
+			t.Fatal("a package without a name was returned")
+		}
+		if entry.Root() == "" {
+			t.Fatalf("the package %q owns no directory", entry.Name)
+		}
+		if !strings.HasPrefix(entry.Root(), topdir+string(filepath.Separator)) {
+			t.Fatalf("the root %q lies outside the workspace", entry.Root())
+		}
+		if len(entry.Files) != 0 {
+			t.Fatalf("the package %q claims %d file(s); west records none", entry.Name, len(entry.Files))
+		}
+		if entry.PURL.Value != "" && !strings.HasPrefix(entry.PURL.Value, "pkg:generic/") {
+			t.Fatalf("purl %q is not of this adapter's type", entry.PURL.Value)
+		}
+		for _, claim := range []Claim{entry.Version, entry.License, entry.Supplier, entry.PURL} {
+			if claim.Value == "" && (claim.Source != "" || claim.Rank != RankNone) {
+				t.Fatalf("a claim named an origin but no value: %#v", claim)
+			}
+		}
+	}
+}
