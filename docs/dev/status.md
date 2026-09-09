@@ -86,10 +86,11 @@
   section 19.2 resolve without a curated entry. Introspection exists behind
   `--allow-introspection` with the exact allowlist of section 9.2 and is off by
   default. Response files are expanded, and packaging manifests, images and
-  assets are handled (section 18). ESP-IDF (milestone 20) is parked.
+  assets are handled (section 18). The ESP-IDF component manager is read as
+  part of strategy 2; the ESP-IDF SDK adapter (milestone 20) is parked.
 - **Hardening (roadmap phase 8).** The performance budget of section 31 is
   measured by a test; the parser bounds of section 30 are one policy with
-  `--max-input-size` and `--strict-symlinks`; fourteen fuzz targets cover every
+  `--max-input-size` and `--strict-symlinks`; twenty fuzz targets cover every
   parser; determinism is checked on a Windows runner; each released binary
   carries an SBOM of itself derived from its linker's own record; and
   regenerating an unchanged fixture corpus is a no-op outside three recorded
@@ -138,7 +139,12 @@ outputs contain the paths.
 What is left is not phase work:
 
 * **ESP-IDF (milestone 20) is parked**, at the point where it was parked in
-  phase 7, as are the vendor linkers (21).
+  phase 7, as are the vendor linkers (21). What exists is the
+  component-manager adapter of section 19.2 strategy 2 —
+  `dependencies.lock` and `managed_components/`, with the `pkg:idf` purl of
+  section 20.4. Milestone 20 is the SDK adapter of strategy 4:
+  `project_description.json`, `sdkconfig`, `partitions.csv` and the IDF's own
+  `components/` tree. The two must not be confused; none of the second exists.
 * **MSVC (milestone 18) is complete.** MSVC/Ninja and Visual Studio 17/MSBuild
   are covered by committed Windows fixtures, acceptance tests and golden SBOMs.
   The implementation uses linker maps, Ninja dependencies and MSBuild TLogs;

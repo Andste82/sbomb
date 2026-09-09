@@ -1059,3 +1059,73 @@ parseable. And `pkgmanager.Options` carries no `limits.Config`, so
 existing adapters: the bound is the package-level `maxSPDXBytes` the vcpkg
 adapter already uses, which is what §30 requires by default but not what a user
 who lowered the ceiling would expect. Both are recorded rather than fixed here.
+
+---
+
+## D35 — The ESP-IDF component manager is read without a YAML library, and four things the specification leaves open had to be settled
+
+§19.2 strategy 2 names the ESP-IDF component manager as a source of exact
+package-manager metadata, §20.4 prescribes `pkg:idf/<namespace>/<name>@<version>`
+and §21 names `idf_component.yml` and `dependencies.lock` as its evidence. The
+adapter in `internal/adapters/pkgmanager/espidf.go` had to settle four questions
+the specification leaves open, and each answer changes what the document says.
+
+**No YAML library, and a deliberately small reader instead.** Nothing in this
+repository parses YAML and `vendor/` carries no parser, so reading these two
+files meant either taking a dependency or writing one.
+`internal/adapters/pkgmanager/idfyaml.go` is that reader: block mappings of
+scalars, and a written list of the constructs it refuses — anchors, aliases and
+merge keys, tags and the reserved indicators, a tab in the indentation, a flow
+collection that does not close on its own line, a second document, a duplicate
+key, a dedent to a column no enclosing mapping starts at, and a nesting deeper
+than eight. Refusal aborts the whole file and is reported as
+`EVIDENCE_UNREADABLE` naming it, because half a lock file is not a weaker answer
+but an invented one. Two constructs are skipped rather than refused — a block
+sequence and a block scalar, which real manifests carry in `targets:` and
+`description:` — by indentation and without interpreting a line of them; a flow
+collection that opens and closes on one line is skipped the same way, since its
+extent is then unambiguous. Refusing those three would throw away files that
+state a licence perfectly plainly two lines further down. **It is not a YAML
+implementation and must not be reused as one**; if a second format arrives, the
+question of a vendored parser is open again.
+
+**The lock file ranks 3 and the component's own manifest ranks 2.** §21.1 makes
+rank 3 "the installed state the owning manager recorded: file list, lock file,
+resolved dependency" and rank 2 "the manifest the owning manager declares".
+`dependencies.lock` is the first and `managed_components/<ns>__<name>/idf_component.yml`
+is the second, so the resolved version wins and the manifest's own is retained
+as the losing claim. Ranking both alike would have made the published version
+depend on the order of the `Take` calls, which is exactly the coin toss §21.1
+exists to prevent.
+
+**The purl is built in the adapter.** `version.PURL` escapes `/` to `%2F`, which
+is right for a purl type without a namespace and wrong for this one:
+`pkg:idf/espressif%2Fled_strip@2.5.3` is not the form §20.4 prescribes. Widening
+that shared helper for one adapter would touch every purl the tool writes, so
+`idfPURL` escapes each segment on its own, in the shape `GenericPURL` already
+uses. A component whose lock entry names no namespace becomes
+`pkg:idf/<name>@<version>`; a namespace is never invented. The fallback in
+`internal/generate/components.go` that derives a purl from an anchor key would
+still produce the `%2F` form for a component that reached it, which no component
+of this adapter does, since it always states a purl of its own.
+
+**The component's published name carries its namespace.** `espressif/led_strip`
+rather than `led_strip`: two namespaces may hold a component of the same name,
+and `PACKAGE_NOT_LINKED` and the component identity both key on the name.
+
+**What could not be verified here.** No fixture in this repository holds an
+ESP-IDF project — milestone 20 is parked and the toolchain image layer is behind
+`--build-arg WITH_ESP_IDF=1` — so three shapes are assumed rather than proven:
+that `dependencies.lock` and `managed_components/` lie in the project source
+directory, that a lock entry's key is `<namespace>/<name>` with its version under
+`version:` and its origin under `source: type:`, and that the manager unpacks a
+component into `<namespace>__<name>`. Where an assumption does not hold the
+adapter finds nothing and says so — a component whose directory is missing is
+`MISSING_PACKAGE_EVIDENCE` naming the directory that was looked for — rather than
+attaching a component to a tree that might belong to something else. A captured
+real project should be run against it before this is called finished.
+
+**What this is not.** Strategy 2 only. `project_description.json`, `sdkconfig`,
+`partitions.csv` and the IDF's own `components/` tree are the SDK adapter of
+strategy 4, which is milestone 20 and still parked. The IDF's own components are
+not managed packages and this adapter never looks at them.

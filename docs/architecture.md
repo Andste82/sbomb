@@ -271,6 +271,12 @@ tree. Otherwise the file has to lie below one of the package's roots. A package
 has more than one: the checkout it was fetched into and the directory the build
 generated for it are both its own.
 
+Where those roots are is knowledge each adapter carries, not something anybody
+searches for: `_deps/<name>-src` for FetchContent, the triplet tree for vcpkg,
+`managed_components/<namespace>__<name>` for the ESP-IDF component manager.
+An adapter opens the paths it names and no others, which is why reading a
+build tree never turns into a walk of somebody's source tree.
+
 A **marker directory** is one carrying a package manifest — a conanfile, a
 `vcpkg.json`, an `idf_component.yml`, a `Cargo.toml` — a licence file, or a
 bundled SBOM under a conventional name (`sbom.cdx.json`, `bom.spdx.json` and

@@ -14,6 +14,45 @@ PDB parsing remains out of scope. MSVC header evidence therefore comes from
 `/showIncludes`, Ninja dependencies or MSBuild TLogs, and a build may report
 `DEBUG_INFO_UNAVAILABLE` where a DWARF-based build would provide debug evidence.
 
+### ESP-IDF components you pulled in are now components in the document
+
+The ESP-IDF component manager writes down exactly what your project depends on —
+`dependencies.lock` names every component it resolved with its version, and each
+component it unpacked into `managed_components/` carries its own manifest with
+its licence. sbomb walked past both. A project built on the component manager
+therefore had its components mapped by whatever generic rule happened to catch
+them, or not at all.
+
+They are read now. A managed component whose files your build actually used
+arrives with the version the lock recorded, the licence the component declares
+about itself, the repository it names, and a purl of the form
+`pkg:idf/espressif/led_strip@2.5.3`. The version says `idf` beside it, so the
+document names the file the answer came from. Where the lock and the component's
+own manifest disagree, the lock wins — it says what was installed, the manifest
+says what the component claims to be — and the losing claim is kept rather than
+dropped.
+
+Nothing about the rules changed. No file joins the used set because a lock file
+mentioned it, no component boundary moves, and a component that was downloaded
+but never linked is absent from the document and reported as
+`PACKAGE_NOT_LINKED`, as before. The IDF's own `components/` tree is not touched:
+those are part of the framework, not packages the manager installed. Two known
+paths are opened and no directory is searched.
+
+A component that a `.gitmodules` line and the component manager both claim now
+belongs to the component manager, and the submodule's claim is reported as
+`COMPONENT_MAPPING_CONFLICT` instead of winning. A component the manager
+resolved whose directory is not there is `MISSING_PACKAGE_EVIDENCE` naming the
+directory that was looked for. Without a lock file the unpacked directories still
+answer, one rank weaker and saying so; without either, sbomb stays silent.
+
+No YAML library was added for this. The two files are read by a deliberately
+small reader with a written list of what it refuses, and a file it does not fully
+understand supplies nothing at all rather than something partial —
+`EVIDENCE_UNREADABLE` naming it, or `INPUT_LIMIT_EXCEEDED` when it breaches a
+parser bound. This is the component manager only; the ESP-IDF SDK adapter,
+with `project_description.json` and `sdkconfig`, is still parked.
+
 ### A dependency that ships its own SBOM is now read from it
 
 A `sbom.cdx.json` or `sbom.spdx.json` at the root of a dependency is the best

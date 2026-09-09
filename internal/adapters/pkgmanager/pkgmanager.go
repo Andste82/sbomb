@@ -116,6 +116,12 @@ var adapters = []Adapter{
 	conan{},
 	vcpkg{},
 	fetchContent{},
+	// espidf comes before submodule, and the position is behaviour rather than
+	// taste: the first adapter to claim a root keeps it. A directory the ESP-IDF
+	// component manager downloaded and unpacked is better described by that
+	// manager than by a bare .gitmodules line naming the same path, while the
+	// trees conan, vcpkg and FetchContent fill can never be managed_components.
+	espidf{},
 	submodule{},
 }
 
