@@ -61,9 +61,12 @@ type Enricher interface {
 // bundledSBOM is first because it is the strongest declared origin there is
 // (rank 4 of section 21.1): a document the upstream shipped and its own
 // tooling checked, rather than our reading of a manifest format. A manifest
-// reader added later belongs after it.
+// reader added later belongs after it, and cmsisPack is the first of those:
+// what a pack descriptor declares is a manifest (rank 2), so a bundled SBOM
+// has to keep the fields both of them state.
 var enrichers = []Enricher{
 	bundledSBOM{},
+	cmsisPack{},
 }
 
 // applyEnrichment lets every enricher describe a root and folds what they say

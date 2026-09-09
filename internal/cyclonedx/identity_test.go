@@ -98,7 +98,10 @@ func TestVersionSourcesMapOntoTheClosedTechniqueVocabulary(t *testing.T) {
 		"fetchcontent": "manifest-analysis",
 		// The .pc file a distribution installs beside a system library: a
 		// declaration read out of a file, like every manifest above it.
-		"pkg-config":    "manifest-analysis",
+		"pkg-config": "manifest-analysis",
+		// The .pdsc descriptor an MCU vendor ships inside a CMSIS-Pack: the
+		// vendor's own declaration, read out of a file in the same sense.
+		"cmsis-pack":    "manifest-analysis",
 		"header":        "source-code-analysis",
 		"go-build-info": "binary-analysis",
 		"git":           "other",

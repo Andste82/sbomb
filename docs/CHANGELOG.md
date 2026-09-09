@@ -14,6 +14,38 @@ PDB parsing remains out of scope. MSVC header evidence therefore comes from
 `/showIncludes`, Ninja dependencies or MSBuild TLogs, and a build may report
 `DEBUG_INFO_UNAVAILABLE` where a DWARF-based build would provide debug evidence.
 
+### An MCU vendor pack carries a version and a supplier at last
+
+A CMSIS pack is the way ARM silicon vendors ship their code, and until now a
+pack your build linked arrived in the document with its directory name and
+nothing else: no version, no supplier, no licence anybody could state. The
+answer was in the box the whole time. Every pack carries a `.pdsc` descriptor
+naming the vendor, the pack and its release history.
+
+sbomb reads it now. A pack whose directory is already a component — because a
+licence file, a manifest or a package manager settled it — gets the version of
+its newest release and the vendor as its supplier, with `cmsis-pack` beside the
+version so the document names where the answer came from. Where the pack sits in
+the layout a pack installer writes, `ARM/CMSIS/5.9.0/ARM.CMSIS.pdsc`, the
+version on disk is used and the one the release history declares is kept as the
+origin that lost. Nothing is executed and no file is fetched: the descriptor is
+read, and that is all.
+
+**No purl comes with it, and that is deliberate.** There is no registered
+package-URL type for CMSIS packs, so anything sbomb wrote there would be an
+identifier no tool can resolve. These components keep `UNKNOWN_PURL`. The
+descriptor's `<license>` names a *file* inside the pack rather than an SPDX
+expression, so no licence is taken from it either — the licence keeps coming
+from the licence file at the pack root, as before.
+
+**Nothing is discovered by this, and the coverage is honestly partial.** A pack
+your build never linked is still absent from the document, and it is not
+reported either: nothing here installs or enumerates a pack, and no pack cache
+is searched for. The descriptor is read only in a directory something else has
+already settled as a component — a pack directory holding nothing but its
+`.pdsc` is still read by nobody, because the file's name is the vendor's and
+there is no fixed name to look for.
+
 ### A distribution library is named after its package, not after the sysroot
 
 A host build links `libfoo.so.3` out of `/usr/lib`, and until now every system
