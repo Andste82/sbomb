@@ -14,7 +14,7 @@ same build produce identical output.
 
 <!-- BEGIN GENERATED CATALOGUE -->
 
-This build emits 47 of the 56 identifiers below. The rest are specified and
+This build emits 48 of the 57 identifiers below. The rest are specified and
 reserved: they describe evidence this version does not yet read, and a run will
 never report them. They are listed and marked so that the table is the whole
 catalogue rather than a snapshot of one version.
@@ -33,6 +33,7 @@ catalogue rather than a snapshot of one version.
 | `CRA_FIELD_INCOMPLETE` | error | `cra` profile | Aggregate: one or more §1.5(1) fields missing on some component | reserved |
 | `DEBUG_INFO_UNAVAILABLE` | info | — | Artifact stripped or no DWARF | emitted |
 | `DYNAMIC_DEPENDENCIES_IGNORED` | info | — | Artifact has `DT_NEEDED`/imports while `systemLibraries=exclude` | emitted |
+| `EVIDENCE_UNREADABLE` | warning | — | A metadata file was found but could not be parsed, so nothing was taken from it | emitted |
 | `HEADER_EVIDENCE_FALLBACK` | info | — | A CU had no DWARF coverage; depfile used instead | emitted |
 | `INPUT_LIMIT_EXCEEDED` | warning | — | A parser limit of §30 was reached | emitted |
 | `INTERNAL_INVARIANT_VIOLATION` | error | always (exit 70) | A graph invariant of §8.8 or a `bom-ref` uniqueness assertion of §28.4 failed | emitted |

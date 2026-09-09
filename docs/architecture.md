@@ -108,6 +108,7 @@ produces the same document.
 | Response files | Link and compile lines too long for a command line |
 | Package manifests | Component identity for vcpkg, Conan, FetchContent, git submodules |
 | Package file lists | Which installed files belong to which package, where the manager wrote it down |
+| Bundled SBOMs | What a dependency says about itself, where it ships a CycloneDX or SPDX document |
 
 Some of these are not there unless you ask the build to produce them. The
 linker map and link dependency file are produced by linker flags, which is what
@@ -271,11 +272,21 @@ has more than one: the checkout it was fetched into and the directory the build
 generated for it are both its own.
 
 A **marker directory** is one carrying a package manifest — a conanfile, a
-`vcpkg.json`, an `idf_component.yml`, a `Cargo.toml` — or a licence file. The
-licence file is the weakest of these and the most useful: a library that was
-copied into the source tree usually has nothing else to identify it. The search
-walks up from the file and stops at the anchor root, so your own top-level
-licence can never be mistaken for a dependency's.
+`vcpkg.json`, an `idf_component.yml`, a `Cargo.toml` — a licence file, or a
+bundled SBOM under a conventional name (`sbom.cdx.json`, `bom.spdx.json` and
+their siblings). The licence file is the weakest of these and the most useful: a
+library that was copied into the source tree usually has nothing else to
+identify it. The search walks up from the file and stops at the anchor root, so
+your own top-level licence — and your own SBOM — can never be mistaken for a
+dependency's.
+
+A dependency that ships its own SBOM is then read from it: version, licence,
+supplier and purl, taken from the one component the document says it is about
+and from nothing else. It is the strongest declared source there is, above every
+manifest and above what the manager that installed the package recorded, because
+the people who ship the package wrote it. It still loses to what your
+configuration says and to the checkout itself. The dependencies such a document
+lists are ignored: nothing is in your SBOM because a file mentioned it.
 
 **A file is never dropped because its component could not be determined.** The
 last case is a real component with a real name, marked for review.

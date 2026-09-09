@@ -372,6 +372,99 @@ func TestNoticeAloneIsNotABoundary(t *testing.T) {
 	}
 }
 
+// bundledDocument is a CycloneDX SBOM as a dependency ships it, describing
+// itself in metadata.component.
+const bundledDocument = `{"bomFormat":"CycloneDX","specVersion":"1.6","version":1,
+  "metadata":{"component":{"type":"library","name":"tinyjson","version":"0.7.0",
+    "purl":"pkg:generic/tinyjson@0.7.0","supplier":{"name":"Example Ltd"},
+    "licenses":[{"expression":"Apache-2.0"}]}}}`
+
+// A dependency that ships its own SBOM says with it that it is a separate
+// piece of software, exactly as a licence file does -- and some of them ship
+// nothing else. Without the marker the library disappears into the
+// manufacturer's own application.
+func TestABundledSBOMMarksAComponentThatHasNoLicenceFile(t *testing.T) {
+	root := t.TempDir()
+	write(t, filepath.Join(root, "third_party", "tinyjson", "sbom.cdx.json"), bundledDocument)
+	write(t, filepath.Join(root, "third_party", "tinyjson", "include", "tinyjson.h"), "#pragma once\n")
+
+	file := domain.UsedFile{ID: fileID("project", "third_party/tinyjson/include/tinyjson.h")}
+	physical := map[string]string{
+		file.ID.Canonical(): filepath.Join(root, "third_party", "tinyjson", "include", "tinyjson.h"),
+	}
+	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
+		physical, map[string]string{"project": root}, nil)
+
+	_, name, _, _, detectedBy := resolver.resolve(file)
+	// Named after its directory and never after the document: the name settles
+	// before the files are grouped, and a reader that changed it would be
+	// moving a boundary rather than describing one.
+	if name != "tinyjson" {
+		t.Fatalf("component name = %q, want tinyjson; the library was absorbed into the project", name)
+	}
+	if detectedBy != "package-metadata:sbom.cdx.json" {
+		t.Errorf("detectedBy = %q, want the document that decided it", detectedBy)
+	}
+}
+
+// The project's own SBOM at its own root describes the project. Treating it as
+// a boundary would rename the project's component after its source directory,
+// which is what happens to anyone who keeps this tool's own output there.
+func TestTheProjectsOwnSBOMIsNotABoundary(t *testing.T) {
+	root := t.TempDir()
+	write(t, filepath.Join(root, "sbom.cdx.json"), bundledDocument)
+	write(t, filepath.Join(root, "src", "main.c"), "int main(void){return 0;}\n")
+
+	file := domain.UsedFile{ID: fileID("project", "src/main.c")}
+	physical := map[string]string{file.ID.Canonical(): filepath.Join(root, "src", "main.c")}
+	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
+		physical, map[string]string{"project": root}, nil)
+
+	_, name, _, _, detectedBy := resolver.resolve(file)
+	if name != "firmware" || detectedBy != "anchor:project" {
+		t.Errorf("resolve() = (%s, %s), want the project anchor", name, detectedBy)
+	}
+}
+
+// The two halves together, through the real reader rather than a stub: the
+// document bounds the component and then describes it, and the four fields a
+// copied-in library used to be missing are all there.
+func TestAMarkerRootIsDescribedByTheDocumentThatMarkedIt(t *testing.T) {
+	root := t.TempDir()
+	componentRoot := filepath.Join(root, "third_party", "tinyjson")
+	write(t, filepath.Join(componentRoot, "sbom.cdx.json"), bundledDocument)
+	source := filepath.Join(componentRoot, "tinyjson.c")
+	write(t, source, "int tinyjson(void){return 0;}\n")
+
+	file := domain.UsedFile{ID: fileID("project", "third_party/tinyjson/tinyjson.c")}
+	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
+		map[string]string{file.ID.Canonical(): source}, map[string]string{"project": root}, nil)
+	component := domain.Component{ID: "component:tinyjson", Name: "tinyjson"}
+
+	findings := resolver.enrichComponent(&component, []domain.UsedFile{file})
+
+	if component.Version != "0.7.0" || component.VersionSource != "bundled-sbom" {
+		t.Errorf("version = %q from %q, want the document's answer and its origin",
+			component.Version, component.VersionSource)
+	}
+	if component.Supplier != "Example Ltd" || component.PURL != "pkg:generic/tinyjson@0.7.0" {
+		t.Errorf("supplier/purl = %q/%q, want the document's", component.Supplier, component.PURL)
+	}
+	if len(component.Licenses) == 0 || component.Licenses[0].Expression != "Apache-2.0" {
+		t.Errorf("license = %#v, want the declared Apache-2.0", component.Licenses)
+	}
+	for _, finding := range findings {
+		switch finding.ID {
+		case "UNKNOWN_VERSION", "MISSING_SUPPLIER", "UNKNOWN_PURL", "UNKNOWN_LICENSE", "EVIDENCE_UNREADABLE":
+			t.Errorf("%s was reported for a component the document described", finding.ID)
+		}
+	}
+	if component.Name != "tinyjson" || component.Root == nil || component.Root.RelPath != "third_party/tinyjson" {
+		t.Errorf("component = %q at %#v, want the identity and the root it was grouped under",
+			component.Name, component.Root)
+	}
+}
+
 // The root is where the component begins, not where the surviving files
 // happen to sit. This is the defect that made a licence text depend on
 // --gc-sections.
@@ -1344,6 +1437,38 @@ func TestAGuessedRootIsNeverRead(t *testing.T) {
 	}
 	if component.Version != "" {
 		t.Errorf("version = %q, want none", component.Version)
+	}
+	var unresolved bool
+	for _, finding := range findings {
+		if finding.ID == "COMPONENT_ROOT_UNRESOLVED" {
+			unresolved = true
+		}
+	}
+	if !unresolved {
+		t.Error("a guessed root stopped being reported as one")
+	}
+}
+
+// The same boundary with the real reader behind it. A document whose name is
+// none of the fixed marker names does not bound a component, so the directory
+// stays a guess -- and a guess is never read, however completely the file in it
+// would have answered.
+func TestAGuessedRootIsNeverReadByTheRealReader(t *testing.T) {
+	root := t.TempDir()
+	source := filepath.Join(root, "src", "a.c")
+	write(t, source, "int a(void){return 0;}\n")
+	write(t, filepath.Join(root, "src", "tinyjson-1.2.cdx.json"), bundledDocument)
+
+	file := domain.UsedFile{ID: fileID("project", "src/a.c")}
+	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
+		map[string]string{file.ID.Canonical(): source}, map[string]string{"project": root}, nil)
+	component := domain.Component{ID: "component:a", Name: "a"}
+
+	findings := resolver.enrichComponent(&component, []domain.UsedFile{file})
+
+	if component.Version != "" || component.Supplier != "" {
+		t.Errorf("component = %q/%q, want nothing: no marker named this root",
+			component.Version, component.Supplier)
 	}
 	var unresolved bool
 	for _, finding := range findings {
