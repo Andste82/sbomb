@@ -1,6 +1,7 @@
 package inventory
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/example/sbomb/internal/domain"
@@ -55,7 +56,7 @@ func TestResolverWithGraphIntegration(t *testing.T) {
 	r.AddCMakeMapping("build:util.o", "project:src/util.cpp")
 
 	// Resolve and add edges
-	resolved, err := r.ResolveAndAddEdges()
+	resolved, _, err := r.ResolveAndAddEdges()
 	if err != nil {
 		t.Fatalf("ResolveAndAddEdges failed: %v", err)
 	}
@@ -96,9 +97,20 @@ func TestResolverWithConflict(t *testing.T) {
 	r.AddNinjaMapping("build:app.o", "project:src/other.cpp")
 
 	// Resolve - CMake should win (higher priority)
-	resolved, _ := r.ResolveAndAddEdges()
+	resolved, findings, _ := r.ResolveAndAddEdges()
 	if resolved != 1 {
 		t.Fatalf("expected 1 resolved, got %d", resolved)
+	}
+
+	// The disagreement is reported, not only recorded on the edge: a reviewer
+	// reads findings, not the evidence dump.
+	if len(findings) != 1 || findings[0].ID != "OBJECT_SOURCE_MAPPING_CONFLICT" {
+		t.Fatalf("findings = %+v, want one OBJECT_SOURCE_MAPPING_CONFLICT", findings)
+	}
+	for _, want := range []string{"cmake-file-api", "ninja-buildgraph", "project:src/main.cpp", "project:src/other.cpp"} {
+		if !strings.Contains(findings[0].Message, want) {
+			t.Errorf("message %q does not name %q", findings[0].Message, want)
+		}
 	}
 
 	// Find the edge and check for conflict attribute
@@ -133,7 +145,7 @@ func TestResolverStrategyFallback(t *testing.T) {
 	// Only add Ninja mapping (CMake not available)
 	r.AddNinjaMapping("build:app.o", "project:src/main.cpp")
 
-	resolved, _ := r.ResolveAndAddEdges()
+	resolved, _, _ := r.ResolveAndAddEdges()
 	if resolved != 1 {
 		t.Fatalf("expected 1 resolved with fallback strategy")
 	}
@@ -165,10 +177,15 @@ func TestResolverUnresolvedObject(t *testing.T) {
 	// Only map the first object
 	r.AddCMakeMapping("build:app.o", "project:src/main.cpp")
 
-	resolved, _ := r.ResolveAndAddEdges()
+	resolved, findings, _ := r.ResolveAndAddEdges()
 	// Should only resolve 1 out of 2
 	if resolved != 1 {
 		t.Fatalf("expected 1 resolved, got %d", resolved)
+	}
+	// An object no strategy could map is missing evidence, not contradicted
+	// evidence. Reporting a disagreement there would invent both sides.
+	if len(findings) != 0 {
+		t.Fatalf("findings = %+v, want none: no strategy said anything about build:unknown.o", findings)
 	}
 
 	// Verify that only one source-mapping edge exists

@@ -14,6 +14,44 @@ PDB parsing remains out of scope. MSVC header evidence therefore comes from
 `/showIncludes`, Ninja dependencies or MSBuild TLogs, and a build may report
 `DEBUG_INFO_UNAVAILABLE` where a DWARF-based build would provide debug evidence.
 
+### Contradictions are now reported instead of being settled in silence
+
+The architecture promises that when two strategies disagree, the higher-priority
+one wins and the disagreement is reported rather than hidden. Four places kept
+only the first half of that promise:
+
+* Two mapping strategies naming different sources for one object computed the
+  string `"cmake-file-api vs ninja-buildgraph"`, hung it on the evidence edge and
+  told nobody. `OBJECT_SOURCE_MAPPING_CONFLICT` had been reserved for exactly
+  this since the first draft of the specification and was never emitted.
+* A source two CMake targets both compile — a library and its test binary, the
+  most ordinary case there is — was deleted from the target map without a word,
+  not even a debug line. The file then loses target ownership and falls through
+  to the marker search or the anchor root, so it can end up in a third component
+  altogether.
+* A directory two package managers both claim stayed with the first adapter
+  asked, silently.
+* A file two packages both list was given to neither, and said so only to a
+  debug log that is off in a normal run.
+
+All four now build the same report: what was disputed, what each side said,
+where each value came from, which side was used and why. Where nothing wins —
+two targets, two packages — the finding says that outright and names the
+strategy the file falls through to, because inventing a winner would be the
+guess this tool refuses to make. The first case reports under
+`OBJECT_SOURCE_MAPPING_CONFLICT`, the other three under the new
+`COMPONENT_MAPPING_CONFLICT`; all four are informational.
+
+Informational deliberately. A lock file and a manifest that differ are normal,
+and confidence is not lowered because a second answer existed: §8.7 lists the
+reasons a confidence may be downgraded and a disagreement is not among them. The
+finding exists so that somebody can look, not to devalue an answer that is right.
+
+Nothing about the resolution changed. The same file lands in the same component
+as before, every fixture document is byte-identical, and no test that checks a
+mapping had to be touched. What changed is that a run now says where it had to
+choose.
+
 ### Package metadata now says where each value came from
 
 A package manager's version, licence, supplier and purl were bare strings, and

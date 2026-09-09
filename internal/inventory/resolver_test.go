@@ -33,7 +33,7 @@ func TestResolveObjectSourceStrategyOrdering(t *testing.T) {
 		t.Fatalf("expected source %s, got %s", source1, srcID)
 	}
 
-	if conflict == "" {
+	if conflict == nil {
 		t.Fatalf("expected conflict to be detected")
 	}
 }
@@ -54,12 +54,94 @@ func TestResolveObjectSourceNoConflict(t *testing.T) {
 		t.Fatalf("ResolveObjectSource failed: %v", err)
 	}
 
-	if conflict != "" {
-		t.Fatalf("expected no conflict, got %s", conflict)
+	if conflict != nil {
+		t.Fatalf("expected no conflict, got %+v", conflict)
 	}
 
 	if string(srcID) != source {
 		t.Fatalf("expected source %s, got %s", source, srcID)
+	}
+}
+
+// Three strategies naming three sources are three sides. Reporting only the
+// first disagreement would hide the third answer from the reviewer, and the
+// whole point of the report is that every answer can be seen.
+func TestEveryDisagreeingStrategyIsASideOfTheConflict(t *testing.T) {
+	r := New(evidence.New())
+
+	objPath := "build/app.o"
+	r.AddCMakeMapping(objPath, "src/main.cpp")
+	r.AddNinjaMapping(objPath, "src/other.cpp")
+	r.AddDWARFMapping(objPath, "src/third.cpp")
+
+	_, _, conflict, err := r.ResolveObjectSource(domain.NodeID(objPath))
+	if err != nil {
+		t.Fatalf("ResolveObjectSource failed: %v", err)
+	}
+	if conflict == nil {
+		t.Fatal("expected a conflict")
+	}
+	if len(conflict.Sides) != 3 {
+		t.Fatalf("sides = %+v, want the winner and both dissenters", conflict.Sides)
+	}
+	// The winner is named, and named first: the sides are in the strategy order
+	// of section 13.2, which is also the reason it won.
+	if conflict.Winner != "cmake-file-api" || conflict.Sides[0].Source != "cmake-file-api" {
+		t.Errorf("winner = %q, sides = %+v, want the File API first", conflict.Winner, conflict.Sides)
+	}
+	if conflict.Subject.Ref != objPath {
+		t.Errorf("subject = %+v, want the object", conflict.Subject)
+	}
+}
+
+// A strategy that agrees is not a side. Only a different source is.
+func TestOnlyADifferentSourceMakesASide(t *testing.T) {
+	r := New(evidence.New())
+
+	objPath := "build/app.o"
+	r.AddCMakeMapping(objPath, "src/main.cpp")
+	r.AddNinjaMapping(objPath, "src/main.cpp")
+	r.AddDWARFMapping(objPath, "src/other.cpp")
+
+	_, _, conflict, err := r.ResolveObjectSource(domain.NodeID(objPath))
+	if err != nil {
+		t.Fatalf("ResolveObjectSource failed: %v", err)
+	}
+	if conflict == nil {
+		t.Fatal("expected a conflict")
+	}
+	if len(conflict.Sides) != 2 {
+		t.Fatalf("sides = %+v, want the winner and the one that differed", conflict.Sides)
+	}
+	if conflict.Sides[1].Source != "dwarf" {
+		t.Errorf("dissenting side = %+v, want dwarf", conflict.Sides[1])
+	}
+}
+
+// A disagreement says something about the evidence, not about the winner's
+// quality. Section 8.7 lists the reasons a confidence may be downgraded and a
+// second, weaker answer is not one of them.
+func TestAConflictDoesNotWeakenTheEdge(t *testing.T) {
+	g := evidence.New()
+	r := New(g)
+	objID := domain.NodeID("build:app.o")
+	g.AddNode(domain.Node{ID: objID, Kind: domain.NodeObject})
+	r.AddCMakeMapping(string(objID), "project:src/main.cpp")
+	r.AddNinjaMapping(string(objID), "project:src/other.cpp")
+
+	if _, findings, err := r.ResolveAndAddEdges(); err != nil || len(findings) != 1 {
+		t.Fatalf("ResolveAndAddEdges() = (%+v, %v), want one finding", findings, err)
+	}
+	for _, edge := range g.Edges() {
+		if edge.Type != "source-mapping" {
+			continue
+		}
+		if edge.Confidence != domain.ConfidenceHigh {
+			t.Errorf("confidence = %s, want the winning strategy's own high", edge.Confidence)
+		}
+		if len(edge.Downgrades) != 0 {
+			t.Errorf("downgrades = %v, want none: a conflict is not a downgrade reason", edge.Downgrades)
+		}
 	}
 }
 
@@ -182,13 +264,16 @@ func TestResolveAndAddEdges(t *testing.T) {
 	r.AddCMakeMapping("build:app.o", "project:src/main.cpp")
 
 	// Resolve and add edges
-	resolved, err := r.ResolveAndAddEdges()
+	resolved, findings, err := r.ResolveAndAddEdges()
 	if err != nil {
 		t.Fatalf("ResolveAndAddEdges failed: %v", err)
 	}
 
 	if resolved != 1 {
 		t.Fatalf("expected 1 resolved object, got %d", resolved)
+	}
+	if len(findings) != 0 {
+		t.Fatalf("one strategy alone is no disagreement, got %+v", findings)
 	}
 
 	// Verify edge was added to graph

@@ -231,13 +231,19 @@ type packagePaths struct {
 // becomes an entry, because a package's files need not all live under one of
 // them -- FetchContent puts the checkout in _deps/<name>-src and everything
 // CMake generated for it in _deps/<name>-build, and both are the package.
-func (r *componentResolver) setPackages(packages []pkgmanager.Package, paths packagePaths) {
+//
+// A file two packages both name is dropped, and that is reported rather than
+// logged: the file then falls through to the strategies below package
+// metadata, which can land it in a third component, and a reviewer who never
+// turns debug logging on would otherwise never learn that two managers had
+// disagreed about it.
+func (r *componentResolver) setPackages(packages []pkgmanager.Package, paths packagePaths) []domain.Finding {
 	r.packages = make([]resolvedPackage, 0, len(packages))
 	r.packageFiles = map[string]resolvedPackage{}
 	// A file two packages both name is dropped rather than given to one of
 	// them, exactly as setTargets does for two targets: two statements are no
 	// statement, and choosing between them would be a guess.
-	contested := map[string]bool{}
+	contested := map[string][]domain.ConflictSide{}
 	for _, entry := range packages {
 		var identity resolvedPackage
 		for index, root := range entry.Roots {
@@ -267,16 +273,34 @@ func (r *componentResolver) setPackages(packages []pkgmanager.Package, paths pac
 			}
 			key := id.Canonical()
 			if other, claimed := r.packageFiles[key]; claimed && other.pkg.Name != entry.Name {
-				r.logger.Debug("File %s is claimed by both %s and %s, so neither gets it",
-					key, other.pkg.Name, entry.Name)
-				contested[key] = true
+				// The package that claimed it first is a side of the dispute
+				// too, and a file three packages list has three sides.
+				if len(contested[key]) == 0 {
+					contested[key] = append(contested[key],
+						domain.ConflictSide{Source: other.pkg.Manager, Value: other.pkg.Name})
+				}
+				contested[key] = append(contested[key],
+					domain.ConflictSide{Source: entry.Manager, Value: entry.Name})
 				continue
 			}
 			r.packageFiles[key] = identity
 		}
 	}
-	for key := range contested {
+	findings := make([]domain.Finding, 0, len(contested))
+	// Sorted, because a map is iterated in a different order on every run and
+	// the findings of two runs over one build have to agree byte for byte.
+	for _, key := range sortedKeys(contested) {
 		delete(r.packageFiles, key)
+		conflict := domain.Conflict{
+			Field:   "package that owns this file",
+			Subject: domain.Subject{Kind: "file", Ref: key},
+			Sides:   sortedSides(contested[key]),
+			Reason: "two statements are no statement, so the file falls through to the mapping " +
+				"strategies below package metadata (section 19.2)",
+		}
+		if finding, ok := conflict.Finding("COMPONENT_MAPPING_CONFLICT", domain.SeverityInfo); ok {
+			findings = append(findings, finding)
+		}
 	}
 	// The order has to be total, not merely longest-first: with several entries
 	// per package two roots of equal length are ordinary, and a comparison that
@@ -295,6 +319,28 @@ func (r *componentResolver) setPackages(packages []pkgmanager.Package, paths pac
 		}
 		return a.pkg.Name < b.pkg.Name
 	})
+	return findings
+}
+
+// sortedSides puts the sides of a conflict in a fixed order and drops the
+// repetitions the evidence produces -- several roots of one package, one target
+// listed in two build configurations -- so that the same evidence always yields
+// the same sentence.
+func sortedSides(sides []domain.ConflictSide) []domain.ConflictSide {
+	sorted := append([]domain.ConflictSide(nil), sides...)
+	sort.Slice(sorted, func(i, j int) bool {
+		if sorted[i].Source != sorted[j].Source {
+			return sorted[i].Source < sorted[j].Source
+		}
+		return sorted[i].Value < sorted[j].Value
+	})
+	unique := sorted[:0]
+	for index, side := range sorted {
+		if index == 0 || side != sorted[index-1] {
+			unique = append(unique, side)
+		}
+	}
+	return unique
 }
 
 // packageFor finds the package a file belongs to. A manager that listed the

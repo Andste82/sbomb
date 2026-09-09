@@ -376,7 +376,7 @@ func buildEvidenceGraph(
 		}
 	}
 	addDWARFMappings(graph, b, resolver, mappedObjects, logger)
-	resolved, _ := resolver.ResolveAndAddEdges()
+	resolved, mappingConflicts, _ := resolver.ResolveAndAddEdges()
 	logger.Info("Resolved %d object(s) to their source", resolved)
 
 	// The resolver records source-mapping edges but not the nodes they point
@@ -420,6 +420,7 @@ func buildEvidenceGraph(
 	outcome := graphOutcome{artifactIDs: artifactIDs, dwarf: dwarf, findings: dwarf.Findings}
 	outcome.findings = append(outcome.findings, unityFindings...)
 	outcome.findings = append(outcome.findings, packagingFindings...)
+	outcome.findings = append(outcome.findings, mappingConflicts...)
 
 	attachments := headerAttachments(graph, b, compile, dwarf)
 	resolution := resolveHeaderEvidence(attachments, cfg.HeaderEvidence)
