@@ -282,9 +282,9 @@ registered anchor, because that is where a path handed to a subprocess is
 allowed to point.
 
 Files are mapped to components in a fixed priority order: these curated entries
-first, then package-manager metadata (vcpkg, Conan, FetchContent, git
-submodules), then a configured CMake target, then the nearest ancestor directory
-holding a package manifest (`conanfile.txt`, `vcpkg.json`, `idf_component.yml`,
+first, then package-manager metadata (vcpkg, Conan, FetchContent, the ESP-IDF
+component manager, git submodules), then a configured CMake target, then the
+nearest ancestor directory holding a package manifest (`conanfile.txt`, `vcpkg.json`, `idf_component.yml`,
 `Cargo.toml`, `west.yml`) **or a licence file** (`LICENSE`, `LICENCE`,
 `COPYING`), then the anchor root, and finally an explicit `unknown:` component
 flagged for review. **A file is never dropped because its component could not be

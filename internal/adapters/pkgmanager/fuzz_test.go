@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -70,4 +71,72 @@ func FuzzDiscover(f *testing.F) {
 			}
 		}
 	})
+}
+
+// The ESP-IDF lock file and component manifest get targets of their own rather
+// than two more parameters of FuzzDiscover: the reader behind them is written
+// in this repository instead of being a vendored parser, so it is the one that
+// most needs to be shown surviving arbitrary bytes -- and a seven-argument fuzz
+// function is unreadable.
+func FuzzIDFLock(f *testing.F) {
+	f.Add("dependencies:\n  espressif/led_strip:\n    source:\n      type: service\n    version: 2.5.3\n")
+	f.Add("dependencies:\n  idf:\n    source:\n      type: idf\n    version: 5.1.2\n")
+	f.Add("dependencies: {a: b}\n")
+	f.Add("dependencies:\n  ../escape:\n    version: 1\n")
+	f.Add("dependencies:\n\ta:\n")
+	f.Add("")
+
+	f.Fuzz(func(t *testing.T, lock string) {
+		source := t.TempDir()
+		if err := os.WriteFile(filepath.Join(source, idfLockName), []byte(lock), 0o600); err != nil {
+			t.Skip(err)
+		}
+		if err := os.MkdirAll(filepath.Join(source, idfManagedDir, "espressif__led_strip"), 0o755); err != nil {
+			t.Skip(err)
+		}
+		checkIDFPackages(t, source)
+	})
+}
+
+func FuzzIDFManifest(f *testing.F) {
+	f.Add("version: \"2.5.3\"\nlicense: Apache-2.0\n")
+	f.Add("description: |\n  text\ntargets:\n  - esp32\n")
+	f.Add("license: [MIT\n")
+	f.Add("&anchor\n")
+	f.Add("")
+
+	f.Fuzz(func(t *testing.T, manifest string) {
+		source := t.TempDir()
+		root := filepath.Join(source, idfManagedDir, "espressif__led_strip")
+		if err := os.MkdirAll(root, 0o755); err != nil {
+			t.Skip(err)
+		}
+		if err := os.WriteFile(filepath.Join(root, idfManifestName), []byte(manifest), 0o600); err != nil {
+			t.Skip(err)
+		}
+		checkIDFPackages(t, source)
+	})
+}
+
+// checkIDFPackages states what must hold whatever those two files contain: a
+// package names a component and a directory inside managed_components, and a
+// purl of another type would be a claim about a package manager that installed
+// nothing here.
+func checkIDFPackages(t *testing.T, source string) {
+	t.Helper()
+	packages, _ := espidf{}.Discover(Options{SourceDir: source, Context: context.Background()})
+	for _, entry := range packages {
+		if entry.Name == "" {
+			t.Fatal("a package without a name was returned")
+		}
+		if entry.Root() == "" {
+			t.Fatalf("the package %q owns no directory", entry.Name)
+		}
+		if !strings.HasPrefix(entry.Root(), filepath.Join(source, idfManagedDir)+string(filepath.Separator)) {
+			t.Fatalf("the root %q lies outside managed_components", entry.Root())
+		}
+		if entry.PURL.Value != "" && !strings.HasPrefix(entry.PURL.Value, "pkg:idf/") {
+			t.Fatalf("purl %q is not of this adapter's type", entry.PURL.Value)
+		}
+	}
 }
