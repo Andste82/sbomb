@@ -343,7 +343,7 @@ func buildEvidenceGraph(
 		artifactIDs = append(artifactIDs, artifactID)
 		logger.Info("Final deliverable: %s (role %s, %s)", canonical, deliverable.Role, deliverable.DiscoveredBy)
 
-		inputs := b.collectLinkEvidence(deliverable, mapPath, depfilePath)
+		inputs := b.collectLinkEvidence(deliverable, buildDir, mapPath, depfilePath)
 		b.addLinkEdges(artifactID, inputs)
 	}
 

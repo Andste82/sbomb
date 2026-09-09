@@ -12,9 +12,9 @@ from an unusual position: most of the machinery is already there and has never
 been pointed at a real Microsoft build. The first two steps therefore find out
 what is true before anything is written.
 
-**9a and 9b are implemented locally.** The Windows fixture corpus, native
-MSVC map parser, `.lib` archive proof and CI validation are in place. Steps 9c
-onward remain unimplemented.
+**9a, 9b and 9c are implemented locally.** The Windows fixture corpus, native
+MSVC map parser, `.lib` archive proof, MSVC linker flags, verbose build-log
+evidence and CI validation are in place. Steps 9d onward remain unimplemented.
 
 ---
 
@@ -87,10 +87,10 @@ that it is skipping map evidence and carries on — which under MSVC means every
 build silently loses its strongest link evidence.
 
 The linker's own spellings go in: `/MAP:<file>` for the map, `/VERBOSE:LIB` for
-what was searched and extracted, `/VERBOSE:REF` for what `/OPT:REF` removed. The
-last two are console output rather than files the linker writes, so capturing
-them is a build-side change of the same kind the map is, and the CMake module is
-where that belongs.
+what was searched and extracted, and `/VERBOSE:REF` for what `/OPT:REF` removed. The
+last two are console output rather than files the linker writes. The CMake
+module enables them and the Windows fixture preserves the verbose build
+output in `build.log`; the structured map remains the input consumed by sbomb.
 
 Gate: a fixture built through `Sbomb.cmake` on Windows has a map; the discarded
 sections of §4.5 are populated from `/VERBOSE:REF` rather than left empty; a

@@ -1,0 +1,14 @@
+Change Dir: 'C:/__fixture_build__'
+
+Run Build Command(s): C:/tools/ninja.exe -v -j 1
+[1/4] C:\PROGRA~2\MICROS~3\2022\BUILDT~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd -ffunction-sections -fdata-sections /showIncludes /FoCMakeFiles\gcapp.dir\deadcode.c.obj /FdCMakeFiles\gcapp.dir\ /FS -c C:\__fixture_src__\deadcode.c
+cl : Command line warning D9002 : ignoring unknown option '-ffunction-sections'
+cl : Command line warning D9002 : ignoring unknown option '-fdata-sections'
+[2/4] C:\PROGRA~2\MICROS~3\2022\BUILDT~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd -ffunction-sections -fdata-sections /showIncludes /FoCMakeFiles\gcapp.dir\live.c.obj /FdCMakeFiles\gcapp.dir\ /FS -c C:\__fixture_src__\live.c
+cl : Command line warning D9002 : ignoring unknown option '-ffunction-sections'
+cl : Command line warning D9002 : ignoring unknown option '-fdata-sections'
+[3/4] C:\PROGRA~2\MICROS~3\2022\BUILDT~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd -ffunction-sections -fdata-sections /showIncludes /FoCMakeFiles\gcapp.dir\main.c.obj /FdCMakeFiles\gcapp.dir\ /FS -c C:\__fixture_src__\main.c
+cl : Command line warning D9002 : ignoring unknown option '-ffunction-sections'
+cl : Command line warning D9002 : ignoring unknown option '-fdata-sections'
+[4/4] C:\Windows\system32\cmd.exe /C "cd . && "C:\Program Files\CMake\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\gcapp.dir --rc=C:\PROGRA~2\WI3CF2~1\10\bin\100203~1.0\x64\rc.exe --mt=C:\PROGRA~2\WI3CF2~1\10\bin\100203~1.0\x64\mt.exe --manifests  -- C:\PROGRA~2\MICROS~3\2022\BUILDT~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\link.exe /nologo CMakeFiles\gcapp.dir\main.c.obj CMakeFiles\gcapp.dir\live.c.obj CMakeFiles\gcapp.dir\deadcode.c.obj  /out:gcapp.exe /implib:gcapp.lib /pdb:gcapp.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console  /MAP:C:/__fixture_build__/gcapp.exe.map /VERBOSE:LIB /VERBOSE:REF -Wl,--gc-sections  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib && cd ."
+

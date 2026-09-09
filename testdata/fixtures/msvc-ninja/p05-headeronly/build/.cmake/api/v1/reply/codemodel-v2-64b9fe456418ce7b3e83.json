@@ -1,0 +1,79 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-120993aad4fb3360d1ef.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "p05_headeronly",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "hdr::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-hdr-Debug-895f694fb7c437324ea3.json",
+					"name" : "hdr",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "sbomb::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-sbomb-Debug-40bc7f7239bdd854cf7c.json",
+					"name" : "sbomb",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "sbomb-hdr::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-sbomb-hdr-Debug-a0cac87c0ce1219bc672.json",
+					"name" : "sbomb-hdr",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/__fixture_build__",
+		"source" : "C:/__fixture_src__"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}

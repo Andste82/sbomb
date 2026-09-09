@@ -135,6 +135,18 @@ func TestTruncatedMSVCMapIsMalformed(t *testing.T) {
 	}
 }
 
+func TestParseMSVCVerboseDiscardedSymbols(t *testing.T) {
+	text := "Discarded foo from MSVCRTD.lib(error.obj)\n" +
+		"Discarded bar from kernel32.lib(KERNEL32.dll)\n"
+	records := ParseMSVCVerbose(text)
+	if len(records) != 2 {
+		t.Fatalf("got %d verbose records, want 2: %+v", len(records), records)
+	}
+	if records[0].Kind != DiscardedSection || records[0].Archive != "MSVCRTD.lib" || records[0].Member != "error.obj" {
+		t.Fatalf("first verbose record = %+v", records[0])
+	}
+}
+
 // TestLinkerScriptWildcardsAreNotArchiveMembers guards the defect the real
 // corpus exposed: a context-free scan reads *crtbegin.o(.ctors) as the member
 // ".ctors" of the archive "*crtbegin.o".

@@ -1,0 +1,9 @@
+Change Dir: 'C:/__fixture_build__'
+
+Run Build Command(s): C:/tools/ninja.exe -v -j 1
+[1/5] C:\PROGRA~2\MICROS~3\2022\BUILDT~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd /showIncludes /FoCMakeFiles\crypto.dir\crypto.c.obj /FdCMakeFiles\crypto.dir\crypto.pdb /FS -c C:\__fixture_src__\crypto.c
+[2/5] C:\PROGRA~2\MICROS~3\2022\BUILDT~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd /showIncludes /FoCMakeFiles\crypto.dir\unused.c.obj /FdCMakeFiles\crypto.dir\crypto.pdb /FS -c C:\__fixture_src__\unused.c
+[3/5] C:\PROGRA~2\MICROS~3\2022\BUILDT~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd /showIncludes /FoCMakeFiles\app.dir\main.c.obj /FdCMakeFiles\app.dir\ /FS -c C:\__fixture_src__\main.c
+[4/5] C:\Windows\system32\cmd.exe /C "cd . && C:\PROGRA~2\MICROS~3\2022\BUILDT~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\lib.exe /nologo /machine:x64 /out:crypto.lib CMakeFiles\crypto.dir\crypto.c.obj CMakeFiles\crypto.dir\unused.c.obj && cd ."
+[5/5] C:\Windows\system32\cmd.exe /C "cd . && "C:\Program Files\CMake\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\app.dir --rc=C:\PROGRA~2\WI3CF2~1\10\bin\100203~1.0\x64\rc.exe --mt=C:\PROGRA~2\WI3CF2~1\10\bin\100203~1.0\x64\mt.exe --manifests  -- C:\PROGRA~2\MICROS~3\2022\BUILDT~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\link.exe /nologo CMakeFiles\app.dir\main.c.obj  /out:app.exe /implib:app.lib /pdb:app.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console  /MAP:C:/__fixture_build__/app.exe.map /VERBOSE:LIB /VERBOSE:REF  crypto.lib  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib && cd ."
+

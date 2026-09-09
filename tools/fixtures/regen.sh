@@ -229,6 +229,7 @@ generate_one() {
   mkdir -p "$SRC_ROOT" "$BUILD_ROOT"
 
   cp "$projects_dir/common.cmake" "$SRC_ROOT/"
+  cp "$repo_root/cmake/Sbomb.cmake" "$SRC_ROOT/"
   cp -r "$projects_dir/$project/." "$SRC_ROOT/"
 
   # A dependency directory becomes a git repository with a fixed identity and
@@ -281,7 +282,7 @@ QUERY
   # finish. A parallel build reorders them and renumbers the node table, so an
   # unchanged fixture produced a different log on every regeneration. The
   # fixtures are small enough that the wall clock cost is a few seconds.
-  if ! cmake --build "$BUILD_ROOT" --parallel 1 >/dev/null 2>"$BUILD_ROOT/build.log"; then
+  if ! cmake --build "$BUILD_ROOT" --parallel 1 --verbose >"$BUILD_ROOT/build.log" 2>&1; then
     log "  BUILD FAILED: $toolchain/$project"
     sed 's/^/    /' "$BUILD_ROOT/build.log" | tail -8 >&2
     return 1
@@ -309,9 +310,13 @@ QUERY
   done
 
   # Generator-specific evidence.
+  if [[ "$toolchain" == "msvc-ninja" ]]; then
+    harvest "$BUILD_ROOT/build.log" "$build_out/build.log"
+  fi
   if [[ "$generator" == Ninja* ]]; then
     harvest "$BUILD_ROOT/build.ninja" "$build_out/build.ninja"
     harvest "$BUILD_ROOT/rules.ninja" "$build_out/rules.ninja"
+    harvest "$BUILD_ROOT/CMakeFiles/rules.ninja" "$build_out/CMakeFiles/rules.ninja"
     harvest "$BUILD_ROOT/.ninja_deps" "$build_out/.ninja_deps"
     # The deps log records each output's modification time, which is wall
     # clock. Nothing sbomb reads uses it, and leaving it in churned every Ninja

@@ -190,7 +190,7 @@ func (b *builder) physicalFor(path string) string {
 // preference order of section 11.2, corrected by deviation D1: the dependency
 // file is authoritative for which files the link consumed, but only the map
 // names the archive members that were actually extracted.
-func (b *builder) collectLinkEvidence(deliverable Deliverable, mapPath, depfilePath string) []linkInput {
+func (b *builder) collectLinkEvidence(deliverable Deliverable, buildDir, mapPath, depfilePath string) []linkInput {
 	inputs := []linkInput{}
 
 	if path := b.locateEvidence(depfilePath, deliverable.Path, ".d"); path != "" {
@@ -252,6 +252,16 @@ func (b *builder) collectLinkEvidence(deliverable Deliverable, mapPath, depfileP
 		}
 		b.logger.Info("Linker map '%s' (%s): %d record(s), %d extracted archive member(s)",
 			filepath.Base(path), result.Format, len(result.Records), members)
+	}
+
+	// link.exe writes /VERBOSE:REF to the build stream. CMake/Ninja callers
+	// that preserve that stream as build.log provide discarded-member evidence
+	// here; a missing log is a normal degradation, not a failed build.
+	if data, err := os.ReadFile(filepath.Join(buildDir, "build.log")); err == nil {
+		for _, record := range mapparser.ParseMSVCVerbose(string(data)) {
+			canonical, _ := b.identify(record.Path)
+			b.discardedObjects[canonical]++
+		}
 	}
 
 	if len(inputs) == 0 {

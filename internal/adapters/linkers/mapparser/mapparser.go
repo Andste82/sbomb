@@ -70,6 +70,37 @@ var ErrMalformed = errors.New("malformed link evidence")
 var ErrInputLimitExceeded = errors.New("input limit exceeded")
 var ErrUnknownFormat = errors.New("unknown linker map format")
 
+// ParseMSVCVerbose reads the optional text emitted by link.exe with
+// /VERBOSE:REF. It is separate from Parse because the linker writes this
+// evidence to the build stream, not to the map file.
+func ParseMSVCVerbose(text string) []Record {
+	var records []Record
+	for _, line := range strings.Split(text, "\n") {
+		trimmed := strings.TrimSpace(line)
+		const prefix = "Discarded "
+		if !strings.HasPrefix(trimmed, prefix) {
+			continue
+		}
+		from := strings.LastIndex(trimmed, " from ")
+		if from < 0 {
+			continue
+		}
+		target := strings.TrimSpace(trimmed[from+len(" from "):])
+		archive, member, ok := splitArchiveMember(target)
+		if !ok {
+			continue
+		}
+		records = append(records, Record{
+			Kind:    DiscardedSection,
+			Path:    archive + "(" + member + ")",
+			Archive: archive,
+			Member:  member,
+			Raw:     line,
+		})
+	}
+	return records
+}
+
 // Sniff identifies the map format from its content.
 func Sniff(text string) string {
 	hasMemberBlock := strings.Contains(text, "Archive member included")

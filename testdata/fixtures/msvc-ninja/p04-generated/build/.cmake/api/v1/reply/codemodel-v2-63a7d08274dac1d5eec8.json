@@ -1,0 +1,79 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-8f7aba5a1f3905fe26f1.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "p04_generated",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "gen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-gen-Debug-e62887a972688c181b4f.json",
+					"name" : "gen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "sbomb::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-sbomb-Debug-3de66985b794b3e8dd6a.json",
+					"name" : "sbomb",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "sbomb-gen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-sbomb-gen-Debug-4ed2d64071f3781f81ba.json",
+					"name" : "sbomb-gen",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/__fixture_build__",
+		"source" : "C:/__fixture_src__"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}

@@ -1,0 +1,10 @@
+Change Dir: 'C:/__fixture_build__'
+
+Run Build Command(s): C:/tools/ninja.exe -v -j 1
+[1/6] C:\PROGRA~2\MICROS~3\2022\BUILDT~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd /showIncludes /FoCMakeFiles\mod_a.dir\mod_a\util.c.obj /FdCMakeFiles\mod_a.dir\mod_a.pdb /FS -c C:\__fixture_src__\mod_a\util.c
+[2/6] C:\PROGRA~2\MICROS~3\2022\BUILDT~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd /showIncludes /FoCMakeFiles\dup.dir\main.c.obj /FdCMakeFiles\dup.dir\ /FS -c C:\__fixture_src__\main.c
+[3/6] C:\PROGRA~2\MICROS~3\2022\BUILDT~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe  /nologo   /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd /showIncludes /FoCMakeFiles\mod_b.dir\mod_b\util.c.obj /FdCMakeFiles\mod_b.dir\mod_b.pdb /FS -c C:\__fixture_src__\mod_b\util.c
+[4/6] C:\Windows\system32\cmd.exe /C "cd . && C:\PROGRA~2\MICROS~3\2022\BUILDT~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\lib.exe /nologo /machine:x64 /out:mod_b.lib CMakeFiles\mod_b.dir\mod_b\util.c.obj && cd ."
+[5/6] C:\Windows\system32\cmd.exe /C "cd . && C:\PROGRA~2\MICROS~3\2022\BUILDT~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\lib.exe /nologo /machine:x64 /out:mod_a.lib CMakeFiles\mod_a.dir\mod_a\util.c.obj && cd ."
+[6/6] C:\Windows\system32\cmd.exe /C "cd . && "C:\Program Files\CMake\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\dup.dir --rc=C:\PROGRA~2\WI3CF2~1\10\bin\100203~1.0\x64\rc.exe --mt=C:\PROGRA~2\WI3CF2~1\10\bin\100203~1.0\x64\mt.exe --manifests  -- C:\PROGRA~2\MICROS~3\2022\BUILDT~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\link.exe /nologo CMakeFiles\dup.dir\main.c.obj  /out:dup.exe /implib:dup.lib /pdb:dup.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console  /MAP:C:/__fixture_build__/dup.exe.map /VERBOSE:LIB /VERBOSE:REF  mod_a.lib  mod_b.lib  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib && cd ."
+

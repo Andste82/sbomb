@@ -1,0 +1,79 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-d4faf0ac919bdf894a88.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "p09_lto",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "ltoapp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ltoapp-Debug-6239fe0aecdb4f159abe.json",
+					"name" : "ltoapp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "sbomb::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-sbomb-Debug-1ec277a40e5f2b31e38d.json",
+					"name" : "sbomb",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "sbomb-ltoapp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-sbomb-ltoapp-Debug-0217688b029a322477c9.json",
+					"name" : "sbomb-ltoapp",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/__fixture_build__",
+		"source" : "C:/__fixture_src__"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}
