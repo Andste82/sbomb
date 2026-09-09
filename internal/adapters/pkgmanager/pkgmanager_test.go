@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/exec"
 )
 
@@ -675,7 +676,7 @@ func TestASecondRootIsNotOfferedAsAPackageOfItsOwn(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	packages, _ := Discover(Options{BuildDir: build, SourceDir: build, Context: context.Background()})
+	packages, findings := Discover(Options{BuildDir: build, SourceDir: build, Context: context.Background()})
 	for _, found := range packages {
 		if found.Root() == buildTree {
 			t.Errorf("%s claims %q, which the FetchContent package already covers", found.Manager, found.Root())
@@ -683,5 +684,53 @@ func TestASecondRootIsNotOfferedAsAPackageOfItsOwn(t *testing.T) {
 	}
 	if len(packages) != 1 || packages[0].Name != "tinylog" {
 		t.Fatalf("packages = %#v, want the FetchContent dependency alone", packages)
+	}
+	// Turning the second manager away is a decision about who owns a directory,
+	// and the report has to name both claimants and the directory itself.
+	var conflicts []domain.Finding
+	for _, finding := range findings {
+		if finding.ID == "COMPONENT_MAPPING_CONFLICT" {
+			conflicts = append(conflicts, finding)
+		}
+	}
+	if len(conflicts) != 1 {
+		t.Fatalf("conflicts = %+v, want exactly one", conflicts)
+	}
+	if conflicts[0].Severity != domain.SeverityInfo {
+		t.Errorf("severity = %s, want info", conflicts[0].Severity)
+	}
+	if conflicts[0].Subject.Ref != buildTree {
+		t.Errorf("subject = %+v, want the contested root %s", conflicts[0].Subject, buildTree)
+	}
+	for _, want := range []string{"fetchcontent", "git-submodule", "tinylog"} {
+		if !strings.Contains(conflicts[0].Message, want) {
+			t.Errorf("message %q does not name %q", conflicts[0].Message, want)
+		}
+	}
+}
+
+// Two managers that report two different directories agree about everything
+// that matters here. Nothing is turned away, so nothing is reported: the
+// finding exists for a real dispute, not for two managers being present.
+func TestTwoManagersWithSeparateRootsConflictOverNothing(t *testing.T) {
+	build := t.TempDir()
+	writePopulate(t, build, "tinylog", "https://example.invalid/org/tinylog.git", "v1.4.0")
+	if err := os.MkdirAll(filepath.Join(build, "vendor", "tinyfmt"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	modules := "[submodule \"tinyfmt\"]\n\tpath = vendor/tinyfmt\n" +
+		"\turl = https://example.invalid/org/tinyfmt.git\n"
+	if err := os.WriteFile(filepath.Join(build, ".gitmodules"), []byte(modules), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	packages, findings := Discover(Options{BuildDir: build, SourceDir: build, Context: context.Background()})
+	if len(packages) != 2 {
+		t.Fatalf("packages = %#v, want both dependencies", packages)
+	}
+	for _, finding := range findings {
+		if finding.ID == "COMPONENT_MAPPING_CONFLICT" {
+			t.Errorf("unexpected conflict: %+v", finding)
+		}
 	}
 }

@@ -484,7 +484,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		}
 		return path
 	}
-	resolver.setPackages(packages, packagePaths{
+	packageConflicts := resolver.setPackages(packages, packagePaths{
 		register: func(root string) domain.FileID {
 			canonical, _ := b.identify(logical(root))
 			return domain.FileID{Anchor: anchorOf(canonical), RelPath: relOf(canonical)}
@@ -496,8 +496,11 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 			return b.identityOf(logical(file))
 		},
 	})
+	findings = append(findings, packageConflicts...)
 	if replyModel != nil {
-		resolver.setTargets(targetsByFile(replyModel, b))
+		byFile, targetConflicts := targetsByFile(replyModel, b)
+		resolver.setTargets(byFile)
+		findings = append(findings, targetConflicts...)
 	}
 	narrowing := narrowingByComponent(resolver, outcome.narrowed)
 	// The build system already says what the project is called and which
@@ -695,7 +698,10 @@ func fileClassOf(node domain.Node) domain.FileClass {
 	}
 }
 
-func sortedKeys(m map[string]string) []string {
+// sortedKeys is how this package iterates a map when the result reaches the
+// document or the findings: Go's map order differs between runs, and the output
+// has to be byte-identical for the same evidence (section 25).
+func sortedKeys[V any](m map[string]V) []string {
 	keys := make([]string, 0, len(m))
 	for key := range m {
 		keys = append(keys, key)
@@ -807,9 +813,14 @@ func requireConfiguredEvidence(mapPath, depfilePath string) error {
 // A file two targets both list is dropped rather than assigned to one of them.
 // That happens for a source compiled into two targets, and the build system
 // having said two things is not a licence to pick one.
-func targetsByFile(model *cmakeapi.Model, b *builder) map[string]string {
+//
+// Dropping it is not silent. The file loses strategy 5 and falls through to the
+// strategies below it, which can put it in a third component altogether, so the
+// second return value reports every contested source and names the targets that
+// contested it.
+func targetsByFile(model *cmakeapi.Model, b *builder) (map[string]string, []domain.Finding) {
 	byFile := map[string]string{}
-	contested := map[string]bool{}
+	contested := map[string][]domain.ConflictSide{}
 	for _, configuration := range model.Configurations {
 		for _, target := range configuration.Targets {
 			for _, source := range target.Sources {
@@ -822,17 +833,37 @@ func targetsByFile(model *cmakeapi.Model, b *builder) map[string]string {
 					continue
 				}
 				if owner, seen := byFile[canonical]; seen && owner != target.Name {
-					contested[canonical] = true
+					// The first owner is a side of the dispute too, and a
+					// source listed in three targets has three sides.
+					if len(contested[canonical]) == 0 {
+						contested[canonical] = append(contested[canonical],
+							domain.ConflictSide{Source: "cmake-file-api", Value: owner})
+					}
+					contested[canonical] = append(contested[canonical],
+						domain.ConflictSide{Source: "cmake-file-api", Value: target.Name})
 					continue
 				}
 				byFile[canonical] = target.Name
 			}
 		}
 	}
-	for canonical := range contested {
+	findings := make([]domain.Finding, 0, len(contested))
+	// Sorted, because the map's own order changes from run to run and the
+	// findings of two runs over one build have to be byte-identical.
+	for _, canonical := range sortedKeys(contested) {
 		delete(byFile, canonical)
+		conflict := domain.Conflict{
+			Field:   "target that owns this source",
+			Subject: domain.Subject{Kind: "file", Ref: canonical},
+			Sides:   sortedSides(contested[canonical]),
+			Reason: "the File API named several, and choosing one would be a guess, so the file " +
+				"falls through to the mapping strategies below target ownership (section 19.2)",
+		}
+		if finding, ok := conflict.Finding("COMPONENT_MAPPING_CONFLICT", domain.SeverityInfo); ok {
+			findings = append(findings, finding)
+		}
 	}
-	return byFile
+	return byFile, findings
 }
 
 // narrowingByComponent groups the headers DWARF narrowing removed by the

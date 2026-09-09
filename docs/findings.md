@@ -14,7 +14,7 @@ same build produce identical output.
 
 <!-- BEGIN GENERATED CATALOGUE -->
 
-This build emits 45 of the 55 identifiers below. The rest are specified and
+This build emits 47 of the 56 identifiers below. The rest are specified and
 reserved: they describe evidence this version does not yet read, and a run will
 never report them. They are listed and marked so that the table is the whole
 catalogue rather than a snapshot of one version.
@@ -26,6 +26,7 @@ catalogue rather than a snapshot of one version.
 | `AMBIGUOUS_FINAL_DELIVERABLE` | error | always (exit 1) | Discovery found several candidates | emitted |
 | `ARCHIVE_MEMBERS_UNRESOLVED` | warning | — | Archive used, member-level detail unavailable | emitted |
 | `CMAKE_FILE_API_UNAVAILABLE` | warning | — | No reply directory and regeneration not permitted | emitted |
+| `COMPONENT_MAPPING_CONFLICT` | info | — | Two sources claim the same file or root; the mapping was decided by rank or given to neither, and the disagreement is reported | emitted |
 | `COMPONENT_ROOT_UNRESOLVED` | info | — | Component root fell back to the common directory of the used files | emitted |
 | `CONFIGURED_EVIDENCE_MISSING` | error | always (exit 2) | A configured linker map or link dependency file does not exist | emitted |
 | `CONFIG_DEPRECATED_OPTION` | warning | — | Deprecated configuration key used | reserved |
@@ -53,7 +54,7 @@ catalogue rather than a snapshot of one version.
 | `MISSING_PACKAGE_EVIDENCE` | warning | — | Package/image artifact without a manifest | emitted |
 | `MISSING_SUPPLIER` | warning | `failOnMissingSupplier` | Component has no supplier/creator (CRA/BSI field) | emitted |
 | `NINJA_DEPS_UNAVAILABLE` | info | — | `ninja -t deps` not permitted or failed | emitted |
-| `OBJECT_SOURCE_MAPPING_CONFLICT` | info | — | Two strategies disagreed; higher priority used | reserved |
+| `OBJECT_SOURCE_MAPPING_CONFLICT` | info | — | Two strategies disagreed; higher priority used | emitted |
 | `PACKAGE_NOT_LINKED` | info | — | A package manager installed this dependency, but no used file belongs to it | emitted |
 | `PCH_HEADERS_EXCLUDED` | info | — | Headers removed by `pchHeaders=exclude` | emitted |
 | `PREBUILT_LIBRARY_UNMAPPED` | warning | `prebuiltLibrariesRequireMapping` | Prebuilt library has no component mapping | emitted |

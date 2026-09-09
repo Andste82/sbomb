@@ -517,12 +517,142 @@ func TestASourceTwoTargetsShareIsNotMapped(t *testing.T) {
 		}},
 	}
 
-	byFile := targetsByFile(model, b)
+	byFile, findings := targetsByFile(model, b)
 	if owner, mapped := byFile["project:shared.c"]; mapped {
 		t.Errorf("shared.c maps to %q; a contested source must stay unmapped", owner)
 	}
 	if byFile["project:main.c"] != "app" {
 		t.Errorf("main.c maps to %q, want app", byFile["project:main.c"])
+	}
+	// Dropping it is a decision, and a decision nobody is told about is the
+	// silence this report exists to end.
+	if len(findings) != 1 || findings[0].ID != "COMPONENT_MAPPING_CONFLICT" {
+		t.Fatalf("findings = %+v, want one COMPONENT_MAPPING_CONFLICT", findings)
+	}
+	if findings[0].Severity != domain.SeverityInfo {
+		t.Errorf("severity = %s, want info", findings[0].Severity)
+	}
+	if findings[0].Subject.Ref != "project:shared.c" {
+		t.Errorf("subject = %+v, want the contested source", findings[0].Subject)
+	}
+	for _, want := range []string{"app", "tests"} {
+		if !strings.Contains(findings[0].Message, want) {
+			t.Errorf("message %q does not name target %q", findings[0].Message, want)
+		}
+	}
+}
+
+// The same source listed by three targets has three sides, and a message built
+// from a map has to be sorted or two runs over one build disagree.
+func TestEveryTargetThatClaimedASourceIsNamedOnce(t *testing.T) {
+	result, err := anchors.Assemble(anchors.Options{
+		Flavor: pathmodel.DefaultFlavor(), ProjectRoot: "/src", BuildRoot: "/bd",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	model := &cmakeapi.Model{
+		SourceRoot: "/src",
+		Configurations: []cmakeapi.Configuration{
+			{Name: "Debug", Targets: []cmakeapi.Target{
+				{Name: "tests", Sources: []cmakeapi.Source{{Path: "shared.c"}}},
+				{Name: "app", Sources: []cmakeapi.Source{{Path: "shared.c"}}},
+				{Name: "bench", Sources: []cmakeapi.Source{{Path: "shared.c"}}},
+			}},
+			// A second configuration repeats the same claims; a repetition is
+			// not a further side.
+			{Name: "Release", Targets: []cmakeapi.Target{
+				{Name: "app", Sources: []cmakeapi.Source{{Path: "shared.c"}}},
+			}},
+		},
+	}
+
+	var messages []string
+	for run := 0; run < 2; run++ {
+		b := newBuilder(evidence.New(), result, "/bd", "/bd", NewLogger(0, nil))
+		_, findings := targetsByFile(model, b)
+		if len(findings) != 1 {
+			t.Fatalf("findings = %+v, want exactly one", findings)
+		}
+		messages = append(messages, findings[0].Message)
+	}
+	if messages[0] != messages[1] {
+		t.Errorf("two runs disagree:\n%s\n%s", messages[0], messages[1])
+	}
+	if got := strings.Count(messages[0], `"app"`); got != 1 {
+		t.Errorf("target app named %d times in %q, want once", got, messages[0])
+	}
+	for _, want := range []string{"app", "bench", "tests"} {
+		if !strings.Contains(messages[0], want) {
+			t.Errorf("message %q does not name target %q", messages[0], want)
+		}
+	}
+}
+
+// One target listing a source in two configurations is not a disagreement.
+// Only a second target is.
+func TestOneTargetInTwoConfigurationsIsNoConflict(t *testing.T) {
+	result, err := anchors.Assemble(anchors.Options{
+		Flavor: pathmodel.DefaultFlavor(), ProjectRoot: "/src", BuildRoot: "/bd",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	b := newBuilder(evidence.New(), result, "/bd", "/bd", NewLogger(0, nil))
+	model := &cmakeapi.Model{
+		SourceRoot: "/src",
+		Configurations: []cmakeapi.Configuration{
+			{Name: "Debug", Targets: []cmakeapi.Target{
+				{Name: "app", Sources: []cmakeapi.Source{{Path: "shared.c"}}},
+			}},
+			{Name: "Release", Targets: []cmakeapi.Target{
+				{Name: "app", Sources: []cmakeapi.Source{{Path: "shared.c"}}},
+			}},
+		},
+	}
+
+	byFile, findings := targetsByFile(model, b)
+	if byFile["project:shared.c"] != "app" {
+		t.Errorf("shared.c maps to %q, want app", byFile["project:shared.c"])
+	}
+	if len(findings) != 0 {
+		t.Errorf("findings = %+v, want none", findings)
+	}
+}
+
+// A source outside the project and the build tree still has an identity: the
+// registry anchors it absolutely rather than giving up on it. So it is a file
+// like any other, and two targets claiming it are reported like any others.
+// The empty-identity check in targetsByFile is a guard, not a quiet exit.
+func TestAContestedSourceOutsideEveryTreeIsStillReported(t *testing.T) {
+	result, err := anchors.Assemble(anchors.Options{
+		Flavor: pathmodel.DefaultFlavor(), ProjectRoot: "/src", BuildRoot: "/bd",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	b := newBuilder(evidence.New(), result, "/bd", "/bd", NewLogger(0, nil))
+	model := &cmakeapi.Model{
+		SourceRoot: "/src",
+		Configurations: []cmakeapi.Configuration{
+			{Name: "Debug", Targets: []cmakeapi.Target{
+				{Name: "app", Sources: []cmakeapi.Source{{Path: "/elsewhere/stray.c"}}},
+				{Name: "tests", Sources: []cmakeapi.Source{{Path: "/elsewhere/stray.c"}}},
+			}},
+		},
+	}
+
+	byFile, findings := targetsByFile(model, b)
+	if len(byFile) != 0 {
+		t.Errorf("byFile = %+v, want nothing: a contested source is mapped by neither target", byFile)
+	}
+	if len(findings) != 1 || findings[0].Subject.Ref != "abs:elsewhere/stray.c" {
+		t.Fatalf("findings = %+v, want one naming the absolute identity", findings)
+	}
+	for _, want := range []string{"app", "tests"} {
+		if !strings.Contains(findings[0].Message, want) {
+			t.Errorf("message %q does not name target %q", findings[0].Message, want)
+		}
 	}
 }
 
@@ -774,9 +904,9 @@ func TestListedFilesAreLookedUpButNotRegistered(t *testing.T) {
 func TestAFileTwoPackagesClaimIsMappedByNeither(t *testing.T) {
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
 		map[string]string{}, map[string]string{}, nil)
-	resolver.setPackages([]pkgmanager.Package{
+	findings := resolver.setPackages([]pkgmanager.Package{
 		{Name: "left", Roots: []string{"/bd/left"}, Files: []string{"/bd/shared/util.h"}, Manager: "vcpkg"},
-		{Name: "right", Roots: []string{"/bd/right"}, Files: []string{"/bd/shared/util.h"}, Manager: "vcpkg"},
+		{Name: "right", Roots: []string{"/bd/right"}, Files: []string{"/bd/shared/util.h"}, Manager: "conan"},
 	}, identityFor(map[string]domain.FileID{
 		"/bd/left":          fileID("build", "left"),
 		"/bd/right":         fileID("build", "right"),
@@ -786,6 +916,60 @@ func TestAFileTwoPackagesClaimIsMappedByNeither(t *testing.T) {
 	contested := domain.UsedFile{ID: fileID("build", "shared/util.h")}
 	if _, name, _, _, detectedBy := resolver.resolve(contested); name != "firmware" {
 		t.Errorf("resolve() = (%s, %s), want the file to fall through to the anchor", name, detectedBy)
+	}
+	// Falling through is a decision. Debug logging is off in a normal run, so
+	// only a finding reaches the person who has to judge the mapping.
+	if len(findings) != 1 || findings[0].ID != "COMPONENT_MAPPING_CONFLICT" {
+		t.Fatalf("findings = %+v, want one COMPONENT_MAPPING_CONFLICT", findings)
+	}
+	if findings[0].Subject.Ref != "build:shared/util.h" {
+		t.Errorf("subject = %+v, want the contested file", findings[0].Subject)
+	}
+	for _, want := range []string{"left", "right", "vcpkg", "conan"} {
+		if !strings.Contains(findings[0].Message, want) {
+			t.Errorf("message %q does not name %q", findings[0].Message, want)
+		}
+	}
+}
+
+// One package listing a file under two of its own roots is not a disagreement
+// with anybody, and a package that claims a file nobody else claims is not one
+// either.
+func TestOnePackageClaimingItsOwnFileIsNoConflict(t *testing.T) {
+	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
+		map[string]string{}, map[string]string{}, nil)
+	findings := resolver.setPackages([]pkgmanager.Package{
+		{Name: "left", Roots: []string{"/bd/left-src", "/bd/left-build"},
+			Files: []string{"/bd/shared/util.h"}, Manager: "fetchcontent"},
+	}, identityFor(map[string]domain.FileID{
+		"/bd/left-src":      fileID("build", "left-src"),
+		"/bd/left-build":    fileID("build", "left-build"),
+		"/bd/shared/util.h": fileID("build", "shared/util.h"),
+	}))
+	if len(findings) != 0 {
+		t.Errorf("findings = %+v, want none", findings)
+	}
+	file := domain.UsedFile{ID: fileID("build", "shared/util.h")}
+	if _, name, _, _, _ := resolver.resolve(file); name != "left" {
+		t.Errorf("resolve() = %s, want the package that listed the file", name)
+	}
+}
+
+// A listed file that lies under no anchor is not part of this build's identity
+// space, so two packages naming it dispute nothing the document could show.
+// It was passed over before and it is passed over now, without a word.
+func TestAListedFileUnderNoAnchorIsSkippedAndNotReported(t *testing.T) {
+	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
+		map[string]string{}, map[string]string{}, nil)
+	findings := resolver.setPackages([]pkgmanager.Package{
+		{Name: "left", Roots: []string{"/bd/left"}, Files: []string{"/elsewhere/stray.h"}, Manager: "vcpkg"},
+		{Name: "right", Roots: []string{"/bd/right"}, Files: []string{"/elsewhere/stray.h"}, Manager: "conan"},
+	}, identityFor(map[string]domain.FileID{
+		"/bd/left":  fileID("build", "left"),
+		"/bd/right": fileID("build", "right"),
+	}))
+	if len(findings) != 0 {
+		t.Errorf("findings = %+v, want none: the file has no identity to dispute", findings)
 	}
 }
 

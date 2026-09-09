@@ -113,9 +113,18 @@ var adapters = []Adapter{
 	submodule{},
 }
 
+// claim records who holds a root, so that turning a second claimant away can
+// say whom it lost to. A bare "taken" would leave the report unable to name the
+// winner, and a winner nobody names is not a report.
+type claim struct {
+	manager string
+	name    string
+}
+
 // Discover runs every adapter and returns the union, sorted by name so the
 // result is deterministic. A package claimed by two managers keeps the first,
-// which is the order above.
+// which is the order above, and the one turned away is reported rather than
+// dropped in silence.
 //
 // That is a rejection and not a merge, deliberately: the ranking of section
 // 21.1 orders the origins one manager knows about, and two managers claiming
@@ -129,19 +138,36 @@ func Discover(options Options) ([]Package, []domain.Finding) {
 	}
 	packages := make([]Package, 0)
 	findings := make([]domain.Finding, 0)
-	claimed := map[string]bool{}
+	claimed := map[string]claim{}
 	for _, adapter := range adapters {
 		found, adapterFindings := adapter.Discover(options)
 		findings = append(findings, adapterFindings...)
 		for _, entry := range found {
-			if entry.Root() == "" || claimed[entry.Root()] {
+			if entry.Root() == "" {
+				continue
+			}
+			if holder, taken := claimed[entry.Root()]; taken {
+				conflict := domain.Conflict{
+					Field:   "package the root belongs to",
+					Subject: domain.Subject{Kind: "file", Ref: entry.Root()},
+					Sides: []domain.ConflictSide{
+						{Source: holder.manager, Value: holder.name},
+						{Source: adapter.Manager(), Value: entry.Name},
+					},
+					Winner: holder.manager,
+					Reason: "it was asked first in this tool's fixed adapter order, and merging the two " +
+						"would publish metadata for a package the winning manager never installed",
+				}
+				if finding, ok := conflict.Finding("COMPONENT_MAPPING_CONFLICT", domain.SeverityInfo); ok {
+					findings = append(findings, finding)
+				}
 				continue
 			}
 			// Every root is marked, not only the identity one, so that a later
 			// adapter cannot claim a tree an earlier package already covers as
 			// a package of its own.
 			for _, root := range entry.Roots {
-				claimed[root] = true
+				claimed[root] = claim{manager: adapter.Manager(), name: entry.Name}
 			}
 			packages = append(packages, entry)
 		}

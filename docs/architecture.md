@@ -157,7 +157,10 @@ flowchart TB
 ```
 
 When two strategies disagree, the higher-priority one wins and the
-disagreement is reported rather than hidden.
+disagreement is reported rather than hidden. The finding names what each
+strategy said and which one was used, so that a reviewer can look at the loser
+instead of only learning that one existed. It is informational: a second answer
+is something to look at, not a reason to trust the winner less.
 
 ## Headers
 
@@ -276,6 +279,16 @@ licence can never be mistaken for a dependency's.
 
 **A file is never dropped because its component could not be determined.** The
 last case is a real component with a real name, marked for review.
+
+Here too a disagreement is reported rather than hidden, and here the outcome is
+usually that *nobody* wins. A source two CMake targets both compile, or a file
+two package managers both claim, belongs to neither of them: two statements are
+no statement, and choosing one would be a guess. The file then falls through to
+the next strategy, which can put it in a third component altogether — so the
+finding names every claimant, says that none of them was used, and names the
+strategy the file fell through to. Two managers claiming the same directory are
+reported the same way, except that there the first manager asked keeps it, and
+the finding says which one that was.
 
 A package that installed files but linked none of them is not part of the
 product and stays out of the document — but it is reported, so "not there"
