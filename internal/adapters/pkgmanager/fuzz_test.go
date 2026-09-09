@@ -294,3 +294,58 @@ func FuzzPkgConfig(f *testing.F) {
 		}
 	})
 }
+
+// The pack descriptor an MCU vendor ships. It is XML out of a tree this tool
+// did not build, it is the first use of encoding/xml in this repository, and
+// what keeps an entity bomb and an external entity harmless is four decoder
+// fields that are deliberately never assigned -- an invisible property, and
+// therefore the one most worth throwing arbitrary bytes at.
+func FuzzCMSISPack(f *testing.F) {
+	f.Add("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<package schemaVersion=\"1.7.7\">\n" +
+		"  <vendor>ARM</vendor>\n  <name>CMSIS</name>\n  <license>LICENSE.txt</license>\n" +
+		"  <releases>\n    <release version=\"5.9.0\" date=\"2022-05-02\">notes</release>\n" +
+		"    <release version=\"5.8.0\">notes</release>\n  </releases>\n</package>\n")
+	f.Add("<package><vendor>ARM</vendor><name>CMSIS</name><releases><release ver")
+	f.Add("<!DOCTYPE package [<!ENTITY lol \"lol\"><!ENTITY lol1 \"&lol;&lol;\">]>\n" +
+		"<package><vendor>&lol1;</vendor></package>")
+	f.Add("<!DOCTYPE package [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]>\n" +
+		"<package><vendor>&xxe;</vendor></package>")
+	f.Add("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><package><vendor>ARM</vendor></package>")
+	f.Add("<package><releases><release version=\"\"/></releases></package>")
+	f.Add("")
+
+	f.Fuzz(func(t *testing.T, descriptor string) {
+		root := t.TempDir()
+		if err := os.WriteFile(filepath.Join(root, "ARM.CMSIS.pdsc"), []byte(descriptor), 0o600); err != nil {
+			t.Skip(err)
+		}
+
+		contributions, findings := cmsisPack{}.Enrich(ComponentRoot{Path: root, Name: "CMSIS"})
+		for _, finding := range findings {
+			// A finding with no identifier reaches no catalogue, and one with
+			// no subject names nothing a reader could look at.
+			if finding.ID == "" || finding.Subject.Ref == "" {
+				t.Fatalf("a finding names no identifier or no subject: %#v", finding)
+			}
+			// Whole or not at all: a descriptor that was reported may not also
+			// have contributed, because a value out of a file that could not be
+			// read to its end is invented.
+			if len(contributions) != 0 {
+				t.Fatalf("%s was reported and %#v was still taken", finding.ID, contributions)
+			}
+		}
+		for _, contribution := range contributions {
+			if contribution.Claim.Value == "" || contribution.Claim.Rank == RankNone {
+				t.Fatalf("a claim with no value or no origin: %#v", contribution)
+			}
+			// A descriptor states a version and a vendor. It states no licence
+			// this tool will publish -- <license> names a file -- and there is
+			// no purl type to build one from.
+			switch contribution.Field {
+			case FieldVersion, FieldSupplier:
+			default:
+				t.Fatalf("a pack descriptor contributed %q, which it cannot state", contribution.Field)
+			}
+		}
+	})
+}

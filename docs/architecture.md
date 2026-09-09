@@ -295,6 +295,16 @@ the people who ship the package wrote it. It still loses to what your
 configuration says and to the checkout itself. The dependencies such a document
 lists are ignored: nothing is in your SBOM because a file mentioned it.
 
+A dependency that ships a CMSIS pack descriptor — the `.pdsc` an MCU vendor puts
+inside a pack — is read from it for the vendor and the version of its newest
+release, which for a vendor pack is usually the only place either of them
+exists. It names no purl, because no package-URL type exists for CMSIS packs and
+inventing one would put an identifier in your document that nothing can resolve,
+and it names no licence, because the descriptor's `<license>` element is a path
+to a file rather than an SPDX expression — the licence keeps coming from that
+file. It adds no file and finds no pack: a pack lives in a cache outside your
+build tree, and nothing here goes looking for one.
+
 **A file is never dropped because its component could not be determined.** The
 last case is a real component with a real name, marked for review.
 

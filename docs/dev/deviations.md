@@ -1420,3 +1420,86 @@ against this before it is called finished.
 
 **One known gap, the same one D36 records.** `--max-input-size` does not reach
 these ceilings; they are file-local constants beside the existing ones.
+
+---
+
+## D38 — A CMSIS pack descriptor is read, and the purl question is answered by not answering it
+
+§21 gained a second enricher: the `*.pdsc` an MCU vendor ships inside a
+CMSIS-Pack, read by `internal/adapters/pkgmanager/cmsispack.go`. For a vendor
+pack that file is usually the only place a version and a supplier exist at all.
+Five things the specification leaves open had to be settled, and each answer
+changes what a document says.
+
+**No purl, and `UNKNOWN_PURL` stays.** The purl specification registers no
+`cmsis` type, so `pkg:cmsis/ARM/CMSIS@5.9.0` would be an identifier nothing can
+resolve — the invented value this tool refuses. Borrowing the `pkg:generic` row
+of §20.4 is worse rather than better: that row belongs to packages derived from
+a repository checkout, and its `?vcs_url=` qualifier is the only part of it that
+identifies anything, which a pack has nothing to put in. §20.4 now says so in a
+row of its own rather than leaving the question to its `Otherwise` row, so that
+the next reader does not reopen it.
+
+**The newest release is the first `<release>` element, not the largest version
+string.** The pack schema requires the release history in descending order, so
+the first element is a stated fact; ordering these strings here would mean
+inventing comparison semantics for a versioning scheme nothing in this
+specification defines — a guess dressed as arithmetic. Where the install layout
+disagrees with the history, rank settles it and the loser is kept in
+`Superseded`, which is what the provenance model of §21.1 is for.
+
+**`<license>` contributes no licence.** In this format the element holds a
+*path* to a licence file inside the pack — `LICENSE.txt` — and not an SPDX
+expression. Publishing it as one would put a filename into
+`licenses[].expression`, which both bundled schemas describe as a valid SPDX
+expression. Its only honest home would be `Package.LicenseFile`, which is a
+path, and D33 keeps paths out of the `Enricher` signature structurally, so an
+enricher cannot set it. Little is lost in practice: a pack's licence file lies
+at the pack root under exactly the names §19.2 already looks for, so the
+component keeps getting its licence from there. The newer schema's
+`<licenseSets>/<license spdx="...">` attribute would be a real expression, but
+it could not be verified against a `PACK.xsd` here, and a field is not added on
+a recollection.
+
+**No pack-root discovery, so this is an enricher and not an adapter.** Every
+adapter addresses a path under `BuildDir` or `SourceDir`. A CMSIS pack root is
+`CMSIS_PACK_ROOT` or a per-user cache; this repository reads no environment
+variable for a location — only `PATH` and `SOURCE_DATE_EPOCH` — and searching
+for one would be the downward scan architecture.md refuses outright. What the
+pack layout does give is an unambiguous reading *upwards from a descriptor
+already found*: `<Vendor>/<Name>/<version>/<Vendor>.<Name>.pdsc`. That is a
+description of a root somebody else settled rather than an enumeration, so it
+lives inside the enricher as a rank-3 version claim, costing no directory
+listing and no second file read. It is the one place here where a directory
+name rather than a statement decides a value; it is confined to a version claim
+on a settled root, all three names have to agree with the descriptor before it
+counts, and anything stronger supersedes it. If pack-root discovery is ever
+wanted, the honest shape is a configured path in the manner of D36's
+`distroManifests`, where every file read was named by the user.
+
+**The safety of the XML reader is four fields that are never assigned.** This is
+the first use of `encoding/xml` in this repository. `Decoder.Entity` stays nil
+and `Decoder.Strict` stays true, which is what turns a billion-laughs bomb and
+an external `SYSTEM` entity into a syntax error instead of an expansion or a
+file read; `CharsetReader` stays nil, so a document declaring ISO-8859-1 is
+refused rather than reinterpreted under a guess; `AutoClose` stays nil. That
+safety is invisible in the code, so the tests assert the *refusals* rather than
+any value, and a later edit that sets one of those fields fails there. The depth
+bound of §30 is ours to impose: Go's decoder was verified here to walk a
+200 000-level document to its end without complaint, bounding the nesting by
+nothing but the size of the input, so `cmsispack.go` counts the depth itself.
+
+**What this does not do, and one known gap.** The descriptor is read only for a
+root something else already settled — a licence file, a manifest, a package
+manager. A pack directory carrying nothing but its `.pdsc` is never offered to
+this reader and goes unread: the descriptor's name is the vendor's
+(`ARM.CMSIS.pdsc`), so it cannot join the fixed-name list §19.2 strategy 6 stats
+per used file per ancestor directory, and a glob there is what D34 already
+refused for the same budget of §31. Coverage is therefore honestly partial. And
+as with D34 and D36, `--max-input-size` does not reach these ceilings; they are
+file-local constants beside the existing ones. The element names read here —
+`package/vendor`, `package/name` and the `version` attribute of
+`package/releases/release` — and the pack layout above come from knowledge of
+the format rather than from a schema in this tree: there is no CMSIS material
+here and no network. A real vendor descriptor should be captured as a fixture
+before this is called finished.

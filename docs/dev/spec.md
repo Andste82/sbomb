@@ -966,7 +966,7 @@ Published as `component.evidence.identity` with `field: "version"`: the value in
 | `VersionSource` | `technique` |
 |---|---|
 | `curated` | `attestation` |
-| `cmake`, `conan`, `vcpkg`, `fetchcontent`, `bundled-sbom`, `idf`, `cpm`, `yocto`, `buildroot`, `pkg-config` | `manifest-analysis` |
+| `cmake`, `conan`, `vcpkg`, `fetchcontent`, `bundled-sbom`, `idf`, `cpm`, `yocto`, `buildroot`, `pkg-config`, `cmsis-pack` | `manifest-analysis` |
 | `header` | `source-code-analysis` |
 | `go-build-info` | `binary-analysis` |
 | `git`, `git-describe`, `git-commit`, anything unmapped | `other` |
@@ -983,6 +983,7 @@ A `purl` MUST be emitted when, and only when, a package type and name can be ass
 | vcpkg | `pkg:vcpkg/<name>@<version>` |
 | ESP-IDF component manager | `pkg:idf/<namespace>/<name>@<version>` |
 | Git-derived (submodule, FetchContent, CPM) | `pkg:generic/<name>@<version>?vcs_url=git%2B<url>%40<commit>` |
+| CMSIS-Pack | no purl; emit `UNKNOWN_PURL` (informational) |
 | Curated with explicit `purl` | verbatim |
 | Otherwise | no purl; emit `UNKNOWN_PURL` (informational) |
 
@@ -1018,6 +1019,8 @@ Besides adapters, this section has readers of a second kind: an **enricher** is 
 The first such reader is the **bundled SBOM**: a CycloneDX `*.cdx.json` or SPDX 2.x `*.spdx.json` lying in a component root. Only the document's own root component is read — `metadata.component` in CycloneDX, the package `documentDescribes` or a `DESCRIBES` relationship names in SPDX — never the dependencies it lists: a dependency list is no evidence that anything was linked, and taking it would put components into the document that no evidence chain reached. It contributes `version`, `license`, `supplier` and `purl` at rank 4 of §21.1. A name in such a document is not published: the component keeps the name that was settled before its files were grouped (D33). The document is subject to the bounds of §30 and is applied whole or not at all: one that breaches a bound is reported as `INPUT_LIMIT_EXCEEDED`, one that cannot be parsed, declares a format or SPDX version this tool does not read, or does not name exactly one package it describes, is reported as `EVIDENCE_UNREADABLE`. A root with no such document is silence, not a finding.
 
 A document a package manager wrote itself is that manager's **install state** (rank 3) and not an SBOM the upstream shipped — `vcpkg.spdx.json` is vcpkg's own record of what it installed. The generic reader MUST skip it, or it would outrank at rank 4 the very adapter that installed the package (D34).
+
+The second such reader is the **CMSIS pack descriptor**: one `*.pdsc` lying directly in a component root, the file an MCU vendor ships inside a CMSIS-Pack. It contributes `version` -- the version attribute of the **first** `<release>` element, which the pack schema requires the history to order newest first -- at rank 2 of §21.1, and `supplier` from `<vendor>` at rank 2, which §20.5 permits because a manager states it. Where the root's own path is the pack installer's layout, `<Vendor>/<Name>/<version>/<Vendor>.<Name>.pdsc` with both names agreeing with the descriptor, that directory's version is contributed at rank 3: it is what was installed rather than what the history declares. Where the two differ both claims are made, so the ranking decides and the loser is kept for the report; where they agree one claim is made, because an origin agreeing with itself is no disagreement. It contributes **no** licence -- `<license>` names a file inside the pack, not an SPDX expression -- and **no** purl, because no purl type is registered for CMSIS packs (§20.4, D38), so `UNKNOWN_PURL` remains for such a component. The descriptor is subject to the bounds of §30 -- bytes, nesting depth and element count -- and is applied whole or not at all: one that breaches a bound is reported as `INPUT_LIMIT_EXCEEDED`, and one that cannot be parsed, declares an encoding this tool does not decode, states neither a vendor nor a release, or lies in a root holding more than one descriptor, is reported as `EVIDENCE_UNREADABLE`. A root with no descriptor is silence, not a finding. Nothing about a pack is **discovered**: a pack root is `CMSIS_PACK_ROOT` or a per-user cache, this tool reads no environment variable for a location, and searching for one would be the downward scan §19.2 forbids (D38).
 
 Besides the enricher there is a reader of a **third** kind, and what distinguishes it is what it is handed: not a manager's install layout and not a settled root, but a file the user named, matched against a component by **name**. The first of these is the **image manifest** an embedded-Linux distribution build writes about the image it produced — Yocto's `license.manifest` (blank-line-separated blocks of `PACKAGE NAME` / `PACKAGE VERSION` / `RECIPE NAME` / `LICENSE`) and Buildroot's `legal-info/manifest.csv` (a CSV whose header names at least `PACKAGE` and `VERSION`). Its location is configured (`distroManifests`, `--distro-manifest`), because a deploy directory lies outside the build tree; nothing is searched for, and every file read was named by the user.
 
