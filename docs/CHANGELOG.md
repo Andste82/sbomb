@@ -14,6 +14,40 @@ PDB parsing remains out of scope. MSVC header evidence therefore comes from
 `/showIncludes`, Ninja dependencies or MSBuild TLogs, and a build may report
 `DEBUG_INFO_UNAVAILABLE` where a DWARF-based build would provide debug evidence.
 
+### A copied-in library can now be described by what lies beside it
+
+`internal/adapters/pkgmanager` had one kind of reader: an adapter, asked for
+the packages it can prove, which searches wherever its manager is known to keep
+things. That leaves a gap the mapping rules make visible. A library somebody
+copied into the source tree is found by §19.2 strategy 6, which walks up from a
+used file until it meets a marker — and for such a library the marker is its
+`LICENSE` and nothing else. The component is found and its boundary is right,
+and then it is named after its directory and left blank: no version, no
+supplier, no purl, three findings saying so. What states them is usually lying
+in the very directory that was just resolved.
+
+Readers therefore come in two kinds now. An adapter enumerates and searches; an
+**enricher** is handed a directory that already stands as a component root and
+describes what the files directly in it say. It does not search, does not
+descend and does not walk up. It hands back claims and findings — no paths, no
+roots — so it cannot add a file to the used set and cannot move a component
+boundary; there is nowhere in the signature to say either. Both call sites
+exist: on the identity root of every discovered package, and on the root of a
+component that only the marker walk found.
+
+No reader is registered yet, so this changes no document: with an empty registry
+not a single directory is touched. What it fixes is decided, though, and the
+order in which it will apply is fixed with it — curated configuration above
+everything, a `versionFrom` rule the user wrote above any manifest that would
+answer in its place, and inside a package a manager owns the rank table of
+§21.1. One limit is deliberate: a component keeps its directory name even where
+a manifest beside it states another, because the name settles before the files
+are grouped and changing it there would move a boundary rather than describe
+one.
+
+Deviation D33 records the split and the two orderings, which §21 does not
+provide for.
+
 ### Contradictions are now reported instead of being settled in silence
 
 The architecture promises that when two strategies disagree, the higher-priority

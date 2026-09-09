@@ -912,3 +912,69 @@ directory, `Discover` still drops the second package whole instead of merging
 its claims into the first. Two managers claiming one tree disagree about who
 installed the package, not about what its version is, and folding the loser's
 metadata in would describe a package the winning manager never installed.
+
+## D33 — Package-manager readers split in two: adapters that search, enrichers that describe
+
+§21 knows one kind of reader. An adapter is asked for the packages it can prove,
+so it enumerates and it searches: it looks in `_deps/`, in a triplet tree, in the
+build directory, wherever its manager is known to keep things. Everything §21
+says about a reader is said about that one.
+
+That leaves a gap the mapping rules make visible. §19.2 strategy 6 finds a
+component by walking up from a used file until it meets a marker file, and a
+library copied into the tree meets nothing but its `LICENSE`. The component is
+correctly found and correctly bounded, and then it is named after its directory
+and nothing else: no version, no supplier, no purl. Whatever states them — a
+`vcpkg.json`, a `Cargo.toml`, an SBOM the upstream shipped — is usually lying in
+the very directory that was just resolved, and no reader in §21 is allowed to be
+handed a directory rather than a manager's install layout.
+
+An **enricher** is therefore added beside the adapter. It is given a directory
+that has already been settled as a component root and returns what the files
+directly in it state. It does not enumerate, does not search, does not descend
+and does not walk up. Its return type is contributions and findings, with no
+path and no root in it, so it cannot add a file to the used set and cannot move
+a component boundary — the rule of §21 holds structurally for it, not by
+discipline. The registry has a fixed order, because equally ranked claims keep
+the first one found and the order therefore decides what a document publishes.
+
+It is called at exactly two places: on the identity root of every package
+discovery kept, and on the root of a component that only §19.2 strategy 6
+found. Not on a further root of a package — those are build trees, and a
+manifest read there would describe generated output — and not on a root taken
+from the deepest common directory of the used files, because that root is a
+guess and reading a file at a guessed location would promote the guess to a
+source.
+
+**A described value obeys the rank table of §21.1.** Enrichment of a package
+runs inside `Discover`, after the owning manager has stated its own claims, so
+an equally ranked enricher loses to the manager that installed the package and a
+stronger origin — a bundled SBOM — wins and is named as the origin.
+
+**Two orderings had to be decided now**, because the call sites fix them even
+though no reader exists yet:
+
+* **§22.2 point 3 above point 4.** The specification puts explicit component
+  metadata above package-manager metadata, while §21.1 ranks a foreign manifest
+  below installed state. They do not in fact collide: inside a package a manager
+  owns, the manifest beside it is one more origin and §21.1 decides, which is
+  the later and more specific rule; for a component no manager owns there is no
+  manager metadata to lose to, and §22.2 applies as written — a declared licence
+  beats the `LICENSE` file found in the same root.
+* **Enrichment stands behind `versionFrom`.** §20.2 makes `components[].version`
+  and `components[].versionFrom` curated configuration, which outranks every
+  package-manager source. A `versionFrom` rule that finds nothing therefore
+  leaves the version empty and `UNKNOWN_VERSION` is reported: the user said
+  where the version is to be read from, and a manifest answering in its place
+  would replace an instruction with a guess.
+
+**A reader does not change a component's name.** Name and identity are settled
+in `resolve` before the used files are grouped, and a manifest that names the
+component differently from its directory would move a boundary rather than
+describe one. The name stays the directory name even where a manifest states
+another; changing that is a mapping question, not an enrichment one.
+
+The registry is empty in this release. Both call sites, the interface and the
+ranking around it exist first, so that every reader added later is added in one
+place and under one set of rules — and while nothing is registered, not a single
+directory is touched and no document can change.

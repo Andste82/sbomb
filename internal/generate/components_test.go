@@ -1093,3 +1093,411 @@ func TestAPackageWithSeveralRootsIsReportedOnce(t *testing.T) {
 		t.Errorf("findings = %+v, want a single PACKAGE_NOT_LINKED for tinylog", findings)
 	}
 }
+
+// stubEnrichment stands in for the readers pkgmanager.Enrich will call. It is
+// installed in the resolver's own field, so the production code needs no test
+// hook of its own -- the same arrangement setPackages uses for packagePaths.
+func stubEnrichment(described pkgmanager.Package, findings []domain.Finding, seen *[]pkgmanager.ComponentRoot) func(pkgmanager.ComponentRoot) (pkgmanager.Package, []domain.Finding) {
+	return func(root pkgmanager.ComponentRoot) (pkgmanager.Package, []domain.Finding) {
+		if seen != nil {
+			*seen = append(*seen, root)
+		}
+		return described, findings
+	}
+}
+
+// describedPackage is what a reader hands back: claims, each with its origin
+// and its rank, and nothing that could widen the used set.
+func describedPackage(t *testing.T, values map[pkgmanager.Field]string, rank pkgmanager.Rank) pkgmanager.Package {
+	t.Helper()
+	var described pkgmanager.Package
+	// Written through Take, because that is the only way a claim is ever
+	// recorded and the test should not be able to assign past the ranking.
+	for _, field := range []pkgmanager.Field{
+		pkgmanager.FieldVersion, pkgmanager.FieldSupplier, pkgmanager.FieldPURL, pkgmanager.FieldLicense,
+	} {
+		value, stated := values[field]
+		if !stated {
+			continue
+		}
+		described.Take(field, pkgmanager.Claim{
+			Value: value, Source: "stub-manifest", Rank: rank, Confidence: domain.ConfidenceHigh,
+		})
+	}
+	return described
+}
+
+// A library copied into the tree is found by the licence file beside it and
+// then carries nothing but its directory name. Whatever else lies in that
+// directory is read here, which is the gap this interface exists to close.
+func TestAMarkerRootIsDescribedByAReader(t *testing.T) {
+	root := t.TempDir()
+	componentRoot := filepath.Join(root, "dep", "tiny")
+	if err := os.MkdirAll(componentRoot, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(componentRoot, "LICENSE"), []byte("SPDX-License-Identifier: MIT\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	source := filepath.Join(componentRoot, "tiny.c")
+	if err := os.WriteFile(source, []byte("int tiny(void){return 0;}\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	file := domain.UsedFile{ID: fileID("project", "dep/tiny/tiny.c")}
+	resolver := newComponentResolver(config.Config{}, map[string]string{file.ID.Canonical(): source},
+		map[string]string{"project": root}, nil)
+	var seen []pkgmanager.ComponentRoot
+	resolver.enrich = stubEnrichment(describedPackage(t, map[pkgmanager.Field]string{
+		pkgmanager.FieldVersion:  "3.0.1",
+		pkgmanager.FieldSupplier: "Example Ltd",
+		pkgmanager.FieldPURL:     "pkg:generic/tiny@3.0.1",
+		pkgmanager.FieldLicense:  "Apache-2.0",
+	}, pkgmanager.RankDeclaredManifest), nil, &seen)
+	component := domain.Component{ID: "component:tiny", Name: "tiny"}
+
+	findings := resolver.enrichComponent(&component, []domain.UsedFile{file})
+
+	if len(seen) != 1 || seen[0].Path != componentRoot || seen[0].Name != "tiny" {
+		t.Fatalf("roots offered = %#v, want the marker directory %q", seen, componentRoot)
+	}
+	if component.Version != "3.0.1" || component.VersionSource != "stub-manifest" {
+		t.Errorf("version = %q from %q, want the reader's answer and its origin",
+			component.Version, component.VersionSource)
+	}
+	if component.Supplier != "Example Ltd" {
+		t.Errorf("supplier = %q", component.Supplier)
+	}
+	if component.PURL != "pkg:generic/tiny@3.0.1" {
+		t.Errorf("purl = %q", component.PURL)
+	}
+	// Section 22.2 puts explicit component metadata above a licence file found
+	// in the root, so the declaration wins over the LICENSE beside it.
+	if len(component.Licenses) == 0 || component.Licenses[0].Expression != "Apache-2.0" {
+		t.Errorf("license = %#v, want the declared Apache-2.0", component.Licenses)
+	}
+	for _, finding := range findings {
+		switch finding.ID {
+		case "UNKNOWN_VERSION", "MISSING_SUPPLIER", "UNKNOWN_PURL", "UNKNOWN_LICENSE":
+			t.Errorf("%s was reported for a component that was described", finding.ID)
+		}
+	}
+	// A reader describes; it does not move a boundary. The name and the
+	// identity settled before the files were grouped and must not have moved.
+	if component.Name != "tiny" || component.ID != "component:tiny" {
+		t.Errorf("component = %q/%q, want the identity it was grouped under", component.ID, component.Name)
+	}
+	if component.Root == nil || component.Root.RelPath != "dep/tiny" {
+		t.Errorf("root = %#v, want the marker directory", component.Root)
+	}
+}
+
+// Curated configuration is above every other source (section 20.2), and a
+// reader that overtook it would make the file the user wrote advisory.
+func TestCuratedMetadataOutranksAReader(t *testing.T) {
+	root := t.TempDir()
+	componentRoot := filepath.Join(root, "dep", "tiny")
+	if err := os.MkdirAll(componentRoot, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(componentRoot, "LICENSE"), []byte("SPDX-License-Identifier: MIT\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	source := filepath.Join(componentRoot, "tiny.c")
+	if err := os.WriteFile(source, []byte("int tiny(void){return 0;}\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	// Matched by glob rather than by path, so the root still comes from the
+	// marker and the reader is reached at all.
+	cfg := config.Config{Components: []config.Component{{
+		Match: "dep/tiny/**", Name: "tiny",
+		Version: "9.9.9", Supplier: "Curated Ltd", PURL: "pkg:generic/tiny@9.9.9",
+	}}}
+	file := domain.UsedFile{ID: fileID("project", "dep/tiny/tiny.c")}
+	resolver := newComponentResolver(cfg, map[string]string{file.ID.Canonical(): source},
+		map[string]string{"project": root}, nil)
+	resolver.enrich = stubEnrichment(describedPackage(t, map[pkgmanager.Field]string{
+		pkgmanager.FieldVersion:  "3.0.1",
+		pkgmanager.FieldSupplier: "Example Ltd",
+		pkgmanager.FieldPURL:     "pkg:generic/tiny@3.0.1",
+	}, pkgmanager.RankBundledSBOM), nil, nil)
+	component := domain.Component{ID: "component:tiny", Name: "tiny"}
+
+	resolver.enrichComponent(&component, []domain.UsedFile{file})
+
+	if component.Version != "9.9.9" || component.VersionSource != "curated" {
+		t.Errorf("version = %q from %q, want the curated value", component.Version, component.VersionSource)
+	}
+	if component.Supplier != "Curated Ltd" || component.PURL != "pkg:generic/tiny@9.9.9" {
+		t.Errorf("supplier/purl = %q/%q, want the curated values", component.Supplier, component.PURL)
+	}
+}
+
+// versionFrom is the user saying where this component's version is to be read
+// from. A reader that answered when the rule found nothing would quietly
+// replace an instruction with a guess of its own.
+func TestACuratedVersionFromKeepsAReaderOutOfTheVersion(t *testing.T) {
+	root := t.TempDir()
+	componentRoot := filepath.Join(root, "dep", "tiny")
+	if err := os.MkdirAll(componentRoot, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(componentRoot, "LICENSE"), []byte("SPDX-License-Identifier: MIT\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	source := filepath.Join(componentRoot, "tiny.c")
+	if err := os.WriteFile(source, []byte("int tiny(void){return 0;}\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	cfg := config.Config{Components: []config.Component{{
+		Match: "dep/tiny/**", Name: "tiny",
+		// A header that is not there: the rule is explicit and answers nothing.
+		VersionFrom: config.StringList{"header:version.h:TINY_VERSION"},
+	}}}
+	file := domain.UsedFile{ID: fileID("project", "dep/tiny/tiny.c")}
+	resolver := newComponentResolver(cfg, map[string]string{file.ID.Canonical(): source},
+		map[string]string{"project": root}, nil)
+	resolver.enrich = stubEnrichment(describedPackage(t, map[pkgmanager.Field]string{
+		pkgmanager.FieldVersion: "3.0.1",
+	}, pkgmanager.RankBundledSBOM), nil, nil)
+	component := domain.Component{ID: "component:tiny", Name: "tiny"}
+
+	findings := resolver.enrichComponent(&component, []domain.UsedFile{file})
+
+	if component.Version != "" {
+		t.Errorf("version = %q, want none: the user said where to read it and it was not there", component.Version)
+	}
+	var reported bool
+	for _, finding := range findings {
+		if finding.ID == "UNKNOWN_VERSION" {
+			reported = true
+		}
+	}
+	if !reported {
+		t.Error("the version stayed empty without UNKNOWN_VERSION being reported")
+	}
+}
+
+// A root a manager owns was already described while it was discovered, where
+// its claims were ranked against the manager's own. Describing it a second
+// time here would rank them against nothing.
+func TestARootAPackageManagerOwnsIsNotDescribedAgain(t *testing.T) {
+	root := t.TempDir()
+	packageRoot := filepath.Join(root, "dep", "tiny")
+	if err := os.MkdirAll(packageRoot, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	source := filepath.Join(packageRoot, "tiny.c")
+	if err := os.WriteFile(source, []byte("int tiny(void){return 0;}\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	file := domain.UsedFile{ID: fileID("project", "dep/tiny/tiny.c")}
+	resolver := newComponentResolver(config.Config{}, map[string]string{file.ID.Canonical(): source},
+		map[string]string{"project": root}, nil)
+	var described pkgmanager.Package
+	described.Take(pkgmanager.FieldVersion, pkgmanager.Claim{
+		Value: "2.0.0", Source: "conan", Rank: pkgmanager.RankInstallState, Confidence: domain.ConfidenceHigh,
+	})
+	described.Name = "tiny"
+	described.Manager = "conan"
+	described.Roots = []string{packageRoot}
+	resolver.setPackages([]pkgmanager.Package{described},
+		identityFor(map[string]domain.FileID{packageRoot: fileID("project", "dep/tiny")}))
+	var seen []pkgmanager.ComponentRoot
+	resolver.enrich = stubEnrichment(pkgmanager.Package{}, nil, &seen)
+	component := domain.Component{ID: "component:tiny", Name: "tiny"}
+
+	resolver.enrichComponent(&component, []domain.UsedFile{file})
+
+	if len(seen) != 0 {
+		t.Errorf("roots offered = %#v, want none: the manager's root was described during discovery", seen)
+	}
+	if component.Version != "2.0.0" {
+		t.Errorf("version = %q, want conan's", component.Version)
+	}
+}
+
+// The important boundary: a root nothing named is the deepest common directory
+// of the files that were used, which is a guess. Reading a file there would
+// turn that guess into a source.
+func TestAGuessedRootIsNeverRead(t *testing.T) {
+	root := t.TempDir()
+	source := filepath.Join(root, "src", "a.c")
+	if err := os.MkdirAll(filepath.Dir(source), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(source, []byte("int a(void){return 0;}\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	file := domain.UsedFile{ID: fileID("project", "src/a.c")}
+	resolver := newComponentResolver(config.Config{}, map[string]string{file.ID.Canonical(): source},
+		map[string]string{"project": root}, nil)
+	var seen []pkgmanager.ComponentRoot
+	resolver.enrich = stubEnrichment(describedPackage(t, map[pkgmanager.Field]string{
+		pkgmanager.FieldVersion: "3.0.1",
+	}, pkgmanager.RankBundledSBOM), nil, &seen)
+	component := domain.Component{ID: "component:a", Name: "a"}
+
+	findings := resolver.enrichComponent(&component, []domain.UsedFile{file})
+
+	if len(seen) != 0 {
+		t.Errorf("roots offered = %#v, want none: nothing named this root", seen)
+	}
+	if component.Version != "" {
+		t.Errorf("version = %q, want none", component.Version)
+	}
+	var unresolved bool
+	for _, finding := range findings {
+		if finding.ID == "COMPONENT_ROOT_UNRESOLVED" {
+			unresolved = true
+		}
+	}
+	if !unresolved {
+		t.Error("a guessed root stopped being reported as one")
+	}
+}
+
+// Evidence that could not be read is reported and nothing is invented from it.
+func TestAReaderFindingReachesTheReport(t *testing.T) {
+	root := t.TempDir()
+	componentRoot := filepath.Join(root, "dep", "tiny")
+	if err := os.MkdirAll(componentRoot, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(componentRoot, "LICENSE"), []byte("SPDX-License-Identifier: MIT\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	source := filepath.Join(componentRoot, "tiny.c")
+	if err := os.WriteFile(source, []byte("int tiny(void){return 0;}\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	file := domain.UsedFile{ID: fileID("project", "dep/tiny/tiny.c")}
+	resolver := newComponentResolver(config.Config{}, map[string]string{file.ID.Canonical(): source},
+		map[string]string{"project": root}, nil)
+	resolver.enrich = stubEnrichment(pkgmanager.Package{}, []domain.Finding{{
+		ID: "INPUT_LIMIT_EXCEEDED", Severity: domain.SeverityWarning,
+		Subject: domain.Subject{Kind: "evidence", Ref: filepath.Join(componentRoot, "manifest")},
+		Message: "the manifest is larger than the limit of section 30",
+	}}, nil)
+	component := domain.Component{ID: "component:tiny", Name: "tiny"}
+
+	findings := resolver.enrichComponent(&component, []domain.UsedFile{file})
+
+	var reported bool
+	for _, finding := range findings {
+		if finding.ID == "INPUT_LIMIT_EXCEEDED" {
+			reported = true
+		}
+	}
+	if !reported {
+		t.Error("a reader's finding did not reach the report")
+	}
+	// Nothing was read, so the licence file beside it still answers and the
+	// version is still missing rather than made up.
+	if len(component.Licenses) == 0 || component.Licenses[0].Expression != "MIT" {
+		t.Errorf("license = %#v, want the MIT of the licence file", component.Licenses)
+	}
+	if component.Version != "" {
+		t.Errorf("version = %q, want none", component.Version)
+	}
+}
+
+// Describing a package does not link it. A dependency that was installed but
+// never linked stays out of the document however well it is described.
+func TestADescribedPackageThatNoFileReachesIsStillNotLinked(t *testing.T) {
+	root := t.TempDir()
+	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
+		map[string]string{}, map[string]string{"project": root}, nil)
+	var described pkgmanager.Package
+	described.Name = "tinyfmt"
+	described.Manager = "vcpkg"
+	described.Roots = []string{filepath.Join(root, "dep", "tinyfmt")}
+	described.Take(pkgmanager.FieldSupplier, pkgmanager.Claim{
+		Value: "Example Ltd", Source: "stub-manifest", Rank: pkgmanager.RankDeclaredManifest,
+	})
+	resolver.setPackages([]pkgmanager.Package{described}, identityFor(map[string]domain.FileID{
+		filepath.Join(root, "dep", "tinyfmt"): fileID("project", "dep/tinyfmt"),
+	}))
+	elsewhere := domain.UsedFile{ID: fileID("project", "src/main.c")}
+
+	findings := resolver.unusedPackageFindings([]domain.UsedFile{elsewhere})
+
+	var reported bool
+	for _, finding := range findings {
+		if finding.ID == "PACKAGE_NOT_LINKED" && finding.Subject.Ref == "tinyfmt" {
+			reported = true
+		}
+	}
+	if !reported {
+		t.Error("a described but unlinked package stopped being reported")
+	}
+	if _, mapped := resolver.packageFor(elsewhere); mapped {
+		t.Error("a described package claimed a file it never listed")
+	}
+}
+
+// The document is made of the files the evidence chain reached, and describing
+// a root does not change which files those are. A library sitting in the tree
+// with its licence beside it, that nothing linked, stays absent however
+// willingly a reader would describe it -- and it is never even offered, because
+// no used file walks up into it.
+func TestDescribingRootsAddsNoComponentToTheDocument(t *testing.T) {
+	root := t.TempDir()
+	write := func(rel, content string) string {
+		t.Helper()
+		path := filepath.Join(root, filepath.FromSlash(rel))
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		return path
+	}
+	// One component of the manufacturer's own and one copied-in library, both
+	// reached by a used file.
+	main := write("src/main.c", "int main(void){return 0;}\n")
+	tiny := write("dep/tiny/tiny.c", "int tiny(void){return 0;}\n")
+	write("dep/tiny/LICENSE", "SPDX-License-Identifier: MIT\n")
+	// And a library nothing linked, laid out exactly like the one that was.
+	write("dep/ghost/ghost.c", "int ghost(void){return 0;}\n")
+	write("dep/ghost/LICENSE", "SPDX-License-Identifier: MIT\n")
+
+	mainFile := domain.UsedFile{ID: fileID("project", "src/main.c")}
+	tinyFile := domain.UsedFile{ID: fileID("project", "dep/tiny/tiny.c")}
+	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
+		map[string]string{
+			mainFile.ID.Canonical(): main,
+			tinyFile.ID.Canonical(): tiny,
+		}, map[string]string{"project": root}, nil)
+	var seen []pkgmanager.ComponentRoot
+	resolver.enrich = stubEnrichment(describedPackage(t, map[pkgmanager.Field]string{
+		pkgmanager.FieldVersion:  "3.0.1",
+		pkgmanager.FieldSupplier: "Example Ltd",
+	}, pkgmanager.RankBundledSBOM), nil, &seen)
+
+	groups, _ := groupFilesByComponent(resolver, []domain.UsedFile{mainFile, tinyFile})
+
+	if len(groups) != 2 {
+		t.Fatalf("components = %#v, want the two the used files reached", groups)
+	}
+	for _, group := range groups {
+		if strings.Contains(group.component.Name, "ghost") {
+			t.Errorf("component %q entered the document without a file reaching it", group.component.Name)
+		}
+		for _, file := range group.files {
+			if strings.Contains(file.ID.RelPath, "ghost") {
+				t.Errorf("file %q entered the document without the evidence chain reaching it", file.ID.RelPath)
+			}
+		}
+	}
+	// Only the marker root was offered. The manufacturer's own component has a
+	// root nothing named, and reading there would turn a guess into a source.
+	if len(seen) != 1 || seen[0].Path != filepath.Join(root, "dep", "tiny") {
+		t.Errorf("roots offered = %#v, want only the marker root of tiny", seen)
+	}
+	for _, group := range groups {
+		if group.component.Name == "firmware" && group.component.Version == "3.0.1" {
+			t.Error("the reader's answer reached a component whose root nothing named")
+		}
+	}
+}

@@ -71,6 +71,11 @@ type componentResolver struct {
 	// runs nothing, which is what a run without introspection must do.
 	runner *exec.Runner
 	ctx    context.Context
+	// enrich describes a component root no package manager owns. It is a field
+	// rather than a direct call so that a test can put its own reader in
+	// without the production code exporting a hook for it -- the same reason
+	// setPackages takes its path resolution as packagePaths.
+	enrich func(pkgmanager.ComponentRoot) (pkgmanager.Package, []domain.Finding)
 }
 
 // resolvedPackage is one package-manager result expressed in identity terms,
@@ -120,6 +125,7 @@ func newComponentResolver(cfg config.Config, physical map[string]string, anchorR
 		projectName:     projectName,
 		anchorRoots:     anchorRoots,
 		logger:          logger,
+		enrich:          pkgmanager.Enrich,
 	}
 }
 
@@ -483,8 +489,24 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 	}
 	r.logger.Debug("Component '%s': root %s (%s)", component.Name, rootInfo.ID.Canonical(), rootInfo.Source)
 
+	// A component that only a marker file found carries nothing but its
+	// directory name: no version, no supplier, no purl. Whatever describes it
+	// lies in that directory, so it is read here -- and only here. A root a
+	// package manager owns was already described while it was discovered, and
+	// a root taken from the used files is a guess, where reading anything
+	// would promote that guess to a source. Enrichment describes; it never
+	// writes to r.packages or r.packageFiles and never touches the component's
+	// name or identity, because both settled before the files were grouped.
+	var described pkgmanager.Package
+	if !isManaged && rootInfo.Physical != "" && strings.HasPrefix(rootInfo.Source, rootSourceMarkerPrefix) {
+		found, enrichmentFindings := r.enrich(pkgmanager.ComponentRoot{Path: rootInfo.Physical, Name: component.Name})
+		described = found
+		findings = append(findings, enrichmentFindings...)
+	}
+
 	// Version (section 20.2): curated first, then exact package-manager
-	// metadata, then what curated versionFrom permits.
+	// metadata, then what curated versionFrom permits, and only after all
+	// three what the component root itself states.
 	switch {
 	case hasCurated && curated.Version != "":
 		component.Version = curated.Version
@@ -512,6 +534,14 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 					"Commit or stash the changes before generating a deliverable SBOM."))
 			}
 		}
+	case described.Version.Value != "":
+		// Behind versionFrom, not in front of it: versionFrom is the user
+		// saying where this component's version is to be read from, and a
+		// manifest that overtook that instruction would be a step backwards
+		// even when the rule it overtook found nothing.
+		component.Version = described.Version.Value
+		component.VersionSource = described.Version.Source
+		component.VersionConf = described.Version.Confidence
 	}
 	if component.Version == "" {
 		message := "no authorized source supplied a version"
@@ -532,6 +562,8 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 		component.Supplier = curated.Supplier
 	} else if isManaged && managed.Supplier.Value != "" {
 		component.Supplier = managed.Supplier.Value
+	} else if described.Supplier.Value != "" {
+		component.Supplier = described.Supplier.Value
 	}
 	if component.Supplier == "" {
 		findings = append(findings, componentFinding("MISSING_SUPPLIER", domain.SeverityWarning, component,
@@ -544,6 +576,11 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 		component.PURL = curated.PURL
 	} else if isManaged && managed.PURL.Value != "" {
 		component.PURL = managed.PURL.Value
+	} else if described.PURL.Value != "" {
+		// Before the anchor fallback: a purl a manifest states names the
+		// package, while one built from an anchor key only names where the
+		// files were found.
+		component.PURL = described.PURL.Value
 	} else if kind, name, ok := purlFromAnchor(component.ID); ok {
 		component.PURL = version.PURL(kind, name, component.Version)
 	}
@@ -562,7 +599,7 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 	}
 
 	// Licenses (section 22.2).
-	licenseFindings := r.resolveComponentLicense(component, files, curated, hasCurated, rootInfo.Physical)
+	licenseFindings := r.resolveComponentLicense(component, files, curated, hasCurated, rootInfo.Physical, described.License)
 	findings = append(findings, licenseFindings...)
 
 	// A component with no hashable file cannot carry a component hash
@@ -588,13 +625,15 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 
 // resolveComponentLicense applies the priority order of section 22.2, limited
 // to the sources that exist today: curated configuration, an SPDX identifier
-// in a used file, and a recognized license file in the component root.
-func (r *componentResolver) resolveComponentLicense(component *domain.Component, files []domain.UsedFile, curated config.Component, hasCurated bool, root string) []domain.Finding {
+// in a used file, what a reader found in the component root, what the package
+// manager stated, and a recognized license file in that root.
+func (r *componentResolver) resolveComponentLicense(component *domain.Component, files []domain.UsedFile, curated config.Component, hasCurated bool, root string, described pkgmanager.Claim) []domain.Finding {
 	findings := []domain.Finding{}
 
-	// Section 22.2 in order: an SPDX identifier in a used file (2), then what
-	// the package manager declared or placed in the package (3 and 4), then a
-	// licence file found by walking the component root (5).
+	// Section 22.2 in order: an SPDX identifier in a used file (2), then the
+	// component's own manifest (3), then what the package manager declared or
+	// placed in the package (4), then a licence file found in the component
+	// root (5).
 	var fromFiles domain.LicenseFinding
 	// observed holds the complete licence texts found in a file that is not
 	// itself one licence -- two of them one after the other, or one with
@@ -616,6 +655,23 @@ func (r *componentResolver) resolveComponentLicense(component *domain.Component,
 		}
 		if len(observed) == 0 {
 			observed = license.ObserveFindings(string(data), path)
+		}
+	}
+	if fromFiles.Expression == "" && described.Value != "" {
+		// Point 3 of the order, which the specification puts above what a
+		// package manager says. The two can never both answer today, because a
+		// root a manager owns is described while it is discovered and its
+		// claims are ranked there (section 21.1); the order is written out
+		// anyway, so that the day one of them changes the code already says
+		// which one the specification meant to win.
+		//
+		// Source stays empty for the same reason it does below: a licence
+		// finding's Source names the file a licence text was read from, and
+		// here an expression was declared rather than a text read.
+		fromFiles = domain.LicenseFinding{
+			Expression: described.Value,
+			Evidence:   "component-level",
+			Confidence: domain.ConfidenceHigh,
 		}
 	}
 	if fromFiles.Expression == "" {
@@ -803,6 +859,12 @@ type componentRootResult struct {
 // makes COMPONENT_ROOT_UNRESOLVED fire.
 const rootSourceUsedFiles = "used-files"
 
+// rootSourceMarkerPrefix opens the Source of a root that strategy 6 found, and
+// the marker's file name follows it. A marker is a file somebody put there, so
+// unlike a root computed from the used files this one is a statement and can be
+// read from.
+const rootSourceMarkerPrefix = "marker:"
+
 // resolveRoot settles where a component begins, following the same priority
 // order that named it (section 19.2). Each branch mirrors one strategy, so the
 // root and the name can never come from two different places.
@@ -838,7 +900,7 @@ func (r *componentResolver) resolveRoot(component *domain.Component, files []dom
 			continue
 		}
 		if id, ok := identityForRoot(file.ID, r.physical[file.ID.Canonical()], root); ok {
-			return componentRootResult{ID: id, Physical: root, Source: "marker:" + marker}
+			return componentRootResult{ID: id, Physical: root, Source: rootSourceMarkerPrefix + marker}
 		}
 	}
 
