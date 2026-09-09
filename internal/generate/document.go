@@ -195,6 +195,12 @@ func groupFilesByComponent(resolver *componentResolver, files []domain.UsedFile)
 	byComponentID := map[string]*fileGroup{}
 	order := []string{}
 
+	// Whatever reading pkg-config metadata produced before this point came from
+	// files that are not in this document -- resolve is asked about
+	// narrowed-away headers as well -- so both what it reported and what it
+	// described start empty here and are filled by the files below.
+	resolver.forgetSystemPackages()
+
 	for _, file := range files {
 		id, name, componentType, scope, detectedBy := resolver.resolve(file)
 		group, known := byComponentID[id]
@@ -233,6 +239,15 @@ func groupFilesByComponent(resolver *componentResolver, files []domain.UsedFile)
 	// file has been mapped, and here the complete set is at hand. The findings
 	// join the others before the sort, so their order is the same on every run.
 	findings = append(findings, resolver.unusedPackageFindings(files)...)
+	// What reading the pkg-config metadata beside a system file reported. It is
+	// collected while the files are mapped, because resolve answers with a
+	// component and has nowhere to put a finding, and drained here so that it
+	// reaches the report in the order the files were mapped in.
+	findings = append(findings, resolver.takeSystemPackageFindings()...)
+	// And what the whole set of mapped files says about one module: two
+	// packages of one name that were described differently are a disagreement
+	// only once every file has been mapped.
+	findings = append(findings, resolver.takePkgConfigConflicts()...)
 	sortFindings(findings)
 	return groups, findings
 }

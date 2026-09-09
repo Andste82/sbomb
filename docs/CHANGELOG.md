@@ -14,6 +14,48 @@ PDB parsing remains out of scope. MSVC header evidence therefore comes from
 `/showIncludes`, Ninja dependencies or MSBuild TLogs, and a build may report
 `DEBUG_INFO_UNAVAILABLE` where a DWARF-based build would provide debug evidence.
 
+### A distribution library is named after its package, not after the sysroot
+
+A host build links `libfoo.so.3` out of `/usr/lib`, and until now every system
+file of the run arrived in one component named after the sysroot, with no
+version anybody could state for it. The distribution had written the answer down
+right beside the library: `<libdir>/pkgconfig/libfoo.pc`, naming the module and
+its version.
+
+sbomb reads it now. A system library your build actually linked gets a component
+of its own, named after the pkg-config module, carrying the version the file
+states and saying `pkg-config` beside it so the document names where the answer
+came from. It stays under `build-environment` and it stays system scope: naming
+a distribution library does not turn it into one of your product's dependencies.
+No process is started for this and no permission is needed — the file is read,
+nothing is executed.
+
+**This only matters where distribution libraries are in the document at all.**
+The default is `systemLibraries: exclude`, and there they are filtered out before
+components are formed, so not one .pc file is opened and your document is byte
+for byte the one you had. Run `--profile-overlay host-linux`, set
+`systemLibraries` yourself, or turn on `includeSystemHeaders`, and the new
+naming appears — which is a visible change to those documents: what was one
+component per sysroot becomes one per named package.
+
+**Nothing is guessed, and the coverage is honestly small.** The .pc file is
+addressed by a name derived from the used file — `libfoo.so.3` asks for `foo.pc`
+and `libfoo.pc`, a header asks for the .pc file named after the directory it sits
+in — and no `pkgconfig` directory is ever listed. So `libz.so` does not find
+`zlib.pc` and `libssl.so` does not find `openssl.pc`; those stay where they were.
+A file that is found must also *verify*: it has to say the library lies in the
+directory it really lies in and name it in its `Libs:` line, or the mapping does
+not happen. Two .pc files that both verify and disagree map nothing and report
+`COMPONENT_MAPPING_CONFLICT` — two statements are no statement. Two *packages*
+of one module name in one sysroot — a distribution `libfoo` in `/usr/lib` and a
+hand-built one in `/opt/lib` — are that same rule one level up: both libraries
+belong in the component, and it carries the version of neither, with the
+disagreement reported against it. A .pc file names
+no licence, so `UNKNOWN_LICENSE` stays with these components, and it names no
+distribution package, so no purl is invented for them. And a .pc file for a
+library your build never linked adds nothing at all: no component, no file, not
+one finding.
+
 ### Yocto and Buildroot describe the components your image build already knows
 
 An embedded-Linux image build writes down what it built: Yocto a

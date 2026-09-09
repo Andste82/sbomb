@@ -447,6 +447,23 @@ that is the tool working. Work upwards from there.
 an embedded target, correct on a host build. Combine it, do not replace:
 `--policy cra --profile-overlay host-linux`.
 
+Turning it on is also what makes distribution libraries *nameable*. With
+`systemLibraries` at its default, they never reach the document, so nothing
+describes them. With `separate-component` — or `includeSystemHeaders: true` for
+headers — sbomb reads the `pkg-config` file the distribution installed beside a
+library it linked (`<libdir>/pkgconfig/<name>.pc`) and gives that library a
+component of its own, named after the pkg-config module and carrying the version
+the file states, instead of folding every system file into one component named
+after the sysroot. No process is run for this and no permission is needed.
+
+It works where the .pc file is named after the library: `libfoo.so.3` finds
+`foo.pc` or `libfoo.pc`, and a header finds the .pc file named after the
+directory it sits in. Nothing is guessed — `libz.so` does not find `zlib.pc`,
+and a library whose .pc file says it lives elsewhere is not claimed by it. Such
+a library stays in the sysroot component, exactly as before. A .pc file names no
+licence and no distribution package, so `UNKNOWN_LICENSE` and `UNKNOWN_PURL`
+remain for these components; only introspection can close that.
+
 ### Gates
 
 Each is a boolean with a matching `--fail-on-…` flag. Each names the findings

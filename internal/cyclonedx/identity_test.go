@@ -92,10 +92,13 @@ func TestVersionSourcesMapOntoTheClosedTechniqueVocabulary(t *testing.T) {
 		"dynamic-analysis": true, "filename": true, "attestation": true, "other": true,
 	}
 	for source, want := range map[string]string{
-		"curated":       "attestation",
-		"conan":         "manifest-analysis",
-		"vcpkg":         "manifest-analysis",
-		"fetchcontent":  "manifest-analysis",
+		"curated":      "attestation",
+		"conan":        "manifest-analysis",
+		"vcpkg":        "manifest-analysis",
+		"fetchcontent": "manifest-analysis",
+		// The .pc file a distribution installs beside a system library: a
+		// declaration read out of a file, like every manifest above it.
+		"pkg-config":    "manifest-analysis",
 		"header":        "source-code-analysis",
 		"go-build-info": "binary-analysis",
 		"git":           "other",

@@ -223,3 +223,74 @@ func FuzzDistroManifest(f *testing.F) {
 		}
 	})
 }
+
+// The pkg-config file a distribution installs beside a system library. It comes
+// out of a sysroot this tool did not build, its parser is written here, and the
+// mapping it decides gives a component its name -- so whatever is in it, the
+// reader may return a module and claims and nothing else, and must never map a
+// file the metadata does not really describe.
+func FuzzPkgConfig(f *testing.F) {
+	f.Add("prefix=/usr\nexec_prefix=${prefix}\nlibdir=${prefix}/lib\n\nName: libfoo\nVersion: 1.2.3\nLibs: -L${libdir} -lfoo\nCflags: -I${prefix}/include\n")
+	f.Add("root_prefix=/usr\nrootprefix=${root_prefix}\nprefix=${rootprefix}\nlibdir=${prefix}/lib\n\nName: systemd\nVersion: 255\n")
+	f.Add("prefix=/usr\n\nName: shared-mime-info\nVersion: 2.4\nRequires:\nLibs:\nCflags:\n")
+	f.Add("#############\n#  comment  #\n#############\n\nlibdir=/usr/lib\n\nName: libfoo\nVersion: 1\nLibs: -L ${libdir} -l foo\n")
+	f.Add("a=${b}\nb=${a}\nlibdir=${a}\n\nName: a\nVersion: 1\n")
+	f.Add("libdir=/usr/lib/../../etc\n\nName: a\nVersion: 1\nLibs: -L${libdir} -la\n")
+	f.Add("libdir=$${literal}\n\nName: a\nVersion: $\nLibs: -L${nowhere} -la\n")
+	f.Add("")
+
+	f.Fuzz(func(t *testing.T, content string) {
+		root := t.TempDir()
+		library := filepath.Join(root, "usr", "lib", "libfoo.so")
+		pc := filepath.Join(root, "usr", "lib", "pkgconfig", "libfoo.pc")
+		for _, path := range []string{library, pc} {
+			if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+				t.Skip(err)
+			}
+		}
+		if err := os.WriteFile(library, []byte("ELF\n"), 0o600); err != nil {
+			t.Skip(err)
+		}
+		if err := os.WriteFile(pc, []byte(content), 0o600); err != nil {
+			t.Skip(err)
+		}
+
+		described, findings := NewPkgConfigReader().Describe(SystemFile{
+			Path: library, Boundary: root, Ref: "sysroot:target/usr/lib/libfoo.so",
+		})
+		for _, finding := range findings {
+			// A finding with no identifier reaches no catalogue, and one with
+			// no subject names nothing a reader could look at.
+			if finding.ID == "" || finding.Subject.Ref == "" {
+				t.Fatalf("a finding names no identifier or no subject: %#v", finding)
+			}
+			// Section 7.5: no report carries the absolute path of the machine
+			// the run happened on.
+			if strings.Contains(finding.Subject.Ref, root) {
+				t.Fatalf("a finding names the absolute path %q", finding.Subject.Ref)
+			}
+		}
+		if !described.Described() {
+			if len(described.Contributions) != 0 {
+				t.Fatalf("a file that was mapped to nothing still contributed %#v", described.Contributions)
+			}
+			return
+		}
+		// The module is the file's own name, because that is the only name this
+		// reader ever addresses a .pc file by.
+		if described.Module != "libfoo" {
+			t.Fatalf("module = %q, want the name of the only file that could be addressed", described.Module)
+		}
+		for _, contribution := range described.Contributions {
+			if contribution.Field != FieldVersion {
+				t.Fatalf("a .pc file contributed %q, which it cannot state", contribution.Field)
+			}
+			if contribution.Claim.Value == "" || contribution.Claim.Source != pkgConfigSource {
+				t.Fatalf("a claim with no value or a foreign origin: %#v", contribution.Claim)
+			}
+			if contribution.Claim.Rank != RankInstallState {
+				t.Fatalf("a claim of rank %v came out of a pkg-config file", contribution.Claim.Rank)
+			}
+		}
+	})
+}
