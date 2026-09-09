@@ -13,7 +13,7 @@ stated once so the two cannot drift apart. Beyond it, a milestone must:
 - Update `docs/CHANGELOG.md` and `docs/dev/status.md`.
 - Record unspecified decisions in `docs/dev/open-questions.md` rather than guessing.
 
-Milestones 0-16 are the core track and must be implemented in order. Milestones 17, 19, and 20 are adapter tracks and may be implemented after Milestone 16. Milestones 18 and 21 are parked and must not be started until explicitly unparked.
+Milestones 0-16 are the core track and must be implemented in order. Milestones 17, 18, 19, and 20 are adapter tracks and may be implemented after Milestone 16. Milestone 21 is parked and must not be started until explicitly unparked.
 
 ## Files
 
@@ -35,7 +35,7 @@ Milestones 0-16 are the core track and must be implemented in order. Milestones 
 - [15-robustness-fuzzing-performance.md](15-robustness-fuzzing-performance.md) - Milestone 15 — Robustness, Fuzzing, Performance
 - [16-cmake-integration-github-action-release.md](16-cmake-integration-github-action-release.md) - Milestone 16 — CMake Integration, GitHub Action, Release
 - [17-makefiles-generator-adapter.md](17-makefiles-generator-adapter.md) - Milestone 17 — Makefiles Generator Adapter
-- [18-msvc-msbuild-adapter-parked.md](18-msvc-msbuild-adapter-parked.md) - Milestone 18 — MSVC / MSBuild Adapter — **PARKED**
+- [18-msvc-msbuild-adapter.md](18-msvc-msbuild-adapter.md) - Milestone 18 — MSVC / MSBuild Adapter
 - [19-packaging-images-and-assets.md](19-packaging-images-and-assets.md) - Milestone 19 — Packaging, Images, and Assets
 - [20-esp-idf-sdk-adapter.md](20-esp-idf-sdk-adapter.md) - Milestone 20 — ESP-IDF SDK Adapter
 - [21-iar-and-vendor-linkers-parked.md](21-iar-and-vendor-linkers-parked.md) - Milestone 21 — IAR and Vendor Linkers — **PARKED**
@@ -57,3 +57,4 @@ each phase uncovered. They are the working state of the roadmap.
 - [phase-06-plan.md](phase-06-plan.md) - Header evidence in full — complete
 - [phase-07-plan.md](phase-07-plan.md) - Adapter breadth — complete, ESP-IDF parked
 - [phase-08-plan.md](phase-08-plan.md) - Hardening — complete
+- [phase-09-plan.md](phase-09-plan.md) - The Microsoft toolchain — planned

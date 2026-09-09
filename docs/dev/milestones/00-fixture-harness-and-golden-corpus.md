@@ -21,7 +21,9 @@
 * For each (project × toolchain) the harness captures into `testdata/fixtures/<toolchain>/<project>/`:
   `build.ninja`, `compile_commands.json`, `.cmake/api/v1/reply/**`, `*.map`, `link.d` (from `-Wl,--dependency-file`), `link-trace.txt` (`-Wl,-t`), all `*.d` depfiles, `.ninja_deps` (raw) and `ninja -t deps` text, `install_manifest.txt`, the stripped and unstripped artifact, and `manifest.json` describing the capture (toolchain versions, flags, host OS).
 * All absolute paths in captured fixtures are rewritten to a fixed sentinel root (`/__fixture_src__`, `/__fixture_build__`) by `fixgen` so fixtures are host-independent.
-* **Windows path fixtures without a Windows machine.** There is no Windows CI runner. Windows path semantics are therefore covered by (a) the `mingw-w64` toolchain, which produces PE artifacts and Windows-flavoured paths inside `compile_commands.json` and depfiles while running on Linux, and (b) hand-written synthetic fixtures under `testdata/fixtures/win-synthetic/` containing drive letters, backslashes, `C$:` Ninja escaping, UNC paths, spaces, and non-ASCII path segments. MSVC-native fixtures are **not** part of this milestone (MSVC is parked, M18).
+* **Windows path fixtures without a Windows machine.** Windows path semantics are covered by (a) the `mingw-w64` toolchain, which produces PE artifacts and Windows-flavoured paths inside `compile_commands.json` and depfiles while running on Linux, and (b) hand-written synthetic fixtures under `testdata/fixtures/win-synthetic/` containing drive letters, backslashes, `C$:` Ninja escaping, UNC paths, spaces, and non-ASCII path segments. MSVC-native fixtures are **not** part of this milestone.
+
+  **[Amended.]** This read "there is no Windows CI runner" and closed with "MSVC is parked, M18". Neither holds: a `windows-latest` runner is available and is already used by the determinism matrix (phase 8d), and M18 is unparked. MSVC fixtures stay out of *this* milestone regardless, because they are not producible in Docker and so cannot follow the rule below that a developer with only Docker can regenerate every fixture. They are generated on the Windows runner and are M18's deliverable, under the same policy this milestone sets: metadata text only, a Windows-shaped sentinel root (`C:/__fixture_src__`) instead of `/__fixture_src__`, and a `PROVENANCE.md` per directory.
 * **Fixture licensing policy** (`testdata/fixtures/POLICY.md`, enforced by a test):
   * Fixture *projects* are original code written for this repository and carry the repository's own license.
   * Committed evidence is limited to **build metadata text**: maps, depfiles, `build.ninja`, File API replies, `compile_commands.json`, trace and log output. These are factual descriptions of a build, contain no upstream source, and are safe to commit.
@@ -44,6 +46,6 @@ go test ./tools/fixtures/... ./internal/testutil/...      # exit 0
 tools/fixtures/regen.sh --check                          # exit 0 (no drift)
 ```
 
-**Definition of Done:** a developer with only Docker can regenerate every Linux fixture; CI verifies no drift; no fixture contains a host-specific path.
+**Definition of Done:** a developer with only Docker can regenerate every Linux fixture; CI verifies no drift; no fixture contains a host-specific path. A Windows fixture is regenerated on a Windows runner and is held to the same three properties.
 
 ---

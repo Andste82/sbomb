@@ -55,9 +55,9 @@ The following MUST NOT be included solely because they exist on disk: unused sou
 | Dimension | Supported |
 |---|---|
 | Host OS the tool runs on | Linux x86_64 and Linux ARM64 are supported and CI-verified. A Windows x86_64 binary is cross-compiled and released but is **not** exercised by CI; Windows path semantics are covered by path-flavor unit tests (§41 M14). macOS is out of scope. |
-| CMake generators | Ninja, Ninja Multi-Config, Unix Makefiles, NMake Makefiles. Visual Studio generators are **parked** (§41 M18). |
-| Compilers | GCC and Clang. MSVC is **parked** (M18). IAR and other vendor compilers are **parked** (M21). |
-| Linkers | GNU ld, GNU gold, LLVM lld. MSVC `link.exe` and IAR ILINK are parked. |
+| CMake generators | Ninja, Ninja Multi-Config, Unix Makefiles, NMake Makefiles. Visual Studio generators are **not yet supported** (§41 M18B). |
+| Compilers | GCC and Clang. MSVC is **not yet supported**; it is planned and unparked (M18). IAR and other vendor compilers are **parked** (M21). |
+| Linkers | GNU ld, GNU gold, LLVM lld. MSVC `link.exe` is planned (M18); IAR ILINK is parked. |
 | Output | CycloneDX JSON 1.6. The writer layer is format-agnostic (§36.1) so SPDX or CycloneDX 1.7 can be added without touching discovery. |
 | Binary formats for inspection | ELF and PE/COFF. Mach-O is out of scope. |
 | Distribution | A single statically linked executable per platform (`CGO_ENABLED=0`). |
@@ -580,7 +580,7 @@ Go's standard library provides `debug/elf`, `debug/pe`, `debug/macho`, and `debu
 
 1. Enumerates DWARF compilation units. For each CU, `DW_AT_name` + `DW_AT_comp_dir` yields the translation unit source path. This is an authoritative list of TUs actually present in the binary and survives archive extraction and (mostly) LTO.
 2. Reads the DWARF line-table file table per CU, yielding the set of files referenced by the line program — that is, the headers that actually contributed code or declarations to the emitted CU.
-3. For PE, reads the PDB path and signature from the debug directory for identity correlation only. **PDB parsing is out of scope for this version.** On PE, DWARF evidence is therefore available only for GCC/Clang-produced binaries (mingw-w64); MSVC-produced binaries have no debug-info adapter, which is one reason MSVC support is parked (§41 M18).
+3. For PE, reads the PDB path and signature from the debug directory for identity correlation only. **PDB parsing is out of scope for this version.** On PE, DWARF evidence is therefore available only for GCC/Clang-produced binaries (mingw-w64); an MSVC-produced binary has no debug-info adapter, so §13.2 strategy 6 never fires for it and its header evidence comes from `/showIncludes` instead (§41 M18).
 
 DWARF header evidence is recorded with type `debug-info`. Per §4.4, the depfile header set and the DWARF header set are **unioned**; files present only in DWARF get confidence `high`, files present only in depfiles get their normal depfile confidence, and files in both get `high`.
 
@@ -1992,7 +1992,7 @@ This specification intentionally does not duplicate the detailed milestone text;
 - [15-robustness-fuzzing-performance.md](milestones/15-robustness-fuzzing-performance.md)
 - [16-cmake-integration-github-action-release.md](milestones/16-cmake-integration-github-action-release.md)
 - [17-makefiles-generator-adapter.md](milestones/17-makefiles-generator-adapter.md)
-- [18-msvc-msbuild-adapter-parked.md](milestones/18-msvc-msbuild-adapter-parked.md)
+- [18-msvc-msbuild-adapter.md](milestones/18-msvc-msbuild-adapter.md)
 - [19-packaging-images-and-assets.md](milestones/19-packaging-images-and-assets.md)
 - [20-esp-idf-sdk-adapter.md](milestones/20-esp-idf-sdk-adapter.md)
 - [21-iar-and-vendor-linkers-parked.md](milestones/21-iar-and-vendor-linkers-parked.md)
@@ -2464,10 +2464,10 @@ These were open questions in v3.0 and are now settled. An implementing agent MUS
 | 8 | Anchor keys are **version-free** (`pkg:conan/mbedtls`, not `...@3.5.0`), so file `bom-ref`s stay stable across dependency version bumps and release-to-release SBOM diffs stay readable. The version lives on the component. | §7.2, §28.4 |
 | 9 | **DWARF is the primary header evidence source** (`headerEvidence=dwarf-preferred`); depfiles are the fallback. Headers dropped by DWARF narrowing are counted and reported, never silently discarded. | §4.4, §33.2 |
 | 10 | `systemLibraries` defaults to **`exclude`**, because embedded targets link statically. A `host-linux` profile overlay switches it on for hosted builds. Ignored dynamic dependencies are reported. | §24.1, §24.2, §33.2 |
-| 11 | **MSVC parked** (M18). PDB parsing out of scope. | §11.4, §41 M18 |
+| 11 | **MSVC unparked** (M18), split into 18A (Ninja or NMake) and 18B (Visual Studio and MSBuild). PDB parsing stays out of scope; header evidence for MSVC comes from `/showIncludes`. | §11.4, §41 M18 |
 | 12 | The SPDX license corpus is embedded as **hashes only** (~700 entries, under 50 KB), not full texts, so the single-executable requirement is unaffected. Generated by `tools/spdxgen`, drift-checked in CI. | §22.3, §41 M11 |
 | 13 | **IAR and vendor linkers parked** (M21) until real fixtures are supplied. | §41 M21 |
-| 14 | **Linux CI only.** Windows binaries are cross-compiled and released but untested by CI; Windows path semantics are covered by an injectable path flavor plus synthetic and mingw fixtures. | §41 M14, M16 |
+| 14 | **CI runs on Linux and Windows.** The determinism matrix includes `windows-latest`, so the released Windows binary is exercised rather than only cross-compiled; Windows path semantics are additionally covered by an injectable path flavor plus synthetic and mingw fixtures. | §41 M14, M16 |
 | 15 | **Fixture licensing policy:** only build-metadata *text* and self-built artifacts from original fixture projects may be committed. No third-party source, headers, toolchain files, or SDK trees. Every fixture carries a `PROVENANCE.md`. | §41 M0 |
 | 16 | Tool name is **`sbomb`**; module path `github.com/<org>/sbomb`; property namespace `sbomb:`. | throughout |
 
