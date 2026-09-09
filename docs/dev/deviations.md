@@ -1257,3 +1257,166 @@ vcpkg file list or the CPM lock. The new ceilings are file-local constants
 beside the existing ones. A user who lowers the run limit does not lower this
 one; that is the status quo for every package-manager parser and is left as a
 known gap rather than fixed halfway here.
+
+## D37 — pkg-config is a fourth kind of reader, and the mapping is the whole contribution
+
+D30 removed the `osPackages` group and named three conditions for anything to
+take its place: a form per manager that yields name, version, architecture and
+supplier in one call; a decision about system paths inside the subprocess anchor
+boundary; and a mapping strategy able to express one package per file. A `.pc`
+file meets the first from a file rather than a call, and needs the third. The
+second falls away entirely, because no process starts.
+
+**Not an enricher, although the task asked for one.** An enricher is invoked at
+exactly two places — on the identity root of a discovered package inside
+`Discover`, and on a root whose `Source` carries the `marker:` prefix — and a
+system file's component has `Source` `anchor`, so no enricher would ever run for
+it. Worse, an enricher describes a root that is already settled, and for a file
+under a sysroot that root is the sysroot anchor itself, under which *every*
+system file of the run falls into one component. A .pc file describes exactly
+one package; hanging it on that collection component would be a false statement
+about all the others. And an enricher reads what lies directly in the root,
+while a .pc file lies in `<libdir>/pkgconfig`. The mapping, not the description,
+is the contribution here — without it there is nothing correct to describe.
+
+**Not an adapter either, for D36's reason.** An adapter enumerates: every .pc
+file in a sysroot would become a package with a root, would claim files by path
+prefix, and every one that matched nothing would be reported as
+`PACKAGE_NOT_LINKED`. A Debian `pkgconfig` directory holds hundreds of them.
+`Discover` also runs *before* the anchors are assembled, so an adapter does not
+yet know where the sysroot is or where its boundary lies.
+
+So `internal/adapters/pkgmanager/pkgconfig.go` is a fourth kind of reader: handed
+a used file and the anchor that bounds it, answering with a module name and
+contributions. As with an enricher and with D36's image manifest, the guarantee
+is structural — `SystemPackage` carries no path, no root, no anchor and no file
+list, so it cannot widen the used set or move a boundary however the caller uses
+it.
+
+**Named addressing, not a directory index.** From `libfoo.so.3` the candidates
+`foo.pc` and `libfoo.pc` are formed and `stat`ed one at a time; from
+`<includedir>/foo/bar.h` the candidates `foo.pc`, `libfoo.pc`, `bar.pc` and
+`libbar.pc`. Nothing enumerates a `pkgconfig` directory. That is the line D31
+drew for the vcpkg file list and the one D30 refused to cross for
+`/var/lib/dpkg/info`, and it is also what §31 can afford: this runs once per
+used system file. The price is real and is paid deliberately — `zlib.pc` is not
+found for `libz.so.1`, `openssl.pc` not for `libssl.so.3`, and a multiarch .pc
+file under `/usr/lib/<triple>/pkgconfig` is not found for a header in
+`/usr/include`. Those libraries stay in the sysroot component, exactly as they
+are today. An index would find them and would also let the size of the sysroot,
+rather than the size of the build, decide how long the run takes and what the
+document says.
+
+**The module comes from the file name, not from `Name:`.** Measured:
+`xkeyboard-config.pc` states `Name: XKeyboardConfig`, and `libcrypt.pc` is a
+symlink to `libxcrypt.pc` whose `Name:` says `libxcrypt`. The file name is the
+identity pkg-config itself keeps the module under and the only name this reader
+ever addressed; `Name:` is a display name, and publishing it would rename a
+component after a second string in the same file — which D33 already refused for
+a bundled SBOM.
+
+**Verification is what makes this not a guess.** A name that matches is not
+evidence; every candidate has to agree with the filesystem before anything is
+mapped. For a library: a stated library directory must *be* the file's directory
+and a `-l` name must name the file. For a header only an include directory
+containing it, which is weaker — that is why the directory the header sits in is
+tried as a module before the header's own stem, and why a header in
+`/usr/include` with a same-named .pc file beside it is the shakiest case this
+reader has. It is bounded by verification against a real path either way, and a
+wrong answer here costs a name and a version on a `build-environment` component
+rather than a product dependency.
+
+**Sysroot prefixing is an interpretation, and it is named as one.** A .pc file
+states the paths the package will have on the target (`libdir=/usr/lib`) while
+in a cross build the whole tree lies under the sysroot. Prefixing the anchor root
+before comparing is what `PKG_CONFIG_SYSROOT_DIR` does; the file itself says
+nothing of the kind. Without it nothing would ever verify in a cross build. The
+unprefixed form is accepted too, for a toolchain that rewrote the paths itself,
+but only while it stays inside the anchor.
+
+**Expansion is lazy where pkg-config's is eager.** pkg-config substitutes a
+variable as it reads the file, so a forward reference stays empty there and
+resolves here. The difference can only make this reader see *more*, never
+something different: whatever it resolves still has to verify against a real
+path. What it buys is a bound that is enforced rather than accidental — a fixed
+depth and an explicit cycle check, both required by §30, where eager
+substitution would have made the depth constant and unenforced.
+
+**No new finding identifier.** `COMPONENT_MAPPING_CONFLICT` already covers a
+file two sources claim and nothing gets, `INPUT_LIMIT_EXCEEDED` the bounds and
+`EVIDENCE_UNREADABLE` a file that cannot be read. Appendix A is unchanged, and
+`findingsdoc --check` passes without an edit.
+
+**No purl, and no root.** §20.4 wants a package type that can be asserted; a .pc
+file names neither a distribution nor a package format, so `pkg:generic` would be
+invented and `UNKNOWN_PURL` (info) stays. The component gets no root either,
+under a `Source` of its own so that `COMPONENT_ROOT_UNRESOLVED` does not fire for
+a root nobody was looking for: `/usr/lib` is where the package installed its
+libraries, and taking it for a component root would start a licence search across
+the whole sysroot for every distribution library in the document.
+
+**Two answers are no answer, and identity is part of the comparison.** Two
+verified candidates are compared on module, `Name:` and `Version:` together,
+because the module is what the component is named after. Two candidate
+*directories* carrying the same file — `/usr/lib/pkgconfig` and
+`/usr/share/pkgconfig` — therefore agree and answer once, while `crypt.pc` and
+`libcrypt.pc` sitting side by side disagree about the name even when they agree
+about the version, and map nothing. The real `libcrypt.pc` / `libxcrypt.pc` pair
+is not a case at all: `libxcrypt.pc` is never a candidate for `libcrypt.so`,
+because candidates come from the used file's name and from nothing else.
+
+**And the same comparison a second time, over the component.** One module name
+can be mapped from several used files, and a sysroot can hold two packages of
+one name — a distribution `libfoo` in `/usr/lib` and a hand-built one in
+`/opt/lib`. Each file is verified against the .pc file beside itself, so each
+answer is right for its own file, but they name one component. Collecting them
+in a map keyed by module and letting the last write win would publish a version
+that is wrong for one of those files and say nothing about it — the one place
+this feature could have guessed without noticing. So the answers are compared
+exactly as two candidates for one file are: equal is one answer given twice,
+different drops the value and is reported as `COMPONENT_MAPPING_CONFLICT` (info)
+against the component. The mapping itself stands — both files do belong to a
+package of that name — and the component keeps what the rest of the run knows
+about it, which for a system library is a name and no version. The sides are one
+per distinct answer rather than one per file, because a module can describe
+hundreds of headers and a report naming every one of them would say the same two
+things over and over.
+
+**What a component was described as is collected per grouping pass, not per
+run.** `resolve` is asked about files that narrowing later removed from the used
+set, and a description that came from such a file would decide a component's
+version — or manufacture a disagreement — out of a file the document does not
+contain. The collection is therefore emptied where the findings are emptied,
+when the files are grouped, and every file that is mapped records its answer
+again from the memo. The memo of what was read survives, so no .pc file is
+opened twice (§31).
+
+**The reader is a field on the resolver rather than a setter.** D36's image
+manifest reaches the resolver through `setDistroMetadata`, because it is read
+once in `generate.go` before the anchors exist. This reader needs nothing from
+the run, so it is constructed in `newComponentResolver` beside `enrich`, which
+keeps it injectable for a test and keeps its per-run cache tied to the resolver's
+lifetime. `generate.go` is untouched.
+
+**What this is worth depends entirely on the policy, and that has to be said
+plainly.** With the default `systemLibraries=exclude` and
+`includeSystemHeaders=false`, system files are filtered out of the used set
+before components are formed, so nothing is read and nothing changes. This
+matters under the `host-linux` profile, or wherever those options are set
+deliberately. Where it does apply it is a visible output change: what used to be
+one component per sysroot becomes one per named package, with a version.
+
+**What could not be verified here.** No fixture in this repository holds a
+sysroot, and there is no network. The format is grounded in the nine .pc files
+present on the machine this was written on —
+`/usr/lib/x86_64-linux-gnu/pkgconfig/{libcrypt,libxcrypt,valgrind}.pc` and
+`/usr/share/pkgconfig/{adwaita-icon-theme,bash-completion,shared-mime-info,systemd,udev,xkeyboard-config}.pc`.
+Neither a backslash continuation nor a literal `$$` occurs in that corpus, so
+what this reader does with them is an assumption the tests record rather than
+pkg-config's behaviour, exactly as D31 disclosed for the vcpkg file list. A `#`
+is treated as a comment only at the start of a line, which is conservative: a
+`#` inside a value is kept. A captured real cross-build sysroot should be run
+against this before it is called finished.
+
+**One known gap, the same one D36 records.** `--max-input-size` does not reach
+these ceilings; they are file-local constants beside the existing ones.

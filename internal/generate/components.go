@@ -101,6 +101,65 @@ type componentResolver struct {
 	// describes a component; it never maps a file, so it appears nowhere in
 	// resolve and nowhere in r.packages.
 	distro *pkgmanager.DistroMetadata
+	// pkgConfig reads the pkg-config metadata a system library installed beside
+	// itself, which is the strategy between 6 and 7 of section 19.2. It is a
+	// field for the reason enrich is one: a test can put its own reader in
+	// without the production code exporting a hook for it.
+	pkgConfig func(pkgmanager.SystemFile) (pkgmanager.SystemPackage, []domain.Finding)
+	// systemPackages is what the reader answered for one used file, keyed by
+	// that file's identity. resolve is asked about a file more than once in a
+	// run -- once while narrowing is counted, once while the files are grouped
+	// -- and re-reading the metadata each time would pay for the same
+	// directories twice (section 31).
+	systemPackages map[string]systemPackageResult
+	// systemPackageFindings is what reading that metadata reported. resolve
+	// answers with a component and has nowhere to put a finding, so they are
+	// collected here and drained once the files are grouped.
+	systemPackageFindings []domain.Finding
+	// pkgConfigByComponent is what the .pc files that named a component stated
+	// about it, keyed by the component name. It describes a component; like the
+	// image manifest above it maps no file, so nothing in it can widen the used
+	// set.
+	pkgConfigByComponent map[string]*pkgConfigComponent
+}
+
+// systemPackageResult is what the pkg-config reader answered about one used
+// file: the module it belongs to, or the empty string for the ordinary case of
+// a file no .pc file describes, what that answer stated about the module, and
+// the findings the answer produced.
+type systemPackageResult struct {
+	module        string
+	contributions []pkgmanager.Contribution
+	findings      []domain.Finding
+}
+
+// pkgConfigComponent collects what every used file of one module was described
+// as. One module can be described more than once in a run: a sysroot may hold
+// two packages of the same name -- a distribution library in /usr/lib and a
+// hand-built one in /opt/lib, both called libfoo -- and each file is then
+// verified against the .pc file beside itself. Each of those answers is right
+// for its own file, but they name one component, and if they state different
+// things nobody can say which of them the component carries.
+//
+// So the answers are compared rather than overwritten: agreement is one answer
+// given twice, and disagreement drops the values and is reported. Keeping the
+// last one written would publish a version that is wrong for one of the files
+// and say nothing about it, which is the guess this reader exists to avoid.
+type pkgConfigComponent struct {
+	contributions []pkgmanager.Contribution
+	// stated is the answer in one comparable string, so that two answers can be
+	// held against each other without knowing which fields a .pc file may fill.
+	stated string
+	// sides is one entry per distinct answer, named after the first file that
+	// gave it, in the order the files were mapped in. Per answer and not per
+	// file, because a module can describe hundreds of headers and a report that
+	// named every one of them would say the same two things over and over.
+	sides []domain.ConflictSide
+	// disputed says two files of this module were described differently. The
+	// contributions are dropped then and the component keeps what the rest of
+	// the run knows about it, which for a system library is a name and no
+	// version.
+	disputed bool
 }
 
 // resolvedPackage is one package-manager result expressed in identity terms,
@@ -151,6 +210,11 @@ func newComponentResolver(cfg config.Config, physical map[string]string, anchorR
 		anchorRoots:     anchorRoots,
 		logger:          logger,
 		enrich:          pkgmanager.Enrich,
+		// One reader per resolver, because the reader holds the run's memo of
+		// which .pc files were there and what was in them.
+		pkgConfig:            pkgmanager.NewPkgConfigReader().Describe,
+		systemPackages:       map[string]systemPackageResult{},
+		pkgConfigByComponent: map[string]*pkgConfigComponent{},
 	}
 }
 
@@ -228,6 +292,32 @@ func (r *componentResolver) resolve(file domain.UsedFile) (id, name, componentTy
 	if root, manifest, found := r.nearestPackageRoot(file); found {
 		componentName := filepath.Base(root)
 		return "component:" + componentName, componentName, "library", string(anchors.ScopeThirdParty), "package-metadata:" + manifest
+	}
+
+	// Between 6 and 7 (section 19.2): the pkg-config metadata a system library
+	// installed beside itself names the package the file belongs to. It sits
+	// here because it is weaker evidence than a marker file somebody put in a
+	// directory -- a .pc file is addressed by a name derived from this file and
+	// then has to verify against it -- and stronger than the anchor below,
+	// which folds every file of a sysroot into one component and could not
+	// carry a version for any of them.
+	//
+	// Only for a sysroot or a toolchain anchor: everywhere else the strategies
+	// above already answer, and asking a project tree for pkg-config metadata
+	// would spend stat calls on directories that never hold any.
+	if kind == "sysroot" || kind == "toolchain" {
+		if module, found := r.systemPackageFor(file, anchorKey); found {
+			// The scope is the anchor's and does not move. Section 24.1 keeps
+			// system and toolchain files out of the product's dependencies, and
+			// naming one of them does not make it one: the component still
+			// hangs under build-environment.
+			scope := anchors.ScopeSystem
+			if kind == "toolchain" {
+				scope = anchors.ScopeToolchain
+			}
+			return "component:" + module, module, "library", string(scope),
+				pkgConfigDetectedByPrefix + module + ".pc"
+		}
 	}
 
 	// Strategy 7: the anchor root itself.
@@ -405,6 +495,160 @@ func (r *componentResolver) packageFor(file domain.UsedFile) (resolvedPackage, b
 	return resolvedPackage{}, false
 }
 
+// pkgConfigDetectedByPrefix opens the detectedBy of a component the pkg-config
+// metadata named, and the .pc file's own name follows it. resolveRoot reads the
+// prefix back, so the two strings that make the strategy visible are one
+// constant rather than two literals that can drift apart.
+const pkgConfigDetectedByPrefix = "pkg-config:"
+
+// systemPackageFor asks the pkg-config metadata beside a system file which
+// package it belongs to. The answer is memoized per file, because resolve is
+// asked about one file more than once in a run and the reader would otherwise
+// walk the same directories again.
+//
+// The boundary handed over is the file's own anchor root, so the upward walk
+// can never leave it (section 22.1). A file whose bytes this run never located,
+// or whose anchor has no root, is not asked about at all: there would be
+// nothing to walk up from and nothing to stop at.
+func (r *componentResolver) systemPackageFor(file domain.UsedFile, anchorKey string) (string, bool) {
+	key := file.ID.Canonical()
+	cached, known := r.systemPackages[key]
+	if !known {
+		if r.pkgConfig == nil {
+			return "", false
+		}
+		path, boundary := r.physical[key], r.anchorRoots[anchorKey]
+		if path == "" || boundary == "" {
+			return "", false
+		}
+		described, findings := r.pkgConfig(pkgmanager.SystemFile{Path: path, Boundary: boundary, Ref: key})
+		cached = systemPackageResult{
+			module:        described.Module,
+			contributions: described.Contributions,
+			findings:      findings,
+		}
+		r.systemPackages[key] = cached
+		if described.Described() {
+			r.logger.Debug("System file %s is described by pkg-config module %s", key, described.Module)
+		}
+	}
+	r.systemPackageFindings = append(r.systemPackageFindings, cached.findings...)
+	if cached.module == "" {
+		return "", false
+	}
+	// Recorded on every answer and not only on the first read of the file,
+	// because what a component carries has to be built from the files this pass
+	// really mapped. The memo above keeps the filesystem from being read twice;
+	// it must not keep a file that was mapped from being counted.
+	r.recordSystemPackage(cached.module, key, cached.contributions)
+	return cached.module, true
+}
+
+// recordSystemPackage holds what one used file was described as against what
+// the other files of the same module were described as. Two files that agree
+// are one answer; two that disagree leave the component with neither, and the
+// disagreement is reported by takePkgConfigConflicts.
+func (r *componentResolver) recordSystemPackage(module, fileRef string, contributions []pkgmanager.Contribution) {
+	stated := statedPkgConfig(contributions)
+	entry, known := r.pkgConfigByComponent[module]
+	if !known {
+		r.pkgConfigByComponent[module] = &pkgConfigComponent{
+			contributions: contributions,
+			stated:        stated,
+			sides:         []domain.ConflictSide{{Source: fileRef, Value: stated}},
+		}
+		return
+	}
+	if entry.stated == stated {
+		return
+	}
+	entry.disputed = true
+	entry.contributions = nil
+	// One side per distinct answer rather than per file: a module can describe
+	// hundreds of headers, and a report that named every one of them would say
+	// the same two things over and over. The first file to state an answer is
+	// the one that stands for it.
+	for _, side := range entry.sides {
+		if side.Value == stated {
+			return
+		}
+	}
+	entry.sides = append(entry.sides, domain.ConflictSide{Source: fileRef, Value: stated})
+}
+
+// statedPkgConfig writes what a .pc file contributed as one comparable string.
+// Only a version ever arrives today, but comparing the whole set rather than
+// that one field means a later contribution cannot slip past the comparison.
+func statedPkgConfig(contributions []pkgmanager.Contribution) string {
+	if len(contributions) == 0 {
+		return "nothing"
+	}
+	parts := make([]string, 0, len(contributions))
+	for _, contribution := range contributions {
+		parts = append(parts, fmt.Sprintf("%s %s", contribution.Field, contribution.Claim.Value))
+	}
+	sort.Strings(parts)
+	return strings.Join(parts, ", ")
+}
+
+// takePkgConfigConflicts reports every module whose files were described
+// differently. It is asked once the files have been grouped, because only then
+// is it known which files reached the document at all.
+func (r *componentResolver) takePkgConfigConflicts() []domain.Finding {
+	findings := []domain.Finding{}
+	// Sorted, because a map is iterated in a different order on every run and
+	// two runs over one build have to report the same thing in the same order.
+	modules := make([]string, 0, len(r.pkgConfigByComponent))
+	for module := range r.pkgConfigByComponent {
+		modules = append(modules, module)
+	}
+	sort.Strings(modules)
+	for _, module := range modules {
+		entry := r.pkgConfigByComponent[module]
+		if !entry.disputed {
+			continue
+		}
+		conflict := domain.Conflict{
+			Field:   "version the pkg-config metadata states for this component",
+			Subject: domain.Subject{Kind: "component", Ref: "component:" + module},
+			Sides:   entry.sides,
+			Reason: "two packages of one module name were described differently, and two statements " +
+				"are no statement, so the component keeps no value from either (section 19.2)",
+		}
+		if finding, ok := conflict.Finding("COMPONENT_MAPPING_CONFLICT", domain.SeverityInfo); ok {
+			findings = append(findings, finding)
+		}
+	}
+	return findings
+}
+
+// forgetSystemPackages drops what reading pkg-config metadata produced before
+// the files were grouped. resolve is also asked about headers that narrowing
+// removed from the used set, and neither a finding nor a description that came
+// from a file the document does not contain belongs in it. What survives is the
+// memo of which .pc files were there, so nothing is read a second time.
+func (r *componentResolver) forgetSystemPackages() {
+	r.systemPackageFindings = nil
+	r.pkgConfigByComponent = map[string]*pkgConfigComponent{}
+}
+
+// takeSystemPackageFindings hands over what reading pkg-config metadata
+// reported and empties the collection.
+//
+// It is emptied rather than only read because resolve is also asked about
+// headers that narrowing removed from the used set, and a finding about a file
+// the document does not contain would name nothing a reader could look at. The
+// memo survives the emptying, so nothing is read a second time, and a file that
+// is in the document replays its own findings when it is mapped. The one thing
+// this costs is a .pc file whose only reader was a narrowed-away header: its
+// findings are dropped with that file's, because the file they would have been
+// attached to is not in the document either.
+func (r *componentResolver) takeSystemPackageFindings() []domain.Finding {
+	findings := r.systemPackageFindings
+	r.systemPackageFindings = nil
+	return findings
+}
+
 // unusedPackageFindings reports every package that no used file belongs to.
 // Leaving it out of the document is correct -- a dependency that was installed
 // but never linked is not part of the product -- but until now it happened
@@ -541,6 +785,18 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 			found, enrichmentFindings := r.enrich(pkgmanager.ComponentRoot{Path: rootInfo.Physical, Name: component.Name})
 			described = found
 			findings = append(findings, enrichmentFindings...)
+		}
+		// What the .pc file that named this component stated about it. It is
+		// folded before the image manifest because the two rank alike (section
+		// 21.1) and Take keeps the first: this file was found by walking up
+		// from a file of this very component and had to verify against it,
+		// while a manifest matched nothing but a name. Only a version ever
+		// arrives -- a .pc file names no licence, no supplier and no package
+		// ecosystem -- so the findings that say those are missing stay.
+		if stated, known := r.pkgConfigByComponent[component.Name]; known {
+			for _, contribution := range stated.contributions {
+				described.Take(contribution.Field, contribution.Claim)
+			}
 		}
 		// An image manifest of an embedded-Linux distribution build answers
 		// here too, and it has to be asked separately from the reader above:
@@ -917,6 +1173,11 @@ const rootSourceUsedFiles = "used-files"
 // read from.
 const rootSourceMarkerPrefix = "marker:"
 
+// rootSourcePkgConfig is the source of a component the pkg-config metadata
+// named. Such a component has no root at all: see resolveRoot for why that is
+// the answer rather than a gap.
+const rootSourcePkgConfig = "pkg-config"
+
 // resolveRoot settles where a component begins, following the same priority
 // order that named it (section 19.2). Each branch mirrors one strategy, so the
 // root and the name can never come from two different places.
@@ -954,6 +1215,16 @@ func (r *componentResolver) resolveRoot(component *domain.Component, files []dom
 		if id, ok := identityForRoot(file.ID, r.physical[file.ID.Canonical()], root); ok {
 			return componentRootResult{ID: id, Physical: root, Source: rootSourceMarkerPrefix + marker}
 		}
+	}
+
+	// The pkg-config strategy settles no root, and that is deliberate. A .pc
+	// file names where the package installed its libraries, not a directory
+	// this component owns: taking /usr/lib for a component root would start a
+	// licence search across the whole sysroot for every distribution library in
+	// the document. The source is its own so that COMPONENT_ROOT_UNRESOLVED
+	// does not fire for a root nobody was looking for.
+	if strings.HasPrefix(component.DetectedBy, pkgConfigDetectedByPrefix) {
+		return componentRootResult{Source: rootSourcePkgConfig}
 	}
 
 	// Strategy 7: the component is the anchor, so the anchor root is its root.

@@ -40,3 +40,8 @@ run ./internal/adapters/pkgmanager FuzzCPMLock
 # It comes out of no build tree this tool has ever seen, and both of its formats
 # are read by a parser written here.
 run ./internal/adapters/pkgmanager FuzzDistroManifest
+
+# The pkg-config file a distribution installs beside a system library. It comes
+# out of a sysroot this tool did not build, and what it decides is not only a
+# version but which component a file belongs to.
+run ./internal/adapters/pkgmanager FuzzPkgConfig

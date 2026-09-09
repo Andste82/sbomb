@@ -463,7 +463,7 @@ func techniqueForVersionSource(source string) string {
 	case "curated":
 		// Declared by whoever wrote the configuration, not derived.
 		return "attestation"
-	case "conan", "vcpkg", "fetchcontent", "cmake", "bundled-sbom", "idf", "cpm", "yocto", "buildroot":
+	case "conan", "vcpkg", "fetchcontent", "cmake", "bundled-sbom", "idf", "cpm", "yocto", "buildroot", "pkg-config":
 		// cmake is CMAKE_PROJECT_VERSION, read from the File API cache: the
 		// build system's own manifest, in the same sense as a package
 		// manager's. bundled-sbom is a document the upstream shipped inside
@@ -477,7 +477,10 @@ func techniqueForVersionSource(source string) string {
 		// buildroot are the manifests an embedded-Linux distribution build
 		// wrote about the image it produced -- a license.manifest and a
 		// legal-info/manifest.csv -- which are declarations read out of a file
-		// as well, however much the build knew when it wrote them.
+		// as well, however much the build knew when it wrote them. pkg-config
+		// is the .pc file a system library installs beside itself: the
+		// generated configuration a package writes while installing, which is
+		// a declaration read out of a file in exactly the same sense.
 		return "manifest-analysis"
 	case "header":
 		return "source-code-analysis"
