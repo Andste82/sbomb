@@ -3,6 +3,8 @@ package archive
 import (
 	"bytes"
 	"fmt"
+	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -28,7 +30,26 @@ func TestParseThinArchiveResolvesRelativePath(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Parse() error = %v", err)
 	}
-	if len(members) != 1 || members[0].Path != "/build/lib/objects/main.o" || !members[0].Thin {
+	wantPath := filepath.Join("/build/lib", "objects", "main.o")
+	if len(members) != 1 || members[0].Path != wantPath || !members[0].Thin {
 		t.Fatalf("members = %#v", members)
+	}
+}
+
+func TestParseRealMSVCStaticLibrary(t *testing.T) {
+	path := filepath.Join("..", "..", "..", "testdata", "fixtures", "msvc-ninja", "p13-prebuilt", "build", "prebuilt", "libvendor.lib")
+	members, err := ParseFile(path)
+	if err != nil {
+		t.Fatalf("ParseFile(%s) error = %v", path, err)
+	}
+	var sawVendor bool
+	for _, member := range members {
+		name := strings.ReplaceAll(member.Name, "\\", "/")
+		if strings.EqualFold(name, "vendor_blob.obj") || strings.HasSuffix(strings.ToLower(name), "/vendor_blob.obj") {
+			sawVendor = true
+		}
+	}
+	if !sawVendor {
+		t.Fatalf("real MSVC library members = %#v, want vendor_blob.obj", members)
 	}
 }

@@ -73,7 +73,7 @@ build CMakeFiles\gen.dir\generated_version.c.obj: C_COMPILER__gen_unscanned_Debu
 
 build gen.exe: C_EXECUTABLE_LINKER__gen_Debug CMakeFiles\gen.dir\main.c.obj CMakeFiles\gen.dir\generated_version.c.obj
   FLAGS = /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd
-  LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console  -Wl,-Map=C:/__fixture_build__/gen.exe.map -Wl,--dependency-file=C:/__fixture_build__/gen.exe.d
+  LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console  /MAP:C:/__fixture_build__/gen.exe.map
   LINK_LIBRARIES = kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
   OBJECT_DIR = CMakeFiles\gen.dir
   POST_BUILD = cd .

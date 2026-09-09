@@ -113,9 +113,10 @@ func memberName(name string, content, longNames []byte) (string, []byte) {
 	if strings.HasPrefix(name, "/") && len(name) > 1 {
 		offset, err := strconv.Atoi(strings.TrimPrefix(name, "/"))
 		if err == nil && offset >= 0 && offset < len(longNames) {
-			end := bytes.IndexByte(longNames[offset:], '\n')
+			remaining := longNames[offset:]
+			end := bytes.IndexAny(remaining, "\n\x00")
 			if end >= 0 {
-				return strings.TrimSuffix(string(longNames[offset:offset+end]), "/"), content
+				return strings.TrimSuffix(string(remaining[:end]), "/"), content
 			}
 		}
 	}

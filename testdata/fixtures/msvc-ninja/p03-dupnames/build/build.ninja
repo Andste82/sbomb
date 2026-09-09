@@ -134,7 +134,7 @@ build CMakeFiles\dup.dir\main.c.obj: C_COMPILER__dup_unscanned_Debug C$:\__fixtu
 
 build dup.exe: C_EXECUTABLE_LINKER__dup_Debug CMakeFiles\dup.dir\main.c.obj | mod_a.lib mod_b.lib || mod_a.lib mod_b.lib
   FLAGS = /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd
-  LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console  -Wl,-Map=C:/__fixture_build__/dup.exe.map -Wl,--dependency-file=C:/__fixture_build__/dup.exe.d
+  LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console  /MAP:C:/__fixture_build__/dup.exe.map
   LINK_LIBRARIES = mod_a.lib  mod_b.lib  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
   OBJECT_DIR = CMakeFiles\dup.dir
   POST_BUILD = cd .

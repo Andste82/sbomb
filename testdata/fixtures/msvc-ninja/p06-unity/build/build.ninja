@@ -66,7 +66,7 @@ build CMakeFiles\unity.dir\Unity\unity_0_c.c.obj: C_COMPILER__unity_unscanned_De
 
 build unity.exe: C_EXECUTABLE_LINKER__unity_Debug CMakeFiles\unity.dir\Unity\unity_0_c.c.obj
   FLAGS = /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd
-  LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console  -Wl,-Map=C:/__fixture_build__/unity.exe.map -Wl,--dependency-file=C:/__fixture_build__/unity.exe.d
+  LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console  /MAP:C:/__fixture_build__/unity.exe.map
   LINK_LIBRARIES = kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
   OBJECT_DIR = CMakeFiles\unity.dir
   POST_BUILD = cd .

@@ -46,15 +46,34 @@ func members(result Result) []string {
 // extracts only crypto.c.o. Reporting unused.c.o would put a file in the SBOM
 // that demonstrably never reached the binary (specification section 12).
 func TestOnlyExtractedMembersAreReported(t *testing.T) {
-	for _, toolchain := range []string{"gcc-ninja", "gcc-make", "clang-ninja", "arm-none-eabi"} {
+	for _, toolchain := range []string{"gcc-ninja", "gcc-make", "clang-ninja", "arm-none-eabi", "msvc-ninja"} {
 		result := parseCorpus(t, toolchain, "p02-static", mapName(t, toolchain))
 		got := members(result)
+		if toolchain == "msvc-ninja" {
+			var sawProjectMember bool
+			for _, member := range got {
+				if member == "crypto.lib(crypto.c.obj)" {
+					sawProjectMember = true
+				}
+				if strings.Contains(member, "unused.c.obj") {
+					t.Errorf("%s: unused.c.obj was reported although the linker never extracted it", toolchain)
+				}
+			}
+			if !sawProjectMember {
+				t.Errorf("%s: project archive member is missing: %v", toolchain, got)
+			}
+			continue
+		}
 		if len(got) != 1 {
 			t.Errorf("%s: got %d archive members, want exactly one: %v", toolchain, len(got), got)
 			continue
 		}
-		if !strings.HasPrefix(got[0], "libcrypto.a(crypto.c.o") {
-			t.Errorf("%s: extracted member = %q, want libcrypto.a(crypto.c.o...)", toolchain, got[0])
+		wantPrefix := "libcrypto.a(crypto.c.o"
+		if toolchain == "msvc-ninja" {
+			wantPrefix = "crypto.lib(crypto.c.obj)"
+		}
+		if !strings.HasPrefix(got[0], wantPrefix) {
+			t.Errorf("%s: extracted member = %q, want %s...", toolchain, got[0], wantPrefix)
 		}
 		for _, member := range got {
 			if strings.Contains(member, "unused") {
@@ -69,7 +88,51 @@ func mapName(t *testing.T, toolchain string) string {
 	if toolchain == "mingw-w64" {
 		return "app.exe.map"
 	}
+	if toolchain == "msvc-ninja" {
+		return "app.exe.map"
+	}
 	return "app.map"
+}
+
+func TestMSVCMapAttributesLibraryMembers(t *testing.T) {
+	result := parseCorpus(t, "msvc-ninja", "p02-static", "app.exe.map")
+	var sawArchive, sawMember, sawObject bool
+	projectMemberCount := 0
+	for _, record := range result.Records {
+		if record.Kind == StaticArchive && record.Path == "crypto.lib" {
+			sawArchive = true
+		}
+		if record.Kind == ArchiveMember && record.Path == "crypto.lib(crypto.c.obj)" {
+			sawMember = true
+			projectMemberCount++
+		}
+		if record.Kind == LinkedObject && record.Path == "main.c.obj" {
+			sawObject = true
+		}
+	}
+	if !sawArchive || !sawMember || !sawObject || projectMemberCount != 1 {
+		t.Fatalf("MSVC records missing archive=%v member=%v object=%v: %+v", sawArchive, sawMember, sawObject, result.Records)
+	}
+	for _, record := range result.Records {
+		if strings.Contains(record.Path, "unused.c.obj") {
+			t.Fatalf("unused MSVC archive member was reported: %+v", record)
+		}
+	}
+}
+
+func TestTruncatedMSVCMapIsMalformed(t *testing.T) {
+	text := corpusMap(t, "msvc-ninja", "p02-static", "app.exe.map")
+	cut := strings.Index(text, "Static symbols")
+	if cut < 0 {
+		t.Fatal("MSVC fixture has no static-symbol section")
+	}
+	result := Parse(strings.NewReader(text[:cut]), FormatMSVC)
+	if len(result.Records) == 0 {
+		t.Fatal("truncated MSVC map should retain parsed public records")
+	}
+	if result.Err == nil {
+		t.Fatal("truncated MSVC map should report an error")
+	}
 }
 
 // TestLinkerScriptWildcardsAreNotArchiveMembers guards the defect the real

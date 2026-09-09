@@ -12,10 +12,9 @@ from an unusual position: most of the machinery is already there and has never
 been pointed at a real Microsoft build. The first two steps therefore find out
 what is true before anything is written.
 
-**9a is implemented locally.** The Windows fixture corpus and its CI
-regeneration gate are in place; the first CI run is the remaining
-reproducibility check before 9a is marked complete. Steps 9b onward remain
-unimplemented.
+**9a and 9b are implemented locally.** The Windows fixture corpus, native
+MSVC map parser, `.lib` archive proof and CI validation are in place. Steps 9c
+onward remain unimplemented.
 
 ---
 

@@ -139,6 +139,8 @@ func Parse(r io.Reader, format string) Result {
 
 	emit := newRecorder(&result)
 	section := gnuOther
+	msvcState := msvcOther
+	var sawMSVCSections, sawMSVCPublics, sawMSVCStatic bool
 	var allocated int
 
 	for scanner.Scan() {
@@ -156,7 +158,9 @@ func Parse(r io.Reader, format string) Result {
 		switch result.Format {
 		case FormatLLD:
 			parseLLDLine(line, emit)
-		case FormatMSVC, FormatIAR:
+		case FormatMSVC:
+			msvcState, sawMSVCSections, sawMSVCPublics, sawMSVCStatic = parseMSVCLine(line, msvcState, emit, sawMSVCSections, sawMSVCPublics, sawMSVCStatic)
+		case FormatIAR:
 			parseGenericLine(line, emit)
 		default:
 			section = parseGNULine(line, section, emit)
@@ -171,10 +175,73 @@ func Parse(r io.Reader, format string) Result {
 		}
 		return result
 	}
+	if result.Format == FormatMSVC && (!sawMSVCSections || !sawMSVCPublics || !sawMSVCStatic) {
+		result.Err = fmt.Errorf("incomplete MSVC map: %w", ErrMalformed)
+		return result
+	}
 	if len(result.Records) == 0 {
 		result.Err = ErrMalformed
 	}
 	return result
+}
+
+type msvcSection int
+
+const (
+	msvcOther msvcSection = iota
+	msvcSectionTable
+	msvcPublics
+	msvcStatic
+)
+
+// parseMSVCLine tracks the named sections of link.exe's map instead of
+// treating every path-shaped token as evidence. Both symbol sections use the
+// same columns; the section state is what makes the interpretation safe.
+func parseMSVCLine(line string, section msvcSection, emit func(Record), sawSections, sawPublics, sawStatic bool) (msvcSection, bool, bool, bool) {
+	trimmed := strings.TrimSpace(line)
+	if strings.HasPrefix(trimmed, "Start") && strings.Contains(trimmed, "Length") && strings.Contains(trimmed, "Name") && strings.Contains(trimmed, "Class") {
+		return msvcSectionTable, true, sawPublics, sawStatic
+	}
+	if strings.Contains(trimmed, "Publics by Value") {
+		return msvcPublics, sawSections, true, sawStatic
+	}
+	if trimmed == "Static symbols" {
+		return msvcStatic, sawSections, sawPublics, true
+	}
+	if section == msvcPublics || section == msvcStatic {
+		parseMSVCInputLine(line, emit)
+	}
+	return section, sawSections, sawPublics, sawStatic
+}
+
+func parseMSVCInputLine(line string, emit func(Record)) {
+	fields := strings.Fields(line)
+	if len(fields) < 5 {
+		return
+	}
+	source := fields[len(fields)-1]
+	if source == "<absolute>" || source == "<linker-defined>" {
+		return
+	}
+	if colon := strings.LastIndexByte(source, ':'); colon > 0 {
+		library, member := source[:colon], source[colon+1:]
+		if strings.HasSuffix(member, ".obj") {
+			archive := library
+			if !strings.HasSuffix(archive, ".lib") {
+				archive += ".lib"
+			}
+			emit(Record{Kind: StaticArchive, Path: archive, Raw: line})
+			emit(Record{Kind: ArchiveMember, Path: archive + "(" + member + ")", Archive: archive, Member: member, Raw: line})
+			return
+		}
+		if looksLikeFile(member) {
+			emit(Record{Kind: classify(member), Path: member, Raw: line})
+		}
+		return
+	}
+	if looksLikeFile(source) {
+		emit(Record{Kind: classify(source), Path: source, Raw: line})
+	}
 }
 
 // recorder appends a record unless an identical one was already seen. Map
@@ -350,7 +417,7 @@ func parseLLDLine(line string, emit func(Record)) {
 	}
 }
 
-// parseGenericLine is the fallback for the parked MSVC and IAR formats. It is
+// parseGenericLine is the fallback for the parked IAR format. It is
 // deliberately conservative: it records only tokens that are unambiguously
 // file paths with a known extension.
 func parseGenericLine(line string, emit func(Record)) {
