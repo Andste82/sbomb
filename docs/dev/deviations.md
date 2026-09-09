@@ -90,9 +90,27 @@ the anchor root (7) and the `unknown:` fallback with a review flag (8).
 
 Strategies 2 through 5 -- Conan, vcpkg, FetchContent and git submodules -- were
 added in roadmap phase 7, so a dependency a package manager installed is now
-named from that manager's own metadata. **Closed**, except that CPM is not
-covered: it is a CMake-level wrapper around FetchContent, and what reaches the
-build tree is FetchContent's own evidence, which strategy 4 already reads.
+named from that manager's own metadata. **Closed.**
+
+CPM is covered without an adapter of its own. It is a CMake-level wrapper around
+FetchContent, so what reaches the build tree is FetchContent's own evidence and
+the FetchContent adapter finds every CPM package already; a second adapter would
+claim the same roots and turn one of the two away whole. Instead the lock CPM
+writes, `<build>/cpm-package-lock.cmake`, is read as a second origin for the
+package that adapter found, and the version it names is ranked against the
+populate script's tag and the checkout's own answer per field (§21.1). Two
+limits come with that, both deliberate:
+
+- With `CPM_SOURCE_CACHE` set, CPM points FetchContent at a checkout under
+  `${CPM_SOURCE_CACHE}/<name>/<hash>` and `_deps/<name>-src` is never created.
+  The identity root then names a directory that does not exist, no file is
+  attributed to the package and `PACKAGE_NOT_LINKED` says so. This is how the
+  FetchContent adapter has always behaved; computing that path would mean
+  reproducing CPM's own hash, which is a guess (§20.1).
+- The copy of the lock a project commits to its source tree is not read. Its
+  path is whatever `CPMUsePackageLock` was given, and its content is allowed to
+  be older than the build tree being analysed, while the file in the build
+  directory is rewritten on every configure and is therefore install state.
 
 ## D8 — DWARF carries no inclusion depth
 

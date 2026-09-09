@@ -40,10 +40,16 @@ var (
 )
 
 func (a fetchContent) Discover(options Options) ([]Package, []domain.Finding) {
+	// The CPM lock is read once for the whole run rather than once per package
+	// (section 31), and before the _deps directory is looked at, so that a lock
+	// this tool had to refuse is reported even in a tree where no package came
+	// of it.
+	locked, findings := readCPMLock(options.BuildDir)
+
 	depsDir := filepath.Join(options.BuildDir, "_deps")
 	entries, err := os.ReadDir(depsDir)
 	if err != nil {
-		return nil, nil
+		return nil, findings
 	}
 	// FetchContent creates <name>-src, <name>-build and <name>-subbuild. Either
 	// of the first and the last is enough to name the package: a build tree
@@ -66,7 +72,6 @@ func (a fetchContent) Discover(options Options) ([]Package, []domain.Finding) {
 	sort.Strings(names)
 
 	packages := make([]Package, 0, len(names))
-	findings := make([]domain.Finding, 0)
 	for _, name := range names {
 		// The checkout is the identity: git and the licence file are there, and
 		// it is what the anchor names. The build tree beside it belongs to the
@@ -88,6 +93,39 @@ func (a fetchContent) Discover(options Options) ([]Package, []domain.Finding) {
 		tag, repository := a.populateInfo(options.BuildDir, name)
 		if repository != "" {
 			found.VCSURL = NormalizeVCSURL(repository)
+		}
+		// CPM drives FetchContent, so a package the lock names was fetched by
+		// CPM and the document should say so. The anchor keeps naming
+		// FetchContent, because the anchor is about the path identity and
+		// _deps/<name>-src is FetchContent's directory. The two sides join on
+		// the name directly: both are lower case, the directory because
+		// FetchContent lower-cases it and the key because readCPMLock does.
+		entry, fromLock := locked[name]
+		if fromLock {
+			found.Manager = cpmManager
+			if found.VCSURL == "" {
+				// Only where the script named none: the script says where the
+				// clone actually came from, while the lock says what was asked
+				// for, and a mirrored or redirected fetch differs between the
+				// two.
+				found.VCSURL = entry.repository
+			}
+			// The lock is asked before the populate script, and that order is
+			// the decision rather than a formality: both are install state and
+			// therefore of equal rank, and Take keeps the first of two equals.
+			// The lock states a VERSION; the script states the revision that
+			// was checked out, which is a version only when the tag happens to
+			// be one -- a package pinned to a commit would otherwise publish a
+			// forty-character hash as its version. The loser is not dropped, it
+			// goes to Superseded.
+			found.Take(FieldVersion, Claim{
+				Value:  strings.TrimPrefix(entry.version, "v"),
+				Source: cpmVersionSource,
+				Rank:   RankInstallState,
+				// Section 20.3: a package manager states an exact declared
+				// version.
+				Confidence: domain.ConfidenceHigh,
+			})
 		}
 		// CMake generated the populate script out of the declaration and then
 		// ran it, so the tag in it is the revision that was actually checked

@@ -14,6 +14,40 @@ PDB parsing remains out of scope. MSVC header evidence therefore comes from
 `/showIncludes`, Ninja dependencies or MSBuild TLogs, and a build may report
 `DEBUG_INFO_UNAVAILABLE` where a DWARF-based build would provide debug evidence.
 
+### CPM.cmake dependencies carry the version CPM recorded
+
+CPM.cmake writes a lock file into your build directory while it configures —
+`cpm-package-lock.cmake`, with the name, version and repository of every package
+it fetched. sbomb walked past it. CPM drives FetchContent, so the dependencies
+were found either way, but their version came from the git tag in the script
+CMake generated: a package asked for by tag published that tag, and a package
+pinned to a commit published a forty-character hash as its version.
+
+The lock is read now. A CPM dependency whose files your build actually used
+arrives with the version the lock recorded, says `cpm` beside it so the document
+names the file the answer came from, and takes the repository from the lock where
+the populate script named none. `sbomb:component:detectedBy` now says `cpm` for
+these packages instead of `fetchcontent`, which is the manager your project
+actually uses. Where git introspection is enabled the checkout still outranks
+both — it says what is there, the lock says what was asked for — and every
+claim that loses is kept rather than dropped.
+
+Nothing about the rules changed. CPM gets no adapter of its own, so a CPM project
+produces exactly the components it did before and not one
+`COMPONENT_MAPPING_CONFLICT` more; no file joins the used set because the lock
+mentions it, no component boundary moves, and a lock entry with no directory
+under `_deps` produces no component. A dependency CPM fetched that nothing links
+is still absent and still reported as `PACKAGE_NOT_LINKED`, naming `cpm` now.
+
+CMake is not interpreted for this. One file is opened, in the build directory,
+and a deliberately narrow reader takes seven keys out of it and ignores every
+other line; the copy of the lock committed to a source tree is not read, because
+its path is free and its content may be older than the build. A lock that
+breaches a parser bound of §30 is refused whole with `INPUT_LIMIT_EXCEEDED`, and
+one whose structure is broken with `EVIDENCE_UNREADABLE` — in both cases nothing
+at all is taken from it. A missing lock, an empty one, and a package CPM wrote
+into it as a comment are all silent, because none of them is a fault.
+
 ### ESP-IDF components you pulled in are now components in the document
 
 The ESP-IDF component manager writes down exactly what your project depends on —

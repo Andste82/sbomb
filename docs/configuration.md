@@ -282,9 +282,9 @@ registered anchor, because that is where a path handed to a subprocess is
 allowed to point.
 
 Files are mapped to components in a fixed priority order: these curated entries
-first, then package-manager metadata (vcpkg, Conan, FetchContent, the ESP-IDF
-component manager, git submodules), then a configured CMake target, then the
-nearest ancestor directory holding a package manifest (`conanfile.txt`, `vcpkg.json`, `idf_component.yml`,
+first, then package-manager metadata (vcpkg, Conan, FetchContent and CPM.cmake,
+the ESP-IDF component manager, git submodules), then a configured CMake target,
+then the nearest ancestor directory holding a package manifest (`conanfile.txt`, `vcpkg.json`, `idf_component.yml`,
 `Cargo.toml`, `west.yml`) **or a licence file** (`LICENSE`, `LICENCE`,
 `COPYING`), then the anchor root, and finally an explicit `unknown:` component
 flagged for review. **A file is never dropped because its component could not be
@@ -298,6 +298,18 @@ FetchContent puts the checkout in `_deps/<name>-src` and everything CMake
 generated for the package in `_deps/<name>-build`, and both belong to it. A file
 that two packages claim belongs to neither and falls through to the strategies
 below.
+
+CPM.cmake is read through FetchContent rather than beside it, because that is
+what CPM does: it calls FetchContent, so the checkout and the build tree are
+FetchContent's and the same package is found either way. What the lock CPM
+writes into your build directory adds is the version — `1.2.0` as CPM recorded
+it, rather than whatever the git tag happened to be, which for a dependency
+pinned to a commit was a forty-character hash — the repository, and a
+`detectedBy` that says `cpm`. Nothing else moves: no file joins the used set
+because the lock mentions it, no component boundary shifts, and a lock entry
+whose `_deps` directory is not there produces no component at all. The copy of
+the lock you commit to your source tree is not read; the one in the build
+directory is, because that is the one your build actually produced.
 
 A dependency a manager installed but nothing linked is not part of your product
 and is not in the document. That is not silent: it reports `PACKAGE_NOT_LINKED`
