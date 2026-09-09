@@ -28,7 +28,7 @@ jobs:
       - name: Formatted
         run: |
           # Only our own packages; vendor/ is third-party source.
-          unformatted=$(gofmt -l $(go list -f '{{.Dir}}' ./...))
+          unformatted=$(git ls-files '*.go' ':!vendor/**' | xargs -r gofmt -l)
           if [ -n "$unformatted" ]; then
             echo "these files are not gofmt-clean:" >&2
             echo "$unformatted" >&2
