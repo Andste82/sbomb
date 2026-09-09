@@ -220,6 +220,7 @@ binary, produced this way.
 | `--map <file>` | Linker map, when it is not beside the artifact |
 | `--link-depfile <file>` | Link dependency file, when it is not beside the artifact |
 | `--image-manifest <file>` | An extra packaging manifest; repeatable |
+| `--distro-manifest <file>` | A Yocto or Buildroot image manifest, for versions and licences; repeatable |
 
 **What comes out**
 

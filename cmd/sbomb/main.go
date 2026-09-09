@@ -383,6 +383,10 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 	mapPath := ""
 	linkDepfile := ""
 	imageManifests := []string{}
+	// A separate flag from --image-manifest, and not a second meaning for it:
+	// that one names the native manifest of appendix E, and one word for two
+	// formats would make both unreadable.
+	distroManifests := []string{}
 	// The evidence dump has always been written to <build-dir>/evidence.json,
 	// which is where "explain" looks for it. The path is selectable now, and
 	// "off" suppresses it, so a run can leave the build directory untouched.
@@ -498,6 +502,14 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 			i++
 		case strings.HasPrefix(args[i], "--image-manifest="):
 			imageManifests = append(imageManifests, strings.TrimPrefix(args[i], "--image-manifest="))
+		case args[i] == "--distro-manifest":
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --distro-manifest\n"
+			}
+			distroManifests = append(distroManifests, args[i+1])
+			i++
+		case strings.HasPrefix(args[i], "--distro-manifest="):
+			distroManifests = append(distroManifests, strings.TrimPrefix(args[i], "--distro-manifest="))
 		case args[i] == "--evidence-dump":
 			if i+1 >= len(args) {
 				return 1, "", "missing value for --evidence-dump\n"
@@ -672,6 +684,7 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 		}
 	}
 	loadedCfg.Manifests = append(loadedCfg.Manifests, imageManifests...)
+	loadedCfg.DistroManifests = append(loadedCfg.DistroManifests, distroManifests...)
 
 	// The scope options of section 33.1 are discovery settings, so the policy
 	// has to be resolved before generation, not after it.

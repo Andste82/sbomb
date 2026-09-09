@@ -26,7 +26,7 @@ catalogue rather than a snapshot of one version.
 | `AMBIGUOUS_FINAL_DELIVERABLE` | error | always (exit 1) | Discovery found several candidates | emitted |
 | `ARCHIVE_MEMBERS_UNRESOLVED` | warning | — | Archive used, member-level detail unavailable | emitted |
 | `CMAKE_FILE_API_UNAVAILABLE` | warning | — | No reply directory and regeneration not permitted | emitted |
-| `COMPONENT_MAPPING_CONFLICT` | info | — | Two sources claim the same file or root; the mapping was decided by rank or given to neither, and the disagreement is reported | emitted |
+| `COMPONENT_MAPPING_CONFLICT` | info | — | Two sources claim the same file, root or name; the mapping or the metadata was decided by rank or given to neither, and the disagreement is reported | emitted |
 | `COMPONENT_ROOT_UNRESOLVED` | info | — | Component root fell back to the common directory of the used files | emitted |
 | `CONFIGURED_EVIDENCE_MISSING` | error | always (exit 2) | A configured linker map or link dependency file does not exist | emitted |
 | `CONFIG_DEPRECATED_OPTION` | warning | — | Deprecated configuration key used | reserved |

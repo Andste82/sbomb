@@ -340,6 +340,51 @@ next to the files themselves:
 {"manifests": ["deps/conanfile.txt"]}
 ```
 
+## `distroManifests`
+
+The manifest an embedded-Linux distribution build wrote about the image it
+produced: a Yocto `license.manifest` out of the deploy directory, or a
+Buildroot `legal-info/manifest.csv`. Relative paths are resolved against the
+project root, so the deploy directory beside the build tree is named once:
+
+```json
+{"distroManifests": ["../deploy/licenses/core-image-minimal/license.manifest"]}
+```
+
+For an image that is the most complete answer there is — name, version and
+licence for every package, written by the build itself — and sbomb uses it for
+exactly one thing: describing components your build already reached. **It never
+adds one.** A manifest with 800 packages against a build that links three
+libraries produces the same three components, the same files and the same
+relations as a run without it; the three that appear in the manifest gain a
+version and a licence, and the other 797 entries add no component, no file and
+no relation. Being in the image is no evidence that this build linked anything.
+The only thing a manifest reports by itself is a contradiction it states: one
+package name given two different versions describes nothing and is reported once
+as `COMPONENT_MAPPING_CONFLICT`. A Yocto recipe whose packages carry different
+licences — `LICENSE:${PN}`, ordinary in a real image — contradicts nothing, so
+the recipe name describes nothing there and no finding is written.
+
+Matching is by name: the component name (`sbomb:component:root` shows where it
+came from) against the manifest's package name and, for Yocto, its recipe name.
+Nothing is matched by path or by resemblance, so a component whose name differs
+from the distribution's is not described until you say so with
+`components[].name`. What the manifest states loses to what you configured, to
+an SBOM the dependency ships and to the package manager that installed it,
+because it describes the image and they describe the package.
+
+Point it at the target manifest. Buildroot's `legal-info/host-manifest.csv`
+describes the tools that ran on the build machine, and its versions are not the
+versions in your image. A path that does not exist is reported as
+`MISSING_PACKAGE_EVIDENCE` and the run goes on; a file that is neither format,
+or whose structure breaks part of the way through, is refused whole with
+`EVIDENCE_UNREADABLE`, because half a manifest would describe some components
+out of the image and leave the rest with nothing to say which is which.
+
+The flag is `--distro-manifest`, repeatable. It is a different setting from
+`manifests`: that one is sbomb's own JSON manifest format, and a Yocto file
+listed there is reported as unreadable evidence.
+
 ## `policy`
 
 Policy has two separable halves. **Scope** decides what belongs in the

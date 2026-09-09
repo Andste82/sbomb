@@ -26,6 +26,34 @@ func TestCommandLineOverridesTheConfiguration(t *testing.T) {
 	}
 }
 
+// The image manifest of an embedded-Linux distribution build is named with a
+// flag of its own, in both spellings, because --image-manifest already names
+// the native manifest of appendix E. A path that is not there is a warning and
+// not the end of the run: the manifest improves a document that is correct
+// without it.
+func TestTheDistroManifestFlagIsAcceptedInBothSpellings(t *testing.T) {
+	buildDir := testutil.CorpusBuildDir(t, "gcc-ninja", "p02-static")
+	config := filepath.Join("..", "..", "testdata", "config", "portable.json")
+	manifest := filepath.Join(t.TempDir(), "manifest.csv")
+	if err := os.WriteFile(manifest, []byte("\"PACKAGE\",\"VERSION\",\"LICENSE\"\n\"zlib\",\"1.3.1\",\"Zlib\"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	code, _, stderr := execute([]string{"generate",
+		"--build-dir", buildDir, "--config", config,
+		"--output", filepath.Join(t.TempDir(), "out.cdx.json"),
+		"--policy", "lenient", "--reproducible", "--evidence-dump=off",
+		"--distro-manifest", manifest,
+		"--distro-manifest=" + filepath.Join(buildDir, "does-not-exist.csv")})
+	if code != 0 {
+		t.Fatalf("exit code = %d, stderr = %s", code, stderr)
+	}
+
+	if code, _, stderr := execute([]string{"generate", "--build-dir", buildDir, "--distro-manifest"}); code != 1 || stderr == "" {
+		t.Fatalf("exit code = %d, stderr = %q, want a usage error for a flag without a value", code, stderr)
+	}
+}
+
 func TestModeRejectsAnUnknownValue(t *testing.T) {
 	code, _, stderr := execute([]string{"generate", "--build-dir", t.TempDir(), "--mode", "nonsense"})
 	if code != 1 || stderr == "" {

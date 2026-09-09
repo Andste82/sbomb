@@ -1147,3 +1147,113 @@ real project should be run against it before this is called finished.
 `partitions.csv` and the IDF's own `components/` tree are the SDK adapter of
 strategy 4, which is milestone 20 and still parked. The IDF's own components are
 not managed packages and this adapter never looks at them.
+
+---
+
+## D36 — An image manifest is a third kind of reader, and it may describe but never enumerate
+
+§21 knew two kinds of reader after D33: an adapter, which searches where a
+manager keeps its packages and enumerates them, and an enricher, which is handed
+a directory that already stands as a component root. A Yocto `license.manifest`
+and a Buildroot `legal-info/manifest.csv` fit neither, and forcing one of them
+would have cost the rule this package exists for.
+
+**Not an adapter.** `Discover` drops a package whose identity root is empty, so
+a metadata-only entry cannot enter that way at all. Giving each entry a root
+would be worse than useless: the entries would claim files by path prefix, and
+every one of them that matched nothing would be reported as
+`PACKAGE_NOT_LINKED` — 797 info findings for the 800-package manifest of an
+image in which this build links three libraries. An image manifest describes an
+image; the packages it names that this build never touched are the normal case
+and not a fault.
+
+**Not an enricher either.** The return type is exactly right — `Enrich` hands
+back contributions and findings, with no path and no root anywhere in the
+signature — but the contract is not. An enricher is defined as reading the files
+lying directly in a settled component root, and `applyEnrichment` refuses a root
+with an empty path. This reader opens a file the user named, usually outside
+every build tree, and matches it against a component by **name**.
+
+So `internal/adapters/pkgmanager/distromanifest.go` is a third kind: a second
+origin for components that already exist, keyed by name. It reuses
+`Contribution`, `Claim`, `Take` and the ranking of §21.1 and adds no vocabulary
+beyond the type itself. Because `Contribution` is a field plus a claim and
+carries no path, no root and no anchor, the guarantee that an image manifest
+cannot add a file, create a component or move a boundary is readable from the
+signature rather than promised in a comment.
+
+**Rank 3, and that is a decision.** §21.1 does not name this origin. The
+manifest is what the image build recorded after building and installing, which
+is the same category as a lock file or an installed-file list, so it ranks as
+installed state: it loses to an SBOM the upstream shipped (rank 4) and to the
+checkout (rank 5), and at equal rank it loses to the manager that installed the
+package, because the reader is asked after the adapter. The consequence worth
+stating out loud is at the other end: rank 3 **outranks** a declared manifest at
+rank 2, so a project that configures both an image manifest and, say, an
+`idf_component.yml` will publish the image build's answer. That is defensible —
+the image manifest says what was built, a declaration says what was asked for —
+but it is a change in what such a project publishes, so it is in the changelog
+rather than left to be discovered.
+
+**Matching is by exact name, and by nothing else.** The package name, and for
+Yocto the recipe name as well, because a component in a build tree may be named
+after either and the two differ whenever a recipe produces several packages.
+Nothing is matched by path, by prefix, by resemblance or by stripping a `-dev`
+suffix: a wrong match publishes a wrong version with high confidence, which is
+the failure this tool exists to avoid. The honest cost is that files pulled out
+of a Yocto recipe-sysroot are named by §19.2 strategy 7 or 8 — `unknown:sysroot:…`
+— and no distribution package name will ever equal that. Such a component is not
+described, and the way to connect one is `components[].name`, said so in the user
+documentation. Guessing a package name out of a sysroot path is not an option.
+
+**An unmatched entry is silence.** Not `PACKAGE_NOT_LINKED`, which is for a
+manager that installed a dependency *for this build*, and not a finding of any
+other identifier: the counts go to the log (§39.3). The alternative — a finding
+per entry — would make the report unreadable for exactly the projects this
+feature is for.
+
+**A disagreement inside the manifests reuses `COMPONENT_MAPPING_CONFLICT`
+rather than adding an identifier.** Two entries stating two versions for one
+name are two statements and therefore none, as §19.2 already decides for a file
+two packages claim; the field is dropped and the disagreement reported. Appendix
+A's wording is widened from "the same file or root" to "the same file, root or
+name" for it. A new identifier would have said nothing the existing one does not.
+
+**The find location is a configuration key of its own, `distroManifests`, and
+not `cfg.Manifests`.** That list is the native manifest of appendix E and
+nothing else: it is parsed by `internal/adapters/manifest.ParseFile`, so a Yocto
+file placed there is read as JSON and reported as `MISSING_PACKAGE_EVIDENCE`, by
+two separate call sites. The shape is copied — a `[]string` resolved against
+`cfg.Project.Root` when relative, plus a repeatable flag appended after the
+configuration is loaded — and the mechanism is separate. `--distro-manifest` is
+likewise a flag of its own, because `--image-manifest` is taken and one word for
+two formats would make both unreadable.
+
+**Buildroot's `host-manifest.csv` is not refused by name.** The bundled-SBOM
+reader skips `vcpkg.spdx.json` by name because it *searches* a root and would
+otherwise pick that file up on its own. Nothing is searched for here: every file
+opened was named by the user, and silently refusing a file somebody explicitly
+configured would be worse than reading it. The warning that the host manifest
+describes the build machine rather than the image is in the user documentation
+instead.
+
+**What could not be verified here.** No fixture in this repository holds a Yocto
+or a Buildroot build, no section of the specification defined either format
+before this change, and `encoding/csv` was used nowhere in the repository. Two
+shapes are therefore assumed rather than proven: that a `license.manifest` is
+blank-line-separated blocks of `PACKAGE NAME` / `PACKAGE VERSION` /
+`RECIPE NAME` / `LICENSE`, and that `manifest.csv` is a CSV whose header names
+`PACKAGE`, `VERSION` and `LICENSE` among its columns. The format is recognized
+from the first non-empty line rather than from the file name, so a manifest
+copied out of a deploy directory under another name still works; where an
+assumption does not hold, the file is refused whole and reported as
+`EVIDENCE_UNREADABLE` naming it, rather than half-read into claims nobody can
+trace. A captured real image build should be run against this before it is
+called finished.
+
+**One known gap.** `pkgmanager.Options` carries no `limits.Config`, so
+`--max-input-size` does not reach these bounds any more than it reaches the
+vcpkg file list or the CPM lock. The new ceilings are file-local constants
+beside the existing ones. A user who lowers the run limit does not lower this
+one; that is the status quo for every package-manager parser and is left as a
+known gap rather than fixed halfway here.

@@ -1010,6 +1010,10 @@ The first such reader is the **bundled SBOM**: a CycloneDX `*.cdx.json` or SPDX 
 
 A document a package manager wrote itself is that manager's **install state** (rank 3) and not an SBOM the upstream shipped — `vcpkg.spdx.json` is vcpkg's own record of what it installed. The generic reader MUST skip it, or it would outrank at rank 4 the very adapter that installed the package (D34).
 
+Besides the enricher there is a reader of a **third** kind, and what distinguishes it is what it is handed: not a manager's install layout and not a settled root, but a file the user named, matched against a component by **name**. The first of these is the **image manifest** an embedded-Linux distribution build writes about the image it produced — Yocto's `license.manifest` (blank-line-separated blocks of `PACKAGE NAME` / `PACKAGE VERSION` / `RECIPE NAME` / `LICENSE`) and Buildroot's `legal-info/manifest.csv` (a CSV whose header names at least `PACKAGE` and `VERSION`). Its location is configured (`distroManifests`, `--distro-manifest`), because a deploy directory lies outside the build tree; nothing is searched for, and every file read was named by the user.
+
+Such a manifest describes an **image**, not this build. It therefore contributes `version` and `license` at rank 3 of §21.1 — it is what the image build recorded after building and installing — and it MUST NOT do anything else: no entry of it may add a file to the used set, create a component, register an anchor or become a package. An entry that matches no component is **silence**: `PACKAGE_NOT_LINKED` is for a manager that installed a dependency for this build, while an image manifest describes hundreds of packages this build has nothing to do with, and a finding per entry would drown the report. Counts belong in the log (§39.3). Matching is by exact name only — the package name and, for Yocto, the recipe name as a secondary alias — and never by path, prefix or resemblance. A manifest is read whole or not at all: one that breaches a bound of §30 is reported as `INPUT_LIMIT_EXCEEDED`, one that is neither format or whose structure breaks part of the way through as `EVIDENCE_UNREADABLE`, and a configured path that is not there as `MISSING_PACKAGE_EVIDENCE`. Where two entries state different values for one **package name**, the field is dropped rather than settled and the disagreement is reported as `COMPONENT_MAPPING_CONFLICT` (info): the manifest contradicts itself about a name it put there. Where they differ only under a recipe alias, the field is dropped **in silence** — several packages of one recipe with different `LICENSE:${PN}` values are ordinary in a real image and contradict nothing, the disagreement would be manufactured by the reader’s own alias, and reporting it would let the size of the image rather than the size of the build decide how long the report is. A field a package name states MUST win over one only an alias states.
+
 Two adapters MAY report the same root — a submodule that FetchContent also populated. The first adapter in the tool's fixed order keeps it, and the second claim is rejected rather than merged: the two disagree about who owns the package, not about what its version is, and folding the loser's metadata into the winner would publish claims about an installation the winning manager never made. The rejection MUST be reported as `COMPONENT_MAPPING_CONFLICT` (info), naming both managers, both package names and the root they both claimed.
 
 Adapters MUST NOT add files to the used set. A package that no used file belongs to is therefore correctly absent from the document — it was installed but never linked, so it is not part of the product — but its absence MUST be reported as `PACKAGE_NOT_LINKED` (info) rather than passing in silence.
@@ -1489,6 +1493,7 @@ sbomb generate \
 | `--map` | auto | Linker map path (repeatable) |
 | `--link-depfile` | auto | Linker dependency file (repeatable) |
 | `--image-manifest` | — | Package/image manifest (repeatable) |
+| `--distro-manifest` | — | Distribution image manifest, Yocto or Buildroot (repeatable) |
 | `--license-scan` | — | External scanner results |
 | `--waivers` | from config | Waiver file |
 | `--review-report` | — | Human-readable report path |
@@ -2083,7 +2088,7 @@ Severity shown is the default and may be changed via `policy.severityOverrides`.
 | `STALE_CMAKE_CONFIGURATION` | warning | `failOnStaleBuildArtifacts` | CMake inputs newer than the File API reply |
 | `UNKNOWN_COMPONENT` | warning | `failOnUnknownComponent` | File could not be mapped to a component |
 | `COMPONENT_ROOT_UNRESOLVED` | info | — | Component root fell back to the common directory of the used files |
-| `COMPONENT_MAPPING_CONFLICT` | info | — | Two sources claim the same file or root; the mapping was decided by rank or given to neither, and the disagreement is reported |
+| `COMPONENT_MAPPING_CONFLICT` | info | — | Two sources claim the same file, root or name; the mapping or the metadata was decided by rank or given to neither, and the disagreement is reported |
 | `UNKNOWN_VERSION` | warning | `failOnUnknownVersion` | Component version could not be resolved |
 | `UNKNOWN_PURL` | info | — | No package type assertable |
 | `UNKNOWN_LICENSE` | warning | `failOnUnknownLicense` | Component license is NOASSERTION |
@@ -2381,6 +2386,7 @@ The normative JSON Schema is embedded in the binary and printed by `sbomb schema
     { "match": "dep/vendor-*/**", "name": "vendor-blobs", "type": "library", "license": "NOASSERTION" }
   ],
   "manifests": ["packaging/firmware-manifest.json"],
+  "distroManifests": ["../deploy/licenses/core-image/license.manifest"],
   "policy": {
     "profile": "cra",
     "profileOverlay": null,
