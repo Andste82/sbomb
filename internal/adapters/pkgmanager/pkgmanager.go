@@ -4,10 +4,16 @@
 // each package, and -- where a manager keeps such a record -- the files it
 // installed for it.
 //
-// One rule governs the whole package: an adapter here may never add a file to
-// the used set. Discovery stays evidence-based -- a dependency that was
-// installed but never linked is not part of the product -- so this only
-// improves what is known about files the evidence chain already reached.
+// It holds two kinds of reader. An adapter enumerates packages and looks for
+// them where a manager is known to keep them; an enricher (see enricher.go) is
+// handed a directory that already stands as a component root and only describes
+// what lies in it.
+//
+// One rule governs both: a reader here may never add a file to the used set,
+// and an enricher may not move a component boundary either. Discovery stays
+// evidence-based -- a dependency that was installed but never linked is not
+// part of the product -- so this only improves what is known about files the
+// evidence chain already reached.
 package pkgmanager
 
 import (
@@ -124,7 +130,8 @@ type claim struct {
 // Discover runs every adapter and returns the union, sorted by name so the
 // result is deterministic. A package claimed by two managers keeps the first,
 // which is the order above, and the one turned away is reported rather than
-// dropped in silence.
+// dropped in silence. Every package that survives that is then offered to the
+// enrichers, which describe its root without changing what it covers.
 //
 // That is a rejection and not a merge, deliberately: the ranking of section
 // 21.1 orders the origins one manager knows about, and two managers claiming
@@ -169,6 +176,13 @@ func Discover(options Options) ([]Package, []domain.Finding) {
 			for _, root := range entry.Roots {
 				claimed[root] = claim{manager: adapter.Manager(), name: entry.Name}
 			}
+			// Whatever else describes the package lies beside it. Only the
+			// identity root is offered: the further roots are build trees --
+			// the one FetchContent has CMake fill beside the checkout -- and a
+			// manifest read there would describe generated output rather than
+			// the package, which is the reason resolveRoot reads a licence and
+			// a version from the identity root alone.
+			findings = append(findings, applyEnrichment(&entry, ComponentRoot{Path: entry.Root(), Name: entry.Name})...)
 			packages = append(packages, entry)
 		}
 	}

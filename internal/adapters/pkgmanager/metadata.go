@@ -73,7 +73,11 @@ type Claim struct {
 	Confidence domain.Confidence
 }
 
-// Contribution is a claim that lost, kept with the field it was about.
+// Contribution is a claim together with the field it is about. It is what an
+// enricher hands back, because a reader that describes a root has to say which
+// value it is describing, and it is also what Package.Superseded keeps: there
+// the claims are the ones that lost, and a loser nobody can name a field for
+// cannot be reported.
 type Contribution struct {
 	Field Field
 	Claim Claim
@@ -94,7 +98,8 @@ type Contribution struct {
 // Take mutates the package, so it may only be called while the package is
 // being discovered. Once Discover has returned, packages are copied by value
 // through the resolver, and a Take on a copy would append to a slice the
-// original never sees.
+// original never sees. Enrichment counts as part of discovery for this reason
+// and runs inside Discover, on the package the adapter just produced.
 func (p *Package) Take(field Field, claim Claim) {
 	if claim.Value == "" || claim.Rank == RankNone {
 		return
