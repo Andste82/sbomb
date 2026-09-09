@@ -2,6 +2,8 @@ package inventory
 
 import (
 	"fmt"
+	"path"
+	"strings"
 
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/evidence"
@@ -78,6 +80,26 @@ func (r *ObjectSourceResolver) ResolveObjectSource(objID domain.NodeID) (domain.
 				strategy string
 				source   string
 			}{strat.name, source})
+			continue
+		}
+		// MSVC maps commonly report only the object basename (main.c.obj),
+		// while compile databases and Ninja use CMakeFiles/.../main.c.obj.
+		// Accept that shorthand only when it identifies one object uniquely;
+		// duplicate basenames must remain unresolved rather than guessed.
+		var basenameSource string
+		matches := 0
+		for objectPath, sourcePath := range strat.data {
+			if identityBase(objectPath) != identityBase(objPath) {
+				continue
+			}
+			basenameSource = sourcePath
+			matches++
+		}
+		if matches == 1 {
+			results = append(results, struct {
+				strategy string
+				source   string
+			}{strat.name, basenameSource})
 		}
 	}
 
@@ -99,6 +121,13 @@ func (r *ObjectSourceResolver) ResolveObjectSource(objID domain.NodeID) (domain.
 
 	// Highest priority (first) strategy wins
 	return domain.NodeID(results[0].source), results[0].strategy, conflict, nil
+}
+
+func identityBase(value string) string {
+	if _, relative, ok := strings.Cut(value, ":"); ok {
+		value = relative
+	}
+	return path.Base(strings.ReplaceAll(value, "\\", "/"))
 }
 
 // AddCMakeMapping adds a source mapping from CMake File API data.

@@ -44,6 +44,13 @@ func TestWindowsFlavorOnLinux(t *testing.T) {
 	}
 }
 
+func TestWindowsFlavorUnescapesNinjaDriveColon(t *testing.T) {
+	flavor := WindowsFlavor{}
+	if got := ResolveWithFlavor(`C$:\fixture\project\src\main.c`, `C:/fixture/project`, `C:/fixture/build`, flavor); got != "project:src/main.c" {
+		t.Fatalf("ResolveWithFlavor(C$:) = %q, want project:src/main.c", got)
+	}
+}
+
 func TestSlugFollowsTheSpecifiedNormalization(t *testing.T) {
 	cases := map[string]string{
 		"mbedTLS":          "mbedtls",

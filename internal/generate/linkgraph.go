@@ -430,7 +430,8 @@ func (b *builder) memberObject(archiveCanonical, member string) (string, bool) {
 	}
 	matches := make([]string, 0, 1)
 	for _, candidate := range candidates {
-		if filepath.Base(candidate) == member {
+		candidateBase := filepath.Base(strings.ReplaceAll(candidate, "\\", "/"))
+		if candidateBase == member {
 			matches = append(matches, candidate)
 		}
 	}

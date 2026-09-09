@@ -98,6 +98,9 @@ func normalizeWindows(p string) string {
 	}
 	p = strings.ReplaceAll(p, "/", "\\")
 	root := "/"
+	if len(p) >= 3 && p[1] == '$' && p[2] == ':' {
+		p = p[:1] + p[2:]
+	}
 	if strings.HasPrefix(p, "\\\\") {
 		root = "//"
 	} else if len(p) >= 2 && p[1] == ':' {
