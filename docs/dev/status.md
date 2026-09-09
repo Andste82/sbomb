@@ -139,18 +139,12 @@ What is left is not phase work:
 
 * **ESP-IDF (milestone 20) is parked**, at the point where it was parked in
   phase 7, as are the vendor linkers (21).
-* **MSVC (milestone 18) is unparked.** Both conditions its parking named are
-  met: `windows-latest` is available and already runs the determinism matrix,
-  and PDB parsing turns out not to be on the critical path, because on a
-  single-config generator headers come from `/showIncludes` through the Ninja
-  deps log and link evidence comes from the map. Surveying the code found that
-  most of what the milestone listed as missing already exists — PE inspection,
-  the Windows path flavor, MSVC response-file quoting, `.obj` handling,
-  multi-config selection — and has simply never been run against a Microsoft
-  build. The milestone is split into 18A (MSVC on Ninja or NMake) and 18B (the
-  Visual Studio generator and MSBuild); the plan is
-  [milestones/phase-09-plan.md](milestones/phase-09-plan.md). Nothing is
-  implemented yet, and §1.3 still says MSVC is not supported.
+* **MSVC (milestone 18) is complete.** MSVC/Ninja and Visual Studio 17/MSBuild
+  are covered by committed Windows fixtures, acceptance tests and golden SBOMs.
+  The implementation uses linker maps, Ninja dependencies and MSBuild TLogs;
+  PDB parsing remains out of scope because it is not required for the evidence
+  chain. See [milestones/phase-09-plan.md](milestones/phase-09-plan.md) and
+  [windows.md](../windows.md).
 
 That the repository is private is a property of where it lives rather than an
 open item; what it costs the composite action is in

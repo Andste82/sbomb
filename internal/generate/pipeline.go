@@ -357,6 +357,8 @@ func buildEvidenceGraph(
 		switch compile.strategy[object] {
 		case "ninja-buildgraph":
 			resolver.AddNinjaMapping(objectCanonical, sourceCanonical)
+		case "msbuild-tlog":
+			resolver.AddMSBuildMapping(objectCanonical, sourceCanonical)
 		case "compile-commands-json":
 			resolver.AddCompileCommandsMapping(objectCanonical, sourceCanonical)
 		case "make-buildgraph":

@@ -12,11 +12,12 @@ from an unusual position: most of the machinery is already there and has never
 been pointed at a real Microsoft build. The first two steps therefore find out
 what is true before anything is written.
 
-**9a, 9b, 9c, 9d and 9e are implemented locally.** The Windows fixture corpus,
+**9a, 9b, 9c, 9d, 9e and 9f are implemented.** The Windows fixture corpus,
 native MSVC map parser, `.lib` archive proof, MSVC linker flags, verbose
 build-log evidence, the Linux Windows-flavor Used-File comparison, MSVC p02
 golden, MSBuild TLog adapter, Visual Studio 17 fixture and golden are in place.
-Step 9f remains.
+The support claims are documented in the specification, README, Windows guide,
+status page and changelog.
 
 ---
 
@@ -130,10 +131,9 @@ document.
 ## 9f — Saying so
 
 The support claims change only here, after the tests say they are true: §1.3 of
-the specification, `docs/windows.md`, the README table, `docs/CHANGELOG.md` and
-`docs/dev/status.md`. Until then the tool documents MSVC as planned, not
-supported, because a document that overstates what was verified is the failure
-mode this project exists to avoid.
+the specification, `docs/windows.md`, the README, `docs/CHANGELOG.md` and
+`docs/dev/status.md`. The claims are limited to the evidence paths covered by
+the fixtures; PDB parsing remains out of scope.
 
 ---
 
@@ -145,4 +145,4 @@ mode this project exists to avoid.
 * [x] An MSVC build and a GCC build of one project agree on the project used-file set.
 * [x] A Visual Studio build and a Ninja build of one project agree, or 18B is
   parked again with what was learned written down.
-* [ ] No support claim is made that a test does not back.
+* [x] No support claim is made that a test does not back.

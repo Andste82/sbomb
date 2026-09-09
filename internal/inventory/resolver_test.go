@@ -112,6 +112,27 @@ func TestStrategyPriority(t *testing.T) {
 	}
 }
 
+func TestMSBuildMappingUsesItsOwnStrategy(t *testing.T) {
+	g := evidence.New()
+	r := New(g)
+
+	r.AddMSBuildMapping("build:main.obj", "project:main.c")
+
+	source, strategy, _, err := r.ResolveObjectSource("build:main.obj")
+	if err != nil {
+		t.Fatalf("ResolveObjectSource failed: %v", err)
+	}
+	if source != "project:main.c" {
+		t.Fatalf("source = %s, want project:main.c", source)
+	}
+	if strategy != "msbuild-tlog" {
+		t.Fatalf("strategy = %s, want msbuild-tlog", strategy)
+	}
+	if confidence := r.confidenceForStrategy(strategy); confidence != domain.ConfidenceHigh {
+		t.Fatalf("confidence = %s, want high", confidence)
+	}
+}
+
 func TestDuplicateBasenames(t *testing.T) {
 	// Test that duplicate basenames are properly distinguished by path
 	g := evidence.New()

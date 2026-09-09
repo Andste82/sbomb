@@ -55,10 +55,11 @@ want both.
 
 ## Requirements
 
-A CMake project built with **Ninja**, **Ninja Multi-Config** or **Unix
-Makefiles**, configured with `CMAKE_EXPORT_COMPILE_COMMANDS=ON`. GCC and Clang
-are supported, including cross-compilation to bare-metal ARM and to Windows
-through mingw-w64.
+A CMake project built with **Ninja**, **Ninja Multi-Config**, **Unix
+Makefiles** or **Visual Studio 17 2022**. GCC, Clang, mingw-w64 and MSVC are
+supported, including cross-compilation to bare-metal ARM. Visual Studio/MSVC
+builds use MSBuild `.tlog` evidence when `compile_commands.json` and
+`build.ninja` are not available.
 
 sbomb itself is a single static executable with no runtime dependencies, and it
 never accesses the network.

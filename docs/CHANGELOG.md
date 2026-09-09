@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### MSVC and Visual Studio builds are supported
+
+MSVC builds using Ninja or Ninja Multi-Config are supported through compiler,
+Ninja dependency and linker-map evidence. Visual Studio 17 2022 builds are
+supported through MSBuild `.tlog` evidence, including object/source mappings,
+headers and link inputs. Use `--config-name` for a multi-config build and
+`--path-flavor windows` when analyzing Windows evidence from Linux.
+
+PDB parsing remains out of scope. MSVC header evidence therefore comes from
+`/showIncludes`, Ninja dependencies or MSBuild TLogs, and a build may report
+`DEBUG_INFO_UNAVAILABLE` where a DWARF-based build would provide debug evidence.
+
 ### The introspection allowlist now describes what sbomb can actually do
 
 The allowlist held fifteen command shapes. Three of them were reachable: the

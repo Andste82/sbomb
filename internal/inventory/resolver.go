@@ -23,6 +23,7 @@ import (
 type ObjectSourceResolver struct {
 	cmakeData   map[string]string // object -> source from CMake File API
 	ninjaData   map[string]string // object -> source from Ninja
+	msbuildData map[string]string // object -> source from MSBuild .tlog files
 	depfileData map[string]string // object -> source from depfiles
 	dwarfData   map[string]string // object -> source from DWARF
 	compileData map[string]string // object -> source from compile_commands.json
@@ -43,6 +44,7 @@ func New(g *evidence.Graph) *ObjectSourceResolver {
 	return &ObjectSourceResolver{
 		cmakeData:   make(map[string]string),
 		ninjaData:   make(map[string]string),
+		msbuildData: make(map[string]string),
 		depfileData: make(map[string]string),
 		dwarfData:   make(map[string]string),
 		compileData: make(map[string]string),
@@ -64,6 +66,7 @@ func (r *ObjectSourceResolver) ResolveObjectSource(objID domain.NodeID) (domain.
 	}{
 		{"cmake-file-api", r.cmakeData},
 		{"ninja-buildgraph", r.ninjaData},
+		{"msbuild-tlog", r.msbuildData},
 		{"compile-commands-json", r.compileData},
 		{"depfile-adjacency", r.depfileData},
 		{"dwarf", r.dwarfData},
@@ -138,6 +141,11 @@ func (r *ObjectSourceResolver) AddCMakeMapping(objectPath, sourcePath string) {
 // AddNinjaMapping adds a source mapping from Ninja build graph.
 func (r *ObjectSourceResolver) AddNinjaMapping(objectPath, sourcePath string) {
 	r.ninjaData[objectPath] = sourcePath
+}
+
+// AddMSBuildMapping adds a source mapping from MSBuild .tlog evidence.
+func (r *ObjectSourceResolver) AddMSBuildMapping(objectPath, sourcePath string) {
+	r.msbuildData[objectPath] = sourcePath
 }
 
 // AddDepfileMapping adds a source mapping from depfile adjacency.
@@ -215,6 +223,8 @@ func (r *ObjectSourceResolver) confidenceForStrategy(strategy string) domain.Con
 		return domain.ConfidenceHigh // structured-authoritative
 	case "ninja-buildgraph":
 		return domain.ConfidenceHigh // structured-secondary -> medium, but Ninja is quite reliable
+	case "msbuild-tlog":
+		return domain.ConfidenceHigh // structured-authoritative
 	case "compile-commands-json":
 		return domain.ConfidenceMedium // structured-secondary
 	case "depfile-adjacency":

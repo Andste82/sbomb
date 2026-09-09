@@ -98,20 +98,24 @@ produces the same document.
 |---|---|
 | CMake File API | Targets, artifacts, source lists, toolchain and sysroot locations |
 | `compile_commands.json` | Which source produced which object, and with which flags |
-| Linker map (`-Wl,-Map=`) | What the linker put into the artifact, including archive members |
+| Linker map (`-Wl,-Map=` or MSVC `/MAP:`) | What the linker put into the artifact, including archive members |
 | Link dependency file (`-Wl,--dependency-file=`) | The link inputs, as the linker itself listed them |
 | DWARF debug information | The translation units in the binary, and the headers each one used |
 | `build.ninja` / `.ninja_deps` | Object↔source edges and the headers each compile read |
 | Makefiles (`build.make`, `*.o.d`) | The same, for the Makefiles generator |
+| MSBuild `.tlog` files | Object↔source mappings, header dependencies and archive/link inputs from Visual Studio builds |
+| MSVC build log (`/VERBOSE:REF`) | Linker-discarded object evidence when preserved as `build.log` |
 | Response files | Link and compile lines too long for a command line |
 | Package manifests | Component identity for vcpkg, Conan, FetchContent, git submodules |
 | Package file lists | Which installed files belong to which package, where the manager wrote it down |
 
-Two of these are not there unless you ask for them. The linker map and the link
-dependency file are produced by linker flags, which is what the CMake
-integration adds. Name one and leave it missing and the run fails: describing a
-different file than the one you named would be worse than stopping. Name
-neither and sbomb falls back to DWARF, and without that it says so.
+Some of these are not there unless you ask the build to produce them. The
+linker map and link dependency file are produced by linker flags, which is what
+the CMake integration adds. MSVC uses `/MAP:` and `/VERBOSE:REF`; Visual Studio
+builds additionally leave the structured `.tlog` evidence that the MSBuild
+adapter reads. A missing optional evidence source degrades to the next
+strategy and is reported as a finding rather than being silently replaced by a
+guess.
 
 ## Resolving an object to its source
 
@@ -125,9 +129,10 @@ flowchart TB
     O["object file"]
     S1{"CMake File API"}
     S2{"build graph<br/>ninja or make"}
-    S3{"compile database"}
-    S4{"depfile beside<br/>the object"}
-    S5{"DWARF compilation<br/>unit name"}
+    S3{"MSBuild .tlog"}
+    S4{"compile database"}
+    S5{"depfile beside<br/>the object"}
+    S6{"DWARF compilation<br/>unit name"}
     OK["the source"]
     F["LINKED_OBJECT_SOURCE_UNRESOLVED<br/>reported, not guessed"]
 
@@ -136,12 +141,14 @@ flowchart TB
     S2 -->|no| S3
     S3 -->|no| S4
     S4 -->|no| S5
-    S5 -->|no| F
+    S5 -->|no| S6
+    S6 -->|no| F
     S1 -->|yes| OK
     S2 -->|yes| OK
     S3 -->|yes| OK
     S4 -->|yes| OK
     S5 -->|yes| OK
+    S6 -->|yes| OK
 
     classDef good fill:#dff0d8,stroke:#4a7,color:#000
     classDef bad fill:#f9d6d5,stroke:#c66,color:#000
@@ -161,8 +168,9 @@ rebuilds — being generous is correct for that job and wrong for this one.
 
 sbomb prefers the **DWARF line table**, which lists the files that actually
 emitted code or declarations into the compilation unit. Dependency files are
-the fallback for translation units with no debug information. Which of the two
-governs is a policy choice:
+the fallback for translation units with no debug information. MSVC
+`/showIncludes` output reaches the same dependency evidence through Ninja or
+MSBuild TLogs. Which of the available sources governs is a policy choice:
 
 | `--header-evidence` | Behaviour |
 |---|---|

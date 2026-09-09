@@ -4,8 +4,9 @@ sbomb runs without a configuration file. You add one when you need to name the
 deliverable explicitly, curate component metadata for the CRA fields, give
 external directories a portable identity, or pin a policy.
 
-The file is JSON, `sbomb.json` by default, selected with `--config`. **Unknown
-keys are an error at every level of the document**, so a typo cannot silently
+The file is JSON and is loaded when selected with `--config <file>`. There is
+no default configuration file. **Unknown keys are an error at every level of
+the document**, so a typo cannot silently
 disable a policy gate — `{"policy": {"failOnMisingHash": true}}` is refused,
 not ignored.
 

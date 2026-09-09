@@ -54,10 +54,10 @@ The following MUST NOT be included solely because they exist on disk: unused sou
 
 | Dimension | Supported |
 |---|---|
-| Host OS the tool runs on | Linux x86_64 and Linux ARM64 are supported and CI-verified. A Windows x86_64 binary is cross-compiled and released but is **not** exercised by CI; Windows path semantics are covered by path-flavor unit tests (§41 M14). macOS is out of scope. |
-| CMake generators | Ninja, Ninja Multi-Config, Unix Makefiles, NMake Makefiles. Visual Studio generators are **not yet supported** (§41 M18B). |
-| Compilers | GCC and Clang. MSVC is **not yet supported**; it is planned and unparked (M18). IAR and other vendor compilers are **parked** (M21). |
-| Linkers | GNU ld, GNU gold, LLVM lld. MSVC `link.exe` is planned (M18); IAR ILINK is parked. |
+| Host OS the tool runs on | Linux x86_64, Linux ARM64 and Windows x86_64 are supported and CI-verified. macOS is out of scope. |
+| CMake generators | Ninja, Ninja Multi-Config, Unix Makefiles, NMake Makefiles and Visual Studio 17 2022. |
+| Compilers | GCC, Clang and MSVC. IAR and other vendor compilers are **parked** (M21). |
+| Linkers | GNU ld, GNU gold, LLVM lld and MSVC `link.exe`. IAR ILINK is parked. |
 | Output | CycloneDX JSON 1.6. The writer layer is format-agnostic (§36.1) so SPDX or CycloneDX 1.7 can be added without touching discovery. |
 | Binary formats for inspection | ELF and PE/COFF. Mach-O is out of scope. |
 | Distribution | A single statically linked executable per platform (`CGO_ENABLED=0`). |

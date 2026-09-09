@@ -140,7 +140,8 @@ object no `.vcxproj` claims.
 ```
 go test ./internal/adapters/msbuild/... -race                                 # 0
 sbomb generate --build-dir testdata/fixtures/msvc-vs17/p02-static/build \
-  --config-name Release --output /tmp/vs.cdx.json --reproducible              # 0
+  --config-name Debug --path-flavor windows --output /tmp/vs.cdx.json \
+  --reproducible                                                            # 0
 cmp /tmp/vs.cdx.json testdata/golden/msvc-vs17-p02.cdx.json                   # 0
 ```
 
