@@ -43,8 +43,10 @@ the whole shape of 9b–9d depends on the answers:
   strategy 4 can key on.
 
 Gate: `tools/fixtures/regen.sh --check` passes with the new toolchain declared,
-`TestFixturesContainNoHostPaths` still passes, and CI regenerates the Windows
-fixture on `windows-latest` and fails on drift.
+`TestFixturesContainNoHostPaths` still passes, and CI regenerates and validates
+the Windows fixture on `windows-latest`. Exact byte drift is not a gate because
+that runner updates CMake and MSVC independently of the repository fixture
+capture.
 
 Where it starts, because a corpus toolchain is declared in more than one place:
 

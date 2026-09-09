@@ -56,7 +56,7 @@ than which command it runs.
 | `ci` | push, pull request | `gate` | Builds with and without network, vets, tests, formatted |
 | | | `race` | No data races, with cgo enabled |
 | | | `corpus` | Fixture corpus complete, free of host paths, unchanged by the tests |
-| | | `msvc-corpus` | Regenerates the native MSVC/Ninja fixture corpus on `windows-latest` and fails on drift |
+| | | `msvc-corpus` | Regenerates and validates the native MSVC/Ninja fixture corpus on `windows-latest` |
 | | | `performance-budget` | 10 000 translation units within the budget of section 31 |
 | | | `documentation` | The findings and property catalogues match the code and the specification, and every documented configuration loads |
 | | | `spdx-drift` | Embedded licence digests and templates match the upstream SPDX list (informational) |

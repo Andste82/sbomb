@@ -80,8 +80,9 @@ jobs:
           fi
 
   # MSVC fixtures are generated on Windows because the compiler and linker
-  # evidence cannot be produced by the Linux corpus job. The committed files
-  # must be reproducible on the same runner class.
+  # evidence cannot be produced by the Linux corpus job. The runner validates
+  # that the native corpus can still be regenerated and parsed. Exact bytes
+  # are not compared: windows-latest updates CMake and MSVC independently.
   msvc-corpus:
     runs-on: windows-latest
     steps:
@@ -101,9 +102,11 @@ jobs:
           $command = 'call "' + $install.Trim() + '\Common7\Tools\VsDevCmd.bat" -arch=x64 -host_arch=x64 & bash -lc "cd ' + $bashWorkspace + '; tools/fixtures/regen.sh --only msvc-ninja"'
           cmd.exe /d /s /c $command
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - name: Committed MSVC fixtures are reproducible
+      - name: Regenerated MSVC fixtures are complete and portable
         shell: pwsh
-        run: git diff --exit-code -- testdata/fixtures/msvc-ninja
+        run: |
+          go test ./tools/fixtures/...
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
   # Section 31 states a budget; this measures it. The 10 000 unit row runs on
   # every push because it costs seconds. The 50 000 unit row needs a 200 MB map
