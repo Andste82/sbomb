@@ -134,6 +134,13 @@ var adapters = []Adapter{
 	// asked for it -- with a name, a revision and a repository -- while
 	// .gitmodules states a path and a URL and nothing more.
 	west{},
+	// meson comes before submodule, and the position is behaviour once more: a
+	// Meson subproject is very often a git submodule as well -- the wrap and
+	// the .gitmodules entry name the same directory -- and the wrap is the
+	// stronger statement. It names the subproject the way Meson addresses it,
+	// says which revision was asked for, and says where it came from, while
+	// .gitmodules states a path and a URL and nothing more.
+	meson{},
 	submodule{},
 }
 

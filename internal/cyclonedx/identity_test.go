@@ -101,12 +101,21 @@ func TestVersionSourcesMapOntoTheClosedTechniqueVocabulary(t *testing.T) {
 		"pkg-config": "manifest-analysis",
 		// The .pdsc descriptor an MCU vendor ships inside a CMSIS-Pack: the
 		// vendor's own declaration, read out of a file in the same sense.
-		"cmsis-pack":    "manifest-analysis",
-		"header":        "source-code-analysis",
-		"go-build-info": "binary-analysis",
-		"git":           "other",
-		"git-describe":  "other",
-		"git-commit":    "other",
+		"cmsis-pack": "manifest-analysis",
+		// The four declarations a project keeps at its own root, and the wrap
+		// file a Meson project declares for a subproject. Each is a version
+		// read out of a file, so forgetting one of them here would let it fall
+		// silently to "other" instead of failing a test.
+		"cmake-config-version": "manifest-analysis",
+		"build2":               "manifest-analysis",
+		"xmake":                "manifest-analysis",
+		"bazel":                "manifest-analysis",
+		"meson":                "manifest-analysis",
+		"header":               "source-code-analysis",
+		"go-build-info":        "binary-analysis",
+		"git":                  "other",
+		"git-describe":         "other",
+		"git-commit":           "other",
 		// A source nobody has mapped yet must not be guessed at.
 		"something-new": "other",
 	} {

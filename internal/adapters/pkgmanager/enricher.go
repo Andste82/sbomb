@@ -64,9 +64,23 @@ type Enricher interface {
 // reader added later belongs after it, and cmsisPack is the first of those:
 // what a pack descriptor declares is a manifest (rank 2), so a bundled SBOM
 // has to keep the fields both of them state.
+// The four readers of rootmanifest.go follow cmsisPack, and their order among
+// themselves is behaviour for the same reason: all four contribute a version at
+// rank 2, so a root carrying both a MODULE.bazel and an xmake.lua publishes the
+// version of whichever reader stands first in this list. Sorting these lines
+// alphabetically, or adding a reader in the middle, changes what such a
+// document says. They are ordered from the most specific statement to the
+// least: a CMake package-version file is generated from the version the project
+// was configured with, a build2 manifest states nothing but package metadata,
+// and an xmake.lua and a MODULE.bazel are build descriptions that happen to
+// carry one line about the version.
 var enrichers = []Enricher{
 	bundledSBOM{},
 	cmsisPack{},
+	cmakeConfigVersion{},
+	build2Manifest{},
+	xmakeManifest{},
+	bazelModule{},
 }
 
 // applyEnrichment lets every enricher describe a root and folds what they say

@@ -98,6 +98,18 @@
   the workspace is found by its `.west` directory, and each project it declares
   contributes a component root, the revision that was asked for and the
   repository it came from (deviation D39).
+  Meson subprojects are read as part of strategy 2 too: every
+  `subprojects/*.wrap` a project declares names a subproject, the directory
+  Meson unpacked it into and -- for a `[wrap-git]` -- the revision that was
+  asked for and the repository it came from. A `[wrap-file]` names a tarball,
+  so it contributes no version and no purl (deviation D40).
+  Four single-file declarations are read by enrichers, in a directory that is
+  already a component root and never to draw one: a CMake
+  `<Pkg>ConfigVersion.cmake`, a build2 `manifest`, an `xmake.lua` and a
+  `MODULE.bazel`. Each contributes a version at rank 2 of section 21.1, build2
+  also a licence where it is shaped like an SPDX expression, and none of them
+  a name -- that is what finally gives a library somebody copied into the tree
+  a version of its own (deviation D40).
   Section 24.3's file-based half exists as well: the pkg-config metadata a
   distribution installs beside a system library names that library's package and
   its version without a subprocess, wherever a policy lets system files into the
@@ -105,7 +117,7 @@
   the licence of such a component remain open (D30, D37).
 - **Hardening (roadmap phase 8).** The performance budget of section 31 is
   measured by a test; the parser bounds of section 30 are one policy with
-  `--max-input-size` and `--strict-symlinks`; twenty-two fuzz targets cover every
+  `--max-input-size` and `--strict-symlinks`; twenty-eight fuzz targets cover every
   parser; determinism is checked on a Windows runner; each released binary
   carries an SBOM of itself derived from its linker's own record; and
   regenerating an unchanged fixture corpus is a no-op outside three recorded
@@ -125,6 +137,26 @@
   reader (deviation D37) closes the file-based part of that gap and needs no
   permission; what still waits on the group is the licence, the supplier and the
   purl of a distribution package, none of which a `.pc` file states.
+- **A Meson wrap whose directory Meson has not unpacked says nothing.** Meson
+  fetches a subproject while it configures, so a wrap with no directory on
+  disk describes a dependency this build never obtained; it produces no
+  component and no finding, the way an uncloned west project does.
+- **A build2 manifest using the format's multi-line value syntax is refused
+  whole.** The reader knows `name: value` lines and the format line `: 1`; a
+  `description:` block ends the file with `EVIDENCE_UNREADABLE` and no
+  contributions. The grammar could not be verified against build2 itself from
+  this repository, and guessing at a delimiter could read a line inside such a
+  block as a version. A fixture from real build2 output is what would close it
+  (deviation D40).
+- **A `<Pkg>ConfigVersion.cmake` is usually not in the component root.** An
+  installed package keeps it under `lib/cmake/<Pkg>/`, and an enricher may not
+  descend, so that reader answers only where the file really lies in the root
+  (deviation D40).
+- **`mbed_lib.json` is not read.** The only thing it states is a name, and a
+  name has no field in the enricher contract and is never published (D33).
+  Making an Mbed library a component of its own means adding the file to the
+  strategy 6 marker list, which moves boundaries and costs a stat per ancestor
+  directory per used file; it is a task of its own (deviation D40).
 - **A west manifest's `import:` is not followed.** west resolves an import in
   memory and writes nothing down, so an application manifest that imports
   Zephyr's yields the projects it states itself and no others. The coverage for
