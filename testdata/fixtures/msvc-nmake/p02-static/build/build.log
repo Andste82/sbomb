@@ -1,0 +1,264 @@
+Warning: NMake does not support parallel builds. Ignoring parallel build command line option.
+Change Dir: 'C:/__fixture_build__'
+
+Run Build Command(s): "C:/Program Files/CMake/bin/cmake.exe" -E env VERBOSE=1 nmake -f Makefile /nologo
+	"C:\Program Files\CMake\bin\cmake.exe" -SC:\__fixture_src__ -BC:\__fixture_build__ --check-build-system CMakeFiles\Makefile.cmake 0
+	"C:\Program Files\CMake\bin\cmake.exe" -E cmake_progress_start C:\__fixture_build__\CMakeFiles C:\__fixture_build__\\CMakeFiles\progress.marks
+	"C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64\nmake.exe"  -f CMakeFiles\Makefile2 /nologo -L                  all
+	"C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64\nmake.exe"  -f CMakeFiles\crypto.dir\build.make /nologo -L                  CMakeFiles\crypto.dir\depend
+	"C:\Program Files\CMake\bin\cmake.exe" -E cmake_depends "NMake Makefiles" C:\__fixture_src__ C:\__fixture_src__ C:\__fixture_build__ C:\__fixture_build__ C:\__fixture_build__\CMakeFiles\crypto.dir\DependInfo.cmake "--color="
+	"C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64\nmake.exe"  -f CMakeFiles\crypto.dir\build.make /nologo -L                  CMakeFiles\crypto.dir\build
+[ 20%] Building C object CMakeFiles/crypto.dir/crypto.c.obj
+	"C:\Program Files\CMake\bin\cmake.exe" -E cmake_cl_compile_depends --dep-file=CMakeFiles\crypto.dir\crypto.c.obj.d --working-dir=C:\__fixture_build__ --filter-prefix="Note: including file: " -- C:\PROGRA~2\MICROS~3\2022\BUILDT~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe @C:/__fixture_build__/response.tmp
+crypto.c
+[ 40%] Building C object CMakeFiles/crypto.dir/unused.c.obj
+	"C:\Program Files\CMake\bin\cmake.exe" -E cmake_cl_compile_depends --dep-file=CMakeFiles\crypto.dir\unused.c.obj.d --working-dir=C:\__fixture_build__ --filter-prefix="Note: including file: " -- C:\PROGRA~2\MICROS~3\2022\BUILDT~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe @C:/__fixture_build__/response.tmp
+unused.c
+[ 60%] Linking C static library crypto.lib
+	"C:\Program Files\CMake\bin\cmake.exe" -P CMakeFiles\crypto.dir\cmake_clean_target.cmake
+	C:\PROGRA~2\MICROS~3\2022\BUILDT~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\lib.exe /nologo /machine:x64 /out:crypto.lib @CMakeFiles\crypto.dir\objects1.rsp
+[ 60%] Built target crypto
+	"C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64\nmake.exe"  -f CMakeFiles\app.dir\build.make /nologo -L                  CMakeFiles\app.dir\depend
+	"C:\Program Files\CMake\bin\cmake.exe" -E cmake_depends "NMake Makefiles" C:\__fixture_src__ C:\__fixture_src__ C:\__fixture_build__ C:\__fixture_build__ C:\__fixture_build__\CMakeFiles\app.dir\DependInfo.cmake "--color="
+	"C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64\nmake.exe"  -f CMakeFiles\app.dir\build.make /nologo -L                  CMakeFiles\app.dir\build
+[ 80%] Building C object CMakeFiles/app.dir/main.c.obj
+	"C:\Program Files\CMake\bin\cmake.exe" -E cmake_cl_compile_depends --dep-file=CMakeFiles\app.dir\main.c.obj.d --working-dir=C:\__fixture_build__ --filter-prefix="Note: including file: " -- C:\PROGRA~2\MICROS~3\2022\BUILDT~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\cl.exe @C:/__fixture_build__/response.tmp
+main.c
+[100%] Linking C executable app.exe
+	"C:\Program Files\CMake\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\app.dir --rc=C:\PROGRA~2\WI3CF2~1\10\bin\100203~1.0\x64\rc.exe --mt=C:\PROGRA~2\WI3CF2~1\10\bin\100203~1.0\x64\mt.exe --manifests -- C:\PROGRA~2\MICROS~3\2022\BUILDT~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\link.exe /nologo @CMakeFiles\app.dir\objects1.rsp @C:/__fixture_build__/response.tmp
+Visual Studio Incremental Link with embedded manifests
+Create CMakeFiles\app.dir/manifest.rc
+Create empty: CMakeFiles\app.dir/embed.manifest
+RC Pass 1:
+C:\PROGRA~2\WI3CF2~1\10\bin\100203~1.0\x64\rc.exe /fo CMakeFiles\app.dir/manifest.res CMakeFiles\app.dir/manifest.rc
+LINK Pass 1:
+C:\PROGRA~2\MICROS~3\2022\BUILDT~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\link.exe /nologo @CMakeFiles\app.dir\objects1.rsp /out:app.exe /implib:app.lib /pdb:C:\__fixture_build__\app.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console /MAP:C:/__fixture_build__/app.exe.map /VERBOSE:LIB /VERBOSE:REF crypto.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:CMakeFiles\app.dir/intermediate.manifest CMakeFiles\app.dir/manifest.res
+
+Searching libraries
+    Searching crypto.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\kernel32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\user32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\gdi32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\winspool.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\shell32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\ole32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\oleaut32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\uuid.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\comdlg32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\advapi32.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\MSVCRTD.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\OLDNAMES.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\vcruntimed.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\lib\10.0.20348.0\ucrt\x64\ucrtd.lib:
+    Searching crypto.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\kernel32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\user32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\gdi32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\winspool.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\shell32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\ole32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\oleaut32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\uuid.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\comdlg32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\advapi32.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\MSVCRTD.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\OLDNAMES.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\vcruntimed.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\lib\10.0.20348.0\ucrt\x64\ucrtd.lib:
+    Searching crypto.lib:
+
+Finished searching libraries
+
+Searching libraries
+    Searching crypto.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\kernel32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\user32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\gdi32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\winspool.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\shell32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\ole32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\oleaut32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\uuid.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\comdlg32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\advapi32.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\MSVCRTD.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\OLDNAMES.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\vcruntimed.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\lib\10.0.20348.0\ucrt\x64\ucrtd.lib:
+
+Finished searching libraries
+
+Searching libraries
+    Searching crypto.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\kernel32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\user32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\gdi32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\winspool.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\shell32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\ole32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\oleaut32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\uuid.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\comdlg32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\advapi32.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\MSVCRTD.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\OLDNAMES.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\vcruntimed.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\lib\10.0.20348.0\ucrt\x64\ucrtd.lib:
+
+Finished searching libraries
+
+Searching libraries
+    Searching crypto.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\kernel32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\user32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\gdi32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\winspool.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\shell32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\ole32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\oleaut32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\uuid.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\comdlg32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\advapi32.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\MSVCRTD.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\OLDNAMES.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\vcruntimed.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\lib\10.0.20348.0\ucrt\x64\ucrtd.lib:
+
+Finished searching libraries
+
+Searching libraries
+    Searching crypto.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\kernel32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\user32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\gdi32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\winspool.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\shell32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\ole32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\oleaut32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\uuid.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\comdlg32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\advapi32.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\MSVCRTD.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\OLDNAMES.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\vcruntimed.lib:
+
+Finished searching libraries
+MT:
+C:\PROGRA~2\WI3CF2~1\10\bin\100203~1.0\x64\mt.exe /nologo /manifest CMakeFiles\app.dir/intermediate.manifest /out:CMakeFiles\app.dir/embed.manifest /notify_update
+RC Pass 2:
+C:\PROGRA~2\WI3CF2~1\10\bin\100203~1.0\x64\rc.exe /fo CMakeFiles\app.dir/manifest.res CMakeFiles\app.dir/manifest.rc
+FINAL LINK:
+C:\PROGRA~2\MICROS~3\2022\BUILDT~1\VC\Tools\MSVC\1434~1.319\bin\Hostx64\x64\link.exe /nologo @CMakeFiles\app.dir\objects1.rsp /out:app.exe /implib:app.lib /pdb:C:\__fixture_build__\app.pdb /version:0.0 /machine:x64 /debug /INCREMENTAL /subsystem:console /MAP:C:/__fixture_build__/app.exe.map /VERBOSE:LIB /VERBOSE:REF crypto.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:CMakeFiles\app.dir/intermediate.manifest CMakeFiles\app.dir/manifest.res
+
+Searching libraries
+    Searching crypto.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\kernel32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\user32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\gdi32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\winspool.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\shell32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\ole32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\oleaut32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\uuid.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\comdlg32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\advapi32.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\MSVCRTD.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\OLDNAMES.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\vcruntimed.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\lib\10.0.20348.0\ucrt\x64\ucrtd.lib:
+    Searching crypto.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\kernel32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\user32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\gdi32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\winspool.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\shell32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\ole32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\oleaut32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\uuid.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\comdlg32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\advapi32.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\MSVCRTD.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\OLDNAMES.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\vcruntimed.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\lib\10.0.20348.0\ucrt\x64\ucrtd.lib:
+    Searching crypto.lib:
+
+Finished searching libraries
+
+Searching libraries
+    Searching crypto.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\kernel32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\user32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\gdi32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\winspool.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\shell32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\ole32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\oleaut32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\uuid.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\comdlg32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\advapi32.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\MSVCRTD.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\OLDNAMES.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\vcruntimed.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\lib\10.0.20348.0\ucrt\x64\ucrtd.lib:
+
+Finished searching libraries
+
+Searching libraries
+    Searching crypto.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\kernel32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\user32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\gdi32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\winspool.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\shell32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\ole32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\oleaut32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\uuid.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\comdlg32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\advapi32.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\MSVCRTD.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\OLDNAMES.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\vcruntimed.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\lib\10.0.20348.0\ucrt\x64\ucrtd.lib:
+
+Finished searching libraries
+
+Searching libraries
+    Searching crypto.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\kernel32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\user32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\gdi32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\winspool.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\shell32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\ole32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\oleaut32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\uuid.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\comdlg32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\advapi32.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\MSVCRTD.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\OLDNAMES.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\vcruntimed.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\lib\10.0.20348.0\ucrt\x64\ucrtd.lib:
+
+Finished searching libraries
+
+Searching libraries
+    Searching crypto.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\kernel32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\user32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\gdi32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\winspool.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\shell32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\ole32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\oleaut32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\uuid.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\comdlg32.lib:
+    Searching C:\Program Files (x86)\Windows Kits\10\\lib\10.0.20348.0\\um\x64\advapi32.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\MSVCRTD.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\OLDNAMES.lib:
+    Searching C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.34.31933\lib\x64\vcruntimed.lib:
+
+Finished searching libraries
+[100%] Built target app
+	"C:\Program Files\CMake\bin\cmake.exe" -E cmake_progress_start C:\__fixture_build__\CMakeFiles 0
+

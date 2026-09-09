@@ -62,6 +62,12 @@ func TestIsAbsolutePortable(t *testing.T) {
 	}
 }
 
+func TestNormalizeSeparators(t *testing.T) {
+	if got := NormalizeSeparators(`C:\build\main.obj`); got != "C:/build/main.obj" {
+		t.Fatalf("NormalizeSeparators() = %q, want C:/build/main.obj", got)
+	}
+}
+
 func TestSlugFollowsTheSpecifiedNormalization(t *testing.T) {
 	cases := map[string]string{
 		"mbedTLS":          "mbedtls",

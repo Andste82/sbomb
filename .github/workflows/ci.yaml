@@ -99,7 +99,7 @@ jobs:
           $drive = $env:GITHUB_WORKSPACE.Substring(0, 1).ToLowerInvariant()
           $directory = $env:GITHUB_WORKSPACE.Substring(2) -replace '\\', '/'
           $bashWorkspace = "/$drive$directory"
-          $command = 'call "' + $install.Trim() + '\Common7\Tools\VsDevCmd.bat" -arch=x64 -host_arch=x64 & bash -lc "cd ' + $bashWorkspace + '; tools/fixtures/regen.sh --only msvc-ninja"'
+          $command = 'call "' + $install.Trim() + '\Common7\Tools\VsDevCmd.bat" -arch=x64 -host_arch=x64 & bash -lc "cd ' + $bashWorkspace + '; tools/fixtures/regen.sh --only msvc-ninja && tools/fixtures/regen.sh --only msvc-nmake"'
           cmd.exe /d /s /c $command
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Regenerated MSVC fixtures are complete and portable

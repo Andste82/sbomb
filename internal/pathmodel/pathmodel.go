@@ -33,6 +33,12 @@ func IsAbsolute(path string) bool {
 	return len(path) >= 3 && isASCIIAlpha(path[0]) && path[1] == ':' && (path[2] == '/' || path[2] == '\\') || strings.HasPrefix(path, `\\\\`)
 }
 
+// NormalizeSeparators converts Windows and POSIX separators to slash form for
+// host-side path joining and comparison.
+func NormalizeSeparators(path string) string {
+	return strings.ReplaceAll(path, "\\", "/")
+}
+
 func isASCIIAlpha(value byte) bool {
 	return (value >= 'A' && value <= 'Z') || (value >= 'a' && value <= 'z')
 }

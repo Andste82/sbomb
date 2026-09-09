@@ -183,10 +183,18 @@ func collectCompileEvidence(buildDir string, commands []compiledb.Command, comma
 		commandStrategy = "compile-commands-json"
 	}
 	evidence := newCompileEvidence()
-	if parsed, err := makeadapter.Parse(buildDir); err == nil {
-		evidence.makeBuild = parsed
+	makeBuildDir, makePathErr := filepath.Abs(buildDir)
+	if makePathErr != nil {
+		logger.Debug("Makefiles adapter path resolution failed: %v", makePathErr)
+	}
+	if makePathErr == nil {
+		if parsed, err := makeadapter.Parse(makeBuildDir); err == nil {
+			evidence.makeBuild = parsed
+		} else {
+			logger.Debug("Makefiles adapter does not apply: %v", err)
+		}
 	} else {
-		logger.Debug("Makefiles adapter does not apply: %v", err)
+		logger.Debug("Makefiles adapter does not apply: %v", makePathErr)
 	}
 
 	// Strategy 2: the Ninja build graph names the source of every object. That

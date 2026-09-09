@@ -17,14 +17,20 @@ import (
 func TestMSVCAndGCCP02UsedFileSetsAgree(t *testing.T) {
 	repoRoot := filepath.Join("..", "..")
 	msvcBuild := filepath.Join(repoRoot, "testdata", "fixtures", "msvc-ninja", "p02-static", "build")
+	nmakeBuild := filepath.Join(repoRoot, "testdata", "fixtures", "msvc-nmake", "p02-static", "build")
 	gccBuild := filepath.Join(repoRoot, "testdata", "fixtures", "gcc-ninja", "p02-static", "build")
 	msvc := run9dFixture(t, msvcBuild, "C:/__fixture_src__", "C:/__fixture_build__")
+	nmake := run9dFixture(t, nmakeBuild, "C:/__fixture_src__", "C:/__fixture_build__")
 	gcc := run9dFixture(t, gccBuild, "/__fixture_src__", "/__fixture_build__")
 
 	gccProject := projectFileSet(gcc)
 	msvcProject := projectFileSet(msvc)
+	nmakeProject := projectFileSet(nmake)
 	if diff := symmetricFileSetDifference(gccProject, msvcProject); len(diff) > 0 {
 		t.Fatalf("MSVC and GCC p02-static used-file sets differ:\n%s", strings.Join(diff, "\n"))
+	}
+	if diff := symmetricFileSetDifference(gccProject, nmakeProject); len(diff) > 0 {
+		t.Fatalf("MSVC NMake and GCC p02-static used-file sets differ:\n%s", strings.Join(diff, "\n"))
 	}
 	if len(msvcProject) == 0 {
 		t.Fatal("MSVC produced no project files in the used-file set")

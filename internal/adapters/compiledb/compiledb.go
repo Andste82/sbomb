@@ -64,7 +64,7 @@ func Parse(data []byte) ([]Command, error) {
 			return nil, fmt.Errorf("compile command %d: %w", index, err)
 		}
 		directory := entry.Directory
-		if directory != "" {
+		if directory != "" && !pathmodel.IsAbsolute(directory) {
 			directory, err = filepath.Abs(directory)
 			if err != nil {
 				return nil, fmt.Errorf("compile command %d directory: %w", index, err)
@@ -126,6 +126,7 @@ func resolvePath(directory, path string) string {
 	if path == "" {
 		return ""
 	}
+	path = pathmodel.NormalizeSeparators(path)
 	if pathmodel.IsAbsolute(path) || directory == "" {
 		return filepath.Clean(path)
 	}

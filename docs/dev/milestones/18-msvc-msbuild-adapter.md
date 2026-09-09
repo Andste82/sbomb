@@ -89,6 +89,8 @@ produce a correct SBOM.
   `toolchains-v1` reports for MSVC.
 * A golden SBOM for `msvc-ninja/p02-static`, generated on Linux from the
   committed fixture with `--path-flavor windows`.
+* A golden SBOM for `msvc-nmake/p02-static`, generated from the NMake fixture
+  with the Makefiles adapter and MSVC `.obj.d` header evidence.
 
 **Acceptance**
 
@@ -97,6 +99,8 @@ go test ./internal/adapters/linkers/... ./tools/fixtures/... -race    # 0
 sbomb generate --build-dir testdata/fixtures/msvc-ninja/p02-static/build \
   --path-flavor windows --output /tmp/ms.cdx.json --reproducible      # 0
 cmp /tmp/ms.cdx.json testdata/golden/msvc-ninja-p02.cdx.json          # 0
+go test ./cmd/sbomb -run TestMilestone18ANMakeAcceptance -count=1       # 0
+go test ./internal/generate -run TestMSVCAndGCCP02UsedFileSetsAgree -count=1 # 0
 ```
 
 **Definition of Done:** an MSVC-built project produces an SBOM whose used-file

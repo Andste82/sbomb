@@ -1,0 +1,10 @@
+{
+  "buildRoot": "C:/__fixture_build__",
+  "generatedAt": "2026-09-05T00:00:00Z",
+  "generator": "NMake Makefiles",
+  "host": "windows",
+  "project": "p02-static",
+  "sourceRoot": "C:/__fixture_src__",
+  "toolchain": "msvc-nmake",
+  "toolchainVersion": "Microsoft (R) C/C++ Optimizing Compiler Version 19.34.31937 for x64"
+}

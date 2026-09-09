@@ -109,6 +109,16 @@ func parseBuildMake(path, buildDir string, target *Target) error {
 			continue
 		}
 		object := strings.TrimSpace(line[:colon])
+		prerequisites := splitMakeWords(line[colon+1:])
+		if looksLikeArchive(object) {
+			target.LinkInputs = append(target.LinkInputs, resolvePath(buildDir, object))
+			for _, prerequisite := range prerequisites {
+				if looksLikeObject(prerequisite) {
+					target.LinkInputs = append(target.LinkInputs, resolvePath(buildDir, prerequisite))
+				}
+			}
+			continue
+		}
 		if !looksLikeObject(object) {
 			continue
 		}
@@ -116,13 +126,14 @@ func parseBuildMake(path, buildDir string, target *Target) error {
 		if _, resolved := target.ObjectSources[objectPath]; resolved {
 			continue
 		}
-		for _, prerequisite := range splitShellWords(line[colon+1:]) {
+		for _, prerequisite := range prerequisites {
 			if looksLikeSource(prerequisite) {
 				target.ObjectSources[objectPath] = resolvePath(buildDir, prerequisite)
 				break
 			}
 		}
 	}
+	target.LinkInputs = unique(target.LinkInputs)
 	return nil
 }
 
@@ -216,6 +227,20 @@ func parseDependencyFiles(directory string, target *Target) error {
 			return fmt.Errorf("parse %s: %w", path, parseErr)
 		}
 		target.DependencyFiles = append(target.DependencyFiles, path)
+		if len(rules) == 0 && strings.HasSuffix(entry.Name(), ".obj.d") {
+			object := strings.TrimSuffix(path, ".d")
+			headers := make([]string, 0)
+			for _, line := range strings.Split(string(data), "\n") {
+				line = strings.TrimSpace(strings.TrimSuffix(line, "\r"))
+				if line != "" {
+					headers = append(headers, resolvePath(buildRoot, line))
+				}
+			}
+			if len(headers) > 0 {
+				target.ObjectDeps[resolvePath(buildRoot, object)] = headers
+			}
+			return nil
+		}
 		for _, rule := range rules {
 			for _, object := range rule.Targets {
 				target.ObjectDeps[resolvePath(buildRoot, object)] = resolvePaths(buildRoot, rule.Prereqs)
@@ -272,6 +297,45 @@ func splitShellWords(text string) []string {
 	return result
 }
 
+func splitMakeWords(text string) []string {
+	var result []string
+	var word strings.Builder
+	var quote rune
+	flush := func() {
+		if word.Len() > 0 {
+			result = append(result, word.String())
+			word.Reset()
+		}
+	}
+	for index := 0; index < len(text); index++ {
+		char := rune(text[index])
+		if quote != 0 {
+			if char == quote {
+				quote = 0
+			} else {
+				word.WriteByte(text[index])
+			}
+			continue
+		}
+		if char == '\'' || char == '"' {
+			quote = char
+			continue
+		}
+		if unicode.IsSpace(char) {
+			flush()
+			continue
+		}
+		if char == '\\' && index+1 < len(text) && unicode.IsSpace(rune(text[index+1])) {
+			index++
+			word.WriteByte(text[index])
+			continue
+		}
+		word.WriteByte(text[index])
+	}
+	flush()
+	return result
+}
+
 func quotedStrings(text string) []string {
 	var result []string
 	for len(text) > 0 {
@@ -292,6 +356,10 @@ func quotedStrings(text string) []string {
 
 func looksLikeObject(path string) bool {
 	return strings.HasSuffix(path, ".o") || strings.HasSuffix(path, ".obj")
+}
+
+func looksLikeArchive(path string) bool {
+	return strings.HasSuffix(path, ".a") || strings.HasSuffix(path, ".lib")
 }
 
 // sourceExtensions is the set of compiler inputs that can produce a linked
@@ -316,6 +384,7 @@ func looksLikeSource(path string) bool {
 	return sourceExtensions[strings.ToLower(filepath.Ext(path))]
 }
 func resolvePath(base, path string) string {
+	path = pathmodel.NormalizeSeparators(path)
 	if pathmodel.IsAbsolute(path) {
 		return filepath.Clean(path)
 	}

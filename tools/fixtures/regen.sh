@@ -70,6 +70,7 @@ TOOLCHAINS=(
   "arm-none-eabi|Ninja|arm-none-eabi.cmake"
   "mingw-w64|Ninja|mingw-w64.cmake"
   "msvc-ninja|Ninja|"
+  "msvc-nmake|NMake Makefiles|"
 )
 
 # Files above this size are refused: the corpus stores evidence, not payloads.
@@ -88,6 +89,9 @@ if [[ "${1:-}" == "--check" ]]; then
     for project in "${PROJECTS[@]}"; do
       allowed=${PROJECT_TOOLCHAINS[$project]:-}
       if [[ -n "$allowed" && " $allowed " != *" $toolchain "* ]]; then
+        continue
+      fi
+      if [[ "$toolchain" == "msvc-nmake" && "$project" != "p02-static" ]]; then
         continue
       fi
       dir="$corpus_dir/$toolchain/$project"
@@ -126,7 +130,7 @@ fi
 for tool in cmake ninja go; do
   command -v "$tool" >/dev/null || die "$tool is required to regenerate fixtures"
 done
-if [[ -z "$ONLY_TOOLCHAIN" || "$ONLY_TOOLCHAIN" != "msvc-ninja" ]]; then
+if [[ -z "$ONLY_TOOLCHAIN" || ("$ONLY_TOOLCHAIN" != "msvc-ninja" && "$ONLY_TOOLCHAIN" != "msvc-nmake") ]]; then
   command -v make >/dev/null || die "make is required to regenerate fixtures"
 fi
 
@@ -174,7 +178,7 @@ toolchain_version() {
     clang-ninja)        clang --version | head -1 ;;
     arm-none-eabi)      arm-none-eabi-gcc --version | head -1 ;;
     mingw-w64)          x86_64-w64-mingw32-gcc --version | head -1 ;;
-    msvc-ninja)
+    msvc-ninja|msvc-nmake)
       local compiler
       compiler=$(command -v cl.exe)
       "$compiler" 2>&1 | grep -m1 'Microsoft (R)'
@@ -188,7 +192,7 @@ toolchain_available() {
     clang-ninja)        command -v clang && command -v ld.lld ;;
     arm-none-eabi)      command -v arm-none-eabi-gcc ;;
     mingw-w64)          command -v x86_64-w64-mingw32-gcc ;;
-    msvc-ninja)
+    msvc-ninja|msvc-nmake)
       local compiler
       compiler=$(command -v cl.exe) || return 1
       [[ -x "$compiler" && -x "$(dirname "$compiler")/link.exe" ]]
@@ -316,8 +320,11 @@ QUERY
   done
 
   # Generator-specific evidence.
-  if [[ "$toolchain" == "msvc-ninja" ]]; then
+  if [[ "$toolchain" == msvc-* ]]; then
     harvest "$BUILD_ROOT/build.log" "$build_out/build.log"
+    if [[ "$toolchain" == "msvc-nmake" ]]; then
+      sed -E -i 's#C:\\Users\\[^[:space:]" ]+#C:/__fixture_build__/response.tmp#g' "$build_out/build.log"
+    fi
   fi
   if [[ "$generator" == Ninja* ]]; then
     harvest "$BUILD_ROOT/build.ninja" "$build_out/build.ninja"
@@ -334,7 +341,7 @@ QUERY
       harvest "$found" "$build_out/${found#"$BUILD_ROOT"/}"
     done < <(find "$BUILD_ROOT/CMakeFiles" \
                \( -name build.make -o -name link.txt -o -name compiler_depend.make \
-                  -o -name 'objects*.rsp' -o -name '*.o.d' \) -type f | sort)
+                  -o -name 'objects*.rsp' -o -name '*.o.d' -o -name '*.obj.d' \) -type f | sort)
   fi
 
   # Packaging evidence: the manifest the build generated, the image it packed
@@ -455,6 +462,9 @@ for toolchain_spec in "${TOOLCHAINS[@]}"; do
     fi
     allowed=${PROJECT_TOOLCHAINS[$project]:-}
     if [[ -n "$allowed" && " $allowed " != *" $toolchain "* ]]; then
+      continue
+    fi
+    if [[ "$toolchain" == "msvc-nmake" && "$project" != "p02-static" ]]; then
       continue
     fi
     generate_one "$toolchain" "$generator" "$toolchain_file" "$project" || failures=$((failures + 1))
