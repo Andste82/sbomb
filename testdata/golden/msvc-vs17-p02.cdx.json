@@ -2,7 +2,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "version": 1,
-  "serialNumber": "urn:uuid:7bed215b-f8b2-5a87-847e-25bdb9893e09",
+  "serialNumber": "urn:uuid:a5f9be65-07ee-5da8-8a3b-52abd4769515",
   "metadata": {
     "tools": [
       {
@@ -13,8 +13,8 @@
     ],
     "component": {
       "type": "application",
-      "name": "Debug\\app.exe",
-      "bom-ref": "product:debug-app.exe",
+      "name": "app.exe",
+      "bom-ref": "product:app.exe",
       "properties": [
         {
           "name": "sbomb:artifact:role",
@@ -3466,7 +3466,7 @@
       "ref": "file:project:MAIN.C"
     },
     {
-      "ref": "product:debug-app.exe",
+      "ref": "product:app.exe",
       "dependsOn": [
         "component:project",
         "component:unknown-abs-crypto.lib",

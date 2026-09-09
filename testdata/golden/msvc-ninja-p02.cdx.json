@@ -2,7 +2,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "version": 1,
-  "serialNumber": "urn:uuid:c49329c6-d043-5490-ad13-ac04159d20fd",
+  "serialNumber": "urn:uuid:1af3baca-7bbe-58ca-9f4b-edd0b1ddad63",
   "metadata": {
     "tools": [
       {
@@ -139,12 +139,6 @@
       "type": "file",
       "name": "crypto.c.obj",
       "bom-ref": "file:abs:CMakeFiles/crypto.dir/crypto.c.obj",
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "8ff011f74dbd3cbb60c3e1d74bdea98fa24888b2e7a3cd35d9739c1edac7d55a"
-        }
-      ],
       "properties": [
         {
           "name": "sbomb:cdx:archiveProperty",

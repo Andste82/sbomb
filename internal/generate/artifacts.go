@@ -80,13 +80,19 @@ func resolveDeliverables(cfg config.Config, buildDir string, model *cmakeapi.Mod
 	candidates := discoverCandidates(model, cfg.Discovery, logger)
 	if cfg.Build.Config != "" {
 		prefix := filepath.ToSlash(cfg.Build.Config) + "/"
-		filtered := candidates[:0]
+		filtered := make([]string, 0, len(candidates))
 		for _, candidate := range candidates {
 			if strings.HasPrefix(filepath.ToSlash(candidate), prefix) {
 				filtered = append(filtered, candidate)
 			}
 		}
-		candidates = filtered
+		// Single-config generators (Ninja, Make) never prefix artifact paths
+		// with the configuration name, so a --config-name passed alongside
+		// them would otherwise discard every real candidate. Only narrow the
+		// set when the prefix actually matched something.
+		if len(filtered) > 0 {
+			candidates = filtered
+		}
 	}
 	if len(candidates) == 0 {
 		return nil, findings, &ExitError{
