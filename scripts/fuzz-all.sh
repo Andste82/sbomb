@@ -29,3 +29,9 @@ run ./internal/adapters/pkgmanager FuzzDiscover
 run ./internal/adapters/binfmt FuzzInspectBytes
 run ./internal/testutil FuzzLoadFixtureManifest
 run ./internal/adapters/manifest FuzzParse
+
+# The readers of the package-manager lock files, each one written here rather
+# than vendored, each one handed a file out of somebody else's build tree.
+run ./internal/adapters/pkgmanager FuzzIDFLock
+run ./internal/adapters/pkgmanager FuzzIDFManifest
+run ./internal/adapters/pkgmanager FuzzCPMLock

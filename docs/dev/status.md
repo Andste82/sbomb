@@ -87,10 +87,13 @@
   `--allow-introspection` with the exact allowlist of section 9.2 and is off by
   default. Response files are expanded, and packaging manifests, images and
   assets are handled (section 18). The ESP-IDF component manager is read as
-  part of strategy 2; the ESP-IDF SDK adapter (milestone 20) is parked.
+  part of strategy 2; the ESP-IDF SDK adapter (milestone 20) is parked. CPM.cmake
+  has no adapter of its own on purpose: it drives FetchContent, so the roots in
+  the build tree are FetchContent's, and the lock CPM writes beside them is read
+  as a second origin for the package the FetchContent adapter already found.
 - **Hardening (roadmap phase 8).** The performance budget of section 31 is
   measured by a test; the parser bounds of section 30 are one policy with
-  `--max-input-size` and `--strict-symlinks`; twenty fuzz targets cover every
+  `--max-input-size` and `--strict-symlinks`; twenty-one fuzz targets cover every
   parser; determinism is checked on a Windows runner; each released binary
   carries an SBOM of itself derived from its linker's own record; and
   regenerating an unchanged fixture corpus is a no-op outside three recorded

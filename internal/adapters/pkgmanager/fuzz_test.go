@@ -140,3 +140,43 @@ func checkIDFPackages(t *testing.T, source string) {
 		}
 	}
 }
+
+// The CPM lock gets a target of its own for the same reason the ESP-IDF files
+// do: the reader behind it is written in this repository rather than vendored,
+// and it is handed a file out of a build tree this tool did not create.
+func FuzzCPMLock(f *testing.F) {
+	f.Add("# CPM Package Lock\n\n# fmt\nCPMDeclarePackage(fmt\n  NAME fmt\n  VERSION 9.1.0\n  GITHUB_REPOSITORY fmtlib/fmt\n)\n")
+	f.Add("# fmt (unversioned)\n# CPMDeclarePackage(fmt\n#  NAME fmt\n#  GIT_TAG main\n#)\n")
+	f.Add("CPMDeclarePackage(")
+	f.Add("CPMDeclarePackage(a\n  NAME ../../etc/passwd\n  GIT_REPOSITORY https://u:p@h/o/r.git\n)\n")
+	f.Add("CPMDeclarePackage(a\n  VERSION 1\n)\nCPMDeclarePackage(a\n  VERSION 2\n)\n")
+	f.Add("")
+
+	f.Fuzz(func(t *testing.T, lock string) {
+		build := t.TempDir()
+		if err := os.WriteFile(filepath.Join(build, cpmLockName), []byte(lock), 0o600); err != nil {
+			t.Skip(err)
+		}
+		if err := os.MkdirAll(filepath.Join(build, "_deps", "a-src"), 0o755); err != nil {
+			t.Skip(err)
+		}
+		packages, _ := fetchContent{}.Discover(Options{BuildDir: build, Context: context.Background()})
+		// Whatever the lock says, it may only describe the package the _deps
+		// layout already named: no second package, and no name or root taken
+		// out of the file itself.
+		if len(packages) != 1 {
+			t.Fatalf("packages = %#v, want the one the directory layout names", packages)
+		}
+		if packages[0].Name != "a" {
+			t.Fatalf("the package was renamed to %q by the lock file", packages[0].Name)
+		}
+		if packages[0].Root() != filepath.Join(build, "_deps", "a-src") {
+			t.Fatalf("the root %q is not the one the directory layout gives", packages[0].Root())
+		}
+		for _, claim := range []Claim{packages[0].Version, packages[0].PURL} {
+			if claim.Value == "" && (claim.Source != "" || claim.Rank != RankNone) {
+				t.Fatalf("a claim named an origin but no value: %#v", claim)
+			}
+		}
+	})
+}

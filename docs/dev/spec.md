@@ -957,7 +957,7 @@ Published as `component.evidence.identity` with `field: "version"`: the value in
 | `VersionSource` | `technique` |
 |---|---|
 | `curated` | `attestation` |
-| `cmake`, `conan`, `vcpkg`, `fetchcontent`, `bundled-sbom`, `idf` | `manifest-analysis` |
+| `cmake`, `conan`, `vcpkg`, `fetchcontent`, `bundled-sbom`, `idf`, `cpm` | `manifest-analysis` |
 | `header` | `source-code-analysis` |
 | `go-build-info` | `binary-analysis` |
 | `git`, `git-describe`, `git-commit`, anything unmapped | `other` |

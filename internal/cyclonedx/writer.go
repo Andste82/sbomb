@@ -463,7 +463,7 @@ func techniqueForVersionSource(source string) string {
 	case "curated":
 		// Declared by whoever wrote the configuration, not derived.
 		return "attestation"
-	case "conan", "vcpkg", "fetchcontent", "cmake", "bundled-sbom", "idf":
+	case "conan", "vcpkg", "fetchcontent", "cmake", "bundled-sbom", "idf", "cpm":
 		// cmake is CMAKE_PROJECT_VERSION, read from the File API cache: the
 		// build system's own manifest, in the same sense as a package
 		// manager's. bundled-sbom is a document the upstream shipped inside
@@ -471,7 +471,9 @@ func techniqueForVersionSource(source string) string {
 		// declaration read out of a file, which is what this technique names.
 		// idf is the ESP-IDF component manager's dependencies.lock and the
 		// idf_component.yml beside the component it unpacked: a lock file and a
-		// manifest, both declarations read out of a file.
+		// manifest, both declarations read out of a file. cpm is the lock
+		// CPM.cmake writes into the build directory while configuring, which is
+		// a declaration read out of a file in the same sense.
 		return "manifest-analysis"
 	case "header":
 		return "source-code-analysis"
