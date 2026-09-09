@@ -23,7 +23,7 @@ var hostPathFragments = []string{
 }
 
 func Toolchains() []string {
-	return []string{"gcc-ninja", "gcc-make", "clang-ninja", "arm-none-eabi", "mingw-w64", "msvc-ninja"}
+	return []string{"gcc-ninja", "gcc-make", "clang-ninja", "arm-none-eabi", "mingw-w64", "msvc-ninja", "msvc-vs17"}
 }
 
 func Projects() []string {
@@ -40,6 +40,9 @@ func AllPairs() [][2]string {
 	for _, toolchain := range Toolchains() {
 		for _, project := range Projects() {
 			if project == "p11-conan" && !allowedToolchains[toolchain] {
+				continue
+			}
+			if toolchain == "msvc-vs17" && project != "p02-static" {
 				continue
 			}
 			pairs = append(pairs, [2]string{toolchain, project})

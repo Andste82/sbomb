@@ -191,6 +191,34 @@ func TestMilestone17MakefilesAcceptance(t *testing.T) {
 	assertGolden(t, "gcc-make-p02.cdx.json", actual)
 }
 
+func TestMilestone18AMSVCAcceptance(t *testing.T) {
+	buildDir := testutil.CorpusBuildDir(t, "msvc-ninja", "p02-static")
+	output := filepath.Join(t.TempDir(), "ms.cdx.json")
+	code, _, stderr := execute([]string{"generate", "--build-dir", buildDir, "--path-flavor", "windows", "--policy", "lenient", "--output", output, "--reproducible"})
+	if code != 0 || stderr != "" {
+		t.Fatalf("MSVC acceptance result = code %d, stderr %q", code, stderr)
+	}
+	actual, err := os.ReadFile(output)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertGolden(t, "msvc-ninja-p02.cdx.json", actual)
+}
+
+func TestMilestone18BMSBuildAcceptance(t *testing.T) {
+	buildDir := testutil.CorpusBuildDir(t, "msvc-vs17", "p02-static")
+	output := filepath.Join(t.TempDir(), "vs.cdx.json")
+	code, _, stderr := execute([]string{"generate", "--build-dir", buildDir, "--config-name", "Debug", "--path-flavor", "windows", "--policy", "lenient", "--output", output, "--reproducible"})
+	if code != 0 || stderr != "" {
+		t.Fatalf("MSBuild acceptance result = code %d, stderr %q", code, stderr)
+	}
+	actual, err := os.ReadFile(output)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertGolden(t, "msvc-vs17-p02.cdx.json", actual)
+}
+
 // TestEvidenceChainYieldsTheSameFilesAcrossToolchains is the phase 2
 // acceptance criterion. The same project built with five different toolchain
 // and generator combinations must yield the same used-file set, because the

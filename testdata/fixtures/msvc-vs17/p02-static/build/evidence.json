@@ -1,0 +1,721 @@
+{
+  "schemaVersion": 1,
+  "toolVersion": "0.0.0",
+  "anchors": [
+    {
+      "key": "abs"
+    },
+    {
+      "key": "build"
+    },
+    {
+      "key": "project"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "abs:KERNEL32.dll",
+      "kind": "archive",
+      "attributes": {
+        "scope": "unknown"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib",
+      "kind": "archive",
+      "attributes": {
+        "scope": "unknown"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(amdsecgs.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "amdsecgs.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(argv_mode.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "argv_mode.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(commit_mode.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "commit_mode.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(cpu_disp.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "cpu_disp.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(default_local_stdio_options.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "default_local_stdio_options.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(denormal_control.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "denormal_control.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(dyn_tls_dtor.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "dyn_tls_dtor.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(dyn_tls_init.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "dyn_tls_init.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(env_mode.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "env_mode.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(error.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "error.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(exe_main.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "exe_main.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(file_mode.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "file_mode.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(gs_report.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "gs_report.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(gs_support.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "gs_support.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(gshandler.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "gshandler.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(guard_dispatch.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "guard_dispatch.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(guard_support.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "guard_support.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(guard_xfg_dispatch.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "guard_xfg_dispatch.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(init.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "init.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(initsect.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "initsect.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(invalid_parameter_handler.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "invalid_parameter_handler.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(matherr.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "matherr.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(matherr_detection.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "matherr_detection.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(new_mode.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "new_mode.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(pdblkup.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "pdblkup.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(thread_locale.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "thread_locale.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(tncleanup.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "tncleanup.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(ucrt_detection.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "ucrt_detection.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(ucrt_stubs.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "ucrt_stubs.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(userapi.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "userapi.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(utility.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "utility.obj"
+      }
+    },
+    {
+      "id": "abs:MSVCRTD.lib(utility_desktop.obj)",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:MSVCRTD.lib",
+        "member": "utility_desktop.obj"
+      }
+    },
+    {
+      "id": "abs:VCRUNTIME140D.dll",
+      "kind": "archive",
+      "attributes": {
+        "scope": "unknown"
+      }
+    },
+    {
+      "id": "abs:crypto.lib",
+      "kind": "archive",
+      "attributes": {
+        "scope": "unknown"
+      }
+    },
+    {
+      "id": "abs:main.obj",
+      "kind": "object",
+      "attributes": {
+        "scope": "unknown"
+      }
+    },
+    {
+      "id": "abs:ucrtbased.dll",
+      "kind": "archive",
+      "attributes": {
+        "scope": "unknown"
+      }
+    },
+    {
+      "id": "artifact:abs:Debug/app.exe",
+      "kind": "artifact",
+      "attributes": {
+        "discoveredBy": "cmake-file-api",
+        "path": "abs:Debug/app.exe",
+        "role": "application"
+      }
+    },
+    {
+      "id": "build:CRYPTO.DIR/DEBUG/CRYPTO.OBJ",
+      "kind": "object",
+      "attributes": {
+        "archive": "abs:crypto.lib",
+        "member": "crypto.obj",
+        "scope": "build"
+      }
+    },
+    {
+      "id": "project:CRYPTO.C",
+      "kind": "source",
+      "attributes": {
+        "scope": "project"
+      }
+    },
+    {
+      "id": "project:MAIN.C",
+      "kind": "source",
+      "attributes": {
+        "scope": "project"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(amdsecgs.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(argv_mode.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(commit_mode.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(cpu_disp.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(default_local_stdio_options.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(denormal_control.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(dyn_tls_dtor.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(dyn_tls_init.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(env_mode.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(error.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(exe_main.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(file_mode.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(gs_report.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(gs_support.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(gshandler.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(guard_dispatch.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(guard_support.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(guard_xfg_dispatch.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(init.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(initsect.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(invalid_parameter_handler.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(matherr.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(matherr_detection.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(new_mode.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(pdblkup.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(thread_locale.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(tncleanup.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(ucrt_detection.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(ucrt_stubs.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(userapi.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(utility.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:MSVCRTD.lib",
+      "to": "abs:MSVCRTD.lib(utility_desktop.obj)",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "medium",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "abs:crypto.lib",
+      "to": "build:CRYPTO.DIR/DEBUG/CRYPTO.OBJ",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map",
+      "attributes": {
+        "member": "crypto.obj"
+      }
+    },
+    {
+      "from": "abs:main.obj",
+      "to": "project:MAIN.C",
+      "type": "source-mapping",
+      "strength": "derived",
+      "confidence": "unknown",
+      "source": "msbuild-tlog:object-source-mapping",
+      "adapter": "resolver"
+    },
+    {
+      "from": "artifact:abs:Debug/app.exe",
+      "to": "abs:KERNEL32.dll",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "artifact:abs:Debug/app.exe",
+      "to": "abs:MSVCRTD.lib",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "artifact:abs:Debug/app.exe",
+      "to": "abs:VCRUNTIME140D.dll",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "artifact:abs:Debug/app.exe",
+      "to": "abs:crypto.lib",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "artifact:abs:Debug/app.exe",
+      "to": "abs:main.obj",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "artifact:abs:Debug/app.exe",
+      "to": "abs:ucrtbased.dll",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "msvc:app.exe.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "build:CRYPTO.DIR/DEBUG/CRYPTO.OBJ",
+      "to": "project:CRYPTO.C",
+      "type": "source-mapping",
+      "strength": "derived",
+      "confidence": "unknown",
+      "source": "msbuild-tlog:object-source-mapping",
+      "adapter": "resolver"
+    }
+  ]
+}

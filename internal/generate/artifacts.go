@@ -78,6 +78,16 @@ func resolveDeliverables(cfg config.Config, buildDir string, model *cmakeapi.Mod
 	}
 
 	candidates := discoverCandidates(model, cfg.Discovery, logger)
+	if cfg.Build.Config != "" {
+		prefix := filepath.ToSlash(cfg.Build.Config) + "/"
+		filtered := candidates[:0]
+		for _, candidate := range candidates {
+			if strings.HasPrefix(filepath.ToSlash(candidate), prefix) {
+				filtered = append(filtered, candidate)
+			}
+		}
+		candidates = filtered
+	}
 	if len(candidates) == 0 {
 		return nil, findings, &ExitError{
 			Code: 1,

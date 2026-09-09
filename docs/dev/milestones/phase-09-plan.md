@@ -12,10 +12,11 @@ from an unusual position: most of the machinery is already there and has never
 been pointed at a real Microsoft build. The first two steps therefore find out
 what is true before anything is written.
 
-**9a, 9b, 9c and 9d are implemented locally.** The Windows fixture corpus,
+**9a, 9b, 9c, 9d and 9e are implemented locally.** The Windows fixture corpus,
 native MSVC map parser, `.lib` archive proof, MSVC linker flags, verbose
-build-log evidence, the Linux Windows-flavor Used-File comparison and the
-MSVC p02 golden are in place. Steps 9e onward remain unimplemented.
+build-log evidence, the Linux Windows-flavor Used-File comparison, MSVC p02
+golden, MSBuild TLog adapter, Visual Studio 17 fixture and golden are in place.
+Step 9f remains.
 
 ---
 
@@ -142,6 +143,6 @@ mode this project exists to avoid.
 * [x] The MSVC map is parsed by section, and archive members are attributed.
 * [x] `Sbomb.cmake` asks `link.exe` for evidence in `link.exe`'s spelling.
 * [x] An MSVC build and a GCC build of one project agree on the project used-file set.
-* [ ] A Visual Studio build and a Ninja build of one project agree, or 18B is
+* [x] A Visual Studio build and a Ninja build of one project agree, or 18B is
   parked again with what was learned written down.
 * [ ] No support claim is made that a test does not back.

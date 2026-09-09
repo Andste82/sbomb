@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -419,10 +420,26 @@ func (b *builder) addArchiveMember(artifactID domain.NodeID, input linkInput) {
 	})
 }
 
+func identityBase(value string) string {
+	if _, relative, ok := strings.Cut(value, ":"); ok {
+		value = relative
+	}
+	return strings.ToLower(path.Base(strings.ReplaceAll(value, "\\", "/")))
+}
+
 // memberObject finds the build-tree object an archive member was created from,
 // using the archive's declared inputs.
 func (b *builder) memberObject(archiveCanonical, member string) (string, bool) {
 	candidates := b.archiveInputs[archiveCanonical]
+	if len(candidates) == 0 {
+		base := identityBase(archiveCanonical)
+		for key, inputs := range b.archiveInputs {
+			if identityBase(key) == base {
+				candidates = inputs
+				break
+			}
+		}
+	}
 	if len(candidates) == 0 {
 		// build.ninja did not name this archive, either because it could not
 		// be read or because it does not mention it. Only then is ninja asked.
@@ -431,7 +448,7 @@ func (b *builder) memberObject(archiveCanonical, member string) (string, bool) {
 	matches := make([]string, 0, 1)
 	for _, candidate := range candidates {
 		candidateBase := filepath.Base(strings.ReplaceAll(candidate, "\\", "/"))
-		if candidateBase == member {
+		if strings.EqualFold(candidateBase, member) {
 			matches = append(matches, candidate)
 		}
 	}

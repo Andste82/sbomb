@@ -91,7 +91,13 @@ if [[ "${1:-}" == "--check" ]]; then
         continue
       fi
       dir="$corpus_dir/$toolchain/$project"
-      for required in manifest.json PROVENANCE.md build/compile_commands.json; do
+      req_files=(manifest.json PROVENANCE.md)
+      if [[ "$toolchain" == "msvc-vs17" ]]; then
+        req_files+=(build/p02_static.sln)
+      else
+        req_files+=(build/compile_commands.json)
+      fi
+      for required in "${req_files[@]}"; do
         if [[ ! -e "$dir/$required" ]]; then
           log "missing $toolchain/$project/$required"
           missing=1

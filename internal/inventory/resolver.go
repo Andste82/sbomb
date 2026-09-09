@@ -127,7 +127,7 @@ func identityBase(value string) string {
 	if _, relative, ok := strings.Cut(value, ":"); ok {
 		value = relative
 	}
-	return path.Base(strings.ReplaceAll(value, "\\", "/"))
+	return strings.ToLower(path.Base(strings.ReplaceAll(value, "\\", "/")))
 }
 
 // AddCMakeMapping adds a source mapping from CMake File API data.

@@ -1,0 +1,10 @@
+{
+  "buildRoot": "C:/__fixture_build__",
+  "generatedAt": "2026-09-05T00:00:00Z",
+  "generator": "Visual Studio 17 2022",
+  "host": "windows",
+  "project": "p02-static",
+  "sourceRoot": "C:/__fixture_src__",
+  "toolchain": "msvc-vs17",
+  "toolchainVersion": ""
+}

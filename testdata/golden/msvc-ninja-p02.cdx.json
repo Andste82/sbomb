@@ -2,19 +2,19 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "version": 1,
-  "serialNumber": "urn:uuid:bbea2b40-c02c-51ad-8c1b-582d661bdadc",
+  "serialNumber": "urn:uuid:c49329c6-d043-5490-ad13-ac04159d20fd",
   "metadata": {
     "tools": [
       {
         "vendor": "sbomb",
         "name": "sbomb",
-        "version": "0.16.0"
+        "version": "0.0.0-test"
       }
     ],
     "component": {
       "type": "application",
-      "name": "p02-static",
-      "bom-ref": "product:p02-static",
+      "name": "app.exe",
+      "bom-ref": "product:app.exe",
       "properties": [
         {
           "name": "sbomb:artifact:role",
@@ -41,7 +41,7 @@
       },
       {
         "name": "sbomb:run:toolVersion",
-        "value": "0.16.0"
+        "value": "0.0.0-test"
       },
       {
         "name": "sbomb:build:config",
@@ -56,8 +56,8 @@
   "components": [
     {
       "type": "application",
-      "name": "p02-static",
-      "bom-ref": "component:p02-static",
+      "name": "project",
+      "bom-ref": "component:project",
       "licenses": [
         {
           "license": {
@@ -139,6 +139,12 @@
       "type": "file",
       "name": "crypto.c.obj",
       "bom-ref": "file:abs:CMakeFiles/crypto.dir/crypto.c.obj",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "8ff011f74dbd3cbb60c3e1d74bdea98fa24888b2e7a3cd35d9739c1edac7d55a"
+        }
+      ],
       "properties": [
         {
           "name": "sbomb:cdx:archiveProperty",
@@ -3283,7 +3289,7 @@
   ],
   "dependencies": [
     {
-      "ref": "component:p02-static",
+      "ref": "component:project",
       "dependsOn": [
         "file:project:crypto.c",
         "file:project:main.c"
@@ -3656,9 +3662,9 @@
       "ref": "file:project:main.c"
     },
     {
-      "ref": "product:p02-static",
+      "ref": "product:app.exe",
       "dependsOn": [
-        "component:p02-static",
+        "component:project",
         "component:unknown-abs-..",
         "component:unknown-abs-cmakefiles",
         "component:unknown-abs-crypto.lib",

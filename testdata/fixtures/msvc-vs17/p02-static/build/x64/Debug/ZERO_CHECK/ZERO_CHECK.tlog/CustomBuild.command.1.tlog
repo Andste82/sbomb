@@ -1,0 +1,10 @@
+^C:\__FIXTURE_BUILD__\CMAKEFILES\DF00779C8FDB727E28A8ACF75748319B\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/__fixture_src__ -BC:/__fixture_build__ --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/__fixture_build__/p02_static.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

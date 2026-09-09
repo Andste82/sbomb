@@ -1,0 +1,3513 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "version": 1,
+  "serialNumber": "urn:uuid:7bed215b-f8b2-5a87-847e-25bdb9893e09",
+  "metadata": {
+    "tools": [
+      {
+        "vendor": "sbomb",
+        "name": "sbomb",
+        "version": "0.0.0-test"
+      }
+    ],
+    "component": {
+      "type": "application",
+      "name": "Debug\\app.exe",
+      "bom-ref": "product:debug-app.exe",
+      "properties": [
+        {
+          "name": "sbomb:artifact:role",
+          "value": "application"
+        },
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        }
+      ]
+    },
+    "properties": [
+      {
+        "name": "sbomb:run:specVersion",
+        "value": "1.6"
+      },
+      {
+        "name": "sbomb:run:toolVersion",
+        "value": "0.0.0-test"
+      },
+      {
+        "name": "sbomb:build:config",
+        "value": "Debug"
+      },
+      {
+        "name": "sbomb:build:generator",
+        "value": "Visual Studio 17 2022"
+      }
+    ]
+  },
+  "components": [
+    {
+      "type": "application",
+      "name": "project",
+      "bom-ref": "component:project",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "anchor:project"
+        },
+        {
+          "name": "sbomb:component:root",
+          "value": "project:"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "KERNEL32.dll",
+      "bom-ref": "file:abs:KERNEL32.dll",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:KERNEL32.dll"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib",
+      "bom-ref": "file:abs:MSVCRTD.lib",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(amdsecgs.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(amdsecgs.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(amdsecgs.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(argv_mode.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(argv_mode.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(argv_mode.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(commit_mode.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(commit_mode.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(commit_mode.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(cpu_disp.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(cpu_disp.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(cpu_disp.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(default_local_stdio_options.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(default_local_stdio_options.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(default_local_stdio_options.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(denormal_control.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(denormal_control.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(denormal_control.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(dyn_tls_dtor.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(dyn_tls_dtor.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(dyn_tls_dtor.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(dyn_tls_init.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(dyn_tls_init.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(dyn_tls_init.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(env_mode.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(env_mode.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(env_mode.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(error.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(error.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(error.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(exe_main.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(exe_main.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(exe_main.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(file_mode.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(file_mode.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(file_mode.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(gs_report.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(gs_report.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(gs_report.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(gs_support.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(gs_support.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(gs_support.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(gshandler.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(gshandler.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(gshandler.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(guard_dispatch.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(guard_dispatch.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(guard_dispatch.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(guard_support.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(guard_support.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(guard_support.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(guard_xfg_dispatch.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(guard_xfg_dispatch.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(guard_xfg_dispatch.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(init.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(init.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(init.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(initsect.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(initsect.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(initsect.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(invalid_parameter_handler.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(invalid_parameter_handler.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(invalid_parameter_handler.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(matherr.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(matherr.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(matherr.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(matherr_detection.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(matherr_detection.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(matherr_detection.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(new_mode.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(new_mode.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(new_mode.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(pdblkup.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(pdblkup.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(pdblkup.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(thread_locale.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(thread_locale.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(thread_locale.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(tncleanup.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(tncleanup.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(tncleanup.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(ucrt_detection.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(ucrt_detection.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(ucrt_detection.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(ucrt_stubs.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(ucrt_stubs.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(ucrt_stubs.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(userapi.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(userapi.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(userapi.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(utility.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(utility.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(utility.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MSVCRTD.lib(utility_desktop.obj)",
+      "bom-ref": "file:abs:MSVCRTD.lib(utility_desktop.obj)",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:MSVCRTD.lib(utility_desktop.obj)"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "VCRUNTIME140D.dll",
+      "bom-ref": "file:abs:VCRUNTIME140D.dll",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:VCRUNTIME140D.dll"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "crypto.lib",
+      "bom-ref": "file:abs:crypto.lib",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:crypto.lib"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "main.obj",
+      "bom-ref": "file:abs:main.obj",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:main.obj"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "ucrtbased.dll",
+      "bom-ref": "file:abs:ucrtbased.dll",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "abs:ucrtbased.dll"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "CRYPTO.C",
+      "bom-ref": "file:project:CRYPTO.C",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:CRYPTO.C"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "MAIN.C",
+      "bom-ref": "file:project:MAIN.C",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:MAIN.C"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/crypto.lib",
+      "bom-ref": "component:unknown-abs-crypto.lib",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:root",
+          "value": "abs:"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/KERNEL32.dll",
+      "bom-ref": "component:unknown-abs-kernel32.dll",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:root",
+          "value": "abs:"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/main.obj",
+      "bom-ref": "component:unknown-abs-main.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:root",
+          "value": "abs:"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:root",
+          "value": "abs:"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(amdsecgs.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-amdsecgs.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(argv_mode.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-argv_mode.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(commit_mode.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-commit_mode.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(cpu_disp.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-cpu_disp.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(default_local_stdio_options.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-default_local_stdio_options.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(denormal_control.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-denormal_control.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(dyn_tls_dtor.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-dyn_tls_dtor.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(dyn_tls_init.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-dyn_tls_init.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(env_mode.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-env_mode.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(error.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-error.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(exe_main.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-exe_main.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(file_mode.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-file_mode.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(gs_report.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-gs_report.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(gs_support.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-gs_support.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(gshandler.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-gshandler.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(guard_dispatch.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-guard_dispatch.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(guard_support.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-guard_support.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(guard_xfg_dispatch.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-guard_xfg_dispatch.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(init.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-init.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(initsect.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-initsect.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(invalid_parameter_handler.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-invalid_parameter_handler.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(matherr.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-matherr.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(matherr_detection.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-matherr_detection.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(new_mode.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-new_mode.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(pdblkup.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-pdblkup.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(thread_locale.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-thread_locale.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(tncleanup.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-tncleanup.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(ucrt_detection.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-ucrt_detection.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(ucrt_stubs.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-ucrt_stubs.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(userapi.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-userapi.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(utility.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-utility.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/MSVCRTD.lib(utility_desktop.obj)",
+      "bom-ref": "component:unknown-abs-msvcrtd.lib-utility_desktop.obj",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/ucrtbased.dll",
+      "bom-ref": "component:unknown-abs-ucrtbased.dll",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:root",
+          "value": "abs:"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "unknown:abs/VCRUNTIME140D.dll",
+      "bom-ref": "component:unknown-abs-vcruntime140d.dll",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:root",
+          "value": "abs:"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:review:required",
+          "value": "true"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "component:project",
+      "dependsOn": [
+        "file:project:CRYPTO.C",
+        "file:project:MAIN.C"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-crypto.lib",
+      "dependsOn": [
+        "file:abs:crypto.lib"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-kernel32.dll",
+      "dependsOn": [
+        "file:abs:KERNEL32.dll"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-main.obj",
+      "dependsOn": [
+        "file:abs:main.obj"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-amdsecgs.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(amdsecgs.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-argv_mode.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(argv_mode.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-commit_mode.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(commit_mode.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-cpu_disp.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(cpu_disp.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-default_local_stdio_options.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(default_local_stdio_options.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-denormal_control.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(denormal_control.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-dyn_tls_dtor.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(dyn_tls_dtor.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-dyn_tls_init.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(dyn_tls_init.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-env_mode.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(env_mode.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-error.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(error.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-exe_main.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(exe_main.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-file_mode.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(file_mode.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-gs_report.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(gs_report.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-gs_support.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(gs_support.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-gshandler.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(gshandler.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-guard_dispatch.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(guard_dispatch.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-guard_support.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(guard_support.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-guard_xfg_dispatch.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(guard_xfg_dispatch.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-init.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(init.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-initsect.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(initsect.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-invalid_parameter_handler.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(invalid_parameter_handler.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-matherr.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(matherr.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-matherr_detection.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(matherr_detection.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-new_mode.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(new_mode.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-pdblkup.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(pdblkup.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-thread_locale.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(thread_locale.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-tncleanup.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(tncleanup.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-ucrt_detection.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(ucrt_detection.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-ucrt_stubs.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(ucrt_stubs.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-userapi.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(userapi.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-utility.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(utility.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-msvcrtd.lib-utility_desktop.obj",
+      "dependsOn": [
+        "file:abs:MSVCRTD.lib(utility_desktop.obj)"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-ucrtbased.dll",
+      "dependsOn": [
+        "file:abs:ucrtbased.dll"
+      ]
+    },
+    {
+      "ref": "component:unknown-abs-vcruntime140d.dll",
+      "dependsOn": [
+        "file:abs:VCRUNTIME140D.dll"
+      ]
+    },
+    {
+      "ref": "file:abs:KERNEL32.dll"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(amdsecgs.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(argv_mode.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(commit_mode.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(cpu_disp.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(default_local_stdio_options.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(denormal_control.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(dyn_tls_dtor.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(dyn_tls_init.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(env_mode.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(error.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(exe_main.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(file_mode.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(gs_report.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(gs_support.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(gshandler.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(guard_dispatch.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(guard_support.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(guard_xfg_dispatch.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(init.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(initsect.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(invalid_parameter_handler.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(matherr.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(matherr_detection.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(new_mode.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(pdblkup.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(thread_locale.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(tncleanup.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(ucrt_detection.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(ucrt_stubs.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(userapi.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(utility.obj)"
+    },
+    {
+      "ref": "file:abs:MSVCRTD.lib(utility_desktop.obj)"
+    },
+    {
+      "ref": "file:abs:VCRUNTIME140D.dll"
+    },
+    {
+      "ref": "file:abs:crypto.lib"
+    },
+    {
+      "ref": "file:abs:main.obj"
+    },
+    {
+      "ref": "file:abs:ucrtbased.dll"
+    },
+    {
+      "ref": "file:project:CRYPTO.C"
+    },
+    {
+      "ref": "file:project:MAIN.C"
+    },
+    {
+      "ref": "product:debug-app.exe",
+      "dependsOn": [
+        "component:project",
+        "component:unknown-abs-crypto.lib",
+        "component:unknown-abs-kernel32.dll",
+        "component:unknown-abs-main.obj",
+        "component:unknown-abs-msvcrtd.lib",
+        "component:unknown-abs-msvcrtd.lib-amdsecgs.obj",
+        "component:unknown-abs-msvcrtd.lib-argv_mode.obj",
+        "component:unknown-abs-msvcrtd.lib-commit_mode.obj",
+        "component:unknown-abs-msvcrtd.lib-cpu_disp.obj",
+        "component:unknown-abs-msvcrtd.lib-default_local_stdio_options.obj",
+        "component:unknown-abs-msvcrtd.lib-denormal_control.obj",
+        "component:unknown-abs-msvcrtd.lib-dyn_tls_dtor.obj",
+        "component:unknown-abs-msvcrtd.lib-dyn_tls_init.obj",
+        "component:unknown-abs-msvcrtd.lib-env_mode.obj",
+        "component:unknown-abs-msvcrtd.lib-error.obj",
+        "component:unknown-abs-msvcrtd.lib-exe_main.obj",
+        "component:unknown-abs-msvcrtd.lib-file_mode.obj",
+        "component:unknown-abs-msvcrtd.lib-gs_report.obj",
+        "component:unknown-abs-msvcrtd.lib-gs_support.obj",
+        "component:unknown-abs-msvcrtd.lib-gshandler.obj",
+        "component:unknown-abs-msvcrtd.lib-guard_dispatch.obj",
+        "component:unknown-abs-msvcrtd.lib-guard_support.obj",
+        "component:unknown-abs-msvcrtd.lib-guard_xfg_dispatch.obj",
+        "component:unknown-abs-msvcrtd.lib-init.obj",
+        "component:unknown-abs-msvcrtd.lib-initsect.obj",
+        "component:unknown-abs-msvcrtd.lib-invalid_parameter_handler.obj",
+        "component:unknown-abs-msvcrtd.lib-matherr.obj",
+        "component:unknown-abs-msvcrtd.lib-matherr_detection.obj",
+        "component:unknown-abs-msvcrtd.lib-new_mode.obj",
+        "component:unknown-abs-msvcrtd.lib-pdblkup.obj",
+        "component:unknown-abs-msvcrtd.lib-thread_locale.obj",
+        "component:unknown-abs-msvcrtd.lib-tncleanup.obj",
+        "component:unknown-abs-msvcrtd.lib-ucrt_detection.obj",
+        "component:unknown-abs-msvcrtd.lib-ucrt_stubs.obj",
+        "component:unknown-abs-msvcrtd.lib-userapi.obj",
+        "component:unknown-abs-msvcrtd.lib-utility.obj",
+        "component:unknown-abs-msvcrtd.lib-utility_desktop.obj",
+        "component:unknown-abs-ucrtbased.dll",
+        "component:unknown-abs-vcruntime140d.dll"
+      ]
+    }
+  ]
+}

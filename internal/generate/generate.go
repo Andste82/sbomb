@@ -16,6 +16,7 @@ import (
 	"github.com/example/sbomb/internal/adapters/cmakeapi"
 	"github.com/example/sbomb/internal/adapters/compiledb"
 	"github.com/example/sbomb/internal/adapters/manifest"
+	"github.com/example/sbomb/internal/adapters/msbuild"
 	"github.com/example/sbomb/internal/adapters/pkgmanager"
 	"github.com/example/sbomb/internal/anchors"
 	"github.com/example/sbomb/internal/buildinfo"
@@ -200,21 +201,32 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	//    --sysroot flag the anchor model looks for.
 	compilePath := filepath.Join(buildDir, "compile_commands.json")
 	commandStrategy := "compile-commands-json"
+	var msbuildEvidence msbuild.Evidence
 	commands, err := compiledb.ParseFile(compilePath)
 	if err != nil {
 		if !os.IsNotExist(err) {
 			return Result{}, fmt.Errorf("parse compile database: %w", err)
 		}
 		logger.Info("compile_commands.json not found in '%s'", buildDir)
-		// The file is the evidence; ninja is asked only in its absence, and
-		// only about the deliverables the run is actually about.
-		commands = ninjaCompileCommands(ctx, buildDir, deliverables, runner, logger)
-		// These lines come from the build graph, not from a compile database
-		// this directory does not have. Section 13.2 counts `ninja -t
-		// commands` as strategy 2, so the mappings they yield must say so
-		// rather than name a file the run never read.
-		commandStrategy = "ninja-buildgraph"
-		findings = append(findings, missingCompileEvidenceFinding(cfg, buildDir, runner, len(commands), hasNinjaBuildGraph(buildDir)))
+		if msbuild.HasEvidence(buildDir) && !hasNinjaBuildGraph(buildDir) {
+			msbuildEvidence, err = msbuild.Read(buildDir)
+			if err != nil {
+				return Result{}, fmt.Errorf("read MSBuild evidence: %w", err)
+			}
+			commandStrategy = "msbuild-tlog"
+			logger.Info("Read %d MSBuild mapping(s)", len(msbuildEvidence.Mappings))
+			commands = nil
+		} else {
+			// The file is the evidence; ninja is asked only in its absence, and
+			// only about the deliverables the run is actually about.
+			commands = ninjaCompileCommands(ctx, buildDir, deliverables, runner, logger)
+			// These lines come from the build graph, not from a compile database
+			// this directory does not have. Section 13.2 counts `ninja -t
+			// commands` as strategy 2, so the mappings they yield must say so
+			// rather than name a file the run never read.
+			commandStrategy = "ninja-buildgraph"
+			findings = append(findings, missingCompileEvidenceFinding(cfg, buildDir, runner, len(commands), hasNinjaBuildGraph(buildDir)))
+		}
 	} else {
 		logger.Info("Discovered %d compile command(s)", len(commands))
 	}
@@ -309,6 +321,16 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	b.setIntrospection(runner, ctx)
 	b.headerClass = headers.New(anchorResult.ImplicitIncludeDirs, toolchainRoots(anchorResult), componentRoots(cfg))
 	compile := collectCompileEvidence(buildDir, commands, commandStrategy, logger)
+	for _, mapping := range msbuildEvidence.Mappings {
+		compile.addSource(mapping.Object, mapping.Source, mapping.Strategy)
+	}
+	for object, headers := range msbuildEvidence.Headers {
+		compile.addHeaders(object, headers)
+	}
+	for archive, objects := range msbuildEvidence.LibInputs {
+		logger.Debug("MSBuild LibInput %s -> %v", archive, objects)
+		b.recordArchiveInputs(archive, objects)
+	}
 	findings = append(findings, compile.findings...)
 	mapPath, depfilePath := "", ""
 	if len(cfg.Artifacts) > 0 {
