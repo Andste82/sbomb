@@ -10,6 +10,7 @@ import (
 	"unicode"
 
 	"github.com/example/sbomb/internal/adapters/depfiles"
+	"github.com/example/sbomb/internal/pathmodel"
 	"github.com/example/sbomb/internal/respfile"
 )
 
@@ -315,7 +316,7 @@ func looksLikeSource(path string) bool {
 	return sourceExtensions[strings.ToLower(filepath.Ext(path))]
 }
 func resolvePath(base, path string) string {
-	if filepath.IsAbs(path) {
+	if pathmodel.IsAbsolute(path) {
 		return filepath.Clean(path)
 	}
 	return filepath.Clean(filepath.Join(base, path))

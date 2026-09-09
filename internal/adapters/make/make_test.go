@@ -53,6 +53,12 @@ func TestParseTargetEvidence(t *testing.T) {
 	}
 }
 
+func TestResolvePathAcceptsWindowsAbsolutePathsOnLinux(t *testing.T) {
+	if got := resolvePath("/build", "C:/__fixture_src__/main.c"); got != "C:/__fixture_src__/main.c" {
+		t.Fatalf("resolvePath() = %q, want C:/__fixture_src__/main.c", got)
+	}
+}
+
 func TestParseFallsBackToDFile(t *testing.T) {
 	root := t.TempDir()
 	// The adapter applies to a Makefiles build tree, which a Makefile is what

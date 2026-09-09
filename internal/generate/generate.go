@@ -233,7 +233,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 
 	for _, manifestPath := range cfg.Manifests {
 		path := manifestPath
-		if !filepath.IsAbs(path) {
+		if !pathmodel.IsAbsolute(path) {
 			path = filepath.Join(cfg.Project.Root, path)
 		}
 		if _, manifestErr := manifest.ParseFile(path); manifestErr != nil {
@@ -590,7 +590,7 @@ func ninjaCompileCommands(ctx context.Context, buildDir string, deliverables []D
 	commands := make([]compiledb.Command, 0)
 	for _, deliverable := range deliverables {
 		target := deliverable.EvidencePath
-		if target == "" || filepath.IsAbs(target) {
+		if target == "" || pathmodel.IsAbsolute(target) {
 			// A deliverable outside the build directory is not a target ninja
 			// knows by that name.
 			continue
@@ -814,7 +814,7 @@ func targetsByFile(model *cmakeapi.Model, b *builder) map[string]string {
 		for _, target := range configuration.Targets {
 			for _, source := range target.Sources {
 				path := source.Path
-				if !filepath.IsAbs(path) {
+				if !pathmodel.IsAbsolute(path) {
 					path = filepath.Join(model.SourceRoot, path)
 				}
 				canonical := b.identityOf(path).Canonical()

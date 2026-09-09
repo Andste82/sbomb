@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/example/sbomb/internal/pathmodel"
 	"github.com/example/sbomb/internal/respfile"
 	"unicode"
 )
@@ -125,7 +126,7 @@ func resolvePath(directory, path string) string {
 	if path == "" {
 		return ""
 	}
-	if filepath.IsAbs(path) || directory == "" {
+	if pathmodel.IsAbsolute(path) || directory == "" {
 		return filepath.Clean(path)
 	}
 	return filepath.Clean(filepath.Join(directory, path))

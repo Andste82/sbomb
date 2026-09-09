@@ -10,6 +10,7 @@ import (
 	"github.com/example/sbomb/internal/adapters/cmakeapi"
 	"github.com/example/sbomb/internal/config"
 	"github.com/example/sbomb/internal/domain"
+	"github.com/example/sbomb/internal/pathmodel"
 )
 
 // Deliverable is one resolved final deliverable: the artifact the evidence
@@ -220,7 +221,7 @@ func locateArtifact(path, projectRoot, buildDir string) (string, bool) {
 		return "", false
 	}
 	candidates := []string{path}
-	if !filepath.IsAbs(path) {
+	if !pathmodel.IsAbsolute(path) {
 		if projectRoot != "" {
 			candidates = append(candidates, filepath.Join(projectRoot, path))
 		}

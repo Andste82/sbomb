@@ -7,6 +7,7 @@ import (
 
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/limits"
+	"github.com/example/sbomb/internal/pathmodel"
 )
 
 // maxUnityFileBytes bounds what the unity parser will read (section 30). A
@@ -122,7 +123,7 @@ func resolveUnityTU(b *builder, object, source string, depfileHeaders []string, 
 		base := filepath.Dir(physicalSource)
 		for _, include := range includes {
 			path := include
-			if !filepath.IsAbs(path) {
+			if !pathmodel.IsAbsolute(path) {
 				path = filepath.Join(base, path)
 			}
 			if !isSourcePath(path) {

@@ -12,6 +12,8 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/example/sbomb/internal/pathmodel"
 )
 
 // The bounds of section 9.3.
@@ -103,7 +105,7 @@ func expand(args []string, options Options, depth int, budget *int64) ([]string,
 			return out, fmt.Errorf("%w: %s", ErrDepthExceeded, arg)
 		}
 		path := reference
-		if !filepath.IsAbs(path) && options.Dir != "" {
+		if !pathmodel.IsAbsolute(path) && options.Dir != "" {
 			path = filepath.Join(options.Dir, path)
 		}
 		data, err := options.ReadFile(path)

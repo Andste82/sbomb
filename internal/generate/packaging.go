@@ -12,6 +12,7 @@ import (
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/evidence"
 	"github.com/example/sbomb/internal/limits"
+	"github.com/example/sbomb/internal/pathmodel"
 )
 
 // Section 18. A firmware image contains inputs the compiler and linker never
@@ -161,7 +162,7 @@ func readManifests(cfg config.Config, buildDir string, logger *Logger) ([]manife
 
 	candidates := make([]string, 0, len(cfg.Manifests)+1)
 	for _, path := range cfg.Manifests {
-		if !filepath.IsAbs(path) {
+		if !pathmodel.IsAbsolute(path) {
 			path = filepath.Join(cfg.Project.Root, path)
 		}
 		candidates = append(candidates, path)
@@ -249,7 +250,7 @@ func readInstallManifest(path string) (manifest.Manifest, bool) {
 // the project root unless absolute. A path inside the build tree is given as
 // such by the build that wrote it.
 func resolveManifestPath(cfg config.Config, buildDir, path string) string {
-	if path == "" || filepath.IsAbs(path) {
+	if path == "" || pathmodel.IsAbsolute(path) {
 		return path
 	}
 	root := cfg.Project.Root

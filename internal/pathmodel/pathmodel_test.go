@@ -51,6 +51,17 @@ func TestWindowsFlavorUnescapesNinjaDriveColon(t *testing.T) {
 	}
 }
 
+func TestIsAbsolutePortable(t *testing.T) {
+	for _, path := range []string{"/tmp/build", `C:\\build\\app.obj`, "C:/build/app.obj", `\\\\server\\share\\app.obj`} {
+		if !IsAbsolute(path) {
+			t.Errorf("IsAbsolute(%q) = false, want true", path)
+		}
+	}
+	if IsAbsolute("build/app.obj") {
+		t.Error("IsAbsolute(relative path) = true, want false")
+	}
+}
+
 func TestSlugFollowsTheSpecifiedNormalization(t *testing.T) {
 	cases := map[string]string{
 		"mbedTLS":          "mbedtls",

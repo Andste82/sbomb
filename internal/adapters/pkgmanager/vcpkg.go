@@ -10,6 +10,7 @@ import (
 
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/limits"
+	"github.com/example/sbomb/internal/pathmodel"
 )
 
 // vcpkg reads the SPDX document vcpkg writes for every package it installs
@@ -176,7 +177,7 @@ func (vcpkg) installedFiles(tree installTree, name string) ([]string, []domain.F
 		}
 		// Section 30.3: a listed path that is absolute or walks upwards would
 		// name a file outside the install tree, which no install list may do.
-		if filepath.IsAbs(relative) || strings.HasPrefix(relative, "/") || pathEscapes(relative) {
+		if pathmodel.IsAbsolute(relative) || strings.HasPrefix(relative, "/") || pathEscapes(relative) {
 			continue
 		}
 		files = append(files, filepath.Join(tree.root, filepath.FromSlash(relative)))

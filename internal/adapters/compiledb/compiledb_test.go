@@ -57,3 +57,14 @@ func TestParseWithoutOutput(t *testing.T) {
 		t.Fatalf("output = %q, want empty", commands[0].Output)
 	}
 }
+
+func TestParseWindowsAbsolutePathsOnLinux(t *testing.T) {
+	data := []byte(`[{"directory":"C:/__fixture_build__","file":"C:/__fixture_src__/main.c","command":"cl /c /Foobj/main.obj C:/__fixture_src__/main.c"}]`)
+	commands, err := Parse(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := commands[0].File; got != `C:/__fixture_src__/main.c` {
+		t.Fatalf("file = %q, want C:/__fixture_src__/main.c", got)
+	}
+}

@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/example/sbomb/internal/domain"
+	"github.com/example/sbomb/internal/pathmodel"
 )
 
 type Options struct{ IncludeRuntimeLibraries bool }
@@ -307,7 +308,7 @@ func resolvePath(compDir, name string) string {
 	if name == "" {
 		return ""
 	}
-	if filepath.IsAbs(name) {
+	if pathmodel.IsAbsolute(name) {
 		return filepath.Clean(name)
 	}
 	if compDir == "" {

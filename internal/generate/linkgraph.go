@@ -17,6 +17,7 @@ import (
 	"github.com/example/sbomb/internal/evidence"
 	"github.com/example/sbomb/internal/exec"
 	"github.com/example/sbomb/internal/headers"
+	"github.com/example/sbomb/internal/pathmodel"
 )
 
 // linkInput is one file the linker consumed, together with what kind of input
@@ -158,7 +159,7 @@ func (b *builder) scopeOfCanonical(canonical string) anchors.Scope {
 // against the directory being read reports a physical absolute path, which has
 // to be expressed in the logical build root before it can be identified.
 func (b *builder) logicalFor(path string) string {
-	if !filepath.IsAbs(path) || b.logicalBuild == "" {
+	if !pathmodel.IsAbsolute(path) || b.logicalBuild == "" {
 		return path
 	}
 	absoluteBuild, err := filepath.Abs(b.physicalBuild)
@@ -181,7 +182,7 @@ func (b *builder) physicalFor(path string) string {
 			return b.physicalBuild
 		}
 	}
-	if !filepath.IsAbs(path) {
+	if !pathmodel.IsAbsolute(path) {
 		return filepath.Join(b.physicalBuild, path)
 	}
 	return path

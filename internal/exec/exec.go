@@ -18,6 +18,8 @@ import (
 	osexec "os/exec"
 	"path/filepath"
 	"sort"
+
+	"github.com/example/sbomb/internal/pathmodel"
 	"strings"
 	"time"
 )
@@ -216,7 +218,7 @@ func (r *Runner) checkProgram(path string) error {
 	if path == "" {
 		return fmt.Errorf("%w: empty path", ErrPathOutsideAnchors)
 	}
-	if !filepath.IsAbs(path) {
+	if !pathmodel.IsAbsolute(path) {
 		return nil
 	}
 	exists := r.Exists

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/example/sbomb/internal/domain"
+	"github.com/example/sbomb/internal/pathmodel"
 )
 
 // InventoryFile is the JSON-serializable representation used for --inventory-dump.
@@ -214,7 +215,7 @@ func withinAnchor(path string, anchors []string) bool {
 			continue
 		}
 		rel, err := filepath.Rel(cleanAnchor, cleanPath)
-		if err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)) && !filepath.IsAbs(rel) {
+		if err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)) && !pathmodel.IsAbsolute(rel) {
 			return true
 		}
 	}
@@ -330,7 +331,7 @@ func canonicalFilePath(id domain.FileID, options HashOptions) string {
 	if id.RelPath == "" {
 		return ""
 	}
-	if filepath.IsAbs(id.RelPath) {
+	if pathmodel.IsAbsolute(id.RelPath) {
 		return id.RelPath
 	}
 	return filepath.Clean(id.RelPath)

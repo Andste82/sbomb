@@ -3,6 +3,7 @@ package pathmodel
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"path/filepath"
 	"runtime"
 	"strings"
 )
@@ -22,6 +23,19 @@ type WindowsFlavor struct{}
 
 func (WindowsFlavor) Normalize(path string) string { return normalizeWindows(path) }
 func (WindowsFlavor) CaseSensitive() bool          { return false }
+
+// IsAbsolute reports whether a path is absolute under the host OS or in a
+// Windows path spelling carried by cross-platform build evidence.
+func IsAbsolute(path string) bool {
+	if filepath.IsAbs(path) {
+		return true
+	}
+	return len(path) >= 3 && isASCIIAlpha(path[0]) && path[1] == ':' && (path[2] == '/' || path[2] == '\\') || strings.HasPrefix(path, `\\\\`)
+}
+
+func isASCIIAlpha(value byte) bool {
+	return (value >= 'A' && value <= 'Z') || (value >= 'a' && value <= 'z')
+}
 
 // DefaultFlavor returns the logical path flavor for the current host.
 func DefaultFlavor() Flavor {
