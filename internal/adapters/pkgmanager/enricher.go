@@ -58,10 +58,13 @@ type Enricher interface {
 // ranked claims, so moving a line here changes which value a document
 // publishes.
 //
-// It is empty in this release. The interface and both of its call sites come
-// first, so that every reader added later is added in one place and under one
-// set of rules.
-var enrichers = []Enricher{}
+// bundledSBOM is first because it is the strongest declared origin there is
+// (rank 4 of section 21.1): a document the upstream shipped and its own
+// tooling checked, rather than our reading of a manifest format. A manifest
+// reader added later belongs after it.
+var enrichers = []Enricher{
+	bundledSBOM{},
+}
 
 // applyEnrichment lets every enricher describe a root and folds what they say
 // into a package. It runs during discovery, while the package is still being
@@ -72,9 +75,9 @@ var enrichers = []Enricher{}
 // That is the intended order: both describe the same package, and the one that
 // put it there is the one to believe where neither origin outranks the other.
 func applyEnrichment(pkg *Package, root ComponentRoot) []domain.Finding {
-	// Nothing is registered in this release, and this line is why that costs
-	// nothing: with no enricher not a single directory is touched, so no
-	// document can change.
+	// A root nobody settled is no root, and a registry with nothing in it
+	// touches no directory at all. Both are cheap guards in front of the only
+	// file reads this file causes.
 	if len(enrichers) == 0 || pkg == nil || root.Path == "" {
 		return nil
 	}

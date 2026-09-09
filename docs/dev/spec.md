@@ -877,7 +877,9 @@ Every used file MUST have exactly one **primary** grouping component. Mapping st
 7. Anchor root itself (e.g. everything under `pkg:conan/mbedtls` maps to that package).
 8. Unknown component.
 
-Strategy 6 recognizes a directory as a component root by the files it carries: `conanfile.py/txt`, `vcpkg.json`, `idf_component.yml`, `Cargo.toml`, `west.yml`, `CONTROL` — **and a recognized licence file** (`LICENSE`, `LICENCE`, `COPYING`, with the optional `.txt`/`.md` extension of §22.3). A directory that carries its own licence is a distinct work by convention, and for a library that was simply copied into the source tree it is the only marker there is. A licence file does **not** mark a boundary at the anchor root itself: a project's own top-level licence describes the project, not a dependency inside it.
+Strategy 6 recognizes a directory as a component root by the files it carries: `conanfile.py/txt`, `vcpkg.json`, `idf_component.yml`, `Cargo.toml`, `west.yml`, `CONTROL` — **a recognized licence file** (`LICENSE`, `LICENCE`, `COPYING`, with the optional `.txt`/`.md` extension of §22.3) — **and a bundled SBOM under a conventional name** (`sbom.cdx.json`, `bom.cdx.json`, `sbom.spdx.json`, `bom.spdx.json`). A directory that carries its own licence is a distinct work by convention, and for a library that was simply copied into the source tree it is the only marker there is; a dependency that ships its own SBOM says the same thing, and some ship nothing else. Neither marks a boundary at the anchor root itself: a project's own top-level licence, and a project's own SBOM, describe the project rather than a dependency inside it.
+
+The SBOM marker names are fixed, while the reader of §21 globs `*.cdx.json` and `*.spdx.json` in a root that is already settled. The asymmetry is a cost of §31: this list is consulted with a `stat` per used file per ancestor directory, where a directory listing would be paid tens of thousands of times over, and a settled root is read once per component. A dependency whose document is named `<name>-<version>.cdx.json` is therefore described by it but not bounded by it.
 
 `NOTICE` and `COPYRIGHT` are not boundary markers. They are attribution material rather than a licence grant, and a directory carrying only a NOTICE is not thereby a separate work.
 
@@ -942,6 +944,7 @@ Every grouping component MUST have either a resolved `version` or an explicit `U
 | Curated | high |
 | `CMAKE_PROJECT_VERSION` | high |
 | Package-manager | high |
+| Bundled SBOM | high |
 | SDK metadata | high |
 | Git tag (clean tree, exact tag) | high |
 | Git describe (with distance / dirty) | medium |
@@ -954,7 +957,7 @@ Published as `component.evidence.identity` with `field: "version"`: the value in
 | `VersionSource` | `technique` |
 |---|---|
 | `curated` | `attestation` |
-| `cmake`, `conan`, `vcpkg`, `fetchcontent` | `manifest-analysis` |
+| `cmake`, `conan`, `vcpkg`, `fetchcontent`, `bundled-sbom` | `manifest-analysis` |
 | `header` | `source-code-analysis` |
 | `go-build-info` | `binary-analysis` |
 | `git`, `git-describe`, `git-commit`, anything unmapped | `other` |
@@ -1000,6 +1003,12 @@ Adapters and their evidence files:
 Each adapter registers anchors (§7.4) and supplies component name, version, purl, license hint, and root paths. An adapter registers **one** anchor per package, on the identity root: §7.2 gives a package a single version-free key, and a second key would name a package that does not exist.
 
 An adapter MAY also supply the list of files the manager itself recorded as belonging to the package, where such a record exists — vcpkg writes one per package under `installed/vcpkg/info/`. That list is used for mapping only (§19.2 strategy 2), and it is subject to the bounds of §30: a list that breaches them is refused whole and reported as `INPUT_LIMIT_EXCEEDED`, while a list that is simply absent is not reported, because it improves an attribution that works without it.
+
+Besides adapters, this section has readers of a second kind: an **enricher** is handed a directory that already stands as a component root — the identity root of a discovered package, or the root §19.2 strategy 6 settled — and only describes what lies directly in it. It does not enumerate, does not search and does not descend. Its return carries metadata claims and findings, and no paths, so it can neither add a file to the used set nor move a component boundary (D33).
+
+The first such reader is the **bundled SBOM**: a CycloneDX `*.cdx.json` or SPDX 2.x `*.spdx.json` lying in a component root. Only the document's own root component is read — `metadata.component` in CycloneDX, the package `documentDescribes` or a `DESCRIBES` relationship names in SPDX — never the dependencies it lists: a dependency list is no evidence that anything was linked, and taking it would put components into the document that no evidence chain reached. It contributes `version`, `license`, `supplier` and `purl` at rank 4 of §21.1. A name in such a document is not published: the component keeps the name that was settled before its files were grouped (D33). The document is subject to the bounds of §30 and is applied whole or not at all: one that breaches a bound is reported as `INPUT_LIMIT_EXCEEDED`, one that cannot be parsed, declares a format or SPDX version this tool does not read, or does not name exactly one package it describes, is reported as `EVIDENCE_UNREADABLE`. A root with no such document is silence, not a finding.
+
+A document a package manager wrote itself is that manager's **install state** (rank 3) and not an SBOM the upstream shipped — `vcpkg.spdx.json` is vcpkg's own record of what it installed. The generic reader MUST skip it, or it would outrank at rank 4 the very adapter that installed the package (D34).
 
 Two adapters MAY report the same root — a submodule that FetchContent also populated. The first adapter in the tool's fixed order keeps it, and the second claim is rejected rather than merged: the two disagree about who owns the package, not about what its version is, and folding the loser's metadata into the winner would publish claims about an installation the winning manager never made. The rejection MUST be reported as `COMPONENT_MAPPING_CONFLICT` (info), naming both managers, both package names and the root they both claimed.
 
@@ -2088,6 +2097,7 @@ Severity shown is the default and may be changed via `policy.severityOverrides`.
 | `NINJA_DEPS_UNAVAILABLE` | info | — | `ninja -t deps` not permitted or failed |
 | `RSP_DEPTH_EXCEEDED` | warning | — | Response file recursion limit hit |
 | `INPUT_LIMIT_EXCEEDED` | warning | — | A parser limit of §30 was reached |
+| `EVIDENCE_UNREADABLE` | warning | — | A metadata file was found but could not be parsed, so nothing was taken from it |
 | `PREBUILT_LIBRARY_UNMAPPED` | warning | `prebuiltLibrariesRequireMapping` | Prebuilt library has no component mapping |
 | `WAIVER_EXPIRED` | warning | — | A waiver's `expires` date has passed |
 | `WAIVER_UNUSED` | info | — | A waiver matched no finding |

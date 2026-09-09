@@ -42,6 +42,26 @@ var licenseBoundaryFiles = []string{
 	"COPYING", "COPYING.txt", "COPYING.md",
 }
 
+// bundledSBOMFiles mark a directory as the root of a distinct component in the
+// same way a licence file does: a dependency that ships its own SBOM says with
+// it that it is a separate piece of software, and it is often the only thing
+// such a dependency ships besides its sources.
+//
+// The names are fixed, unlike the globs the reader in internal/adapters/
+// pkgmanager uses on a root that is already settled. This list is consulted
+// with os.Stat once per used file per ancestor directory, so a directory
+// listing here would be paid tens of thousands of times over against the
+// budget of section 31, while a settled root is read once per component.
+//
+// Like a licence file, and for the same reason, these never mark a boundary at
+// the anchor root itself: a project's own SBOM at its own root describes the
+// project, and taking it for a marker would rename the project's component
+// after its source directory.
+var bundledSBOMFiles = []string{
+	"sbom.cdx.json", "bom.cdx.json",
+	"sbom.spdx.json", "bom.spdx.json",
+}
+
 // componentResolver maps used files onto components, following the priority
 // order of section 19.2. Only strategies 1, 6, 7 and 8 exist so far; package
 // managers, SDK layouts and submodule boundaries are later work (D7).
@@ -439,9 +459,15 @@ func (r *componentResolver) nearestPackageRoot(file domain.UsedFile) (root, mani
 		// A licence file marks a boundary too, but never at the anchor root
 		// itself: a project's own top-level licence describes the project, not
 		// a dependency inside it, and treating it as a marker would rename the
-		// project's own component after its directory.
+		// project's own component after its directory. A bundled SBOM is the
+		// same kind of statement under the same exception.
 		if !atBoundary {
 			for _, name := range licenseBoundaryFiles {
+				if info, err := os.Stat(filepath.Join(dir, name)); err == nil && !info.IsDir() {
+					return dir, name, true
+				}
+			}
+			for _, name := range bundledSBOMFiles {
 				if info, err := os.Stat(filepath.Join(dir, name)); err == nil && !info.IsDir() {
 					return dir, name, true
 				}

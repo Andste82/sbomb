@@ -14,6 +14,47 @@ PDB parsing remains out of scope. MSVC header evidence therefore comes from
 `/showIncludes`, Ninja dependencies or MSBuild TLogs, and a build may report
 `DEBUG_INFO_UNAVAILABLE` where a DWARF-based build would provide debug evidence.
 
+### A dependency that ships its own SBOM is now read from it
+
+A `sbom.cdx.json` or `sbom.spdx.json` at the root of a dependency is the best
+evidence about that dependency there is. Everything the CRA asks for is in it
+already — version, licence, supplier, purl — put there by the people who ship
+the package and checked by their tooling, instead of by our reading of somebody's
+manifest format. Until now sbomb walked past it.
+
+It is read now, and it ranks accordingly: above every manifest and above what the
+package manager that installed the dependency recorded, below what your
+configuration says and below the checkout itself — a document states what was
+shipped, a checkout shows what is there. The claim it displaces is kept rather
+than dropped, and the version it supplies is published with `bundled-sbom` beside
+it, so the document says which file the answer came from.
+
+Only the one component the document is about is read: `metadata.component` in
+CycloneDX, the package `documentDescribes` names in SPDX. The dependencies such a
+document lists are ignored, and that is the point — a dependency list is no
+evidence that anything was linked, and nothing enters your SBOM because a file
+mentioned it. No file joins the used set, no component boundary moves, and a
+dependency that was installed but never linked is still absent and still reported
+as `PACKAGE_NOT_LINKED`.
+
+A document that cannot be trusted end to end supplies nothing at all rather than
+something partial: over the size limit of §30 it is `INPUT_LIMIT_EXCEEDED`, and
+unparseable, of an unknown format, SPDX 3.0, or describing more than one package,
+it is the new `EVIDENCE_UNREADABLE`. Both name the file. A root with no document
+is silence: a dependency that shipped no SBOM has nothing missing about it.
+
+vcpkg is deliberately untouched. Its `vcpkg.spdx.json` looks like a bundled SBOM
+and is not one — vcpkg wrote it itself, so it is that manager's record of what it
+installed — and the reader skips it by name. Reading it again would have let a
+generic reader outrank the adapter that installed the package and quietly
+relabelled the origin of every vcpkg component.
+
+A directory that carries such a document is also a component boundary now, like
+one carrying a licence file, and under the same exception: not at your own
+project root, where your own SBOM describes your project rather than a dependency
+inside it. Deviation D34 records the six questions §21.1 left open and how each
+was answered.
+
 ### A copied-in library can now be described by what lies beside it
 
 `internal/adapters/pkgmanager` had one kind of reader: an adapter, asked for
@@ -35,15 +76,13 @@ boundary; there is nowhere in the signature to say either. Both call sites
 exist: on the identity root of every discovered package, and on the root of a
 component that only the marker walk found.
 
-No reader is registered yet, so this changes no document: with an empty registry
-not a single directory is touched. What it fixes is decided, though, and the
-order in which it will apply is fixed with it — curated configuration above
-everything, a `versionFrom` rule the user wrote above any manifest that would
-answer in its place, and inside a package a manager owns the rank table of
-§21.1. One limit is deliberate: a component keeps its directory name even where
-a manifest beside it states another, because the name settles before the files
-are grouped and changing it there would move a boundary rather than describe
-one.
+The first reader to use this is the bundled-SBOM reader above. The order it
+applies in was fixed here — curated configuration above everything, a
+`versionFrom` rule the user wrote above any manifest that would answer in its
+place, and inside a package a manager owns the rank table of §21.1. One limit
+is deliberate: a component keeps its directory name even where a manifest
+beside it states another, because the name settles before the files are grouped
+and changing it there would move a boundary rather than describe one.
 
 Deviation D33 records the split and the two orderings, which §21 does not
 provide for.

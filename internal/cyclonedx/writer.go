@@ -463,10 +463,12 @@ func techniqueForVersionSource(source string) string {
 	case "curated":
 		// Declared by whoever wrote the configuration, not derived.
 		return "attestation"
-	case "conan", "vcpkg", "fetchcontent", "cmake":
+	case "conan", "vcpkg", "fetchcontent", "cmake", "bundled-sbom":
 		// cmake is CMAKE_PROJECT_VERSION, read from the File API cache: the
 		// build system's own manifest, in the same sense as a package
-		// manager's.
+		// manager's. bundled-sbom is a document the upstream shipped inside
+		// the package: a stronger origin than any manifest, but still a
+		// declaration read out of a file, which is what this technique names.
 		return "manifest-analysis"
 	case "header":
 		return "source-code-analysis"

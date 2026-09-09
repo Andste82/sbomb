@@ -24,6 +24,10 @@ func (vcpkg) Manager() string { return "vcpkg" }
 // The bounds of section 30 for the two files this adapter reads. The SPDX
 // document is one package's metadata; a file list can name every header of a
 // large library, so it is bounded by entries as well as by bytes.
+//
+// maxSPDXBytes bounds every SPDX document this package reads, this one and the
+// ones bundledsbom.go finds: it is one bound for one format, and two ceilings
+// for the same kind of file would be a difference nobody could justify.
 const (
 	maxSPDXBytes       = 8 << 20
 	maxFileListBytes   = 8 << 20
@@ -32,19 +36,26 @@ const (
 
 // spdxDocument is the part of vcpkg.spdx.json this adapter reads.
 type spdxDocument struct {
-	Packages []struct {
-		Name             string `json:"name"`
-		VersionInfo      string `json:"versionInfo"`
-		LicenseConcluded string `json:"licenseConcluded"`
-		LicenseDeclared  string `json:"licenseDeclared"`
-		Supplier         string `json:"supplier"`
-		Homepage         string `json:"homepage"`
-		ExternalRefs     []struct {
-			ReferenceCategory string `json:"referenceCategory"`
-			ReferenceType     string `json:"referenceType"`
-			ReferenceLocator  string `json:"referenceLocator"`
-		} `json:"externalRefs"`
-	} `json:"packages"`
+	Packages []spdxPackage `json:"packages"`
+}
+
+// spdxPackage is one package entry of an SPDX 2.x document. It is shared with
+// the bundled-SBOM reader because the entry has the same shape wherever the
+// document came from; what differs is which entry may be read, and that is
+// decided by each reader rather than by this type.
+type spdxPackage struct {
+	SPDXID           string `json:"SPDXID"`
+	Name             string `json:"name"`
+	VersionInfo      string `json:"versionInfo"`
+	LicenseConcluded string `json:"licenseConcluded"`
+	LicenseDeclared  string `json:"licenseDeclared"`
+	Supplier         string `json:"supplier"`
+	Homepage         string `json:"homepage"`
+	ExternalRefs     []struct {
+		ReferenceCategory string `json:"referenceCategory"`
+		ReferenceType     string `json:"referenceType"`
+		ReferenceLocator  string `json:"referenceLocator"`
+	} `json:"externalRefs"`
 }
 
 func (a vcpkg) Discover(options Options) ([]Package, []domain.Finding) {
@@ -244,8 +255,18 @@ func (a vcpkg) readPackage(path, root string) (Package, bool) {
 	// Everything below comes out of the one document vcpkg wrote when it
 	// installed the port, so all four claims share its standing. It is install
 	// state and not a bundled SBOM: vcpkg produced it, the upstream project did
-	// not ship it. The distinction is idle while nothing reads an upstream
-	// SBOM, and it decides the winner as soon as something does.
+	// not ship it. That distinction now decides a winner -- bundledsbom.go
+	// reads SBOMs at a component root at rank 4, and it skips this file by
+	// name, or a generic reader would outrank the adapter that installed the
+	// package and relabel the origin of every vcpkg component.
+	//
+	// This adapter keeps its own path through the same file for three things
+	// the generic reader may not do: it discovers the package at all -- its
+	// name, its identity root and its anchor key -- it reads the installed
+	// file list that tells one port from another inside a shared triplet tree,
+	// and it finds the copyright file vcpkg placed beside the document. An
+	// enricher describes a root somebody else has settled; none of those three
+	// is a description.
 	found.Take(FieldVersion, Claim{
 		Value: entry.VersionInfo, Source: "vcpkg", Rank: RankInstallState,
 		Confidence: domain.ConfidenceHigh,

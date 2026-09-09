@@ -974,7 +974,88 @@ component differently from its directory would move a boundary rather than
 describe one. The name stays the directory name even where a manifest states
 another; changing that is a mapping question, not an enrichment one.
 
-The registry is empty in this release. Both call sites, the interface and the
-ranking around it exist first, so that every reader added later is added in one
-place and under one set of rules — and while nothing is registered, not a single
-directory is touched and no document can change.
+The registry was empty when this was written: both call sites, the interface and
+the ranking around it came first, so that every reader added later is added in
+one place and under one set of rules. The first reader is the bundled-SBOM
+reader of D34.
+
+---
+
+## D34 — A bundled SBOM is read, and six things the specification leaves open had to be settled
+
+§21.1 gives rank 4 to "an SBOM the upstream shipped inside the package, at the
+package root" and says nothing further: not which file that is, not which part
+of it may be read, and not what to do with a document that is none of those
+things. The reader in `internal/adapters/pkgmanager/bundledsbom.go` had to
+settle six questions, and each answer changes what a document says.
+
+**vcpkg's own document is excluded by name.** `vcpkg.spdx.json` is an SPDX
+document lying at a package root, and it is *not* an upstream SBOM: vcpkg wrote
+it while installing the port, so it is that manager's install state at rank 3.
+A generic reader that picked it up would read the same file a second time at
+rank 4, beat the adapter that installed the package, and silently relabel the
+origin of every vcpkg component in the document. The exclusion is by filename
+rather than by asking who owns the root, because `ComponentRoot` carries a path
+and a name by design and nothing else — and because the rule is right in the
+other case too: a vcpkg tree reached through §19.2 strategy 6, with no adapter
+involved, must not have that file read as an upstream statement either.
+
+**The marker names are fixed and the reader's globs are not.** §19.2 strategy 6
+recognizes four names by `stat`; the reader globs `*.cdx.json` and `*.spdx.json`
+once in a root that is already settled. A directory listing in the marker walk
+would be paid once per used file per ancestor directory, tens of thousands of
+times over against the budget of §31, and the marker walk exists to bound
+components rather than to find documents. The cost is real and is accepted: a
+dependency shipping `mbedtls-3.4.cdx.json` and nothing else is described by that
+document if something else already bounded its directory, and is not bounded by
+it otherwise.
+
+**SPDX 2.x only.** SPDX 3.0 is JSON-LD with a different shape; reading it by
+pattern matching on an `@graph` would be exactly the guess this tool refuses. A
+document declaring any other version is refused whole and reported, so that the
+values it would have supplied are traceable to the version rather than absent
+without explanation.
+
+**The described package comes from `documentDescribes` or a `DESCRIBES`
+relationship, never from `packages[0]`.** The vcpkg adapter may take the first
+package because vcpkg's own layout guarantees the port comes first; a foreign
+document guarantees nothing, and the file lying in a dependency's directory may
+well be a product SBOM listing a whole delivery. A document naming several
+described packages is refused rather than reduced to one of them. The single
+exception is a document with exactly one package and no relationship at all,
+which cannot mean anything else.
+
+**A name in a document is never published.** It is read far enough to establish
+that the document describes *a* package at all — a CycloneDX `metadata.component`
+without a name describes nothing — and then dropped. D33 settles that a reader
+does not change a component's name, and `Contribution` has no field for one. It
+is deliberately not a gate either: directory names routinely differ from package
+names (`dep/mbedtls-3.4` against `mbedtls`), so refusing a document over a
+mismatch would throw away good evidence to enforce a convention nobody agreed
+to.
+
+**No JSON-Schema validation, and a licence array is read only where it is
+unambiguous.** `internal/cyclonedx` compiles the 1.6 and 1.7 schemas, and
+validating against them would refuse a perfectly readable 1.4 document, or one
+that is invalid in a field this reader never looks at. "Schema-violating" is
+therefore defined operationally: the document must parse, must declare its
+format, and must name exactly one component it is about. A CycloneDX licence
+array yields an expression, or a single licence object's SPDX identifier; a bare
+`name` states nothing this tool will publish, because CycloneDX defines that
+field as the licence that has no SPDX identifier and the claim would end up in
+`licenses[].expression`, which the schemas describe as a valid SPDX expression.
+Several licence objects without an expression state nothing either, because the
+format does not say whether they apply together or the recipient chooses, and
+§22.3 forbids deciding that by inspection.
+
+**What this does not do.** A product-level SBOM that happens to sit in a
+dependency's directory is read as if it described that dependency. There is no
+reliable way to tell the two apart without gating on the name, which costs more
+than it saves; the exposure is bounded to four fields, adds no file and moves no
+boundary. `EVIDENCE_UNREADABLE` was added to appendix A for the refusals, rather
+than stretching `INPUT_LIMIT_EXCEEDED` over a document that is simply not
+parseable. And `pkgmanager.Options` carries no `limits.Config`, so
+`--max-input-size` does not reach this reader any more than it reaches the
+existing adapters: the bound is the package-level `maxSPDXBytes` the vcpkg
+adapter already uses, which is what §30 requires by default but not what a user
+who lowered the ceiling would expect. Both are recorded rather than fixed here.
