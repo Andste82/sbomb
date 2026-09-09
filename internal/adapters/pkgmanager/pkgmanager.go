@@ -100,6 +100,11 @@ type Options struct {
 	Runner *exec.Runner
 	// Context bounds the introspection calls.
 	Context context.Context
+	// Distro is what the image manifests of an embedded-Linux distribution
+	// build state, read once per run (distromanifest.go). A nil value means no
+	// manifest was configured and nothing happens; it never enumerates a
+	// package, and only describes one an adapter already found.
+	Distro *DistroMetadata
 }
 
 // Adapter reads one package manager's evidence.
@@ -189,6 +194,16 @@ func Discover(options Options) ([]Package, []domain.Finding) {
 			// the package, which is the reason resolveRoot reads a licence and
 			// a version from the identity root alone.
 			findings = append(findings, applyEnrichment(&entry, ComponentRoot{Path: entry.Root(), Name: entry.Name})...)
+			// What a distribution image manifest says about a package of this
+			// name, folded in last for the reason enrichment is folded in
+			// after the adapter: an image manifest and the manager that
+			// installed the package rank alike (section 21.1), and where
+			// neither origin outranks the other the manager that put the
+			// package there is the one to believe. Nothing but claims arrives
+			// here -- no root, no file, no anchor key.
+			for _, contribution := range options.Distro.Describe(entry.Name) {
+				entry.Take(contribution.Field, contribution.Claim)
+			}
 			packages = append(packages, entry)
 		}
 	}

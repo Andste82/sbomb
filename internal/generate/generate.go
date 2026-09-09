@@ -254,6 +254,29 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 			compilers = append(compilers, command.Arguments[0])
 		}
 	}
+	// What an embedded-Linux distribution build recorded about its image
+	// (section 21): a Yocto license.manifest, a Buildroot
+	// legal-info/manifest.csv. It is read once here and handed to both readers
+	// of it, because a deploy directory lies outside the build tree and
+	// re-reading it per component would open the same file hundreds of times.
+	// Its entries describe components; they never create one.
+	distroPaths := make([]string, 0, len(cfg.DistroManifests))
+	for _, path := range cfg.DistroManifests {
+		// Resolved exactly as cfg.Manifests is: absolute stays, relative is
+		// anchored at the project root.
+		if !filepath.IsAbs(path) {
+			path = filepath.Join(cfg.Project.Root, path)
+		}
+		distroPaths = append(distroPaths, path)
+	}
+	distro, distroFindings := pkgmanager.ReadDistroManifests(distroPaths)
+	findings = append(findings, distroFindings...)
+	for _, source := range distro.Sources() {
+		// A count belongs in the log and not in a finding (section 39.3), and
+		// a user who configured a manifest wants to see that it was read.
+		logger.Info("Image manifest %s: %d package(s) described", source.Path, source.Entries)
+	}
+
 	// Package managers are consulted before the anchors are assembled, because
 	// an installed dependency needs an anchor of its own (section 21): without
 	// one its files keep the absolute path of a package cache, which is
@@ -265,6 +288,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		// build system knows where it configured from.
 		SourceDir: projectRootForIdentity,
 		Runner:    runner,
+		Distro:    distro,
 	})
 	findings = append(findings, packageFindings...)
 	packageAnchors := make([]anchors.PackageAnchor, 0, len(packages))
@@ -474,6 +498,11 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	// the run's anchors and its log, and a second one would be a second truth
 	// about what sbomb is allowed to execute.
 	resolver.setIntrospection(runner, ctx)
+	// The same index the adapters were offered. A component no package manager
+	// owns -- named after an anchor, or after the directory a marker file
+	// bounded -- is where an image manifest usually answers, and it is asked
+	// there rather than being read a second time.
+	resolver.setDistroMetadata(distro)
 	// A path below the build directory being read has to be expressed in the
 	// logical build root first (section 7.6), exactly as every other path the
 	// adapters hand over. A path outside it -- a package cache -- is already

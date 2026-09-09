@@ -109,6 +109,7 @@ produces the same document.
 | Package manifests | Component identity for vcpkg, Conan, FetchContent, git submodules |
 | Package file lists | Which installed files belong to which package, where the manager wrote it down |
 | Bundled SBOMs | What a dependency says about itself, where it ships a CycloneDX or SPDX document |
+| Distribution image manifests | Name, version and licence for a component the evidence chain already reached, where a Yocto or Buildroot build wrote one |
 
 Some of these are not there unless you ask the build to produce them. The
 linker map and link dependency file are produced by linker flags, which is what

@@ -180,3 +180,46 @@ func FuzzCPMLock(f *testing.F) {
 		}
 	})
 }
+
+// An image manifest is the one file in this package that comes out of no build
+// tree at all: the user names it, a distribution build somewhere else wrote it,
+// and both of its formats are read by a parser written here. Whatever is in it,
+// the reader may return claims and findings and nothing else.
+func FuzzDistroManifest(f *testing.F) {
+	f.Add("PACKAGE NAME: busybox\nPACKAGE VERSION: 1.36.1\nRECIPE NAME: busybox\nLICENSE: GPL-2.0-only\n")
+	f.Add("\"PACKAGE\",\"VERSION\",\"LICENSE\"\n\"busybox\",\"1.36.1\",\"GPL-2.0+, LGPL-2.1+\"\n")
+	f.Add("\"PACKAGE\",\"VERSION\"\n\"a\"\n")
+	f.Add("PACKAGE NAME:\nPACKAGE VERSION:\n\nPACKAGE NAME: a\n")
+	f.Add("PACKAGE NAME: a\nPACKAGE VERSION: 1\n\nPACKAGE NAME: a\nPACKAGE VERSION: 2\n")
+	f.Add("")
+
+	f.Fuzz(func(t *testing.T, manifest string) {
+		path := filepath.Join(t.TempDir(), "manifest")
+		if err := os.WriteFile(path, []byte(manifest), 0o600); err != nil {
+			t.Skip(err)
+		}
+		metadata, findings := ReadDistroManifests([]string{path})
+		for _, finding := range findings {
+			// A finding with no identifier reaches no catalogue, and one with
+			// no subject names nothing a reader could look at.
+			if finding.ID == "" || finding.Subject.Ref == "" {
+				t.Fatalf("a finding names no identifier or no subject: %#v", finding)
+			}
+		}
+		for _, source := range metadata.Sources() {
+			for _, name := range []string{"a", "busybox", ""} {
+				for _, contribution := range metadata.Describe(name) {
+					// A claim with an origin but no value would publish
+					// identity evidence for a version nobody stated, and a
+					// value with no origin could be attributed to nothing.
+					if contribution.Claim.Value == "" || contribution.Claim.Source == "" {
+						t.Fatalf("%s described %q as %#v", source.Path, name, contribution)
+					}
+					if contribution.Claim.Rank != RankInstallState {
+						t.Fatalf("a claim of rank %v came out of an image manifest", contribution.Claim.Rank)
+					}
+				}
+			}
+		}
+	})
+}

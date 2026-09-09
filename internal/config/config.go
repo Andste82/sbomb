@@ -21,6 +21,18 @@ type Config struct {
 	Discovery     Discovery   `json:"discovery,omitempty"`
 	Components    []Component `json:"components,omitempty"`
 	Manifests     []string    `json:"manifests,omitempty"`
+	// DistroManifests are the manifests an embedded-Linux distribution build
+	// wrote about an image: a Yocto license.manifest, a Buildroot
+	// legal-info/manifest.csv. They are a separate key from Manifests, and not
+	// a second use of it, because Manifests is the native package/image
+	// manifest of appendix E and nothing else -- a Yocto file listed there is
+	// read as JSON and reported as MISSING_PACKAGE_EVIDENCE.
+	//
+	// They describe an image rather than this build, so they only supply
+	// metadata for components the evidence chain reached on its own and never
+	// add one. A path that does not exist is a finding at run time rather than
+	// a load error: one configuration is used against several build trees.
+	DistroManifests []string `json:"distroManifests,omitempty"`
 }
 
 type Project struct {

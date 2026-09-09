@@ -96,6 +96,11 @@ type componentResolver struct {
 	// without the production code exporting a hook for it -- the same reason
 	// setPackages takes its path resolution as packagePaths.
 	enrich func(pkgmanager.ComponentRoot) (pkgmanager.Package, []domain.Finding)
+	// distro is what the image manifests of an embedded-Linux distribution
+	// build state, keyed by package name and read once for the whole run. It
+	// describes a component; it never maps a file, so it appears nowhere in
+	// resolve and nowhere in r.packages.
+	distro *pkgmanager.DistroMetadata
 }
 
 // resolvedPackage is one package-manager result expressed in identity terms,
@@ -178,6 +183,13 @@ func (r *componentResolver) setTargets(byFile map[string]string) {
 func (r *componentResolver) setIntrospection(runner *exec.Runner, ctx context.Context) {
 	r.runner = runner
 	r.ctx = ctx
+}
+
+// setDistroMetadata hands over what the configured image manifests state. It
+// is a field rather than a package-level call for the reason enrich is: a test
+// can put its own index in without the production code exporting a hook.
+func (r *componentResolver) setDistroMetadata(distro *pkgmanager.DistroMetadata) {
+	r.distro = distro
 }
 
 // resolve names the component a file belongs to and records which strategy
@@ -524,10 +536,24 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 	// writes to r.packages or r.packageFiles and never touches the component's
 	// name or identity, because both settled before the files were grouped.
 	var described pkgmanager.Package
-	if !isManaged && rootInfo.Physical != "" && strings.HasPrefix(rootInfo.Source, rootSourceMarkerPrefix) {
-		found, enrichmentFindings := r.enrich(pkgmanager.ComponentRoot{Path: rootInfo.Physical, Name: component.Name})
-		described = found
-		findings = append(findings, enrichmentFindings...)
+	if !isManaged {
+		if rootInfo.Physical != "" && strings.HasPrefix(rootInfo.Source, rootSourceMarkerPrefix) {
+			found, enrichmentFindings := r.enrich(pkgmanager.ComponentRoot{Path: rootInfo.Physical, Name: component.Name})
+			described = found
+			findings = append(findings, enrichmentFindings...)
+		}
+		// An image manifest of an embedded-Linux distribution build answers
+		// here too, and it has to be asked separately from the reader above:
+		// it is keyed by name rather than by directory, so it can describe a
+		// component that a marker file never bounded -- one named after an
+		// anchor, or after nothing at all -- which is what a file out of a
+		// Yocto sysroot usually becomes. It is folded through Take, so the
+		// ranking of section 21.1 decides and the switches below need no
+		// branch of their own. A component a manager owns is not asked: its
+		// package was described while it was discovered.
+		for _, contribution := range r.distro.Describe(component.Name) {
+			described.Take(contribution.Field, contribution.Claim)
+		}
 	}
 
 	// Version (section 20.2): curated first, then exact package-manager

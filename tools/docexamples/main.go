@@ -30,6 +30,7 @@ var configurationKeys = map[string]bool{
 	"schemaVersion": true, "project": true, "build": true, "mode": true,
 	"artifacts": true, "policy": true, "output": true, "anchors": true,
 	"discovery": true, "components": true, "manifests": true,
+	"distroManifests": true,
 }
 
 func main() {

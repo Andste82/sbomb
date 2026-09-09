@@ -14,6 +14,54 @@ PDB parsing remains out of scope. MSVC header evidence therefore comes from
 `/showIncludes`, Ninja dependencies or MSBuild TLogs, and a build may report
 `DEBUG_INFO_UNAVAILABLE` where a DWARF-based build would provide debug evidence.
 
+### Yocto and Buildroot describe the components your image build already knows
+
+An embedded-Linux image build writes down what it built: Yocto a
+`license.manifest` in the deploy directory, Buildroot a
+`legal-info/manifest.csv`. Name, version and licence for every package, from the
+build itself — and sbomb walked past both, so a library that arrived through the
+distribution reached the document with its directory name and nothing else.
+
+Name one with `distroManifests` in the configuration or `--distro-manifest` on
+the command line, and every component your build actually used that the manifest
+names arrives with that version and that licence, saying `yocto` or `buildroot`
+beside it so the document names the file the answer came from. Relative paths
+are resolved against the project root, which is what lets one configuration name
+a deploy directory that sits outside the build tree.
+
+**The manifest describes your image; it does not decide what is in your
+document.** An 800-package manifest against a build that links three libraries
+produces exactly the components, files and relations it produced before —
+three of them are described, the other 797 entries add no component, no file, no
+relation and not one `PACKAGE_NOT_LINKED`. Being installed in an image is no
+evidence that anything linked it, which is the rule this whole tool is built on.
+The one thing a manifest reports on its own is a contradiction it states itself:
+one package name given two versions describes nothing and says so once. A Yocto
+recipe whose packages carry different licences — what `LICENSE:${PN}` does — is
+no contradiction, so the recipe name simply describes nothing there and stays
+silent. Matching is by name only, against the package name and, for Yocto,
+the recipe name; nothing is matched by path or by resemblance, because a wrong
+match publishes a wrong version with high confidence.
+
+What the manifest says loses to your configuration, to an SBOM a dependency
+ships with itself, to the checkout, and — at equal standing — to the package
+manager that installed the package, because that one put it there. It ranks as
+installed state, which means it outranks a manifest that only declares what was
+asked for: a project that configures both an image manifest and, say, an
+ESP-IDF component manifest will see the image build's answer win. Every claim
+that loses is kept rather than dropped.
+
+Both formats are read strictly. The CSV is parsed as CSV and not split on
+commas, so a licence expression like `GPL-2.0+, LGPL-2.1+ with exceptions`
+arrives whole, and a row with a field too few refuses the whole file instead of
+quietly shifting every column after it. A manifest that breaches a parser bound
+is refused whole with `INPUT_LIMIT_EXCEEDED`, one that is neither format with
+`EVIDENCE_UNREADABLE`, and a configured path that is not there with
+`MISSING_PACKAGE_EVIDENCE` — a typo has to be visible. Two entries that state
+different versions for one name describe nothing at all and say so. Configure no
+manifest and nothing at all happens: no file is opened and the document is the
+one you had.
+
 ### CPM.cmake dependencies carry the version CPM recorded
 
 CPM.cmake writes a lock file into your build directory while it configures —

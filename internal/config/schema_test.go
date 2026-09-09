@@ -147,7 +147,7 @@ func TestEverySectionOfTheLoaderIsInTheSchema(t *testing.T) {
 	}
 	for _, section := range []string{
 		"schemaVersion", "project", "build", "mode", "artifacts",
-		"policy", "output", "anchors", "discovery", "components", "manifests",
+		"policy", "output", "anchors", "discovery", "components", "manifests", "distroManifests",
 	} {
 		if _, present := properties[section]; !present {
 			t.Errorf("the schema does not mention %q, which the loader accepts", section)
