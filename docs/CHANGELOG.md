@@ -14,6 +14,83 @@ PDB parsing remains out of scope. MSVC header evidence therefore comes from
 `/showIncludes`, Ninja dependencies or MSBuild TLogs, and a build may report
 `DEBUG_INFO_UNAVAILABLE` where a DWARF-based build would provide debug evidence.
 
+### A copied-in library can now get its version from the manifest lying beside it
+
+A library somebody vendored into your tree — no package manager, no lock file,
+just a directory with a licence file in it — has always arrived in the document
+under its directory name and nothing else. sbomb already knew how to describe
+such a directory once something had settled it as a component; what it could
+read there was a bundled SBOM or a CMSIS pack descriptor, and most vendored
+libraries ship neither.
+
+It reads four more declarations now, each one directly in a directory that is
+already a component root:
+
+- `<Pkg>ConfigVersion.cmake` or `<pkg>-config-version.cmake` — the
+  `PACKAGE_VERSION` a CMake package-version file assigns.
+- a build2 `manifest` — its `version:`, and its `license:` where that is an
+  SPDX expression.
+- `xmake.lua` — the `set_version` line.
+- `MODULE.bazel` — the `version` of its `module()` call.
+
+The component carries `cmake-config-version`, `build2`, `xmake` or `bazel`
+beside its version, so the document says where the answer came from.
+
+**No build system is executed and no language is interpreted.** CMake, Lua and
+Starlark are programming languages, and evaluating one to learn a version would
+mean running code out of your dependency. Each reader recognises exactly one
+assignment in exactly one shape. A file that states the version twice with
+different values, one that assigns a variable instead of a literal, an
+unfinished `module()` call, or a root holding two package-version files is
+reported as `EVIDENCE_UNREADABLE` and contributes nothing at all — never half a
+file. A version somebody commented out is not read either, including one inside
+a Lua long comment (`--[[ ... ]]`), whose lines carry no comment marker of their
+own.
+
+**A name is never taken from these files, and neither is a boundary.** The
+component keeps the name it already had, and a directory that carries only an
+`xmake.lua` still gets no component of its own: these are not boundary markers,
+and a licence file, a package manifest or a package manager is still what draws
+a component's edge. Nothing about your used-file set changes.
+
+**Two limits worth knowing.** An installed package usually keeps its
+`<Pkg>ConfigVersion.cmake` under `lib/cmake/<Pkg>/` rather than in the
+component root, and these readers do not go looking — so that one answers less
+often than its name suggests. And a build2 manifest that uses the format's
+multi-line value syntax (a `description:` block, typically) is refused whole
+with `EVIDENCE_UNREADABLE` rather than read in part, because a value taken out
+of a file this tool cannot follow to the end would be one nobody stated.
+
+### Meson subprojects are read from their wrap files
+
+A Meson project declares each of its dependencies in
+`subprojects/<name>.wrap`, and Meson unpacks it into `subprojects/<directory>/`
+next to it. Until now such a subproject was just a directory in your source
+tree: its files were folded into the component your project anchor stands for,
+with no name, version or repository telling the dependency apart from the code
+that used it.
+
+sbomb reads those wrap files now, at that one location and nowhere else. The
+wrap's own file name is the subproject's name, `directory` says where it was
+unpacked, and a `[wrap-git]` says which revision was asked for and where it came
+from — so the component carries `meson` beside its version and a `pkg:generic`
+purl with the repository and, where the wrap pins one, the commit. A Meson
+subproject that is also a git submodule is described by the wrap, because a wrap
+says more than a `.gitmodules` line.
+
+**A `[wrap-file]` gets no version, deliberately.** It names a tarball and its
+hash; a version read out of an archive's file name would be a guess, so such a
+subproject keeps `UNKNOWN_VERSION` and `UNKNOWN_PURL`. A wrap pinned to a commit
+gets none either — the commit goes into the purl and into `vcsCommit`, as it
+does for a Zephyr project.
+
+**The report can grow.** A project with many subprojects that links only a few
+of them now produces one `PACKAGE_NOT_LINKED` (info) per subproject nothing
+linked — the same thing vcpkg and west have always said, and correct: a
+dependency that was unpacked but never linked is not part of your product, so
+it is not in the document. A wrap whose directory is not on disk at all says
+nothing: Meson had no reason to fetch it, and there is nothing to report.
+
 ### A Zephyr workspace is read from the manifest west wrote
 
 Until now a Zephyr build hid its modules inside the application. A driver out of

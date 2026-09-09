@@ -459,3 +459,130 @@ func checkWestPackages(t *testing.T, topdir, source string) {
 		}
 	}
 }
+
+// The four declarations a project keeps at its own root. Every one of them is
+// read by a parser written in this repository, out of a file this tool did not
+// write, in a language this tool deliberately does not interpret -- so the
+// interesting property is not what they take out of a good file but that
+// arbitrary bytes produce a claim or a finding and never a panic or a value
+// nobody stated.
+func FuzzRootManifests(f *testing.F) {
+	f.Add(`set(PACKAGE_VERSION "3.4.1")`+"\n",
+		": 1\nname: libhello\nversion: 1.0.2\nlicense: MIT\n",
+		"set_version(\"2.1.0\")\n",
+		"module(name = \"a\", version = \"1.0\")\n")
+	f.Add("set(PACKAGE_VERSION ${PROJECT_VERSION})", ": 1\nlicense: other: see COPYING\n",
+		"set_version(", "module(")
+	f.Add("set(PACKAGE_VERSION", ": 2\nversion: 1\n", "set_version(\"1\")\nset_version(\"2\")\n",
+		"module(\n version = \"1.0\",\n")
+	f.Add("set(PACKAGE_VERSION \"\")", ":\n", "-- set_version(\"1\")", "module(name=\"a\") module(name=\"b\")")
+	f.Add("", "", "", "")
+
+	f.Fuzz(func(t *testing.T, cmake, build2, xmake, bazel string) {
+		root := t.TempDir()
+		for name, content := range map[string]string{
+			"fooConfigVersion.cmake": cmake,
+			build2ManifestName:       build2,
+			xmakeManifestName:        xmake,
+			bazelModuleName:          bazel,
+		} {
+			if err := os.WriteFile(filepath.Join(root, name), []byte(content), 0o600); err != nil {
+				t.Skip(err)
+			}
+		}
+
+		for _, enricher := range []Enricher{cmakeConfigVersion{}, build2Manifest{}, xmakeManifest{}, bazelModule{}} {
+			contributions, findings := enricher.Enrich(ComponentRoot{Path: root, Name: "foo"})
+			for _, finding := range findings {
+				// A finding with no identifier reaches no catalogue, and one
+				// with no subject names nothing a reader could look at.
+				if finding.ID == "" || finding.Subject.Ref == "" {
+					t.Fatalf("%s: a finding names no identifier or no subject: %#v", enricher.Source(), finding)
+				}
+				// Whole or not at all: a file that was reported may not also
+				// have contributed, because a value out of a file that could
+				// not be read to its end is invented.
+				if len(contributions) != 0 {
+					t.Fatalf("%s: %s was reported and %#v was still taken",
+						enricher.Source(), finding.ID, contributions)
+				}
+			}
+			for _, contribution := range contributions {
+				if contribution.Claim.Value == "" || contribution.Claim.Rank == RankNone {
+					t.Fatalf("%s: a claim with no value or no origin: %#v", enricher.Source(), contribution)
+				}
+				// These readers state a version, and build2 also states a
+				// licence. Neither states a supplier or a purl, and a name has
+				// no field at all.
+				switch contribution.Field {
+				case FieldVersion:
+				case FieldLicense:
+					if enricher.Source() != build2Source {
+						t.Fatalf("%s contributed a licence, which it cannot state", enricher.Source())
+					}
+				default:
+					t.Fatalf("%s contributed %q, which it cannot state", enricher.Source(), contribution.Field)
+				}
+			}
+		}
+	})
+}
+
+// The wrap file a Meson project declares. It decides not only a version but
+// where a component root lies -- a path out of somebody else's file, joined
+// onto this machine's -- which is the shape section 30.3 exists for.
+func FuzzMesonWrap(f *testing.F) {
+	f.Add("[wrap-git]\nurl = https://example.invalid/org/zlib.git\nrevision = v1.3.1\n")
+	f.Add("[wrap-file]\ndirectory = ../../etc\nsource_url = https://example.invalid/a.tar.gz\n")
+	f.Add("[wrap-file]\ndirectory = zlib\n[wrap-git]\ndirectory = elsewhere\n")
+	f.Add("[wrap-git]\nurl = https://u:p@example.invalid/org/zlib.git\nrevision = \n")
+	f.Add("[provide]\nzlib = zlib_dep\n")
+	f.Add("[wrap-git")
+	f.Add("")
+
+	f.Fuzz(func(t *testing.T, wrap string) {
+		source := t.TempDir()
+		subprojects := filepath.Join(source, mesonSubprojectsDir)
+		for _, dir := range []string{subprojects, filepath.Join(subprojects, "zlib")} {
+			if err := os.MkdirAll(dir, 0o755); err != nil {
+				t.Skip(err)
+			}
+		}
+		if err := os.WriteFile(filepath.Join(subprojects, "zlib.wrap"), []byte(wrap), 0o600); err != nil {
+			t.Skip(err)
+		}
+
+		packages, findings := meson{}.Discover(Options{SourceDir: source, Context: context.Background()})
+		for _, finding := range findings {
+			if finding.ID == "" || finding.Subject.Ref == "" {
+				t.Fatalf("a finding names no identifier or no subject: %#v", finding)
+			}
+		}
+		for _, entry := range packages {
+			if entry.Name == "" {
+				t.Fatal("a package without a name was returned")
+			}
+			if entry.Root() == "" {
+				t.Fatalf("the package %q owns no directory", entry.Name)
+			}
+			// Whatever the wrap says, the root stays inside the subprojects
+			// directory of this source tree.
+			if !strings.HasPrefix(entry.Root(), subprojects+string(filepath.Separator)) {
+				t.Fatalf("the root %q lies outside the subprojects directory", entry.Root())
+			}
+			// A wrap records no file list, so inventing one would widen the
+			// used set -- the one thing no reader here may do.
+			if len(entry.Files) != 0 {
+				t.Fatalf("the package %q claims %d file(s); a wrap records none", entry.Name, len(entry.Files))
+			}
+			if entry.PURL.Value != "" && !strings.HasPrefix(entry.PURL.Value, "pkg:generic/") {
+				t.Fatalf("purl %q is not of this adapter's type", entry.PURL.Value)
+			}
+			for _, claim := range []Claim{entry.Version, entry.License, entry.Supplier, entry.PURL} {
+				if claim.Value == "" && (claim.Source != "" || claim.Rank != RankNone) {
+					t.Fatalf("a claim named an origin but no value: %#v", claim)
+				}
+			}
+		}
+	})
+}

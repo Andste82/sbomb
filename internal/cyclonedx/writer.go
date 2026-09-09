@@ -463,7 +463,8 @@ func techniqueForVersionSource(source string) string {
 	case "curated":
 		// Declared by whoever wrote the configuration, not derived.
 		return "attestation"
-	case "conan", "vcpkg", "fetchcontent", "cmake", "bundled-sbom", "idf", "cpm", "yocto", "buildroot", "pkg-config", "cmsis-pack", "west":
+	case "conan", "vcpkg", "fetchcontent", "cmake", "bundled-sbom", "idf", "cpm", "yocto", "buildroot", "pkg-config", "cmsis-pack", "west",
+		"cmake-config-version", "build2", "xmake", "bazel", "meson":
 		// cmake is CMAKE_PROJECT_VERSION, read from the File API cache: the
 		// build system's own manifest, in the same sense as a package
 		// manager's. bundled-sbom is a document the upstream shipped inside
@@ -486,7 +487,13 @@ func techniqueForVersionSource(source string) string {
 		// history, read out of a file like every manifest above it. west is
 		// the manifest a Zephyr workspace declares -- the revision it asked
 		// for each of its projects -- which is a declaration read out of a
-		// file in exactly that sense.
+		// file in exactly that sense. cmake-config-version, build2, xmake and
+		// bazel are the five-line declarations a project keeps at its own
+		// root -- a generated <Pkg>ConfigVersion.cmake, a build2 `manifest`, a
+		// set_version() line, a module() call -- each of them a version read
+		// out of a file rather than derived from anything. meson is the wrap
+		// file a Meson project declares for a subproject: the revision it
+		// asked for, which is a declaration in the same sense as west's.
 		return "manifest-analysis"
 	case "header":
 		return "source-code-analysis"
