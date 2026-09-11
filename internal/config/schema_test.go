@@ -88,6 +88,9 @@ func TestTheSchemaAcceptsAFullyPopulatedConfiguration(t *testing.T) {
 	if err := checkAgainstSchema(t, schema, `{"project":{"name":"a"},"components":[{"path":"d","versionFrom":"git"}]}`); err != nil {
 		t.Errorf("a bare string for versionFrom was rejected: %v", err)
 	}
+	if err := checkAgainstSchema(t, schema, `{"$schema":"https://andste82.github.io/sbomb/sbomb.schema.json","project":{"name":"a"}}`); err != nil {
+		t.Errorf("an editor schema reference was rejected: %v", err)
+	}
 }
 
 // The schema must refuse what the loader refuses, or it is the more permissive
