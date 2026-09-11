@@ -1116,7 +1116,7 @@ func (r *componentResolver) licenseFromComponentRoot(root string) (domain.Licens
 	if root == "" {
 		return domain.LicenseFinding{}, false
 	}
-	for _, name := range recognizedLicenseFiles {
+	for _, name := range licenseFilesIn(root) {
 		found, err := license.ResolveFile(filepath.Join(root, name))
 		if err == nil && found.Expression != "" {
 			found.Evidence = "component-level"
@@ -1133,7 +1133,7 @@ func (r *componentResolver) licenseEvidenceFromComponentRoot(root string) []doma
 	if root == "" {
 		return nil
 	}
-	for _, name := range recognizedLicenseFiles {
+	for _, name := range licenseFilesIn(root) {
 		data, err := os.ReadFile(filepath.Join(root, name))
 		if err != nil {
 			continue
@@ -1154,12 +1154,92 @@ func licenseNames(findings []domain.LicenseFinding) []string {
 	return names
 }
 
-// recognizedLicenseFiles is the exhaustive list of section 22.3.
-var recognizedLicenseFiles = []string{
-	"LICENSE", "LICENSE.txt", "LICENSE.md",
-	"LICENCE", "LICENCE.txt", "LICENCE.md",
-	"COPYING", "COPYING.txt", "COPYING.md",
-	"NOTICE", "COPYRIGHT",
+// The licence file names of section 22.3 are recognized case-insensitively,
+// with an optional .txt or .md extension, and LICENSE-<id> is recognized as a
+// family rather than as a name -- that is how a component carrying LICENSE-MIT
+// and LICENSE-APACHE side by side says it holds both. Neither rule can be
+// expressed as a fixed list of paths to stat, so a component root is listed
+// once and its entries are matched instead.
+//
+// That is affordable here and nowhere else. A component root is read once per
+// component, after something else settled it, while the boundary markers of
+// section 19.2 are stat-ed once per used file per ancestor directory and a
+// directory listing there would be paid tens of thousands of times over
+// against the budget of section 31.
+//
+// LICENCE-<id> is deliberately absent: section 22.3 names the British spelling
+// as a whole file name and the -<id> form only for LICENSE.
+const (
+	licenseRankLicense = iota
+	licenseRankLicenseID
+	licenseRankCopying
+	licenseRankNotice
+	licenseRankCopyright
+)
+
+// recognizedLicenseFile says whether a directory entry is a licence file of
+// section 22.3, and ranks it. The rank orders the candidates a single root
+// carries, so that a component holding both a LICENSE and a NOTICE is decided
+// by its licence rather than by whichever name the filesystem returned first.
+// LICENSE and LICENCE share a rank: a spelling is not a statement.
+func recognizedLicenseFile(name string) (int, bool) {
+	stem := name
+	if ext := filepath.Ext(stem); strings.EqualFold(ext, ".txt") || strings.EqualFold(ext, ".md") {
+		stem = strings.TrimSuffix(stem, ext)
+	}
+	switch strings.ToUpper(stem) {
+	case "LICENSE", "LICENCE":
+		return licenseRankLicense, true
+	case "COPYING":
+		return licenseRankCopying, true
+	case "NOTICE":
+		return licenseRankNotice, true
+	case "COPYRIGHT":
+		return licenseRankCopyright, true
+	}
+	if upper := strings.ToUpper(stem); strings.HasPrefix(upper, "LICENSE-") && len(upper) > len("LICENSE-") {
+		return licenseRankLicenseID, true
+	}
+	return 0, false
+}
+
+// licenseFilesIn lists the recognized licence files a component root carries,
+// in the order they are to be consulted: by rank, then by name. A directory is
+// read in no defined order, and section 29 requires the same evidence to
+// produce the same document, so the order is imposed here rather than
+// inherited from the filesystem.
+func licenseFilesIn(root string) []string {
+	if root == "" {
+		return nil
+	}
+	entries, err := os.ReadDir(root)
+	if err != nil {
+		return nil
+	}
+	type candidate struct {
+		rank int
+		name string
+	}
+	candidates := make([]candidate, 0, 4)
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		if rank, ok := recognizedLicenseFile(entry.Name()); ok {
+			candidates = append(candidates, candidate{rank: rank, name: entry.Name()})
+		}
+	}
+	sort.Slice(candidates, func(i, j int) bool {
+		if candidates[i].rank != candidates[j].rank {
+			return candidates[i].rank < candidates[j].rank
+		}
+		return candidates[i].name < candidates[j].name
+	})
+	names := make([]string, 0, len(candidates))
+	for _, found := range candidates {
+		names = append(names, found.name)
+	}
+	return names
 }
 
 // componentRootResult is where a component begins, and how that was

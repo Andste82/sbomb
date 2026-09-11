@@ -2,6 +2,22 @@
 
 ## 0.17.0
 
+### A licence file is found whatever its name is spelled like
+
+Section 22.3 has always recognized its file names case-insensitively, with an
+optional `.txt` or `.md` extension, and it recognizes `LICENSE-<id>` — the form
+a component uses when it holds more than one licence and keeps `LICENSE-MIT`
+and `LICENSE-APACHE` side by side. The code carried a hand-written list of
+eleven exact names instead, so a component whose licence sat in `license.txt`
+or in `LICENSE-MIT` resolved to NOASSERTION with nothing saying why.
+
+A settled component root is now listed once and its entries are matched, in a
+fixed order — licence, then `LICENSE-<id>`, then `COPYING`, `NOTICE`,
+`COPYRIGHT` — so the answer does not depend on the order a directory was read
+in. The boundary markers of section 19.2 are unchanged: those are stat-ed per
+used file per ancestor directory, where a directory listing would be paid tens
+of thousands of times over.
+
 ### A licence is never taken from a directory above the component
 
 An early per-file licence resolver walked from a file's directory up to the

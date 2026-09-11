@@ -1626,3 +1626,77 @@ func TestDescribingRootsAddsNoComponentToTheDocument(t *testing.T) {
 		}
 	}
 }
+
+// Section 22.3 recognizes its file names case-insensitively, with an optional
+// .txt or .md extension, and recognizes LICENSE-<id>. The code used to carry a
+// hand-written list of eleven exact names instead, so a component whose licence
+// sat in license.txt or in LICENSE-MIT resolved to NOASSERTION.
+func TestALicenceFileIsRecognizedWhateverItsCaseAndExtension(t *testing.T) {
+	recognized := []string{
+		"LICENSE", "license", "License.txt", "LICENSE.MD",
+		"LICENCE", "licence.md",
+		"COPYING", "copying.TXT",
+		"NOTICE", "COPYRIGHT", "copyright.md",
+		"LICENSE-MIT", "license-Apache-2.0.txt",
+	}
+	for _, name := range recognized {
+		if _, ok := recognizedLicenseFile(name); !ok {
+			t.Errorf("%q is a licence file of section 22.3 and was not recognized", name)
+		}
+	}
+
+	// Everything else is a file that happens to sit beside a licence. Reading
+	// one would be the keyword heuristic section 22.3 forbids, one directory
+	// further out.
+	notRecognized := []string{
+		"LICENSE-", "LICENSES", "MIT-LICENSE", "LICENSE.rst", "LICENSE.old",
+		"NOTICE.c", "copyleft", "licensing.md",
+	}
+	for _, name := range notRecognized {
+		if _, ok := recognizedLicenseFile(name); ok {
+			t.Errorf("%q is not a licence file of section 22.3 and was recognized", name)
+		}
+	}
+}
+
+// A directory is read in no defined order, and section 29 requires one
+// document per evidence. The order the candidates are consulted in is
+// therefore the code's, not the filesystem's.
+func TestTheLicenceFilesOfARootAreConsultedInAFixedOrder(t *testing.T) {
+	root := t.TempDir()
+	for _, name := range []string{"NOTICE", "COPYING", "LICENSE-MIT", "LICENSE", "README.md", "LICENSE-APACHE"} {
+		if err := os.WriteFile(filepath.Join(root, name), []byte("x\n"), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	// A project that keeps its texts in a directory of that name states
+	// nothing by the name alone, and there is nothing there to read.
+	if err := os.Mkdir(filepath.Join(root, "LICENCE"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	want := []string{"LICENSE", "LICENSE-APACHE", "LICENSE-MIT", "COPYING", "NOTICE"}
+	got := licenseFilesIn(root)
+	if strings.Join(got, ",") != strings.Join(want, ",") {
+		t.Errorf("licenceFilesIn = %v, want %v", got, want)
+	}
+}
+
+// The defect this guards: the component's licence is in the file, and the file
+// was skipped because its name was spelled in a way the list did not carry.
+func TestAComponentRootResolvesALicenceThroughAnyRecognizedName(t *testing.T) {
+	for _, name := range []string{"license.txt", "LICENSE-MIT", "Licence.md"} {
+		root := t.TempDir()
+		if err := os.WriteFile(filepath.Join(root, name), []byte("SPDX-License-Identifier: MIT\n"), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		resolver := &componentResolver{}
+		found, ok := resolver.licenseFromComponentRoot(root)
+		if !ok || found.Expression != "MIT" {
+			t.Errorf("licence in %q resolved to %#v, want MIT", name, found)
+		}
+		if found.Source != name {
+			t.Errorf("licence in %q names source %q", name, found.Source)
+		}
+	}
+}
