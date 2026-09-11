@@ -287,40 +287,34 @@ identify it. The search walks up from the file and stops at the anchor root, so
 your own top-level licence — and your own SBOM — can never be mistaken for a
 dependency's.
 
-A dependency that ships its own SBOM is then read from it: version, licence,
-supplier and purl, taken from the one component the document says it is about
-and from nothing else. It is the strongest declared source there is, above every
-manifest and above what the manager that installed the package recorded, because
-the people who ship the package wrote it. It still loses to what your
-configuration says and to the checkout itself. The dependencies such a document
-lists are ignored: nothing is in your SBOM because a file mentioned it.
+Once a component is known, whatever the package wrote about itself is read.
+Several files may say something, and they disagree often enough that the order
+matters. One rule settles it: **installed beats declared, and a dependency's own
+SBOM beats both.** A manifest says what somebody wanted; an install record says
+what is there.
 
-A dependency that ships a CMSIS pack descriptor — the `.pdsc` an MCU vendor puts
-inside a pack — is read from it for the vendor and the version of its newest
-release, which for a vendor pack is usually the only place either of them
-exists. It names no purl, because no package-URL type exists for CMSIS packs and
-inventing one would put an identifier in your document that nothing can resolve,
-and it names no licence, because the descriptor's `<license>` element is a path
-to a file rather than an SPDX expression — the licence keeps coming from that
-file. It adds no file and finds no pack: a pack lives in a cache outside your
-build tree, and nothing here goes looking for one.
+| Rank | Source | Typically states |
+|---|---|---|
+| above all | Your configuration | whatever you set |
+| 1 | An SBOM the dependency ships | version, licence, supplier, purl |
+| 2 | What the manager recorded while installing | version, licence, supplier, purl, file list |
+| 3 | The manifest that manager declares | version, licence, supplier |
+| 4 | Any other declaration at the same root | version, sometimes licence |
 
-A **Zephyr workspace** is read from what west itself wrote down. The workspace
-is the directory holding `.west`, found by walking up from your sources and in
-no other way — the config in it names the repository the manifest was cloned
-into, and the manifest names each project, the directory west put it in and the
-revision that was asked for. Without a `.west` directory nothing is read at all,
-even where a `west.yml` lies beside your sources: a project's path means nothing
-without the workspace root it is measured from. A project pinned to a commit
-gets no version out of this, because a commit is not a version — the commit
-travels into the purl instead, and the component says `UNKNOWN_VERSION` — while
-with git introspection allowed the checkout answers in the manifest's place,
-where it lies inside the trees this tool is reading. A manifest that `import`s
-another repository's is followed only as far as it states projects itself: west
-resolves such an import in memory and writes nothing down, so the coverage for
-that layout is honestly partial. And here too a project west cloned that nothing
-links stays out of the document, with its absence reported rather than passed
-over.
+Read today: Conan, vcpkg, FetchContent, CPM, git submodules, the ESP-IDF
+component manager, a Zephyr workspace through west, Meson subprojects, Yocto and
+Buildroot image manifests, pkg-config, CMSIS packs, bundled CycloneDX and SPDX
+documents, and the single-file declarations of CMake, build2, xmake and Bazel.
+
+Two things none of them may do. A dependency list inside such a file is never
+followed — nothing is in your SBOM because a file mentioned it. And no reader
+goes looking: each opens the paths its ecosystem defines and no others.
+
+Some of them answer only partly, and the document says so rather than filling
+the gap. A CMSIS pack gets no purl, because no package-URL type exists for one
+and inventing an identifier nothing can resolve would be worse than none. A west
+project pinned to a commit gets no version, because a commit is not a version.
+A `.pc` file names no licence at all.
 
 **A file is never dropped because its component could not be determined.** The
 last case is a real component with a real name, marked for review.
