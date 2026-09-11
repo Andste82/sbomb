@@ -159,10 +159,6 @@ func Load(path string) (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
-	data, err = removeSchemaReference(data)
-	if err != nil {
-		return Config{}, fmt.Errorf("%s: %w", filepath.Base(path), err)
-	}
 	// Unknown fields are refused at every level, not only the top one. A typo
 	// in a policy gate -- "failOnMisingHash" -- used to load without complaint,
 	// which meant a gate somebody believed was on was off. That is the one
@@ -198,23 +194,6 @@ func Load(path string) (Config, error) {
 		cfg.Policy.Profile = "default"
 	}
 	return cfg, nil
-}
-
-func removeSchemaReference(data []byte) ([]byte, error) {
-	var document map[string]json.RawMessage
-	if err := json.Unmarshal(data, &document); err != nil {
-		return nil, err
-	}
-	rawReference, ok := document["$schema"]
-	if !ok {
-		return data, nil
-	}
-	var reference string
-	if err := json.Unmarshal(rawReference, &reference); err != nil {
-		return nil, fmt.Errorf("$schema must be a string: %w", err)
-	}
-	delete(document, "$schema")
-	return json.Marshal(document)
 }
 
 func validate(cfg Config) error {

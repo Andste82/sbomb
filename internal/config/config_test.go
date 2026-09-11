@@ -25,17 +25,6 @@ func TestLoadValidFile(t *testing.T) {
 	}
 }
 
-func TestLoadAcceptsSchemaReference(t *testing.T) {
-	path := filepath.Join(t.TempDir(), "sbomb.json")
-	body := `{"$schema":"https://andste82.github.io/sbomb/sbomb.schema.json","project":{"name":"demo"}}`
-	if err := os.WriteFile(path, []byte(body), 0o600); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := Load(path); err != nil {
-		t.Fatalf("Load() rejected an editor schema reference: %v", err)
-	}
-}
-
 // build.dir is optional. It names what the build root is called, which the
 // CMake File API already answers; --build-dir says where to read, which the
 // CLI always supplies. Requiring it in the file forced every configuration to

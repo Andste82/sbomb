@@ -6,8 +6,6 @@
 /_demo
 /dist/
 .env
-*.test
-*.pdb
 
 # Devcontainer-local Claude Code state; not part of the project.
 .devcontainer/.claude-config/
