@@ -27,7 +27,6 @@ import (
 	"github.com/example/sbomb/internal/exec"
 	"github.com/example/sbomb/internal/headers"
 	"github.com/example/sbomb/internal/inventory"
-	"github.com/example/sbomb/internal/license"
 	"github.com/example/sbomb/internal/limits"
 	"github.com/example/sbomb/internal/pathmodel"
 	"github.com/example/sbomb/internal/policy"
@@ -739,21 +738,6 @@ func sortedKeys[V any](m map[string]V) []string {
 	return keys
 }
 
-// fileLicenses resolves the licenses of one used file. It is the only place
-// that reads file bytes for licensing, and only for evidence-selected files
-// (section 22.1).
-func fileLicenses(path string, logger *Logger) []domain.LicenseFinding {
-	if path == "" {
-		return nil
-	}
-	data, err := os.ReadFile(path)
-	finding := resolveLicense(path, data, err, logger)
-	if finding.Name == "" && finding.Expression == "" {
-		return nil
-	}
-	return []domain.LicenseFinding{finding}
-}
-
 // buildSubject names the build in a finding using the identity the evidence
 // carries, so that a finding does not embed the directory the run read from.
 func buildSubject(cfg config.Config, buildDir string) string {
@@ -761,29 +745,6 @@ func buildSubject(cfg config.Config, buildDir string) string {
 		return cfg.Build.Dir
 	}
 	return buildDir
-}
-
-func resolveLicense(path string, data []byte, readErr error, logger *Logger) domain.LicenseFinding {
-	if readErr == nil {
-		finding := license.ResolveFromText(string(data), path)
-		if finding.Expression != "" {
-			logger.Debug("License for '%s': resolved SPDX header '%s'", path, finding.Expression)
-			return finding
-		}
-	}
-	for dir := filepath.Dir(path); dir != "." && dir != string(filepath.Separator); dir = filepath.Dir(dir) {
-		logger.Trace("Scanning parent directory '%s' for license files for '%s'...", dir, path)
-		for _, name := range []string{"LICENSE", "LICENSE.txt", "LICENSE.md", "COPYING", "COPYING.txt", "NOTICE"} {
-			licensePath := filepath.Join(dir, name)
-			finding, err := license.ResolveFile(licensePath)
-			if err == nil && finding.Expression != "" {
-				logger.Debug("License for '%s': resolved '%s' from parent file '%s'", path, finding.Expression, licensePath)
-				return finding
-			}
-		}
-	}
-	logger.Trace("License for '%s': NOASSERTION (reason: %s)", path, license.ReasonNoEvidence)
-	return domain.LicenseFinding{Name: "NOASSERTION", Evidence: "unknown", Reason: license.ReasonNoEvidence}
 }
 
 // absolutePath makes a path absolute without failing: an anchor root that
