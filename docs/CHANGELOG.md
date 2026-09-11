@@ -2,6 +2,15 @@
 
 ## 0.17.0
 
+### A licence is never taken from a directory above the component
+
+An early per-file licence resolver walked from a file's directory up to the
+filesystem root and took the first `LICENSE`, `COPYING` or `NOTICE` it found —
+exactly what section 22.1 forbids, because an unrelated ancestor then decides
+what a component is licensed under. Component mapping replaced it before the
+first published release, and the walk was left standing: unreachable from any
+run, and asserted by a test. Both are gone.
+
 ### MSVC and Visual Studio builds are supported
 
 MSVC builds using Ninja or Ninja Multi-Config are supported through compiler,
