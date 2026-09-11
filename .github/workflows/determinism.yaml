@@ -1,4 +1,4 @@
-name: determinism
+name: Determinism Check
 
 on:
   push:

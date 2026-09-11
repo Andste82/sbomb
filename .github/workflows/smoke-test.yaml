@@ -1,4 +1,4 @@
-name: smoke-test
+name: Smoke-Test
 
 # What a user does: take the published release, point it at a build directory,
 # and expect the right answer. Nothing here builds sbomb -- if it did, it would

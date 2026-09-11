@@ -1,4 +1,4 @@
-name: pages
+name: Pages Deployment
 
 # The install scripts live in the repository and are served from GitHub Pages.
 # Publishing them from here rather than linking at raw.githubusercontent.com
