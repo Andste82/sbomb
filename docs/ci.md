@@ -51,21 +51,21 @@ otherwise yields two different documents by design (section 7.3).
 A job never repeats the name of its workflow, and says what it checks rather
 than which command it runs.
 
-| Workflow | Runs on | Job | Checks |
+| Workflow | Runs on | Job | Checks and purpose |
 |---|---|---|---|
-| `ci` | push, pull request | `gate` | Builds with and without network, vets, tests, formatted |
-| | | `race` | No data races, with cgo enabled |
-| | | `corpus` | Fixture corpus complete, free of host paths, unchanged by the tests |
-| | | `msvc-corpus` | Regenerates and validates the native MSVC/Ninja fixture corpus on `windows-latest` |
-| | | `performance-budget` | 10 000 translation units within the budget of section 31 |
-| | | `documentation` | The findings and property catalogues match the code and the specification, and every documented configuration loads |
-| | | `spdx-drift` | Embedded licence digests and templates match the upstream SPDX list (informational) |
-| | | `end-to-end` | The CMake integration against a real toolchain |
-| `determinism` | push, pull request | `hash` | Two runs on one platform produce one hash — linux/amd64, linux/arm64, windows/amd64 |
-| | | `compare` | All three platforms produced the same hash |
-| `release` | `v*` tag | `publish` | Reproducible build of the five targets, version matches the tag, checksums cover everything, self-SBOMs validate, release published |
-| `smoke-test` | called by `release` | `run` | The published binary, on Linux and Windows, against the committed fixture: the right files and only those |
-| | | `compare` | Both platforms produced the same SBOM |
+| `ci` | push, pull request | `gate` | Builds with and without network, vets, tests and formats; proves ordinary source changes remain buildable and clean. |
+| | | `race` | Runs with cgo and the race detector; checks concurrent evidence collection for data races. |
+| | | `corpus` | Checks complete, portable fixtures and verifies tests leave them unchanged; protects committed golden inputs. |
+| | | `msvc-corpus` | Regenerates MSVC/Ninja fixtures on Windows and parses them; proves native evidence coverage still works. |
+| | | `performance-budget` | Measures the 10,000-translation-unit case against its time and memory limits; catches scalability regressions. |
+| | | `documentation` | Checks generated catalogues and loads documented configs; prevents docs from describing unsupported behavior. |
+| | | `spdx-drift` | Runs `spdxgen --check` against current SPDX data; verifies generated hashes and templates stay current so known licenses do not become `NOASSERTION` (informational). |
+| | | `end-to-end` | Runs the real CMake integration with a toolchain; catches wiring errors package tests cannot exercise. |
+| `determinism` | push, pull request | `hash` | Repeats the same build on Linux and Windows targets; detects timestamps or ordering that change output. |
+| | | `compare` | Compares hashes across platforms; proves equivalent evidence produces equivalent SBOM bytes. |
+| `release` | `v*` tag | `publish` | Rebuilds five targets, validates versions, checksums and self-SBOMs, then publishes; protects the release artifact set. |
+| `smoke-test` | called by `release` | `run` | Downloads and runs the published binaries on Linux and Windows; catches packaging or upload errors source CI cannot see. |
+| | | `compare` | Compares the published platform SBOMs; confirms the release behaves consistently outside the build runner. |
 
 `release` calls `smoke-test` once the release exists rather than letting a tag
 or a `release: published` event start it. A tag push raced the workflow that

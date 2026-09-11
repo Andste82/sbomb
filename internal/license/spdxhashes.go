@@ -4,7 +4,7 @@
 // specification section 22.3 technique 2. Only the digests are stored; the
 // texts are not embedded.
 //
-// SPDX license list version: 01b8052
+// SPDX license list version: 1dd5767
 // Licenses in the list: 739
 // Distinct normalized texts: 698
 //
