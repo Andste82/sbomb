@@ -34,6 +34,9 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
 
       # What is served is what is in the tree, assembled here and nowhere else.
       - name: Assemble the site
@@ -42,6 +45,8 @@ jobs:
           mkdir -p site
           cp docs/site/index.html site/
           cp install.sh install.ps1 site/
+          go run ./cmd/sbomb schema --config > site/sbomb.schema.json
+          python -m json.tool site/sbomb.schema.json >/dev/null
           # A shell fetched with curl must arrive as bytes, not as a rendered
           # page; .nojekyll stops Pages from touching what it does not own.
           touch site/.nojekyll
