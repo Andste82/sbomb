@@ -64,6 +64,10 @@ var required = map[string][]string{
 func Schema() string {
 	document := objectSchema(reflect.TypeOf(Config{}), "")
 	document["$schema"] = "https://json-schema.org/draft/2020-12/schema"
+	document["properties"].(map[string]any)["$schema"] = map[string]any{
+		"type":        "string",
+		"description": "Optional JSON Schema reference used by editors.",
+	}
 	document["title"] = "sbomb configuration"
 	document["description"] = "Derived from the Go types the loader uses, so the two cannot disagree."
 	encoded, err := json.MarshalIndent(document, "", "  ")
