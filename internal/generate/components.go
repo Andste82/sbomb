@@ -20,6 +20,20 @@ import (
 
 // packageMetadataFiles are the manifests that mark a directory as the root of
 // a distinct software component, used by strategy 6 of section 19.2.
+//
+// Most of these ecosystems now have an adapter of their own, and none of the
+// markers became redundant because of it. An adapter finds a package where that
+// manager left an install record behind: a lock file, a file list, a populated
+// _deps tree. A library somebody copied into the source tree carries the
+// manifest and nothing else -- no manager installed it, so no adapter can claim
+// it -- and the marker is then the only thing that gives it a boundary of its
+// own. Dropping an entry here because an adapter exists would lose components,
+// not sharpen them: the adapter would keep describing what it installs, and the
+// copied-in directory would dissolve into whatever encloses it.
+//
+// The order of the two strategies already settles the overlap. Strategy 2 runs
+// first, so where an adapter did claim the directory the manifest here is never
+// consulted, and the weaker marker can never overrule the manager.
 var packageMetadataFiles = []string{
 	"conanfile.txt", "conanfile.py", "conandata.yml",
 	"vcpkg.json", "CONTROL",
