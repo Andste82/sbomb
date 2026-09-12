@@ -55,9 +55,9 @@ DISTRIBUTED COMPONENTS
   modified:                  unknown
   used files:                3
   narrowing delta:           0 header(s), 0 additional copyright statement(s)
-  copyright statements:      3
+  copyright statements:      2
   source obligation:         library-source, relinking
-  retained licence:          LICENSE (project:dep/lgpl-lib/LICENSE, sha256:b5af363e432a5f6ba35216c5feaf4a54461fc7916eec64f17453cb24a70ecf2d)
+  retained licence:          LICENSE (project:dep/lgpl-lib/LICENSE, sha256:504f56052b78bda68423747cc50aa469ec5412654c000c87e181de257d2cfc86)
 - mit-lib
   bom-ref:                   component:mit-lib
   version:                   -

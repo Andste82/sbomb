@@ -2,7 +2,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "version": 1,
-  "serialNumber": "urn:uuid:7ec75aa9-8820-55e8-b0ad-acfa6e6929f2",
+  "serialNumber": "urn:uuid:ceb7cd9f-4c4f-5fda-a0d9-2937e2d8da9e",
   "metadata": {
     "tools": [
       {
@@ -1088,7 +1088,7 @@
         },
         {
           "name": "sbomb:component:licenseFile",
-          "value": "project:dep/gpl-gen/LICENSE@sha256:d8263ec29367df2e648c0eca1b908e725e8b638280aab0641c196b9efa37f4f9"
+          "value": "project:dep/gpl-gen/LICENSE@sha256:fe84827856780d1c70e8a0248fc622b0516c8787fd560262356289f465907855"
         },
         {
           "name": "sbomb:component:linkageForm",
@@ -1126,9 +1126,6 @@
           },
           {
             "text": "Copyright (C) 2026 Fixture GPL Generator Authors"
-          },
-          {
-            "text": "Copyright (C) yyyy>  name of author>"
           }
         ]
       }
@@ -1170,7 +1167,7 @@
         },
         {
           "name": "sbomb:component:licenseFile",
-          "value": "project:dep/lgpl-lib/LICENSE@sha256:b5af363e432a5f6ba35216c5feaf4a54461fc7916eec64f17453cb24a70ecf2d"
+          "value": "project:dep/lgpl-lib/LICENSE@sha256:504f56052b78bda68423747cc50aa469ec5412654c000c87e181de257d2cfc86"
         },
         {
           "name": "sbomb:component:linkageForm",
@@ -1211,9 +1208,6 @@
       ],
       "evidence": {
         "copyright": [
-          {
-            "text": "Copyright (C)  year >  name of author >"
-          },
           {
             "text": "Copyright (C) 1991, 1999 Free Software Foundation, Inc."
           },

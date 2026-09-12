@@ -407,8 +407,8 @@
         {
           "kind": "license",
           "file": "project:dep/gpl-gen/LICENSE",
-          "sha256": "d8263ec29367df2e648c0eca1b908e725e8b638280aab0641c196b9efa37f4f9",
-          "sizeBytes": 17712,
+          "sha256": "fe84827856780d1c70e8a0248fc622b0516c8787fd560262356289f465907855",
+          "sizeBytes": 17716,
           "detectedId": "GPL-2.0-only",
           "technique": "spdx-template"
         }
@@ -421,8 +421,8 @@
         {
           "kind": "license",
           "file": "project:dep/lgpl-lib/LICENSE",
-          "sha256": "b5af363e432a5f6ba35216c5feaf4a54461fc7916eec64f17453cb24a70ecf2d",
-          "sizeBytes": 26091
+          "sha256": "504f56052b78bda68423747cc50aa469ec5412654c000c87e181de257d2cfc86",
+          "sizeBytes": 26095
         }
       ]
     },

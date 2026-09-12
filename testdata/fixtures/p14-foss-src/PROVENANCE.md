@@ -26,6 +26,18 @@ licence it declares, with a holder invented for the fixture:
 The licence texts themselves are the published ones from the SPDX license list
 (https://spdx.org/licenses/); the long ones were rendered from the standard
 license templates this repository already embeds in
-internal/license/spdxtemplates.gz. That is what a real dependency ships. They
-are data the tool is meant to recognize, and no code in this repository is
-licensed by them.
+internal/license/spdxtemplates.gz, with every optional span taken and every
+declared variable at its `original` value. That is what a real dependency
+ships. They are data the tool is meant to recognize, and no code in this
+repository is licensed by them.
+
+The rendering keeps the template's own spacing, which differs between licences:
+the LGPL-2.1 template puts the space inside the placeholder of its "how to
+apply" appendix (`Copyright (C) < year > < name of author >`) and the GPL-2.0
+one does not (`Copyright (C)< yyyy>  <name of author>`). Neither is
+normalized. An angle bracket missing on one side of such a placeholder stops
+the line from looking like a placeholder at all, and the copyright extractor
+then reads the licence's own appendix as a notice of the component
+(internal/license/copyright.go, placeholderGroup). The corpus shipped that
+damage once; TestFixtureLicenceTextsCarryBalancedPlaceholders now asserts the
+shape instead of trusting it.
