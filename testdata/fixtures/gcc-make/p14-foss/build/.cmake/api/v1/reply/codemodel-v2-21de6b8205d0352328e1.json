@@ -1,0 +1,124 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-b1d15b4ae8e720c2a666.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "p14_foss",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "apache_lib::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-apache_lib-Debug-c2d0a3cb72b488da594c.json",
+					"name" : "apache_lib",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "fossapp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-fossapp-Debug-9451fd3ad89ad40aa811.json",
+					"name" : "fossapp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "lgpl_lib::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-lgpl_lib-Debug-6684170915888b0b3af0.json",
+					"name" : "lgpl_lib",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "mit_lib::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-mit_lib-Debug-5a59c3451fe4b5e2614b.json",
+					"name" : "mit_lib",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "multi_lib::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-multi_lib-Debug-88ee5459386f9ba9b2c8.json",
+					"name" : "multi_lib",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "nocopyright_lib::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-nocopyright_lib-Debug-ef5ba50d092f8413832a.json",
+					"name" : "nocopyright_lib",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "nolicense_lib::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-nolicense_lib-Debug-e85ad749078c9d201a2c.json",
+					"name" : "nolicense_lib",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "table_gen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-table_gen-Debug-92f689885b8218e1c014.json",
+					"name" : "table_gen",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/__fixture_build__",
+		"source" : "/__fixture_src__"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 6
+	}
+}

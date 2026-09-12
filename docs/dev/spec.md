@@ -1546,14 +1546,18 @@ sbomb generate \
 | `--adapter` | — | Force an adapter, `<class>=<id>` (repeatable) |
 | `--inventory-dump` | — | Internal inventory dump path (§40) |
 
-Six of these are specified and not implemented, each waiting on the feature it
+Five of these are specified and not implemented, each waiting on the feature it
 belongs to rather than on effort:
 `--license-scan` on external scanner input (§22.2), `--output-dir` on assembly
 mode, `--adapter` on adapter-selection override (§9.1),
-`--allow-cmake-regenerate` on File API regeneration,
-`--include-runtime-libraries` on the `DT_NEEDED` closure, and
-`--inventory-dump` on §40. A flag that is specified and absent is refused with
-`unknown flag`, never accepted and ignored.
+`--allow-cmake-regenerate` on File API regeneration, and
+`--include-runtime-libraries` on the `DT_NEEDED` closure. A flag that is
+specified and absent is refused with `unknown flag`, never accepted and
+ignored.
+
+`--inventory-dump` writes the §40 document from the same discovery that wrote
+the SBOM. It is a further rendering of one run, like `--review-report` and
+`--findings-json`, and changes neither the document nor the exit code.
 
 Nine further flags were specified and are removed rather than built; deviation
 D22 gives the reason for each.
@@ -2032,7 +2036,7 @@ Logs are for humans debugging the tool. Findings are for users and CI. A conditi
 Two internal formats are normative because tests depend on them:
 
 * **Evidence dump** (`--evidence-dump`, `sbomb evidence`): Appendix C.
-* **Inventory dump** (`--inventory-dump`, used by golden tests): a JSON document with `schemaVersion`, `files[]` (sorted by canonical path) with class, hashes, size, missing flag, component id, and properties; and `components[]` sorted by bom-ref.
+* **Inventory dump** (`--inventory-dump`, used by golden tests): a JSON document with `schemaVersion`, `files[]` (sorted by canonical path) with class, hashes, size, missing flag, component id, and properties; and `components[]` sorted by bom-ref and then by id. The tiebreak is not cosmetic: deriving a bom-ref is the writer's job, so a component taken straight out of discovery has none, and without a second key the order of the dump would be the order of discovery.
 
 Both MUST be stable, sorted, and independent of the CycloneDX writer, so that inventory correctness can be tested before any CycloneDX code exists.
 

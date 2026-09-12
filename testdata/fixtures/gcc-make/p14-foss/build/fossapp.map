@@ -1,0 +1,711 @@
+Archive member included to satisfy reference by file (symbol)
+
+libmit_lib.a(mit_a.c.o)       CMakeFiles/fossapp.dir/src/main.c.o (mit_used_a)
+libapache_lib.a(apache_one.c.o)
+                              CMakeFiles/fossapp.dir/src/main.c.o (apache_one)
+libapache_lib.a(apache_two.c.o)
+                              CMakeFiles/fossapp.dir/src/main.c.o (apache_two)
+liblgpl_lib.a(lgpl_core.c.o)  CMakeFiles/fossapp.dir/src/main.c.o (lgpl_core)
+liblgpl_lib.a(lgpl_extra.c.o)
+                              CMakeFiles/fossapp.dir/src/main.c.o (lgpl_extra)
+libmulti_lib.a(multi.c.o)     CMakeFiles/fossapp.dir/src/main.c.o (multi_pick)
+libnolicense_lib.a(nolicense.c.o)
+                              CMakeFiles/fossapp.dir/src/main.c.o (nolicense_sum)
+libnocopyright_lib.a(nocopyright.c.o)
+                              CMakeFiles/fossapp.dir/src/main.c.o (nocopyright_mix)
+
+Merging program properties
+
+
+As-needed library included to satisfy reference by file (symbol)
+
+libc.so.6                     /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o (__libc_start_main@@GLIBC_2.34)
+
+Discarded input sections
+
+ .note.GNU-stack
+                0x0000000000000000        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+ .note.gnu.property
+                0x0000000000000000       0x20 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o
+ .note.gnu.property
+                0x0000000000000000       0x20 /usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 CMakeFiles/fossapp.dir/src/main.c.o
+ .note.gnu.property
+                0x0000000000000000       0x20 CMakeFiles/fossapp.dir/src/main.c.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 CMakeFiles/fossapp.dir/generated/table.c.o
+ .note.gnu.property
+                0x0000000000000000       0x20 CMakeFiles/fossapp.dir/generated/table.c.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 libmit_lib.a(mit_a.c.o)
+ .note.gnu.property
+                0x0000000000000000       0x20 libmit_lib.a(mit_a.c.o)
+ .note.GNU-stack
+                0x0000000000000000        0x0 libapache_lib.a(apache_one.c.o)
+ .note.gnu.property
+                0x0000000000000000       0x20 libapache_lib.a(apache_one.c.o)
+ .note.GNU-stack
+                0x0000000000000000        0x0 libapache_lib.a(apache_two.c.o)
+ .note.gnu.property
+                0x0000000000000000       0x20 libapache_lib.a(apache_two.c.o)
+ .note.GNU-stack
+                0x0000000000000000        0x0 liblgpl_lib.a(lgpl_core.c.o)
+ .note.gnu.property
+                0x0000000000000000       0x20 liblgpl_lib.a(lgpl_core.c.o)
+ .note.GNU-stack
+                0x0000000000000000        0x0 liblgpl_lib.a(lgpl_extra.c.o)
+ .note.gnu.property
+                0x0000000000000000       0x20 liblgpl_lib.a(lgpl_extra.c.o)
+ .note.GNU-stack
+                0x0000000000000000        0x0 libmulti_lib.a(multi.c.o)
+ .note.gnu.property
+                0x0000000000000000       0x20 libmulti_lib.a(multi.c.o)
+ .note.GNU-stack
+                0x0000000000000000        0x0 libnolicense_lib.a(nolicense.c.o)
+ .note.gnu.property
+                0x0000000000000000       0x20 libnolicense_lib.a(nolicense.c.o)
+ .note.GNU-stack
+                0x0000000000000000        0x0 libnocopyright_lib.a(nocopyright.c.o)
+ .note.gnu.property
+                0x0000000000000000       0x20 libnocopyright_lib.a(nocopyright.c.o)
+ .note.GNU-stack
+                0x0000000000000000        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o
+ .note.gnu.property
+                0x0000000000000000       0x20 /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o
+ .note.gnu.property
+                0x0000000000000000       0x20 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
+ .note.GNU-stack
+                0x0000000000000000        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+LOAD /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+LOAD /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o
+LOAD /usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o
+LOAD CMakeFiles/fossapp.dir/src/main.c.o
+LOAD CMakeFiles/fossapp.dir/generated/table.c.o
+LOAD libmit_lib.a
+LOAD libapache_lib.a
+LOAD liblgpl_lib.a
+LOAD libmulti_lib.a
+LOAD libnolicense_lib.a
+LOAD libnocopyright_lib.a
+LOAD /usr/lib/gcc/x86_64-linux-gnu/13/libgcc.a
+LOAD /usr/lib/gcc/x86_64-linux-gnu/13/libgcc_s.so
+START GROUP
+LOAD /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/libgcc_s.so.1
+LOAD /usr/lib/gcc/x86_64-linux-gnu/13/libgcc.a
+END GROUP
+LOAD /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/libc.so
+START GROUP
+LOAD /lib/x86_64-linux-gnu/libc.so.6
+LOAD /usr/lib/x86_64-linux-gnu/libc_nonshared.a
+LOAD /lib64/ld-linux-x86-64.so.2
+END GROUP
+LOAD /usr/lib/gcc/x86_64-linux-gnu/13/libgcc.a
+LOAD /usr/lib/gcc/x86_64-linux-gnu/13/libgcc_s.so
+START GROUP
+LOAD /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/libgcc_s.so.1
+LOAD /usr/lib/gcc/x86_64-linux-gnu/13/libgcc.a
+END GROUP
+LOAD /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o
+LOAD /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
+                [!provide]                        PROVIDE (__executable_start = SEGMENT_START ("text-segment", 0x0))
+                0x0000000000000318                . = (SEGMENT_START ("text-segment", 0x0) + SIZEOF_HEADERS)
+
+.interp         0x0000000000000318       0x1c
+ *(.interp)
+ .interp        0x0000000000000318       0x1c /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+
+.note.gnu.property
+                0x0000000000000338       0x30
+ .note.gnu.property
+                0x0000000000000338       0x30 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+
+.note.gnu.build-id
+                0x0000000000000368       0x24
+ *(.note.gnu.build-id)
+ .note.gnu.build-id
+                0x0000000000000368       0x24 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+
+.note.ABI-tag   0x000000000000038c       0x20
+ .note.ABI-tag  0x000000000000038c       0x20 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+
+.hash
+ *(.hash)
+
+.gnu.hash       0x00000000000003b0       0x24
+ *(.gnu.hash)
+ .gnu.hash      0x00000000000003b0       0x24 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+
+.dynsym         0x00000000000003d8       0xa8
+ *(.dynsym)
+ .dynsym        0x00000000000003d8       0xa8 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+
+.dynstr         0x0000000000000480       0x8f
+ *(.dynstr)
+ .dynstr        0x0000000000000480       0x8f /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+
+.gnu.version    0x0000000000000510        0xe
+ *(.gnu.version)
+ .gnu.version   0x0000000000000510        0xe /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+
+.gnu.version_d  0x0000000000000520        0x0
+ *(.gnu.version_d)
+ .gnu.version_d
+                0x0000000000000520        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+
+.gnu.version_r  0x0000000000000520       0x30
+ *(.gnu.version_r)
+ .gnu.version_r
+                0x0000000000000520       0x30 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+
+.rela.dyn       0x0000000000000550       0xc0
+ *(.rela.init)
+ *(.rela.text .rela.text.* .rela.gnu.linkonce.t.*)
+ *(.rela.fini)
+ *(.rela.rodata .rela.rodata.* .rela.gnu.linkonce.r.*)
+ *(.rela.data .rela.data.* .rela.gnu.linkonce.d.*)
+ .rela.data.rel.ro
+                0x0000000000000550        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+ .rela.data.rel.local
+                0x0000000000000550       0x18 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+ *(.rela.tdata .rela.tdata.* .rela.gnu.linkonce.td.*)
+ *(.rela.tbss .rela.tbss.* .rela.gnu.linkonce.tb.*)
+ *(.rela.ctors)
+ *(.rela.dtors)
+ *(.rela.got)
+ .rela.got      0x0000000000000568       0x78 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+ *(.rela.bss .rela.bss.* .rela.gnu.linkonce.b.*)
+ .rela.bss      0x00000000000005e0        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+ *(.rela.ldata .rela.ldata.* .rela.gnu.linkonce.l.*)
+ *(.rela.lbss .rela.lbss.* .rela.gnu.linkonce.lb.*)
+ *(.rela.lrodata .rela.lrodata.* .rela.gnu.linkonce.lr.*)
+ *(.rela.ifunc)
+ .rela.ifunc    0x00000000000005e0        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+ .rela.fini_array
+                0x00000000000005e0       0x18 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+ .rela.init_array
+                0x00000000000005f8       0x18 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+
+.rela.plt       0x0000000000000610       0x18
+ *(.rela.plt)
+ .rela.plt      0x0000000000000610       0x18 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+ *(.rela.iplt)
+
+.relr.dyn
+ *(.relr.dyn)
+                0x0000000000001000                . = ALIGN (CONSTANT (MAXPAGESIZE))
+
+.init           0x0000000000001000       0x1b
+ *(SORT_NONE(.init))
+ .init          0x0000000000001000       0x16 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o
+                0x0000000000001000                _init
+ .init          0x0000000000001016        0x5 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
+
+.plt            0x0000000000001020       0x20
+ *(.plt)
+ .plt           0x0000000000001020       0x20 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+ *(.iplt)
+
+.plt.got        0x0000000000001040       0x10
+ *(.plt.got)
+ .plt.got       0x0000000000001040       0x10 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+                0x0000000000001040                __cxa_finalize@@GLIBC_2.2.5
+
+.plt.sec        0x0000000000001050       0x10
+ *(.plt.sec)
+ .plt.sec       0x0000000000001050       0x10 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+                0x0000000000001050                printf@@GLIBC_2.2.5
+
+.text           0x0000000000001060      0x25d
+ *(.text.unlikely .text.*_unlikely .text.unlikely.*)
+ *(.text.exit .text.exit.*)
+ *(.text.startup .text.startup.*)
+ *(.text.hot .text.hot.*)
+ *(SORT_BY_NAME(.text.sorted.*))
+ *(.text .stub .text.* .gnu.linkonce.t.*)
+ .text          0x0000000000001060       0x26 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+                0x0000000000001060                _start
+ .text          0x0000000000001086        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o
+ *fill*         0x0000000000001086        0xa 
+ .text          0x0000000000001090       0xb9 /usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o
+ .text          0x0000000000001149       0xb8 CMakeFiles/fossapp.dir/src/main.c.o
+                0x0000000000001157                main
+ .text          0x0000000000001201        0x0 CMakeFiles/fossapp.dir/generated/table.c.o
+ .text          0x0000000000001201       0x13 libmit_lib.a(mit_a.c.o)
+                0x0000000000001201                mit_used_a
+ .text          0x0000000000001214       0x12 libapache_lib.a(apache_one.c.o)
+                0x0000000000001214                apache_one
+ .text          0x0000000000001226       0x16 libapache_lib.a(apache_two.c.o)
+                0x0000000000001226                apache_two
+ .text          0x000000000000123c       0x13 liblgpl_lib.a(lgpl_core.c.o)
+                0x000000000000123c                lgpl_core
+ .text          0x000000000000124f       0x13 liblgpl_lib.a(lgpl_extra.c.o)
+                0x000000000000124f                lgpl_extra
+ .text          0x0000000000001262       0x35 libmulti_lib.a(multi.c.o)
+                0x0000000000001262                multi_pick
+ .text          0x0000000000001297       0x13 libnolicense_lib.a(nolicense.c.o)
+                0x0000000000001297                nolicense_sum
+ .text          0x00000000000012aa       0x13 libnocopyright_lib.a(nocopyright.c.o)
+                0x00000000000012aa                nocopyright_mix
+ .text          0x00000000000012bd        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o
+ .text          0x00000000000012bd        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
+ *(.gnu.warning)
+
+.fini           0x00000000000012c0        0xd
+ *(SORT_NONE(.fini))
+ .fini          0x00000000000012c0        0x8 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o
+                0x00000000000012c0                _fini
+ .fini          0x00000000000012c8        0x5 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
+                [!provide]                        PROVIDE (__etext = .)
+                [!provide]                        PROVIDE (_etext = .)
+                [!provide]                        PROVIDE (etext = .)
+                0x0000000000002000                . = ALIGN (CONSTANT (MAXPAGESIZE))
+                0x0000000000002000                . = SEGMENT_START ("rodata-segment", (ALIGN (CONSTANT (MAXPAGESIZE)) + (. & (CONSTANT (MAXPAGESIZE) - 0x1))))
+
+.rodata         0x0000000000002000       0x40
+ *(.rodata .rodata.* .gnu.linkonce.r.*)
+ .rodata.cst4   0x0000000000002000        0x4 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+                0x0000000000002000                _IO_stdin_used
+ .rodata        0x0000000000002004       0x13 CMakeFiles/fossapp.dir/src/main.c.o
+ *fill*         0x0000000000002017        0x9 
+ .rodata        0x0000000000002020       0x20 CMakeFiles/fossapp.dir/generated/table.c.o
+                0x0000000000002020                foss_table
+
+.rodata1
+ *(.rodata1)
+
+.eh_frame_hdr   0x0000000000002040       0x7c
+ *(.eh_frame_hdr)
+ .eh_frame_hdr  0x0000000000002040       0x7c /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+                0x0000000000002040                __GNU_EH_FRAME_HDR
+ *(.eh_frame_entry .eh_frame_entry.*)
+
+.eh_frame       0x00000000000020c0      0x1cc
+ *(.eh_frame)
+ .eh_frame      0x00000000000020c0       0x30 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+                                         0x2c (size before relaxing)
+ *fill*         0x00000000000020f0        0x0 
+ .eh_frame      0x00000000000020f0       0x28 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+                                         0x40 (size before relaxing)
+ .eh_frame      0x0000000000002118       0x18 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+                                         0x30 (size before relaxing)
+ .eh_frame      0x0000000000002130       0x18 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+                                         0x30 (size before relaxing)
+ .eh_frame      0x0000000000002148       0x40 CMakeFiles/fossapp.dir/src/main.c.o
+                                         0x58 (size before relaxing)
+ .eh_frame      0x0000000000002188       0x20 libmit_lib.a(mit_a.c.o)
+                                         0x38 (size before relaxing)
+ .eh_frame      0x00000000000021a8       0x20 libapache_lib.a(apache_one.c.o)
+                                         0x38 (size before relaxing)
+ .eh_frame      0x00000000000021c8       0x20 libapache_lib.a(apache_two.c.o)
+                                         0x38 (size before relaxing)
+ .eh_frame      0x00000000000021e8       0x20 liblgpl_lib.a(lgpl_core.c.o)
+                                         0x38 (size before relaxing)
+ .eh_frame      0x0000000000002208       0x20 liblgpl_lib.a(lgpl_extra.c.o)
+                                         0x38 (size before relaxing)
+ .eh_frame      0x0000000000002228       0x20 libmulti_lib.a(multi.c.o)
+                                         0x38 (size before relaxing)
+ .eh_frame      0x0000000000002248       0x20 libnolicense_lib.a(nolicense.c.o)
+                                         0x38 (size before relaxing)
+ .eh_frame      0x0000000000002268       0x20 libnocopyright_lib.a(nocopyright.c.o)
+                                         0x38 (size before relaxing)
+ .eh_frame      0x0000000000002288        0x4 /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o
+ *(.eh_frame.*)
+
+.sframe         0x000000000000228c        0x0
+ *(.sframe)
+ .sframe        0x000000000000228c        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+ .sframe        0x000000000000228c        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+ *(.sframe.*)
+
+.gcc_except_table
+ *(.gcc_except_table .gcc_except_table.*)
+
+.gnu_extab
+ *(.gnu_extab*)
+
+.exception_ranges
+ *(.exception_ranges*)
+                0x0000000000003db8                . = DATA_SEGMENT_ALIGN (CONSTANT (MAXPAGESIZE), CONSTANT (COMMONPAGESIZE))
+
+.eh_frame
+ *(.eh_frame)
+ *(.eh_frame.*)
+
+.sframe
+ *(.sframe)
+ *(.sframe.*)
+
+.gnu_extab
+ *(.gnu_extab)
+
+.gcc_except_table
+ *(.gcc_except_table .gcc_except_table.*)
+
+.exception_ranges
+ *(.exception_ranges*)
+
+.tdata          0x0000000000003db8        0x0
+                [!provide]                        PROVIDE (__tdata_start = .)
+ *(.tdata .tdata.* .gnu.linkonce.td.*)
+
+.tbss
+ *(.tbss .tbss.* .gnu.linkonce.tb.*)
+ *(.tcommon)
+
+.preinit_array  0x0000000000003db8        0x0
+                [!provide]                        PROVIDE (__preinit_array_start = .)
+ *(.preinit_array)
+                [!provide]                        PROVIDE (__preinit_array_end = .)
+
+.init_array     0x0000000000003db8        0x8
+                [!provide]                        PROVIDE (__init_array_start = .)
+ *(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*))
+ *(.init_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .ctors)
+ .init_array    0x0000000000003db8        0x8 /usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o
+                [!provide]                        PROVIDE (__init_array_end = .)
+
+.fini_array     0x0000000000003dc0        0x8
+                [!provide]                        PROVIDE (__fini_array_start = .)
+ *(SORT_BY_INIT_PRIORITY(.fini_array.*) SORT_BY_INIT_PRIORITY(.dtors.*))
+ *(.fini_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .dtors)
+ .fini_array    0x0000000000003dc0        0x8 /usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o
+                [!provide]                        PROVIDE (__fini_array_end = .)
+
+.ctors
+ *crtbegin.o(.ctors)
+ *crtbegin?.o(.ctors)
+ *(EXCLUDE_FILE(*crtend?.o *crtend.o) .ctors)
+ *(SORT_BY_NAME(.ctors.*))
+ *(.ctors)
+
+.dtors
+ *crtbegin.o(.dtors)
+ *crtbegin?.o(.dtors)
+ *(EXCLUDE_FILE(*crtend?.o *crtend.o) .dtors)
+ *(SORT_BY_NAME(.dtors.*))
+ *(.dtors)
+
+.jcr
+ *(.jcr)
+
+.data.rel.ro    0x0000000000003dc8        0x0
+ *(.data.rel.ro.local* .gnu.linkonce.d.rel.ro.local.*)
+ *(.data.rel.ro .data.rel.ro.* .gnu.linkonce.d.rel.ro.*)
+ .data.rel.ro   0x0000000000003dc8        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+
+.dynamic        0x0000000000003dc8      0x1f0
+ *(.dynamic)
+ .dynamic       0x0000000000003dc8      0x1f0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+                0x0000000000003dc8                _DYNAMIC
+
+.got            0x0000000000003fb8       0x48
+ *(.got.plt)
+ .got.plt       0x0000000000003fb8       0x20 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+                0x0000000000003fb8                _GLOBAL_OFFSET_TABLE_
+ *(.igot.plt)
+ *(.got)
+ .got           0x0000000000003fd8       0x28 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+ *(.igot)
+                0x0000000000004000                . = DATA_SEGMENT_RELRO_END (., 0x0)
+
+.data           0x0000000000004000       0x10
+ *(.data .data.* .gnu.linkonce.d.*)
+ .data          0x0000000000004000        0x4 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+                0x0000000000004000                data_start
+                0x0000000000004000                __data_start
+ .data          0x0000000000004004        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o
+ .data          0x0000000000004004        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o
+ *fill*         0x0000000000004004        0x4 
+ .data.rel.local
+                0x0000000000004008        0x8 /usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o
+                0x0000000000004008                __dso_handle
+ .data          0x0000000000004010        0x0 CMakeFiles/fossapp.dir/src/main.c.o
+ .data          0x0000000000004010        0x0 CMakeFiles/fossapp.dir/generated/table.c.o
+ .data          0x0000000000004010        0x0 libmit_lib.a(mit_a.c.o)
+ .data          0x0000000000004010        0x0 libapache_lib.a(apache_one.c.o)
+ .data          0x0000000000004010        0x0 libapache_lib.a(apache_two.c.o)
+ .data          0x0000000000004010        0x0 liblgpl_lib.a(lgpl_core.c.o)
+ .data          0x0000000000004010        0x0 liblgpl_lib.a(lgpl_extra.c.o)
+ .data          0x0000000000004010        0x0 libmulti_lib.a(multi.c.o)
+ .data          0x0000000000004010        0x0 libnolicense_lib.a(nolicense.c.o)
+ .data          0x0000000000004010        0x0 libnocopyright_lib.a(nocopyright.c.o)
+ .data          0x0000000000004010        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o
+ .data          0x0000000000004010        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
+
+.tm_clone_table
+                0x0000000000004010        0x0
+ .tm_clone_table
+                0x0000000000004010        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o
+ .tm_clone_table
+                0x0000000000004010        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o
+
+.data1
+ *(.data1)
+                0x0000000000004010                _edata = .
+                [!provide]                        PROVIDE (edata = .)
+                0x0000000000004010                . = ALIGN (ALIGNOF (NEXT_SECTION))
+                0x0000000000004010                __bss_start = .
+
+.bss            0x0000000000004010        0x8
+ *(.dynbss)
+ .dynbss        0x0000000000004010        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+ *(.bss .bss.* .gnu.linkonce.b.*)
+ .bss           0x0000000000004010        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+ .bss           0x0000000000004010        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o
+ .bss           0x0000000000004010        0x1 /usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o
+ .bss           0x0000000000004011        0x0 CMakeFiles/fossapp.dir/src/main.c.o
+ .bss           0x0000000000004011        0x0 CMakeFiles/fossapp.dir/generated/table.c.o
+ .bss           0x0000000000004011        0x0 libmit_lib.a(mit_a.c.o)
+ .bss           0x0000000000004011        0x0 libapache_lib.a(apache_one.c.o)
+ .bss           0x0000000000004011        0x0 libapache_lib.a(apache_two.c.o)
+ .bss           0x0000000000004011        0x0 liblgpl_lib.a(lgpl_core.c.o)
+ .bss           0x0000000000004011        0x0 liblgpl_lib.a(lgpl_extra.c.o)
+ .bss           0x0000000000004011        0x0 libmulti_lib.a(multi.c.o)
+ .bss           0x0000000000004011        0x0 libnolicense_lib.a(nolicense.c.o)
+ .bss           0x0000000000004011        0x0 libnocopyright_lib.a(nocopyright.c.o)
+ .bss           0x0000000000004011        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o
+ .bss           0x0000000000004011        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
+ *(COMMON)
+                0x0000000000004018                . = ALIGN ((. != 0x0)?0x8:0x1)
+ *fill*         0x0000000000004011        0x7 
+
+.lbss
+ *(.dynlbss)
+ *(.lbss .lbss.* .gnu.linkonce.lb.*)
+ *(LARGE_COMMON)
+                0x0000000000004018                . = ALIGN (0x8)
+                0x0000000000004018                . = SEGMENT_START ("ldata-segment", .)
+
+.lrodata
+ *(.lrodata .lrodata.* .gnu.linkonce.lr.*)
+
+.ldata          0x0000000000006018        0x0
+ *(.ldata .ldata.* .gnu.linkonce.l.*)
+                0x0000000000006018                . = ALIGN ((. != 0x0)?0x8:0x1)
+                0x0000000000006018                . = ALIGN (0x8)
+                0x0000000000004018                _end = .
+                [!provide]                        PROVIDE (end = .)
+                0x0000000000006018                . = DATA_SEGMENT_END (.)
+
+.stab
+ *(.stab)
+
+.stabstr
+ *(.stabstr)
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.comment        0x0000000000000000       0x2d
+ *(.comment)
+ .comment       0x0000000000000000       0x2d /usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o
+                                         0x2e (size before relaxing)
+ .comment       0x000000000000002d       0x2e CMakeFiles/fossapp.dir/src/main.c.o
+ .comment       0x000000000000002d       0x2e CMakeFiles/fossapp.dir/generated/table.c.o
+ .comment       0x000000000000002d       0x2e libmit_lib.a(mit_a.c.o)
+ .comment       0x000000000000002d       0x2e libapache_lib.a(apache_one.c.o)
+ .comment       0x000000000000002d       0x2e libapache_lib.a(apache_two.c.o)
+ .comment       0x000000000000002d       0x2e liblgpl_lib.a(lgpl_core.c.o)
+ .comment       0x000000000000002d       0x2e liblgpl_lib.a(lgpl_extra.c.o)
+ .comment       0x000000000000002d       0x2e libmulti_lib.a(multi.c.o)
+ .comment       0x000000000000002d       0x2e libnolicense_lib.a(nolicense.c.o)
+ .comment       0x000000000000002d       0x2e libnocopyright_lib.a(nocopyright.c.o)
+ .comment       0x000000000000002d       0x2e /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o
+
+.gnu.build.attributes
+ *(.gnu.build.attributes .gnu.build.attributes.*)
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges  0x0000000000000000      0x1d0
+ *(.debug_aranges)
+ .debug_aranges
+                0x0000000000000000       0x30 CMakeFiles/fossapp.dir/src/main.c.o
+ .debug_aranges
+                0x0000000000000030       0x20 CMakeFiles/fossapp.dir/generated/table.c.o
+ .debug_aranges
+                0x0000000000000050       0x30 libmit_lib.a(mit_a.c.o)
+ .debug_aranges
+                0x0000000000000080       0x30 libapache_lib.a(apache_one.c.o)
+ .debug_aranges
+                0x00000000000000b0       0x30 libapache_lib.a(apache_two.c.o)
+ .debug_aranges
+                0x00000000000000e0       0x30 liblgpl_lib.a(lgpl_core.c.o)
+ .debug_aranges
+                0x0000000000000110       0x30 liblgpl_lib.a(lgpl_extra.c.o)
+ .debug_aranges
+                0x0000000000000140       0x30 libmulti_lib.a(multi.c.o)
+ .debug_aranges
+                0x0000000000000170       0x30 libnolicense_lib.a(nolicense.c.o)
+ .debug_aranges
+                0x00000000000001a0       0x30 libnocopyright_lib.a(nocopyright.c.o)
+
+.debug_pubnames
+ *(.debug_pubnames)
+
+.debug_info     0x0000000000000000      0x55c
+ *(.debug_info .gnu.linkonce.wi.*)
+ .debug_info    0x0000000000000000      0x1bf CMakeFiles/fossapp.dir/src/main.c.o
+ .debug_info    0x00000000000001bf       0x5d CMakeFiles/fossapp.dir/generated/table.c.o
+ .debug_info    0x000000000000021c       0x68 libmit_lib.a(mit_a.c.o)
+ .debug_info    0x0000000000000284       0x68 libapache_lib.a(apache_one.c.o)
+ .debug_info    0x00000000000002ec       0x68 libapache_lib.a(apache_two.c.o)
+ .debug_info    0x0000000000000354       0x68 liblgpl_lib.a(lgpl_core.c.o)
+ .debug_info    0x00000000000003bc       0x68 liblgpl_lib.a(lgpl_extra.c.o)
+ .debug_info    0x0000000000000424       0x68 libmulti_lib.a(multi.c.o)
+ .debug_info    0x000000000000048c       0x68 libnolicense_lib.a(nolicense.c.o)
+ .debug_info    0x00000000000004f4       0x68 libnocopyright_lib.a(nocopyright.c.o)
+
+.debug_abbrev   0x0000000000000000      0x3ac
+ *(.debug_abbrev)
+ .debug_abbrev  0x0000000000000000       0xf2 CMakeFiles/fossapp.dir/src/main.c.o
+ .debug_abbrev  0x00000000000000f2       0x52 CMakeFiles/fossapp.dir/generated/table.c.o
+ .debug_abbrev  0x0000000000000144       0x4d libmit_lib.a(mit_a.c.o)
+ .debug_abbrev  0x0000000000000191       0x4d libapache_lib.a(apache_one.c.o)
+ .debug_abbrev  0x00000000000001de       0x4d libapache_lib.a(apache_two.c.o)
+ .debug_abbrev  0x000000000000022b       0x4d liblgpl_lib.a(lgpl_core.c.o)
+ .debug_abbrev  0x0000000000000278       0x4d liblgpl_lib.a(lgpl_extra.c.o)
+ .debug_abbrev  0x00000000000002c5       0x4d libmulti_lib.a(multi.c.o)
+ .debug_abbrev  0x0000000000000312       0x4d libnolicense_lib.a(nolicense.c.o)
+ .debug_abbrev  0x000000000000035f       0x4d libnocopyright_lib.a(nocopyright.c.o)
+
+.debug_line     0x0000000000000000      0x3e2
+ *(.debug_line .debug_line.* .debug_line_end)
+ .debug_line    0x0000000000000000      0x107 CMakeFiles/fossapp.dir/src/main.c.o
+ .debug_line    0x0000000000000107       0x3a CMakeFiles/fossapp.dir/generated/table.c.o
+ .debug_line    0x0000000000000141       0x53 libmit_lib.a(mit_a.c.o)
+ .debug_line    0x0000000000000194       0x53 libapache_lib.a(apache_one.c.o)
+ .debug_line    0x00000000000001e7       0x53 libapache_lib.a(apache_two.c.o)
+ .debug_line    0x000000000000023a       0x53 liblgpl_lib.a(lgpl_core.c.o)
+ .debug_line    0x000000000000028d       0x53 liblgpl_lib.a(lgpl_extra.c.o)
+ .debug_line    0x00000000000002e0       0x5c libmulti_lib.a(multi.c.o)
+ .debug_line    0x000000000000033c       0x53 libnolicense_lib.a(nolicense.c.o)
+ .debug_line    0x000000000000038f       0x53 libnocopyright_lib.a(nocopyright.c.o)
+
+.debug_frame
+ *(.debug_frame)
+
+.debug_str      0x0000000000000000      0x160
+ *(.debug_str)
+ .debug_str     0x0000000000000000      0x160 CMakeFiles/fossapp.dir/src/main.c.o
+                                        0x17e (size before relaxing)
+ .debug_str     0x0000000000000160       0xab CMakeFiles/fossapp.dir/generated/table.c.o
+ .debug_str     0x0000000000000160       0x9f libmit_lib.a(mit_a.c.o)
+ .debug_str     0x0000000000000160       0x9f libapache_lib.a(apache_one.c.o)
+ .debug_str     0x0000000000000160       0x9f libapache_lib.a(apache_two.c.o)
+ .debug_str     0x0000000000000160       0x9e liblgpl_lib.a(lgpl_core.c.o)
+ .debug_str     0x0000000000000160       0x9f liblgpl_lib.a(lgpl_extra.c.o)
+ .debug_str     0x0000000000000160       0x9f libmulti_lib.a(multi.c.o)
+ .debug_str     0x0000000000000160       0xa2 libnolicense_lib.a(nolicense.c.o)
+ .debug_str     0x0000000000000160       0xa4 libnocopyright_lib.a(nocopyright.c.o)
+
+.debug_loc
+ *(.debug_loc)
+
+.debug_macinfo
+ *(.debug_macinfo)
+
+.debug_weaknames
+ *(.debug_weaknames)
+
+.debug_funcnames
+ *(.debug_funcnames)
+
+.debug_typenames
+ *(.debug_typenames)
+
+.debug_varnames
+ *(.debug_varnames)
+
+.debug_pubtypes
+ *(.debug_pubtypes)
+
+.debug_ranges
+ *(.debug_ranges)
+
+.debug_addr
+ *(.debug_addr)
+
+.debug_line_str
+                0x0000000000000000      0x44b
+ *(.debug_line_str)
+ .debug_line_str
+                0x0000000000000000      0x44b CMakeFiles/fossapp.dir/src/main.c.o
+                                        0x1db (size before relaxing)
+ .debug_line_str
+                0x000000000000044b       0x78 CMakeFiles/fossapp.dir/generated/table.c.o
+ .debug_line_str
+                0x000000000000044b       0x80 libmit_lib.a(mit_a.c.o)
+ .debug_line_str
+                0x000000000000044b       0x95 libapache_lib.a(apache_one.c.o)
+ .debug_line_str
+                0x000000000000044b       0x95 libapache_lib.a(apache_two.c.o)
+ .debug_line_str
+                0x000000000000044b       0x8e liblgpl_lib.a(lgpl_core.c.o)
+ .debug_line_str
+                0x000000000000044b       0x91 liblgpl_lib.a(lgpl_extra.c.o)
+ .debug_line_str
+                0x000000000000044b       0x8c libmulti_lib.a(multi.c.o)
+ .debug_line_str
+                0x000000000000044b       0x90 libnolicense_lib.a(nolicense.c.o)
+ .debug_line_str
+                0x000000000000044b       0x9a libnocopyright_lib.a(nocopyright.c.o)
+
+.debug_loclists
+ *(.debug_loclists)
+
+.debug_macro
+ *(.debug_macro)
+
+.debug_names
+ *(.debug_names)
+
+.debug_rnglists
+ *(.debug_rnglists)
+
+.debug_str_offsets
+ *(.debug_str_offsets)
+
+.debug_sup
+ *(.debug_sup)
+
+.gnu.attributes
+ *(.gnu.attributes)
+
+/DISCARD/
+ *(.note.GNU-stack)
+ *(.gnu_debuglink)
+ *(.gnu.lto_*)
+OUTPUT(fossapp elf64-x86-64)

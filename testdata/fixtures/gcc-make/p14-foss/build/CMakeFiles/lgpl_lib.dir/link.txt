@@ -1,0 +1,2 @@
+/usr/bin/ar qc liblgpl_lib.a "CMakeFiles/lgpl_lib.dir/dep/lgpl-lib/src/lgpl_core.c.o" "CMakeFiles/lgpl_lib.dir/dep/lgpl-lib/src/lgpl_extra.c.o"
+/usr/bin/ranlib liblgpl_lib.a

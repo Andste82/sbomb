@@ -231,6 +231,7 @@ binary, produced this way.
 | `--report-format text\|markdown` | Report rendering; default `text` |
 | `--report-chains all` | Include the full evidence chains in the report |
 | `--evidence-dump <path>` | Where the evidence graph goes; `off` writes none |
+| `--inventory-dump <file>` | The used-file set and components in sbomb's own format |
 | `--format cyclonedx-json` | Output format; the only one so far |
 | `--spec-version 1.6\|1.7` | CycloneDX revision; default `1.6` |
 | `--reproducible` | Omit the timestamp and derive a stable serial number |

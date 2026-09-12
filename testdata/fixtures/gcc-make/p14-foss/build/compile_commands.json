@@ -1,0 +1,80 @@
+[
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/cc   -g -o CMakeFiles/table_gen.dir/dep/gpl-gen/table_gen.c.o -c /__fixture_src__/dep/gpl-gen/table_gen.c",
+  "file": "/__fixture_src__/dep/gpl-gen/table_gen.c",
+  "output": "CMakeFiles/table_gen.dir/dep/gpl-gen/table_gen.c.o"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/cc  -I/__fixture_src__/dep/mit-lib/include -g -o CMakeFiles/mit_lib.dir/dep/mit-lib/src/mit_a.c.o -c /__fixture_src__/dep/mit-lib/src/mit_a.c",
+  "file": "/__fixture_src__/dep/mit-lib/src/mit_a.c",
+  "output": "CMakeFiles/mit_lib.dir/dep/mit-lib/src/mit_a.c.o"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/cc  -I/__fixture_src__/dep/mit-lib/include -g -o CMakeFiles/mit_lib.dir/dep/mit-lib/src/mit_b.c.o -c /__fixture_src__/dep/mit-lib/src/mit_b.c",
+  "file": "/__fixture_src__/dep/mit-lib/src/mit_b.c",
+  "output": "CMakeFiles/mit_lib.dir/dep/mit-lib/src/mit_b.c.o"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/cc  -I/__fixture_src__/dep/mit-lib/include -g -o CMakeFiles/mit_lib.dir/dep/mit-lib/src/mit_c.c.o -c /__fixture_src__/dep/mit-lib/src/mit_c.c",
+  "file": "/__fixture_src__/dep/mit-lib/src/mit_c.c",
+  "output": "CMakeFiles/mit_lib.dir/dep/mit-lib/src/mit_c.c.o"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/cc  -I/__fixture_src__/dep/apache-lib/include -g -o CMakeFiles/apache_lib.dir/dep/apache-lib/src/apache_one.c.o -c /__fixture_src__/dep/apache-lib/src/apache_one.c",
+  "file": "/__fixture_src__/dep/apache-lib/src/apache_one.c",
+  "output": "CMakeFiles/apache_lib.dir/dep/apache-lib/src/apache_one.c.o"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/cc  -I/__fixture_src__/dep/apache-lib/include -g -o CMakeFiles/apache_lib.dir/dep/apache-lib/src/apache_two.c.o -c /__fixture_src__/dep/apache-lib/src/apache_two.c",
+  "file": "/__fixture_src__/dep/apache-lib/src/apache_two.c",
+  "output": "CMakeFiles/apache_lib.dir/dep/apache-lib/src/apache_two.c.o"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/cc  -I/__fixture_src__/dep/lgpl-lib/include -g -o CMakeFiles/lgpl_lib.dir/dep/lgpl-lib/src/lgpl_core.c.o -c /__fixture_src__/dep/lgpl-lib/src/lgpl_core.c",
+  "file": "/__fixture_src__/dep/lgpl-lib/src/lgpl_core.c",
+  "output": "CMakeFiles/lgpl_lib.dir/dep/lgpl-lib/src/lgpl_core.c.o"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/cc  -I/__fixture_src__/dep/lgpl-lib/include -g -o CMakeFiles/lgpl_lib.dir/dep/lgpl-lib/src/lgpl_extra.c.o -c /__fixture_src__/dep/lgpl-lib/src/lgpl_extra.c",
+  "file": "/__fixture_src__/dep/lgpl-lib/src/lgpl_extra.c",
+  "output": "CMakeFiles/lgpl_lib.dir/dep/lgpl-lib/src/lgpl_extra.c.o"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/cc  -I/__fixture_src__/dep/multi-license/include -g -o CMakeFiles/multi_lib.dir/dep/multi-license/src/multi.c.o -c /__fixture_src__/dep/multi-license/src/multi.c",
+  "file": "/__fixture_src__/dep/multi-license/src/multi.c",
+  "output": "CMakeFiles/multi_lib.dir/dep/multi-license/src/multi.c.o"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/cc  -I/__fixture_src__/dep/nolicense/include -g -o CMakeFiles/nolicense_lib.dir/dep/nolicense/src/nolicense.c.o -c /__fixture_src__/dep/nolicense/src/nolicense.c",
+  "file": "/__fixture_src__/dep/nolicense/src/nolicense.c",
+  "output": "CMakeFiles/nolicense_lib.dir/dep/nolicense/src/nolicense.c.o"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/cc  -I/__fixture_src__/dep/nocopyright/include -g -o CMakeFiles/nocopyright_lib.dir/dep/nocopyright/src/nocopyright.c.o -c /__fixture_src__/dep/nocopyright/src/nocopyright.c",
+  "file": "/__fixture_src__/dep/nocopyright/src/nocopyright.c",
+  "output": "CMakeFiles/nocopyright_lib.dir/dep/nocopyright/src/nocopyright.c.o"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/cc  -I/__fixture_src__/dep/mit-lib/include -I/__fixture_src__/dep/apache-lib/include -I/__fixture_src__/dep/lgpl-lib/include -I/__fixture_src__/dep/multi-license/include -I/__fixture_src__/dep/nolicense/include -I/__fixture_src__/dep/nocopyright/include -I/__fixture_src__/dep/bsd-hdr/include -g -o CMakeFiles/fossapp.dir/src/main.c.o -c /__fixture_src__/src/main.c",
+  "file": "/__fixture_src__/src/main.c",
+  "output": "CMakeFiles/fossapp.dir/src/main.c.o"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/cc  -I/__fixture_src__/dep/mit-lib/include -I/__fixture_src__/dep/apache-lib/include -I/__fixture_src__/dep/lgpl-lib/include -I/__fixture_src__/dep/multi-license/include -I/__fixture_src__/dep/nolicense/include -I/__fixture_src__/dep/nocopyright/include -I/__fixture_src__/dep/bsd-hdr/include -g -o CMakeFiles/fossapp.dir/generated/table.c.o -c /__fixture_build__/generated/table.c",
+  "file": "/__fixture_build__/generated/table.c",
+  "output": "CMakeFiles/fossapp.dir/generated/table.c.o"
+}
+]

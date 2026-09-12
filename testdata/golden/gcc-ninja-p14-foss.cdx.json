@@ -1,0 +1,682 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "version": 1,
+  "serialNumber": "urn:uuid:c0b0e40f-67d6-5142-a801-f4f8edb545f8",
+  "metadata": {
+    "tools": [
+      {
+        "vendor": "sbomb",
+        "name": "sbomb",
+        "version": "0.0.0-test"
+      }
+    ],
+    "component": {
+      "type": "application",
+      "name": "fossapp",
+      "bom-ref": "product:fossapp",
+      "properties": [
+        {
+          "name": "sbomb:artifact:role",
+          "value": "application"
+        },
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        }
+      ]
+    },
+    "properties": [
+      {
+        "name": "sbomb:run:specVersion",
+        "value": "1.6"
+      },
+      {
+        "name": "sbomb:run:toolVersion",
+        "value": "0.0.0-test"
+      },
+      {
+        "name": "sbomb:build:config",
+        "value": "Debug"
+      },
+      {
+        "name": "sbomb:build:generator",
+        "value": "Ninja"
+      }
+    ]
+  },
+  "components": [
+    {
+      "type": "application",
+      "name": "project",
+      "bom-ref": "component:project",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "anchor:project"
+        },
+        {
+          "name": "sbomb:component:root",
+          "value": "project:"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "table.c",
+      "bom-ref": "file:build:generated/table.c",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "e1f86d9804ada8505f7a07c96b8bc3dc0c5e736b4227402ecf1d88087d7fae0b"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "build"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "build:generated/table.c"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "apache_lib.h",
+      "bom-ref": "file:project:dep/apache-lib/include/apache_lib.h",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:evidence:header:class",
+          "value": "project-header"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/apache-lib/include/apache_lib.h"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "apache_one.c",
+      "bom-ref": "file:project:dep/apache-lib/src/apache_one.c",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/apache-lib/src/apache_one.c"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "apache_two.c",
+      "bom-ref": "file:project:dep/apache-lib/src/apache_two.c",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/apache-lib/src/apache_two.c"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "bsd_hdr.h",
+      "bom-ref": "file:project:dep/bsd-hdr/include/bsd_hdr.h",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:evidence:header:class",
+          "value": "project-header"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/bsd-hdr/include/bsd_hdr.h"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "lgpl_lib.h",
+      "bom-ref": "file:project:dep/lgpl-lib/include/lgpl_lib.h",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:evidence:header:class",
+          "value": "project-header"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/lgpl-lib/include/lgpl_lib.h"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "lgpl_core.c",
+      "bom-ref": "file:project:dep/lgpl-lib/src/lgpl_core.c",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/lgpl-lib/src/lgpl_core.c"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "lgpl_extra.c",
+      "bom-ref": "file:project:dep/lgpl-lib/src/lgpl_extra.c",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/lgpl-lib/src/lgpl_extra.c"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "mit_lib.h",
+      "bom-ref": "file:project:dep/mit-lib/include/mit_lib.h",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:evidence:header:class",
+          "value": "project-header"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/mit-lib/include/mit_lib.h"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "mit_a.c",
+      "bom-ref": "file:project:dep/mit-lib/src/mit_a.c",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/mit-lib/src/mit_a.c"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "multi.h",
+      "bom-ref": "file:project:dep/multi-license/include/multi.h",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:evidence:header:class",
+          "value": "project-header"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/multi-license/include/multi.h"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "multi.c",
+      "bom-ref": "file:project:dep/multi-license/src/multi.c",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/multi-license/src/multi.c"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "nocopyright.h",
+      "bom-ref": "file:project:dep/nocopyright/include/nocopyright.h",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:evidence:header:class",
+          "value": "project-header"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/nocopyright/include/nocopyright.h"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "nocopyright.c",
+      "bom-ref": "file:project:dep/nocopyright/src/nocopyright.c",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/nocopyright/src/nocopyright.c"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "nolicense.h",
+      "bom-ref": "file:project:dep/nolicense/include/nolicense.h",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:evidence:header:class",
+          "value": "project-header"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/nolicense/include/nolicense.h"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "nolicense.c",
+      "bom-ref": "file:project:dep/nolicense/src/nolicense.c",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/nolicense/src/nolicense.c"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "main.c",
+      "bom-ref": "file:project:src/main.c",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:src/main.c"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "component:project",
+      "dependsOn": [
+        "file:build:generated/table.c",
+        "file:project:dep/apache-lib/include/apache_lib.h",
+        "file:project:dep/apache-lib/src/apache_one.c",
+        "file:project:dep/apache-lib/src/apache_two.c",
+        "file:project:dep/bsd-hdr/include/bsd_hdr.h",
+        "file:project:dep/lgpl-lib/include/lgpl_lib.h",
+        "file:project:dep/lgpl-lib/src/lgpl_core.c",
+        "file:project:dep/lgpl-lib/src/lgpl_extra.c",
+        "file:project:dep/mit-lib/include/mit_lib.h",
+        "file:project:dep/mit-lib/src/mit_a.c",
+        "file:project:dep/multi-license/include/multi.h",
+        "file:project:dep/multi-license/src/multi.c",
+        "file:project:dep/nocopyright/include/nocopyright.h",
+        "file:project:dep/nocopyright/src/nocopyright.c",
+        "file:project:dep/nolicense/include/nolicense.h",
+        "file:project:dep/nolicense/src/nolicense.c",
+        "file:project:src/main.c"
+      ]
+    },
+    {
+      "ref": "file:build:generated/table.c"
+    },
+    {
+      "ref": "file:project:dep/apache-lib/include/apache_lib.h"
+    },
+    {
+      "ref": "file:project:dep/apache-lib/src/apache_one.c"
+    },
+    {
+      "ref": "file:project:dep/apache-lib/src/apache_two.c"
+    },
+    {
+      "ref": "file:project:dep/bsd-hdr/include/bsd_hdr.h"
+    },
+    {
+      "ref": "file:project:dep/lgpl-lib/include/lgpl_lib.h"
+    },
+    {
+      "ref": "file:project:dep/lgpl-lib/src/lgpl_core.c"
+    },
+    {
+      "ref": "file:project:dep/lgpl-lib/src/lgpl_extra.c"
+    },
+    {
+      "ref": "file:project:dep/mit-lib/include/mit_lib.h"
+    },
+    {
+      "ref": "file:project:dep/mit-lib/src/mit_a.c"
+    },
+    {
+      "ref": "file:project:dep/multi-license/include/multi.h"
+    },
+    {
+      "ref": "file:project:dep/multi-license/src/multi.c"
+    },
+    {
+      "ref": "file:project:dep/nocopyright/include/nocopyright.h"
+    },
+    {
+      "ref": "file:project:dep/nocopyright/src/nocopyright.c"
+    },
+    {
+      "ref": "file:project:dep/nolicense/include/nolicense.h"
+    },
+    {
+      "ref": "file:project:dep/nolicense/src/nolicense.c"
+    },
+    {
+      "ref": "file:project:src/main.c"
+    },
+    {
+      "ref": "product:fossapp",
+      "dependsOn": [
+        "component:project"
+      ]
+    }
+  ]
+}

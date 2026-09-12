@@ -17,6 +17,7 @@ import (
 	"github.com/example/sbomb/internal/evidence"
 	"github.com/example/sbomb/internal/exec"
 	"github.com/example/sbomb/internal/generate"
+	"github.com/example/sbomb/internal/inventory"
 	"github.com/example/sbomb/internal/limits"
 	"github.com/example/sbomb/internal/pathmodel"
 	"github.com/example/sbomb/internal/policy"
@@ -391,6 +392,11 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 	// which is where "explain" looks for it. The path is selectable now, and
 	// "off" suppresses it, so a run can leave the build directory untouched.
 	evidenceDump := ""
+	// The inventory dump of section 40: the used-file set and the components
+	// in the tool's own format, which is what golden tests compare. It is a
+	// further rendering of the same run, like the review report, and never
+	// changes the document.
+	inventoryDump := ""
 	var introspectionGroups []string
 	var bounds limits.Config
 	for i := 0; i < len(args); i++ {
@@ -581,6 +587,14 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 			i++
 		case strings.HasPrefix(args[i], "--waivers="):
 			waiversPath = strings.TrimPrefix(args[i], "--waivers=")
+		case args[i] == "--inventory-dump":
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --inventory-dump\n"
+			}
+			inventoryDump = args[i+1]
+			i++
+		case strings.HasPrefix(args[i], "--inventory-dump="):
+			inventoryDump = strings.TrimPrefix(args[i], "--inventory-dump=")
 		case args[i] == "--findings-json":
 			if i+1 >= len(args) {
 				return 1, "", "missing value for --findings-json\n"
@@ -757,6 +771,13 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 		}
 		if err := evidenceFile.Close(); err != nil {
 			return 2, logBuf.String(), err.Error() + "\n"
+		}
+	}
+
+	if inventoryDump != "" {
+		cliLogger.Info("Writing inventory dump to '%s'...", inventoryDump)
+		if err := inventory.WriteDump(inventoryDump, generated.Document.Files, generated.Document.Components); err != nil {
+			return 1, logBuf.String(), err.Error() + "\n"
 		}
 	}
 
