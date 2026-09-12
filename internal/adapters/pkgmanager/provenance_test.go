@@ -107,8 +107,12 @@ func TestTheCheckoutOutranksTheDeclaredTag(t *testing.T) {
 		described: "v1.3.0", wantVersion: "1.3.0", wantSource: "git-describe",
 		wantConfidence: domain.ConfidenceHigh, wantDisplaced: "1.2.0",
 	}, {
+		// The distance lowers the confidence and does not enter the version:
+		// section 19.4 makes `version` the release the checkout derives from,
+		// and the commit that says which one it actually is rides in the purl's
+		// vcs_url qualifier, asserted below.
 		name:      "a describe with distance outranks the declaration and is rated lower",
-		described: "v1.3.0-4-gdeadbee", wantVersion: "1.3.0-4-gdeadbee", wantSource: "git-describe",
+		described: "v1.3.0-4-gdeadbee", wantVersion: "1.3.0", wantSource: "git-describe",
 		wantConfidence: domain.ConfidenceMedium, wantDisplaced: "1.2.0",
 	}, {
 		name:      "a modified checkout outranks it too",
@@ -243,14 +247,19 @@ func TestEachAdapterNamesTheOriginItRead(t *testing.T) {
 				"[submodule \"dep/tinyhash\"]\n\tpath = dep/tinyhash\n"+
 					"\turl = https://example.invalid/org/tinyhash.git\n")
 			writeTestFile(t, filepath.Join(source, "dep", "tinyhash", "hash.c"), "int h(void){return 0;}\n")
-			runner := standInGit(t, "v0.9.0", "")
+			// The stand-in answers rev-parse with a commit: section 20.3
+			// reserves high confidence for an exact tag on a clean tree, and a
+			// tag is only known to be a tag once HEAD says it is not the
+			// abbreviation `--always` falls back to. An unreadable HEAD rates
+			// medium instead, which internal/version asserts separately.
+			runner := standInGit(t, "v0.9.0", "5f2c1d0e9b8a7c6d5e4f3a2b1c0d9e8f7a6b5c4d")
 			runner.Anchors = []string{source}
 			return Options{SourceDir: source, Runner: runner, Context: context.Background()}
 		},
 		want: map[Field]Claim{
 			FieldVersion: {Value: "0.9.0", Source: "git-describe", Rank: RankObservedCheckout, Confidence: domain.ConfidenceHigh},
 			FieldPURL: {
-				Value:  "pkg:generic/tinyhash@0.9.0?vcs_url=git%2Bhttps%3A%2F%2Fexample.invalid%2Forg%2Ftinyhash",
+				Value:  "pkg:generic/tinyhash@0.9.0?vcs_url=git%2Bhttps%3A%2F%2Fexample.invalid%2Forg%2Ftinyhash%405f2c1d0e9b8a7c6d5e4f3a2b1c0d9e8f7a6b5c4d",
 				Source: "git-submodule", Rank: RankObservedCheckout,
 			},
 		},

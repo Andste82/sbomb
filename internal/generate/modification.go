@@ -2,11 +2,11 @@ package generate
 
 import (
 	"fmt"
-	"regexp"
 	"strings"
 
 	"github.com/example/sbomb/internal/adapters/pkgmanager"
 	"github.com/example/sbomb/internal/domain"
+	"github.com/example/sbomb/internal/version"
 )
 
 // Modification status, section 19.4, in three states. The third one is the
@@ -92,7 +92,8 @@ func (r *componentResolver) readGitModification(root string, record *domain.Modi
 		record.Commit = strings.TrimSpace(string(commit))
 	}
 
-	if strings.HasSuffix(value, "-dirty") {
+	checkout := version.DescribeCheckout(value, record.Commit)
+	if checkout.Dirty {
 		// A patch record already said "modified"; the dirty tree says it
 		// again, and the signal names the stronger of the two.
 		record.Status = domain.ModificationModified
@@ -106,45 +107,27 @@ func (r *componentResolver) readGitModification(root string, record *domain.Modi
 		// before the tree was committed.
 		return
 	}
-	if exactTagDescribe(value, record.Commit) {
+	switch {
+	case checkout.Tagged && checkout.Distance == 0:
 		record.Status = domain.ModificationUnmodified
-		record.Signal = fmt.Sprintf("the component root's checkout is clean and stands on its recorded tag %s", value)
-		return
+		record.Signal = fmt.Sprintf("the component root's checkout is clean and stands on its recorded tag %s", checkout.Tag)
+	case checkout.Tagged:
+		// Clean, and some commits past the tag. The count is in the answer
+		// already -- `git describe` writes `<tag>-<n>-g<hash>` -- so nothing
+		// has to be counted and section 9.2 needs no new command. A tree
+		// somebody fixed and committed is the commonest shape of a modified
+		// dependency, and reporting it as unknown was reporting "not checked"
+		// for something that had been checked.
+		//
+		// What stays unstated is *which* tag: `git describe` names the nearest
+		// reachable one, and a tag the maintainer added after their own change
+		// is nearer than the upstream release. Deviation D47.
+		record.Status = domain.ModificationModified
+		record.Signal = fmt.Sprintf("the component root's checkout is clean and stands %d commit(s) past its tag %s",
+			checkout.Distance, checkout.Tag)
+	default:
+		// No reachable tag at all, so there is nothing to have deviated from.
+		// Unknown is the answer that cannot be wrong.
+		record.Signal = "the component root's checkout is clean and has no reachable tag to compare against"
 	}
-	// Clean, but not on a tag: either there is no tag at all or HEAD is some
-	// number of commits past one, and section 9.2 permits no command that
-	// counts them. That is unknown, not unmodified.
-	record.Signal = "the component root's checkout is clean but does not stand on a recorded tag, and the distance to one cannot be established"
-}
-
-// describeDistance matches the suffix `git describe` appends when HEAD is some
-// number of commits past the nearest tag: a dash, the count, and the
-// abbreviated commit behind a "g".
-//
-// The whole suffix is matched, anchored at the end, rather than the "g" that
-// introduces the hash. A tag name may contain the two characters "-g" --
-// `v1.0-gamma`, `release-gcc13` -- and reading such a tag as a distance suffix
-// would report `unknown` for a component standing exactly on it. The three
-// package-manager adapters that ask `git describe` for the same reason
-// (west.go, fetchcontent.go, submodule.go) still test for the substring; their
-// answers feed other sections and other goldens, and changing them belongs to
-// those sections.
-var describeDistance = regexp.MustCompile(`-[0-9]+-g[0-9a-f]{4,}$`)
-
-// exactTagDescribe reports whether a `git describe --tags --always --dirty`
-// answer is a tag and nothing else.
-//
-// Three shapes come back: a tag, a tag with a commit distance suffix
-// (`v1.2.0-4-gdeadbee`), and -- because of `--always` -- an abbreviated commit
-// for a repository that has no tag in HEAD's history. The third is why the
-// commit is needed: an abbreviated hash is a prefix of the full one, and a tag
-// name is not.
-func exactTagDescribe(described, commit string) bool {
-	if described == "" {
-		return false
-	}
-	if commit != "" && strings.HasPrefix(commit, described) {
-		return false
-	}
-	return !describeDistance.MatchString(described)
 }

@@ -8,6 +8,7 @@ import (
 
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/limits"
+	"github.com/example/sbomb/internal/version"
 )
 
 // west reads the manifest a Zephyr workspace declares (section 21). It is
@@ -303,25 +304,33 @@ func (west) refineFromGit(options Options, found *Package, findings *[]domain.Fi
 	if value == "" {
 		return
 	}
-	found.Dirty = strings.HasSuffix(value, "-dirty")
-	trimmed := strings.TrimSuffix(value, "-dirty")
-	exact := !found.Dirty && !strings.Contains(trimmed, "-g")
-	confidence := domain.ConfidenceHigh
-	if !exact {
-		// Section 20.3: a describe with distance or a dirty tree is weaker
-		// evidence than an exact tag.
-		confidence = domain.ConfidenceMedium
-	}
-	found.Take(FieldVersion, Claim{
-		Value:      westVersionOf(trimmed),
-		Source:     westDescribeSource,
-		Rank:       RankObservedCheckout,
-		Confidence: confidence,
-	})
+	// The answer is compared against HEAD as this call reads it, not against
+	// whatever Commit already held: the west manifest pins a project to a
+	// revision and puts it there, and comparing a describe answer with a
+	// *declared* commit would read the abbreviation of an undeclared HEAD as
+	// a tag.
+	head := ""
 	if commit, err := options.Runner.Run(options.Context, "git", "-C", found.Root(), "rev-parse", "HEAD"); err == nil {
-		if value := strings.TrimSpace(string(commit)); value != "" {
-			found.Commit = value
+		head = strings.TrimSpace(string(commit))
+	}
+	if head != "" {
+		found.Commit = head
+	}
+	checkout := version.DescribeCheckout(value, head)
+	found.Dirty = checkout.Dirty
+	if checkout.Tagged {
+		confidence := domain.ConfidenceHigh
+		if checkout.Dirty || checkout.Distance > 0 || checkout.Ambiguous {
+			// Section 20.3: a describe with distance or a dirty tree is weaker
+			// evidence than an exact tag.
+			confidence = domain.ConfidenceMedium
 		}
+		found.Take(FieldVersion, Claim{
+			Value:      westVersionOf(checkout.Tag),
+			Source:     westDescribeSource,
+			Rank:       RankObservedCheckout,
+			Confidence: confidence,
+		})
 	}
 	if found.Dirty {
 		*findings = append(*findings, domain.Finding{

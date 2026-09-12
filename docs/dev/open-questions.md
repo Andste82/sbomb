@@ -213,6 +213,15 @@ relocated copy — which is correct, and is not asserted anywhere. It becomes
 testable the day the corpus carries a repository, for whatever reason makes that
 worth doing.
 
+**It also blocks the document-level evidence for D47.** The distance rule of
+§19.4 is covered by tests that build a repository with real git in a temporary
+directory, so the rule itself is not waiting on this question. What is waiting
+is any golden that shows a `modified` component at all: over the committed
+corpus every component is `unknown`, because there is no `.git` for the run to
+read.
+
+---
+
 ## Q10 — reserved
 
 **Settled: `license.id`.** §28.7 orders the two encodings by what the value is,
@@ -289,47 +298,45 @@ that references to Q13 and later keep their meaning.
 
 ## Q13 — Should `§9.2` permit `git rev-list --count <upstream>..HEAD`?
 
-Section 19.4's modification status has three states and reaches `false` only
-from a clean checkout standing exactly on its recorded tag. A clean checkout
-four commits past its tag is `unknown`, and it is the commonest real shape of a
-vendored dependency somebody has fixed and committed: the tree is clean, the tag
-is still `v1.2.0`, and the component *is* modified.
+**Narrowed. The premise this question was written on was wrong.** It said that
+§9.2 permits no command that counts commits past a tag. It does:
+`git describe --tags --always --dirty`, which the allowlist already carries and
+which §19.4 already calls, answers `<tag>-<count>-g<hash>`. The count was being
+matched and discarded. Since deviation D47 it is read, and a clean checkout
+standing past its tag is `modified` rather than `unknown` — with no change to
+the allowlist at all.
 
-Answering it needs one command:
+What is left is narrower and still real: the count is measured from the
+**nearest reachable** tag. A maintainer who tags their own fix (`v1.2.0-acme1`)
+gets distance zero and therefore `false`, although the component is modified
+relative to the release it was pinned to. Measuring from a *recorded* revision
+is what would need `rev-list`, and that is where the original cost applies:
 
-```
-git -C <root> rev-list --count <tag>..HEAD
-```
-
-which returns a number, reads nothing outside the repository, writes nothing,
-and would turn that case from `unknown` into `true` with a count beside it.
-
-**What it costs is not the command, it is the allowlist.** Section 9.2 is a
-security boundary and the table in `internal/exec/exec.go` is its enforcement:
-five shapes the specification lists are absent because nothing could call them
+**What it costs is not the command, it is the allowlist.** §9.2 is a security
+boundary and the table in `internal/exec/exec.go` is its enforcement: five
+shapes the specification lists are absent because nothing could call them
 without guessing (deviation D29), and two more were removed because the
 permitted shape did not answer the question (D30). `rev-list` is the first entry
 that would take a **caller-supplied revision** in an argument slot rather than a
 path. A revision is not a path, so `checkPath` does not apply to it, and a tag
 name comes out of a repository sbomb was pointed at — which is untrusted input
-by section 30. `git rev-list --count <x>..HEAD` with a hostile `<x>` is not
-known to be exploitable, and "not known to be" is not the standard an allowlist
-is held to: the argument would have to be that the revision slot is validated
-against a grammar before it is passed, and that grammar would have to be
-written and tested.
+by §30. `git rev-list --count <x>..HEAD` with a hostile `<x>` is not known to be
+exploitable, and "not known to be" is not the standard an allowlist is held to:
+the argument would have to be that the revision slot is validated against a
+grammar before it is passed, and that grammar would have to be written and
+tested.
 
-Three things would have to land together, and none of them belongs in a
-milestone about deriving attributes:
+Two things would then have to land together:
 
 1. a revision slot in the allowlist table, with validation of its own —
    `PathSlots` has no equivalent for revisions today;
-2. the security argument in section 9.2, stated rather than assumed;
-3. a fixture with a repository in it, because a counting rule nothing counts is
-   an untested branch (see Q9).
+2. the security argument in §9.2, stated rather than assumed.
 
-Until then the restriction is stated in section 19.4 rather than worked around,
-and the state it produces is `unknown` — which is the answer that cannot be
-wrong.
+The third thing the question used to list — a fixture with a repository in it —
+is no longer a precondition for the *rule*, because the rule is covered by
+tests that build a repository from real git in a temporary directory
+(`internal/generate/modification_test.go`). It remains a precondition for
+seeing any of this in a golden document, which is Q9.
 
 ---
 

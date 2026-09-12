@@ -967,8 +967,9 @@ The repository URL MUST be written as an external reference of type `vcs`, not a
 |---|---|
 | The component root's git tree is dirty | `true` |
 | Package metadata records applied patches | `true` |
-| A git root was found at the component root, was clean, and stood exactly on its recorded tag | `false` |
-| Anything else, including `--allow-introspection` being off | `unknown` |
+| A git root was found at the component root, was clean, and stood exactly on its tag | `false` |
+| A git root was found, was clean, and stood a positive number of commits past its tag | `true` |
+| Anything else — no reachable tag, no git root, `--allow-introspection` off | `unknown` |
 
 `false` MUST be emitted only after a positive check. **Absence of information is `unknown`, never `false`**: reporting a check that never ran as "not modified" turns a gap into a claim, and it is the one error an auditor will find.
 
@@ -976,7 +977,11 @@ The git root MUST be the component root itself — a `.git` directory or file di
 
 Patch evidence is read from the package metadata **directly in the component root** and nowhere else, in the manner of an enricher (§21): a Conan recipe's `conandata.yml` `patches:` block, and the patch file names a vcpkg `portfile.cmake` applies. Neither the patch nor its content is ever read — sbomb records *that* a patch was applied, which is why `pedigree.patches[].diff` stays empty (requirement R6). Both readers are bounded by §30 item 10: a record file over 1 MiB is not read and at most 64 patches per component are listed, and either breach emits `INPUT_LIMIT_EXCEEDED` rather than passing for "no patch record". What each record says about a patch — the file name, and the description where the metadata gives one — reaches the document in `pedigree.notes`, because the schema lets `pedigree.patches[]` carry nothing but its type, diff and resolves, and `resolves` is for the issues a patch closes.
 
-**Comparison against the recorded upstream is not implemented.** Counting commits ahead of a tag needs `git rev-list --count <upstream>..HEAD`, which §9.2 does not permit, and that allowlist is a security boundary rather than a convenience. A clean checkout that does not stand on a tag is therefore `unknown` and not `false`. What growing the allowlist would cost is recorded in `docs/dev/open-questions.md`.
+**The distance is read, not counted.** `git describe --tags --always --dirty` answers `<tag>-<count>-g<hash>` when HEAD stands past the nearest tag, so the number is already in the answer §9.2 permits and no command has to be added to the allowlist. A clean checkout standing a positive number of commits past its tag is `true`, with the count and the tag in the finding's signal, because a dependency somebody fixed and committed is the commonest shape of a modified component and reporting it as `unknown` reported "not checked" for something that had been checked.
+
+**Which tag it is measured from is not stated.** `git describe` names the nearest *reachable* tag, and a tag the maintainer added after their own change is nearer than the upstream release; in that case the distance is zero and the status is `false` although the component was modified. Establishing the distance from a *recorded* revision would need `git rev-list --count <upstream>..HEAD`, which §9.2 does not permit and whose argument slot would take a revision rather than a path — the allowlist is a security boundary, not a convenience. The residual is recorded as deviation D47 and the cost of closing it in `docs/dev/open-questions.md`.
+
+**`version` is not where a deviation goes.** The version of a component is the release it derives from (§20.3), so a checkout past its tag publishes the tag and states the rest as its modification status, its `pedigree` and the commit in its purl. Publishing `1.2.0-4-gdeadbee` there would say the opposite of the truth to every consumer that compares versions: under semantic versioning a pre-release sorts *below* the release, so an advisory fixed in 1.2.0 would keep matching a checkout that stands after it. Where `git describe --always` falls back to the abbreviated commit, because no tag is reachable at all, **no version is claimed**: a commit identifies content and does not order against a range. `UNKNOWN_VERSION` says so, and the commit is published as a commit.
 
 Where the status is `unknown`, `FOSS_MODIFICATION_UNKNOWN` (info) is emitted. It gates nothing: it says that a question was asked and could not be answered, which is the whole reason the third state exists.
 
@@ -1000,6 +1005,8 @@ Every grouping component MUST have either a resolved `version` or an explicit `U
 6. A version macro in a used header of the component, when `components[].versionFrom` names it explicitly, e.g. `{"versionFrom": "header:include/mbedtls/build_info.h:MBEDTLS_VERSION_STRING"}`. Only literal string or integer macro definitions are read; no preprocessing is performed.
 7. None → omit `version`, emit `UNKNOWN_VERSION`.
 
+Point 4 yields a **tag**. Where the repository has no reachable tag, `--always` answers with the abbreviated commit instead, and point 4 yields nothing: resolution continues at point 5, which an explicit `versionFrom` has to ask for, and otherwise at point 7. A commit identifies content and does not order against a range, so it is a version only where somebody asked for one that way.
+
 `versionFrom` accepts a string or an ordered array of strings, restricting which strategies apply to that component.
 
 ### 20.3 Version Confidence
@@ -1013,9 +1020,13 @@ Every grouping component MUST have either a resolved `version` or an explicit `U
 | SDK metadata | high |
 | Git tag (clean tree, exact tag) | high |
 | Git describe (with distance / dirty) | medium |
-| Git commit only | medium |
+| Git commit only | — (no version is claimed, §19.4) |
 | Header macro | medium |
 | None | unknown |
+
+The version a `git describe` answer yields is its **tag**, never the tag plus the distance suffix: §19.4 states why, and the distance is what lowers the confidence to medium rather than what the value carries. A `--always` fallback answers with the abbreviated commit alone, which is an identity and not a version, so nothing is claimed from it and `UNKNOWN_VERSION` is emitted.
+
+Telling the two apart needs `git rev-parse HEAD`, and only where the answer carries no distance suffix — a suffix is proof of a tag, because `--always` writes none around a bare commit. The commit MUST be the one that call reads, never a revision some manifest declared: comparing a describe answer against a *declared* commit would read the abbreviation of an undeclared HEAD as a tag. Where HEAD cannot be read the answer is ambiguous, and an ambiguous answer is rated medium rather than high — the same rule as an unreadable commit above.
 
 Published as `component.evidence.identity` with `field: "version"`: the value in `concludedValue`, the confidence above as the numeric `confidence`, and the source as one method — its `technique` from the closed CycloneDX vocabulary, its `value` the exact source string, since three sources share `manifest-analysis` and only the value says which manifest. §28.1 gives the specified field precedence, and `evidence.identity` predates 1.6, so this is written at both specification versions.
 

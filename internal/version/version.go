@@ -153,26 +153,42 @@ func gitVersion(described string, head func() (string, bool)) (Result, bool) {
 	if described == "" {
 		return Result{}, false
 	}
-	dirty := strings.HasSuffix(described, "-dirty")
-	tag := strings.TrimSuffix(described, "-dirty")
-	if tag == "" {
+	// The commit is read first when the answer could be an abbreviation of it,
+	// which is the one case it changes anything -- a tag is told from a bare
+	// hash by comparing the two, and nothing else can tell them apart.
+	sha := ""
+	if !distanceSuffix.MatchString(strings.TrimSuffix(described, "-dirty")) {
+		if value, ok := head(); ok {
+			sha = value
+		}
+	}
+	checkout := DescribeCheckout(described, sha)
+	if !checkout.Tagged {
+		// No reachable tag: --always answered with the abbreviated commit.
+		// Section 20.2 makes a commit a version of its own at point 5, which
+		// only an explicit versionFrom rule may ask for, so the git rule of
+		// point 4 claims nothing here. A commit identifies content and does
+		// not order against a range; publishing it as a version would put a
+		// value in the field that no consumer can compare.
 		return Result{}, false
 	}
 	result := Result{
-		Version:    strings.TrimPrefix(tag, "v"),
+		Version:    strings.TrimPrefix(checkout.Tag, "v"),
 		Source:     "git-describe",
 		Confidence: domain.ConfidenceMedium,
-		Dirty:      dirty,
+		Dirty:      checkout.Dirty,
 	}
-	// A modified tree does not hold the content the tag names, and a
-	// "-g<sha>" suffix means the tag is some commits behind this one. Either
-	// way the answer describes this commit only approximately.
-	if dirty || strings.Contains(tag, "-g") {
-		return result, true
-	}
-	// When the commit cannot be read, a tag and an abbreviation cannot be told
-	// apart, and the lower rating is the honest one.
-	if sha, ok := head(); ok && !strings.HasPrefix(sha, tag) {
+	// Section 20.3 reserves high confidence for an exact tag on a clean tree.
+	// A dirty tree does not hold the content the tag names, and a distance
+	// means the tag names an earlier commit than this one; either way the
+	// answer describes this commit only approximately. Section 19.4 says why
+	// the distance does not enter the value: the version names the release
+	// this checkout derives from, and the distance is published as the
+	// modification status instead.
+	//
+	// When the commit could not be read, a tag and an abbreviation cannot be
+	// told apart, and the lower rating is the honest one.
+	if !checkout.Dirty && checkout.Distance == 0 && !checkout.Ambiguous {
 		result.Confidence = domain.ConfidenceHigh
 	}
 	return result, true

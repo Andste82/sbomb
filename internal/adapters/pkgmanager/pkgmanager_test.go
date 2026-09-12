@@ -734,3 +734,73 @@ func TestTwoManagersWithSeparateRootsConflictOverNothing(t *testing.T) {
 		}
 	}
 }
+
+// Section 19.4: `version` names the release a component derives from, so a
+// checkout past its tag publishes the tag and says the rest elsewhere. Writing
+// `1.2.0-4-gdeadbee` there would be worse than imprecise: semantic versioning
+// sorts a pre-release *below* the release, so an advisory fixed in 1.2.0 would
+// keep matching a checkout that stands four commits after it.
+func TestAVersionFromACheckoutIsTheTagWithoutTheDistance(t *testing.T) {
+	const head = "1d0f2c3b4a5968778695a4b3c2d1e0f918273645"
+	for _, testCase := range []struct {
+		name           string
+		described      string
+		wantVersion    string
+		wantConfidence domain.Confidence
+		wantDirty      bool
+	}{
+		{"standing on the tag", "v1.2.0", "1.2.0", domain.ConfidenceHigh, false},
+		{"four commits past it", "v1.2.0-4-gdeadbee", "1.2.0", domain.ConfidenceMedium, false},
+		{"dirty on the tag", "v1.2.0-dirty", "1.2.0", domain.ConfidenceMedium, true},
+		{"dirty and past it", "v1.2.0-4-gdeadbee-dirty", "1.2.0", domain.ConfidenceMedium, true},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			build := t.TempDir()
+			writePopulate(t, build, "tinylog", "https://example.invalid/org/tinylog.git", "v1.2.0")
+			runner := standInGit(t, testCase.described, head)
+			runner.Anchors = []string{build}
+
+			packages, _ := Discover(Options{BuildDir: build, Runner: runner, Context: context.Background()})
+			if len(packages) != 1 {
+				t.Fatalf("packages = %#v", packages)
+			}
+			found := packages[0]
+			if found.Version.Value != testCase.wantVersion {
+				t.Errorf("version = %q, want %q", found.Version.Value, testCase.wantVersion)
+			}
+			if found.Version.Confidence != testCase.wantConfidence {
+				t.Errorf("confidence = %q, want %q", found.Version.Confidence, testCase.wantConfidence)
+			}
+			if found.Dirty != testCase.wantDirty {
+				t.Errorf("dirty = %v, want %v", found.Dirty, testCase.wantDirty)
+			}
+			if found.Commit != head {
+				t.Errorf("commit = %q, want HEAD recorded whatever the version says", found.Commit)
+			}
+		})
+	}
+}
+
+// A repository with no reachable tag: `git describe --always` answers with the
+// abbreviated commit. That is an identity, not a version -- it does not sort,
+// it does not compare, and no advisory range can be evaluated against it -- so
+// no version is claimed from it and the commit is recorded as the commit.
+func TestAnAbbreviatedCommitIsNotAVersion(t *testing.T) {
+	const head = "1d0f2c3b4a5968778695a4b3c2d1e0f918273645"
+	build := t.TempDir()
+	writePopulate(t, build, "tinylog", "https://example.invalid/org/tinylog.git", head)
+	runner := standInGit(t, head[:8], head)
+	runner.Anchors = []string{build}
+
+	packages, _ := Discover(Options{BuildDir: build, Runner: runner, Context: context.Background()})
+	if len(packages) != 1 {
+		t.Fatalf("packages = %#v", packages)
+	}
+	found := packages[0]
+	if found.Version.Source == "git-describe" {
+		t.Errorf("version = %q from git-describe, want no version claimed from a bare commit", found.Version.Value)
+	}
+	if found.Commit != head {
+		t.Errorf("commit = %q, want the commit recorded", found.Commit)
+	}
+}
