@@ -341,6 +341,29 @@ Backslashes MUST NOT appear. Absolute Windows drive paths MUST NOT appear.
 
 Reports and `explain` output SHOULD additionally show the absolute path for anchors `project` and `build` when `--absolute-paths` is set. Absolute paths MUST NOT appear in the CycloneDX document.
 
+### 7.9 Source Tree Relocation
+
+**[New in v3.1.]**
+
+A build directory and the source tree it was produced from need not be in the same place when the SBOM is generated. The ordinary case is a CI split: one job builds, a second restores the build directory and runs sbomb. The build root already has two forms for this reason, and the source root has the same two:
+
+| | Logical root | Physical root |
+|---|---|---|
+| Build | The build root the evidence records (File API `paths.build`, `build.dir`) | The directory `--build-dir` names |
+| Source | The source root the evidence records (File API `paths.source`) | `--source-dir` / `project.root`, defaulting to the logical root |
+
+Normative rules:
+
+1. **Identity uses the logical source root and nothing else.** Anchor resolution (§7.3) and therefore every `bom-ref` and every canonical path are computed against the logical root. Relocating a tree MUST NOT change a single identity in the document. This includes anchor roots: a root an adapter discovered by reading the relocated tree — a git submodule, a Zephyr workspace project, a Meson subproject, an ESP-IDF managed component — MUST be registered (§7.4) in the logical source root, because an anchor root is what identities are resolved against and not something that is read.
+2. **Reads use the physical source root.** A path recorded under the logical source root is read from the corresponding path under the physical one. This applies to every read the specification already permits — hashing (§23), licence files (§22.1), the marker walk of §19.2 strategy 6 — and permits no read that was not already permitted.
+3. A relocated read MUST stay inside the physical source root. A path that would leave it is refused: no readable location is recorded for it at all, so its bytes are not read, and `MISSING_FILE_HASH` is emitted as §7.6 requires for any refused read. Refusing MUST NOT be implemented by handing back the logical path — a `..` segment surviving in it is resolved by the operating system, and where the logical root also exists on the generating machine the escaping file would then be read after all. There is no flag that lifts this; §30.4 has no exception for relocation.
+4. Path comparison against the logical source root follows the flavor rules of §7.3: separators are equivalent, and the comparison is case-insensitive under the Windows flavor.
+5. If the physical source root does not exist, `SOURCE_TREE_UNAVAILABLE` (warning) is emitted **once per run**, not once per file, and everything that depends on reading sources degrades explicitly: licences become NOASSERTION with reason `no-evidence` (§22.7) and hashes are missing (§23). The finding never fails a run by itself.
+6. Without a File API reply there is no logical source root. Relocation is then inactive and `--source-dir` supplies the identity root as it always has; `CMAKE_FILE_API_UNAVAILABLE` already states why.
+7. **Only the source root is relocated.** Package caches keep the paths the build recorded: a Conan package folder is read out of a file the build wrote and is a build-machine path. The general form — a list of prefix replacements, as `-ffile-prefix-map` and a debugger's `substitute-path` use — is not specified here.
+
+This changes the meaning `--source-dir` had in §32.2, which is recorded in `deviations.md` D41.
+
 ---
 
 ## 8. Evidence Model
@@ -1510,7 +1533,7 @@ sbomb generate \
 
 | Flag | Default | Meaning |
 |---|---|---|
-| `--source-dir` | `.` | Source directory |
+| `--source-dir` | logical source root | Physical source directory: where the source tree is now (§7.9). It never changes identity. |
 | `--build-dir` | required | Build directory |
 | `--config` | `sbomb.json` if present | Configuration file |
 | `--output` | — | Output file (single artifact) |
@@ -2133,6 +2156,7 @@ Severity shown is the default and may be changed via `policy.severityOverrides`.
 | `TOOLCHAIN_LAYOUT_UNKNOWN` | warning | — | Implicit include dirs unknown; heuristic classification |
 | `DEBUG_INFO_UNAVAILABLE` | info | — | Artifact stripped or no DWARF |
 | `CMAKE_FILE_API_UNAVAILABLE` | warning | — | No reply directory and regeneration not permitted |
+| `SOURCE_TREE_UNAVAILABLE` | warning | — | The source root the evidence names cannot be read (§7.9) |
 | `NINJA_DEPS_UNAVAILABLE` | info | — | `ninja -t deps` not permitted or failed |
 | `RSP_DEPTH_EXCEEDED` | warning | — | Response file recursion limit hit |
 | `INPUT_LIMIT_EXCEEDED` | warning | — | A parser limit of §30 was reached |
@@ -2511,6 +2535,7 @@ Every included file MUST be explainable as a concrete chain of build inputs and 
 | Area | Change |
 |---|---|
 | §7 | **New** anchor/path-identity model, replacing project-relative-only canonical paths |
+| §7.9 | **New** source-tree relocation: logical vs physical source root, so a restored build directory can be read without changing identity |
 | §20 | **New** version and PURL resolution (absent in v2.0) |
 | §26 | **New** structured findings, severities, machine format, waivers |
 | §28 | Output binding fully pinned: flat components, bom-ref schemes, native evidence fields, NOASSERTION encoding, property namespace, deterministic serialNumber, key ordering |

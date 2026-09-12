@@ -130,15 +130,31 @@
   toolchain and `--check` requires it; `testdata/fixtures/POLICY.md` records
   the exception. `--inventory-dump` writes the section 40 document from the
   same run that wrote the SBOM, so later milestones can be compared against a
-  golden inventory. The tool resolves no licence from that tree yet: the
-  evidence names `/__fixture_src__` and the files are elsewhere, which is what
-  source-tree relocation changes. `tools/fixtures/replynorm` keeps the fixture
+  golden inventory. `tools/fixtures/replynorm` keeps the fixture
   off the churn list: CMake orders a target's dependency array by comparing
   target pointers, and the normalizer sorts it and renames each File API
   document to the digest of what it wrote. The one thing the fixture does not
   carry is a git repository, so the modification status of its components
   reads `unknown` against the committed corpus; open question Q9 holds the
   measurements for the milestone that derives it.
+
+- Section 7.9, source-tree relocation: the source root has a logical and a
+  physical form, as the build root always has. The logical one -- what the
+  build evidence recorded -- is the only root identity is computed against;
+  `--source-dir` sets the physical one, and only reads use it. A build
+  directory restored in a second CI job therefore resolves its licences and
+  hashes its sources, and two runs with the tree in two different directories
+  produce byte-identical documents. A tree that is not there is
+  `SOURCE_TREE_UNAVAILABLE`, once per run; a relocated read that would leave
+  the physical source root is refused and reports `MISSING_FILE_HASH`, with no
+  flag to lift it. `--source-dir` no longer re-anchors the project, which is
+  deviation D41. The package-manager adapters are pointed at the physical root
+  because they open files, and every anchor root they report is expressed in
+  the logical root before it is registered -- a git submodule, a west project,
+  a Meson subproject or an ESP-IDF managed component under a relocated tree
+  therefore keeps the anchor, and the identities, the build machine gave it.
+  `p14-foss` resolves MIT, Apache-2.0, BSD-3-Clause, LGPL-2.1-only and 0BSD
+  from the committed tree.
 
 ## Known Gaps
 
@@ -214,8 +230,14 @@ outputs contain the paths.
 
 The FOSS attribution export is planned in a branch of its own
 (`docs/dev/foss/`), eight milestones from the fixture to the rendered notices
-document. F1 has landed: the fixture, the source harvest and the inventory
-dump. Nothing else of it is built.
+document. F1 and F2 have landed: the fixture, the source harvest, the inventory
+dump and the source-tree relocation that lets the fixture be read at all.
+Nothing else of it is built. The first thing the relocation made visible
+belongs to F3: `dep/multi-license` carries `LICENSE-MIT` and `LICENSE-APACHE`
+and no plain `LICENSE`, so it is not recognized as a component boundary and its
+`SPDX-License-Identifier` decides the *project* component's licence. The
+boundary marker list is F3's subject, and the golden records the current answer
+rather than hiding it.
 
 What is left is not phase work:
 

@@ -979,13 +979,18 @@ func (r *componentResolver) resolveComponentLicense(component *domain.Component,
 		if err != nil {
 			continue
 		}
-		if found := license.ResolveFromText(string(data), path); found.Expression != "" {
+		// The identity of the file, never the path it was read from. Where the
+		// bytes are is a property of this machine -- and since section 7.9 of
+		// which directory --source-dir named -- while the document states what
+		// was read, in canonical form (section 7.8, appendix B).
+		ref := file.ID.Canonical()
+		if found := license.ResolveFromText(string(data), ref); found.Expression != "" {
 			fromFiles = found
 			observed = nil
 			break
 		}
 		if len(observed) == 0 {
-			observed = license.ObserveFindings(string(data), path)
+			observed = license.ObserveFindings(string(data), ref)
 		}
 	}
 	if fromFiles.Expression == "" && described.Value != "" {

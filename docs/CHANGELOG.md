@@ -2,6 +2,48 @@
 
 ## 0.17.0
 
+### A source tree that moved can be read
+
+A build directory and the sources it was made from need not be in the same
+place when the SBOM is written. The ordinary case is a CI split -- one job
+builds, a second restores the build directory and runs sbomb -- and until now
+it silently cost every licence and every source hash: the recorded paths were
+opened literally, found nothing, and the document said `NOASSERTION` with no
+finding saying why.
+
+The source root now has the two forms the build root has always had. The
+**logical** root is what the build evidence recorded and is the only thing
+identity is computed against; the **physical** root is where the bytes are now,
+and `--source-dir` sets it. Relocating a tree therefore changes not one
+`bom-ref` and not one canonical path -- two runs over the same evidence with the
+tree in two different directories produce byte-identical documents, serial
+number included, and a test asserts exactly that. That holds for the anchors a
+package manager contributes too: a git submodule, a west project, a Meson
+subproject or an ESP-IDF managed component is discovered by reading the tree
+where it is, and registered under the root the build recorded, so its files keep
+the identities the build machine gave them.
+
+`--source-dir` changed meaning to make this possible: it no longer re-anchors
+the project. Re-anchoring was never coherent -- the evidence still named the old
+root, so only files lying under both roots kept an identity -- and where the
+build evidence names no source root at all the flag still supplies the identity
+root as before. `deviations.md` D41 records the change and what was observed.
+
+A source tree that cannot be read is now a finding: `SOURCE_TREE_UNAVAILABLE`,
+warning, once per run rather than once per file, and it fails no build by
+itself. It names the anchor rather than the directory, because a finding is one
+of the surfaces `--redact-unanchored-paths` covers.
+
+A relocated read that would leave the physical source root is refused outright
+and reports `MISSING_FILE_HASH`, which is what the specification already says
+about a read it refuses. No flag lifts that.
+
+The effect on the corpus is the point of the exercise: `p14-foss`, whose
+sources are committed at `testdata/fixtures/p14-foss-src`, resolves MIT,
+Apache-2.0, BSD-3-Clause, LGPL-2.1-only and 0BSD, hashes every source file, and
+keeps the GPL code generator out -- nothing links it. Its two goldens change
+accordingly.
+
 ### A fixture whose licences can actually be read
 
 Every golden SBOM in this repository said `NOASSERTION` for every licence, and

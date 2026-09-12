@@ -52,7 +52,11 @@ func (d *dwarfEvidence) available() bool {
 func inspectArtifacts(b *builder, deliverables []Deliverable, logger *Logger) *dwarfEvidence {
 	result := newDWARFEvidence()
 	for _, deliverable := range deliverables {
-		path := b.physicalFor(b.logicalFor(deliverable.EvidencePath))
+		path, readable := b.physicalFor(b.logicalFor(deliverable.EvidencePath))
+		if !readable {
+			logger.Debug("Artifact '%s' lies outside the tree it would be read from", deliverable.EvidencePath)
+			continue
+		}
 		inspected, err := binfmt.Inspect(path, binfmt.Options{})
 		if err != nil {
 			logger.Debug("Artifact '%s' could not be inspected: %v", path, err)

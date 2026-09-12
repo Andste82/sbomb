@@ -17,11 +17,11 @@
     {
       "canonical": "project:dep/apache-lib/include/apache_lib.h",
       "class": "header",
-      "missing": true,
+      "hashes": {
+        "SHA-256": "276eb9575be113a794f3789409437404a2b60045bbbd09aef2523db15a4b720d"
+      },
+      "sizeBytes": 197,
       "properties": {
-        "finding": [
-          "MISSING_FILE_HASH"
-        ],
         "sbomb:component:scope": [
           "project"
         ],
@@ -33,11 +33,11 @@
     {
       "canonical": "project:dep/apache-lib/src/apache_one.c",
       "class": "source",
-      "missing": true,
+      "hashes": {
+        "SHA-256": "82ff9ab94c732e37bf89695cc17c57d3c3f539521cdcfa30248044d4c68f4c47"
+      },
+      "sizeBytes": 169,
       "properties": {
-        "finding": [
-          "MISSING_FILE_HASH"
-        ],
         "sbomb:component:scope": [
           "project"
         ]
@@ -46,11 +46,11 @@
     {
       "canonical": "project:dep/apache-lib/src/apache_two.c",
       "class": "source",
-      "missing": true,
+      "hashes": {
+        "SHA-256": "17f3f78e4db04aaed9609f69d84327f051ef05832c332fe2fbbdb40066a56f6d"
+      },
+      "sizeBytes": 169,
       "properties": {
-        "finding": [
-          "MISSING_FILE_HASH"
-        ],
         "sbomb:component:scope": [
           "project"
         ]
@@ -59,11 +59,11 @@
     {
       "canonical": "project:dep/bsd-hdr/include/bsd_hdr.h",
       "class": "header",
-      "missing": true,
+      "hashes": {
+        "SHA-256": "b440f5903223b3a73894bc91ccec2c661302205f409b74fd174b7f0de20fa93d"
+      },
+      "sizeBytes": 377,
       "properties": {
-        "finding": [
-          "MISSING_FILE_HASH"
-        ],
         "sbomb:component:scope": [
           "project"
         ],
@@ -75,11 +75,11 @@
     {
       "canonical": "project:dep/lgpl-lib/include/lgpl_lib.h",
       "class": "header",
-      "missing": true,
+      "hashes": {
+        "SHA-256": "f7fd638c0e4823c696c610a8b1019065e335b8dd59cd33ccc6dd17ef22ea1c0e"
+      },
+      "sizeBytes": 197,
       "properties": {
-        "finding": [
-          "MISSING_FILE_HASH"
-        ],
         "sbomb:component:scope": [
           "project"
         ],
@@ -91,11 +91,11 @@
     {
       "canonical": "project:dep/lgpl-lib/src/lgpl_core.c",
       "class": "source",
-      "missing": true,
+      "hashes": {
+        "SHA-256": "6b2ef29c847374d7937429440ad2d2d85dec26c77f0da5a216fcd6292548a33e"
+      },
+      "sizeBytes": 171,
       "properties": {
-        "finding": [
-          "MISSING_FILE_HASH"
-        ],
         "sbomb:component:scope": [
           "project"
         ]
@@ -104,11 +104,11 @@
     {
       "canonical": "project:dep/lgpl-lib/src/lgpl_extra.c",
       "class": "source",
-      "missing": true,
+      "hashes": {
+        "SHA-256": "4446475e8917e5484af96db6353aa6d0a6ee7e729feebd2c39d3da02e2858d73"
+      },
+      "sizeBytes": 234,
       "properties": {
-        "finding": [
-          "MISSING_FILE_HASH"
-        ],
         "sbomb:component:scope": [
           "project"
         ]
@@ -117,11 +117,11 @@
     {
       "canonical": "project:dep/mit-lib/include/mit_lib.h",
       "class": "header",
-      "missing": true,
+      "hashes": {
+        "SHA-256": "5de679e7144d715e468c751004cdfa3c70072fac6876568dd139e87e2853a90c"
+      },
+      "sizeBytes": 218,
       "properties": {
-        "finding": [
-          "MISSING_FILE_HASH"
-        ],
         "sbomb:component:scope": [
           "project"
         ],
@@ -133,11 +133,11 @@
     {
       "canonical": "project:dep/mit-lib/src/mit_a.c",
       "class": "source",
-      "missing": true,
+      "hashes": {
+        "SHA-256": "6d8a045c61248f33f7acd4ceebc41d709361632f2727fa229f95fd45efc2d14d"
+      },
+      "sizeBytes": 160,
       "properties": {
-        "finding": [
-          "MISSING_FILE_HASH"
-        ],
         "sbomb:component:scope": [
           "project"
         ]
@@ -146,11 +146,11 @@
     {
       "canonical": "project:dep/multi-license/include/multi.h",
       "class": "header",
-      "missing": true,
+      "hashes": {
+        "SHA-256": "b2ca841a99e63effd2eff4f3ff951baadca75ea3fa00ff537a7b6181532825e4"
+      },
+      "sizeBytes": 170,
       "properties": {
-        "finding": [
-          "MISSING_FILE_HASH"
-        ],
         "sbomb:component:scope": [
           "project"
         ],
@@ -162,11 +162,11 @@
     {
       "canonical": "project:dep/multi-license/src/multi.c",
       "class": "source",
-      "missing": true,
+      "hashes": {
+        "SHA-256": "b5ad33121d4d1761c87f00529f300cb49f8e7525f24fb3e517f9b7d5ce64b4d4"
+      },
+      "sizeBytes": 174,
       "properties": {
-        "finding": [
-          "MISSING_FILE_HASH"
-        ],
         "sbomb:component:scope": [
           "project"
         ]
@@ -175,11 +175,11 @@
     {
       "canonical": "project:dep/nocopyright/include/nocopyright.h",
       "class": "header",
-      "missing": true,
+      "hashes": {
+        "SHA-256": "6edd8b836dc7737777c270b88dba18a0d527e4c06033cd4b672b3fa3ca57e461"
+      },
+      "sizeBytes": 121,
       "properties": {
-        "finding": [
-          "MISSING_FILE_HASH"
-        ],
         "sbomb:component:scope": [
           "project"
         ],
@@ -191,11 +191,11 @@
     {
       "canonical": "project:dep/nocopyright/src/nocopyright.c",
       "class": "source",
-      "missing": true,
+      "hashes": {
+        "SHA-256": "34758173c7c791ae856efdb33c7f860c69e8c50e4dbda96261a746175e718ee7"
+      },
+      "sizeBytes": 267,
       "properties": {
-        "finding": [
-          "MISSING_FILE_HASH"
-        ],
         "sbomb:component:scope": [
           "project"
         ]
@@ -204,11 +204,11 @@
     {
       "canonical": "project:dep/nolicense/include/nolicense.h",
       "class": "header",
-      "missing": true,
+      "hashes": {
+        "SHA-256": "48297112fd9548f6232a8c68db803cbf69b4ea3f6794f32e070f772369eee672"
+      },
+      "sizeBytes": 131,
       "properties": {
-        "finding": [
-          "MISSING_FILE_HASH"
-        ],
         "sbomb:component:scope": [
           "project"
         ],
@@ -220,11 +220,11 @@
     {
       "canonical": "project:dep/nolicense/src/nolicense.c",
       "class": "source",
-      "missing": true,
+      "hashes": {
+        "SHA-256": "13ffe47de986df0b8435a1046f4954a3563151aba635e64a3c5b44480c98b5be"
+      },
+      "sizeBytes": 292,
       "properties": {
-        "finding": [
-          "MISSING_FILE_HASH"
-        ],
         "sbomb:component:scope": [
           "project"
         ]
@@ -233,11 +233,11 @@
     {
       "canonical": "project:src/main.c",
       "class": "source",
-      "missing": true,
+      "hashes": {
+        "SHA-256": "9a3878e3886a7b19746abefb0579cc913b665ea6ab5f3e8dfd818e674d2deae5"
+      },
+      "sizeBytes": 831,
       "properties": {
-        "finding": [
-          "MISSING_FILE_HASH"
-        ],
         "sbomb:component:scope": [
           "project"
         ]
@@ -245,6 +245,26 @@
     }
   ],
   "components": [
+    {
+      "id": "component:apache-lib",
+      "name": "apache-lib"
+    },
+    {
+      "id": "component:bsd-hdr",
+      "name": "bsd-hdr"
+    },
+    {
+      "id": "component:lgpl-lib",
+      "name": "lgpl-lib"
+    },
+    {
+      "id": "component:mit-lib",
+      "name": "mit-lib"
+    },
+    {
+      "id": "component:nocopyright",
+      "name": "nocopyright"
+    },
     {
       "id": "component:project",
       "name": "project"

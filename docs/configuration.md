@@ -35,7 +35,7 @@ Describes the product the SBOM is about. These values become the root component.
 | `supplier` | The supplier, which BSI TR-03183-2 requires |
 | `license` | SPDX expression for the product itself |
 | `type` | CycloneDX component type; derived from the artifact's role when absent |
-| `root` | Source root; defaults to the current directory |
+| `root` | Where the source tree is now; defaults to where the build recorded it |
 
 ### Neither name nor version has to be written twice
 
@@ -55,6 +55,27 @@ only fills a gap.
 Without a File API reply there is nothing to read — the bundled CMake module
 files the query that produces one. Then `name` falls back to the deliverable,
 and `version` is simply absent, which `UNKNOWN_VERSION` reports.
+
+### Reading a build that was made somewhere else
+
+`project.root`, and `--source-dir` on the command line, say where the sources
+**are**, not what they are called. The build evidence already records the source
+root the build used, and that recorded root is what every file identity is
+computed against. So the usual CI split works:
+
+```
+# job 1
+cmake -S . -B build && cmake --build build
+# job 2, after restoring build/ somewhere else entirely
+sbomb generate --build-dir build --source-dir ./checkout --output app.cdx.json
+```
+
+The document that comes out is identical to the one the build machine would
+have produced — same `bom-ref`s, same canonical paths — and the licences and
+hashes that need the sources are resolved rather than missing.
+`SOURCE_TREE_UNAVAILABLE` (warning) says when the tree is not where you pointed,
+instead of leaving you with `NOASSERTION` and no explanation. Package-manager
+caches are not relocated: their paths come from files the build wrote.
 
 ## `build`
 

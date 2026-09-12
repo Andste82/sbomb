@@ -16,11 +16,16 @@ import (
 // hand, and one raw path in any of them defeats the option entirely. That is
 // what this checks, in all three at once.
 func TestRedactionAppliesToEveryOutput(t *testing.T) {
-	buildDir := testutil.CorpusBuildDir(t, "gcc-ninja", "p02-static")
+	// p14-foss, because its document contains a generated file that lives in
+	// the build tree. The build root is the anchor this test can still move:
+	// since section 7.9 the configured source root is the *physical* one and
+	// no longer re-anchors anything, so pointing project.root elsewhere leaves
+	// the source files anchored exactly where the evidence put them.
+	buildDir := testutil.CorpusBuildDir(t, "gcc-ninja", "p14-foss")
 
-	// The corpus records the sentinel roots. Pointing the anchors somewhere
-	// else leaves every file in the build under no anchor at all, which is the
-	// case section 7.5 redacts.
+	// The corpus records the sentinel roots. Pointing the build anchor
+	// somewhere else leaves the generated file under no anchor at all, which is
+	// the case section 7.5 redacts.
 	configDir := t.TempDir()
 	configPath := filepath.Join(configDir, "unanchored.json")
 	config := `{

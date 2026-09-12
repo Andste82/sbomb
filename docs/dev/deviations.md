@@ -1762,3 +1762,69 @@ fragment `${PROJECT_VERSION` as a version, because its value class is
 `[^"\s)]+`. The new reader refuses any value containing `$`, `{` or `}` rather
 than inheriting the flaw, and a test pins that. Whether the Conan adapter is
 pulled along is a separate decision and belongs in a commit of its own.
+
+## D41 — `--source-dir` relocates reads and no longer re-anchors identity
+
+Section 32.2 described `--source-dir` as "source directory", defaulting to `.`,
+and the implementation assigned it to `cfg.Project.Root`, which is the identity
+root handed to `anchors.Assemble`. Section 7.9 now defines it as the **physical**
+source root: where the tree is read from, with the logical root — what the build
+evidence recorded — keeping identity.
+
+**What was observed.** A build directory produced in one CI job and restored in
+another names its sources at the path the build machine used. sbomb opens those
+paths literally, finds nothing, and reports `NOASSERTION` for every licence and
+`MISSING_FILE_HASH` for every source file, with no finding saying why. The
+corpus reproduces it exactly: `p14-foss` records `/__fixture_src__` and its
+sources are committed at `testdata/fixtures/p14-foss-src`, so before this change
+no licence in the repository's own fixture could be resolved.
+
+Pointing `--source-dir` at the restored tree did not help, and could not: it
+re-anchored every file against the new directory. A relocated run then produced
+a *different document* — different `bom-ref`s, different canonical paths — from
+the same evidence, which is the one thing the anchor model exists to prevent.
+The build root has had the logical/physical pair since the corpus was built
+(`logicalFor`/`physicalFor`); the source root simply never got one.
+
+**What the implementation does.** The logical source root comes from the File
+API reply (`paths.source`) and is the only root anchoring uses. `--source-dir` /
+`project.root` supplies the physical root, defaults to the logical one, and is
+used for reads alone. Two runs of the same evidence with the tree in two
+different directories produce byte-identical documents, serial number included;
+a test asserts that.
+
+The one place the two roots meet is a package-manager adapter. It is handed the
+physical root, because finding a `.gitmodules` or a `subprojects/*.wrap` means
+opening files — and the anchor root it reports back is therefore a physical path,
+which is expressed in the logical root before `anchors.Assemble` registers it.
+An anchor root is not read; it is what file identities are resolved against, and
+a physical one would give a relocated run different `bom-ref`s for every file of
+a submodule. A read of that root goes back through `physicalFor`, so the marker
+walk of section 19.2 strategy 6 and the licence files still come out of the tree
+that is there.
+
+A refused read records no readable location at all rather than handing back the
+logical path. The distinction is the whole of it: the remainder of a refused path
+still carries its `..`, the operating system resolves it, and on a machine where
+the logical root also exists — relocating to a restored copy while the original
+checkout is still present — the escaping file would be read after all.
+
+**What it costs.** When a File API reply is present, a configured `project.root`
+no longer changes any identity. Section 7.4 lists configuration as a source of
+the `project` anchor and it still is — but only where the build evidence names
+no source root, which is the case section 7.9 rule 6 keeps for it. Re-anchoring
+a tree somewhere else was never a coherent operation anyway: the evidence still
+named the old root, so only the files that happened to lie under both roots kept
+an identity.
+
+**What is deliberately not built.** No `--allow-unanchored-reads`. Section 7.6
+names the flag, nothing implements it, and relocation does not need it: a
+relocated read that would leave the physical source root is refused outright and
+reports `MISSING_FILE_HASH`, exactly as section 7.6 prescribes for a refused
+read. A flag that lifts section 30.4 would be a trust-boundary change bought for
+a feature that does not need it.
+
+Package caches are not relocated either. Their roots are read from files the
+build wrote and are build-machine paths; the source-root pair is built because
+the fixture corpus cannot be tested without it. Open question Q8 records the day
+the general form is needed.

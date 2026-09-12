@@ -14,6 +14,20 @@ The alternative -- building artifacts on demand in tests -- would remove about
 2 MB from the repository but makes the corpus non-hermetic and the tests
 toolchain-dependent. Revisit if the corpus grows.
 
+One cost is already settled and is not in question: a committed build directory
+is always stale. Git restores no modification times, so the sources a checkout
+writes are newer than the artifacts it writes beside them, in whatever order the
+checkout happened to use. Section 27.2 signal 4 is mtime comparison, so
+`STALE_BUILD_EVIDENCE` (severity `error`) is correct and unavoidable for the
+corpus, and the `default` policy gate fails on it with exit code 3. Every run
+against a fixture therefore passes `--policy lenient`, tests included; an
+acceptance command that expects exit 0 from a corpus fixture needs it too.
+
+It is a property of the corpus and not of a build directory in the field, where
+the artifacts are newer than the sources that produced them. Suppressing the
+finding for fixtures would disable the one staleness signal the corpus can
+exercise, so the flag is the answer rather than a special case in the detector.
+
 ## Q2 — Staleness evidence from `.ninja_log`
 
 Section 27.2 lists `.ninja_log` output hashes as the third-strongest staleness
@@ -81,14 +95,46 @@ by hand is evidence nobody watched being produced. The `PROVENANCE.md` rule of
 milestone 0 is what carries that weight, and it may need the workflow run URL
 added to it.
 
-## Q7, Q8 — reserved
+## Q7 — reserved
 
 The FOSS attribution plan (`docs/dev/foss/decisions.md`, on its own branch)
-already refers to two entries by number that the milestones adding them have
-not reached: Q7, two versions of one package in a single assembly (milestone
-F7), and Q8, relocating package-manager caches rather than only the source
-root (milestone F2). The numbers are held so those references keep pointing at
-what they were written for.
+refers to Q7 by number: two versions of one package in a single assembly,
+milestone F7. The number is held so the reference keeps pointing at what it was
+written for.
+
+## Q8 — Should anything but the source root be relocatable?
+
+Section 7.9 gives the source tree a logical and a physical root, so a build
+directory restored in a second CI job can be read. Two kinds of path are
+deliberately left out, and both are read from files the build wrote:
+
+* a **package-manager cache** — Conan reads its package folder out of the
+  per-configuration data file its CMakeDeps generator wrote into the build
+  directory (`internal/adapters/pkgmanager/conan.go`), which is a build-machine
+  path, and vcpkg is the same shape;
+* a **toolchain or sysroot root**, which the File API reply reports as the
+  compiler found it.
+
+The general form that covers all of them is one mechanism, and it is a known
+one: a list of prefix replacements, exactly what `-ffile-prefix-map` writes into
+a binary and what a debugger's `substitute-path` consumes. It would be a
+configuration array of `{from, to}` pairs applied to every path before it is
+read, with identity still computed against the recorded path.
+
+It was not built, for one reason: **nothing needs it yet.** sbomb normally runs
+right after the build on the machine that built, where every one of those paths
+exists. The source root is the exception only because the fixture corpus cannot
+be tested without it — the corpus commits sources and no caches — and a feature
+justified by its own tests stays as small as it can. The other setup that would
+need it, a project compiling with `-ffile-prefix-map`, shows up today as missing
+file hashes rather than as a wrong answer.
+
+What would settle it: a real project where a package cache is not where the
+build left it. Two questions have to be answered with it, and neither can be
+answered from here. Whether the replacements are ordered or longest-match, since
+a cache root often lies inside a home directory that is itself remapped. And
+whether a replacement may introduce a path that no anchor covers, which section
+30.4 refuses for a symlink and would have to refuse here for the same reason.
 
 ## Q9 — How does a fixture carry a git repository?
 
@@ -141,3 +187,28 @@ F6 takes, the tree it needs is already committed.
 
 Milestone F6 is where it has to be settled, because that is where modification
 status is derived.
+
+## Q10 — Is a resolved single identifier an `expression` or a `license.id`?
+
+Section 28.7 lists two encodings for `components[].licenses`: a known SPDX
+**identifier** becomes `{"license": {"id": "<SPDX-ID>"}}`, and a known SPDX
+**expression** becomes `{"expression": "<expr>"}`. `licensesToCyclone`
+(`internal/cyclonedx/writer.go`) tests the expression field first, so a licence
+resolved to the bare identifier `MIT` is written as `{"expression": "MIT"}`.
+Read strictly, that is the second encoding applied to a case the first one
+covers; read as a whole, `MIT` is a well-formed SPDX expression and the document
+is valid either way.
+
+Nothing observed this before F2. Every licence in every golden was
+`NOASSERTION`, so the branch was never reached with a resolved value, and the
+F2 milestone's own acceptance command greps for `"id": "MIT"` and finds
+`"expression": "MIT"` instead.
+
+What it would cost to change is the reason it is a question rather than a fix:
+the condition sits in the shared writer, so every resolved licence in every
+document and every golden changes shape at once — including the ones F3 to F8
+are about to add — and a consumer that reads only one of the two forms sees a
+different document than before. It is settled where the attribution document is
+rendered and the licence expressions are actually consumed (F5 or F8), with the
+NOASSERTION encoding of section 28.7 and deviation D19 in one view, not as a
+by-product of a milestone about where files are read from.
