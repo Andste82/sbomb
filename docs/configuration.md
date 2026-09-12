@@ -210,6 +210,39 @@ Files under no anchor keep their absolute path and are reported as
 `UNANCHORED_FILE`. `--redact-unanchored-paths` replaces those paths with a
 digest, in the SBOM, the findings and the review report alike.
 
+### An anchor is also where the component search stops
+
+A file whose component nothing states is mapped by walking up from its
+directory until a directory carries a marker — a package manifest, a licence
+file, a bundled SBOM. That walk stops at the file's anchor root.
+
+A file under no anchor has no such ceiling. The walk continues towards the
+filesystem root, and a manifest in a shared parent — a scratch directory, or a
+CI runner's workspace holding other people's checkouts — can name a component
+of your product. Anchoring the tree bounds it:
+
+```json
+{
+  "anchors": [
+    {"key": "vendor", "path": "/opt/vendor"}
+  ]
+}
+```
+
+Files under `/opt/vendor` are then `extern:vendor:<relative path>`, the walk
+stops at `/opt/vendor`, and nothing above it is read or stat-ed.
+
+A licence file or a bundled SBOM **at the anchor root itself** does not mark a
+boundary: it describes the anchored tree rather than a dependency inside it. A
+package manifest there still does.
+
+A file the tool cannot read takes part in no such walk at all, and contributes
+nothing to a component root. Its path describes a machine that is not this one,
+so any directory found from it would be a coincidence.
+
+To name one directory rather than bound a tree, use a `components[]` entry with
+a `path`. It decides the component outright and no search runs.
+
 ## `components`
 
 Groups files into the components the SBOM reports, and supplies the metadata
