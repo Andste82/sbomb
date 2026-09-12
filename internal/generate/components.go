@@ -2,6 +2,8 @@ package generate
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -127,6 +129,18 @@ type componentResolver struct {
 	// same ancestor directories once per used file, and section 31 does not
 	// pay for the same answer twice.
 	licenseBoundaries map[string]string
+	// licenseReads counts how often retention opened each path. It holds the
+	// recognized licence files of the mapped component roots and nothing else,
+	// so it is bounded by the retention limit per component rather than by the
+	// used-file count. Reading is the only cost retention has, and a claim
+	// about reads that nothing counts is not a claim.
+	licenseReads map[string]int
+	// retainedByRoot is what retention already read for one component root,
+	// keyed by that root's identity and its physical directory. Two components
+	// resolving to one root read its licence files once between them, which is
+	// what makes the claim of section 22.9 -- one read per file per root --
+	// hold without depending on how the roots were settled.
+	retainedByRoot map[string]retainedLicenses
 }
 
 // systemPackageResult is what the pkg-config reader answered about one used
@@ -920,7 +934,7 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 	}
 
 	// Licenses (section 22.2).
-	licenseFindings := r.resolveComponentLicense(component, files, curated, hasCurated, rootInfo.Physical, described.License)
+	licenseFindings := r.resolveComponentLicense(component, files, curated, hasCurated, rootInfo, described.License)
 	findings = append(findings, licenseFindings...)
 
 	// A component with no hashable file cannot carry a component hash
@@ -948,8 +962,33 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 // to the sources that exist today: curated configuration, an SPDX identifier
 // in a used file, what a reader found in the component root, what the package
 // manager stated, and a recognized license file in that root.
-func (r *componentResolver) resolveComponentLicense(component *domain.Component, files []domain.UsedFile, curated config.Component, hasCurated bool, root string, described pkgmanager.Claim) []domain.Finding {
+func (r *componentResolver) resolveComponentLicense(component *domain.Component, files []domain.UsedFile, curated config.Component, hasCurated bool, rootInfo componentRootResult, described pkgmanager.Claim) []domain.Finding {
 	findings := []domain.Finding{}
+
+	// Retention first, and independently of what decides the identifier
+	// (section 22.9). The bytes are the deliverable, so they are kept whether
+	// the identifier came from a header, a manifest or one of these files --
+	// and a component whose header says MIT still owes its recipients the
+	// text. Identification below reads no file again: it consumes this.
+	retained := r.retainLicenseArtifacts(rootInfo.ID, rootInfo.Physical)
+	component.LicenseArtifacts = sortedLicenseArtifacts(retained.artifacts)
+	for _, artifact := range component.LicenseArtifacts {
+		name := "sbomb:component:licenseFile"
+		if artifact.Kind != domain.LicenseArtifactLicense {
+			// A NOTICE and a COPYRIGHT are the same obligation -- attribution
+			// material to reproduce -- and the canonical path in the value
+			// says which of the two a given entry is.
+			name = "sbomb:component:noticeFile"
+		}
+		component.Properties = addProperty(component.Properties, name,
+			artifact.File.Canonical()+"@sha256:"+artifact.SHA256)
+	}
+	if len(retained.dropped) > 0 {
+		findings = append(findings, componentFinding("FOSS_LICENSE_ARTIFACT_LIMIT", domain.SeverityInfo, component,
+			fmt.Sprintf("the component root carries more recognized licence files than section 22.9 retains, or a larger one: %s",
+				strings.Join(retained.dropped, ", ")),
+			"Nothing was truncated. Reduce the licence files in the component root, or retain the named file by hand."))
+	}
 
 	// Section 22.2 in order: an SPDX identifier in a used file (2), then the
 	// component's own manifest (3), then what the package manager declared or
@@ -1006,12 +1045,12 @@ func (r *componentResolver) resolveComponentLicense(component *domain.Component,
 		}
 	}
 	if fromFiles.Expression == "" {
-		if found, ok := r.licenseFromComponentRoot(root); ok {
+		if found, ok := licenseFromRetained(retained); ok {
 			fromFiles = found
 		}
 	}
 	if fromFiles.Expression == "" && len(observed) == 0 {
-		observed = r.licenseEvidenceFromComponentRoot(root)
+		observed = licenseEvidenceFromRetained(retained)
 	}
 
 	switch {
@@ -1079,7 +1118,56 @@ func (r *componentResolver) resolveComponentLicense(component *domain.Component,
 			component.Properties = addProperty(component.Properties, "sbomb:license:source", component.Licenses[0].Source)
 		}
 	}
+
+	// Section 22.9 and requirement R10: an identifier without the text is the
+	// one case where the attribution obligation cannot be satisfied from what
+	// the tool saw, and it is said at the point where the entry would have
+	// been. No canonical SPDX text is ever put there instead -- for MIT and
+	// the BSD family that text carries a placeholder where the rights holder
+	// belongs, so substituting it ships a template where a notice was owed.
+	if hasResolvedLicense(component.Licenses) && !hasRetainedGrant(component.LicenseArtifacts) {
+		findings = append(findings, componentFinding("FOSS_LICENSE_TEXT_MISSING", domain.SeverityInfo, component,
+			fmt.Sprintf("the licence is %s, and no licence text was retained for this component",
+				renderedLicense(component.Licenses[0])),
+			"Place the component's own licence file in its root, or record the text with the component by hand; sbomb never substitutes a canonical SPDX text."))
+	}
 	return findings
+}
+
+// hasResolvedLicense says whether a licence was actually settled, as opposed
+// to the NOASSERTION of section 22.7, which is the tool saying it does not
+// know.
+func hasResolvedLicense(licenses []domain.LicenseFinding) bool {
+	if len(licenses) == 0 {
+		return false
+	}
+	return licenses[0].Expression != "" || licenses[0].SPDXID != "" ||
+		(licenses[0].Name != "" && licenses[0].Name != "NOASSERTION")
+}
+
+// hasRetainedGrant says whether the component carries the bytes of a licence
+// grant. A NOTICE alone does not satisfy the obligation the grant states, so
+// it does not answer this.
+func hasRetainedGrant(artifacts []domain.LicenseArtifact) bool {
+	for _, artifact := range artifacts {
+		if artifact.Kind == domain.LicenseArtifactLicense {
+			return true
+		}
+	}
+	return false
+}
+
+// renderedLicense names a licence finding the way a message should: the
+// expression, else the identifier, else the name.
+func renderedLicense(finding domain.LicenseFinding) string {
+	switch {
+	case finding.Expression != "":
+		return finding.Expression
+	case finding.SPDXID != "":
+		return finding.SPDXID
+	default:
+		return finding.Name
+	}
 }
 
 // licenseFromPackageManager uses what the manager declared, or the licence
@@ -1113,40 +1201,200 @@ func (r *componentResolver) licenseFromPackageManager(name string) (domain.Licen
 	return found, true
 }
 
-// licenseFromComponentRoot looks for a recognized license file, but only in
-// the component root itself. Section 22.1 forbids scanning the repository for
-// license files outside mapped component roots.
-func (r *componentResolver) licenseFromComponentRoot(root string) (domain.LicenseFinding, bool) {
+// Retention limits of section 22.9, which are the section 30 point 9 bounds on
+// untrusted input applied to a licence file. The count bounds the list and the
+// size bounds one entry; neither ever truncates a retained file, because a
+// truncated licence is not a licence and a truncated notice is not a notice.
+const (
+	maxLicenseArtifacts     = 8
+	maxLicenseArtifactBytes = 1 << 20
+)
+
+// retainedLicenses is what section 22.9 kept for one component root, in the
+// consultation order of section 22.3 -- grants first -- because that order
+// decides which file answers step 5 of section 22.2 and it is not the order
+// the artifacts are stored in.
+type retainedLicenses struct {
+	artifacts []domain.LicenseArtifact
+	// detected is index-aligned with artifacts and holds the whole finding
+	// detection produced, of which domain.LicenseArtifact keeps the
+	// identifier and the technique. Carrying it here is what lets step 5 of
+	// section 22.2 answer from the retained bytes instead of reading and
+	// detecting a second time.
+	detected []domain.LicenseFinding
+	// dropped names what a limit excluded, for FOSS_LICENSE_ARTIFACT_LIMIT.
+	dropped []string
+}
+
+// retainLicenseArtifacts keeps the bytes of every recognized licence file the
+// component root carries (section 22.9).
+//
+// An SPDX identifier is not a deliverable. MIT and the BSD family name the
+// rights holder inside the licence text, and the text SPDX publishes for MIT
+// has a placeholder where that holder belongs -- so the component's own file
+// is what an attribution obligation is satisfied with, and the identifier is
+// an index into a catalogue. Nothing here is ever substituted for a text a
+// component does not carry.
+//
+// Section 22.1 still bounds where this may look: the settled component root
+// itself, listed once, and nothing above or below it.
+func (r *componentResolver) retainLicenseArtifacts(rootID domain.FileID, root string) retainedLicenses {
 	if root == "" {
-		return domain.LicenseFinding{}, false
+		return retainedLicenses{}
 	}
+	key := rootID.Canonical() + "|" + root
+	if cached, known := r.retainedByRoot[key]; known {
+		return cached
+	}
+	var retained retainedLicenses
 	for _, name := range licenseFilesIn(root) {
-		found, err := license.ResolveFile(filepath.Join(root, name))
-		if err == nil && found.Expression != "" {
-			found.Evidence = "component-level"
-			found.Source = name
-			return found, true
+		if len(retained.artifacts) >= maxLicenseArtifacts {
+			retained.dropped = append(retained.dropped,
+				fmt.Sprintf("%s (past the limit of %d artifacts)", name, maxLicenseArtifacts))
+			continue
 		}
+		path := filepath.Join(root, name)
+		// The size is asked before the bytes are, so that a licence file the
+		// size of a disk image is refused rather than allocated for.
+		if info, err := os.Stat(path); err == nil && info.Size() > maxLicenseArtifactBytes {
+			retained.dropped = append(retained.dropped,
+				fmt.Sprintf("%s (%d bytes, over the limit of %d)", name, info.Size(), maxLicenseArtifactBytes))
+			continue
+		}
+		data, err := r.readForLicense(path)
+		if err != nil {
+			continue
+		}
+		sum := sha256.Sum256(data)
+		artifact := domain.LicenseArtifact{
+			Kind:   licenseArtifactKind(name),
+			File:   domain.FileID{Anchor: rootID.Anchor, RelPath: joinRelPath(rootID.RelPath, name)},
+			SHA256: hex.EncodeToString(sum[:]),
+			Bytes:  data,
+		}
+		found := domain.LicenseFinding{}
+		// Only a grant is detected on. A NOTICE quoting a licence is evidence
+		// of what must be reproduced and not of what applies, and an
+		// identifier recorded beside its bytes is one inference away from
+		// becoming the component's licence (section 22.2).
+		if artifact.Kind == domain.LicenseArtifactLicense {
+			found = license.ResolveFromText(string(data), name)
+			if found.Expression != "" {
+				artifact.DetectedID = found.Expression
+				artifact.Technique = found.Technique
+			}
+		}
+		retained.artifacts = append(retained.artifacts, artifact)
+		retained.detected = append(retained.detected, found)
+	}
+	if r.retainedByRoot == nil {
+		r.retainedByRoot = map[string]retainedLicenses{}
+	}
+	r.retainedByRoot[key] = retained
+	return retained
+}
+
+// readForLicense reads one licence file of a component root and counts the
+// read. Section 22.9 permits one read per file per root; the counter is how
+// that is checked rather than promised. A failed open counts too: the point is
+// which paths this run touches.
+func (r *componentResolver) readForLicense(path string) ([]byte, error) {
+	if r.licenseReads == nil {
+		r.licenseReads = map[string]int{}
+	}
+	r.licenseReads[path]++
+	return os.ReadFile(path)
+}
+
+// licenseArtifactKind maps a recognized file name onto the kind of obligation
+// it carries (section 22.9).
+func licenseArtifactKind(name string) string {
+	rank, ok := recognizedLicenseFile(name)
+	if !ok {
+		return ""
+	}
+	switch rank {
+	case licenseRankNotice:
+		return domain.LicenseArtifactNotice
+	case licenseRankCopyright:
+		return domain.LicenseArtifactCopyright
+	}
+	return domain.LicenseArtifactLicense
+}
+
+// joinRelPath puts a file name below a root's relative path. A root that is
+// the anchor itself has none, and "/name" is not an identity.
+func joinRelPath(root, name string) string {
+	if root == "" {
+		return name
+	}
+	return strings.TrimSuffix(root, "/") + "/" + name
+}
+
+// sortedLicenseArtifacts is the stored order of section 22.9: (kind, canonical
+// path). It is deliberately not the consultation order of section 22.3 -- a
+// document is read, and a resolution order is executed.
+func sortedLicenseArtifacts(artifacts []domain.LicenseArtifact) []domain.LicenseArtifact {
+	if len(artifacts) == 0 {
+		return nil
+	}
+	sorted := make([]domain.LicenseArtifact, len(artifacts))
+	copy(sorted, artifacts)
+	sort.Slice(sorted, func(i, j int) bool {
+		if sorted[i].Kind != sorted[j].Kind {
+			return sorted[i].Kind < sorted[j].Kind
+		}
+		return sorted[i].File.Canonical() < sorted[j].File.Canonical()
+	})
+	return sorted
+}
+
+// licenseFromRetained is step 5 of section 22.2, answered from the bytes
+// section 22.9 already kept. Only a grant answers it, and the first one that
+// detection settled -- in the order of section 22.3 -- wins.
+func licenseFromRetained(retained retainedLicenses) (domain.LicenseFinding, bool) {
+	for i, artifact := range retained.artifacts {
+		if artifact.Kind != domain.LicenseArtifactLicense || artifact.DetectedID == "" {
+			continue
+		}
+		found := retained.detected[i]
+		found.Evidence = "component-level"
+		// The file name, not the path it was read from: where the bytes are is
+		// a property of this machine (section 7.9), and the identity of the
+		// artifact is recorded beside its hash in sbomb:component:licenseFile.
+		found.Source = baseNameOf(artifact.File.RelPath)
+		return found, true
 	}
 	return domain.LicenseFinding{}, false
 }
 
-// licenseEvidenceFromComponentRoot observes the licence texts in the component
-// root's licence file when nothing there resolved to one licence.
-func (r *componentResolver) licenseEvidenceFromComponentRoot(root string) []domain.LicenseFinding {
-	if root == "" {
-		return nil
-	}
-	for _, name := range licenseFilesIn(root) {
-		data, err := os.ReadFile(filepath.Join(root, name))
-		if err != nil {
+// licenseEvidenceFromRetained observes the complete licence texts in a grant
+// that is not itself one licence -- two of them one after the other, or one
+// with material around it. It is evidence (section 22.4), never a conclusion.
+//
+// A NOTICE is not consulted: it is retained for reproduction and left out of
+// the identification chain entirely (section 22.2), so a NOTICE reciting the
+// Apache licence cannot make the component's licence NOASSERTION-with-review
+// either.
+func licenseEvidenceFromRetained(retained retainedLicenses) []domain.LicenseFinding {
+	for _, artifact := range retained.artifacts {
+		if artifact.Kind != domain.LicenseArtifactLicense {
 			continue
 		}
-		if observed := license.ObserveFindings(string(data), name); len(observed) > 0 {
+		if observed := license.ObserveFindings(string(artifact.Bytes), baseNameOf(artifact.File.RelPath)); len(observed) > 0 {
 			return observed
 		}
 	}
 	return nil
+}
+
+// baseNameOf is the last segment of a canonical relative path, which is always
+// slash-separated (section 7.7).
+func baseNameOf(relPath string) string {
+	if index := strings.LastIndex(relPath, "/"); index >= 0 {
+		return relPath[index+1:]
+	}
+	return relPath
 }
 
 // licenseNames lists the identifiers of a set of observations, for a message.

@@ -247,27 +247,99 @@
   "components": [
     {
       "id": "component:apache-lib",
-      "name": "apache-lib"
+      "name": "apache-lib",
+      "licenseArtifacts": [
+        {
+          "kind": "license",
+          "file": "project:dep/apache-lib/LICENSE",
+          "sha256": "0b8f6fef304298b6a8a8ad91e7a5b0b2255231f39c8fc4ab84774f8e22d07f98",
+          "sizeBytes": 10359,
+          "detectedId": "Apache-2.0",
+          "technique": "spdx-digest"
+        },
+        {
+          "kind": "notice",
+          "file": "project:dep/apache-lib/NOTICE",
+          "sha256": "c499743d9175cc82bc99be3600c9303257d66a55ada9c7b3f78323a3c2d7610c",
+          "sizeBytes": 324
+        }
+      ]
     },
     {
       "id": "component:bsd-hdr",
-      "name": "bsd-hdr"
+      "name": "bsd-hdr",
+      "licenseArtifacts": [
+        {
+          "kind": "license",
+          "file": "project:dep/bsd-hdr/LICENSE",
+          "sha256": "4bd971475aab8e30017fb65c7f5a6c4da171ee8ee25b3580fad812227f8cb2a2",
+          "sizeBytes": 1513,
+          "detectedId": "BSD-3-Clause",
+          "technique": "spdx-template"
+        }
+      ]
     },
     {
       "id": "component:lgpl-lib",
-      "name": "lgpl-lib"
+      "name": "lgpl-lib",
+      "licenseArtifacts": [
+        {
+          "kind": "license",
+          "file": "project:dep/lgpl-lib/LICENSE",
+          "sha256": "b5af363e432a5f6ba35216c5feaf4a54461fc7916eec64f17453cb24a70ecf2d",
+          "sizeBytes": 26091
+        }
+      ]
     },
     {
       "id": "component:mit-lib",
-      "name": "mit-lib"
+      "name": "mit-lib",
+      "licenseArtifacts": [
+        {
+          "kind": "license",
+          "file": "project:dep/mit-lib/LICENSE",
+          "sha256": "931fcdc2d230c2d176c937a73a35d00af205d8414ec6526c83654fadb5d2f52d",
+          "sizeBytes": 1084,
+          "detectedId": "MIT",
+          "technique": "spdx-digest"
+        }
+      ]
     },
     {
       "id": "component:multi-license",
-      "name": "multi-license"
+      "name": "multi-license",
+      "licenseArtifacts": [
+        {
+          "kind": "license",
+          "file": "project:dep/multi-license/LICENSE-APACHE",
+          "sha256": "0b8f6fef304298b6a8a8ad91e7a5b0b2255231f39c8fc4ab84774f8e22d07f98",
+          "sizeBytes": 10359,
+          "detectedId": "Apache-2.0",
+          "technique": "spdx-digest"
+        },
+        {
+          "kind": "license",
+          "file": "project:dep/multi-license/LICENSE-MIT",
+          "sha256": "59d026162035ee799ad4a49867be3ef92276bfe13250cf10796ec0d3b856596e",
+          "sizeBytes": 1086,
+          "detectedId": "MIT",
+          "technique": "spdx-digest"
+        }
+      ]
     },
     {
       "id": "component:nocopyright",
-      "name": "nocopyright"
+      "name": "nocopyright",
+      "licenseArtifacts": [
+        {
+          "kind": "license",
+          "file": "project:dep/nocopyright/LICENSE",
+          "sha256": "6fd46bc279753ff2f06019924d5e4877729545e72c93165d2fb3bab0bdeebec2",
+          "sizeBytes": 632,
+          "detectedId": "0BSD",
+          "technique": "spdx-template"
+        }
+      ]
     },
     {
       "id": "component:project",

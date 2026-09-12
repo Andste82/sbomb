@@ -212,3 +212,37 @@ different document than before. It is settled where the attribution document is
 rendered and the licence expressions are actually consumed (F5 or F8), with the
 NOASSERTION encoding of section 28.7 and deviation D19 in one view, not as a
 by-product of a milestone about where files are read from.
+
+---
+
+## Q11 — Does `FOSS_LICENSE_TEXT_MISSING` apply to the manufacturer's own code?
+
+The finding is defined for a component with a resolved licence identifier and no
+retained text. The FOSS plan's own table narrows it to a **distributed**
+component, and the distribution role is F6 work: it does not exist yet, so F4
+fires the finding for every component the criterion matches.
+
+On the corpus that is exactly one component — `p14-foss`'s own application. It
+declares `MIT` in `src/main.c` and carries no licence file at its root, so the
+finding says the document's attribution material cannot be assembled from what
+sbomb saw. That is *true*, and arguably the most useful instance of it: a
+manufacturer shipping MIT code without its own LICENSE file has a real gap.
+
+But F7 builds `THIRD-PARTY-NOTICES.txt` from `type != application` (decision
+Q12), so the component this fires for is the one the notices document leaves
+out — and a finding whose subject never reaches the document it is about reads
+as noise in a CI log.
+
+Three answers, none of them obviously right:
+
+* leave it as it is, and let a manufacturer's own missing LICENSE be reported;
+* restrict it to `type != application`, which makes the finding agree with the
+  document but stops reporting the one gap an auditor would ask about;
+* restrict it to `distributed` components once F6 exists, which is what the
+  plan says, and which is a third criterion again — a build-time-only code
+  generator under GPL is not in the notices document either.
+
+It is settled in F6, where the role exists and all three criteria can be
+compared against one corpus instead of argued about. Until then the finding is
+informational, gates nothing, and over-reports rather than under-reports, which
+is the right direction for a compliance signal.

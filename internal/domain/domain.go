@@ -154,9 +154,51 @@ type Component struct {
 	// the files live -- a system archive linked statically is bundled into the
 	// artifact and is not provided by anything.
 	EnvironmentProvided bool
-	Properties          map[string][]string
-	Files               []FileID
+	// LicenseArtifacts are the recognized license files the component root
+	// carries, kept verbatim (section 22.9). They are the deliverable an
+	// attribution obligation is satisfied with: for MIT and the BSD family
+	// the rights holder is inside the text, so the identifier in Licenses is
+	// an index into a catalogue and these are the bytes. Ordered by
+	// (Kind, File).
+	LicenseArtifacts []LicenseArtifact
+	Properties       map[string][]string
+	Files            []FileID
 }
+
+// LicenseArtifact is one retained license file of a component root, per
+// section 22.9. The bytes are unmodified -- line endings included -- because a
+// reproduced notice that was reformatted is not the notice the license said to
+// reproduce.
+type LicenseArtifact struct {
+	// Kind is "license" for a grant (LICENSE, LICENCE, COPYING,
+	// LICENSE-<id>), "notice" for NOTICE, "copyright" for COPYRIGHT. A grant
+	// answers section 22.2; the other two answer only what must be
+	// reproduced.
+	Kind string
+	// File is the identity of the file, never the path it was read from
+	// (section 7.8): the component root's identity with the file name below
+	// it.
+	File FileID
+	// SHA256 is the hex digest of Bytes, so that a consumer can check the
+	// text it received against what the tool saw.
+	SHA256 string
+	Bytes  []byte
+	// DetectedID is the SPDX identifier detection settled on, empty when none
+	// of the techniques of section 22.3 did. It stays empty for a "notice" or
+	// "copyright" artifact on purpose: an identifier recorded there is one
+	// inference away from becoming the component's license, which section
+	// 22.2 forbids.
+	DetectedID string
+	// Technique names which technique of section 22.3 produced DetectedID.
+	Technique string
+}
+
+// LicenseArtifactKind values, spelled once.
+const (
+	LicenseArtifactLicense   = "license"
+	LicenseArtifactNotice    = "notice"
+	LicenseArtifactCopyright = "copyright"
+)
 
 // VCSRecord is where a component's source is kept, as the manager recorded it.
 // It is never a stand-in for a supplier (section 20.5).

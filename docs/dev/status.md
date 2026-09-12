@@ -169,6 +169,33 @@
   matches a licence file now, memoized per directory so section 31 pays for
   each directory once, and `multi-license` is a component of the fixture.
 
+- Section 22.9, licence artifact retention: every recognized licence file a
+  mapped component root carries is kept verbatim, with its canonical path and
+  its SHA-256. An SPDX identifier is not a deliverable -- MIT and the BSD
+  family name the rights holder inside the text, and the canonical text SPDX
+  publishes for `MIT` has a placeholder where that holder belongs -- so the
+  component's own bytes are what an attribution obligation is satisfied with,
+  and no canonical text is ever substituted for one a component does not
+  carry. **All** matching files are retained, not the first that resolves: the
+  dual-licensed `multi-license` ships both of its texts. `NOTICE` and
+  `COPYRIGHT` are retained as kinds of their own and have left the
+  identification chain of section 22.2 entirely (deviation D42), because a
+  NOTICE that quotes a licence is evidence of what must be reproduced and not
+  of what applies. The retained bytes reach the document as
+  `evidence.licenses[].license.text` (base64, with `acknowledgement`) when
+  `licenseTextInSBOM` says so, and its default keeps `generate` the size it
+  was; they reach the inventory dump as kind, path, digest, size, identifier
+  and technique. Identification and observation now consume the retained bytes
+  instead of opening the same file a second time, the answer per root is
+  memoized, and one counter records every read retention causes -- so "one read
+  per licence file per root" is asserted rather than claimed. The limits are 8 artifacts per component and 1 MiB each, and
+  exceeding either bounds the list and reports
+  `FOSS_LICENSE_ARTIFACT_LIMIT` -- a retained file is never truncated.
+  A component with an identifier and no text reports
+  `FOSS_LICENSE_TEXT_MISSING`, which on the fixture is the manufacturer's own
+  application: it declares `MIT` in `src/main.c` and carries no licence file of
+  its own.
+
 ## Known Gaps
 
 - **Five specified flags are absent**, each waiting on the feature it belongs
@@ -243,14 +270,15 @@ outputs contain the paths.
 
 The FOSS attribution export is planned in a branch of its own
 (`docs/dev/foss/`), eight milestones from the fixture to the rendered notices
-document. F1 and F2 have landed: the fixture, the source harvest, the inventory
-dump and the source-tree relocation that lets the fixture be read at all.
-Nothing else of it is built. The first thing the relocation made visible
-belongs to F3: `dep/multi-license` carries `LICENSE-MIT` and `LICENSE-APACHE`
-and no plain `LICENSE`, so it is not recognized as a component boundary and its
-`SPDX-License-Identifier` decides the *project* component's licence. The
-boundary marker list is F3's subject, and the golden records the current answer
-rather than hiding it.
+document. F1 to F4 have landed: the fixture, the source harvest, the inventory
+dump, the source-tree relocation that lets the fixture be read at all, the
+component root as a resolved fact, and the retention of the licence and notice
+bytes those roots carry. What is not built is everything the notices document
+is made of besides the texts: copyright statements (F5), the distribution role,
+the linkage form and the tri-state modification status (F6), the `foss`
+subcommand and `--foss-out` with the four documents they write (F7), and the
+user documentation and CI wiring (F8). No obligation is named and no copyright
+line is read yet.
 
 What is left is not phase work:
 

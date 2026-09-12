@@ -1830,3 +1830,49 @@ Package caches are not relocated either. Their roots are read from files the
 build wrote and are build-machine paths; the source-root pair is built because
 the fixture corpus cannot be tested without it. Open question Q8 records the day
 the general form is needed.
+
+---
+
+## D42 — `NOTICE` and `COPYRIGHT` decide no licence
+
+Section 22.2 ranked "a recognized license file in the component root" as step 5,
+and section 22.3 recognizes five names. Two of them — `NOTICE` and `COPYRIGHT` —
+are not licence grants, and the implementation consulted them anyway: they
+ranked below `LICENSE`, `LICENCE` and `COPYING`, which narrows the case without
+closing it. A component that carries a `NOTICE` and no licence file had its
+licence decided by the NOTICE.
+
+**Why that is a wrong answer rather than a weak one.** The Apache Software
+Foundation's assembly rules describe NOTICE as the place for attribution notices
+the licence text does not already satisfy — "the copyright notifications
+embedded within BSD and MIT licenses do not need to be duplicated in NOTICE".
+Its content is therefore routinely about somebody other than the component it
+sits beside: a dependency's holder, a bundled font's author, a trademark
+statement. Reading a complete licence text out of it and publishing that as the
+component's licence produces a high-confidence identifier for a licence nobody
+granted here. NOASSERTION is a better answer than a confident wrong one, and
+section 22.7 exists to say so.
+
+The observation path is closed for the same reason. A NOTICE reciting two
+licences used to make the component NOASSERTION-with-review and name those two
+licences as observed evidence — which reads as "this component is under one of
+these", and is not what the file says.
+
+**What replaces it.** Retention (section 22.9). Both files are kept verbatim
+with their hashes, under kinds of their own, so requirement R4 — the NOTICE
+propagation obligation of Apache-2.0 section 4(d) — is satisfied from the bytes
+rather than from an identifier. They are named in the document by
+`sbomb:component:noticeFile`, and a `notice` or `copyright` artifact
+deliberately records no detected identifier at all: recorded beside its bytes,
+an identifier is one inference away from becoming the component's licence again.
+
+Section 19.2 had already reached the same conclusion for the component
+boundary: a directory carrying only a NOTICE is not thereby a separate work.
+This is the same rule applied to the second question those files were being
+asked.
+
+**What it costs.** A component whose only licence-ish file is a NOTICE now
+reports `UNKNOWN_LICENSE` instead of an identifier. That is the point: the
+identifier it reported was not evidence. The text is in the document and in the
+inventory either way, so nothing a recipient needs was lost — only a claim that
+was not sbomb's to make.

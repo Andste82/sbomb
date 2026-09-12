@@ -612,8 +612,13 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		return Result{Graph: graph, Findings: findings}, err
 	}
 	bom, err := writer.(cyclonedx.Writer).Build(document, sbomwriter.Options{
-		SpecVersion:  specVersion,
-		TLP:          cfg.Output.TLP,
+		SpecVersion: specVersion,
+		TLP:         cfg.Output.TLP,
+		// Section 22.9 retains the licence texts either way; this decides
+		// whether the document carries them (section 28.7). It is read from
+		// the policy and from nowhere else, so no side output can change a
+		// byte of the SBOM (section 32.1).
+		LicenseText:  options.Policy.LicenseTextInSBOM,
 		Reproducible: reproducible,
 	})
 	if err != nil {

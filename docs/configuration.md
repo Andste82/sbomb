@@ -563,7 +563,17 @@ runs that differ here are not comparable.
 | `pchHeaders` | `include`, `exclude`, `annotate-only` | Headers that arrived through a precompiled header |
 | `sectionGarbageCollection` | `ignore`, `annotate`, `exclude` | Objects the linker discarded with `--gc-sections`: keep them, mark them, or drop them |
 | `prebuiltLibrariesRequireMapping` | `true`, `false` | Whether a prebuilt library without a component mapping is an error |
+| `licenseTextInSBOM` | `off`, `evidence` | Whether the licence texts sbomb retained from the component roots are written into the document, as `evidence.licenses[].license.text` |
 | `staleToleranceSeconds` | `5` | How much clock skew counts as "not stale" |
+
+`licenseTextInSBOM` is off because base64 inflates a licence text by a third,
+and most consumers want the identifier. Turn it on where the document itself has
+to carry the attribution material: for MIT and the BSD family the rights holder
+is named *inside* the text, so an identifier alone does not discharge the
+obligation. The texts are retained either way — their canonical path and SHA-256
+are always in `sbomb:component:licenseFile` and `sbomb:component:noticeFile`, and
+a component whose licence sbomb resolved without ever seeing a text reports
+`FOSS_LICENSE_TEXT_MISSING`.
 
 ### Precedence
 

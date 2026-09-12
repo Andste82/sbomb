@@ -3,6 +3,7 @@ package cyclonedx
 import (
 	"bytes"
 	"embed"
+	"encoding/json"
 	"fmt"
 	"path/filepath"
 	"sort"
@@ -68,6 +69,41 @@ var (
 	compileMutex sync.Mutex
 	compiled     = map[string]*jsonschema.Schema{}
 )
+
+var (
+	spdxIDsOnce sync.Once
+	spdxIDs     map[string]bool
+)
+
+// knownSPDXID reports whether an identifier is in the SPDX licence list, as
+// the embedded SPDX schema enumerates it.
+//
+// It has to be asked before `license.id` is written: that field is an enum in
+// both document schemas, so an identifier the list does not carry makes the
+// document invalid -- and an SPDX-License-Identifier line in somebody's file
+// can name anything at all, including a `LicenseRef-`. Such a value goes to
+// `license.name`, which is free text, rather than failing the run or being
+// dropped. The set is read from the schema that validates the document, so the
+// two can never disagree about what an identifier is.
+func knownSPDXID(id string) bool {
+	spdxIDsOnce.Do(func() {
+		spdxIDs = map[string]bool{}
+		data, err := schemaFS.ReadFile(supportFiles[schemaSPDX])
+		if err != nil {
+			return
+		}
+		var document struct {
+			Enum []string `json:"enum"`
+		}
+		if json.Unmarshal(data, &document) != nil {
+			return
+		}
+		for _, entry := range document.Enum {
+			spdxIDs[entry] = true
+		}
+	})
+	return spdxIDs[id]
+}
 
 // schemaFor returns the compiled CycloneDX schema of one version. Compilation
 // happens once per version; the schemas are static, and compiling the one that

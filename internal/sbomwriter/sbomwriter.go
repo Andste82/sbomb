@@ -62,9 +62,22 @@ type Options struct {
 	// empty when it carries none. It is a distribution constraint on the
 	// document rather than a fact about the build, which is why it is a
 	// serialization choice and not part of the Document.
-	TLP          string
+	TLP string
+	// LicenseText decides whether the licence texts retained per section 22.9
+	// are written into the document. It is a serialization choice because it
+	// changes the document and nothing else: no side output may switch it, or
+	// an SBOM would depend on which extra files somebody asked for.
+	LicenseText  string
 	Reproducible bool
 }
+
+// LicenseText values, per the licenseTextInSBOM setting of section 33.1. The
+// empty string is LicenseTextOff, so a caller with no opinion gets the
+// documented default rather than an accident.
+const (
+	LicenseTextOff      = "off"
+	LicenseTextEvidence = "evidence"
+)
 
 // Writer serializes a Document into one SBOM format.
 //

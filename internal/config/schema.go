@@ -41,6 +41,7 @@ var enums = map[string][]string{
 	"policy.systemLibraries":           {"exclude", "separate-component", "report-only"},
 	"policy.pchHeaders":                {"include", "exclude", "annotate-only"},
 	"policy.sectionGarbageCollection":  {"ignore", "annotate", "exclude"},
+	"policy.licenseTextInSBOM":         {"off", "evidence"},
 	"policy.profile":                   {"default", "lenient", "cra", "strict"},
 	"policy.profileOverlay":            {"host-linux"},
 	"components.versionFrom":           nil, // free-form rules; see documentation

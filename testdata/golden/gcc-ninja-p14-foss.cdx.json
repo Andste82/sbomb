@@ -2,7 +2,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "version": 1,
-  "serialNumber": "urn:uuid:00f766f8-6900-5660-b9e5-6d1ac3f300cf",
+  "serialNumber": "urn:uuid:62455472-b5a6-51d8-9f22-721ad36f9e75",
   "metadata": {
     "tools": [
       {
@@ -718,6 +718,14 @@
           "value": "package-metadata:LICENSE"
         },
         {
+          "name": "sbomb:component:licenseFile",
+          "value": "project:dep/apache-lib/LICENSE@sha256:0b8f6fef304298b6a8a8ad91e7a5b0b2255231f39c8fc4ab84774f8e22d07f98"
+        },
+        {
+          "name": "sbomb:component:noticeFile",
+          "value": "project:dep/apache-lib/NOTICE@sha256:c499743d9175cc82bc99be3600c9303257d66a55ada9c7b3f78323a3c2d7610c"
+        },
+        {
           "name": "sbomb:component:root",
           "value": "project:dep/apache-lib"
         },
@@ -764,6 +772,10 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "package-metadata:LICENSE"
+        },
+        {
+          "name": "sbomb:component:licenseFile",
+          "value": "project:dep/bsd-hdr/LICENSE@sha256:4bd971475aab8e30017fb65c7f5a6c4da171ee8ee25b3580fad812227f8cb2a2"
         },
         {
           "name": "sbomb:component:root",
@@ -814,6 +826,10 @@
           "value": "package-metadata:LICENSE"
         },
         {
+          "name": "sbomb:component:licenseFile",
+          "value": "project:dep/lgpl-lib/LICENSE@sha256:b5af363e432a5f6ba35216c5feaf4a54461fc7916eec64f17453cb24a70ecf2d"
+        },
+        {
           "name": "sbomb:component:root",
           "value": "project:dep/lgpl-lib"
         },
@@ -860,6 +876,10 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "package-metadata:LICENSE"
+        },
+        {
+          "name": "sbomb:component:licenseFile",
+          "value": "project:dep/mit-lib/LICENSE@sha256:931fcdc2d230c2d176c937a73a35d00af205d8414ec6526c83654fadb5d2f52d"
         },
         {
           "name": "sbomb:component:root",
@@ -910,6 +930,14 @@
           "value": "package-metadata:LICENSE-APACHE"
         },
         {
+          "name": "sbomb:component:licenseFile",
+          "value": "project:dep/multi-license/LICENSE-APACHE@sha256:0b8f6fef304298b6a8a8ad91e7a5b0b2255231f39c8fc4ab84774f8e22d07f98"
+        },
+        {
+          "name": "sbomb:component:licenseFile",
+          "value": "project:dep/multi-license/LICENSE-MIT@sha256:59d026162035ee799ad4a49867be3ef92276bfe13250cf10796ec0d3b856596e"
+        },
+        {
           "name": "sbomb:component:root",
           "value": "project:dep/multi-license"
         },
@@ -956,6 +984,10 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "package-metadata:LICENSE"
+        },
+        {
+          "name": "sbomb:component:licenseFile",
+          "value": "project:dep/nocopyright/LICENSE@sha256:6fd46bc279753ff2f06019924d5e4877729545e72c93165d2fb3bab0bdeebec2"
         },
         {
           "name": "sbomb:component:root",

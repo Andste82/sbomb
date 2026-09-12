@@ -43,6 +43,11 @@ type Config struct {
 	PCHHeaders                       string
 	SectionGarbageCollection         string
 	PrebuiltLibrariesRequireMapping  bool
+	// LicenseTextInSBOM decides whether the licence texts retained per
+	// section 22.9 are written into the document: "off" or "evidence". It
+	// belongs with the scope options because it changes the output rather than
+	// the verdict, and two runs that differ here are not comparable.
+	LicenseTextInSBOM string
 
 	StaleToleranceSeconds int
 
@@ -93,6 +98,7 @@ func DefaultConfig() Config {
 		PCHHeaders:                       "include",
 		SectionGarbageCollection:         "ignore",
 		PrebuiltLibrariesRequireMapping:  true,
+		LicenseTextInSBOM:                "off",
 		StaleToleranceSeconds:            5,
 
 		HeaderEvidence:    "dwarf-preferred",
