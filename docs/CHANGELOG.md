@@ -2,6 +2,33 @@
 
 ## 0.17.0
 
+### A file that is not there no longer names a component
+
+Evidence from a build made elsewhere names files this machine does not have —
+a build directory restored in a second CI job, an archive somebody handed you,
+a source tree deleted after the build. sbomb reports each one with
+`MISSING_FILE_HASH` and carries it in the document, which is right: the file
+was part of the build.
+
+What was wrong is what happened next. Two steps derive a *directory* from a
+file's path: the upward search for a component boundary (§19.2 strategy 6) and
+the fallback component root, the deepest directory holding every file of a
+component. Both ran on paths that resolve to nothing. The parents of such a
+path do exist here, by coincidence — a scratch directory, a CI runner's
+workspace holding other checkouts — and a `vcpkg.json` or a `LICENSE` in one of
+them decided a component of your firmware. Observed in this repository's own
+test run: a component named `tmp`, detected by a stray `west.yml` in `/tmp`.
+
+Both steps now skip a file that could not be read. A file that is there is
+resolved exactly as before. Where a component has nothing but absent files, it
+keeps its `unknown:` name, carries no root, and says so through
+`UNKNOWN_COMPONENT` and `COMPONENT_ROOT_UNRESOLVED`.
+
+The three MSVC goldens change accordingly: eighteen `sbomb:component:root`
+properties disappear, among them `abs:` and `abs:../__fixture_src__`. Those
+were roots pointing at directories that do not exist — exactly the invented
+answers this removes. No component name, licence or hash moved.
+
 ### A licence file is found whatever its name is spelled like
 
 Section 22.3 has always recognized its file names case-insensitively, with an

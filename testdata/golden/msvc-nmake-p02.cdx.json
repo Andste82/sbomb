@@ -2,7 +2,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "version": 1,
-  "serialNumber": "urn:uuid:347173ff-83bb-55ed-958a-6bea0111c650",
+  "serialNumber": "urn:uuid:307fbae4-12b8-542b-8e9c-f5ec8da66ced",
   "metadata": {
     "tools": [
       {
@@ -1304,10 +1304,6 @@
           "value": "unresolved"
         },
         {
-          "name": "sbomb:component:root",
-          "value": "abs:"
-        },
-        {
           "name": "sbomb:component:scope",
           "value": "unknown"
         },
@@ -1358,10 +1354,6 @@
           "value": "unresolved"
         },
         {
-          "name": "sbomb:component:root",
-          "value": "abs:"
-        },
-        {
           "name": "sbomb:component:scope",
           "value": "unknown"
         },
@@ -1410,10 +1402,6 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
-        },
-        {
-          "name": "sbomb:component:root",
-          "value": "abs:"
         },
         {
           "name": "sbomb:component:scope",
@@ -3066,10 +3054,6 @@
           "value": "unresolved"
         },
         {
-          "name": "sbomb:component:root",
-          "value": "abs:"
-        },
-        {
           "name": "sbomb:component:scope",
           "value": "unknown"
         },
@@ -3118,10 +3102,6 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
-        },
-        {
-          "name": "sbomb:component:root",
-          "value": "abs:"
         },
         {
           "name": "sbomb:component:scope",
