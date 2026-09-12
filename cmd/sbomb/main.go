@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -14,6 +15,7 @@ import (
 	"github.com/example/sbomb/internal/buildinfo"
 	"github.com/example/sbomb/internal/config"
 	"github.com/example/sbomb/internal/cyclonedx"
+	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/evidence"
 	"github.com/example/sbomb/internal/exec"
 	"github.com/example/sbomb/internal/generate"
@@ -924,12 +926,13 @@ func handleExplain(args []string) (int, string, string) {
 	if fileRef == "" && component == "" && bomRef == "" {
 		return 1, "", "one of --file, --component, or --bom-ref is required\n"
 	}
-	subject := fileRef
 	if component != "" {
-		subject = component
-	}
-	if bomRef != "" {
-		subject = bomRef
+		// Section 32.3 documents this subject and the evidence dump cannot
+		// answer it: it carries source, header, object, archive and artifact
+		// nodes, and no component node. Saying so beats "no evidence chain",
+		// which reads as "that component is not in the product". Deviation D46,
+		// open question Q19.
+		return 1, "", "--component cannot be answered from the evidence dump, which carries files and artifacts and no components (deviation D46). Use --file or --bom-ref, or sbomb foss for what was seen about a component.\n"
 	}
 	if buildDir == "" {
 		return 1, "", "--build-dir is required\n"
@@ -937,6 +940,11 @@ func handleExplain(args []string) (int, string, string) {
 	g, err := loadEvidenceGraph(buildDir)
 	if err != nil {
 		return 1, "", err.Error() + "\n"
+	}
+
+	subject, subjectErr := explainSubject(g, fileRef, bomRef)
+	if subjectErr != "" {
+		return 1, "", subjectErr
 	}
 
 	var text string
@@ -954,6 +962,42 @@ func handleExplain(args []string) (int, string, string) {
 		text += "\n"
 	}
 	return 0, text, ""
+}
+
+// explainSubject turns what the user typed into a node id of the dump. Section
+// 32.3 spells its examples as a path relative to a root and as a bom-ref, and
+// the graph is keyed by canonical identity (`<anchor>:<relative path>`), so
+// neither example reached a node before.
+//
+// A bom-ref of a file is its identity behind "file:" (§28.4), so the prefix
+// comes off. A path is looked up as an identity first, because that is what
+// `explain` has always accepted and what the review report prints; failing
+// that, every anchor of the dump is offered it. Two anchors carrying one
+// relative path is an ambiguity rather than a choice: both are named and
+// nothing is picked, because picking would make the answer depend on map order.
+func explainSubject(g *evidence.Graph, fileRef, bomRef string) (string, string) {
+	if bomRef != "" {
+		return strings.TrimPrefix(bomRef, "file:"), ""
+	}
+	if _, found := g.Node(domain.NodeID(fileRef)); found {
+		return fileRef, ""
+	}
+	relative := strings.TrimPrefix(filepath.ToSlash(fileRef), "./")
+	var matches []string
+	for _, node := range g.Nodes() {
+		if id := string(node.ID); strings.HasSuffix(id, ":"+relative) {
+			matches = append(matches, id)
+		}
+	}
+	sort.Strings(matches)
+	switch len(matches) {
+	case 0:
+		return fileRef, ""
+	case 1:
+		return matches[0], ""
+	default:
+		return "", fmt.Sprintf("%s is ambiguous: %s. Name one of them.\n", fileRef, strings.Join(matches, ", "))
+	}
 }
 
 func loadEvidenceGraph(buildDir string) (*evidence.Graph, error) {

@@ -2,7 +2,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "version": 1,
-  "serialNumber": "urn:uuid:ceb7cd9f-4c4f-5fda-a0d9-2937e2d8da9e",
+  "serialNumber": "urn:uuid:2ad78286-d9bb-518d-ba77-b90800b02d59",
   "metadata": {
     "tools": [
       {
@@ -61,7 +61,9 @@
       "scope": "required",
       "licenses": [
         {
-          "expression": "MIT"
+          "license": {
+            "id": "MIT"
+          }
         }
       ],
       "properties": [
@@ -906,7 +908,9 @@
       "scope": "required",
       "licenses": [
         {
-          "expression": "Apache-2.0"
+          "license": {
+            "id": "Apache-2.0"
+          }
         }
       ],
       "properties": [
@@ -986,7 +990,9 @@
       "scope": "required",
       "licenses": [
         {
-          "expression": "BSD-3-Clause"
+          "license": {
+            "id": "BSD-3-Clause"
+          }
         }
       ],
       "properties": [
@@ -1062,7 +1068,9 @@
       "scope": "excluded",
       "licenses": [
         {
-          "expression": "GPL-2.0-only"
+          "license": {
+            "id": "GPL-2.0-only"
+          }
         }
       ],
       "properties": [
@@ -1137,7 +1145,9 @@
       "scope": "required",
       "licenses": [
         {
-          "expression": "LGPL-2.1-only"
+          "license": {
+            "id": "LGPL-2.1-only"
+          }
         }
       ],
       "properties": [
@@ -1224,7 +1234,9 @@
       "scope": "required",
       "licenses": [
         {
-          "expression": "MIT"
+          "license": {
+            "id": "MIT"
+          }
         }
       ],
       "properties": [
@@ -1380,7 +1392,9 @@
       "scope": "required",
       "licenses": [
         {
-          "expression": "0BSD"
+          "license": {
+            "id": "0BSD"
+          }
         }
       ],
       "properties": [

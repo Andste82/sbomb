@@ -803,6 +803,14 @@ func licensesToCyclone(findings []domain.LicenseFinding) []License {
 	licenses := make([]License, 0, len(findings))
 	for _, finding := range findings {
 		switch {
+		// Section 28.7 orders the two encodings by what the value is, not by
+		// which field carries it: a known SPDX identifier is `license.id` and
+		// only a compound expression is `expression`. A bare `MIT` satisfies
+		// both readings of the grammar -- it is a well-formed expression too --
+		// and the identifier is the more specific statement, which is what a
+		// consumer filtering on `license.id` looks for.
+		case knownSPDXID(finding.Expression):
+			licenses = append(licenses, License{License: &LicenseIdentifier{ID: finding.Expression}})
 		case finding.Expression != "":
 			licenses = append(licenses, License{Expression: finding.Expression})
 		case finding.SPDXID != "":

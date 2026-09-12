@@ -381,6 +381,10 @@ func TestFetchContentDependencyBecomesItsOwnComponent(t *testing.T) {
 			} `json:"supplier"`
 			Licenses []struct {
 				Expression string `json:"expression"`
+				License    *struct {
+					ID   string `json:"id"`
+					Name string `json:"name"`
+				} `json:"license"`
 			} `json:"licenses"`
 		} `json:"components"`
 		Dependencies []struct {
@@ -404,8 +408,10 @@ func TestFetchContentDependencyBecomesItsOwnComponent(t *testing.T) {
 		if !strings.HasPrefix(component.PURL, "pkg:generic/tinylog@1.2.0?vcs_url=") {
 			t.Errorf("purl = %q, want a generic purl carrying the checkout (section 20.4)", component.PURL)
 		}
-		if len(component.Licenses) != 1 || component.Licenses[0].Expression != "MIT" {
-			t.Errorf("licenses = %#v, want MIT from the populated dependency's own file", component.Licenses)
+		// Section 28.7: a known identifier is license.id, not an expression.
+		if len(component.Licenses) != 1 || component.Licenses[0].License == nil ||
+			component.Licenses[0].License.ID != "MIT" {
+			t.Errorf("licenses = %#v, want license.id MIT from the populated dependency's own file", component.Licenses)
 		}
 		// Section 20.5: a repository host is not a supplier.
 		if component.Supplier != nil && component.Supplier.Name != "" {
