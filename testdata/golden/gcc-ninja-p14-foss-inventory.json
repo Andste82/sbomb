@@ -262,6 +262,10 @@
       "name": "mit-lib"
     },
     {
+      "id": "component:multi-license",
+      "name": "multi-license"
+    },
+    {
       "id": "component:nocopyright",
       "name": "nocopyright"
     },

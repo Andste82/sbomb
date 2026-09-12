@@ -156,6 +156,19 @@
   `p14-foss` resolves MIT, Apache-2.0, BSD-3-Clause, LGPL-2.1-only and 0BSD
   from the committed tree.
 
+- Section 19.2, the component root as a resolved fact, is now verified against
+  that fixture on both its toolchains rather than only by unit tests. Every
+  root has a named source, `mit-lib` begins at `dep/mit-lib` although the
+  linker extracted one of its three members, `bsd-hdr` begins at
+  `dep/bsd-hdr` with no build file anywhere in it, and
+  `COMPONENT_ROOT_UNRESOLVED` fires for none of them. One defect was left:
+  the boundary markers were nine exact names to `stat`, so a component
+  carrying `LICENSE-MIT` and `LICENSE-APACHE` and no plain `LICENSE` was not
+  recognized at all -- its sources dissolved into the enclosing project and
+  decided the project's own licence. The marker is matched as section 22.3
+  matches a licence file now, memoized per directory so section 31 pays for
+  each directory once, and `multi-license` is a component of the fixture.
+
 ## Known Gaps
 
 - **Five specified flags are absent**, each waiting on the feature it belongs

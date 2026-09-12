@@ -2,7 +2,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "version": 1,
-  "serialNumber": "urn:uuid:bedf9f09-b7de-59fe-885b-ef36163036ad",
+  "serialNumber": "urn:uuid:00f766f8-6900-5660-b9e5-6d1ac3f300cf",
   "metadata": {
     "tools": [
       {
@@ -60,7 +60,7 @@
       "bom-ref": "component:project",
       "licenses": [
         {
-          "expression": "MIT OR Apache-2.0"
+          "expression": "MIT"
         }
       ],
       "properties": [
@@ -94,7 +94,7 @@
         },
         {
           "name": "sbomb:license:source",
-          "value": "project:dep/multi-license/include/multi.h"
+          "value": "project:src/main.c"
         },
         {
           "name": "sbomb:license:technique",
@@ -885,6 +885,54 @@
     },
     {
       "type": "library",
+      "name": "multi-license",
+      "bom-ref": "component:multi-license",
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "package-metadata:LICENSE-APACHE"
+        },
+        {
+          "name": "sbomb:component:root",
+          "value": "project:dep/multi-license"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "third-party"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "file-level"
+        },
+        {
+          "name": "sbomb:license:source",
+          "value": "project:dep/multi-license/include/multi.h"
+        },
+        {
+          "name": "sbomb:license:technique",
+          "value": "spdx-identifier"
+        }
+      ]
+    },
+    {
+      "type": "library",
       "name": "nocopyright",
       "bom-ref": "component:nocopyright",
       "licenses": [
@@ -963,6 +1011,13 @@
       ]
     },
     {
+      "ref": "component:multi-license",
+      "dependsOn": [
+        "file:project:dep/multi-license/include/multi.h",
+        "file:project:dep/multi-license/src/multi.c"
+      ]
+    },
+    {
       "ref": "component:nocopyright",
       "dependsOn": [
         "file:project:dep/nocopyright/include/nocopyright.h",
@@ -973,8 +1028,6 @@
       "ref": "component:project",
       "dependsOn": [
         "file:build:generated/table.c",
-        "file:project:dep/multi-license/include/multi.h",
-        "file:project:dep/multi-license/src/multi.c",
         "file:project:dep/nolicense/include/nolicense.h",
         "file:project:dep/nolicense/src/nolicense.c",
         "file:project:src/main.c"
@@ -1038,6 +1091,7 @@
         "component:bsd-hdr",
         "component:lgpl-lib",
         "component:mit-lib",
+        "component:multi-license",
         "component:nocopyright",
         "component:project"
       ]

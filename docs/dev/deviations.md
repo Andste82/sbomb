@@ -1735,8 +1735,10 @@ component that is not a build2 package.
 `manifest`, `xmake.lua` and `MODULE.bazel` were not added to
 `packageMetadataFiles`, so a library copied into the tree with only an
 `xmake.lua` beside it still gets no component of its own. The marker lists draw
-boundaries and are paid for with a stat per ancestor directory per used file;
-these readers describe a boundary somebody else already drew. A test in
+boundaries and are paid for with a stat per ancestor directory per used file
+-- the licence marker with one memoized directory listing per ancestor, which
+is the same budget by another route -- while these readers describe a boundary
+somebody else already drew. A test in
 `internal/generate/rootmanifest_test.go` states both halves: the same library
 **with** a licence file gains a version from its `xmake.lua` and nothing else
 changes, and **without** one it gains no component at all.

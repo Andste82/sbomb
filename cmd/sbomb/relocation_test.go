@@ -98,11 +98,12 @@ func TestRelocatedSourceTreeResolvesLicences(t *testing.T) {
 		t.Fatalf("generate = code %d, stderr %q", code, stderr)
 	}
 	want := map[string]string{
-		"component:mit-lib":     "MIT",
-		"component:apache-lib":  "Apache-2.0",
-		"component:bsd-hdr":     "BSD-3-Clause",
-		"component:lgpl-lib":    "LGPL-2.1-only",
-		"component:nocopyright": "0BSD",
+		"component:mit-lib":       "MIT",
+		"component:apache-lib":    "Apache-2.0",
+		"component:bsd-hdr":       "BSD-3-Clause",
+		"component:lgpl-lib":      "LGPL-2.1-only",
+		"component:multi-license": "MIT OR Apache-2.0",
+		"component:nocopyright":   "0BSD",
 	}
 	licenses := componentLicenses(t, output)
 	for ref, expression := range want {

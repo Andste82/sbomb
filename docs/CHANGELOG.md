@@ -2,6 +2,40 @@
 
 ## 0.17.0
 
+### A library is recognized by the licence file it really carries
+
+A component that holds `LICENSE-MIT` and `LICENSE-APACHE` side by side holds no
+file called `LICENSE` at all, and the boundary markers of section 19.2 were a
+list of exact names to `stat`. Such a library was therefore invisible: its
+sources dissolved into the enclosing project, the project's own licence was
+decided by a file that belongs to the dependency, and the attribution export
+would have named the manufacturer as the holder of both texts.
+
+The boundary marker is now matched the way section 22.3 matches a licence file
+-- case-insensitively, with an optional `.txt` or `.md`, and including the
+`LICENSE-<id>` form -- rather than compared against nine fixed names. `NOTICE`
+and `COPYRIGHT` still mark nothing: they are attribution material and not a
+licence grant, which section 19.2 now states as the rule the match applies
+rather than as a gap in a list.
+
+Matching a name needs the directory listed rather than a name `stat`-ed, which
+section 31 would otherwise pay for once per used file per ancestor directory.
+The answer per directory is memoized for the run instead, which is fewer reads
+than the nine `stat`s it replaces, and the specification now requires the memo.
+
+In the corpus this adds `multi-license` to `p14-foss` as a component of its own,
+rooted at `dep/multi-license` and carrying `MIT OR Apache-2.0`, and the
+project's own licence changes from that dependency's dual expression to the
+`MIT` its own `src/main.c` declares. Both `p14-foss` goldens change; every
+other golden is byte-identical.
+
+Everything else section 19.2 requires of a component root was already
+implemented and is now verified against that fixture on both toolchains: every
+root is a resolved fact with a named source, `mit-lib` begins at
+`dep/mit-lib` although the linker extracted one of its three members,
+`bsd-hdr` begins at `dep/bsd-hdr` with no build file anywhere in it, and
+`COMPONENT_ROOT_UNRESOLVED` fires for none of them.
+
 ### A source tree that moved can be read
 
 A build directory and the sources it was made from need not be in the same
