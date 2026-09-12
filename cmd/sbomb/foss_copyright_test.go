@@ -70,9 +70,10 @@ func TestFOSSFixtureCopyrightStatements(t *testing.T) {
 		"component:bsd-hdr": {"Copyright (c) 2026, Fixture BSD Header Authors"},
 		// The LGPL text carries the Free Software Foundation's notice on the
 		// licence itself, and the fixture's own sources carry theirs. Both are
-		// in the component's files; what they mean is not decided here.
+		// in the component's files; what they mean is not decided here. The
+		// "how to apply" appendix of the same text states a placeholder, which
+		// is not a holder -- as for apache-lib above.
 		"component:lgpl-lib": {
-			"Copyright (C)  year >  name of author >",
 			"Copyright (C) 1991, 1999 Free Software Foundation, Inc.",
 			"Copyright (C) 2026 Fixture LGPL Library Authors",
 		},
@@ -83,15 +84,14 @@ func TestFOSSFixtureCopyrightStatements(t *testing.T) {
 	}
 	// The GPL-2.0 code generator is a component on gcc-ninja only (section
 	// 16, open question Q14). Its notices are read exactly like a linked
-	// component's: its own source header, the Free Software Foundation's
-	// notice on the licence text, and the placeholder from the "how to apply"
-	// appendix of that text -- the same three shapes lgpl-lib shows, and the
-	// reason a build-time-only component is described rather than dropped.
+	// component's: its own source header and the Free Software Foundation's
+	// notice on the licence text, with the placeholder of the "how to apply"
+	// appendix rejected -- the same shapes lgpl-lib shows, and the reason a
+	// build-time-only component is described rather than dropped.
 	generator := map[string][]string{
 		"component:gpl-gen": {
 			"Copyright (C) 1989, 1991 Free Software Foundation, Inc.",
 			"Copyright (C) 2026 Fixture GPL Generator Authors",
-			"Copyright (C) yyyy>  name of author>",
 		},
 	}
 	for _, toolchain := range []string{"gcc-ninja", "gcc-make"} {

@@ -130,6 +130,43 @@ func TestHarvestedFossSourcesArePresent(t *testing.T) {
 	}
 }
 
+// A licence's "how to apply this licence" appendix writes the holder as a
+// bracketed placeholder -- `Copyright (C) <year> <name of author>` in the GNU
+// texts, `Copyright [yyyy] [name of copyright owner]` in Apache-2.0 -- and the
+// copyright extractor rejects a holder that is nothing but one of those
+// (internal/license/copyright.go, placeholderGroup). A licence text whose
+// opening angle brackets went missing defeats that rule silently: the line
+// stops looking like a placeholder and is attributed to the component as a
+// real notice. The corpus shipped exactly that damage in the LGPL and GPL
+// texts, and it reached the goldens, so the shape is asserted here rather than
+// left to be noticed again.
+func TestFixtureLicenceTextsCarryBalancedPlaceholders(t *testing.T) {
+	for _, dir := range []string{
+		filepath.Join("projects", "p14-foss", "dep"),
+		filepath.Join("..", "..", "testdata", "fixtures", fixtures.FossSourceTree, "dep"),
+	} {
+		matches, err := filepath.Glob(filepath.Join(dir, "*", "LICENSE*"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(matches) == 0 {
+			t.Fatalf("no licence text found under %s", dir)
+		}
+		for _, path := range matches {
+			data, err := os.ReadFile(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for number, line := range strings.Split(string(data), "\n") {
+				if strings.Contains(line, ">") && !strings.Contains(line, "<") {
+					t.Errorf("%s:%d closes a placeholder that was never opened: %q",
+						path, number+1, line)
+				}
+			}
+		}
+	}
+}
+
 // TestRegenCheckRequiresHarvestedFossSources runs the corpus completeness check
 // against a stand-in repository, because the real one is complete and the
 // interesting case is the incomplete one. The check reports every fixture as
