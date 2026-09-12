@@ -2,6 +2,105 @@
 
 ## 0.17.0
 
+### One discovery, two renderings: `--foss-out` and `sbomb foss`
+
+The attribution material F3 to F6 collected is now written out. Four files, one
+of which ships with the product:
+
+```
+<out>/THIRD-PARTY-NOTICES.txt    the shippable attribution document
+<out>/foss-review.txt            the internal record, human-readable
+<out>/foss-review.json           the same facts, machine-readable
+<out>/source-obligations.txt     which components owe source material, and why
+```
+
+The primary entry point is a flag on `generate`, because the FOSS documents are
+a further rendering of one discovery -- the row `--review-report`,
+`--findings-json`, `--evidence-dump` and `--inventory-dump` are already in.
+`sbomb foss --out <dir>` is a thin front end over the same code path, for the
+case "I want the notices, not an SBOM on disk". Neither workflow runs discovery
+twice, and that is not a performance note: two invocations mean two graphs built
+from a tree that may have changed in between, and the SBOM and the notices
+document could then disagree while each is internally correct. The two entry
+points are asserted to produce byte-identical files, and the run's own counters
+-- graph builds and hashed files -- are asserted to be the same with the FOSS
+view on and off.
+
+**`--foss-out` never changes the document.** The retained licence text always
+reaches the notices document and reaches the CycloneDX document only when
+`licenseTextInSBOM` says so, so an SBOM never depends on which side outputs
+somebody asked for. A test compares the two documents byte for byte.
+
+**Who is in the notices document** is decided by the component type and not by
+the anchor scope: every distributed component whose type is not `application`.
+A library copied into the source tree carries `scope=project` and would be
+dropped by the scope, which is exactly backwards. Embedded assets -- fonts,
+icon sets, images -- are components like any other and are in it.
+
+The distribution role is tested for `distributed` and not for "not
+build-time-only", which is a difference you can see under the default profile:
+sbomb's own synthetic `build-environment` grouping has no files of its own, no
+chain from an artifact reaches it, and nothing derives a role for it -- so the
+shippable document must not present it to a customer as a third-party component
+under an unknown licence. A component in that position is named in a section of
+`foss-review.txt` instead, because a component in none of the record's lists
+would otherwise leave the FOSS outputs without a word. The toolchain runtime,
+which *is* inside the artifact, is a distributed component and is in the notices
+document like any other.
+
+The rendering flag lives on `foss` alone: `sbomb foss --format text|markdown`.
+`generate --foss-out` writes the text rendering (open question Q17).
+
+**Each unique licence text appears once**, keyed by the SHA-256 of the retained
+bytes, with the components sharing it named beside it; a later carrier points at
+it. No holder is lost by that, because two MIT texts naming two holders have two
+digests -- which is the whole reason the component's own file is retained rather
+than a canonical one. A component with no retained text appears with
+`[licence text not found in component - attribution incomplete]` and never with
+a substituted SPDX text, and a waiver never changes that marker: the document
+reports what sbomb saw, not what somebody decided about it.
+
+**The licence view is the union view.** DWARF narrowing is right for a bill of
+materials and wrong for a licence question -- whether a header emitted code is
+not the question, whether its interface was used is -- so the FOSS view reads
+the narrowed headers of the components it reports for their copyright
+statements and states the delta per component and in total. It reads only those
+components' headers: section 31 forbids reading a file that is not needed for
+the output, and the narrowed header of a component no document mentions is not.
+
+**Source obligations are named and never produced.** `source-obligations.txt`
+lists every distributed component whose licence carries one, with the
+obligation, its trigger and the sentence that sbomb does not and cannot produce
+the material. The classification is a flat, committed list in
+`internal/foss/copyleft.go` -- thirty-odd copyleft identifiers plus the common
+permissive ones, so that "on no list" means something -- and an identifier on
+neither list reports `FOSS_LICENSE_UNCLASSIFIED` and is never assumed
+permissive. A free test asserts every entry is an identifier the SPDX table
+embedded for section 22.3 already knows. Importing a two-thousand-entry licence
+database would put classifications nobody has read into a document that carries
+the manufacturer's name.
+
+New in the document: `sbomb:component:sourceObligation`, repeated and sorted.
+New findings: `FOSS_SOURCE_OBLIGATION` and `FOSS_LICENSE_UNCLASSIFIED`, both
+info, neither gating. **No exit code depends on licence content**: policy gates
+are evaluated by `generate` as before and never by `foss`, and everything the
+FOSS view finds is informational.
+
+**The output is not a source offer**, and that is machine-checked rather than
+promised: no file matching `*.c`, `*.h`, `*.cpp`, `*.hpp`, `*.S`, `*.tar*`,
+`*.zip` or `*.patch` is ever written into the output directory, the one function
+that creates a file there refuses any other name, and
+`scripts/determinism-check.sh` checks it on every platform it runs on. Complete
+Corresponding Source is the source of the whole work plus the scripts that
+control its compilation and installation; an evidence-derived subset would look
+like a source offer while being materially incomplete, which would turn the
+tool's precision into a compliance defect.
+
+`--out` writes its four names and overwrites them, the way `--output`
+overwrites an SBOM: nothing else in the directory is read, moved or deleted, and
+a directory that already holds them is not refused -- a CI job whose output
+directory exists is the normal case.
+
 ### What is distributed, how it got there, and whether it was changed
 
 Three attributes, all derived from the evidence graph that was already being

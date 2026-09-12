@@ -13,7 +13,7 @@ not understand them can ignore them; one that does can audit the answer.
 ## Catalogue
 
 <!-- BEGIN GENERATED CATALOGUE -->
-This build writes 44 of the 80 properties below. The rest are specified and
+This build writes 45 of the 81 properties below. The rest are specified and
 reserved: they describe evidence this version does not yet record, and no
 document sbomb writes will contain them. They are listed and marked so that the
 table is the whole catalogue rather than a snapshot of one version.
@@ -45,6 +45,7 @@ table is the whole catalogue rather than a snapshot of one version.
 | `sbomb:component:noticeFile` | Grouping components | repeated, <canonicalPath>@sha256:<hex> | emitted |
 | `sbomb:component:root` | Grouping components | — | emitted |
 | `sbomb:component:scope` | Grouping components | project | third-party | sdk | toolchain | system | emitted |
+| `sbomb:component:sourceObligation` | Grouping components | repeated, sorted | emitted |
 | `sbomb:component:vcsCommit` | Grouping components | — | emitted |
 | `sbomb:component:vcsDirty` | Grouping components | — | emitted |
 | `sbomb:component:vcsTag` | Grouping components | — | reserved |

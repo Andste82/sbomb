@@ -87,6 +87,12 @@ type builder struct {
 	// inputs`, so that a second unresolved member of the same archive does not
 	// start a second process.
 	askedArchives map[string]bool
+	// counters is the run's own tally of the expensive work: how often the
+	// evidence graph was built and how many files were read for a hash. It
+	// exists so that "one discovery" is a checked property rather than a
+	// claim -- a second graph build would show up here as a 2, and no timing
+	// measurement is involved (section 32.6).
+	counters *Counters
 }
 
 func newBuilder(graph *evidence.Graph, anchorResult *anchors.Result, logicalBuild, physicalBuild string, logger *Logger) *builder {
@@ -103,6 +109,7 @@ func newBuilder(graph *evidence.Graph, anchorResult *anchors.Result, logicalBuil
 		retainedObjects:    map[string]bool{},
 		reconstructedLinks: map[string][]string{},
 		askedArchives:      map[string]bool{},
+		counters:           &Counters{},
 	}
 }
 

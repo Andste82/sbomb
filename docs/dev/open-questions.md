@@ -421,3 +421,67 @@ own rule file. The work is:
 Item 2 is the whole difficulty: with no rule for it, a generator input list
 would name CMake's own bookkeeping files as inputs of the product, and a
 suffix list is the kind of heuristic section 19.2 exists to keep out.
+
+---
+
+## Q15 — `FOSS_PER_FILE_LICENSE_DIVERGENCE` is specified by no milestone
+
+`docs/dev/foss/spec-delta.md` §10 lists ten new findings for the attribution
+track. Nine of them are claimed by a milestone and are now emitted. The tenth,
+`FOSS_PER_FILE_LICENSE_DIVERGENCE` (info — "files of one component carry
+different SPDX identifiers"), appears in no milestone's deliverables or tests,
+so F7 did not add it to appendix A: a catalogue entry nothing emits describes a
+document sbomb does not produce, and the two generated catalogues are checked
+against the code.
+
+It is not redundant. §22.5 already reports `LICENSE_CONFLICT` when two sources
+disagree about *one* component's licence, and §22.2 decides the component's
+identifier from the file-level evidence — but a component whose files carry
+`MIT` in one directory and `GPL-2.0-only` in another is a different situation
+from a conflict: both readings are correct, and the component has two licences
+rather than a disputed one. The fixture's `dep/multi-license` is the benign form
+(one dual-licensed dependency); the form worth a finding is a directory that was
+assembled from two upstreams.
+
+Deciding it needs two things this milestone had no mandate for: what the
+threshold is (any two distinct identifiers? or only where neither is implied by
+the component's own expression?), and a fixture that exhibits the malignant
+case. Recorded here rather than guessed.
+
+## Q16 — The review record shows a waiver's reason and not its approver
+
+Decision Q11 says a waived FOSS finding "keeps its reason, approver and expiry
+in the report". `foss-review.txt` prints the reason, because that is what the
+finding carries: `policy.Evaluate` copies `waiver.reason` onto
+`domain.Finding.WaiverReason` and drops `approvedBy` and `expires`
+(`internal/policy/policy.go`). The approver and the expiry are in the waiver
+file, which is committed beside the configuration.
+
+Carrying them would mean widening `domain.Finding` — and therefore the findings
+JSON, which is a format other tools read (appendix A is normative about its
+field names). That is a change to a consumed format for information that is one
+file away, so F7 left it alone. If an auditor wants the approver in the record
+rather than in the waiver file, the change is a `waiver` sub-object on the
+finding rather than three more top-level strings, and it belongs with whatever
+else widens that schema next.
+
+## Q17 — `generate --foss-out` writes the text rendering and cannot select markdown
+
+§32.6 gives `sbomb foss` a `--format text|markdown` and gives `generate` only
+`--foss-out <dir>`. Milestone F7 lists exactly that flag surface, so `generate`
+has no rendering flag: `--foss-out` writes the text rendering, and a user who
+wants the markdown one runs `sbomb foss`. An earlier draft of F7 did add
+`--foss-format` to `generate`; it was removed as surface no milestone asked
+for.
+
+The asymmetry is real rather than principled. `--review-report` has
+`--report-format` beside it, which is the same shape of question, and a CI job
+that produces the SBOM and the notices in one run is exactly the case where the
+rendering would be chosen. Against it: every flag on `generate` is a flag
+forever, the renderings are house style anyway (§32.6), and the two entry
+points are one code path — so whatever is decided must keep them
+byte-identical, which is asserted today for the text rendering only.
+
+Deciding it needs no evidence and no fixture, only a view on whether `generate`
+should carry a second output's rendering flag. Recorded here so that the
+asymmetry is a decision and not an oversight.

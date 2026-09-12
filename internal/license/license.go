@@ -243,3 +243,25 @@ func lookupNormalizedHash(normalized string) (string, bool) {
 	id, ok := knownLicenseHashes[key]
 	return id, ok
 }
+
+// KnownIdentifiers is every SPDX license identifier this build carries a
+// record of: the digests of section 22.3 technique 2 and the templates of
+// technique 4. It exists so that a list of identifiers written by hand
+// somewhere else can be checked against the table rather than against a
+// reviewer's memory -- a typo in an identifier is otherwise a silent
+// classification failure.
+func KnownIdentifiers() map[string]bool {
+	ids := make(map[string]bool, len(knownLicenseHashes))
+	for _, id := range knownLicenseHashes {
+		ids[id] = true
+	}
+	// A template failure is not fatal here: the digest table alone is a real
+	// answer, and every caller asks "is this identifier known", never "how
+	// many are there".
+	if templates, err := TemplateIDs(); err == nil {
+		for _, id := range templates {
+			ids[id] = true
+		}
+	}
+	return ids
+}

@@ -1,0 +1,32 @@
+SOURCE OBLIGATIONS
+==================
+
+For every distributed component whose licence carries a source obligation:
+what is owed, what triggered it, and the fact that sbomb neither produces
+nor can produce the material. A build-time-only component is not in this
+list, because a component the product does not contain triggered nothing.
+
+This is a list of obligations, not a compliance verdict. Whether an
+obligation was discharged is not something sbomb can observe.
+
+COMPONENTS OWING SOURCE MATERIAL
+
+- lgpl-lib - LGPL-2.1-only - static-archive-member
+  A source offer for the library, including any modification to it, is
+  required.
+  Static linkage additionally implicates the relinking provision of the LGPL
+  (section 6 of LGPL-2.0 and LGPL-2.1, section 4 of LGPL-3.0): the material
+  needed to relink the application against a modified library is part of
+  what is owed.
+  sbomb does not and cannot produce this material.
+
+UNCLASSIFIED LICENCES
+
+An identifier on neither obligation list is reported here and never assumed
+permissive, so that a gap in the list is visible rather than silent. The
+list is small and curated on purpose: two thousand imported classifications
+nobody has read do not belong in a document that carries the manufacturer's
+name.
+
+None: every licence identifier of every distributed component is on one of
+the lists.

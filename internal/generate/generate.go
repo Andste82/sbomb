@@ -55,6 +55,25 @@ type Result struct {
 	// which consulted a process is distinguishable from one that read only
 	// files.
 	Introspection []string
+	// Counters is what the run did, in the two quantities that would double
+	// if a caller ran discovery twice (section 32.6).
+	Counters Counters
+	// FOSSView is the licence view of section 32.6: what the union header set
+	// adds over the view the document was built from. It is nil unless
+	// Options.FOSSView asked for it, because it is the one thing the FOSS
+	// outputs need that the document does not carry.
+	FOSSView *FOSSView
+}
+
+// Counters is the run's own tally of the work that a second discovery would
+// repeat. Section 32.6 requires "one discovery" to be assertable, and these
+// are the two numbers that say it: a timing measurement is not a test.
+type Counters struct {
+	// GraphBuilds is how often the evidence graph was assembled. One run is
+	// one build; anything else is the defect this counter exists to catch.
+	GraphBuilds int
+	// HashedFiles is how many files were opened and read for their digest.
+	HashedFiles int
 }
 
 // NarrowingCount is one component's share of the headers DWARF narrowing
@@ -95,6 +114,12 @@ type Options struct {
 	// artifacts[].map and artifacts[].linkDepfile.
 	MapPath         string
 	LinkDepfilePath string
+	// FOSSView asks for the licence view of section 32.6 beside the document.
+	// It adds one bounded step to the run -- the narrowed headers of the
+	// components the FOSS outputs report are read for copyright statements --
+	// and it changes nothing the document contains. Discovery is not repeated
+	// and no graph is rebuilt.
+	FOSSView bool
 }
 
 type Logger struct {
@@ -497,7 +522,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	// taken from the bytes the digest already needed, so the read below is
 	// the only one either of them causes (decision Q9).
 	copyrights := newCopyrightCollector()
-	used, hashFindings := hashUsedFiles(used, b.physical, options.Limits, logger, copyrights.observe)
+	used, hashFindings := hashUsedFiles(used, b.physical, options.Limits, logger, copyrights.observe, b.counters)
 	findings = append(findings, hashFindings...)
 
 	// Staleness: the hashes describe the files as they are now, which is only
@@ -665,11 +690,20 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	}
 	sort.Strings(adapterNames)
 
-	return Result{
+	result := Result{
 		Graph: graph, Findings: findings, Document: document, BOM: bom,
 		Adapters: adapterNames, HeaderNarrowing: narrowing,
 		Introspection: introspectionCommands(runner),
-	}, nil
+		Counters:      *b.counters,
+	}
+	// The licence view of section 32.6, asked for by the caller that wants the
+	// FOSS documents. It runs after the document is built and writes into
+	// nothing the document carries, which is what makes --foss-out an output
+	// selector rather than a content switch (decision B1).
+	if options.FOSSView {
+		result.FOSSView = fossView(narrowing, document, b.physicalFor, options.Limits, logger)
+	}
+	return result, nil
 }
 
 // introspectionCommands is the argv of every command this run executed, in the

@@ -252,6 +252,45 @@
   the two characters `-g`, so a tag called `v1.0-gamma` is a tag. Both patch
   readers are bounded by section 30 item 10 and report `INPUT_LIMIT_EXCEEDED`
   rather than passing a refused record off as "no patches".
+- Section 32.6: **the FOSS outputs.** `generate --foss-out <dir>` and
+  `sbomb foss --out <dir>` write four documents -- `THIRD-PARTY-NOTICES.txt`,
+  which ships with the product, and `foss-review.txt`, `foss-review.json` and
+  `source-obligations.txt`, which do not. Both entry points are one discovery
+  and one renderer (`internal/foss`, a writer that reads the resolved document
+  and touches no evidence), and three properties are asserted rather than
+  claimed: the two produce byte-identical files, the document is byte-identical
+  with and without `--foss-out`, and the run's own counters -- graph builds and
+  hashed files -- are the same with the licence view on and off.
+  The notices document carries every component whose distribution role is
+  `distributed` and whose type is not `application` (decision Q12, so a library
+  copied into the tree is in it and the manufacturer's own code is not). The
+  role is tested for `distributed` rather than for "not build-time-only", and
+  one predicate decides it for both the renderer and the read set of the licence
+  view: a component whose role no chain derived -- section 24.2's synthetic
+  `build-environment` grouping is the one in the corpus -- is in neither
+  shippable document and is named in a section of the review record, because
+  sbomb's own bookkeeping node is not a third-party component and a component in
+  none of the record's lists would leave the outputs without a word. It carries
+  each unique retained text once keyed by
+  its SHA-256 with the components sharing it named beside it (Q13), the
+  statements verbatim, and `[licence text not found in component - attribution
+  incomplete]` where a text is missing -- which a waiver never changes (Q11).
+  It adds no path of its own, and a test asserts that over the corpus.
+  `foss-review.json` is the writer registry's rendering of the same document
+  with the texts included rather than a schema of sbomb's own (section 36.1),
+  so the SPDX writer will replace it rather than sit beside it.
+  `source-obligations.txt` names what a copyleft licence asks for, its trigger
+  and the fact that sbomb does not produce it; the classification is a flat
+  committed list in `internal/foss/copyleft.go` whose every entry is asserted to
+  be an identifier the embedded SPDX table knows, and an identifier on neither
+  list reports `FOSS_LICENSE_UNCLASSIFIED` rather than being assumed permissive.
+  The licence view is the union view: the narrowed headers of the components the
+  FOSS outputs report are read for copyright statements, and the delta is stated
+  per component and in total. No exit code depends on licence content.
+  The structural guarantee -- nothing that looks like source, an archive or a
+  patch is ever written into the output directory -- is enforced in the one
+  function that creates a file there and checked by a test and by
+  `scripts/determinism-check.sh`.
 
 ## Known Gaps
 
@@ -327,15 +366,14 @@ outputs contain the paths.
 
 The FOSS attribution export is planned in a branch of its own
 (`docs/dev/foss/`), eight milestones from the fixture to the rendered notices
-document. F1 to F6 have landed: the fixture, the source harvest, the inventory
+document. F1 to F7 have landed: the fixture, the source harvest, the inventory
 dump, the source-tree relocation that lets the fixture be read at all, the
 component root as a resolved fact, the retention of the licence and notice
-bytes those roots carry, the copyright statements of section 22.10, and the
+bytes those roots carry, the copyright statements of section 22.10, the
 distribution role, linkage form and modification status of sections 24.5 and
-19.4. What is not built is the rendering: the `foss` subcommand and
-`--foss-out` with the four documents they write (F7), and the user
-documentation and CI wiring (F8). No obligation is named yet, and nothing
-renders the attribution material -- it is in the document and nowhere else.
+19.4, and the four documents of section 32.6 that render all of it. What is not
+built is F8: `docs/foss.md`, the `foss: true` Action input, and the CI job that
+keeps the notices format from drifting.
 
 Now that the distribution role is a resolved fact, `FOSS_LICENSE_TEXT_MISSING`
 and `FOSS_COPYRIGHT_MISSING` are asked only of a distributed component (open
@@ -354,6 +392,37 @@ object mapping; order-only inputs are not read, because a CMake build graph
 puts its target ordering set there and reading it made the two *unextracted*
 members of the fixture's MIT archive build-time-only files of the document
 (deviation D45).
+
+Two of F7's own tests could not be written against the corpus, and each is a
+fixture gap rather than a behaviour gap. The corpus carries no embedded font,
+so the asset case of decision Q18 -- a font with a `LICENSE` beside it and one
+without -- is asserted over documents a unit test builds; and assembly mode has
+no fixture, so the per-artifact breakdown of decision Q10 is too. The milestone
+named `dep/nolicense` for the incompleteness marker, which the corpus also
+cannot carry: that directory holds no licence file, so F3's boundary rule
+resolves no component root for it and its files fold into `component:project`,
+which is `application` and in no notices document. The two properties the
+milestone wanted from it are asserted on the corpus through other components
+instead -- under the default profile the toolchain runtime is a distributed
+component with neither a retained text nor a copyright statement, so both
+markers stand in its entry; and a waiver over `nocopyright`'s
+`FOSS_COPYRIGHT_MISSING` leaves `THIRD-PARTY-NOTICES.txt` byte-identical, marker
+included (decision Q11). The milestone also listed a test asserting that a
+non-empty `--out` directory is *refused*; decision Q14 and section 32.6 say the
+opposite, and the overwrite is what is implemented and tested.
+
+The goldens of the four documents are captured under the lenient profile, which
+is the corpus convention for `p14-foss` and predates the milestone. The reason
+it is the convention is worth recording: the fixture's build directory is
+copied per test and the copy does not preserve modification times, so a used
+file that lands after the artifact makes the artifact look stale and the default
+profile's `failOnStaleBuildArtifacts` gate turns that into exit 3 -- a property
+of the copy and not of the build. The default profile is nevertheless a
+materially different notices document -- its
+`includeToolchainRuntime=separate-component` reports the toolchain runtime as a
+component -- so it is exercised through `sbomb foss`, which evaluates no gate
+at all, by tests of its own rather than by a second set of goldens, and it is
+the profile `scripts/determinism-check.sh` renders the FOSS documents under.
 
 One gap of F6 remains, and one of section 16 takes its place. The corpus
 carries no `.git` -- the harvest skips it -- so every fixture component's

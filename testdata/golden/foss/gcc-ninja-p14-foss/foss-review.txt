@@ -1,0 +1,149 @@
+FOSS REVIEW RECORD
+==================
+
+What sbomb saw about the licences of what this build produced. It states no
+verdict: the manufacturer performs the assessment, and this record is the
+data it is performed on. Of the four documents of this directory,
+THIRD-PARTY-NOTICES.txt is the one that ships with the product; this file,
+foss-review.json and source-obligations.txt are internal.
+
+RUN
+
+product:                     fossapp
+policy profile:              lenient
+mode:                        single
+licence view:                union
+SBOM view:                   dwarf-preferred
+reproducible:                true
+
+DISTRIBUTED COMPONENTS
+
+- apache-lib
+  bom-ref:                   component:apache-lib
+  version:                   -
+  licence:                   Apache-2.0 (file-level)
+  origin:                    -
+  distribution role:         distributed
+  linkage form:              static-archive-member
+  modified:                  unknown
+  used files:                3
+  narrowing delta:           0 header(s), 0 additional copyright statement(s)
+  copyright statements:      1
+  source obligation:         -
+  retained licence:          LICENSE (project:dep/apache-lib/LICENSE, sha256:0b8f6fef304298b6a8a8ad91e7a5b0b2255231f39c8fc4ab84774f8e22d07f98)
+  retained notice:           NOTICE (project:dep/apache-lib/NOTICE, sha256:c499743d9175cc82bc99be3600c9303257d66a55ada9c7b3f78323a3c2d7610c)
+- bsd-hdr
+  bom-ref:                   component:bsd-hdr
+  version:                   -
+  licence:                   BSD-3-Clause (file-level)
+  origin:                    -
+  distribution role:         distributed
+  linkage form:              header-only
+  modified:                  unknown
+  used files:                1
+  narrowing delta:           0 header(s), 0 additional copyright statement(s)
+  copyright statements:      1
+  source obligation:         -
+  retained licence:          LICENSE (project:dep/bsd-hdr/LICENSE, sha256:4bd971475aab8e30017fb65c7f5a6c4da171ee8ee25b3580fad812227f8cb2a2)
+- lgpl-lib
+  bom-ref:                   component:lgpl-lib
+  version:                   -
+  licence:                   LGPL-2.1-only (file-level)
+  origin:                    -
+  distribution role:         distributed
+  linkage form:              static-archive-member
+  modified:                  unknown
+  used files:                3
+  narrowing delta:           0 header(s), 0 additional copyright statement(s)
+  copyright statements:      3
+  source obligation:         library-source, relinking
+  retained licence:          LICENSE (project:dep/lgpl-lib/LICENSE, sha256:b5af363e432a5f6ba35216c5feaf4a54461fc7916eec64f17453cb24a70ecf2d)
+- mit-lib
+  bom-ref:                   component:mit-lib
+  version:                   -
+  licence:                   MIT (file-level)
+  origin:                    -
+  distribution role:         distributed
+  linkage form:              static-archive-member
+  modified:                  unknown
+  used files:                2
+  narrowing delta:           0 header(s), 0 additional copyright statement(s)
+  copyright statements:      1
+  source obligation:         -
+  retained licence:          LICENSE (project:dep/mit-lib/LICENSE, sha256:931fcdc2d230c2d176c937a73a35d00af205d8414ec6526c83654fadb5d2f52d)
+- multi-license
+  bom-ref:                   component:multi-license
+  version:                   -
+  licence:                   MIT OR Apache-2.0 (file-level)
+  origin:                    -
+  distribution role:         distributed
+  linkage form:              static-archive-member
+  modified:                  unknown
+  used files:                2
+  narrowing delta:           0 header(s), 0 additional copyright statement(s)
+  copyright statements:      1
+  source obligation:         -
+  retained licence:          LICENSE-APACHE (project:dep/multi-license/LICENSE-APACHE, sha256:0b8f6fef304298b6a8a8ad91e7a5b0b2255231f39c8fc4ab84774f8e22d07f98)
+  retained licence:          LICENSE-MIT (project:dep/multi-license/LICENSE-MIT, sha256:59d026162035ee799ad4a49867be3ef92276bfe13250cf10796ec0d3b856596e)
+- nocopyright
+  bom-ref:                   component:nocopyright
+  version:                   -
+  licence:                   0BSD (file-level)
+  origin:                    -
+  distribution role:         distributed
+  linkage form:              static-archive-member
+  modified:                  unknown
+  used files:                2
+  narrowing delta:           0 header(s), 0 additional copyright statement(s)
+  copyright statements:      0
+  source obligation:         -
+  retained licence:          LICENSE (project:dep/nocopyright/LICENSE, sha256:6fd46bc279753ff2f06019924d5e4877729545e72c93165d2fb3bab0bdeebec2)
+
+BUILD-TIME-ONLY COMPONENTS
+
+These components are not inside what is distributed: every path from an
+artifact to their files runs through a generator or toolchain edge. Whether
+their licences impose anything at all depends on the individual licence's
+terms for build tools, which is a question sbomb does not answer. They
+appear in neither THIRD-PARTY-NOTICES.txt nor source-obligations.txt.
+
+- gpl-gen
+  licence:                   GPL-2.0-only
+  linkage form:              build-tool
+  used files:                1
+
+LICENCE VIEW
+
+The FOSS view is computed with headerEvidence=union whatever view the SBOM
+uses, and this is not configurable: whether a header emitted code is not the
+licence question, whether its interface was used is. The delta below is what
+the SBOM view dropped and this view keeps.
+
+headers narrowed away:       25
+- gnu-13.3.0: 25 header(s), 0 additional copyright statement(s)
+
+COMPLETENESS
+
+  components                     6
+  with resolved licence          6 / 6
+  with retained licence text     6 / 6
+  with copyright statements      5 / 6
+  with resolved version          0 / 6
+  modification status unknown    6
+  licence view vs. SBOM view     +25 files
+  build-time-only components     1
+  unique retained texts          7
+
+FINDINGS
+
+- FOSS_COPYRIGHT_MISSING [info] component:nocopyright: no copyright statement was found in the component's files or in its retained licence artifacts
+- FOSS_LICENSE_TEXT_MISSING [info] component:project: the licence is MIT, and no licence text was retained for this component
+- FOSS_MODIFICATION_UNKNOWN [info] component:apache-lib: whether this component was modified could not be established, so it is reported as unknown rather than as unmodified
+- FOSS_MODIFICATION_UNKNOWN [info] component:bsd-hdr: whether this component was modified could not be established, so it is reported as unknown rather than as unmodified
+- FOSS_MODIFICATION_UNKNOWN [info] component:gpl-gen: whether this component was modified could not be established, so it is reported as unknown rather than as unmodified
+- FOSS_MODIFICATION_UNKNOWN [info] component:lgpl-lib: whether this component was modified could not be established, so it is reported as unknown rather than as unmodified
+- FOSS_MODIFICATION_UNKNOWN [info] component:mit-lib: whether this component was modified could not be established, so it is reported as unknown rather than as unmodified
+- FOSS_MODIFICATION_UNKNOWN [info] component:multi-license: whether this component was modified could not be established, so it is reported as unknown rather than as unmodified
+- FOSS_MODIFICATION_UNKNOWN [info] component:nocopyright: whether this component was modified could not be established, so it is reported as unknown rather than as unmodified
+- FOSS_MODIFICATION_UNKNOWN [info] component:project: whether this component was modified could not be established, so it is reported as unknown rather than as unmodified
+- FOSS_SOURCE_OBLIGATION [info] component:lgpl-lib: the licence LGPL-2.1-only triggers a source obligation (library-source, relinking); sbomb names it and does not produce the material

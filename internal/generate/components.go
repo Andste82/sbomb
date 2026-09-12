@@ -951,6 +951,12 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 	// root, which is why it comes after it is settled.
 	findings = append(findings, r.resolveModification(component, rootInfo)...)
 
+	// What the licence asks for beyond attribution (section 32.6). After the
+	// licences, because it classifies the expression they resolved, and after
+	// the attributes of section 24.5, because a build-time-only component
+	// triggered nothing.
+	findings = append(findings, resolveSourceObligations(component)...)
+
 	// A component with no hashable file cannot carry a component hash
 	// (section 1.5(1) via the MISSING_COMPONENT_HASH gate).
 	var hashed int

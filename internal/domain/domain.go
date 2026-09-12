@@ -191,6 +191,11 @@ type Component struct {
 	// require the notice to be reproduced, and the holder is named in the
 	// notice rather than in the identifier.
 	Copyrights []CopyrightStatement
+	// SourceObligations are the obligation names the component's licence
+	// triggers, sorted (section 32.6). They are a statement about the
+	// licence and never about compliance: sbomb cannot observe whether an
+	// obligation was discharged, and it does not produce the material.
+	SourceObligations []string
 	// Copyright is the single concluded copyright notice of the component,
 	// set from curated configuration alone. CycloneDX has one string field
 	// for the conclusion and an array for the observation, and section 22.4

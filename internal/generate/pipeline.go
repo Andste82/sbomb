@@ -465,6 +465,10 @@ func buildEvidenceGraph(
 	// its source and has to be attached to the object it produced.
 	dwarf := inspectArtifacts(b, deliverables, logger)
 	outcome := graphOutcome{artifactIDs: artifactIDs, dwarf: dwarf, findings: dwarf.Findings}
+	// One assembly of the evidence graph per run. The counter is incremented
+	// where the work happens, so a second call would be visible in the result
+	// rather than only in the wall clock (section 32.6).
+	b.counters.GraphBuilds++
 	outcome.findings = append(outcome.findings, unityFindings...)
 	outcome.findings = append(outcome.findings, packagingFindings...)
 	outcome.findings = append(outcome.findings, mappingConflicts...)
@@ -816,7 +820,7 @@ func unresolvedObjects(graph *evidence.Graph, used []domain.Node, anchorResult *
 // evidence-selected files are read; the source tree is never walked
 // (section 23).
 func hashUsedFiles(files []domain.UsedFile, physical map[string]string, bounds limits.Config, logger *Logger,
-	observe func(domain.FileID, []byte)) ([]domain.UsedFile, []domain.Finding) {
+	observe func(domain.FileID, []byte), counters *Counters) ([]domain.UsedFile, []domain.Finding) {
 	findings := []domain.Finding{}
 	for index := range files {
 		canonical := files[index].ID.Canonical()
@@ -849,6 +853,11 @@ func hashUsedFiles(files []domain.UsedFile, physical map[string]string, bounds l
 		Observe: observe,
 	})
 	for index := range hashed {
+		if len(hashed[index].Hashes) > 0 {
+			// One increment per file whose bytes were actually read, which is
+			// the number a second discovery would double (section 32.6).
+			counters.HashedFiles++
+		}
 		if len(hashed[index].Hashes) == 0 && !hashed[index].Missing {
 			findings = append(findings, domain.Finding{
 				ID:       "MISSING_FILE_HASH",
