@@ -42,7 +42,18 @@ type builder struct {
 	// analysed somewhere other than where it was produced.
 	logicalBuild  string
 	physicalBuild string
-	findings      []domain.Finding
+	// logicalSource and physicalSource are the same pair for the source tree
+	// (section 7.9). The logical root is what the build evidence records and
+	// what identity is computed against; the physical root is where those bytes
+	// are now. They are equal unless --source-dir named another directory, and
+	// both are empty when no File API reply named a source root at all, in
+	// which case relocation is inactive.
+	logicalSource  string
+	physicalSource string
+	// flavor decides how a path is compared against the source root: a
+	// Windows build writes both separators and compares without case.
+	flavor   pathmodel.Flavor
+	findings []domain.Finding
 
 	// physical maps a canonical identity back to a readable path, because
 	// hashing and license detection need the bytes, not the identity.
@@ -95,6 +106,24 @@ func newBuilder(graph *evidence.Graph, anchorResult *anchors.Result, logicalBuil
 	}
 }
 
+// setSourceRoots turns on the source-tree relocation of section 7.9. It is a
+// setter rather than a constructor argument because relocation is inactive in
+// most runs -- the two roots are then equal -- and because a builder made by a
+// test has no source tree at all.
+func (b *builder) setSourceRoots(logical, physical string, flavor pathmodel.Flavor) {
+	b.logicalSource = strings.TrimSuffix(pathmodel.NormalizeSeparators(logical), "/")
+	b.physicalSource = physical
+	b.flavor = flavor
+}
+
+// relocatesSource reports whether a path under the logical source root has to
+// be translated before it can be read. Nothing is translated when the two roots
+// are the same string, so a run on the machine that built pays nothing for this.
+func (b *builder) relocatesSource() bool {
+	return b.logicalSource != "" && b.physicalSource != "" &&
+		pathmodel.NormalizeSeparators(b.physicalSource) != b.logicalSource
+}
+
 // setIntrospection hands over the runner an archive fallback may ask ninja
 // with. It is the run's own runner, carrying its anchors and its log, so that
 // every command sbomb starts is bounded and recorded in one place (section 9.2).
@@ -116,7 +145,19 @@ func (b *builder) identify(path string) (string, anchors.Scope) {
 	id, scope := b.anchors.ScopeOfPath(b.logicalBuild, b.logicalFor(path))
 	canonical := id.Canonical()
 	if _, known := b.physical[canonical]; !known {
-		b.physical[canonical] = b.physicalFor(b.logicalFor(path))
+		physical, readable := b.physicalFor(b.logicalFor(path))
+		// A refused read is recorded as no location at all, which is what every
+		// reader of this map already checks for. Section 7.9 rule 3 asks for
+		// MISSING_FILE_HASH in addition, and here is where it can be said once
+		// per file rather than once per attempt to open it.
+		b.physical[canonical] = physical
+		if !readable {
+			b.findings = append(b.findings, domain.Finding{
+				ID: "MISSING_FILE_HASH", Severity: domain.SeverityWarning,
+				Subject: domain.Subject{Kind: "file", Ref: canonical},
+				Message: "the path leaves the source tree it would be read from, so the read was refused and no hash could be computed",
+			})
+		}
 		b.logger.Trace("Identity: %-64s <- %s", canonical, path)
 		// One finding per file, not one per mention: a path named by both the
 		// dependency file and the map would otherwise be reported twice.
@@ -159,33 +200,143 @@ func (b *builder) scopeOfCanonical(canonical string) anchors.Scope {
 // against the directory being read reports a physical absolute path, which has
 // to be expressed in the logical build root before it can be identified.
 func (b *builder) logicalFor(path string) string {
-	if !pathmodel.IsAbsolute(path) || b.logicalBuild == "" {
+	if !pathmodel.IsAbsolute(path) {
 		return path
 	}
-	absoluteBuild, err := filepath.Abs(b.physicalBuild)
-	if err != nil {
-		return path
+	if b.logicalBuild != "" {
+		if absoluteBuild, err := filepath.Abs(b.physicalBuild); err == nil {
+			if rel, found := strings.CutPrefix(path, absoluteBuild+"/"); found {
+				return b.logicalBuild + "/" + rel
+			}
+		}
 	}
-	if rel, found := strings.CutPrefix(path, absoluteBuild+"/"); found {
-		return b.logicalBuild + "/" + rel
+	// The same inverse for the source tree (section 7.9): an adapter that read
+	// a licence or a manifest out of the relocated tree reports where it read
+	// it, and that path has to be expressed in the logical source root before
+	// it can be identified -- otherwise the relocation would reach the document.
+	if b.relocatesSource() {
+		return inLogicalSource(path, b.logicalSource, b.physicalSource, b.flavor)
 	}
 	return path
 }
 
-// physicalFor maps a path from the evidence to where its bytes live now.
-func (b *builder) physicalFor(path string) string {
+// inLogicalSource expresses a path found in the relocated tree in the logical
+// source root. It is the whole of section 7.9 rule 1: every identity, and every
+// anchor root an identity is resolved against, is stated in the root the build
+// recorded, so that a relocated run anchors exactly as the run on the build
+// machine does. A path that lies outside the physical source root is returned
+// unchanged -- a package cache is not relocated (rule 7).
+//
+// It is a function rather than a method because the anchor roots have to be
+// translated before the registry exists, and therefore before there is a
+// builder to ask.
+func inLogicalSource(path, logical, physical string, flavor pathmodel.Flavor) string {
+	logical = strings.TrimSuffix(pathmodel.NormalizeSeparators(logical), "/")
+	if logical == "" || physical == "" || pathmodel.NormalizeSeparators(physical) == logical {
+		return path
+	}
+	absolutePhysical, err := filepath.Abs(physical)
+	if err != nil {
+		return path
+	}
+	rel, found := relativeUnder(path, absolutePhysical, flavor)
+	if !found {
+		return path
+	}
+	if rel == "" {
+		return logical
+	}
+	return logical + "/" + rel
+}
+
+// relativeUnder reports the part of path that lies below root, comparing at a
+// segment boundary under the rules of section 7.3: separators are equivalent
+// and the Windows flavor compares without case.
+//
+// It does not clean the path first, which is the point. A `..` segment that
+// survives into the remainder is what the containment check of section 7.9
+// rule 3 has to see; resolving it here would hide the escape rather than refuse
+// it.
+func relativeUnder(path, root string, flavor pathmodel.Flavor) (string, bool) {
+	if root == "" {
+		return "", false
+	}
+	candidate := pathmodel.NormalizeSeparators(path)
+	prefix := strings.TrimSuffix(pathmodel.NormalizeSeparators(root), "/")
+	equal := func(a, b string) bool {
+		if flavor != nil && !flavor.CaseSensitive() {
+			return strings.EqualFold(a, b)
+		}
+		return a == b
+	}
+	if equal(candidate, prefix) {
+		return "", true
+	}
+	if len(candidate) > len(prefix)+1 && candidate[len(prefix)] == '/' && equal(candidate[:len(prefix)], prefix) {
+		return candidate[len(prefix)+1:], true
+	}
+	return "", false
+}
+
+// physicalFor maps a path from the evidence to where its bytes live now. The
+// second result is false when the read is refused: no path is returned at all
+// then, because every reader here treats the empty string as "there is nothing
+// to open" and a refusal that handed back a path would only be a request to
+// open it (section 7.9 rule 3).
+func (b *builder) physicalFor(path string) (string, bool) {
 	if b.logicalBuild != "" {
 		if rel, found := strings.CutPrefix(path, b.logicalBuild+"/"); found {
-			return filepath.Join(b.physicalBuild, rel)
+			return filepath.Join(b.physicalBuild, rel), true
 		}
 		if path == b.logicalBuild {
-			return b.physicalBuild
+			return b.physicalBuild, true
+		}
+	}
+	// Section 7.9: a source tree that was restored somewhere else is read where
+	// it is. Identity is not asked about here -- it was computed against the
+	// logical root before this is ever called -- so a relocated run and a local
+	// one produce the same document from the same evidence.
+	if b.relocatesSource() {
+		if rel, found := relativeUnder(path, b.logicalSource, b.flavor); found {
+			if physical, ok := underSourceRoot(b.physicalSource, rel); ok {
+				return physical, true
+			}
+			// Refused, per section 7.9 rule 3 and section 30.4. Returning the
+			// logical path would not be a refusal: the `..` the remainder still
+			// carries is resolved by the kernel, so on a machine where the
+			// logical root also exists -- relocating to a copy while the
+			// original checkout is still there -- the escaping file would be
+			// read after all.
+			b.logger.Debug("Refused a relocated read that would leave '%s': %s", b.physicalSource, path)
+			return "", false
 		}
 	}
 	if !pathmodel.IsAbsolute(path) {
-		return filepath.Join(b.physicalBuild, path)
+		return filepath.Join(b.physicalBuild, path), true
 	}
-	return path
+	return path, true
+}
+
+// underSourceRoot joins a relative path onto the physical source root and
+// refuses the result if it leaves that root. Build evidence is untrusted input
+// (section 30), and relocation is the one place where a `..` in a recorded path
+// would be resolved against a directory the caller named rather than against
+// the tree the build actually used.
+func underSourceRoot(root, rel string) (string, bool) {
+	if rel == "" {
+		return root, true
+	}
+	joined := filepath.Join(root, filepath.FromSlash(rel))
+	absoluteRoot, rootErr := filepath.Abs(root)
+	absoluteJoined, joinedErr := filepath.Abs(joined)
+	if rootErr != nil || joinedErr != nil {
+		return "", false
+	}
+	relative, err := filepath.Rel(absoluteRoot, absoluteJoined)
+	if err != nil || relative == ".." || strings.HasPrefix(relative, ".."+string(filepath.Separator)) {
+		return "", false
+	}
+	return joined, true
 }
 
 // collectLinkEvidence reads the link evidence for one deliverable in the

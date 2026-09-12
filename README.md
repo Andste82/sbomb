@@ -214,7 +214,7 @@ binary, produced this way.
 | `--build-dir <dir>` | The CMake build directory. Required. |
 | `--config <file>` | Configuration file; defaults to `sbomb.json` if present |
 | `--output <file>` | Where to write the SBOM |
-| `--source-dir <dir>` | Source root, overriding `project.root` |
+| `--source-dir <dir>` | Where the sources are now; set it when the build directory has been restored somewhere else |
 | `--mode single\|assembly` | One deliverable, or several treated as one product |
 | `--config-name <name>` | Which configuration to read from a multi-config generator |
 | `--map <file>` | Linker map, when it is not beside the artifact |

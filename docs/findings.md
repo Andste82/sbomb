@@ -14,7 +14,7 @@ same build produce identical output.
 
 <!-- BEGIN GENERATED CATALOGUE -->
 
-This build emits 48 of the 57 identifiers below. The rest are specified and
+This build emits 49 of the 58 identifiers below. The rest are specified and
 reserved: they describe evidence this version does not yet read, and a run will
 never report them. They are listed and marked so that the table is the whole
 catalogue rather than a snapshot of one version.
@@ -63,6 +63,7 @@ catalogue rather than a snapshot of one version.
 | `RSP_DEPTH_EXCEEDED` | warning | — | Response file recursion limit hit | reserved |
 | `SECTION_GC_EXCLUDED` | info | — | Objects removed by `sectionGarbageCollection=exclude` | emitted |
 | `SECTION_GC_INFO_UNAVAILABLE` | info | — | `sectionGarbageCollection` requested but the evidence source does not report discarded sections | emitted |
+| `SOURCE_TREE_UNAVAILABLE` | warning | — | The source root the evidence names cannot be read (§7.9) | emitted |
 | `STALE_BUILD_EVIDENCE` | error | `failOnStaleBuildArtifacts` | Timestamps or hashes indicate a stale build | emitted |
 | `STALE_CMAKE_CONFIGURATION` | warning | `failOnStaleBuildArtifacts` | CMake inputs newer than the File API reply | reserved |
 | `TOOLCHAIN_LAYOUT_UNKNOWN` | warning | — | Implicit include dirs unknown; heuristic classification | emitted |

@@ -87,15 +87,17 @@ func TestFOSSFixtureLinkedObjectSet(t *testing.T) {
 	}
 }
 
-// TestFOSSFixtureGolden puts the fixture into the regression set before any
-// attribution code exists. Every licence here is still NOASSERTION, because
-// the source tree the evidence names is not where the harvested files are;
-// that is what the source-tree relocation milestone changes, and this golden
-// is what will show the change.
+// TestFOSSFixtureGolden is the fixture's regression document. It is generated
+// with the source tree relocated (section 7.9), because that is the only way
+// the committed corpus can be read at all: the evidence names
+// /__fixture_src__ and the harvested sources live in testdata/fixtures. The
+// golden therefore shows resolved licences rather than the NOASSERTION of F1,
+// and the directory the sources were read from appears nowhere in it.
 func TestFOSSFixtureGolden(t *testing.T) {
 	buildDir := testutil.CorpusBuildDir(t, "gcc-ninja", "p14-foss")
 	output := filepath.Join(t.TempDir(), "foss.cdx.json")
-	code, _, stderr := execute([]string{"generate", "--build-dir", buildDir, "--policy", "lenient", "--output", output, "--reproducible"})
+	code, _, stderr := execute([]string{"generate", "--build-dir", buildDir, "--policy", "lenient",
+		"--source-dir", testutil.CorpusSourceTree(t), "--output", output, "--reproducible"})
 	if code != 0 || stderr != "" {
 		t.Fatalf("generate = code %d, stderr %q", code, stderr)
 	}
@@ -115,6 +117,7 @@ func TestInventoryDump(t *testing.T) {
 	directory := t.TempDir()
 	dumpPath := filepath.Join(directory, "inventory.json")
 	code, _, stderr := execute([]string{"generate", "--build-dir", buildDir, "--policy", "lenient",
+		"--source-dir", testutil.CorpusSourceTree(t),
 		"--output", filepath.Join(directory, "out.cdx.json"), "--inventory-dump", dumpPath, "--reproducible"})
 	if code != 0 || stderr != "" {
 		t.Fatalf("generate = code %d, stderr %q", code, stderr)
@@ -155,12 +158,14 @@ func TestInventoryDump(t *testing.T) {
 		}
 	}
 
-	// A second run over an independent copy of the same evidence must produce
+	// A second run over an independent copy of the same evidence, and an
+	// independent copy of the source tree in another directory, must produce
 	// the same bytes; that is what makes the dump usable as a golden at all.
 	secondBuild := testutil.CorpusBuildDir(t, "gcc-ninja", "p14-foss")
 	secondDirectory := t.TempDir()
 	secondPath := filepath.Join(secondDirectory, "inventory.json")
 	code, _, stderr = execute([]string{"generate", "--build-dir", secondBuild, "--policy", "lenient",
+		"--source-dir", testutil.CorpusSourceTreeCopy(t),
 		"--output", filepath.Join(secondDirectory, "out.cdx.json"), "--inventory-dump", secondPath, "--reproducible"})
 	if code != 0 || stderr != "" {
 		t.Fatalf("second generate = code %d, stderr %q", code, stderr)

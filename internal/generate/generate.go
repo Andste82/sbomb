@@ -170,19 +170,60 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	if buildRootForIdentity == "" {
 		buildRootForIdentity = absolutePath(buildDir)
 	}
-	projectRootForIdentity := cfg.Project.Root
-	if projectRootForIdentity == "." {
-		projectRootForIdentity = ""
+	// The source root has two forms, exactly as the build root does
+	// (section 7.9). The logical one is what the build recorded and what every
+	// identity is computed against; the physical one is where those bytes are
+	// now, and only reads use it. Pointing --source-dir at a restored tree
+	// therefore relocates the reads and changes not one bom-ref.
+	//
+	// Without a reply there is no recorded source root, so there is nothing to
+	// relocate from: --source-dir then supplies the identity root as it always
+	// has, and CMAKE_FILE_API_UNAVAILABLE above already says why (decision
+	// Q16).
+	configuredSourceRoot := cfg.Project.Root
+	if configuredSourceRoot == "." {
+		configuredSourceRoot = ""
 	}
-	if projectRootForIdentity == "" && replyModel != nil {
-		projectRootForIdentity = replyModel.SourceRoot
+	logicalSourceRoot := ""
+	if replyModel != nil {
+		logicalSourceRoot = replyModel.SourceRoot
+	}
+	projectRootForIdentity := logicalSourceRoot
+	if projectRootForIdentity == "" {
+		projectRootForIdentity = configuredSourceRoot
 	}
 	if projectRootForIdentity == "" {
 		projectRootForIdentity = absolutePath(".")
 	}
+	physicalSourceRoot := configuredSourceRoot
+	if physicalSourceRoot == "" {
+		physicalSourceRoot = projectRootForIdentity
+	}
+	if info, statErr := os.Stat(physicalSourceRoot); statErr != nil || !info.IsDir() {
+		// Once per run and not once per file: the tree is one thing, and a
+		// warning per source file would bury the one fact that explains all of
+		// them (section 7.9 rule 5).
+		logger.Info("Source tree '%s' cannot be read; licences and hashes that need it will be missing", physicalSourceRoot)
+		findings = append(findings, domain.Finding{
+			ID: "SOURCE_TREE_UNAVAILABLE", Severity: domain.SeverityWarning,
+			// The subject is the anchor, not the directory. A finding is one of
+			// the three surfaces section 30.7 redacts, and the run's own log
+			// already names the path for whoever is allowed to see it.
+			Subject:     domain.Subject{Kind: "configuration", Ref: "project"},
+			Message:     "the source root the build evidence names is not readable, so nothing that has to be read from a source file could be resolved",
+			Remediation: "Point --source-dir at the source tree this build was made from.",
+		})
+	} else if physicalSourceRoot != projectRootForIdentity {
+		logger.Info("Source tree relocated: '%s' is read from '%s'", projectRootForIdentity, physicalSourceRoot)
+	}
 	runner := &exec.Runner{
 		Features: options.Introspection,
-		Anchors:  []string{projectRootForIdentity, buildRootForIdentity, absolutePath(buildDir)},
+		// The physical source root belongs here beside the identity roots: this
+		// gateway bounds where a command may point, and under relocation the
+		// tree a `git -C` reads is the physical one (section 7.9 rule 2). The
+		// logical root stays in the list because on the build machine it is the
+		// only one there is.
+		Anchors: []string{projectRootForIdentity, physicalSourceRoot, buildRootForIdentity, absolutePath(buildDir)},
 		Log: func(record exec.Record) {
 			logger.Info("Introspection: %s (%s)", strings.Join(record.Argv, " "), record.Duration.Round(time.Millisecond))
 		},
@@ -282,10 +323,12 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	// neither portable nor the same on the next machine.
 	packages, packageFindings := pkgmanager.Discover(pkgmanager.Options{
 		BuildDir: buildDir,
-		// The source root the File API reports, not the configured one: a run
-		// without a configuration file still has to find .gitmodules, and the
-		// build system knows where it configured from.
-		SourceDir: projectRootForIdentity,
+		// The physical source root: a run without a configuration file still has
+		// to find .gitmodules, and the build system knows where it configured
+		// from -- but this adapter opens files, so it is pointed at where the
+		// tree is rather than at the root the identities are computed against
+		// (section 7.9 rule 2).
+		SourceDir: physicalSourceRoot,
 		Runner:    runner,
 		Distro:    distro,
 	})
@@ -300,7 +343,17 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		// roots need no key of their own: they lie inside the build tree and
 		// are already identified portably through the build anchor.
 		if entry.AnchorKey != "" && entry.Root() != "" {
-			packageAnchors = append(packageAnchors, anchors.PackageAnchor{Key: entry.AnchorKey, Root: entry.Root()})
+			// In the logical source root, never the physical one. The adapters
+			// above were pointed at the relocated tree because they open files;
+			// an anchor root is not opened, it is what file identities are
+			// resolved against, and a root stated where the tree happens to sit
+			// today would anchor a relocated run differently from the run on the
+			// build machine -- which section 7.9 rule 1 forbids outright. Every
+			// read of this root goes back through physicalFor.
+			packageAnchors = append(packageAnchors, anchors.PackageAnchor{
+				Key:  entry.AnchorKey,
+				Root: logicalPackageRoot(entry.Root(), logicalSourceRoot, physicalSourceRoot, options.PathFlavor),
+			})
 		}
 	}
 
@@ -341,6 +394,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 
 	// 7. Build the evidence graph from link and compile evidence.
 	b := newBuilder(graph, anchorResult, buildRootForIdentity, buildDir, logger)
+	b.setSourceRoots(logicalSourceRoot, physicalSourceRoot, options.PathFlavor)
 	b.setIntrospection(runner, ctx)
 	b.headerClass = headers.New(anchorResult.ImplicitIncludeDirs, toolchainRoots(anchorResult), componentRoots(cfg))
 	compile := collectCompileEvidence(buildDir, commands, commandStrategy, logger)
@@ -488,9 +542,17 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		})
 	}
 
+	// The roots the component resolver walks up to are read from, not compared
+	// against an identity: strategy 6 stats a marker file in every directory on
+	// the way and stops at the anchor root. So each root is expressed where its
+	// bytes are, which under relocation is the physical source or build root and
+	// otherwise is the anchor root itself. Without this the walk would leave the
+	// relocated tree and claim a licence file from whatever encloses it.
 	anchorRoots := map[string]string{}
 	for _, anchor := range anchorResult.Registry.Anchors() {
-		anchorRoots[anchor.Key] = anchor.Root
+		if physical, readable := b.physicalFor(anchor.Root); readable {
+			anchorRoots[anchor.Key] = physical
+		}
 	}
 	resolver := newComponentResolver(cfg, b.physical, anchorRoots, logger)
 	// The same runner the package-manager adapters used: it already carries
@@ -754,6 +816,25 @@ func absolutePath(path string) string {
 		return absolute
 	}
 	return path
+}
+
+// logicalPackageRoot expresses a package root that was found in the relocated
+// source tree in the logical source root, which is the only root identities and
+// therefore anchors may be stated in (section 7.9 rule 1). A root the
+// translation does not touch -- a package cache, a directory in the build tree
+// -- is returned exactly as the adapter reported it: rule 7 relocates the
+// source root and nothing else.
+func logicalPackageRoot(root, logicalSource, physicalSource string, flavor pathmodel.Flavor) string {
+	if root == "" || logicalSource == "" || physicalSource == "" {
+		return root
+	}
+	// The adapters were handed the physical root as it was configured, which may
+	// be relative; the comparison is between absolute paths.
+	candidate := absolutePath(root)
+	if translated := inLogicalSource(candidate, logicalSource, physicalSource, flavor); translated != candidate {
+		return translated
+	}
+	return root
 }
 
 func buildTimestamp() string {

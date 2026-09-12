@@ -92,7 +92,12 @@ func (p Package) Root() string {
 type Options struct {
 	// BuildDir is where the build tree is being read from.
 	BuildDir string
-	// SourceDir is the project source root, as the evidence names it.
+	// SourceDir is the project source root where its bytes are -- the physical
+	// root of section 7.9, which is the relocated tree when the build directory
+	// and the sources are no longer together. An adapter here opens files, so
+	// this is what it needs; a root it reports back is therefore a physical path
+	// too, and its caller expresses it in the logical root before anything is
+	// identified against it (rule 1).
 	SourceDir string
 	// Runner runs introspection commands. It refuses everything when
 	// introspection is off, which is the default, so an adapter must work

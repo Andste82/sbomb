@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/example/sbomb/tools/fixtures"
 )
 
 type FixtureManifest struct {
@@ -46,6 +48,31 @@ func CorpusBuildDir(t *testing.T, toolchain, project string) string {
 	destination := t.TempDir()
 	if err := copyTree(source, destination); err != nil {
 		t.Fatalf("copying fixture %s/%s: %v", toolchain, project, err)
+	}
+	return destination
+}
+
+// CorpusSourceTree is the committed source tree of the FOSS fixture, as an
+// absolute path. It is the one project whose sources the corpus carries
+// (testdata/fixtures/POLICY.md), and nothing writes into it, so the tree itself
+// is handed out rather than a copy.
+func CorpusSourceTree(t *testing.T) string {
+	t.Helper()
+	tree := filepath.Join(RepoRoot(t), "testdata", "fixtures", fixtures.FossSourceTree)
+	if _, err := os.Stat(tree); err != nil {
+		t.Fatalf("the FOSS fixture source tree is missing: %v", err)
+	}
+	return tree
+}
+
+// CorpusSourceTreeCopy copies that tree into a temporary directory, for a test
+// that needs the same sources in two places at once -- which is how a
+// relocation is observed (section 7.9).
+func CorpusSourceTreeCopy(t *testing.T) string {
+	t.Helper()
+	destination := t.TempDir()
+	if err := copyTree(CorpusSourceTree(t), destination); err != nil {
+		t.Fatalf("copying the FOSS fixture source tree: %v", err)
 	}
 	return destination
 }

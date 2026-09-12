@@ -84,6 +84,9 @@ warning
 - MISSING_SUPPLIER: the component has no supplier, which BSI TR-03183-2 requires
     subject: component/toolchain:gnu-13.3.0
     remediation: Add components[].supplier for this component.
+- SOURCE_TREE_UNAVAILABLE: the source root the build evidence names is not readable, so nothing that has to be read from a source file could be resolved
+    subject: configuration/project
+    remediation: Point --source-dir at the source tree this build was made from.
 - UNANCHORED_FILE: the file lies under no registered anchor and was identified by absolute path
     subject: file/abs:lib/x86_64-linux-gnu/libc.so.6
     remediation: Add an anchors[] entry for the directory this file belongs to, so its identity stays portable.
