@@ -71,10 +71,12 @@ func execute(args []string) (int, string, string) {
 		return handleValidate(subArgs[1:])
 	case "evidence":
 		return handleEvidence(subArgs[1:])
+	case "foss":
+		return handleFOSS(subArgs[1:], verbosity)
 	case "self":
 		return handleSelf(subArgs[1:], verbosity)
 	default:
-		return 1, "", "usage: sbomb [version|generate|self|validate|evidence|explain|schema]\n"
+		return 1, "", "usage: sbomb [version|generate|foss|self|validate|evidence|explain|schema]\n"
 	}
 }
 
@@ -397,6 +399,11 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 	// further rendering of the same run, like the review report, and never
 	// changes the document.
 	inventoryDump := ""
+	// The FOSS documents of section 32.6, in the same row: a further
+	// rendering of one discovery. It is an output selector and never a
+	// content switch -- the document is byte-identical with and without it
+	// (decision B1).
+	fossOut := ""
 	var introspectionGroups []string
 	var bounds limits.Config
 	for i := 0; i < len(args); i++ {
@@ -595,6 +602,14 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 			i++
 		case strings.HasPrefix(args[i], "--inventory-dump="):
 			inventoryDump = strings.TrimPrefix(args[i], "--inventory-dump=")
+		case args[i] == "--foss-out":
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --foss-out\n"
+			}
+			fossOut = args[i+1]
+			i++
+		case strings.HasPrefix(args[i], "--foss-out="):
+			fossOut = strings.TrimPrefix(args[i], "--foss-out=")
 		case args[i] == "--findings-json":
 			if i+1 >= len(args) {
 				return 1, "", "missing value for --findings-json\n"
@@ -741,6 +756,10 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 		Limits:                bounds,
 		MapPath:               mapPath,
 		LinkDepfilePath:       linkDepfile,
+		// One discovery for both renderings (section 32.6). The licence view
+		// is computed inside the run that produced the document, so the SBOM
+		// and the notices document can never describe two different trees.
+		FOSSView: fossOut != "",
 	})
 	if err != nil {
 		return exitCodeFor(err, 2), logBuf.String(), err.Error() + "\n"
@@ -822,6 +841,21 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 			text = report.RenderMarkdown(policyConfig.Profile, res.Findings, res.ExitCode)
 		}
 		if err := os.WriteFile(reviewReportPath, []byte(text), 0o600); err != nil {
+			return 1, logBuf.String(), err.Error() + "\n"
+		}
+	}
+	if fossOut != "" {
+		cliLogger.Info("Writing the FOSS documents to '%s'...", fossOut)
+		if err := writeFOSSOutputs(fossOut, fossRendering{
+			Generated:    generated,
+			Findings:     res.Findings,
+			Profile:      policyConfig.Profile,
+			Mode:         loadedCfg.Mode,
+			HeaderView:   policyConfig.HeaderEvidence,
+			SpecVersion:  loadedCfg.Output.SpecVersion,
+			TLP:          loadedCfg.Output.TLP,
+			Reproducible: repro,
+		}); err != nil {
 			return 1, logBuf.String(), err.Error() + "\n"
 		}
 	}

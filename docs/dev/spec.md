@@ -1429,6 +1429,7 @@ Rules:
 * An expired waiver does **not** suppress; it additionally produces `WAIVER_EXPIRED` (severity `warning`).
 * A waiver that matches nothing produces `WAIVER_UNUSED` (severity `info`), enabling waiver hygiene in CI.
 * Waiver evaluation uses the run's date, or `SOURCE_DATE_EPOCH` when set, so it is reproducible.
+* A waiver never changes `THIRD-PARTY-NOTICES.txt` (§32.6). Waivers annotate rather than delete, and that document reports what the tool saw rather than what somebody decided about it.
 
 ---
 
@@ -1643,6 +1644,9 @@ Mandatory ordering rules:
 | `pedigree.commits[]` | `uid` |
 | `pedigree.patches[]` | `type` |
 | `sbomb:component:linkageForm` | value |
+| `sbomb:component:sourceObligation` | value |
+| notices document entries (§32.6) | `(name, bom-ref)` |
+| retained texts in the notices document | printed once, under the first entry that carries them, keyed by the SHA-256 of the bytes |
 
 All sorting uses byte-wise comparison of UTF-8, not locale collation.
 
@@ -1664,7 +1668,7 @@ Concrete requirements:
 4. Symlink handling per §7.6; reads outside registered anchors are refused by default.
 5. All file reads use `O_NOFOLLOW` semantics for the final component where the platform supports it, when `--strict-symlinks` is set.
 6. Regular expressions applied to untrusted input MUST be from `regexp` (RE2, linear time). Backtracking engines are forbidden.
-7. Redaction (`--redact-unanchored-paths`) MUST apply to the SBOM, the findings JSON, and the review report equally.
+7. Redaction (`--redact-unanchored-paths`) MUST apply to the SBOM, the findings JSON, the review report, and the FOSS review record (`foss-review.txt`, `foss-review.json`) equally. `THIRD-PARTY-NOTICES.txt` and `source-obligations.txt` add no path of their own — they carry licence text, copyright lines, an origin URL and component names — and a test asserts that over the fixture corpus. Where component mapping failed, an unmapped component's §19.3 name embeds the directory the evidence named, and redaction reaches it there exactly as it reaches every other identity: the same mechanism, not an exception.
 8. The tool MUST NOT make network requests. There is no online license or vulnerability lookup.
 9. Retained license artifacts are bounded: at most 8 per component and at most 1 MiB each, and an artifact over the bound is dropped from the list rather than truncated (§22.9).
 10. Patch records are bounded: at most 1 MiB per record file and at most 64 patches per component (§19.4). Both breaches emit `INPUT_LIMIT_EXCEEDED`. A record file over the bound is not read at all — a refused record is not a record that says "no patches" — and a list cut short still leaves the component `modified`, because the answer does not depend on the count.
@@ -1698,6 +1702,7 @@ sbomb generate   [flags]     Generate SBOM(s) and evaluate policy
 sbomb explain    [flags]     Explain why a file or component is in the SBOM
 sbomb validate   [flags]     Validate an existing CycloneDX document produced by this tool
 sbomb evidence   [flags]     Dump the evidence graph without producing an SBOM
+sbomb foss       [flags]     Write the FOSS attribution documents without an SBOM on disk
 sbomb schema     [flags]     Print the embedded configuration / findings / evidence JSON Schemas
 sbomb version                Print version, commit, build date, spec support
 ```
@@ -1750,6 +1755,7 @@ sbomb generate \
 | `--path-flavor` | from `runtime.GOOS` | `posix` \| `windows`. Hidden flag; exists so Windows path semantics are testable on Linux (§41 M14). |
 | `--adapter` | — | Force an adapter, `<class>=<id>` (repeatable) |
 | `--inventory-dump` | — | Internal inventory dump path (§40) |
+| `--foss-out` | — | Directory for the four FOSS documents of §32.6 |
 
 Five of these are specified and not implemented, each waiting on the feature it
 belongs to rather than on effort:
@@ -1763,6 +1769,9 @@ ignored.
 `--inventory-dump` writes the §40 document from the same discovery that wrote
 the SBOM. It is a further rendering of one run, like `--review-report` and
 `--findings-json`, and changes neither the document nor the exit code.
+
+`--foss-out` is in the same row: it writes the four documents of §32.6 from the
+same discovery and changes neither the document nor the exit code.
 
 Nine further flags were specified and are removed rather than built; deviation
 D22 gives the reason for each.
@@ -1804,6 +1813,139 @@ Third-party Go modules are permitted (§37), so validation is performed **in-pro
 * Output is written atomically: to a temporary file in the destination directory, validated, then renamed. A failed validation MUST NOT leave a partial or invalid file at the target path.
 
 Either validation layer failing → exit 4.
+
+---
+
+### 32.6 The FOSS Attribution Outputs
+
+The FOSS documents are **an additional rendering of a `generate` run**, in the
+row §32.2 already contains: `--review-report`, `--findings-json`,
+`--evidence-dump` and `--inventory-dump` are all further outputs of one
+discovery.
+
+```
+sbomb generate --build-dir <dir> [--source-dir <dir>] --output app.cdx.json --foss-out <dir>
+sbomb foss     --build-dir <dir> [--source-dir <dir>] --out <dir> [--format text|markdown] [--reproducible]
+```
+
+`foss` is a thin front end over the same code path, for the case where no SBOM
+is wanted on disk. Beside the flags above it accepts the discovery and policy
+flags of §32.2 that still have a meaning without an SBOM on disk:
+`--config`, `--config-name`, `--mode`, `--spec-version`, `--policy`,
+`--waivers`, `--redact-unanchored-paths` and `--allow-introspection`. It never
+creates the build directory: it reads a build tree and writes only into
+`--out`. **Both entry points share one discovery and one renderer,
+and neither workflow runs discovery twice.** This is not a performance note:
+two invocations mean two graphs built from a tree that may have changed in
+between, and the SBOM and the notices document could then disagree while each
+is internally correct. The two entry points MUST produce byte-identical files
+for the same build.
+
+**The FOSS outputs never change the document.** The retained license text of
+§22.9 always reaches the notices document, and reaches the CycloneDX document
+only when `licenseTextInSBOM` says so (§33.1). `--foss-out` is an output
+selector, never a content switch: `generate` with and without it MUST write the
+same bytes to `--output`.
+
+**The four files.** One of them ships with the product; three are internal.
+
+```
+<out>/THIRD-PARTY-NOTICES.txt    the shippable attribution document
+<out>/foss-review.txt            the internal record, human-readable
+<out>/foss-review.json           the same facts, machine-readable
+<out>/source-obligations.txt     which components owe source material, and why
+```
+
+`foss-review.json` is not a fourth format of sbomb's own invention: it is the
+§36.1 rendering of `sbomwriter.Document` through the writer registry, with the
+retained license texts included. When the SPDX writer of §36.1 arrives, that
+writer produces this file and the intermediate form is retired rather than
+placed beside it.
+
+`--out` and `--foss-out` write these four names and overwrite them, exactly as
+`--output` overwrites an SBOM. Nothing else in the directory is read, moved or
+deleted, and a directory that already holds other files is not refused. The
+writer MUST refuse any file name other than these four, so that the structural
+guarantee below is a property of the code and not of its callers.
+
+**Who is in the notices document.** Every grouping component whose
+distribution role is `distributed` (§24.5) and whose CycloneDX type is not
+`application`. The anchor scope is the wrong criterion: a library copied into
+the source tree carries `scope=project` and would be dropped. Correctness
+therefore rests on component mapping, and `UNKNOWN_COMPONENT` and
+`COMPONENT_ROOT_UNRESOLVED` are the signals that it went wrong. Embedded assets
+— fonts, icon sets, images — are components like any other and are in it.
+
+The rule is stated as `distributed` and MUST be implemented as that test
+rather than as "not `build-time-only`". §24.5 knows two roles, and a component
+can carry neither: the role is derived per node from chains that start at an
+artifact, so §24.2's synthetic `build-environment` grouping — which has no
+files of its own and which no chain reaches — has no role at all. §24.5's rule
+that omission fails towards inclusion is about an *evidence type* the
+derivation does not recognise, and leaves that node `distributed`; it is not a
+licence to treat an absent derivation as a positive answer, which here would
+present sbomb's own bookkeeping node to a customer as a third-party component
+under an unknown licence. Such a component is therefore in neither
+`THIRD-PARTY-NOTICES.txt` nor `source-obligations.txt`, and `foss-review.txt`
+names it in a section of its own: a component in none of the record's lists
+would otherwise leave the FOSS outputs without a word, and where the entry is
+not sbomb's own grouping it is a component mapping to look at.
+
+Build-time-only components are listed in a section of their own in
+`foss-review.txt` and appear in neither `THIRD-PARTY-NOTICES.txt` nor
+`source-obligations.txt`: naming a component the product does not contain
+invites an obligation that was never triggered. Whether a build tool's license
+imposes anything is a question about that license's terms, and sbomb does not
+answer it.
+
+**Incompleteness is stated.** A component with no retained license text appears
+with the marker `[licence text not found in component - attribution
+incomplete]`. No canonical SPDX text is ever substituted (§22.9).
+
+**A waiver never changes `THIRD-PARTY-NOTICES.txt`** (§26.3): that document
+reports what the tool saw, not what somebody decided about it.
+
+**The license view.** The FOSS view is computed with `headerEvidence=union`
+regardless of the view the SBOM uses, and this is not configurable. DWARF
+narrowing is right for a bill of materials and wrong for a license question:
+whether a header emitted code is not the question, whether its interface was
+used is. The narrowed headers are retained with their names, so the union set
+is `used ∪ narrowed` out of one run. The FOSS view additionally reads the
+narrowed headers of the components it reports for copyright statements (§22.10)
+and reports the delta per component and in total, so that the difference
+between the two views is visible rather than implied. It reads the narrowed
+headers of those components only: §31 forbids reading a file that is not needed
+for the output, and a narrowed header of a component no output mentions is not.
+
+**Source obligations.** `source-obligations.txt` names, for every distributed
+component whose license carries one, the obligation, its trigger and its
+consequence — and states that the material is out of scope. The classification
+is a flat, committed list of SPDX identifiers in `internal/foss/copyleft.go`
+with the obligation names each triggers; an identifier on neither list emits
+`FOSS_LICENSE_UNCLASSIFIED` and is never assumed permissive. It is not a rules
+engine: the single condition in it is static linkage against an LGPL library,
+and that condition is written out rather than expressed in data. Every
+identifier in the list MUST exist in the SPDX table §22.3 already embeds.
+
+**The structural guarantee.** No file matching `*.c`, `*.h`, `*.cpp`, `*.hpp`,
+`*.S`, `*.tar*`, `*.zip` or `*.patch` is ever written into the output
+directory, and a test asserts it. Corresponding Source is the complete source
+of the work plus the scripts that control compilation and installation; an
+evidence-derived subset would look like a source offer while being materially
+incomplete, which turns the tool's precision into a compliance defect.
+`--out-source` and any equivalent MUST NOT be added.
+
+**Exit codes** are those of §32.4 with the documented precedence, and **none of
+them depends on license content**. Policy gates (exit `3`) are evaluated by
+`generate` as they are today and never by `foss`; everything the FOSS view
+finds is informational. A `--build-dir` that does not exist is exit `2`: no
+evidence can be collected from it. A missing `--out` is exit `1`.
+
+In assembly mode there is exactly one notices document per run — the mode
+already declares what a product is, and two things distributed separately are
+two products and two runs — and `foss-review.txt` breaks the components down
+per artifact, because "which artifact pulled in the LGPL component" is the
+question that gets asked.
 
 ---
 
@@ -2341,6 +2483,8 @@ Severity shown is the default and may be changed via `policy.severityOverrides`.
 | `FOSS_COPYRIGHT_MISSING` | info | — | Distributed component carries no copyright statement and none was curated (§22.10) |
 | `FOSS_COPYRIGHT_LIMIT` | info | — | More distinct copyright statements than the limit of §22.10 |
 | `FOSS_MODIFICATION_UNKNOWN` | info | — | Modification status could not be established, so it is reported as unknown rather than as unmodified (§19.4) |
+| `FOSS_LICENSE_UNCLASSIFIED` | info | — | The license identifier is on neither obligation list of §32.6, so nothing is claimed about it and nothing is ruled out |
+| `FOSS_SOURCE_OBLIGATION` | info | — | A distributed component's license triggers a source obligation, which §32.6 names and does not produce |
 | `MISSING_FILE_HASH` | warning | `failOnMissingHash` | File unavailable or unreadable |
 | `UNANCHORED_FILE` | warning | `failOnUnanchoredFile` | File matched no anchor |
 | `VCS_DIRTY` | info | `failOnReviewRequired` | Component working tree is dirty |
@@ -2410,6 +2554,7 @@ sbomb:component:distributionRole (distributed | build-time-only)
 sbomb:component:linkageForm      (repeated, sorted)
 sbomb:component:archiveMembersUsed
 sbomb:component:modified         (true | false | unknown)
+sbomb:component:sourceObligation (repeated, sorted)
 sbomb:license:source             sbomb:license:evidenceClass
 sbomb:license:confidence         sbomb:license:review
 sbomb:license:reason             sbomb:license:conflictingValue

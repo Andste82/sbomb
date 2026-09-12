@@ -14,7 +14,7 @@ same build produce identical output.
 
 <!-- BEGIN GENERATED CATALOGUE -->
 
-This build emits 54 of the 63 identifiers below. The rest are specified and
+This build emits 56 of the 65 identifiers below. The rest are specified and
 reserved: they describe evidence this version does not yet read, and a run will
 never report them. They are listed and marked so that the table is the whole
 catalogue rather than a snapshot of one version.
@@ -38,7 +38,9 @@ catalogue rather than a snapshot of one version.
 | `FOSS_COPYRIGHT_MISSING` | info | — | Distributed component carries no copyright statement and none was curated (§22.10) | emitted |
 | `FOSS_LICENSE_ARTIFACT_LIMIT` | info | — | More recognized license files, or a larger one, than the retention limit of §22.9 | emitted |
 | `FOSS_LICENSE_TEXT_MISSING` | info | — | Distributed component has a license identifier but carries no retained text (§22.9) | emitted |
+| `FOSS_LICENSE_UNCLASSIFIED` | info | — | The license identifier is on neither obligation list of §32.6, so nothing is claimed about it and nothing is ruled out | emitted |
 | `FOSS_MODIFICATION_UNKNOWN` | info | — | Modification status could not be established, so it is reported as unknown rather than as unmodified (§19.4) | emitted |
+| `FOSS_SOURCE_OBLIGATION` | info | — | A distributed component's license triggers a source obligation, which §32.6 names and does not produce | emitted |
 | `HEADER_EVIDENCE_FALLBACK` | info | — | A CU had no DWARF coverage; depfile used instead | emitted |
 | `INPUT_LIMIT_EXCEEDED` | warning | — | A parser limit of §30 was reached | emitted |
 | `INTERNAL_INVARIANT_VIOLATION` | error | always (exit 70) | A graph invariant of §8.8 or a `bom-ref` uniqueness assertion of §28.4 failed | emitted |

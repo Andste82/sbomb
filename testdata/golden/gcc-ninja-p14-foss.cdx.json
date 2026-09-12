@@ -2,7 +2,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "version": 1,
-  "serialNumber": "urn:uuid:e9a30a4c-0db0-528b-be93-89d1008d9221",
+  "serialNumber": "urn:uuid:7ec75aa9-8820-55e8-b0ad-acfa6e6929f2",
   "metadata": {
     "tools": [
       {
@@ -1187,6 +1187,14 @@
         {
           "name": "sbomb:component:scope",
           "value": "third-party"
+        },
+        {
+          "name": "sbomb:component:sourceObligation",
+          "value": "library-source"
+        },
+        {
+          "name": "sbomb:component:sourceObligation",
+          "value": "relinking"
         },
         {
           "name": "sbomb:license:evidenceClass",

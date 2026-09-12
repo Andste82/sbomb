@@ -46,10 +46,18 @@ func TestRedactionAppliesToEveryOutput(t *testing.T) {
 	run := func(t *testing.T, redact bool) map[string]string {
 		t.Helper()
 		outputDir := t.TempDir()
+		fossDir := filepath.Join(outputDir, "foss")
 		paths := map[string]string{
 			"SBOM":          filepath.Join(outputDir, "out.cdx.json"),
 			"findings JSON": filepath.Join(outputDir, "findings.json"),
 			"review report": filepath.Join(outputDir, "report.txt"),
+			// Section 30.7 is extended by name to the FOSS review record
+			// (section 32.6). The notices document is checked separately: it
+			// adds no path of its own, and an unmapped component's section
+			// 19.3 name is the one identity that can carry one into it.
+			"foss review text": filepath.Join(fossDir, "foss-review.txt"),
+			"foss review JSON": filepath.Join(fossDir, "foss-review.json"),
+			"notices":          filepath.Join(fossDir, "THIRD-PARTY-NOTICES.txt"),
 		}
 		args := []string{"generate",
 			"--build-dir", buildDir,
@@ -58,6 +66,7 @@ func TestRedactionAppliesToEveryOutput(t *testing.T) {
 			"--output", paths["SBOM"],
 			"--findings-json", paths["findings JSON"],
 			"--review-report", paths["review report"],
+			"--foss-out", fossDir,
 			"--reproducible"}
 		if redact {
 			args = append(args, "--redact-unanchored-paths")
