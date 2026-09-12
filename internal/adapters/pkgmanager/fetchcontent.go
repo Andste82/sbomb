@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/example/sbomb/internal/domain"
+	"github.com/example/sbomb/internal/version"
 )
 
 // fetchContent reads CMake's FetchContent layout (section 21). Two evidence
@@ -202,25 +203,44 @@ func (fetchContent) refineFromGit(options Options, found *Package, findings *[]d
 	if value == "" {
 		return
 	}
-	found.Dirty = strings.HasSuffix(value, "-dirty")
-	exact := !found.Dirty && !strings.Contains(value, "-g")
-	confidence := domain.ConfidenceHigh
-	if !exact {
-		// Section 20.3: a describe with distance or a dirty tree is weaker
-		// evidence than an exact tag.
-		confidence = domain.ConfidenceMedium
-	}
-	// The checkout outranks the generated script even when it answers with less
-	// confidence: the script says which revision was asked for, the checkout
-	// says which one is there now.
-	found.Take(FieldVersion, Claim{
-		Value:      strings.TrimPrefix(strings.TrimSuffix(value, "-dirty"), "v"),
-		Source:     "git-describe",
-		Rank:       RankObservedCheckout,
-		Confidence: confidence,
-	})
+	// HEAD is read first because it is what tells a tag from the abbreviated
+	// commit `--always` falls back to.
+	// The answer is compared against HEAD as this call reads it, not against
+	// whatever Commit already held: a manifest may have pinned a revision
+	// there, and comparing a describe answer with a *declared* commit would
+	// read the abbreviation of an undeclared HEAD as a tag.
+	head := ""
 	if commit, err := options.Runner.Run(options.Context, "git", "-C", found.Root(), "rev-parse", "HEAD"); err == nil {
-		found.Commit = strings.TrimSpace(string(commit))
+		head = strings.TrimSpace(string(commit))
+	}
+	if head != "" {
+		found.Commit = head
+	}
+	checkout := version.DescribeCheckout(value, head)
+	found.Dirty = checkout.Dirty
+	if checkout.Tagged {
+		confidence := domain.ConfidenceHigh
+		if checkout.Dirty || checkout.Distance > 0 || checkout.Ambiguous {
+			// Section 20.3: a describe with distance or a dirty tree is weaker
+			// evidence than an exact tag.
+			confidence = domain.ConfidenceMedium
+		}
+		// The checkout outranks the generated script even when it answers with
+		// less confidence: the script says which revision was asked for, the
+		// checkout says which one is there now.
+		//
+		// The version is the tag, not the tag plus the distance: section 19.4
+		// makes `version` the release the component derives from, and a
+		// `1.2.0-4-gdeadbee` sorts *below* 1.2.0 under semantic versioning, so
+		// writing it there tells every consumer the opposite of the truth. The
+		// distance reaches the document as the modification status and the
+		// commit.
+		found.Take(FieldVersion, Claim{
+			Value:      strings.TrimPrefix(checkout.Tag, "v"),
+			Source:     "git-describe",
+			Rank:       RankObservedCheckout,
+			Confidence: confidence,
+		})
 	}
 	if remote, err := options.Runner.Run(options.Context, "git", "-C", found.Root(),
 		"config", "--get", "remote.origin.url"); err == nil {

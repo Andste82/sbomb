@@ -2058,3 +2058,29 @@ resolved before. `explainSubject` strips the `file:` prefix of §28.4 and offers
 a relative path to every anchor the dump registered, taking a unique match and
 naming the candidates when two anchors carry one relative path, because
 choosing would make the answer depend on map order.
+
+## D47 — The distance is measured from the nearest tag, not from the recorded one
+
+§19.4 reports a clean checkout standing a positive number of commits past its
+tag as `modified`, and takes the count out of the `git describe --tags --always
+--dirty` answer that §9.2 already permits. The tag that count is measured from
+is whichever one git finds **nearest and reachable**, and that is not always the
+release the component was pinned to.
+
+The case it misses: a maintainer fixes a vendored dependency, commits, and tags
+their own result — `v1.2.0-acme1`. `git describe` names that tag with distance
+zero, so the status is `false` although the component is modified relative to
+upstream. The case it gets right is the ordinary one, where nobody tagged
+anything and the nearest tag is still the upstream release.
+
+Measuring against a *recorded* revision needs `git rev-list --count
+<upstream>..HEAD`. That is not a matter of adding a line to the allowlist of
+§9.2: every command it permits takes paths in its argument slots, `checkPath`
+validates them, and a revision is not a path — it comes out of a repository
+sbomb was merely pointed at, which §30 treats as untrusted input. A revision
+slot with a grammar of its own would have to be written, tested and argued for
+in §9.2 first. Open question Q13 records what that costs.
+
+So the status is right where it is derived and incomplete where somebody tagged
+over their own change, and it is never `false` because nothing was checked --
+`unknown` covers that, as it did before.

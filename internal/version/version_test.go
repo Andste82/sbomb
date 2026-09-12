@@ -3,6 +3,7 @@ package version
 import (
 	"context"
 	"os"
+	osexec "os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -135,24 +136,38 @@ func TestGitVersionRatesWhatGitAnswered(t *testing.T) {
 			want: Result{Version: "1.2.3", Source: "git-describe", Confidence: domain.ConfidenceHigh},
 		},
 		{
+			// The commit is read here too: `abc1234-dirty` is a bare hash with
+			// a dirty tree, and only HEAD tells that from a tag.
 			name:      "a modified tree is reported as such and rated lower",
-			described: "v1.2.3-dirty", head: head, wantOK: true, wantNoAsks: true,
+			described: "v1.2.3-dirty", head: head, wantOK: true, wantAsked: true,
 			want: Result{Version: "1.2.3", Source: "git-describe", Confidence: domain.ConfidenceMedium, Dirty: true},
 		},
 		{
+			// Section 19.4: the version is the release this checkout derives
+			// from. The distance lowers the rating and stays out of the value,
+			// because `1.2.3-4-gdeadbee` sorts below `1.2.3` under semantic
+			// versioning and would make an advisory fixed in 1.2.3 match a
+			// checkout standing after it.
 			name:      "commits past the tag mean the tag does not name this commit",
 			described: "v1.2.3-4-gdeadbee", head: head, wantOK: true, wantNoAsks: true,
-			want: Result{Version: "1.2.3-4-gdeadbee", Source: "git-describe", Confidence: domain.ConfidenceMedium},
+			want: Result{Version: "1.2.3", Source: "git-describe", Confidence: domain.ConfidenceMedium},
 		},
 		{
 			name:      "distance and modification together stay at the lower rating",
 			described: "v1.2.3-4-gdeadbee-dirty", head: head, wantOK: true, wantNoAsks: true,
-			want: Result{Version: "1.2.3-4-gdeadbee", Source: "git-describe", Confidence: domain.ConfidenceMedium, Dirty: true},
+			want: Result{Version: "1.2.3", Source: "git-describe", Confidence: domain.ConfidenceMedium, Dirty: true},
 		},
 		{
-			name:      "the --always fallback is a commit, not a tag",
-			described: head[:7], head: head, wantOK: true, wantAsked: true,
-			want: Result{Version: head[:7], Source: "git-describe", Confidence: domain.ConfidenceMedium},
+			// Section 20.2 makes a commit a version only at point 5, which an
+			// explicit versionFrom rule has to ask for. The git rule of point 4
+			// claims nothing from a bare commit: it identifies content and does
+			// not order against a range.
+			name:      "the --always fallback is a commit, not a version",
+			described: head[:7], head: head, wantAsked: true,
+		},
+		{
+			name:      "a bare commit with a dirty tree is no version either",
+			described: head[:7] + "-dirty", head: head, wantAsked: true,
 		},
 		{
 			name:      "an unreadable commit cannot promote a tag",
@@ -232,4 +247,62 @@ func TestPURLPercentEncodesSpecialCharacters(t *testing.T) {
 	if got != "pkg:generic/demo%2Bcore%40latest@1.2.3" {
 		t.Fatalf("unexpected purl: %q", got)
 	}
+}
+
+// A repository with no reachable tag: `git describe --tags --always --dirty`
+// falls back to the abbreviated commit. The git rule of section 20.2 point 4
+// must produce nothing from it, so that resolution continues to point 5 --
+// which an explicit `commit` rule has to ask for -- and otherwise to point 7,
+// where UNKNOWN_VERSION says there is no version.
+//
+// This is the same property TestGitRulesProduceNothingWithoutIntrospection
+// keeps for a different cause: an answer that is not a version must not count
+// as success, because a success here hides UNKNOWN_VERSION.
+func TestABareCommitDoesNotSatisfyTheGitRule(t *testing.T) {
+	root := t.TempDir()
+	if !realGitRepository(t, root) {
+		t.Skip("git is not available")
+	}
+	runner := &exec.Runner{Features: exec.Features{Git: true}, Anchors: []string{root}}
+	options := Options{Runner: runner, Context: context.Background()}
+
+	if got, ok := Resolve([]string{"git"}, root, options); ok || got.Version != "" {
+		t.Errorf("the git rule answered %+v ok=%v for a repository with no tag, want nothing", got, ok)
+	}
+	// The commit rule, which somebody has to ask for by name, still answers.
+	if got, ok := Resolve([]string{"commit"}, root, options); !ok || got.Version == "" {
+		t.Errorf("the commit rule answered %+v ok=%v, want the commit version of point 5", got, ok)
+	}
+}
+
+// realGitRepository makes root a repository with one commit and no tag at all,
+// with an identity of its own so the test does not depend on whoever runs it.
+func realGitRepository(t *testing.T, root string) bool {
+	t.Helper()
+	if _, err := osexec.LookPath("git"); err != nil {
+		return false
+	}
+	if err := os.WriteFile(filepath.Join(root, "file.txt"), []byte("x\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	empty := filepath.Join(t.TempDir(), "gitconfig")
+	if err := os.WriteFile(empty, nil, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	for _, args := range [][]string{
+		{"init", "-q", "-b", "main"},
+		{"add", "-A"},
+		{"commit", "-qm", "one", "--no-gpg-sign"},
+	} {
+		command := osexec.Command("git", append([]string{"-C", root}, args...)...)
+		command.Env = append(os.Environ(),
+			"GIT_AUTHOR_NAME=sbomb", "GIT_AUTHOR_EMAIL=t@sbomb.invalid",
+			"GIT_COMMITTER_NAME=sbomb", "GIT_COMMITTER_EMAIL=t@sbomb.invalid",
+			"GIT_AUTHOR_DATE=2026-01-01T00:00:00Z", "GIT_COMMITTER_DATE=2026-01-01T00:00:00Z",
+			"GIT_CONFIG_GLOBAL="+empty, "GIT_CONFIG_SYSTEM="+empty)
+		if out, err := command.CombinedOutput(); err != nil {
+			t.Fatalf("git %v: %v\n%s", args, err, out)
+		}
+	}
+	return true
 }

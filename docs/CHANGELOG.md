@@ -2,6 +2,48 @@
 
 ## 0.17.0
 
+### A dependency somebody fixed and committed is reported as modified
+
+A vendored dependency with a clean tree, its tag untouched and a few commits on
+top is the commonest shape of a modified component. It was reported as
+`unknown`, on the grounds that counting commits past a tag needs a command the
+introspection allowlist of §9.2 does not permit.
+
+It does not. `git describe --tags --always --dirty` — already permitted,
+already called — answers `<tag>-<count>-g<hash>`, and the count was being
+matched and thrown away. It is read now: the status is `true`, and the signal
+names the tag and the distance. No command was added to the allowlist.
+
+What the distance is measured from is the nearest reachable tag, not the
+revision the component was pinned to, so a maintainer who tags their own fix
+still gets `false`. Deviation D47 records that, and open question Q13 records
+what closing it would cost.
+
+### A version says which release a component derives from, and nothing else
+
+A checkout four commits past `v1.2.0` published the version
+`1.2.0-4-gdeadbee`. That is worse than imprecise: under semantic versioning a
+pre-release sorts *below* the release, so an advisory fixed in 1.2.0 kept
+matching a checkout that stands after it. The version is now the tag alone, at
+medium confidence, and the deviation is stated where consumers read it — the
+modification status, `pedigree`, and the commit in the purl's `vcs_url`
+qualifier.
+
+Where no tag is reachable at all, `git describe --always` answers with the
+abbreviated commit. **No version is claimed from it** any more; it used to be
+published as the version, at the confidence an exact tag gets. A commit
+identifies content and does not order against a range, so `UNKNOWN_VERSION` is
+emitted instead and the commit is published as a commit.
+
+Four places derived those facts from that one string, each with its own copy of
+the parsing: the version resolver of §20.2, and the FetchContent, submodule and
+west adapters. They share one reading now (`version.DescribeCheckout`), which
+`generate` uses as well, so the version and the modification status cannot
+disagree about one answer.
+
+No golden changes: the committed corpus carries no `.git`, so none of this runs
+over it. That is open question Q9.
+
 ### A known licence identifier is written where CycloneDX puts identifiers
 
 §28.7 has always said that a known SPDX identifier is

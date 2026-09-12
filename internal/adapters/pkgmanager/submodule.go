@@ -8,6 +8,7 @@ import (
 
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/limits"
+	"github.com/example/sbomb/internal/version"
 )
 
 // submodule reads .gitmodules, which is strategy 3 of section 19.2: a git
@@ -129,24 +130,35 @@ func (submodule) refineFromGit(options Options, found *Package, findings *[]doma
 	if value == "" {
 		return
 	}
-	found.Dirty = strings.HasSuffix(value, "-dirty")
-	trimmed := strings.TrimSuffix(value, "-dirty")
-	exact := !found.Dirty && !strings.Contains(trimmed, "-g")
-	confidence := domain.ConfidenceHigh
-	if !exact {
-		confidence = domain.ConfidenceMedium
-	}
-	// .gitmodules names no revision at all, so the checkout is the only origin
-	// there is for a version here -- and it would outrank a declaration anyway,
-	// because it reports what the tree holds rather than what was asked for.
-	found.Take(FieldVersion, Claim{
-		Value:      strings.TrimPrefix(trimmed, "v"),
-		Source:     "git-describe",
-		Rank:       RankObservedCheckout,
-		Confidence: confidence,
-	})
+	// The answer is compared against HEAD as this call reads it, not against
+	// whatever Commit already held: a manifest may have pinned a revision
+	// there, and comparing a describe answer with a *declared* commit would
+	// read the abbreviation of an undeclared HEAD as a tag.
+	head := ""
 	if commit, err := options.Runner.Run(options.Context, "git", "-C", found.Root(), "rev-parse", "HEAD"); err == nil {
-		found.Commit = strings.TrimSpace(string(commit))
+		head = strings.TrimSpace(string(commit))
+	}
+	if head != "" {
+		found.Commit = head
+	}
+	checkout := version.DescribeCheckout(value, head)
+	found.Dirty = checkout.Dirty
+	if checkout.Tagged {
+		confidence := domain.ConfidenceHigh
+		if checkout.Dirty || checkout.Distance > 0 || checkout.Ambiguous {
+			confidence = domain.ConfidenceMedium
+		}
+		// .gitmodules names no revision at all, so the checkout is the only
+		// origin there is for a version here -- and it would outrank a
+		// declaration anyway, because it reports what the tree holds rather
+		// than what was asked for. The version is the tag alone; section 19.4
+		// says why.
+		found.Take(FieldVersion, Claim{
+			Value:      strings.TrimPrefix(checkout.Tag, "v"),
+			Source:     "git-describe",
+			Rank:       RankObservedCheckout,
+			Confidence: confidence,
+		})
 	}
 	if found.Dirty {
 		*findings = append(*findings, domain.Finding{

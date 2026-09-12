@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	sbombexec "github.com/example/sbomb/internal/exec"
@@ -208,20 +209,48 @@ func TestACommentedPatchNameIsNotAPatch(t *testing.T) {
 // Counting the commits between HEAD and the tag needs `git rev-list`, which
 // section 9.2 does not permit, and a clean tree some distance past a tag is
 // not an unmodified component.
-func TestACleanCheckoutOffItsTagIsUnknown(t *testing.T) {
+// A dependency somebody fixed and committed: clean tree, tag untouched, HEAD
+// past it. It is the commonest shape of a modified component, and the count is
+// in the `git describe` answer already, so nothing has to be counted.
+func TestACleanCheckoutPastItsTagIsModified(t *testing.T) {
 	root := modificationTree(t)
 	if !gitRepository(t, root) {
 		t.Skip("git is not available")
 	}
-	// A second commit, so HEAD is one past the tag and the tree is clean.
-	write(t, filepath.Join(root, "src", "lib.c"), "int lib(void){return 2;}\n")
-	git(t, root, "add", "-A")
-	git(t, root, "commit", "-qm", "second", "--no-gpg-sign")
+	// Two more commits, so HEAD is two past the tag and the tree is clean.
+	for _, body := range []string{"int lib(void){return 2;}\n", "int lib(void){return 3;}\n"} {
+		write(t, filepath.Join(root, "src", "lib.c"), body)
+		git(t, root, "add", "-A")
+		git(t, root, "commit", "-qm", "fix", "--no-gpg-sign")
+	}
+
+	component, _ := modificationOf(t, root, sbombexec.Features{Git: true})
+	if component.Modification.Status != domain.ModificationModified {
+		t.Errorf("status = %q, want %q (%s)", component.Modification.Status,
+			domain.ModificationModified, component.Modification.Signal)
+	}
+	if !strings.Contains(component.Modification.Signal, "2 commit(s) past its tag v1.2.0") {
+		t.Errorf("signal = %q, want the distance and the tag it is measured from", component.Modification.Signal)
+	}
+}
+
+// No tag at all: `--always` answers with the abbreviated commit, and there is
+// nothing the checkout could have deviated from. Unknown is the answer that
+// cannot be wrong.
+func TestACheckoutWithNoTagIsUnknown(t *testing.T) {
+	root := modificationTree(t)
+	if !gitRepository(t, root) {
+		t.Skip("git is not available")
+	}
+	git(t, root, "tag", "-d", "v1.2.0")
 
 	component, _ := modificationOf(t, root, sbombexec.Features{Git: true})
 	if component.Modification.Status != domain.ModificationUnknown {
 		t.Errorf("status = %q, want %q (%s)", component.Modification.Status,
 			domain.ModificationUnknown, component.Modification.Signal)
+	}
+	if !strings.Contains(component.Modification.Signal, "no reachable tag") {
+		t.Errorf("signal = %q, want the absence of a tag as the reason", component.Modification.Signal)
 	}
 }
 
@@ -257,31 +286,6 @@ func TestAnEnclosingRepositoryDoesNotDecideAVendoredComponent(t *testing.T) {
 	}
 }
 
-// A tag whose own name contains "-g" is a tag. `git describe` marks a distance
-// from a tag with the whole suffix `-<count>-g<hash>`, and reading the two
-// characters alone would report `unknown` for a component standing exactly on
-// `v1.0-gamma`.
-func TestATagWhoseNameContainsTheDistanceMarkerIsStillATag(t *testing.T) {
-	commit := "1d0f2c3b4a5968778695a4b3c2d1e0f918273645"
-	exact := []string{"v1.2.0", "v1.0-gamma", "release-gcc13", "v2.0-gtest-support"}
-	for _, described := range exact {
-		if !exactTagDescribe(described, commit) {
-			t.Errorf("%q reads as a distance from a tag, and it is a tag name", described)
-		}
-	}
-	distances := []string{"v1.2.0-4-gdeadbee", "v1.0-gamma-12-g1d0f2c3"}
-	for _, described := range distances {
-		if exactTagDescribe(described, commit) {
-			t.Errorf("%q reads as a tag, and it is a distance from one", described)
-		}
-	}
-	// `--always` falls back to the abbreviated commit for a repository with no
-	// tag, and an abbreviated hash is a prefix of the full one.
-	if exactTagDescribe(commit[:8], commit) {
-		t.Error("an abbreviated commit reads as a tag")
-	}
-}
-
 // A tag with a distance suffix, from real git, so that the shape the regexp
 // matches is the shape git writes and not the one this test imagines.
 func TestTheDistanceSuffixIsTheOneGitWrites(t *testing.T) {
@@ -295,9 +299,13 @@ func TestTheDistanceSuffixIsTheOneGitWrites(t *testing.T) {
 	git(t, root, "commit", "-qm", "past the tag", "--no-gpg-sign")
 
 	component, _ := modificationOf(t, root, sbombexec.Features{Git: true})
-	if component.Modification.Status != domain.ModificationUnknown {
+	if component.Modification.Status != domain.ModificationModified {
 		t.Errorf("status = %q, want %q one commit past a tag named v1.0-gamma (%s)",
-			component.Modification.Status, domain.ModificationUnknown, component.Modification.Signal)
+			component.Modification.Status, domain.ModificationModified, component.Modification.Signal)
+	}
+	if !strings.Contains(component.Modification.Signal, "1 commit(s) past its tag v1.0-gamma") {
+		t.Errorf("signal = %q, want the tag read whole even though its name carries -g",
+			component.Modification.Signal)
 	}
 
 	// And standing on that same tag is "false": the tag's name is not a
