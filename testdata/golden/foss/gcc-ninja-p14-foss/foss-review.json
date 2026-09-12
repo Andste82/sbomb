@@ -60,7 +60,9 @@
       "scope": "required",
       "licenses": [
         {
-          "expression": "MIT"
+          "license": {
+            "id": "MIT"
+          }
         }
       ],
       "properties": [
@@ -905,7 +907,9 @@
       "scope": "required",
       "licenses": [
         {
-          "expression": "Apache-2.0"
+          "license": {
+            "id": "Apache-2.0"
+          }
         }
       ],
       "properties": [
@@ -998,7 +1002,9 @@
       "scope": "required",
       "licenses": [
         {
-          "expression": "BSD-3-Clause"
+          "license": {
+            "id": "BSD-3-Clause"
+          }
         }
       ],
       "properties": [
@@ -1087,7 +1093,9 @@
       "scope": "excluded",
       "licenses": [
         {
-          "expression": "GPL-2.0-only"
+          "license": {
+            "id": "GPL-2.0-only"
+          }
         }
       ],
       "properties": [
@@ -1175,7 +1183,9 @@
       "scope": "required",
       "licenses": [
         {
-          "expression": "LGPL-2.1-only"
+          "license": {
+            "id": "LGPL-2.1-only"
+          }
         }
       ],
       "properties": [
@@ -1275,7 +1285,9 @@
       "scope": "required",
       "licenses": [
         {
-          "expression": "MIT"
+          "license": {
+            "id": "MIT"
+          }
         }
       ],
       "properties": [
@@ -1468,7 +1480,9 @@
       "scope": "required",
       "licenses": [
         {
-          "expression": "0BSD"
+          "license": {
+            "id": "0BSD"
+          }
         }
       ],
       "properties": [

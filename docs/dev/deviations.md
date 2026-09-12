@@ -2035,3 +2035,26 @@ yields a smaller used-file set when it was built with Make than with Ninja, and
 `MISSING_GENERATOR_INPUT_EVIDENCE` is what names the difference. Recorded as
 open question Q14; inventing a fourth source is what deviation D20 already
 refused once.
+
+## D46 — `explain --component` refuses instead of answering
+
+§32.3 documents three subjects for `explain`, and one of them cannot be served
+by the file it reads. The evidence dump of appendix C carries source, header,
+object, archive and artifact nodes; it carries no component, because the
+component mapping of §19.2 is a layer above the graph (§35) and decision Q20 of
+the FOSS plan refused to change the dump's format for this.
+
+Until that is decided (open question Q19), `--component` exits 1 with a message
+naming what it cannot do and pointing at `--file`, `--bom-ref` and
+`sbomb foss`. It used to print "no evidence chain for <name>", which is the
+wording for a subject that *is* in the graph and unreachable — for a component
+it read as "this component is not in your product", which is the opposite of
+what the tool knows.
+
+The other two subjects of §32.3 are served as specified. Both of its examples
+are spelled the way a human writes them — a path relative to a root, and a
+`file:` bom-ref — while the graph is keyed by canonical identity, so neither
+resolved before. `explainSubject` strips the `file:` prefix of §28.4 and offers
+a relative path to every anchor the dump registered, taking a unique match and
+naming the candidates when two anchors carry one relative path, because
+choosing would make the answer depend on map order.

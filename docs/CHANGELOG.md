@@ -2,6 +2,36 @@
 
 ## 0.17.0
 
+### A known licence identifier is written where CycloneDX puts identifiers
+
+§28.7 has always said that a known SPDX identifier is
+`licenses[].license.id` and that `licenses[].expression` is for an expression.
+The writer tested the expression field first, so a component resolved to the
+bare identifier `MIT` was published as `{"expression": "MIT"}` — valid
+CycloneDX, and not what a consumer filtering on `license.id` looks for. A
+compound expression such as `MIT OR Apache-2.0` stays an expression, and an
+identifier the SPDX list does not carry stays one too, because `license.id` is
+an enum in both schemas. The membership test is read from the same embedded
+SPDX schema that validates the document, so the writer and the validator cannot
+disagree.
+
+Three goldens change: the resolved single identifiers move from `expression` to
+`license.id`, and `MIT OR Apache-2.0` does not move.
+
+### `explain` accepts the subjects the documentation shows
+
+§32.3's examples name a file by a path relative to a root and by a `file:`
+bom-ref. The graph is keyed by canonical identity, so neither reached a node:
+both answered "no evidence chain". A bom-ref now has its `file:` prefix taken
+off, and a relative path is offered to every anchor the dump registered — a
+unique match is used, and two anchors carrying one relative path are named
+rather than one of them picked.
+
+`--component` still cannot be answered from a dump that carries no components.
+It now says so and points at `--file`, `--bom-ref` and `sbomb foss`, instead of
+printing "no evidence chain", which read as "that component is not in the
+product". Deviation D46, open question Q19.
+
 ### The attribution outputs are documented, and CI keeps them from drifting
 
 [docs/foss.md](foss.md) is new and is the whole story of the four files:
