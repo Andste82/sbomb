@@ -40,16 +40,20 @@ in [../gap-analysis.md](../gap-analysis.md#the-testability-gap-which-is-the-real
 F3 is a correctness fix that the attribution data depends on. F4–F6 are the
 data. F7 renders it. F8 is documentation and CI.
 
-| ID | Title | Depends on | Size |
-|---|---|---|---|
-| [F1](F1-fixture.md) | Fixture project, source harvest, inventory dump | — | medium |
-| [F2](F2-source-tree-relocation.md) | Source tree relocation | F1 | small |
-| [F3](F3-component-root.md) | The component root as a resolved fact | F2 | medium |
-| [F4](F4-license-artifacts.md) | Licence and NOTICE artifact retention | F3 | medium |
-| [F5](F5-copyright.md) | Copyright statement extraction | F4 | small |
-| [F6](F6-component-attributes.md) | Distribution role, linkage form, modification | F1 | medium |
-| [F7](F7-foss-command.md) | The FOSS outputs: `generate --foss-out` and `sbomb foss` | F4, F5, F6 | large |
-| [F8](F8-documentation-and-ci.md) | Documentation, catalogues, CI, Action | F7 | small |
+| ID | Title | Depends on | Size | Status |
+|---|---|---|---|---|
+| [F1](F1-fixture.md) | Fixture project, source harvest, inventory dump | — | medium | planned |
+| [F2](F2-source-tree-relocation.md) | Source tree relocation | F1 | small | planned |
+| [F3](F3-component-root.md) | The component root as a resolved fact | F2 | medium | code landed, untested against a corpus |
+| [F4](F4-license-artifacts.md) | Licence and NOTICE artifact retention | F3 | medium | planned |
+| [F5](F5-copyright.md) | Copyright statement extraction | F4 | small | planned |
+| [F6](F6-component-attributes.md) | Distribution role, linkage form, modification | F1 | medium | planned |
+| [F7](F7-foss-command.md) | The FOSS outputs: `generate --foss-out` and `sbomb foss` | F4, F5, F6 | large | planned |
+| [F8](F8-documentation-and-ci.md) | Documentation, catalogues, CI, Action | F7 | small | planned |
+
+F3 was built before this plan was used, so its dependency on F2 held in one
+direction only: the code is in place, and the fixture that would prove it is
+not. F1 therefore inherits F3's test list.
 
 F6 depends only on F1: it is graph work and can be built in parallel with
 F2–F5 if two people are on this.

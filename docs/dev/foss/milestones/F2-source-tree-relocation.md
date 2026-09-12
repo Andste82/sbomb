@@ -20,7 +20,7 @@ is opened literally. In production this is the ordinary CI split: build in one
 job, generate the SBOM in another from a restored build directory.
 
 `--source-dir` is not the answer today. It assigns `cfg.Project.Root`
-(`cmd/sbomb/main.go:649`), which becomes the **identity** root handed to
+(`cmd/sbomb/main.go:650`), which becomes the **identity** root handed to
 `anchors.Assemble`. Pointing it at a relocated tree re-anchors every file and
 changes the document instead of relocating a single read.
 
@@ -34,8 +34,13 @@ changes the document instead of relocating a single read.
 * **Identity is unaffected.** Anchoring continues to use the logical root. A
   test asserts that relocating a tree changes no `bom-ref` and no canonical
   path — that is the whole point of the anchor model.
-* Reads that would leave every registered anchor are refused (§30.4), with the
-  existing `--allow-unanchored-reads` escape.
+* Reads that would leave every registered anchor are refused (§30.4). **There
+  is no escape hatch to reuse.** `--allow-unanchored-reads` is named in §7.6
+  and does not exist as a flag: `AllowUnanchoredReads` is an option of
+  `internal/inventory` (`inventory.go:48`), consulted only for a symlink whose
+  target escapes every anchor, and nothing outside a test sets it. This
+  milestone either builds the flag or states that a relocated read is refused
+  outright.
 * Finding `SOURCE_TREE_UNAVAILABLE` (warning) when the physical source root
   does not exist, emitted once per run rather than once per file.
 * **Without a CMake File API reply there is no logical source root**, so
@@ -44,7 +49,7 @@ changes the document instead of relocating a single read.
   finding (decision [Q16](../decisions.md)).
 * **Only the source root is relocated.** Package caches keep the paths the
   build recorded — Conan reads its package folder out of a file the build wrote
-  (`internal/adapters/pkgmanager/conan.go:86`), so those paths are
+  (`internal/adapters/pkgmanager/conan.go:99`), so those paths are
   build-machine paths. The general form, a list of prefix replacements as
   `-ffile-prefix-map` and the debugger's `substitute-path` use, is **not built**:
   see decision [Q17](../decisions.md) for why the case is narrower than it

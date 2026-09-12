@@ -45,21 +45,34 @@ milestone [F7](milestones/F7-foss-command.md).
 | [spec-delta.md](spec-delta.md) | The amendments `docs/dev/spec.md` needs. Nothing here can be built without them: the findings and property catalogues are generated from the appendices and CI refuses a mismatch. |
 | [milestones/](milestones/) | F1–F8, each independently buildable and testable. |
 
-## Two findings that came out of the analysis and are not FOSS work
+## Findings that came out of the analysis and are not FOSS work
 
-Both are defects in the current tool that the FOSS work would otherwise
-inherit, and both are worth fixing on their own merit:
+Defects in the current tool that the FOSS work would otherwise inherit, each
+worth fixing on its own merit. Three of the four have been fixed since this
+plan was written.
 
-* **Licence detection silently stops working when the source tree moves.** The
-  build root has a logical/physical mapping (`internal/generate/linkgraph.go:145`);
-  the source root does not. Build on one machine, run sbomb on another, and
-  every licence becomes NOASSERTION with no finding. Milestone
+* **Licence detection silently stops working when the source tree moves.**
+  *Open.* The build root has a logical/physical mapping
+  (`internal/generate/linkgraph.go:130` and `:145`); the source root does not.
+  Build on one machine, run sbomb on another, and every licence becomes
+  NOASSERTION with no finding. Milestone
   [F2](milestones/F2-source-tree-relocation.md).
-* **The component root is guessed from the used files.** `componentRoot`
-  (`internal/generate/components.go:505`) returns the deepest common directory
-  of the files that happened to be linked, so a component's `LICENSE` is found
-  or missed depending on what the linker kept. Milestone
-  [F3](milestones/F3-component-root.md).
+* **The component root was guessed from the used files.** *Fixed in `634ba4a`.*
+  The root is resolved by the strategy that named the component, and
+  `COMPONENT_ROOT_UNRESOLVED` says when only the fallback applied.
+* **A second reader walked above the component.** *Fixed in `bee9a03`.*
+  `resolveLicense` ascended to the filesystem root for a `LICENSE`, which §22.1
+  forbids. It had been unreachable from any run since component mapping
+  replaced it, and a test asserted the forbidden behaviour.
+* **A path that resolves to nothing was treated as a directory.** *Fixed in
+  `efbcd8a`, and not foreseen by this plan.* The upward marker walk and the
+  fallback component root both derived a directory from a file's path without
+  asking whether the file is there. Evidence from a build made elsewhere names
+  files this machine does not have, and a manifest in one of their coincidental
+  parents named a component — the repository's own test run produced a
+  component called `tmp` from a stray `west.yml` in `/tmp`. It belongs on this
+  list because every artifact this track retains is read from the component
+  root.
 
 ## Stage 2 — outlook, not part of this track
 

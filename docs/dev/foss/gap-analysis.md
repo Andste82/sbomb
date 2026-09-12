@@ -1,8 +1,12 @@
 # The requirements against the code as it stands
 
 Each requirement of [requirements.md](requirements.md) against what
-`internal/` actually does today. Line references are to the tree this was
-written from; they are pointers, not contracts.
+`internal/` actually does today. Line references are pointers, not contracts.
+
+Last checked against `main` at `9bea8e1` (2026-09-12). Four defects this
+analysis named have been fixed since it was written — see R2 and the
+[README](README.md) — and one it did not foresee was found and fixed with
+them.
 
 Verdicts: **exists** — nothing to build. **partial** — the mechanism is there
 and something specific is missing. **missing** — no code covers it. **wrong** —
@@ -36,43 +40,50 @@ specification defines fourteen evidence types; the code currently emits seven
 
 ## R2 — The component's own licence text, verbatim
 
-**partial, on top of two defects.**
+**partial.** The three defects this section named when the plan was written
+have since been fixed on `main`; what is left is the retention itself.
 
-The bytes are read three times a run and dropped every time:
+The bytes are read and dropped every time:
 
 * `license.ResolveFile` (`internal/license/license.go:119`) reads the file and
   returns only a `LicenseFinding`.
-* `licenseFromComponentRoot` (`internal/generate/components.go:453`) walks
-  `recognizedLicenseFiles` in the component root and returns the **first**
-  file that resolves; the rest are never opened.
-* `licenseEvidenceFromComponentRoot` (`:471`) reads the same files again for
-  the observation path.
+* `licenseFromComponentRoot` (`internal/generate/components.go:1115`) consults
+  the recognized files of the component root and returns the **first** that
+  resolves; the rest are never opened.
+* `licenseEvidenceFromComponentRoot` (`:1132`) reads them again for the
+  observation path.
 
-Three specific problems have to be fixed before retention is worth anything:
+**What has been fixed since, and is therefore no longer F3 or F4 work:**
 
-1. **The component root is not the component root.** `componentRoot`
-   (`:507`) returns the deepest common directory of the component's *used*
-   files. A library with three sources of which the linker kept one has a root
-   of `dep/mit-lib/src`, and its `LICENSE` at `dep/mit-lib/` is never seen.
-   Worse, the answer depends on the link result: turning on `--gc-sections`
-   can change which licence text a product ships. `domain.Component.Root`
-   exists (`internal/domain/domain.go:139`) and is never assigned; the package
-   adapters already carry the authoritative value
-   (`pkgmanager.Package.Root`, and `LicenseFile` when the manager placed one).
-   Milestone [F3](milestones/F3-component-root.md). Half the mechanism is
-   already there and unused — `nearestPackageRoot` (`components.go:184`) walks
-   up for package metadata and stops at the anchor root — and a licence file
-   joins its markers, which is decision [Q7](decisions.md).
-2. **A second reader walks upwards.** `resolveLicense`
-   (`internal/generate/generate.go:528`) ascends from a file's directory to the
-   filesystem root looking for `LICENSE`, `COPYING` or `NOTICE`. §22.1 forbids
-   exactly this, and for attribution it is worse than a wrong identifier: it
-   would retain an unrelated ancestor's licence text and print it under this
-   component's name. Milestone [F3](milestones/F3-component-root.md).
-3. **The recognized-file list is narrower than the specification.**
-   `recognizedLicenseFiles` (`components.go:498`) has no `LICENSE-<id>` form,
-   which §22.3 names. Multi-licence components (`LICENSE.MIT`, `LICENSE.APACHE`)
-   are the common case this misses.
+1. **The component root is a resolved fact.** `resolveRoot`
+   (`components.go:1198`) settles it in the mapping priority order — curated
+   path, package-manager root, the marker directory strategy 6 stopped at, the
+   anchor root — with the common directory of used files as the last resort and
+   `COMPONENT_ROOT_UNRESOLVED` (info) when only that applied. §19.2 is amended
+   accordingly, `domain.Component.Root` is populated (`components.go:778`) and
+   `sbomb:component:root` is emitted. A recognized licence file marks a
+   boundary (`licenseBoundaryFiles`, `components.go:53`), which is decision
+   [Q7](decisions.md). Landed in `634ba4a`.
+2. **The second reader is gone.** `resolveLicense` ascended from a file's
+   directory to the filesystem root looking for `LICENSE`, `COPYING` or
+   `NOTICE` — §22.1 forbids exactly that. It had been unreachable from any run
+   since component mapping replaced it, and a test asserted the forbidden
+   behaviour. Both were removed in `bee9a03`.
+3. **The recognized-file list matches §22.3.** The hand-written list of eleven
+   exact names is replaced by `recognizedLicenseFile` / `licenseFilesIn`
+   (`components.go:1157`): case-insensitive, optional `.txt`/`.md`, and
+   `LICENSE-<id>` as a family, consulted in a fixed order. Landed in `2717c1b`.
+
+**A fourth defect was found while fixing those and is also gone.** The upward
+marker walk and the fallback component root both derived a *directory* from a
+file's path without asking whether the path resolves. Evidence from a build
+made elsewhere names files this machine does not have, their parents exist here
+by coincidence, and a manifest in one of them named a component — this
+repository's own test run produced a component called `tmp` from a stray
+`west.yml` in `/tmp`. Both steps skip an unreadable file now (`efbcd8a`). It
+matters here because every artifact this track retains is read from the
+component root, and a root derived from a dead path would have been retained
+from whatever sits there.
 
 **To build:** retention of the bytes with hash and canonical path, all matching
 files rather than the first, and the CycloneDX attachment to carry them
@@ -92,9 +103,10 @@ original line and the `FileID` it came from. Milestone
 
 ## R4 — NOTICE, kept separate
 
-**partial and slightly wrong.** `NOTICE` and `COPYRIGHT` are in
-`recognizedLicenseFiles`, so a NOTICE file can currently *decide a component's
-licence identifier*. For a component whose NOTICE quotes a licence that is not
+**partial and slightly wrong.** `NOTICE` and `COPYRIGHT` are recognized by
+`recognizedLicenseFile` (`internal/generate/components.go:1157`), so a NOTICE
+file can currently *decide a component's licence identifier*. They rank below
+the licence forms, which narrows the case without closing it. For a component whose NOTICE quotes a licence that is not
 the component's own, that is a wrong answer with high confidence.
 
 **To build:** NOTICE becomes an artifact kind of its own, retained for
@@ -105,7 +117,7 @@ Milestone [F4](milestones/F4-license-artifacts.md).
 
 **partial.** Dirty state is already detected, but only where a package manager
 adapter derived it from `git describe --dirty`
-(`internal/adapters/pkgmanager/fetchcontent.go:144`, `submodule.go:122`), and it
+(`internal/adapters/pkgmanager/fetchcontent.go:205`, `submodule.go:132`), and it
 is a two-state boolean surfaced as `VCS_DIRTY` and `sbomb:component:vcsDirty`.
 
 Three gaps:
@@ -192,7 +204,7 @@ to Appendix A first; see [spec-delta.md](spec-delta.md).
 
 **exists.** Anchors, hashes, the evidence dump and `explain` cover it. One
 caveat: `explain` reads the dumped graph from the build directory
-(`cmd/sbomb/main.go:886`), not a fresh run, so any attribute that should be
+(`cmd/sbomb/main.go:888`), not a fresh run, so any attribute that should be
 visible there has to be written into the dump — an Appendix C change. Decision
 [Q20](decisions.md) settles it: `explain` is **not** extended. It already
 answers "is this component really in the product", and `foss-review.txt`
@@ -241,7 +253,7 @@ things have to change, and they are independent:
    * The source root has no such mapping. A path like
      `/__fixture_src__/dep/mit-lib/LICENSE` is opened literally and fails.
    * `--source-dir` looks like the answer and is not: it assigns
-     `cfg.Project.Root` (`cmd/sbomb/main.go:649`), which is the **identity**
+     `cfg.Project.Root` (`cmd/sbomb/main.go:650`), which is the **identity**
      root fed to `anchors.Assemble`. Pointing it at a relocated tree does not
      relocate any read; it re-anchors every file and changes the SBOM.
 

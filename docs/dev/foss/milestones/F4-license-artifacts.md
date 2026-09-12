@@ -33,7 +33,11 @@ file is the deliverable; the identifier is an index into a catalogue.
 
   on `domain.Component`, sorted by `(Kind, File)`. **All** matching files are
   retained, not the first that resolves — `licenseFromComponentRoot`
-  (`internal/generate/components.go:453`) returns early today and stops.
+  (`internal/generate/components.go:1115`) returns early today and stops. The
+  candidates it walks are no longer a fixed list of names: `licenseFilesIn`
+  (`:1157`) lists the settled root once and matches its entries against §22.3,
+  case-insensitively and including `LICENSE-<id>`, in a fixed order. Retention
+  consumes that list rather than replacing it.
 
 * **NOTICE and COPYRIGHT leave the identification chain.** They are retained
   for reproduction and are no longer inputs to §22.2. A NOTICE that quotes a

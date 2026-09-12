@@ -1,5 +1,18 @@
 ### Milestone F3 — The component root as a resolved fact
 
+**Status: the code landed, ahead of this plan and without its fixture.**
+`634ba4a` resolved the root (`resolveRoot`, `internal/generate/components.go:1198`),
+populated `domain.Component.Root`, emitted `sbomb:component:root` and
+`COMPONENT_ROOT_UNRESOLVED`, and made a recognized licence file a boundary
+marker. `bee9a03` removed `resolveLicense`'s parent walk. `2717c1b` replaced
+the fixed name list with §22.3 matching, `LICENSE-<id>` included. §19.2 and
+§22.3 are amended accordingly.
+
+What is **not** done is the evidence for it: the tests below were written
+against the `p14-foss` fixture of F1, which does not exist, so none of them was
+run. Treat this milestone as "implemented, unverified against the corpus" and
+keep the test list — it is the acceptance criteria for F1, not dead text.
+
 **Goal:** stop guessing where a component begins. Everything the attribution
 export retains is read from the component root, so a root that moves with the
 link result produces an attribution document that moves with the link result.
@@ -49,8 +62,9 @@ link result produces an attribution document that moves with the link result.
 * `resolveLicense`'s parent walk removed. A file with no own SPDX identifier
   gets its licence from its component, through the component root, with
   evidence class `inherited` and confidence `low` exactly as §22.8 requires.
-* `recognizedLicenseFiles` gains the `LICENSE-<id>` form of §22.3, with the
-  case and extension rule stated once.
+* The recognized file names follow §22.3 — case-insensitive, optional
+  `.txt`/`.md`, and the `LICENSE-<id>` form — rather than a hand-written list.
+  *Done in `2717c1b`: `recognizedLicenseFile` and `licenseFilesIn`.*
 
 **Tests**
 

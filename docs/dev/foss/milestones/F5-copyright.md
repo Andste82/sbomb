@@ -15,7 +15,7 @@ not decoration: the licence says the notice shall be reproduced.
   else, and no directory walk.
 
 * **It rides on the hashing pass, it does not add one** (decision
-  [Q9](../decisions.md)). `hashOne` (`internal/inventory/inventory.go:166`)
+  [Q9](../decisions.md)). `hashOne` (`internal/inventory/inventory.go:167`)
   already does `os.ReadFile`, so the bytes are in memory when the SHA-256 is
   computed. `HashOptions` gains `Observe func(domain.FileID, []byte)`, supplied
   by the `generate` layer. Zero extra I/O against the §31 budget, and the §35
