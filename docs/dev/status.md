@@ -122,13 +122,30 @@
   carries an SBOM of itself derived from its linker's own record; and
   regenerating an unchanged fixture corpus is a no-op outside three recorded
   projects.
+- The FOSS attribution track has begun. `p14-foss` is in the corpus: a CMake
+  project of nine components whose licence texts, NOTICE files and copyright
+  headers are committed beside the build evidence, because none of the
+  attribution work can be observed in a corpus of build evidence alone.
+  `tools/fixtures/regen.sh` harvests its source tree once rather than per
+  toolchain and `--check` requires it; `testdata/fixtures/POLICY.md` records
+  the exception. `--inventory-dump` writes the section 40 document from the
+  same run that wrote the SBOM, so later milestones can be compared against a
+  golden inventory. The tool resolves no licence from that tree yet: the
+  evidence names `/__fixture_src__` and the files are elsewhere, which is what
+  source-tree relocation changes. `tools/fixtures/replynorm` keeps the fixture
+  off the churn list: CMake orders a target's dependency array by comparing
+  target pointers, and the normalizer sorts it and renames each File API
+  document to the digest of what it wrote. The one thing the fixture does not
+  carry is a git repository, so the modification status of its components
+  reads `unknown` against the committed corpus; open question Q9 holds the
+  measurements for the milestone that derives it.
 
 ## Known Gaps
 
-- **Six specified flags are absent**, each waiting on the feature it belongs
+- **Five specified flags are absent**, each waiting on the feature it belongs
   to rather than on effort: `--license-scan`, `--output-dir`,
-  `--adapter`, `--allow-cmake-regenerate`, `--include-runtime-libraries`,
-  `--inventory-dump`. Section 32 names them beneath the CLI table; nine others
+  `--adapter`, `--allow-cmake-regenerate`, `--include-runtime-libraries`.
+  Section 32 names them beneath the CLI table; nine others
   were removed rather than built (deviation D22). The `cmake` introspection
   group returns with `--allow-cmake-regenerate` and was removed until then,
   because without it no allowed command can produce a File API reply
@@ -194,6 +211,11 @@ Nothing in section 30 is assumed any more: point 7, that
 `--redact-unanchored-paths` applies equally to the SBOM, the findings JSON and
 the review report, is now covered by a test that also proves the unredacted
 outputs contain the paths.
+
+The FOSS attribution export is planned in a branch of its own
+(`docs/dev/foss/`), eight milestones from the fixture to the rendered notices
+document. F1 has landed: the fixture, the source harvest and the inventory
+dump. Nothing else of it is built.
 
 What is left is not phase work:
 

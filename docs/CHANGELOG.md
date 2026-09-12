@@ -2,6 +2,57 @@
 
 ## 0.17.0
 
+### A fixture whose licences can actually be read
+
+Every golden SBOM in this repository said `NOASSERTION` for every licence, and
+not because detection failed: the corpus commits build evidence and no sources,
+so there was nothing on disk to detect. Nothing about attribution could be
+observed, let alone tested.
+
+`p14-foss` closes that. It is a CMake project of nine components, each one a
+case an attribution export has to handle: an MIT library with three sources of
+which the linker keeps one, an Apache-2.0 library with a `LICENSE` and a
+`NOTICE`, a header-only BSD-3-Clause component with nothing but a licence file
+and an `include/` directory, a statically linked LGPL-2.1 archive, a GPL-2.0
+code generator that runs during the build and is linked into nothing, a
+component holding `LICENSE-MIT` and `LICENSE-APACHE` side by side, one with no
+licence at all, and one with a licence and no copyright holder. Its source
+tree is committed beside the build evidence -- once, not per toolchain --
+because a licence text cannot be read out of a linker map.
+`testdata/fixtures/POLICY.md` records the exception and `PROVENANCE.md` the
+origin of every text.
+
+The assertion the whole attribution track leans on is a test now: exactly one
+member of the MIT archive reaches the artifact, both members of the Apache and
+LGPL archives do, and nothing of the GPL generator does.
+
+### `--inventory-dump` writes the inventory the specification promised
+
+Section 40 has always specified it and section 32.1 has always listed it; the
+CLI refused it. It writes the used-file set and the components in sbomb's own
+format -- sorted by canonical path, independent of the CycloneDX writer -- from
+the same discovery that wrote the SBOM. It is a further rendering of one run,
+like `--review-report`, and changes neither the document nor the exit code.
+
+### The fixture corpus stopped churning on a CMake pointer comparison
+
+CMake serializes a target's transitive dependency list in the iteration order
+of a `std::set` whose comparator ends in a comparison of target pointers, so
+the array comes out in whatever order the targets happened to be allocated in.
+Every File API document is named for the digest of its own bytes, so the name
+moves with the array, and the codemodel and index that reference the name move
+too. Regenerating an unchanged corpus rewrote files for no reason, which is
+what makes a corpus diff unreviewable.
+
+`tools/fixtures/replynorm` sorts the array by target identifier -- a set has no
+order, so nothing is lost -- and renames each document to the digest of what it
+wrote, leaving a reply the File API could itself have produced. Every byte of
+jsoncpp's layout around the elements is copied through rather than
+re-serialized. `regen.sh` runs it for `p14-foss`, which therefore is not on
+`check-reproducible.sh`'s list of projects that churn. `p03-dupnames` has the
+same defect and still is, because it is also harvested on a Windows host and
+switching it over means regenerating the whole corpus.
+
 ### A file that is not there no longer names a component
 
 Evidence from a build made elsewhere names files this machine does not have —

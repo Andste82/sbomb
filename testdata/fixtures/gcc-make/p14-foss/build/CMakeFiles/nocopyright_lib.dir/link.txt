@@ -1,0 +1,2 @@
+/usr/bin/ar qc libnocopyright_lib.a CMakeFiles/nocopyright_lib.dir/dep/nocopyright/src/nocopyright.c.o
+/usr/bin/ranlib libnocopyright_lib.a

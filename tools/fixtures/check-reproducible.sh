@@ -14,6 +14,11 @@
 #                 so mod_a and mod_b swap places in the File API reply. The
 #                 file is content-addressed, so its name moves with it, and the
 #                 codemodel and index that reference the name move too.
+#                 tools/fixtures/replynorm removes exactly this, and regen.sh
+#                 runs it for p14-foss. It is not run here yet because this
+#                 project is also harvested on a Windows host, and switching it
+#                 over means regenerating the whole corpus rather than one
+#                 project.
 #
 #   p09-lto       The linker map names GCC's temporary LTO objects
 #                 (/tmp/ccXXXXXX.ltrans0.ltrans.o), whose names are drawn per

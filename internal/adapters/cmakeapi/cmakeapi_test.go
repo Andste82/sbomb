@@ -211,9 +211,11 @@ func TestEveryFixtureReplyParses(t *testing.T) {
 		}
 	}
 	// Six toolchains times thirteen projects, less the three p11-conan builds
-	// the non-GCC toolchains cannot produce.
-	if parsed != 77 {
-		t.Errorf("parsed %d fixture replies, want 77", parsed)
+	// the non-GCC toolchains cannot produce, plus the two p14-foss builds:
+	// that fixture runs on the two GCC toolchains only, because an LGPL
+	// archive and a code generator say nothing extra when cross-compiled.
+	if parsed != 79 {
+		t.Errorf("parsed %d fixture replies, want 79", parsed)
 	}
 }
 

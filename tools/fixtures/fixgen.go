@@ -27,19 +27,29 @@ func Toolchains() []string {
 }
 
 func Projects() []string {
-	return []string{"p01-hello", "p02-static", "p03-dupnames", "p04-generated", "p05-headeronly", "p06-unity", "p07-pch", "p08-gcsections", "p09-lto", "p10-fetchcontent", "p11-conan", "p12-assets", "p13-prebuilt"}
+	return []string{"p01-hello", "p02-static", "p03-dupnames", "p04-generated", "p05-headeronly", "p06-unity", "p07-pch", "p08-gcsections", "p09-lto", "p10-fetchcontent", "p11-conan", "p12-assets", "p13-prebuilt", "p14-foss"}
+}
+
+// FossSourceTree is where the harvested source tree of the FOSS fixture lives,
+// relative to the corpus root. It is the one project whose sources are
+// committed, and it is stored once rather than under every toolchain: the
+// bytes do not depend on the compiler.
+const FossSourceTree = "p14-foss-src"
+
+// projectToolchains restricts a project to the toolchains it says something
+// about. It is the Go side of PROJECT_TOOLCHAINS in tools/fixtures/regen.sh,
+// and the two have to agree or the corpus and the tests disagree about what
+// exists.
+var projectToolchains = map[string][]string{
+	"p11-conan": {"gcc-ninja", "gcc-make", "clang-ninja"},
+	"p14-foss":  {"gcc-ninja", "gcc-make"},
 }
 
 func AllPairs() [][2]string {
-	allowedToolchains := map[string]bool{
-		"gcc-ninja":   true,
-		"gcc-make":    true,
-		"clang-ninja": true,
-	}
 	pairs := make([][2]string, 0, len(Toolchains())*len(Projects()))
 	for _, toolchain := range Toolchains() {
 		for _, project := range Projects() {
-			if project == "p11-conan" && !allowedToolchains[toolchain] {
+			if allowed, restricted := projectToolchains[project]; restricted && !containsString(allowed, toolchain) {
 				continue
 			}
 			if (toolchain == "msvc-nmake" || toolchain == "msvc-vs17") && project != "p02-static" {
@@ -49,6 +59,15 @@ func AllPairs() [][2]string {
 		}
 	}
 	return pairs
+}
+
+func containsString(values []string, want string) bool {
+	for _, value := range values {
+		if value == want {
+			return true
+		}
+	}
+	return false
 }
 
 func FixtureDir(toolchain, project string) string {

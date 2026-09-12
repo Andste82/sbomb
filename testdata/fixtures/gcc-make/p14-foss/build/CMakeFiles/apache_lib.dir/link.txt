@@ -1,0 +1,2 @@
+/usr/bin/ar qc libapache_lib.a "CMakeFiles/apache_lib.dir/dep/apache-lib/src/apache_one.c.o" "CMakeFiles/apache_lib.dir/dep/apache-lib/src/apache_two.c.o"
+/usr/bin/ranlib libapache_lib.a

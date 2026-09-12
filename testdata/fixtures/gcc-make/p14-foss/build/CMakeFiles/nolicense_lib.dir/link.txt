@@ -1,0 +1,2 @@
+/usr/bin/ar qc libnolicense_lib.a CMakeFiles/nolicense_lib.dir/dep/nolicense/src/nolicense.c.o
+/usr/bin/ranlib libnolicense_lib.a

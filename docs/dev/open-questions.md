@@ -80,3 +80,64 @@ What this does not settle is trust: a fixture built by a workflow and committed
 by hand is evidence nobody watched being produced. The `PROVENANCE.md` rule of
 milestone 0 is what carries that weight, and it may need the workflow run URL
 added to it.
+
+## Q7, Q8 — reserved
+
+The FOSS attribution plan (`docs/dev/foss/decisions.md`, on its own branch)
+already refers to two entries by number that the milestones adding them have
+not reached: Q7, two versions of one package in a single assembly (milestone
+F7), and Q8, relocating package-manager caches rather than only the source
+root (milestone F2). The numbers are held so those references keep pointing at
+what they were written for.
+
+## Q9 — How does a fixture carry a git repository?
+
+`tools/fixtures/regen.sh` turns every `dep/*/` of a fixture into a git
+repository with a fixed identity, date and tag, and leaves one of `p14-foss`'s
+dependencies dirty after the commit. That is what section 19.4's modification
+status is read from, and the harvested source tree does not carry it: the
+harvest skips `.git`, because git tracks a nested repository as a gitlink and
+not as files, so committing one would need it renamed and the tool taught to
+look for the new name.
+
+What that costs is narrow and real: a run over the committed corpus can see
+that `dep/lgpl-lib` differs from the tree that produced the tag only if it can
+ask git, and it cannot. The modification status of every fixture component is
+therefore `unknown` there, which is the honest answer and not the interesting
+one.
+
+Three routes exist and none is obviously right. Harvest `.git` under another
+name and give sbomb a way to be pointed at it -- that is a production feature
+invented for a test. Record the expected answer in the fixture's manifest and
+assert against that -- which tests the assertion rather than the tool. Or build
+the repository in a temporary directory at test time from the committed tree,
+which is honest but makes the test non-hermetic and toolchain-dependent, the
+same trade Q1 records for built artifacts.
+
+Two things were measured while F1 was written, so that whoever settles this
+starts from facts rather than from the first route that looks plausible.
+
+Renaming is not optional in any route that commits the repository. Git will not
+put a path with a `.git` component into the index at all -- not only a nested
+repository as a gitlink: `git add -f p14-foss-src/dep/mit-lib/.git/HEAD`
+succeeds and adds nothing. Something therefore has to put the name back before
+a repository exists on disk, which is a materialization step in the test and
+not a property of the corpus.
+
+A harvested repository is not reproducible as it stands. `.git/index` stores
+each entry's `ctime`, `mtime`, `dev` and `ino`, which are drawn fresh on every
+regeneration, so committing the directory as `git add` left it would put the
+churn that `tools/fixtures/replynorm` was written to remove straight back.
+Deleting the index is not a way out: git then reports every tracked file as
+both deleted and untracked, which is a wrong answer rather than `unknown`.
+Rebuilding it with `git read-tree HEAD` writes zeroed stat fields and is
+reproducible, and git falls back to comparing content when the stat cache does
+not match, so the answers stay right.
+
+What the corpus does carry is the dirty content: the bytes harvested from
+`dep/lgpl-lib/src/lgpl_extra.c` are the bytes that were compiled, comment and
+all, and they differ from `tools/fixtures/projects/p14-foss/`. Whatever route
+F6 takes, the tree it needs is already committed.
+
+Milestone F6 is where it has to be settled, because that is where modification
+status is derived.

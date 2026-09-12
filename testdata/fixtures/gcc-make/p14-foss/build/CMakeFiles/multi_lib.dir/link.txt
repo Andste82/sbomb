@@ -1,0 +1,2 @@
+/usr/bin/ar qc libmulti_lib.a "CMakeFiles/multi_lib.dir/dep/multi-license/src/multi.c.o"
+/usr/bin/ranlib libmulti_lib.a

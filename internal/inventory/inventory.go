@@ -3,6 +3,7 @@ package inventory
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -247,9 +248,31 @@ func BuildInventoryDump(files []domain.UsedFile, components []domain.Component) 
 	for _, c := range components {
 		componentEntries = append(componentEntries, InventoryComponent{ID: c.ID, BomRef: c.BomRef, Name: c.Name})
 	}
-	sort.Slice(componentEntries, func(i, j int) bool { return componentEntries[i].ID < componentEntries[j].ID })
+	// Section 40 orders components by bom-ref. A bom-ref is the writer's to
+	// derive (section 36.1), so a component handed here straight out of
+	// discovery carries none, and the id is what is left to order by. Both
+	// keys are compared, in that order, so the document says the same thing
+	// whether or not a writer has been through it.
+	sort.Slice(componentEntries, func(i, j int) bool {
+		if componentEntries[i].BomRef != componentEntries[j].BomRef {
+			return componentEntries[i].BomRef < componentEntries[j].BomRef
+		}
+		return componentEntries[i].ID < componentEntries[j].ID
+	})
 
 	return InventoryDump{SchemaVersion: 1, Files: ordered, Components: componentEntries}
+}
+
+// WriteDump serializes the inventory dump of section 40 to path. The format is
+// the tool's own and is independent of the CycloneDX writer on purpose: it is
+// what inventory correctness is asserted against, so it must not move when a
+// serialization does.
+func WriteDump(path string, files []domain.UsedFile, components []domain.Component) error {
+	encoded, err := json.MarshalIndent(BuildInventoryDump(files, components), "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(path, append(encoded, '\n'), 0o600)
 }
 
 // DetectStaleness checks for timestamp violations where a source or header is newer than the artifact.

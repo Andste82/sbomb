@@ -1,0 +1,2 @@
+/usr/bin/ar qc libmit_lib.a "CMakeFiles/mit_lib.dir/dep/mit-lib/src/mit_a.c.o" "CMakeFiles/mit_lib.dir/dep/mit-lib/src/mit_b.c.o" "CMakeFiles/mit_lib.dir/dep/mit-lib/src/mit_c.c.o"
+/usr/bin/ranlib libmit_lib.a

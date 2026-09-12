@@ -305,13 +305,27 @@ linker stamps a link time into every `.exe`, so the mingw toolchain file passes
 `--no-insert-timestamp`. GCC draws a random seed per invocation and embeds it
 in LTO sections, so `p09-lto` pins `-frandom-seed`.
 
-Three projects remain, and in each the toolchain is what is not reproducible:
+One more was ours after all. CMake writes a target's dependency list in the
+iteration order of a `std::set` whose comparator ends in a comparison of target
+pointers, so the array comes out in allocation order and every File API
+document named for its own digest moves with it. This was recorded below as a
+toolchain defect on the grounds that sorting the array at harvest time would be
+post-hoc rewriting of the evidence and would break the content-addressed name.
+Both halves of that turned out to be answerable. A set has no order, so sorting
+the array discards nothing that was in the evidence, and nothing sbomb writes
+depends on the order it arrived in -- the CycloneDX writer sorts every
+dependency list it emits, and no golden moved. A document can then be renamed
+to the digest of what was written, which leaves a reply the File API could
+itself have produced. `tools/fixtures/replynorm` does exactly that, and
+verifies its own SHA-3 against the corpus before it changes anything.
 
-* **p03-dupnames.** CMake writes a target's dependency list in an unstable
-  order, so `mod_a` and `mod_b` swap places in the File API reply. The reply is
-  content-addressed, so its filename moves with its content, and the codemodel
-  and index that name it move too. Sorting the array at harvest time would be
-  post-hoc rewriting of the evidence and would break the content-addressed name.
+Three projects stay listed:
+
+* **p03-dupnames.** CMake orders `mod_a` and `mod_b` by target pointer in the
+  File API reply, as above. `tools/fixtures/replynorm` removes it, and
+  `regen.sh` runs the normalizer for `p14-foss`. This project is also harvested
+  on a Windows host, so switching it over means regenerating the whole corpus
+  rather than one project, and it stays listed until somebody does.
 * **p09-lto.** The linker map names GCC's temporary LTO objects,
   `/tmp/ccXXXXXX.ltrans0.ltrans.o`, drawn per invocation. That is what the
   fixture is for: section 17.3 downgrades attribution under LTO precisely
@@ -525,9 +539,10 @@ size of the real one is not a reference anybody can use.
 Seven were built, because each mirrors a setting the configuration file already
 had and a one-off run against somebody else's build tree should not require
 writing a file first: `--source-dir`, `--mode`, `--config-name`, `--map`,
-`--link-depfile`, `--image-manifest`, `--evidence-dump`.
+`--link-depfile`, `--image-manifest`, `--evidence-dump`. `--inventory-dump`
+joined them once the corpus carried a fixture whose inventory is worth pinning.
 
-Seven stay specified and absent, each waiting on the feature it belongs to
+The rest stay specified and absent, each waiting on the feature it belongs to
 rather than on effort. They are named in section 32 beneath the table.
 
 Nine are removed:

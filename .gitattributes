@@ -5,6 +5,13 @@
 testdata/fixtures/** -text
 testdata/golden/** -text
 
+# The FOSS fixture's sources are committed twice over: once as the project the
+# harness builds and once as the harvested tree above. Their retained bytes are
+# hashed and compared across three platforms in determinism.yaml, so a CRLF
+# conversion on a Windows checkout would look like a tool defect rather than
+# like git editing its input.
+tools/fixtures/projects/** -text
+
 # Shell scripts must keep LF wherever they are checked out; CRLF makes them
 # unrunnable under bash.
 *.sh text eol=lf

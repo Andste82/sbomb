@@ -2,7 +2,9 @@
 # Regenerate the golden fixture corpus from real toolchain output.
 #
 # Every fixture is produced by actually configuring and building a small CMake
-# project and then harvesting only the build evidence -- never the sources.
+# project and then harvesting the build evidence. Sources are harvested for
+# exactly one project, p14-foss, whose licence and notice files are what the
+# attribution export reads; testdata/fixtures/POLICY.md records the exception.
 # Builds run under the sentinel roots /__fixture_src__ and /__fixture_build__
 # so that compile_commands.json, the CMake File API reply, .ninja_deps, the
 # linker map, the link depfile and the DWARF inside the artifact all record
@@ -53,14 +55,26 @@ if [[ "${1:-}" == "--only" ]]; then
   shift 2
 fi
 
-PROJECTS=(p01-hello p02-static p03-dupnames p04-generated p05-headeronly p06-unity p07-pch p08-gcsections p09-lto p10-fetchcontent p11-conan p12-assets p13-prebuilt)
+PROJECTS=(p01-hello p02-static p03-dupnames p04-generated p05-headeronly p06-unity p07-pch p08-gcsections p09-lto p10-fetchcontent p11-conan p12-assets p13-prebuilt p14-foss)
 
 # Some projects only make sense for some toolchains. A Conan package is built
 # for one target, so linking it into an ARM or Windows binary is not a fixture
 # failure but a category error; the corpus records what a real build produces.
+#
+# p14-foss is restricted for a second reason: it is the only project whose
+# source tree is committed, and an LGPL archive plus a code generator says
+# nothing extra when cross-compiled to bare metal.
 declare -A PROJECT_TOOLCHAINS=(
   [p11-conan]="gcc-ninja gcc-make clang-ninja"
+  [p14-foss]="gcc-ninja gcc-make"
 )
+
+# The one project whose sources are committed, and where they land. The
+# attribution export reads licence texts, NOTICE files and copyright headers
+# out of the source tree, so a corpus of build evidence alone cannot exercise
+# any of it. testdata/fixtures/POLICY.md records the exception.
+FOSS_PROJECT=p14-foss
+FOSS_SRC_DIR="$corpus_dir/$FOSS_PROJECT-src"
 
 # name|generator|toolchain file (empty for native)
 TOOLCHAINS=(
@@ -119,6 +133,15 @@ if [[ "${1:-}" == "--check" ]]; then
       fi
     done
   done
+  # The harvested source tree is a corpus-level artifact rather than a
+  # per-toolchain one, and it is the only thing the attribution export can be
+  # tested against. A licence file is what it is required to carry, so that is
+  # what is checked: a tree harvested without one is worse than none, because
+  # it looks complete.
+  if [[ ! -e "$FOSS_SRC_DIR/dep/mit-lib/LICENSE" ]]; then
+    log "missing $FOSS_PROJECT-src/dep/mit-lib/LICENSE"
+    missing=1
+  fi
   [[ $missing -eq 0 ]] || die "fixture corpus is incomplete; run tools/fixtures/regen.sh"
   log "fixture corpus is complete"
   exit 0
@@ -137,8 +160,10 @@ fi
 # Built once rather than "go run" per fixture: the deps log normalizer runs for
 # every Ninja fixture, and there are dozens.
 depsnorm=$(mktemp -t depsnorm.XXXXXX)
-trap 'rm -f "$depsnorm"' EXIT
+replynorm=$(mktemp -t replynorm.XXXXXX)
+trap 'rm -f "$depsnorm" "$replynorm"' EXIT
 (cd "$repo_root" && go build -o "$depsnorm" ./tools/fixtures/depsnorm)
+(cd "$repo_root" && go build -o "$replynorm" ./tools/fixtures/replynorm)
 
 if ! mkdir -p "$SRC_ROOT" "$BUILD_ROOT" 2>/dev/null; then
   die "cannot create sentinel roots $SRC_ROOT and $BUILD_ROOT.
@@ -170,6 +195,62 @@ harvest_glob() {
     [[ -e "$match" ]] || continue
     harvest "$match" "$out_dir/${match#"$BUILD_ROOT"/}"
   done
+}
+
+# --------------------------------------------------------------------------
+# The FOSS fixture's source tree, harvested once rather than per toolchain.
+# The bytes do not depend on the compiler, so a copy under every toolchain
+# directory would be waste that grows with every toolchain added; the tree
+# therefore lives beside them.
+#
+# .git is left behind: git refuses to track a nested repository as anything
+# but a gitlink, and nothing in this track reads it. What that costs is
+# recorded in docs/dev/open-questions.md.
+# --------------------------------------------------------------------------
+harvest_source_tree() {
+  rm -rf "$FOSS_SRC_DIR"
+  local found
+  while IFS= read -r found; do
+    harvest "$found" "$FOSS_SRC_DIR/${found#"$SRC_ROOT"/}"
+  done < <(find "$SRC_ROOT" -type f ! -path '*/.git/*' | sort)
+
+  cat > "$FOSS_SRC_DIR/PROVENANCE.md" <<PROVENANCE
+# Provenance
+
+Source: tools/fixtures/projects/$FOSS_PROJECT, harvested from \$SRC_ROOT by
+tools/fixtures/regen.sh. Harvested once, not per toolchain: the bytes do not
+depend on the compiler.
+License: MIT (the repository licence; the fixture sources are part of it)
+Date: $FIXTURE_DATE
+
+## The licence texts under dep/
+
+Original fixture material, not third-party payload. Every dependency here was
+written for this corpus, and the licence text beside it is the text of the
+licence it declares, with a holder invented for the fixture:
+
+| Component | Text | Holder |
+|---|---|---|
+| dep/mit-lib | MIT | Fixture MIT Library Authors |
+| dep/apache-lib | Apache-2.0, with a NOTICE | Fixture Apache Library Authors |
+| dep/bsd-hdr | BSD-3-Clause | Fixture BSD Header Authors |
+| dep/lgpl-lib | LGPL-2.1 | Fixture LGPL Library Authors |
+| dep/gpl-gen | GPL-2.0 | Fixture GPL Generator Authors |
+| dep/multi-license | MIT and Apache-2.0, side by side | Fixture Dual Licensed Authors |
+| dep/nolicense | none | -- |
+| dep/nocopyright | 0BSD, with no copyright line | -- |
+
+The licence texts themselves are the published ones from the SPDX license list
+(https://spdx.org/licenses/); the long ones were rendered from the standard
+license templates this repository already embeds in
+internal/license/spdxtemplates.gz. That is what a real dependency ships. They
+are data the tool is meant to recognize, and no code in this repository is
+licensed by them.
+PROVENANCE
+
+  local file_count
+  file_count=$(find "$FOSS_SRC_DIR" -type f | wc -l)
+  log "  $FOSS_PROJECT-src: $file_count files"
 }
 
 toolchain_version() {
@@ -257,6 +338,15 @@ generate_one() {
     git -C "$dep" tag -f v1.2.0 >/dev/null
   done
 
+  # One dependency is left dirty after its commit, so that the corpus carries
+  # the case section 19.4 calls modified=true: the tree that was compiled is
+  # not the tree the tag names. The edit is a comment, so the object code is
+  # unchanged and the difference is visible only to a tool that looks.
+  if [[ -f "$SRC_ROOT/dep/lgpl-lib/src/lgpl_extra.c" ]]; then
+    printf '\n/* Downstream fix applied on top of v1.2.0, not upstream. */\n' \
+      >> "$SRC_ROOT/dep/lgpl-lib/src/lgpl_extra.c"
+  fi
+
   mkdir -p "$BUILD_ROOT/.cmake/api/v1/query/client-sbomb"
   cat > "$BUILD_ROOT/.cmake/api/v1/query/client-sbomb/query.json" <<'QUERY'
 {"requests":[{"kind":"codemodel","version":2},{"kind":"cache","version":2},{"kind":"cmakeFiles","version":1},{"kind":"toolchains","version":1}]}
@@ -318,6 +408,23 @@ QUERY
     fi
     harvest "$reply" "$build_out/.cmake/api/v1/reply/$reply_name"
   done
+
+  # CMake serializes a target's dependency set in the iteration order of a
+  # std::set whose comparator ends in a pointer comparison, so the array comes
+  # out in whatever order the targets were allocated in and every document
+  # named for its digest moves with it. replynorm sorts the array and renames
+  # the documents to the digest of what it wrote, which is the difference
+  # between a corpus that churns on every regeneration and one that does not.
+  #
+  # Applied to the FOSS fixture only. Every other project in the corpus was
+  # harvested before this normalizer existed, and parts of it can only be
+  # rebuilt on a Windows host, so normalizing the rest means regenerating the
+  # whole corpus rather than the project this milestone adds. p03-dupnames has
+  # the same defect and is still waived in check-reproducible.sh for that
+  # reason.
+  if [[ "$project" == "$FOSS_PROJECT" ]]; then
+    "$replynorm" "$build_out/.cmake/api/v1/reply"
+  fi
 
   # Generator-specific evidence.
   if [[ "$toolchain" == msvc-* ]]; then
@@ -407,6 +514,13 @@ QUERY
   while IFS= read -r found; do
     harvest "$found" "$build_out/${found#"$BUILD_ROOT"/}"
   done < <(find "$BUILD_ROOT" -maxdepth 1 -type f -executable ! -name '*.sh' | sort)
+
+  # The FOSS fixture is the one project whose sources are committed. The
+  # harvest runs from whichever toolchain built it -- the bytes are the same
+  # either way -- so that --only gcc-make/p14-foss refreshes the tree too.
+  if [[ "$project" == "$FOSS_PROJECT" ]]; then
+    harvest_source_tree
+  fi
 
   local version
   version=$(toolchain_version "$toolchain")

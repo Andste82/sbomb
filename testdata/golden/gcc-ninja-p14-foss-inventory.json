@@ -1,0 +1,253 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "canonical": "build:generated/table.c",
+      "class": "source",
+      "hashes": {
+        "SHA-256": "e1f86d9804ada8505f7a07c96b8bc3dc0c5e736b4227402ecf1d88087d7fae0b"
+      },
+      "sizeBytes": 113,
+      "properties": {
+        "sbomb:component:scope": [
+          "build"
+        ]
+      }
+    },
+    {
+      "canonical": "project:dep/apache-lib/include/apache_lib.h",
+      "class": "header",
+      "missing": true,
+      "properties": {
+        "finding": [
+          "MISSING_FILE_HASH"
+        ],
+        "sbomb:component:scope": [
+          "project"
+        ],
+        "sbomb:evidence:header:class": [
+          "project-header"
+        ]
+      }
+    },
+    {
+      "canonical": "project:dep/apache-lib/src/apache_one.c",
+      "class": "source",
+      "missing": true,
+      "properties": {
+        "finding": [
+          "MISSING_FILE_HASH"
+        ],
+        "sbomb:component:scope": [
+          "project"
+        ]
+      }
+    },
+    {
+      "canonical": "project:dep/apache-lib/src/apache_two.c",
+      "class": "source",
+      "missing": true,
+      "properties": {
+        "finding": [
+          "MISSING_FILE_HASH"
+        ],
+        "sbomb:component:scope": [
+          "project"
+        ]
+      }
+    },
+    {
+      "canonical": "project:dep/bsd-hdr/include/bsd_hdr.h",
+      "class": "header",
+      "missing": true,
+      "properties": {
+        "finding": [
+          "MISSING_FILE_HASH"
+        ],
+        "sbomb:component:scope": [
+          "project"
+        ],
+        "sbomb:evidence:header:class": [
+          "project-header"
+        ]
+      }
+    },
+    {
+      "canonical": "project:dep/lgpl-lib/include/lgpl_lib.h",
+      "class": "header",
+      "missing": true,
+      "properties": {
+        "finding": [
+          "MISSING_FILE_HASH"
+        ],
+        "sbomb:component:scope": [
+          "project"
+        ],
+        "sbomb:evidence:header:class": [
+          "project-header"
+        ]
+      }
+    },
+    {
+      "canonical": "project:dep/lgpl-lib/src/lgpl_core.c",
+      "class": "source",
+      "missing": true,
+      "properties": {
+        "finding": [
+          "MISSING_FILE_HASH"
+        ],
+        "sbomb:component:scope": [
+          "project"
+        ]
+      }
+    },
+    {
+      "canonical": "project:dep/lgpl-lib/src/lgpl_extra.c",
+      "class": "source",
+      "missing": true,
+      "properties": {
+        "finding": [
+          "MISSING_FILE_HASH"
+        ],
+        "sbomb:component:scope": [
+          "project"
+        ]
+      }
+    },
+    {
+      "canonical": "project:dep/mit-lib/include/mit_lib.h",
+      "class": "header",
+      "missing": true,
+      "properties": {
+        "finding": [
+          "MISSING_FILE_HASH"
+        ],
+        "sbomb:component:scope": [
+          "project"
+        ],
+        "sbomb:evidence:header:class": [
+          "project-header"
+        ]
+      }
+    },
+    {
+      "canonical": "project:dep/mit-lib/src/mit_a.c",
+      "class": "source",
+      "missing": true,
+      "properties": {
+        "finding": [
+          "MISSING_FILE_HASH"
+        ],
+        "sbomb:component:scope": [
+          "project"
+        ]
+      }
+    },
+    {
+      "canonical": "project:dep/multi-license/include/multi.h",
+      "class": "header",
+      "missing": true,
+      "properties": {
+        "finding": [
+          "MISSING_FILE_HASH"
+        ],
+        "sbomb:component:scope": [
+          "project"
+        ],
+        "sbomb:evidence:header:class": [
+          "project-header"
+        ]
+      }
+    },
+    {
+      "canonical": "project:dep/multi-license/src/multi.c",
+      "class": "source",
+      "missing": true,
+      "properties": {
+        "finding": [
+          "MISSING_FILE_HASH"
+        ],
+        "sbomb:component:scope": [
+          "project"
+        ]
+      }
+    },
+    {
+      "canonical": "project:dep/nocopyright/include/nocopyright.h",
+      "class": "header",
+      "missing": true,
+      "properties": {
+        "finding": [
+          "MISSING_FILE_HASH"
+        ],
+        "sbomb:component:scope": [
+          "project"
+        ],
+        "sbomb:evidence:header:class": [
+          "project-header"
+        ]
+      }
+    },
+    {
+      "canonical": "project:dep/nocopyright/src/nocopyright.c",
+      "class": "source",
+      "missing": true,
+      "properties": {
+        "finding": [
+          "MISSING_FILE_HASH"
+        ],
+        "sbomb:component:scope": [
+          "project"
+        ]
+      }
+    },
+    {
+      "canonical": "project:dep/nolicense/include/nolicense.h",
+      "class": "header",
+      "missing": true,
+      "properties": {
+        "finding": [
+          "MISSING_FILE_HASH"
+        ],
+        "sbomb:component:scope": [
+          "project"
+        ],
+        "sbomb:evidence:header:class": [
+          "project-header"
+        ]
+      }
+    },
+    {
+      "canonical": "project:dep/nolicense/src/nolicense.c",
+      "class": "source",
+      "missing": true,
+      "properties": {
+        "finding": [
+          "MISSING_FILE_HASH"
+        ],
+        "sbomb:component:scope": [
+          "project"
+        ]
+      }
+    },
+    {
+      "canonical": "project:src/main.c",
+      "class": "source",
+      "missing": true,
+      "properties": {
+        "finding": [
+          "MISSING_FILE_HASH"
+        ],
+        "sbomb:component:scope": [
+          "project"
+        ]
+      }
+    }
+  ],
+  "components": [
+    {
+      "id": "component:project",
+      "name": "project"
+    }
+  ]
+}

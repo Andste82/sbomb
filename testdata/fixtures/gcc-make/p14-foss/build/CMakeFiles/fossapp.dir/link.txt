@@ -1,0 +1,1 @@
+/usr/bin/cc -g -Wl,-Map=/__fixture_build__/fossapp.map -Wl,--dependency-file=/__fixture_build__/fossapp.d CMakeFiles/fossapp.dir/src/main.c.o CMakeFiles/fossapp.dir/generated/table.c.o -o fossapp  libmit_lib.a libapache_lib.a liblgpl_lib.a libmulti_lib.a libnolicense_lib.a libnocopyright_lib.a 
