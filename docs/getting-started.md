@@ -348,6 +348,44 @@ sbomb explain --build-dir build --file project:src/main.c
 which prints the chain of evidence back to the artifact — and prints nothing at
 all when there is no chain, which is the answer to "why is my file missing?".
 
+## The licence notices
+
+The same run can write the attribution material out, as further outputs beside
+the SBOM:
+
+```bash
+sbomb generate --build-dir build --output build/app.cdx.json \
+  --foss-out build/foss
+```
+
+or, when no SBOM is wanted on disk:
+
+```bash
+sbomb foss --build-dir build --out build/foss
+```
+
+Four files, one of which ships with the product:
+
+```
+build/foss/THIRD-PARTY-NOTICES.txt    the shippable attribution document
+build/foss/foss-review.txt            the internal record, human-readable
+build/foss/foss-review.json           the same facts, machine-readable
+build/foss/source-obligations.txt     which components owe source material
+```
+
+The notices document contains only what the product actually contains, which
+is the whole reason to derive it from build evidence: a code generator that ran
+under GPL-2.0 is not a shipped GPL component, and it is not in there. Nothing
+here fails a build -- `sbomb foss` evaluates no policy gate at all.
+
+Both commands need to read the source tree, because a licence text cannot be
+read out of build evidence. Where the build happened somewhere else, point
+`--source-dir` at the tree; [configuration.md](configuration.md#reading-a-build-that-was-made-somewhere-else)
+has the detail.
+
+[docs/foss.md](foss.md) is the whole story, including what sbomb refuses to
+decide.
+
 ## Findings are the point, not the noise
 
 A first run on a real project produces findings. That is the tool working: it
@@ -395,6 +433,9 @@ Use the composite action, or call the binary. Either way, build first:
     policy: cra
     output: build/app.cdx.json
 ```
+
+Add `foss: true` to get the attribution outputs uploaded as a build artifact
+beside the document. It never gates the build.
 
 [docs/ci.md](ci.md) has the details, including what to do about a private
 repository.

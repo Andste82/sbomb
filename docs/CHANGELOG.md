@@ -2,6 +2,67 @@
 
 ## 0.17.0
 
+### The attribution outputs are documented, and CI keeps them from drifting
+
+[docs/foss.md](foss.md) is new and is the whole story of the four files:
+which one ships with the product and which three do not, who is in the notices
+document and who is deliberately not, and -- as a table of its own -- the nine
+things sbomb does **not** do. Licence compatibility verdicts, source bundles,
+obligation fulfilment tracking, per-licence exemptions for binary
+distribution, indicating whether a single embedded asset was changed, OFL
+reserved font names, similarity matching, a licence database and VEX mapping
+are each left out for a stated reason rather than for lack of time. A reader
+who wants one of them can see why they will not find it, which is the only
+honest way to ship a compliance-adjacent tool.
+
+The sentence that draws the line is in the document and in two of the four
+outputs: **sbomb produces data; the manufacturer performs the assessment.**
+The CRA asks which components are in the artifact so that vulnerabilities can
+be handled and says nothing about licence obligations; FOSS obligations come
+from the licences and applied long before the CRA existed. They share one data
+model because they need the same facts, and nothing more than that.
+
+`sbomb foss` is now in [getting-started.md](getting-started.md), and
+`licenseTextInSBOM` appears in a configuration example rather than only in
+prose, so `tools/docexamples` -- which now reads `docs/foss.md` too -- would
+fail CI on a documented setting the loader rejects.
+
+`explain` gains no attribution mode. "Is this library really in our product?"
+is answered by `foss-review.txt`, which states the distribution role and the
+linkage form per component, and *why* is answered by `sbomb explain --file
+<id>` for any of the component's files; a third answer would mean writing the
+attribution attributes into `evidence.json`, which other tools read. The
+documentation points at both instead.
+
+Writing that sentence turned up a defect, and it is recorded rather than
+fixed. §32.3 specifies `sbomb explain --component <name>`, and the flag exists,
+but it is only another spelling of the subject argument: the evidence dump
+carries file, object, archive and artifact nodes and no component nodes at all,
+so every component name answers "no evidence chain". Making it work means
+putting components into `evidence.json` — the change decision Q20 declined for
+the attribution attributes, for the same reason. Open question Q19 states the
+options; the documentation names `--file`, which works.
+
+**In CI.** The composite action takes `foss: true` and uploads the output
+directory as `sbomb-foss-<os>-<arch>`. Both of its steps carry
+`continue-on-error`: `sbomb foss` evaluates no policy gate and no exit code of
+it depends on licence content, so a crash in the notices renderer must not turn
+a build that produced a valid SBOM red. A new `foss-outputs` job compares the
+fixture's four files against their goldens -- the notices format is house style
+with no schema, so nothing else would notice a drift -- and runs the attribution
+command the action runs, under the `strict` profile whose gates would fail this
+fixture in `generate`, asserting four files, exit 0, and that nothing
+resembling corresponding source was written.
+
+**Two fixes users will notice**, both further up this release and worth
+naming as fixes because licences will appear that did not resolve before: a
+source tree that moved can now be read at all (below, *A source tree that moved
+can be read*), and a library that carries `LICENSE-MIT` and `LICENSE-APACHE`
+instead of a plain `LICENSE` is now a component with its own licence rather
+than sources dissolved into the enclosing project (*A library is recognized by
+the licence file it really carries*). Both changed what a document says about
+licences, in the direction of saying something true.
+
 ### One discovery, two renderings: `--foss-out` and `sbomb foss`
 
 The attribution material F3 to F6 collected is now written out. Four files, one

@@ -26,6 +26,8 @@ here is a version that goes stale the next time one is cut.
 | `config` | — | Configuration file |
 | `policy` | `default` | Policy profile |
 | `output` | `sbomb.cdx.json` | Where the document goes |
+| `foss` | `false` | Also write the four attribution outputs of [foss.md](foss.md) and upload the directory |
+| `foss-out` | `sbomb-foss` | Where those four files go |
 | `reproducible` | `false` | Omit the timestamp |
 | `path-flavor` | the host's | Pin to `posix` when comparing across platforms |
 | `token` | `${{ github.token }}` | Needed while the repository is private; pass `""` to download anonymously |
@@ -40,6 +42,22 @@ without credentials, and an unauthenticated request answers 404 rather than
 defaulting to `${{ github.token }}`, and downloads with `gh` when it has one.
 Pass `token: ""` to download anonymously, which is what a consumer of a public
 release wants.
+
+`foss: true` adds two steps: `sbomb foss`, and an upload of the output
+directory as the build artifact `sbomb-foss-<os>-<arch>`. Both carry
+`continue-on-error`, because attribution is informational -- `sbomb foss`
+evaluates no policy gate and no exit code of it depends on licence content, and
+a crash in the notices renderer must not turn a build that produced a valid
+SBOM red. It reads the same `config` and `policy` as the document.
+
+```yaml
+- uses: Andste82/sbomb/.github/actions/sbomb@<sbomb-version>
+  with:
+    version: <sbomb-version>
+    build-dir: build
+    policy: cra
+    foss: true
+```
 
 `path-flavor` is empty by default, which means the host's. Pin it to `posix`
 when a document produced on a Windows runner has to be byte-identical to one
@@ -56,6 +74,7 @@ than which command it runs.
 | `ci` | push, pull request | `gate` | Builds with and without network, vets, tests and formats; proves ordinary source changes remain buildable and clean. |
 | | | `race` | Runs with cgo and the race detector; checks concurrent evidence collection for data races. |
 | | | `corpus` | Checks complete, portable fixtures and verifies tests leave them unchanged; protects committed golden inputs. |
+| | | `foss-outputs` | Compares the fixture's four attribution outputs against their goldens and runs the action's attribution command; the notices format has no schema, so nothing else would notice a drift. |
 | | | `msvc-corpus` | Regenerates MSVC/Ninja fixtures on Windows and parses them; proves native evidence coverage still works. |
 | | | `performance-budget` | Measures the 10,000-translation-unit case against its time and memory limits; catches scalability regressions. |
 | | | `documentation` | Checks generated catalogues and loads documented configs; prevents docs from describing unsupported behavior. |

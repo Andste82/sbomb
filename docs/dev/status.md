@@ -291,9 +291,36 @@
   patch is ever written into the output directory -- is enforced in the one
   function that creates a file there and checked by a test and by
   `scripts/determinism-check.sh`.
+- **The attribution export is documented and guarded.** `docs/foss.md` states
+  what the four outputs are, which one ships, who is in the notices document,
+  the CRA/FOSS separation, and -- as a table of its own -- the nine things
+  sbomb does not do and why each is left out. `docs/getting-started.md` carries
+  the `foss` command and `docs/configuration.md` carries `licenseTextInSBOM` in
+  an example rather than only in prose, so `tools/docexamples` -- which now
+  reads `docs/foss.md` as well -- fails CI on a documented setting the loader
+  would reject. `explain` is not extended (decision Q20): both answers already
+  exist, and a third would change the format of `evidence.json`. The composite
+  action takes `foss: true`, writes the outputs and uploads them as
+  `sbomb-foss-<os>-<arch>`; both of its steps carry `continue-on-error`,
+  because attribution gates nothing. The `foss-outputs` CI job compares the
+  fixture's four files against their goldens and runs the action's own command
+  under the `strict` profile -- whose gates would fail this fixture in
+  `generate` -- asserting four files, exit 0 and no source material in the
+  output directory. The notices format is house style with no schema, so
+  nothing but that golden would notice a drift.
 
 ## Known Gaps
 
+- **`explain --component` answers nothing.** Section 32.3 specifies it and the
+  flag exists, but `--file`, `--component` and `--bom-ref` all set one subject
+  string that is looked up as a node id in the evidence dump, and the dump
+  carries no component nodes: component mapping happens above the graph and
+  nothing writes its result back. Every component name therefore answers `no
+  evidence chain`. It surfaced while writing `docs/foss.md`, whose "why is this
+  in here?" section names `--file` instead, and it puts decision Q20's premise
+  in question. Fixing it costs what that decision refused to spend -- a change
+  to the dump format, a second discovery, or one subcommand reading two files
+  -- so it is recorded as open question Q19 rather than guessed at.
 - **Five specified flags are absent**, each waiting on the feature it belongs
   to rather than on effort: `--license-scan`, `--output-dir`,
   `--adapter`, `--allow-cmake-regenerate`, `--include-runtime-libraries`.
@@ -366,14 +393,31 @@ outputs contain the paths.
 
 The FOSS attribution export is planned in a branch of its own
 (`docs/dev/foss/`), eight milestones from the fixture to the rendered notices
-document. F1 to F7 have landed: the fixture, the source harvest, the inventory
+document. All eight have landed: the fixture, the source harvest, the inventory
 dump, the source-tree relocation that lets the fixture be read at all, the
 component root as a resolved fact, the retention of the licence and notice
 bytes those roots carry, the copyright statements of section 22.10, the
 distribution role, linkage form and modification status of sections 24.5 and
-19.4, and the four documents of section 32.6 that render all of it. What is not
-built is F8: `docs/foss.md`, the `foss: true` Action input, and the CI job that
-keeps the notices format from drifting.
+19.4, the four documents of section 32.6 that render all of it, and the
+documentation, Action input and CI job that keep them usable and from drifting.
+Stage 2 -- a customer-owned obligation matrix with an adoption gate, a `foss`
+policy profile with gates, and a licence gate in `sbomb diff` -- is outlook and
+is deliberately not started: it answers *what must therefore be done*, and that
+question is only worth asking once Stage 1 has been used on real projects and
+has demonstrably fallen short.
+
+One F8 test could not be written as stated. "An Action run on the fixture
+uploads four files and exits 0" cannot be run from this repository: a composite
+action needs a runner, and the step under test downloads a release that will
+not carry `sbomb foss` until one is cut. The property is split instead --
+`TestTheActionsAttributionStepProducesFourFilesOnAnIncompleteFixture` runs the
+command the step runs and asserts the four files, exit 0 and that the fixture
+really is incomplete, and `TestTheActionCannotGateTheBuildOnAttribution` reads
+`action.yaml` and asserts the wiring: the input, the condition, the upload, and
+`continue-on-error` on both steps. The CI job runs the first half again outside
+the test binary. Neither half is a mock of the other, and the seam between them
+-- that the shell in `action.yaml` assembles the same arguments the test does
+-- is the part nothing checks.
 
 Now that the distribution role is a resolved fact, `FOSS_LICENSE_TEXT_MISSING`
 and `FOSS_COPYRIGHT_MISSING` are asked only of a distributed component (open

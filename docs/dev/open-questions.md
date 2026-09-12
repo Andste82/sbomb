@@ -485,3 +485,86 @@ byte-identical, which is asserted today for the text rendering only.
 Deciding it needs no evidence and no fixture, only a view on whether `generate`
 should carry a second output's rendering flag. Recorded here so that the
 asymmetry is a decision and not an oversight.
+
+## Q18 — Nothing tests the composite action end to end
+
+Milestone F8 lists "an Action run on the fixture uploads four files and exits 0
+even when components are incomplete" as a test. It cannot be run from this
+repository. A composite action needs a runner, and its first step downloads a
+released binary — so an end-to-end run would test a release that does not yet
+carry the command under test, and on the very first release that does, the
+workflow would be testing the published artifact rather than the tree.
+
+What exists instead is the property split in two, which is what the `foss-out`
+and `foss` steps were built to make possible:
+`TestTheActionsAttributionStepProducesFourFilesOnAnIncompleteFixture` runs the
+command the step runs and asserts the four files and exit 0 on a fixture whose
+notices document carries the incompleteness marker;
+`TestTheActionCannotGateTheBuildOnAttribution` reads `action.yaml` and asserts
+the input, the condition, the upload and `continue-on-error` on both steps; and
+the `foss-outputs` CI job runs the first half outside the test binary.
+
+The seam nothing checks is that the shell in `action.yaml` assembles the same
+arguments the test does. Two ways to close it, neither obviously right:
+
+* Have the action call a script committed here (`scripts/foss.sh`) that the
+  test also calls, so there is one argument assembly. It costs a file and makes
+  the action depend on a checkout of this repository, which composite actions
+  otherwise do not need.
+* Run the action in CI against a locally built binary, by giving it an input
+  that skips the download. That is a production flag existing only for a test,
+  which §32 rejects elsewhere.
+
+Deciding it needs no evidence, only a view on how much a composite action's
+shell is worth insuring. Recorded so that the gap is a decision rather than an
+oversight.
+
+## Q19 — `explain --component` answers nothing, and fixing it means changing `evidence.json`
+
+§32.3 specifies three subjects for `explain`:
+
+```
+sbomb explain --build-dir build/debug --file dep/mbedtls/include/mbedtls/aes.h
+sbomb explain --build-dir build/debug --component mbedtls
+sbomb explain --build-dir build/debug --bom-ref file:project:src/main.cpp
+```
+
+The three flags exist, and all three are the same thing: `--file`,
+`--component` and `--bom-ref` set one `subject` string, which is looked up as a
+node id in the evidence graph loaded from the dump (`cmd/sbomb/main.go`,
+`handleExplain`). The graph carries source, header, object, archive and
+artifact nodes. It carries **no component nodes** — component mapping happens
+above the graph, in `internal/componentmap` and `internal/generate`, and
+nothing writes its result back into it. So every component name answers `no
+evidence chain for <name>` and exits 1, on every project. Verified on
+`p14-foss`: `--component mit-lib` fails while `--file
+project:dep/mit-lib/src/mit_a.c` prints the archive-member and link hops to
+`artifact:build:fossapp`.
+
+It surfaced while writing `docs/foss.md`. Decision Q20 declined a FOSS mode for
+`explain` on the grounds that "is this library really in our product?" is
+already answered by `explain --component`; it is not, and the documentation
+names `--file` instead, which is true and which the review record's identifiers
+line up with.
+
+What a fix costs is exactly what Q20 refused to spend. The subject has to
+resolve to a set of file nodes, which means either:
+
+* **Components in the dump.** Appendix C gains component nodes, or a
+  component-to-files index beside the nodes. That is a format change to a file
+  other tools read, and it makes the dump depend on the component mapping — a
+  layer above it (§35).
+* **`explain` runs discovery.** It would stop being a reader of the dump, and
+  a second run on a tree that has changed answers about a build nobody made.
+* **`explain` reads the SBOM.** The document already states the mapping: the
+  §28 dependency cascade gives every grouping component a `dependsOn` list of
+  its `file:` refs, so `explain --component mit-lib` could take the document
+  beside the build directory, expand the name to those file ids, and explain
+  each of them from the dump. It needs no format change and no second
+  discovery, but it makes one subcommand read two files, and it answers nothing
+  where no document was kept.
+
+None of the three is obviously right, the third is cheap, and the flag is
+specified — so this is a defect with a real cost of repair rather than an
+oversight. Until it is decided, the behaviour is not what §32.3 states, and no
+documentation claims otherwise.

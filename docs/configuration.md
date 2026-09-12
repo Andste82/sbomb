@@ -463,6 +463,7 @@ scope produce the same document — a verdict never changes the content.
     "profile": "cra",
     "headerEvidence": "dwarf-preferred",
     "includeAssets": true,
+    "licenseTextInSBOM": "evidence",
     "failOnStaleBuildArtifacts": true,
     "waiversFile": "sbomb-waivers.json"
   }
@@ -582,7 +583,8 @@ is named *inside* the text, so an identifier alone does not discharge the
 obligation. The texts are retained either way — their canonical path and SHA-256
 are always in `sbomb:component:licenseFile` and `sbomb:component:noticeFile`, and
 a component whose licence sbomb resolved without ever seeing a text reports
-`FOSS_LICENSE_TEXT_MISSING`.
+`FOSS_LICENSE_TEXT_MISSING`, and the four attribution outputs of
+[foss.md](foss.md) carry the texts whatever this says.
 
 The copyright statements are not gated by it. A licence text is kilobytes of
 base64 and a copyright line is a line of prose, so `evidence.copyright[]` is

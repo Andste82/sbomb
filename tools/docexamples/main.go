@@ -40,6 +40,7 @@ func main() {
 		filepath.Join("docs", "getting-started.md"),
 		filepath.Join("docs", "architecture.md"),
 		filepath.Join("docs", "ci.md"),
+		filepath.Join("docs", "foss.md"),
 	}
 	checked, failed := 0, 0
 	for _, document := range documents {

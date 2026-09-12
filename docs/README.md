@@ -10,6 +10,7 @@ is only relevant to working *on* sbomb is under [dev/](dev/).
 | [configuration.md](configuration.md) | Writing the configuration file: artifacts, anchors, curated components |
 | [findings.md](findings.md) | A run failed and you need to know why, which flag changes it, and how to waive one |
 | [properties.md](properties.md) | Reading the `sbomb:` properties in a generated document |
+| [foss.md](foss.md) | Shipping the licence and copyright notices: the four attribution outputs, and what sbomb refuses to decide |
 | [ci.md](ci.md) | Adding sbomb to a GitHub workflow |
 | [windows.md](windows.md) | Analysing a Windows build, or analysing one from Linux |
 | [CHANGELOG.md](CHANGELOG.md) | What changed between releases |
