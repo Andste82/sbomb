@@ -2,7 +2,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "version": 1,
-  "serialNumber": "urn:uuid:62455472-b5a6-51d8-9f22-721ad36f9e75",
+  "serialNumber": "urn:uuid:9be806f0-d64e-55af-9b76-c83e4cabd3a0",
   "metadata": {
     "tools": [
       {
@@ -100,7 +100,17 @@
           "name": "sbomb:license:technique",
           "value": "spdx-identifier"
         }
-      ]
+      ],
+      "evidence": {
+        "copyright": [
+          {
+            "text": "Copyright (c) 2026 Fixture Unlicensed Authors"
+          },
+          {
+            "text": "Copyright (c) 2026 sbomb fixture authors"
+          }
+        ]
+      }
     },
     {
       "type": "file",
@@ -745,7 +755,14 @@
           "name": "sbomb:license:technique",
           "value": "spdx-identifier"
         }
-      ]
+      ],
+      "evidence": {
+        "copyright": [
+          {
+            "text": "Copyright 2026 Fixture Apache Library Authors"
+          }
+        ]
+      }
     },
     {
       "type": "library",
@@ -797,7 +814,14 @@
           "name": "sbomb:license:technique",
           "value": "spdx-identifier"
         }
-      ]
+      ],
+      "evidence": {
+        "copyright": [
+          {
+            "text": "Copyright (c) 2026, Fixture BSD Header Authors"
+          }
+        ]
+      }
     },
     {
       "type": "library",
@@ -849,7 +873,20 @@
           "name": "sbomb:license:technique",
           "value": "spdx-identifier"
         }
-      ]
+      ],
+      "evidence": {
+        "copyright": [
+          {
+            "text": "Copyright (C)  year >  name of author >"
+          },
+          {
+            "text": "Copyright (C) 1991, 1999 Free Software Foundation, Inc."
+          },
+          {
+            "text": "Copyright (C) 2026 Fixture LGPL Library Authors"
+          }
+        ]
+      }
     },
     {
       "type": "library",
@@ -901,7 +938,14 @@
           "name": "sbomb:license:technique",
           "value": "spdx-identifier"
         }
-      ]
+      ],
+      "evidence": {
+        "copyright": [
+          {
+            "text": "Copyright (c) 2026 Fixture MIT Library Authors"
+          }
+        ]
+      }
     },
     {
       "type": "library",
@@ -957,7 +1001,14 @@
           "name": "sbomb:license:technique",
           "value": "spdx-identifier"
         }
-      ]
+      ],
+      "evidence": {
+        "copyright": [
+          {
+            "text": "Copyright (c) 2026 Fixture Dual Licensed Authors"
+          }
+        ]
+      }
     },
     {
       "type": "library",

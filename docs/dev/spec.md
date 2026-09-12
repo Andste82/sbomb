@@ -1196,6 +1196,39 @@ A `notice` or `copyright` artifact records **no** identifier and **no** techniqu
 
 **Ordering.** Retained artifacts are ordered by `(kind, canonical path)`, per §29.
 
+### 22.10 Copyright Statements
+
+For MIT, ISC and the BSD family the copyright line is not decoration. The licence says the notice **shall be reproduced**, and the holder is named in the notice rather than in the identifier — so a component's attribution is its licence text plus its copyright statements, and neither one substitutes for the other.
+
+**Sources, exhaustively.** The **used files** of the component and the artifacts retained under §22.9. Nothing else. No directory is walked and no file is opened for this: the statements of a used file are taken from the bytes the hashing pass of §23 already read, and the statements of an artifact from the bytes §22.9 already retained. Extraction therefore adds no read and no pass over the tree.
+
+**Window.** The first 64 KiB of a file, which is the window §22.2 rule 2 already uses for SPDX identifiers. A window that would end mid-line is cut back to the last line break inside it, so a statement is never stored truncated.
+
+**Recognized forms, exhaustively.** Two:
+
+1. `SPDX-FileCopyrightText:` — the REUSE 3.3 and SPDX tag. The statement is what follows the tag.
+2. A conventional notice: an optional `(c)` / `(C)` / `©` marker, the word `Copyright`, an optional marker, an optional year or year range, and a **holder**. The statement begins at the marker or the word.
+
+Both expressions are RE2 (§30.6 forbids backtracking).
+
+Form 2 is recognized where the notice **begins the line**, after an optional comment leader (`/*`, `*`, `//`, `#`, `;`, `--`, `<!--`, `%`, `!`). This is narrower than "a line containing `Copyright`" and deliberately so: a licence text says the word a dozen times in its own prose — "reproduce the above copyright notice", "the name of the copyright holder", "THE COPYRIGHT HOLDERS … DISCLAIM" — and none of those are notices. Requiring the statement to begin the line is a rule about where a notice sits, not a keyword heuristic about what the rest of the line says. Deviation D43 records it.
+
+A **holder** must be stated; the year is optional, as REUSE 3.3 has it. A holder that is nothing but a bracketed placeholder — `[name of copyright owner]`, `<name of author>` — is not a holder: that line is the licence's own "how to apply this licence" appendix telling somebody to write a notice. Every Apache-2.0 and every GNU licence text carries one, so recognizing it would put a placeholder into the attribution of every such component.
+
+**What is stored.** The statement **verbatim**, as a substring of the line, with the `FileID` it came from (§7.8 — the identity, never the path it was read from). Nothing inside it is rewritten: no year range is reformatted, no holder is normalized, no whitespace is collapsed, no case is changed. The comment scaffolding around the notice (`/*`, `*/`, `-->`) is not part of the statement and is not stored with it.
+
+**No inference.** A holder is **never** derived from a repository URL, a directory name, a package owner or a supplier. Those say who publishes the code; a notice says who holds the rights, which is frequently several parties and rarely the publisher alone. What a statement *means* is not decided here at all.
+
+**Deduplication.** Statements are collapsed on a **normalized key**: lower-cased, with a leading `Copyright` word and any `(c)` / `©` marker removed, year blocks removed — which is what merges `2019-2021`, `2019, 2020, 2021` and `2021` for one holder — punctuation reduced to separators and whitespace collapsed. The key is **never stored and never displayed**; it exists only so that the REUSE tag and the conventional line naming one holder produce one entry. Among duplicates the entry kept is the **first in canonical file order**, so the result does not depend on map iteration.
+
+**Limits, consistent with §30.** At most **200** statements per component; the excess is dropped and `FOSS_COPYRIGHT_LIMIT` (info) reports how many. The cut is taken after the ordering below, so it takes the same entries whatever order the files were read in. One statement is at most 1 KiB: a longer candidate is not recognized rather than shortened, because a truncated notice is not the notice the licence said to reproduce. A candidate that is not valid UTF-8 is not recognized either — a build tree is untrusted input (§30) and need not be UTF-8, and a JSON encoder substitutes U+FFFD for every invalid byte, which would store something the file does not say.
+
+**Observation and conclusion are separate**, exactly as §22.4 requires for licences. What was read is an observation and reaches `components[].evidence.copyright[].text` (§28). The single concluded notice, `components[].copyright`, is written from curated configuration (`components[].copyright`) **only**; nothing sbomb read is ever promoted into it.
+
+A mapped component with neither an observed statement nor a curated conclusion emits `FOSS_COPYRIGHT_MISSING` (info). Every mapped component is asked, including one the product only builds with: until the distribution role of §24.5 is a resolved fact, narrowing the question would mean guessing which components are distributed, and "no notice was found" is the same true statement about a build tool as about a shipped library. It is the treatment `UNKNOWN_LICENSE` already gives such a component.
+
+**Ordering.** Statements are ordered by text, per §29.
+
 ---
 
 ## 23. Hashing
@@ -1205,6 +1238,7 @@ A `notice` or `copyright` artifact records **no** identifier and **no** techniqu
 * If a file is unavailable or unreadable, no hash is emitted and `MISSING_FILE_HASH` is created.
 * The tool MUST NOT recursively hash the source tree. Only files selected through evidence, plus license files of mapped components (§22.9, which bounds how many and how large), are read.
 * Hashing MUST be parallelized with a bounded worker pool (`--jobs`, default `runtime.NumCPU()`), and results MUST be order-independent.
+* The bytes of a file are in memory while its digest is computed, and the pass MUST offer them to the layer above it once per readable file. The copyright extraction of §22.10 is the caller that uses this, and it is why extraction costs no read: it is a look at what was hashed, not a pass of its own. The hashing layer learns nothing about what the caller looks for (§35).
 
 Hashes reflect the file's current on-disk content, which may differ from what was built. This is why §27 staleness detection is mandatory and why `policy.failOnStaleBuildArtifacts` defaults to `true`.
 
@@ -1444,6 +1478,7 @@ Use native CycloneDX fields first:
 * `components[].evidence.identity`: an array (1.6+) with `field: "purl"` or `"name"`/`"version"`, `confidence` (float per §8.5), `methods[]` with `technique` ∈ `source-code-analysis` | `binary-analysis` | `manifest-analysis` | `filename` | `attestation` | `other`, `value`, and `confidence`.
 * `components[].evidence.occurrences`: `[{ "bom-ref": "...", "location": "<canonicalPath>" }]` for file location.
 * `components[].evidence.licenses`: license evidence, when the selected spec version supports it.
+* `components[].evidence.copyright`: `[{ "text": "<statement>" }]` for the copyright statements of §22.10.
 
 Everything not representable natively goes into `properties[]` (§28.8). The tool MUST NOT encode evidence solely in properties when a native field exists.
 
@@ -1463,6 +1498,10 @@ Everything not representable natively goes into `properties[]` (§28.8). The too
 Artifacts of kind `notice` and `copyright` are **not** written to `evidence.licenses`: that array is license evidence, and §22.2 has just removed those files from the identification chain. They are named by `sbomb:component:noticeFile` with their canonical path and hash, and their bytes reach the attribution outputs.
 
 Whether the text is written at all is the `licenseTextInSBOM` setting of §33.1: `off` (the default) writes none, `evidence` writes them as above. The setting changes the document and nothing else — no side output may change it, because an SBOM that depends on which extra files somebody asked for is not a fixed point of its inputs (§29).
+
+**Copyright statements (§22.10).** The observation goes to `components[].evidence.copyright[]` as `{ "text": "<statement>" }`, ordered by `text` (§29), with the statement exactly as it was stored. The conclusion goes to `components[].copyright`, which is one string and therefore one statement, and is written from curated configuration alone. This is the separation §22.4 already draws for licenses, in the two places CycloneDX provides for it, and it is the reason nothing sbomb read is ever written to `component.copyright`: a consumer reading that field is reading somebody's assertion, not a scan result.
+
+The statements are **not** gated by `licenseTextInSBOM`. A licence text is kilobytes of base64 and a copyright statement is a line of prose, so the size argument that setting exists for does not apply — and for MIT and the BSD family the statement is half of what the licence obliges a distributor to reproduce. Where the notice was read from is not written beside it: the schema permits nothing but `text` in that object, and the provenance stays in the inventory and in the attribution outputs rather than being invented into a field the format does not have.
 
 Every retained artifact, of every kind, is named by a property carrying its provenance: `sbomb:component:licenseFile` for a grant and `sbomb:component:noticeFile` for attribution material, each repeated and sorted, each valued `<canonicalPath>@sha256:<hex>`. The field carries the bytes; the property carries where they came from, which the field cannot say. A `COPYRIGHT` file is named by `sbomb:component:noticeFile` too: it is attribution material reproduced under the same obligation, and its canonical path in the value says which file it was.
 
@@ -1504,9 +1543,11 @@ Mandatory ordering rules:
 | `licenses[]` | rendered license string |
 | `evidence.identity[]` | `(field, value)` |
 | `evidence.occurrences[]` | `location` |
+| `evidence.copyright[]` | `text` |
 | `externalReferences[]` | `(type, url)` |
 | findings | `(id, subject.kind, subject.ref, message)` |
 | retained license artifacts (§22.9) | `(kind, canonical path)` |
+| copyright statements (§22.10) | `text` |
 
 All sorting uses byte-wise comparison of UTF-8, not locale collation.
 
@@ -2200,6 +2241,8 @@ Severity shown is the default and may be changed via `policy.severityOverrides`.
 | `LICENSE_CONFLICT` | warning | `failOnReviewRequired` | Conflicting license evidence |
 | `FOSS_LICENSE_TEXT_MISSING` | info | — | Component has a license identifier but carries no retained text (§22.9) |
 | `FOSS_LICENSE_ARTIFACT_LIMIT` | info | — | More recognized license files, or a larger one, than the retention limit of §22.9 |
+| `FOSS_COPYRIGHT_MISSING` | info | — | Component carries no copyright statement and none was curated (§22.10) |
+| `FOSS_COPYRIGHT_LIMIT` | info | — | More distinct copyright statements than the limit of §22.10 |
 | `MISSING_FILE_HASH` | warning | `failOnMissingHash` | File unavailable or unreadable |
 | `UNANCHORED_FILE` | warning | `failOnUnanchoredFile` | File matched no anchor |
 | `VCS_DIRTY` | info | `failOnReviewRequired` | Component working tree is dirty |

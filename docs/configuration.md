@@ -298,10 +298,19 @@ from a directory name or a repository URL.
 | `versionFrom` | Where to read the version instead — see below |
 | `supplier` | Supplier |
 | `license` | SPDX expression |
+| `copyright` | The component's copyright notice, as a conclusion |
 | `purl` | Package URL |
 
 `path` selects a directory; `match` selects by glob instead. Use one or the
 other.
+
+`copyright` is the one way `component.copyright` is ever written. What sbomb
+read out of the component's own files and licence texts goes to
+`evidence.copyright[]`, which is an observation; `component.copyright` is a
+single statement and therefore a conclusion, so it is somebody's to make. Use
+it where the notices a component states have been reviewed and one line is to
+represent them -- and note that it never removes the observation beside it. A
+component with neither reports `FOSS_COPYRIGHT_MISSING`.
 
 `targets` selects by CMake target, which is what the build system itself says
 rather than what the directory layout suggests:
@@ -574,6 +583,11 @@ obligation. The texts are retained either way — their canonical path and SHA-2
 are always in `sbomb:component:licenseFile` and `sbomb:component:noticeFile`, and
 a component whose licence sbomb resolved without ever seeing a text reports
 `FOSS_LICENSE_TEXT_MISSING`.
+
+The copyright statements are not gated by it. A licence text is kilobytes of
+base64 and a copyright line is a line of prose, so `evidence.copyright[]` is
+always written -- and for MIT and the BSD family that line is half of what the
+licence obliges a distributor to reproduce.
 
 ### Precedence
 

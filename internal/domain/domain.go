@@ -161,8 +161,33 @@ type Component struct {
 	// an index into a catalogue and these are the bytes. Ordered by
 	// (Kind, File).
 	LicenseArtifacts []LicenseArtifact
-	Properties       map[string][]string
-	Files            []FileID
+	// Copyrights are the copyright statements the component's own files and
+	// retained artifacts state (section 22.10), verbatim and deduplicated,
+	// ordered by text. They are an observation: MIT and the BSD family
+	// require the notice to be reproduced, and the holder is named in the
+	// notice rather than in the identifier.
+	Copyrights []CopyrightStatement
+	// Copyright is the single concluded copyright notice of the component,
+	// set from curated configuration alone. CycloneDX has one string field
+	// for the conclusion and an array for the observation, and section 22.4
+	// keeps the two apart: nothing sbomb read is ever promoted into this.
+	Copyright  string
+	Properties map[string][]string
+	Files      []FileID
+}
+
+// CopyrightStatement is one copyright notice as a file states it (section
+// 22.10). Nothing in Text has been rewritten: no year range is reformatted,
+// no holder is normalized, no whitespace is collapsed. Deduplication compares
+// a normalized key that is never stored here and never displayed.
+type CopyrightStatement struct {
+	// Text is the statement, a verbatim substring of the line it was found
+	// in: for a conventional notice it begins at the word Copyright or the
+	// marker before it, and for a REUSE tag it begins after the tag.
+	Text string
+	// File is the identity of the file the statement was read from, never the
+	// path it was read from (section 7.8).
+	File FileID
 }
 
 // LicenseArtifact is one retained license file of a component root, per

@@ -51,3 +51,9 @@ run ./internal/adapters/pkgmanager FuzzDistroManifest
 # out of a sysroot this tool did not build, and what it decides is not only a
 # version but which component a file belongs to.
 run ./internal/adapters/pkgmanager FuzzPkgConfig
+
+# The copyright extractor of section 22.10. It reads the first 64 KiB of every
+# used file and of every retained licence artifact -- somebody else's source
+# tree, which section 30 calls untrusted input -- and what it stores has to be
+# a verbatim substring of what it was handed.
+run ./internal/license FuzzCopyright

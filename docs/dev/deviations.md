@@ -1876,3 +1876,53 @@ reports `UNKNOWN_LICENSE` instead of an identifier. That is the point: the
 identifier it reported was not evidence. The text is in the document and in the
 inventory either way, so nothing a recipient needs was lost — only a claim that
 was not sbomb's to make.
+
+---
+
+## D43 — A copyright notice has to begin its line
+
+Section 22.10 names the second recognized form as "a line containing
+`Copyright`, an optional `(c)`/`(C)`/`©`, an optional year or year range, and a
+holder". Read literally -- every line containing the word -- the extractor
+produces garbage from exactly the files it is pointed at, because a licence
+text is the densest source of the word `copyright` in any tree:
+
+```
+   The above copyright notice and this permission notice shall be included ...
+2. Redistributions in binary form must reproduce the above copyright notice ...
+3. Neither the name of the copyright holder nor the names of its contributors ...
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+   2. Grant of Copyright License. Subject to the terms and conditions of ...
+```
+
+None of those are notices. All five would have been stored verbatim, under a
+holder reading "notice and this permission notice shall be included", and the
+BSD dependency of the fixture alone contributes four of them.
+
+**What is implemented.** The notice has to **begin** the line, after an optional
+comment leader (`/*`, `*`, `//`, `#`, `;`, `--`, `<!--`, `%`, `!`). That is a
+rule about where a notice sits in a file, which is a structural property; it is
+not a keyword heuristic about what the rest of the line says, which section 22.3
+forbids. Both recognized forms of section 22.10 -- the REUSE tag and the
+conventional line -- are the first thing on their line in every convention that
+writes them: REUSE 3.3 puts the tag in a comment header, and the licences
+themselves put the notice on a line of its own.
+
+**The second narrowing, for the same reason.** A holder that is nothing but a
+bracketed placeholder -- `[name of copyright owner]`, `<name of author>` -- is
+not a holder. Every Apache-2.0 licence text ends with a "how to apply this
+license" appendix containing `Copyright [yyyy] [name of copyright owner]`, and
+every GNU licence text carries the same thing in angle brackets. Those lines
+begin their line and would otherwise be recognized, so every Apache-2.0
+component in every project would publish a placeholder as its copyright
+statement. The bracketed form is the same declared-variable notation section
+22.3 technique 4 already reads out of the SPDX templates, so recognizing it as
+a placeholder is reading a declaration rather than guessing.
+
+**What it costs.** A notice written mid-line -- `/* foo.c -- Copyright 2026
+Acme */` -- is not found. That is a real miss, and it is the right trade: a
+missed statement is visible as `FOSS_COPYRIGHT_MISSING` on a component that
+plainly has a holder, while a false one is a fabricated attribution in a
+document carrying the manufacturer's name. Nothing in section 22.10 infers a
+holder, and a rule that recognized prose as a notice would have been an
+inference with a regular expression in front of it.

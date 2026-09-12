@@ -486,7 +486,11 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		})
 	}
 	used = inventory.MergeUsedFiles(used)
-	used, hashFindings := hashUsedFiles(used, b.physical, options.Limits, logger)
+	// Section 22.10 rides on the hashing pass: the copyright statements are
+	// taken from the bytes the digest already needed, so the read below is
+	// the only one either of them causes (decision Q9).
+	copyrights := newCopyrightCollector()
+	used, hashFindings := hashUsedFiles(used, b.physical, options.Limits, logger, copyrights.observe)
 	findings = append(findings, hashFindings...)
 
 	// Staleness: the hashes describe the files as they are now, which is only
@@ -564,6 +568,11 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	// bounded -- is where an image manifest usually answers, and it is asked
 	// there rather than being read a second time.
 	resolver.setDistroMetadata(distro)
+	// What the hashing pass observed. The resolver reads no file for this:
+	// the statements of a component's own files were collected above, and the
+	// ones in its licence and notice files come from the bytes section 22.9
+	// retained.
+	resolver.setCopyrightStatements(copyrights.statements())
 	// A path below the build directory being read has to be expressed in the
 	// logical build root first (section 7.6), exactly as every other path the
 	// adapters hand over. A path outside it -- a package cache -- is already

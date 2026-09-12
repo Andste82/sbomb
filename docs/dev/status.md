@@ -196,6 +196,32 @@
   application: it declares `MIT` in `src/main.c` and carries no licence file of
   its own.
 
+- Section 22.10, copyright statements: every mapped component carries the
+  notices its own used files and its retained licence artifacts state,
+  verbatim. For MIT, ISC and the BSD family the holder is named *inside* the
+  notice rather than in the identifier, and the licence says the notice shall
+  be reproduced -- so a reformatted year range or a normalized holder is an
+  alteration of the thing the obligation is about. Two forms are recognized and
+  no more, both RE2: `SPDX-FileCopyrightText:` and a conventional `Copyright`
+  line, in the first 64 KiB of a file. The conventional form has to begin its
+  line (deviation D43), because a licence text is the densest source of the
+  word `copyright` anywhere and its prose is not a notice, and a bracketed
+  placeholder is not a holder -- which keeps the Apache-2.0 "how to apply this
+  license" appendix out of every Apache-2.0 component. Duplicates collapse on a
+  normalized key that is never stored and never displayed, and the entry kept
+  is the first in canonical file order, so the result does not depend on map
+  iteration. The document gains `evidence.copyright[].text`, ordered by text and
+  not gated by `licenseTextInSBOM`; `component.copyright` is written from the
+  curated `components[].copyright` alone, because one string is one statement
+  and therefore a conclusion. A component with neither reports
+  `FOSS_COPYRIGHT_MISSING`, and above 200 distinct statements
+  `FOSS_COPYRIGHT_LIMIT` says how many were dropped. **It adds no I/O**:
+  `inventory.HashOptions` gained an `Observe` callback, so extraction reads the
+  bytes the digest already needed (decision Q9), and the hashing pass records
+  the paths it opens so that the same run with and without the observer can be
+  shown to open the same set. `internal/inventory` learns nothing about
+  licences.
+
 ## Known Gaps
 
 - **Five specified flags are absent**, each waiting on the feature it belongs
@@ -272,13 +298,19 @@ The FOSS attribution export is planned in a branch of its own
 (`docs/dev/foss/`), eight milestones from the fixture to the rendered notices
 document. F1 to F4 have landed: the fixture, the source harvest, the inventory
 dump, the source-tree relocation that lets the fixture be read at all, the
-component root as a resolved fact, and the retention of the licence and notice
-bytes those roots carry. What is not built is everything the notices document
-is made of besides the texts: copyright statements (F5), the distribution role,
-the linkage form and the tri-state modification status (F6), the `foss`
+component root as a resolved fact, the retention of the licence and notice
+bytes those roots carry, and the copyright statements of section 22.10. What is
+not built is the rest of what the notices document is made of: the distribution
+role, the linkage form and the tri-state modification status (F6), the `foss`
 subcommand and `--foss-out` with the four documents they write (F7), and the
-user documentation and CI wiring (F8). No obligation is named and no copyright
-line is read yet.
+user documentation and CI wiring (F8). No obligation is named yet, and nothing
+renders the attribution material -- it is in the document and nowhere else.
+
+One consequence of F5 is visible and is not a defect of the implementation:
+`FOSS_COPYRIGHT_MISSING` is asked of every mapped component, a build tool
+included, because the distribution role that would narrow it is F6's work. It
+is informational and gates nothing, and `UNKNOWN_LICENSE` already treats such a
+component the same way.
 
 What is left is not phase work:
 

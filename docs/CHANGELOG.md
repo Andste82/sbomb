@@ -2,6 +2,67 @@
 
 ## 0.17.0
 
+### The copyright statements a component states are kept, verbatim
+
+The other half of attribution. For MIT, ISC and the BSD family the copyright
+line is not decoration: the licence says the notice **shall be reproduced**, and
+the holder is named in the notice rather than in the identifier. sbomb had
+never read one -- `internal/license` even *stripped* copyright lines, because
+technique 3 of section 22.3 has to remove them before a text can be compared
+with a canonical one.
+
+Every mapped component now carries the statements of its own used files and of
+the licence and notice files section 22.9 retained, and nothing else: no
+directory is walked, no holder is derived from a repository URL, a directory
+name or a package owner, and no year range is reformatted. The fixture's BSD
+dependency is the case that shows why the retained artifacts are a source --
+its header states an identifier and no holder, and the notice is inside the
+licence text.
+
+Two forms are recognized and no more: `SPDX-FileCopyrightText:` and a
+conventional `Copyright` line, both as RE2 expressions, in the first 64 KiB of a
+file -- the window section 22.2 already uses for SPDX identifiers. The
+conventional form has to *begin* its line, after a comment leader, because a
+licence text is the densest source of the word `copyright` in any tree and none
+of that prose is a notice; a holder that is nothing but `[name of copyright
+owner]` is not a holder either, which is what keeps the Apache-2.0 "how to
+apply this license" appendix out of every Apache-2.0 component's attribution.
+Deviation D43 records both narrowings and what they cost.
+
+Statements that say the same thing collapse on a normalized key -- collapsed
+whitespace, unified `(c)`, merged year ranges -- and the key is never stored and
+never displayed: among duplicates the entry kept is the first in canonical file
+order, with the years and the punctuation of the file it came from. So the REUSE
+tag and the conventional line naming one holder produce one entry, and the entry
+is still something a file actually says.
+
+Where it goes:
+
+* the document gains `evidence.copyright[].text` per component, ordered by
+  text. It is not gated by `licenseTextInSBOM`: a licence text is kilobytes of
+  base64 and a notice is a line of prose;
+* `component.copyright` is written from the new curated
+  `components[].copyright` **only**. One string is one statement, so that field
+  is a conclusion, and nothing sbomb read is ever promoted into it -- the same
+  separation section 22.4 already draws for licences;
+* a component with neither an observed statement nor a curated one reports
+  `FOSS_COPYRIGHT_MISSING`, and above 200 distinct statements
+  `FOSS_COPYRIGHT_LIMIT` says how many were dropped.
+
+**It costs no I/O.** `HashOptions` gained an `Observe` callback and extraction
+rides on the hashing pass of section 23: the bytes are already in memory when
+the digest is computed, so a run opens exactly the files it opened before. That
+is asserted rather than claimed -- the hashing pass records which paths it
+opens, and the same run with and without the observer opens the same set.
+`internal/inventory` learns nothing about licences; the layer above it does the
+work (section 35).
+
+Three goldens change. Both `p14-foss` documents gain `evidence.copyright`, and
+the `p02` review report gains two `FOSS_COPYRIGHT_MISSING` lines for the
+components that state no notice -- the same two that already report
+`UNKNOWN_LICENSE`. Every other golden is byte-identical.
+
+
 ### The licence text a component actually carries is kept
 
 An SPDX identifier is an index into a catalogue, not a deliverable. MIT and the

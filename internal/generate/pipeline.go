@@ -753,7 +753,8 @@ func unresolvedObjects(graph *evidence.Graph, used []domain.Node, anchorResult *
 // hashUsedFiles reads and hashes the files the SBOM will contain. Only
 // evidence-selected files are read; the source tree is never walked
 // (section 23).
-func hashUsedFiles(files []domain.UsedFile, physical map[string]string, bounds limits.Config, logger *Logger) ([]domain.UsedFile, []domain.Finding) {
+func hashUsedFiles(files []domain.UsedFile, physical map[string]string, bounds limits.Config, logger *Logger,
+	observe func(domain.FileID, []byte)) ([]domain.UsedFile, []domain.Finding) {
 	findings := []domain.Finding{}
 	for index := range files {
 		canonical := files[index].ID.Canonical()
@@ -780,6 +781,10 @@ func hashUsedFiles(files []domain.UsedFile, physical map[string]string, bounds l
 	}
 	hashed := inventory.HashUsedFilesWithOptions(files, inventory.HashOptions{
 		Resolve: func(id domain.FileID) string { return physical[id.Canonical()] },
+		// Section 22.10 rides on this read. The bytes are in memory because
+		// the digest needs them, so extraction is a look at what was read and
+		// not a pass of its own (decision Q9).
+		Observe: observe,
 	})
 	for index := range hashed {
 		if len(hashed[index].Hashes) == 0 && !hashed[index].Missing {

@@ -73,7 +73,24 @@ type HashOptions struct {
 	// Jobs bounds the worker pool. Section 23 requires hashing to be
 	// parallelized and its results to be order-independent.
 	Jobs int
+	// Observe is handed the bytes of every file that was read, with the
+	// identity they belong to. Hashing already has the whole file in memory
+	// when it computes the digest, so a caller that needs to look at content
+	// -- the copyright extraction of section 22.10 does -- pays no second
+	// read and no second pass over the tree (decision Q9).
+	//
+	// It is called from the worker pool and MUST be safe for concurrent use.
+	// It is called once per readable file and never for one that could not be
+	// read. This package learns nothing about what the caller looks for: that
+	// is the layering of section 35, and the reason this is a callback rather
+	// than a licence-shaped option.
+	Observe func(domain.FileID, []byte)
 }
+
+// readFile is the one read of the hashing pass. It is a variable so that a
+// test can record which paths a run opens: section 22.10 claims extraction
+// adds no I/O, and a claim about reads that nothing counts is not a claim.
+var readFile = os.ReadFile
 
 // MergeUsedFiles collapses duplicate file evidence records into a single inhabited record.
 func MergeUsedFiles(files []domain.UsedFile) []domain.UsedFile {
@@ -212,9 +229,14 @@ func hashOne(file domain.UsedFile, options HashOptions) domain.UsedFile {
 	if err != nil || (isSymlink && !options.AllowUnanchoredReads && !withinAnchor(resolved, options.Anchors)) {
 		return unreadable()
 	}
-	data, err := os.ReadFile(path)
+	data, err := readFile(path)
 	if err != nil {
 		return unreadable()
+	}
+	if options.Observe != nil {
+		// Before the digest rather than after it, so that nothing can be
+		// observed that was not also hashed.
+		options.Observe(clone.ID, data)
 	}
 	clone.SizeBytes = info.Size()
 	sum := sha256.Sum256(data)
