@@ -1700,3 +1700,67 @@ func TestAComponentRootResolvesALicenceThroughAnyRecognizedName(t *testing.T) {
 		}
 	}
 }
+
+// The evidence of a build made elsewhere names files that are not on this
+// machine. Their paths still have parents here, and a marker in one of them
+// belongs to whatever sits at that path now -- a scratch directory, a CI
+// runner's workspace holding other checkouts. Walking up from a file that is
+// not there is how a firmware SBOM gains a library named after /tmp.
+func TestAFileThatIsNotThereNamesNoComponent(t *testing.T) {
+	root := t.TempDir()
+	// The marker sits above the file's directory, as a stray manifest in a
+	// shared parent would.
+	write(t, filepath.Join(root, "vcpkg.json"), "{}\n")
+
+	absent := domain.UsedFile{ID: fileID("abs", "gone/header.h"), Missing: true}
+	physical := map[string]string{absent.ID.Canonical(): filepath.Join(root, "gone", "header.h")}
+	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
+		physical, map[string]string{"project": root}, nil)
+
+	_, name, _, _, detectedBy := resolver.resolve(absent)
+	if detectedBy == "package-metadata:vcpkg.json" {
+		t.Fatalf("a missing file was mapped by a marker above it: name %q", name)
+	}
+	if !strings.HasPrefix(name, "unknown:") {
+		t.Errorf("component name = %q, want the unknown component of strategy 8", name)
+	}
+
+	// The same file present resolves through the marker, which is the
+	// behaviour this guard must not cost.
+	write(t, filepath.Join(root, "gone", "header.h"), "#pragma once\n")
+	present := domain.UsedFile{ID: fileID("abs", "gone/header.h")}
+	_, _, _, _, detectedBy = resolver.resolve(present)
+	if detectedBy != "package-metadata:vcpkg.json" {
+		t.Errorf("detectedBy = %q, want the marker to decide for a file that is there", detectedBy)
+	}
+}
+
+// The fallback root is the deepest directory holding every file of a
+// component. A file that is not there holds nothing, and letting it vote pulls
+// the root towards a path from another machine -- which is then published as
+// sbomb:component:root and read from for a licence.
+func TestAFileThatIsNotThereDoesNotMoveTheComponentRoot(t *testing.T) {
+	root := t.TempDir()
+	write(t, filepath.Join(root, "lib", "src", "a.c"), "void a(void){}\n")
+	write(t, filepath.Join(root, "lib", "src", "b.c"), "void b(void){}\n")
+
+	files := []domain.UsedFile{
+		{ID: fileID("project", "lib/src/a.c")},
+		{ID: fileID("project", "lib/src/b.c")},
+		{ID: fileID("abs", "elsewhere/c.c"), Missing: true},
+	}
+	physical := map[string]string{
+		files[0].ID.Canonical(): filepath.Join(root, "lib", "src", "a.c"),
+		files[1].ID.Canonical(): filepath.Join(root, "lib", "src", "b.c"),
+		files[2].ID.Canonical(): filepath.Join(root, "elsewhere", "c.c"),
+	}
+	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
+		physical, map[string]string{"project": root}, nil)
+
+	if got, want := resolver.componentRoot(files), filepath.Join(root, "lib", "src"); got != want {
+		t.Errorf("componentRoot = %q, want %q; the absent file moved the root up", got, want)
+	}
+	if got := resolver.componentRoot([]domain.UsedFile{files[2]}); got != "" {
+		t.Errorf("componentRoot of only-absent files = %q, want no root at all", got)
+	}
+}

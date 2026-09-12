@@ -2,7 +2,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "version": 1,
-  "serialNumber": "urn:uuid:1af3baca-7bbe-58ca-9f4b-edd0b1ddad63",
+  "serialNumber": "urn:uuid:d229b29d-fb00-51fd-9e80-bcd3ba53a4a3",
   "metadata": {
     "tools": [
       {
@@ -1277,10 +1277,6 @@
           "value": "unresolved"
         },
         {
-          "name": "sbomb:component:root",
-          "value": "abs:../__fixture_src__"
-        },
-        {
           "name": "sbomb:component:scope",
           "value": "unknown"
         },
@@ -1329,10 +1325,6 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
-        },
-        {
-          "name": "sbomb:component:root",
-          "value": "abs:CMakeFiles/crypto.dir"
         },
         {
           "name": "sbomb:component:scope",
@@ -1439,10 +1431,6 @@
           "value": "unresolved"
         },
         {
-          "name": "sbomb:component:root",
-          "value": "abs:"
-        },
-        {
           "name": "sbomb:component:scope",
           "value": "unknown"
         },
@@ -1493,10 +1481,6 @@
           "value": "unresolved"
         },
         {
-          "name": "sbomb:component:root",
-          "value": "abs:"
-        },
-        {
           "name": "sbomb:component:scope",
           "value": "unknown"
         },
@@ -1545,10 +1529,6 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
-        },
-        {
-          "name": "sbomb:component:root",
-          "value": "abs:"
         },
         {
           "name": "sbomb:component:scope",
@@ -3201,10 +3181,6 @@
           "value": "unresolved"
         },
         {
-          "name": "sbomb:component:root",
-          "value": "abs:"
-        },
-        {
           "name": "sbomb:component:scope",
           "value": "unknown"
         },
@@ -3253,10 +3229,6 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
-        },
-        {
-          "name": "sbomb:component:root",
-          "value": "abs:"
         },
         {
           "name": "sbomb:component:scope",

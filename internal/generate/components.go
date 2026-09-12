@@ -713,6 +713,15 @@ func (r *componentResolver) packageByName(name string) (pkgmanager.Package, bool
 // nearestPackageRoot walks up from a file looking for a package manifest,
 // stopping at the anchor root so the search never leaves the component tree.
 func (r *componentResolver) nearestPackageRoot(file domain.UsedFile) (root, manifest string, found bool) {
+	// A file that could not be read names no directory to walk from. The
+	// evidence still records it and the document still carries it, but the
+	// path it carries describes another machine: its parents exist here only by
+	// coincidence, and a marker found in one of them belongs to whatever sits
+	// at that path now. Section 19.2 settles a component boundary from a file
+	// somebody put somewhere, so the walk starts from a file that is there.
+	if file.Missing {
+		return "", "", false
+	}
 	path := r.physical[file.ID.Canonical()]
 	if path == "" {
 		return "", "", false
@@ -1396,6 +1405,14 @@ func identityForRoot(file domain.FileID, physical, root string) (domain.FileID, 
 func (r *componentResolver) componentRoot(files []domain.UsedFile) string {
 	var common string
 	for _, file := range files {
+		// Same reason as in nearestPackageRoot: a file that is not there
+		// contributes no directory. Including it would pull the common
+		// directory towards a path that exists on another machine, and the
+		// result is published as sbomb:component:root and read from for a
+		// licence.
+		if file.Missing {
+			continue
+		}
 		path := r.physical[file.ID.Canonical()]
 		if path == "" {
 			continue
