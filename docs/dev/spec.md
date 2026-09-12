@@ -1111,7 +1111,7 @@ License detection is scoped to used files and mapped components only. The tool M
 2. SPDX identifier in the used file itself (`SPDX-License-Identifier:` within the first 64 KiB).
 3. Explicit component metadata (package manifest `license` field).
 4. Package-manager metadata.
-5. Recognized license file in the component root (§22.3).
+5. Recognized license file in the component root that **grants** a license (§22.3): `LICENSE`, `LICENCE`, `COPYING`, `LICENSE-<id>`.
 6. Recognized documentation in the component root (`README*` with an explicit `SPDX-License-Identifier:` line only).
 7. SDK metadata.
 8. External scanner results supplied via `--license-scan <file>` (SPDX or CycloneDX JSON input).
@@ -1119,9 +1119,13 @@ License detection is scoped to used files and mapped components only. The tool M
 
 Configured upstream metadata (`components[].upstream`) was a further step. It is removed: a repository URL says nothing about a licence without fetching it, and this tool does not access the network (deviation D20).
 
+`NOTICE` and `COPYRIGHT` are recognized license files (§22.3) and are **not** inputs to this order. They are retained for reproduction (§22.9) and decide no identifier. A NOTICE that quotes a license is strong evidence of *what must be reproduced* and poor evidence of *which license applies*: the Apache Software Foundation's own assembly rules describe NOTICE as the place for notices the license text does not already satisfy, so its content is routinely about somebody other than the component it sits beside. Taking it for the component's license is a wrong answer stated with high confidence, which is worse than NOASSERTION. They were inputs until this was written; deviation D42 records the change.
+
 ### 22.3 Recognized License Files and Permitted Detection Techniques
 
 Recognized filenames (case-insensitive, optional extension `.txt`, `.md`): `LICENSE`, `LICENCE`, `COPYING`, `NOTICE`, `COPYRIGHT`, and `LICENSE-<id>`.
+
+The names divide into two groups, and the division decides two separate questions. `LICENSE`, `LICENCE`, `COPYING` and `LICENSE-<id>` **grant** a license: they mark a component boundary (§19.2) and they answer step 5 of §22.2. `NOTICE` and `COPYRIGHT` **reproduce attribution material**: they mark no boundary, they answer no step of §22.2, and they are retained under §22.9 alongside the grants.
 
 **Permitted detection techniques are exhaustively:**
 
@@ -1168,6 +1172,30 @@ Used when no reliable assertion is possible. Never invent a license from weak si
 
 Product license, component license, and file license are independent. Licenses MUST NOT be blindly propagated downward or upward. A file with no own evidence inherits the component license only with evidence class `inherited` and confidence `low`.
 
+### 22.9 License Artifact Retention
+
+An SPDX identifier is an index into a catalogue, not a deliverable. MIT and the BSD family name the rights holder **inside** the license text, and the canonical text SPDX publishes for `MIT` carries a placeholder where that holder belongs — so shipping the canonical text discharges nothing, it ships a template. The component's own file is the artifact an attribution obligation is satisfied with, and the tool MUST therefore keep the bytes.
+
+**What is retained.** For every mapped component with a resolved root (§19.2), every recognized license file (§22.3) that the root itself carries, verbatim: the exact bytes, including line endings and trailing whitespace. Each retained artifact records
+
+* a **kind** — `license` for a grant (`LICENSE`, `LICENCE`, `COPYING`, `LICENSE-<id>`), `notice` for `NOTICE`, `copyright` for `COPYRIGHT`;
+* the **canonical path** of the file (§7.7), never the path it was read from;
+* the **SHA-256** of the retained bytes;
+* the **bytes**;
+* for a grant, the SPDX identifier detection settled on and the §22.3 technique that settled it, both empty when none of techniques 1–4 succeeded.
+
+A `notice` or `copyright` artifact records **no** identifier and **no** technique, deliberately: an identifier recorded there is one inference away from becoming the component's license, which §22.2 has just forbidden.
+
+**No substitution, ever.** Where a component carries no text, none is invented. A canonical SPDX text MUST NOT be put in its place, and the absence is reported as `FOSS_LICENSE_TEXT_MISSING` — which is precisely the case where the attribution obligation cannot be satisfied from what the tool saw. Silence would look complete and a substituted text would look correct; both are worse than the finding.
+
+**Reads.** Retention reads nothing §22.1 and §23 do not already permit: the component root is listed once, and each recognized license file it carries is read **once for that root** — memoized, so two components resolving to one root read it once between them. The identification of §22.2 step 5 and the observation of §22.4 consume those retained bytes rather than opening the file a second time — before this they opened the same file twice. What retention does add is the read of a license file that step 5 never reached because a file-level SPDX identifier (step 2) answered first: §23 admits "license files of mapped components" precisely so that the text can be kept, and a component whose header states `MIT` still owes its recipients the file. The reads are counted, so that the bound is checked rather than promised.
+
+**Limits, consistent with §30.** At most **8** retained artifacts per component, at most **1 MiB** each. Exceeding either bound bounds the **list**: a file over the size limit is not retained at all, and the candidates past the count limit are not retained. A retained file is **never truncated** — a truncated license is not a license, and a truncated NOTICE is not a notice. Either exclusion emits `FOSS_LICENSE_ARTIFACT_LIMIT` (info) naming what was dropped and why. The count is consulted in the order of §22.3, so the grants survive a bound that the attribution material does not.
+
+**Where it goes.** The inventory dump (§40) records kind, canonical path, SHA-256, size, identifier and technique for every retained artifact — the hash pins the bytes exactly, which is what a regression document needs, while a golden of embedded base64 would not review. The bytes themselves reach the CycloneDX document only when `licenseTextInSBOM` says so (§28.7, §33.1), so a `generate` run keeps the output size it has today.
+
+**Ordering.** Retained artifacts are ordered by `(kind, canonical path)`, per §29.
+
 ---
 
 ## 23. Hashing
@@ -1175,7 +1203,7 @@ Product license, component license, and file license are independent. Licenses M
 * Every locally readable included file MUST receive a SHA-256 hash of its **raw bytes**. No line-ending or encoding normalization is performed.
 * Additional algorithms MAY be emitted via `--hash-alg sha256,sha1,sha512`.
 * If a file is unavailable or unreadable, no hash is emitted and `MISSING_FILE_HASH` is created.
-* The tool MUST NOT recursively hash the source tree. Only files selected through evidence, plus license files of mapped components, are read.
+* The tool MUST NOT recursively hash the source tree. Only files selected through evidence, plus license files of mapped components (§22.9, which bounds how many and how large), are read.
 * Hashing MUST be parallelized with a bounded worker pool (`--jobs`, default `runtime.NumCPU()`), and results MUST be order-independent.
 
 Hashes reflect the file's current on-disk content, which may differ from what was built. This is why §27 staleness detection is mandatory and why `policy.failOnStaleBuildArtifacts` defaults to `true`.
@@ -1428,6 +1456,16 @@ Everything not representable natively goes into `properties[]` (§28.8). The too
 
 **[Clarified: CycloneDX has no native NOASSERTION concept; this encoding is normative for this tool so consumers see an explicit, greppable marker rather than a silently absent field.]**
 
+**Retained license text (§22.9).** CycloneDX puts `license.text` beside `license.id`, so the identifier and the component's own wording are stated at once. A retained artifact of kind `license` is written to `components[].evidence.licenses[]` as `license.text` with `contentType: "text/plain"` and `encoding: "base64"`, under `license.id` when detection settled on an identifier the SPDX list carries, under `license.name` when it settled on one the list does not carry or on a compound expression — `id` is an enum in both schemas and `expression` has no room for an attachment — and under `name: "NOASSERTION"` when it settled on nothing. The bytes are the deliverable, and a text nobody could identify still has to reach the recipient. Where an observed license of §22.4 already names that identifier, the text attaches to that entry rather than adding a second one claiming the same license.
+
+`license.acknowledgement` is written **only** on an entry that carries retained text: `declared` when the text came from the component's own files, `concluded` when a curated value decided the identifier. The enum has two values and §22.4 has six evidence classes, so `sbomb:license:evidenceClass` stays beside it rather than being replaced by it.
+
+Artifacts of kind `notice` and `copyright` are **not** written to `evidence.licenses`: that array is license evidence, and §22.2 has just removed those files from the identification chain. They are named by `sbomb:component:noticeFile` with their canonical path and hash, and their bytes reach the attribution outputs.
+
+Whether the text is written at all is the `licenseTextInSBOM` setting of §33.1: `off` (the default) writes none, `evidence` writes them as above. The setting changes the document and nothing else — no side output may change it, because an SBOM that depends on which extra files somebody asked for is not a fixed point of its inputs (§29).
+
+Every retained artifact, of every kind, is named by a property carrying its provenance: `sbomb:component:licenseFile` for a grant and `sbomb:component:noticeFile` for attribution material, each repeated and sorted, each valued `<canonicalPath>@sha256:<hex>`. The field carries the bytes; the property carries where they came from, which the field cannot say. A `COPYRIGHT` file is named by `sbomb:component:noticeFile` too: it is attribution material reproduced under the same obligation, and its canonical path in the value says which file it was.
+
 ### 28.8 Property Namespace
 
 All properties use the prefix `sbomb:`. Names are `sbomb:<area>:<key>`. The complete catalogue is Appendix B. Property arrays are sorted by `(name, value)`. Multi-valued properties repeat the name.
@@ -1468,6 +1506,7 @@ Mandatory ordering rules:
 | `evidence.occurrences[]` | `location` |
 | `externalReferences[]` | `(type, url)` |
 | findings | `(id, subject.kind, subject.ref, message)` |
+| retained license artifacts (§22.9) | `(kind, canonical path)` |
 
 All sorting uses byte-wise comparison of UTF-8, not locale collation.
 
@@ -1491,6 +1530,7 @@ Concrete requirements:
 6. Regular expressions applied to untrusted input MUST be from `regexp` (RE2, linear time). Backtracking engines are forbidden.
 7. Redaction (`--redact-unanchored-paths`) MUST apply to the SBOM, the findings JSON, and the review report equally.
 8. The tool MUST NOT make network requests. There is no online license or vulnerability lookup.
+9. Retained license artifacts are bounded: at most 8 per component and at most 1 MiB each, and an artifact over the bound is dropped from the list rather than truncated (§22.9).
 
 ---
 
@@ -1650,7 +1690,10 @@ sectionGarbageCollection          prebuiltLibrariesRequireMapping
 staleToleranceSeconds             severityOverrides
 waiversFile                       headerEvidence
 failOnMissingSupplier             failOnMissingComponentHash
+licenseTextInSBOM
 ```
+
+`licenseTextInSBOM` ∈ `off` (default) | `evidence` decides whether the license texts retained per §22.9 are written into the document, as `evidence.licenses[].license.text`. It is a *content* setting like the ones above it: two runs that differ here are not comparable, and base64 inflates a license text by a third, which is why `generate` does not carry the texts unless it is asked to.
 
 ### 33.2 Built-in Profiles
 
@@ -1682,6 +1725,7 @@ Five profiles exist: `lenient`, `default`, `strict`, `cra`, and `host-linux`. `c
 | `pchHeaders` | include | include | include | include | — |
 | `sectionGarbageCollection` | ignore | ignore | annotate | ignore | — |
 | `prebuiltLibrariesRequireMapping` | false | true | true | true | — |
+| `licenseTextInSBOM` | off | off | off | off | — |
 
 Note that `cra` is deliberately **not** the strictest profile. It fails on missing CRA/BSI *fields* but tolerates weak evidence and review items, because the regulation is about documenting components, not about proving build provenance. `strict` is the engineering profile; `cra` is the compliance profile. A project may run both in CI, with only `cra` gating the release.
 
@@ -2063,7 +2107,7 @@ Logs are for humans debugging the tool. Findings are for users and CI. A conditi
 Two internal formats are normative because tests depend on them:
 
 * **Evidence dump** (`--evidence-dump`, `sbomb evidence`): Appendix C.
-* **Inventory dump** (`--inventory-dump`, used by golden tests): a JSON document with `schemaVersion`, `files[]` (sorted by canonical path) with class, hashes, size, missing flag, component id, and properties; and `components[]` sorted by bom-ref and then by id. The tiebreak is not cosmetic: deriving a bom-ref is the writer's job, so a component taken straight out of discovery has none, and without a second key the order of the dump would be the order of discovery.
+* **Inventory dump** (`--inventory-dump`, used by golden tests): a JSON document with `schemaVersion`, `files[]` (sorted by canonical path) with class, hashes, size, missing flag, component id, and properties; and `components[]` sorted by bom-ref and then by id. The tiebreak is not cosmetic: deriving a bom-ref is the writer's job, so a component taken straight out of discovery has none, and without a second key the order of the dump would be the order of discovery. A component entry also carries its retained license artifacts (§22.9) as `licenseArtifacts[]`, ordered by `(kind, file)`, each with kind, canonical path, SHA-256, size, and — for a grant — the detected identifier and the technique that detected it. The bytes are not in the dump: the hash pins them exactly and stays reviewable in a diff, which embedded base64 would not.
 
 Both MUST be stable, sorted, and independent of the CycloneDX writer, so that inventory correctness can be tested before any CycloneDX code exists.
 
@@ -2154,6 +2198,8 @@ Severity shown is the default and may be changed via `policy.severityOverrides`.
 | `UNKNOWN_PURL` | info | — | No package type assertable |
 | `UNKNOWN_LICENSE` | warning | `failOnUnknownLicense` | Component license is NOASSERTION |
 | `LICENSE_CONFLICT` | warning | `failOnReviewRequired` | Conflicting license evidence |
+| `FOSS_LICENSE_TEXT_MISSING` | info | — | Component has a license identifier but carries no retained text (§22.9) |
+| `FOSS_LICENSE_ARTIFACT_LIMIT` | info | — | More recognized license files, or a larger one, than the retention limit of §22.9 |
 | `MISSING_FILE_HASH` | warning | `failOnMissingHash` | File unavailable or unreadable |
 | `UNANCHORED_FILE` | warning | `failOnUnanchoredFile` | File matched no anchor |
 | `VCS_DIRTY` | info | `failOnReviewRequired` | Component working tree is dirty |
@@ -2217,6 +2263,8 @@ sbomb:component:scope            (project | third-party | sdk | toolchain | syst
 sbomb:component:headerOnly
 sbomb:component:vcsCommit        sbomb:component:vcsTag
 sbomb:component:vcsDirty
+sbomb:component:licenseFile      (repeated, <canonicalPath>@sha256:<hex>)
+sbomb:component:noticeFile       (repeated, <canonicalPath>@sha256:<hex>)
 sbomb:license:source             sbomb:license:evidenceClass
 sbomb:license:confidence         sbomb:license:review
 sbomb:license:reason             sbomb:license:conflictingValue

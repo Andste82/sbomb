@@ -63,6 +63,7 @@ var scopeSetters = map[string]func(*Config, string){
 	"systemLibraries":          func(c *Config, v string) { c.SystemLibraries = v },
 	"pchHeaders":               func(c *Config, v string) { c.PCHHeaders = v },
 	"sectionGarbageCollection": func(c *Config, v string) { c.SectionGarbageCollection = v },
+	"licenseTextInSBOM":        func(c *Config, v string) { c.LicenseTextInSBOM = v },
 }
 
 // allowedScopeValues rejects a typo rather than letting it silently disable a
@@ -73,6 +74,7 @@ var allowedScopeValues = map[string][]string{
 	"pchHeaders":               {"include", "annotate-only", "exclude"},
 	"sectionGarbageCollection": {"ignore", "annotate", "exclude"},
 	"headerEvidence":           {"dwarf-preferred", "union", "depfiles"},
+	"licenseTextInSBOM":        {"off", "evidence"},
 }
 
 // Resolve builds the effective policy from all four sources in precedence
@@ -117,6 +119,7 @@ func Resolve(cfgPolicy config.Policy, overrides Overrides) (Config, error) {
 		"systemLibraries":          cfgPolicy.SystemLibraries,
 		"pchHeaders":               cfgPolicy.PCHHeaders,
 		"sectionGarbageCollection": cfgPolicy.SectionGarbageCollection,
+		"licenseTextInSBOM":        cfgPolicy.LicenseTextInSBOM,
 	} {
 		if value == "" {
 			continue

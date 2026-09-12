@@ -97,6 +97,7 @@ type Policy struct {
 	PCHHeaders                       string `json:"pchHeaders,omitempty"`
 	SectionGarbageCollection         string `json:"sectionGarbageCollection,omitempty"`
 	PrebuiltLibrariesRequireMapping  *bool  `json:"prebuiltLibrariesRequireMapping,omitempty"`
+	LicenseTextInSBOM                string `json:"licenseTextInSBOM,omitempty"`
 
 	StaleToleranceSeconds *int              `json:"staleToleranceSeconds,omitempty"`
 	SeverityOverrides     map[string]string `json:"severityOverrides,omitempty"`

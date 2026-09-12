@@ -1691,7 +1691,10 @@ func TestAComponentRootResolvesALicenceThroughAnyRecognizedName(t *testing.T) {
 			t.Fatal(err)
 		}
 		resolver := &componentResolver{}
-		found, ok := resolver.licenseFromComponentRoot(root)
+		// Step 5 of section 22.2 is answered from the bytes section 22.9
+		// retained, so the same assertion now goes through retention.
+		retained := resolver.retainLicenseArtifacts(domain.FileID{Anchor: "project", RelPath: "dep/lib"}, root)
+		found, ok := licenseFromRetained(retained)
 		if !ok || found.Expression != "MIT" {
 			t.Errorf("licence in %q resolved to %#v, want MIT", name, found)
 		}

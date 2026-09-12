@@ -2,6 +2,62 @@
 
 ## 0.17.0
 
+### The licence text a component actually carries is kept
+
+An SPDX identifier is an index into a catalogue, not a deliverable. MIT and the
+BSD family name the rights holder *inside* the licence text, and the canonical
+text SPDX publishes for `MIT` carries a placeholder where that holder belongs --
+so shipping the canonical text discharges nothing, it ships a template where a
+notice was required. sbomb read those files and threw the bytes away.
+
+Every recognized licence file a mapped component root carries is now retained
+verbatim, with its canonical path and its SHA-256, and **all** of them are --
+not the first that resolves. The fixture's dual-licensed dependency ships both
+of its texts; before this, one of the two was never opened. Nothing is ever
+substituted for a text a component does not carry: a component with a resolved
+identifier and no text reports `FOSS_LICENSE_TEXT_MISSING`, which is precisely
+the case where the obligation cannot be satisfied from what sbomb saw.
+
+`NOTICE` and `COPYRIGHT` have left the licence identification chain
+(deviation D42). They are retained as kinds of their own, for reproduction,
+because a NOTICE that quotes a licence is strong evidence of *what must be
+reproduced* and poor evidence of *which licence applies* -- and a NOTICE
+deciding a component's licence is a wrong answer stated with high confidence.
+
+Where the bytes go:
+
+* the inventory dump gains `licenseArtifacts[]` per component -- kind,
+  canonical path, SHA-256, size, and the identifier and technique for a grant.
+  The digest pins the bytes exactly and stays readable in a diff, which a line
+  of embedded base64 would not;
+* the document gains `sbomb:component:licenseFile` and
+  `sbomb:component:noticeFile`, repeated and sorted, each
+  `<canonicalPath>@sha256:<hex>`;
+* the texts themselves go to `evidence.licenses[].license.text` as
+  `text/plain` + base64, with `license.acknowledgement` beside them, when the
+  new policy setting `licenseTextInSBOM` is `evidence`. Its default is `off`,
+  so `generate` keeps the output size it had: base64 inflates a licence by a
+  third.
+
+Retention costs no second read. Step 5 of section 22.2 and the observation of
+section 22.4 consume the retained bytes instead of opening the same file again,
+which they did twice before, the answer per component root is memoized so two
+components sharing a root read it once between them, and every read retention
+causes goes through one counter -- so "one read per licence file per root" is
+asserted by a test rather than claimed in a comment. What retention does add is the read of a licence file
+that identification never reached because a file-level `SPDX-License-Identifier`
+answered first; section 23 admits exactly that read, and a component whose
+header says `MIT` still owes its recipients the file.
+
+The limits are 8 artifacts per component and 1 MiB each. Exceeding either
+bounds the *list* and reports `FOSS_LICENSE_ARTIFACT_LIMIT`: a retained file is
+never truncated, because a truncated licence is not a licence.
+
+Both `p14-foss` goldens change -- the document gains the two properties, the
+inventory gains the artifacts -- and a second document golden records the
+`licenseTextInSBOM: "evidence"` run beside it. Every other golden is
+byte-identical.
+
 ### A library is recognized by the licence file it really carries
 
 A component that holds `LICENSE-MIT` and `LICENSE-APACHE` side by side holds no

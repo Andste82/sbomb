@@ -3,6 +3,7 @@ package cyclonedx
 import (
 	"bytes"
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -130,17 +131,17 @@ func (Writer) Build(document *sbomwriter.Document, options sbomwriter.Options) (
 	}
 	refs := newRefTable()
 
-	product := componentToCyclone(document.Product, refs.forProduct(document.Product), specVersion)
+	product := componentToCyclone(document.Product, refs.forProduct(document.Product), specVersion, options)
 	if product.Type == "" {
 		product.Type = "application"
 	}
 
 	components := make([]Component, 0, len(document.Artifacts)+len(document.Components)+len(document.Files))
 	for _, artifact := range document.Artifacts {
-		components = append(components, componentToCyclone(artifact, refs.forArtifact(artifact), specVersion))
+		components = append(components, componentToCyclone(artifact, refs.forArtifact(artifact), specVersion, options))
 	}
 	for _, grouping := range document.Components {
-		components = append(components, componentToCyclone(grouping, refs.forComponent(grouping), specVersion))
+		components = append(components, componentToCyclone(grouping, refs.forComponent(grouping), specVersion, options))
 	}
 	for _, file := range document.Files {
 		components = append(components, fileToCyclone(file, refs.forFile(file)))
@@ -280,7 +281,7 @@ func buildDependencies(document *sbomwriter.Document, refs *refTable, productRef
 	return dependencies
 }
 
-func componentToCyclone(component domain.Component, ref, specVersion string) Component {
+func componentToCyclone(component domain.Component, ref, specVersion string, options sbomwriter.Options) Component {
 	out := Component{
 		Type:    component.Type,
 		Name:    component.Name,
@@ -299,6 +300,7 @@ func componentToCyclone(component domain.Component, ref, specVersion string) Com
 	// which licences are present and nothing about how they relate, so the
 	// finding goes here and out.Licenses stays NOASSERTION until curated.
 	observed := observedLicensesToCyclone(component.LicenseEvidence, specVersion)
+	observed = withRetainedText(observed, component, options)
 	identity := versionIdentityEvidence(component)
 	if len(observed) > 0 || len(identity) > 0 {
 		out.Evidence = &Evidence{Licenses: observed, Identity: identity}
@@ -419,6 +421,92 @@ func observedLicensesToCyclone(findings []domain.LicenseFinding, specVersion str
 		}
 	}
 	return licenses
+}
+
+// withRetainedText adds the licence texts section 22.9 retained to a
+// component's licence evidence, when the run asked for them
+// (licenseTextInSBOM, section 33.1).
+//
+// CycloneDX puts license.text beside license.id, which is why the FOSS data is
+// bound to this format first: for MIT and the BSD family the rights holder is
+// inside the text, so an identifier alone discharges nothing, and SPDX 2.3 has
+// no slot for the verbatim text of a *listed* licence as a component carries
+// it.
+//
+// Only a grant is written. A NOTICE is retained for reproduction and section
+// 22.2 has removed it from the identification chain; putting its bytes into an
+// array called evidence.licenses would put it straight back.
+func withRetainedText(observed []License, component domain.Component, options sbomwriter.Options) []License {
+	if options.LicenseText != sbomwriter.LicenseTextEvidence {
+		return observed
+	}
+	// "declared" is a statement by the component about itself, which is what a
+	// licence file in its own root is. Where a curated value decided the
+	// identifier, the identifier is somebody's conclusion even though the
+	// bytes are the component's.
+	acknowledgement := "declared"
+	if len(component.Licenses) > 0 && component.Licenses[0].Source == "curated" {
+		acknowledgement = "concluded"
+	}
+	for _, artifact := range component.LicenseArtifacts {
+		if artifact.Kind != domain.LicenseArtifactLicense {
+			continue
+		}
+		text := &Attachment{
+			ContentType: "text/plain",
+			Encoding:    "base64",
+			Content:     base64.StdEncoding.EncodeToString(artifact.Bytes),
+		}
+		// An observation already naming this licence is the same statement
+		// about the same file. The text attaches to it rather than adding a
+		// second entry claiming the licence twice.
+		if attached := attachToObserved(observed, artifact.DetectedID, text, acknowledgement); attached {
+			continue
+		}
+		identifier := &LicenseIdentifier{Text: text, Acknowledgement: acknowledgement}
+		switch {
+		case artifact.DetectedID == "":
+			// None of the techniques of section 22.3 recognized the text, and
+			// no canonical text is ever substituted for it (section 22.9).
+			// The bytes are still the deliverable, so they are written under
+			// the marker section 28.7 uses for "no reliable assertion".
+			identifier.Name = "NOASSERTION"
+		case !knownSPDXID(artifact.DetectedID):
+			// Two cases, one answer. A compound expression states a relation
+			// between licences, and CycloneDX carries that in `expression`,
+			// which has no room for an attachment -- `id` would have to invent
+			// a licence called "MIT OR Apache-2.0". And an identifier the SPDX
+			// list does not carry cannot go in `id` at all, because the field
+			// is an enum in both schemas: a file is free to declare
+			// `LicenseRef-acme`, and the document has to stay valid. Both keep
+			// what the file declared, in the field that is free text.
+			identifier.Name = artifact.DetectedID
+		default:
+			identifier.ID = artifact.DetectedID
+		}
+		observed = append(observed, License{License: identifier})
+	}
+	return observed
+}
+
+// attachToObserved puts a retained text on an existing observation of the same
+// licence, and says whether it found one.
+func attachToObserved(observed []License, id string, text *Attachment, acknowledgement string) bool {
+	if id == "" {
+		return false
+	}
+	for i := range observed {
+		entry := observed[i].License
+		if entry == nil || entry.Text != nil {
+			continue
+		}
+		if entry.ID == id || entry.Name == id {
+			entry.Text = text
+			entry.Acknowledgement = acknowledgement
+			return true
+		}
+	}
+	return false
 }
 
 // versionIdentityEvidence says where the component's version came from.

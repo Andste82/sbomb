@@ -32,6 +32,25 @@ type InventoryComponent struct {
 	ID     string `json:"id"`
 	BomRef string `json:"bomRef,omitempty"`
 	Name   string `json:"name,omitempty"`
+	// LicenseArtifacts are the licence and notice files retained per section
+	// 22.9, ordered by (kind, file).
+	LicenseArtifacts []InventoryLicenseArtifact `json:"licenseArtifacts,omitempty"`
+}
+
+// InventoryLicenseArtifact records one retained licence artifact (section
+// 22.9). The bytes are deliberately absent: the digest pins them exactly and
+// stays reviewable in a diff, which a line of embedded base64 would not, and
+// the bytes themselves reach the document and the attribution outputs.
+type InventoryLicenseArtifact struct {
+	Kind      string `json:"kind"`
+	File      string `json:"file"`
+	SHA256    string `json:"sha256"`
+	SizeBytes int    `json:"sizeBytes"`
+	// DetectedID and Technique are empty for a notice or a copyright file,
+	// which section 22.2 no longer consults, and for a licence text that none
+	// of the techniques of section 22.3 recognized.
+	DetectedID string `json:"detectedId,omitempty"`
+	Technique  string `json:"technique,omitempty"`
 }
 
 // InventoryDump is the stable, CycloneDX-independent inventory document.
@@ -246,7 +265,10 @@ func BuildInventoryDump(files []domain.UsedFile, components []domain.Component) 
 
 	componentEntries := make([]InventoryComponent, 0, len(components))
 	for _, c := range components {
-		componentEntries = append(componentEntries, InventoryComponent{ID: c.ID, BomRef: c.BomRef, Name: c.Name})
+		componentEntries = append(componentEntries, InventoryComponent{
+			ID: c.ID, BomRef: c.BomRef, Name: c.Name,
+			LicenseArtifacts: licenseArtifactEntries(c.LicenseArtifacts),
+		})
 	}
 	// Section 40 orders components by bom-ref. A bom-ref is the writer's to
 	// derive (section 36.1), so a component handed here straight out of
@@ -261,6 +283,34 @@ func BuildInventoryDump(files []domain.UsedFile, components []domain.Component) 
 	})
 
 	return InventoryDump{SchemaVersion: 1, Files: ordered, Components: componentEntries}
+}
+
+// licenseArtifactEntries renders the retained artifacts of one component. The
+// order is section 29's -- (kind, file) -- and it is imposed here rather than
+// trusted, because the dump is what inventory correctness is asserted against
+// and a caller that assembled a component by hand has no such guarantee.
+func licenseArtifactEntries(artifacts []domain.LicenseArtifact) []InventoryLicenseArtifact {
+	if len(artifacts) == 0 {
+		return nil
+	}
+	entries := make([]InventoryLicenseArtifact, 0, len(artifacts))
+	for _, artifact := range artifacts {
+		entries = append(entries, InventoryLicenseArtifact{
+			Kind:       artifact.Kind,
+			File:       artifact.File.Canonical(),
+			SHA256:     artifact.SHA256,
+			SizeBytes:  len(artifact.Bytes),
+			DetectedID: artifact.DetectedID,
+			Technique:  artifact.Technique,
+		})
+	}
+	sort.Slice(entries, func(i, j int) bool {
+		if entries[i].Kind != entries[j].Kind {
+			return entries[i].Kind < entries[j].Kind
+		}
+		return entries[i].File < entries[j].File
+	})
+	return entries
 }
 
 // WriteDump serializes the inventory dump of section 40 to path. The format is

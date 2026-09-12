@@ -97,6 +97,26 @@ type License struct {
 type LicenseIdentifier struct {
 	ID   string `json:"id,omitempty"`
 	Name string `json:"name,omitempty"`
+	// Text is the licence as the component itself carries it, retained per
+	// specification section 22.9. The field exists at 1.6 and at 1.7, and it
+	// is what makes the identifier more than an index into a catalogue: for
+	// MIT and the BSD family the rights holder is inside the text.
+	Text *Attachment `json:"text,omitempty"`
+	// Acknowledgement is "declared" when the statement comes from the
+	// component itself and "concluded" when somebody decided it. It is
+	// written only beside a retained text: the enum has two values where
+	// section 22.4 has six evidence classes, so sbomb:license:evidenceClass
+	// stays beside it rather than being replaced by it.
+	Acknowledgement string `json:"acknowledgement,omitempty"`
+}
+
+// Attachment carries embedded content. CycloneDX requires the declared
+// encoding to match the content, so base64 and the bytes are written
+// together, never separately.
+type Attachment struct {
+	ContentType string `json:"contentType,omitempty"`
+	Encoding    string `json:"encoding,omitempty"`
+	Content     string `json:"content"`
 }
 
 type Property struct {
