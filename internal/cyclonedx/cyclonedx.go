@@ -62,9 +62,14 @@ type Component struct {
 	Supplier *OrganizationalEntity `json:"supplier,omitempty"`
 	// IsExternal is CycloneDX 1.7 and later: the environment is expected to
 	// provide this component rather than the assembly carrying it.
-	IsExternal         bool                `json:"isExternal,omitempty"`
-	Hashes             []Hash              `json:"hashes,omitempty"`
-	Licenses           []License           `json:"licenses,omitempty"`
+	IsExternal bool      `json:"isExternal,omitempty"`
+	Hashes     []Hash    `json:"hashes,omitempty"`
+	Licenses   []License `json:"licenses,omitempty"`
+	// Copyright is the component's concluded copyright notice: one string,
+	// so one statement, which is why it is written from a curated value
+	// alone. What sbomb observed is an array and lives in
+	// evidence.copyright (section 22.10).
+	Copyright          string              `json:"copyright,omitempty"`
 	ExternalReferences []ExternalReference `json:"externalReferences,omitempty"`
 	Properties         []Property          `json:"properties,omitempty"`
 	Evidence           *Evidence           `json:"evidence,omitempty"`
@@ -131,6 +136,20 @@ type Evidence struct {
 	// are not the component's licence: what applies is in Component.Licenses,
 	// and stays NOASSERTION until somebody concludes it.
 	Licenses []License `json:"licenses,omitempty"`
+	// Copyright are the copyright statements observed in the component's own
+	// files and in the licence artifacts it carries (section 22.10), verbatim.
+	// They are an observation for the same reason the licences above are:
+	// Component.Copyright is the conclusion, and only a curated value writes
+	// it.
+	Copyright []Copyright `json:"copyright,omitempty"`
+}
+
+// Copyright is one observed copyright notice. The schema requires the text and
+// permits nothing beside it, so where the notice was read from stays in the
+// inventory and in the attribution outputs rather than being invented into a
+// field the format does not have.
+type Copyright struct {
+	Text string `json:"text"`
 }
 
 // IdentityEvidence substantiates one identity field of a component: what it
@@ -244,6 +263,10 @@ func canonicalizeBOM(bom *BOM) {
 					return bom.Components[i].Evidence.Identity[j].Methods[a].Technique < bom.Components[i].Evidence.Identity[j].Methods[b].Technique
 				})
 			}
+			// Section 29: evidence.copyright[] is ordered by text.
+			sort.SliceStable(bom.Components[i].Evidence.Copyright, func(a, b int) bool {
+				return bom.Components[i].Evidence.Copyright[a].Text < bom.Components[i].Evidence.Copyright[b].Text
+			})
 			sort.SliceStable(bom.Components[i].Evidence.Occurrences, func(a, b int) bool {
 				return bom.Components[i].Evidence.Occurrences[a].Location < bom.Components[i].Evidence.Occurrences[b].Location
 			})

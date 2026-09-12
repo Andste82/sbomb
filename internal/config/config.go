@@ -163,8 +163,14 @@ type Component struct {
 	Version     string     `json:"version,omitempty"`
 	VersionFrom StringList `json:"versionFrom,omitempty"`
 	License     string     `json:"license,omitempty"`
-	Supplier    string     `json:"supplier,omitempty"`
-	PURL        string     `json:"purl,omitempty"`
+	// Copyright is the concluded copyright notice of the component, written
+	// to component.copyright. It is curated and nothing else: section 22.10
+	// keeps the observation -- what sbomb read out of the component's own
+	// files -- in evidence.copyright, and a conclusion is somebody's
+	// statement rather than a reading.
+	Copyright string `json:"copyright,omitempty"`
+	Supplier  string `json:"supplier,omitempty"`
+	PURL      string `json:"purl,omitempty"`
 }
 
 func Load(path string) (Config, error) {

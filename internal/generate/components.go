@@ -141,6 +141,11 @@ type componentResolver struct {
 	// what makes the claim of section 22.9 -- one read per file per root --
 	// hold without depending on how the roots were settled.
 	retainedByRoot map[string]retainedLicenses
+	// copyrights are the statements of section 22.10 that the hashing pass
+	// observed, keyed by canonical file identity. They arrive from above
+	// rather than being read here: extraction rides on the read the hash
+	// already needed (decision Q9).
+	copyrights map[string][]string
 }
 
 // systemPackageResult is what the pkg-config reader answered about one used
@@ -936,6 +941,11 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 	// Licenses (section 22.2).
 	licenseFindings := r.resolveComponentLicense(component, files, curated, hasCurated, rootInfo, described.License)
 	findings = append(findings, licenseFindings...)
+
+	// Copyright statements (section 22.10). After the licences, because the
+	// artifacts section 22.9 retained are one of the two sources: for MIT and
+	// BSD the holder is inside the licence text.
+	findings = append(findings, r.resolveComponentCopyright(component, files, curated, hasCurated)...)
 
 	// A component with no hashable file cannot carry a component hash
 	// (section 1.5(1) via the MISSING_COMPONENT_HASH gate).

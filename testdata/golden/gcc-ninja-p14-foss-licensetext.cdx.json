@@ -2,7 +2,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "version": 1,
-  "serialNumber": "urn:uuid:212eaff6-969b-5eb0-8a51-b527bbb0e258",
+  "serialNumber": "urn:uuid:7d7e83a1-54b4-5dd1-90ea-248acbb07039",
   "metadata": {
     "tools": [
       {
@@ -100,7 +100,17 @@
           "name": "sbomb:license:technique",
           "value": "spdx-identifier"
         }
-      ]
+      ],
+      "evidence": {
+        "copyright": [
+          {
+            "text": "Copyright (c) 2026 Fixture Unlicensed Authors"
+          },
+          {
+            "text": "Copyright (c) 2026 sbomb fixture authors"
+          }
+        ]
+      }
     },
     {
       "type": "file",
@@ -759,6 +769,11 @@
               "acknowledgement": "declared"
             }
           }
+        ],
+        "copyright": [
+          {
+            "text": "Copyright 2026 Fixture Apache Library Authors"
+          }
         ]
       }
     },
@@ -825,6 +840,11 @@
               },
               "acknowledgement": "declared"
             }
+          }
+        ],
+        "copyright": [
+          {
+            "text": "Copyright (c) 2026, Fixture BSD Header Authors"
           }
         ]
       }
@@ -893,6 +913,17 @@
               "acknowledgement": "declared"
             }
           }
+        ],
+        "copyright": [
+          {
+            "text": "Copyright (C)  year >  name of author >"
+          },
+          {
+            "text": "Copyright (C) 1991, 1999 Free Software Foundation, Inc."
+          },
+          {
+            "text": "Copyright (C) 2026 Fixture LGPL Library Authors"
+          }
         ]
       }
     },
@@ -959,6 +990,11 @@
               },
               "acknowledgement": "declared"
             }
+          }
+        ],
+        "copyright": [
+          {
+            "text": "Copyright (c) 2026 Fixture MIT Library Authors"
           }
         ]
       }
@@ -1041,6 +1077,11 @@
               },
               "acknowledgement": "declared"
             }
+          }
+        ],
+        "copyright": [
+          {
+            "text": "Copyright (c) 2026 Fixture Dual Licensed Authors"
           }
         ]
       }

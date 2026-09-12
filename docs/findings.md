@@ -14,7 +14,7 @@ same build produce identical output.
 
 <!-- BEGIN GENERATED CATALOGUE -->
 
-This build emits 51 of the 60 identifiers below. The rest are specified and
+This build emits 53 of the 62 identifiers below. The rest are specified and
 reserved: they describe evidence this version does not yet read, and a run will
 never report them. They are listed and marked so that the table is the whole
 catalogue rather than a snapshot of one version.
@@ -34,6 +34,8 @@ catalogue rather than a snapshot of one version.
 | `DEBUG_INFO_UNAVAILABLE` | info | — | Artifact stripped or no DWARF | emitted |
 | `DYNAMIC_DEPENDENCIES_IGNORED` | info | — | Artifact has `DT_NEEDED`/imports while `systemLibraries=exclude` | emitted |
 | `EVIDENCE_UNREADABLE` | warning | — | A metadata file was found but could not be parsed, so nothing was taken from it | emitted |
+| `FOSS_COPYRIGHT_LIMIT` | info | — | More distinct copyright statements than the limit of §22.10 | emitted |
+| `FOSS_COPYRIGHT_MISSING` | info | — | Component carries no copyright statement and none was curated (§22.10) | emitted |
 | `FOSS_LICENSE_ARTIFACT_LIMIT` | info | — | More recognized license files, or a larger one, than the retention limit of §22.9 | emitted |
 | `FOSS_LICENSE_TEXT_MISSING` | info | — | Component has a license identifier but carries no retained text (§22.9) | emitted |
 | `HEADER_EVIDENCE_FALLBACK` | info | — | A CU had no DWARF coverage; depfile used instead | emitted |

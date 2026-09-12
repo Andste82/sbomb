@@ -110,6 +110,12 @@ info
     subject: build//__fixture_build__
 - DYNAMIC_DEPENDENCIES_IGNORED: 2 system file(s) were excluded by the default inclusion policy
     subject: build//__fixture_build__
+- FOSS_COPYRIGHT_MISSING: no copyright statement was found in the component's files or in its retained licence artifacts
+    subject: component/component:p02-static
+    remediation: If the component carries a notice sbomb did not recognize, record it in components[].copyright.
+- FOSS_COPYRIGHT_MISSING: no copyright statement was found in the component's files or in its retained licence artifacts
+    subject: component/toolchain:gnu-13.3.0
+    remediation: If the component carries a notice sbomb did not recognize, record it in components[].copyright.
 - REPRODUCIBLE_MODE_OMITS_TIMESTAMP: the document omits metadata.timestamp and is therefore not a CRA deliverable SBOM
     subject: run//__fixture_build__
 - UNKNOWN_PURL: no package type could be asserted, so no purl is emitted

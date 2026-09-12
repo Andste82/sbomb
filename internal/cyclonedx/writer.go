@@ -302,8 +302,18 @@ func componentToCyclone(component domain.Component, ref, specVersion string, opt
 	observed := observedLicensesToCyclone(component.LicenseEvidence, specVersion)
 	observed = withRetainedText(observed, component, options)
 	identity := versionIdentityEvidence(component)
-	if len(observed) > 0 || len(identity) > 0 {
-		out.Evidence = &Evidence{Licenses: observed, Identity: identity}
+	// The copyright statements the component's files state (section 22.10).
+	// Unlike the licence text this is never gated: it is a line of prose per
+	// holder, so it costs the document nothing, and for MIT and the BSD
+	// family it is half of what the licence obliges a distributor to
+	// reproduce.
+	copyrights := observedCopyrightToCyclone(component.Copyrights)
+	// A conclusion, and only from a curated value: CycloneDX gives the
+	// conclusion one string and the observation an array, which is the same
+	// separation section 22.4 draws for licences.
+	out.Copyright = component.Copyright
+	if len(observed) > 0 || len(identity) > 0 || len(copyrights) > 0 {
+		out.Evidence = &Evidence{Licenses: observed, Identity: identity, Copyright: copyrights}
 	}
 	// 1.7 can say that the environment provides a component; 1.6 cannot, and
 	// leaves the fact to sbomb:component:scope and the build-environment
@@ -421,6 +431,27 @@ func observedLicensesToCyclone(findings []domain.LicenseFinding, specVersion str
 		}
 	}
 	return licenses
+}
+
+// observedCopyrightToCyclone renders the statements of section 22.10 as
+// evidence.copyright[]. The text is handed over exactly as it was stored: a
+// reformatted year range or a normalized holder is an alteration of a notice
+// somebody is obliged to reproduce.
+func observedCopyrightToCyclone(statements []domain.CopyrightStatement) []Copyright {
+	if len(statements) == 0 {
+		return nil
+	}
+	out := make([]Copyright, 0, len(statements))
+	for _, statement := range statements {
+		if statement.Text == "" {
+			continue
+		}
+		out = append(out, Copyright{Text: statement.Text})
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	return out
 }
 
 // withRetainedText adds the licence texts section 22.9 retained to a
