@@ -22,10 +22,16 @@ import (
 //   - mit-lib compiles three sources and exactly one member is extracted;
 //   - apache-lib and lgpl-lib have both of theirs extracted;
 //   - gpl-gen is a code generator that was run during the build and linked
-//     into nothing, so none of it may appear.
+//     into nothing, so nothing of it may appear as a linked file -- its source
+//     is in the set on gcc-ninja, reached through the generator-input edges
+//     of section 16, and it is the one file of the set that is not
+//     distributed. What is asserted here is the set; what makes it
+//     build-time-only is asserted in TestFOSSFixtureComponentAttributes.
 //
 // Two toolchains, because the set is derived from evidence rather than from
-// what one generator happens to record.
+// what one generator happens to record -- with one exception, stated below:
+// the generating rule's inputs are in the Ninja build graph and section 16
+// lists no source that answers for the Makefiles generator.
 func TestFOSSFixtureLinkedObjectSet(t *testing.T) {
 	want := []string{
 		"file:build:generated/table.c",
@@ -46,8 +52,16 @@ func TestFOSSFixtureLinkedObjectSet(t *testing.T) {
 		"file:project:dep/nolicense/src/nolicense.c",
 		"file:project:src/main.c",
 	}
+	// Section 16's second evidence source is the Ninja build graph, so only
+	// there is the generator's own source in the set (open question Q14).
+	generated := "file:project:dep/gpl-gen/table_gen.c"
 	for _, toolchain := range []string{"gcc-ninja", "gcc-make"} {
 		t.Run(toolchain, func(t *testing.T) {
+			want := want
+			if toolchain == "gcc-ninja" {
+				want = append(append([]string{}, want...), generated)
+				sort.Strings(want)
+			}
 			buildDir := testutil.CorpusBuildDir(t, toolchain, "p14-foss")
 			output := filepath.Join(t.TempDir(), "out.cdx.json")
 			code, _, stderr := execute([]string{"generate", "--build-dir", buildDir, "--policy", "lenient", "--output", output, "--reproducible"})

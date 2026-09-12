@@ -2,6 +2,140 @@
 
 ## 0.17.0
 
+### What is distributed, how it got there, and whether it was changed
+
+Three attributes, all derived from the evidence graph that was already being
+built. They are what no repository scanner can produce, because a scanner sees
+a directory and sbomb sees a link.
+
+**The distribution role.** Every file and every component is `distributed` or
+`build-time-only`, and the definition runs in that direction on purpose:
+`build-time-only` means reachable from an artifact *exclusively* through
+`generator-input`, `generator-output` or `toolchain` edges. Section 8.3 defines
+fourteen evidence types and six are emitted today; an allowlist of
+"distributing" types would make `build-time-only` the default for anything
+unlisted, so adding an evidence type later could drop a component out of an
+attribution document in silence. An evidence type the derivation has never seen
+therefore leaves the node distributed -- omission fails towards inclusion, and a
+regression test says so. A file that is a generator input *and* is compiled is
+distributed: the generator read it, and it is also in the artifact.
+
+The document says it twice, once in CycloneDX's own vocabulary and once in
+sbomb's. `component.scope` becomes `excluded` for a build-time-only component
+and `required` otherwise, so a consumer that never heard of sbomb reads the
+common case straight out of the specified field; `sbomb:component:distribution
+Role` stays beside it, because scope is runtime reachability and the role is
+presence in the artifact, and the two agree on the two common cases and diverge
+on the dynamically linked system library.
+
+**The linkage form.** How a component's files actually got in:
+`static-archive-member`, `static-object`, `dynamic`, `header-only`,
+`embedded-asset`, `generated-source`, `build-tool`. A component may carry
+several, sorted. Where the linker took members out of a static archive,
+`sbomb:component:archiveMembersUsed` is `<used>/<total>` read from the archive
+index -- the fixture's MIT library compiles three sources and ships one, so it
+says `1/3`, which is the number that makes section 12 visible in a document.
+Where no archive could be read the property is absent rather than a ratio
+against a guessed denominator.
+
+**The modification status**, tri-state, and the third state is the point. `true`
+from a dirty checkout at the component root or from package metadata recording
+an applied patch; `false` only after a positive check -- a git root, clean,
+standing exactly on its recorded tag; `unknown` for everything else, including
+introspection being off. Reporting a check that never ran as "not modified"
+turns a gap into a claim, and it is the one error an auditor will find. It
+reaches `component.pedigree`, which is the field CycloneDX specifies for it, and
+that node is written **only** after a positive check: an absent pedigree does
+not mean unmodified, so `sbomb:component:modified` carries the three states
+beside it because pedigree cannot say `unknown`. Patch records are read from a
+Conan recipe's `conandata.yml` and a vcpkg `portfile.cmake` in the component
+root; the patch itself is never read, and `pedigree.patches[].diff` stays empty,
+because sbomb records that a patch was applied and not what it contained.
+
+The git root has to be the component root itself. Asking git from inside a
+directory answers for the nearest enclosing repository, so a library copied into
+a project's tree would inherit the project's dirty state -- and an edit to the
+manufacturer's own code would be published as a modification of a third-party
+component.
+
+Two findings are narrower as a result: `FOSS_LICENSE_TEXT_MISSING` and
+`FOSS_COPYRIGHT_MISSING` now ask only about a distributed component. A
+build-time-only code generator with a licence identifier and no retained text is
+not an attribution gap. `FOSS_MODIFICATION_UNKNOWN` (info) is new and says that
+the question was asked and could not be answered.
+
+### The build graph says what generated a file, so a GPL-2.0 generator is no longer invisible
+
+The attributes above answer the question the whole export turns on -- is this
+GPL-2.0 code generator part of what we ship? -- and on the fixture there was
+nothing to answer it about. Section 16 lists three sources of generator-input
+evidence and **none of them was implemented**: the only `generator-input` edges
+any run produced came from a packaging manifest. So `p14-foss`, which compiles
+`dep/gpl-gen/table_gen.c` into a `table_gen` executable, runs it during the
+build and links the `generated/table.c` it wrote, had no edge from the
+generated file to the generator. The generator was not in the evidence graph,
+not a component of any document, and not reported as missing either.
+
+Source 2 is now read: the **explicit** inputs of the Ninja build edge that
+produced the file, and an input the build itself produced is followed -- eight
+edges deep at most -- so the generator's own source enters the graph through the
+object mapping section 13.2 already does. `p14-foss` now carries
+`component:gpl-gen`: `GPL-2.0-only`, `build-time-only`, linkage form
+`build-tool`, `scope: excluded`, with its licence file and its copyright
+statements read like any other component's. That is the sentence the export
+exists to make: *this GPL-2.0 code is in the build and not in the product, and
+here is the evidence chain*.
+
+Two narrower decisions came with it, both in deviation D45:
+
+* **Order-only inputs are not read**, although section 16's earlier wording
+  asked for them with strength `weak`. A CMake build graph puts its target
+  ordering set after the `||`, so every static library of the project would
+  become an input of every generated file -- and since everything below a
+  `generator-input` edge is build-time-only, the two archive members the linker
+  *never extracted* then appeared in the document through the generator.
+  Measured on the fixture before the rule was narrowed. Explicit inputs are
+  where CMake records a custom command's `DEPENDS`, which is the list the
+  section wants.
+* **An object is never a node on the chain.** It is a transient build artifact
+  and section 13.2 has already said what it was compiled from, so the chain is
+  recorded to that source directly.
+
+`MISSING_GENERATOR_INPUT_EVIDENCE` (warning), which section 16 has always
+required for a generated file with no known input, is emitted for the first
+time -- per generated file the document represents. The absence is not a detail:
+a generated source whose inputs are unknown means a generator, and a licence,
+that the document does not describe, and silence there cannot be told apart
+from a build that generated nothing. It is what names the one remaining gap:
+section 16 lists no source that answers for the Makefiles generator, which
+records the same dependency in `build.make`, so the same project built with
+Make yields a used-file set without the generator and says so (open question
+Q14).
+
+One parsing defect came out with it. The Ninja parser ended a rule's explicit
+input list at the token `|` and not at `||`, so for an edge whose only
+separator was the order-only one, every order-only input had always been
+reported as an explicit input. No caller had noticed, because the two existing
+ones filter by suffix for a source or an object.
+
+### Smaller corrections in the same area
+
+* A patch record larger than the section 30 bound, or a component with more
+  recorded patches than the bound, now reports `INPUT_LIMIT_EXCEEDED`. A
+  refused record used to read as "no patch record", which published `unknown`
+  for a component whose own metadata says it was patched. Both bounds are now
+  named in section 30 and in section 19.4.
+* What a patch record *says* about a patch reaches the document. `conandata.yml`
+  `patch_description` was read into `domain.Patch` and then dropped; it is now
+  in `pedigree.notes` beside the patch file name, which is where a name already
+  went, because the schema lets `pedigree.patches[]` carry nothing but its type,
+  diff and resolves.
+* "Standing exactly on a tag" is decided by the absence of the whole
+  `-<count>-g<hash>` suffix `git describe` appends, not by the absence of the
+  two characters `-g`. A tag named `v1.0-gamma` or `release-gcc13` used to read
+  as a distance from a tag, so a component standing exactly on it reported
+  `unknown` instead of `false`.
+
 ### The copyright statements a component states are kept, verbatim
 
 The other half of attribution. For MIT, ISC and the BSD family the copyright

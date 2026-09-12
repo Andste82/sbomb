@@ -2,7 +2,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "version": 1,
-  "serialNumber": "urn:uuid:307fbae4-12b8-542b-8e9c-f5ec8da66ced",
+  "serialNumber": "urn:uuid:85d19346-c246-567d-92d7-75affaa45386",
   "metadata": {
     "tools": [
       {
@@ -58,6 +58,7 @@
       "type": "application",
       "name": "project",
       "bom-ref": "component:project",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -79,8 +80,28 @@
           "value": "unstructured"
         },
         {
+          "name": "sbomb:component:archiveMembersUsed",
+          "value": "1/2"
+        },
+        {
           "name": "sbomb:component:detectedBy",
           "value": "anchor:project"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-object"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:root",
@@ -126,6 +147,14 @@
           "value": "unknown"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "dynamic"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "abs:KERNEL32.dll"
         }
@@ -151,6 +180,14 @@
         {
           "name": "sbomb:component:scope",
           "value": "unknown"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
         },
         {
           "name": "sbomb:path:canonical",
@@ -180,6 +217,14 @@
           "value": "unknown"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "abs:MSVCRTD.lib(amdsecgs.obj)"
         }
@@ -205,6 +250,14 @@
         {
           "name": "sbomb:component:scope",
           "value": "unknown"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
         },
         {
           "name": "sbomb:path:canonical",
@@ -234,6 +287,14 @@
           "value": "unknown"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "abs:MSVCRTD.lib(commit_mode.obj)"
         }
@@ -259,6 +320,14 @@
         {
           "name": "sbomb:component:scope",
           "value": "unknown"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
         },
         {
           "name": "sbomb:path:canonical",
@@ -288,6 +357,14 @@
           "value": "unknown"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "abs:MSVCRTD.lib(default_local_stdio_options.obj)"
         }
@@ -313,6 +390,14 @@
         {
           "name": "sbomb:component:scope",
           "value": "unknown"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
         },
         {
           "name": "sbomb:path:canonical",
@@ -342,6 +427,14 @@
           "value": "unknown"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "abs:MSVCRTD.lib(dyn_tls_dtor.obj)"
         }
@@ -367,6 +460,14 @@
         {
           "name": "sbomb:component:scope",
           "value": "unknown"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
         },
         {
           "name": "sbomb:path:canonical",
@@ -396,6 +497,14 @@
           "value": "unknown"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "abs:MSVCRTD.lib(env_mode.obj)"
         }
@@ -421,6 +530,14 @@
         {
           "name": "sbomb:component:scope",
           "value": "unknown"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
         },
         {
           "name": "sbomb:path:canonical",
@@ -450,6 +567,14 @@
           "value": "unknown"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "abs:MSVCRTD.lib(exe_main.obj)"
         }
@@ -475,6 +600,14 @@
         {
           "name": "sbomb:component:scope",
           "value": "unknown"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
         },
         {
           "name": "sbomb:path:canonical",
@@ -504,6 +637,14 @@
           "value": "unknown"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "abs:MSVCRTD.lib(gs_report.obj)"
         }
@@ -529,6 +670,14 @@
         {
           "name": "sbomb:component:scope",
           "value": "unknown"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
         },
         {
           "name": "sbomb:path:canonical",
@@ -558,6 +707,14 @@
           "value": "unknown"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "abs:MSVCRTD.lib(gshandler.obj)"
         }
@@ -583,6 +740,14 @@
         {
           "name": "sbomb:component:scope",
           "value": "unknown"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
         },
         {
           "name": "sbomb:path:canonical",
@@ -612,6 +777,14 @@
           "value": "unknown"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "abs:MSVCRTD.lib(guard_support.obj)"
         }
@@ -637,6 +810,14 @@
         {
           "name": "sbomb:component:scope",
           "value": "unknown"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
         },
         {
           "name": "sbomb:path:canonical",
@@ -666,6 +847,14 @@
           "value": "unknown"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "abs:MSVCRTD.lib(init.obj)"
         }
@@ -691,6 +880,14 @@
         {
           "name": "sbomb:component:scope",
           "value": "unknown"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
         },
         {
           "name": "sbomb:path:canonical",
@@ -720,6 +917,14 @@
           "value": "unknown"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "abs:MSVCRTD.lib(invalid_parameter_handler.obj)"
         }
@@ -745,6 +950,14 @@
         {
           "name": "sbomb:component:scope",
           "value": "unknown"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
         },
         {
           "name": "sbomb:path:canonical",
@@ -774,6 +987,14 @@
           "value": "unknown"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "abs:MSVCRTD.lib(matherr_detection.obj)"
         }
@@ -799,6 +1020,14 @@
         {
           "name": "sbomb:component:scope",
           "value": "unknown"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
         },
         {
           "name": "sbomb:path:canonical",
@@ -828,6 +1057,14 @@
           "value": "unknown"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "abs:MSVCRTD.lib(pdblkup.obj)"
         }
@@ -853,6 +1090,14 @@
         {
           "name": "sbomb:component:scope",
           "value": "unknown"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
         },
         {
           "name": "sbomb:path:canonical",
@@ -882,6 +1127,14 @@
           "value": "unknown"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "abs:MSVCRTD.lib(tncleanup.obj)"
         }
@@ -907,6 +1160,14 @@
         {
           "name": "sbomb:component:scope",
           "value": "unknown"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
         },
         {
           "name": "sbomb:path:canonical",
@@ -936,6 +1197,14 @@
           "value": "unknown"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "abs:MSVCRTD.lib(ucrt_stubs.obj)"
         }
@@ -961,6 +1230,14 @@
         {
           "name": "sbomb:component:scope",
           "value": "unknown"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
         },
         {
           "name": "sbomb:path:canonical",
@@ -990,6 +1267,14 @@
           "value": "unknown"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "abs:MSVCRTD.lib(utility.obj)"
         }
@@ -1017,6 +1302,14 @@
           "value": "unknown"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "abs:MSVCRTD.lib(utility_desktop.obj)"
         }
@@ -1042,6 +1335,14 @@
         {
           "name": "sbomb:component:scope",
           "value": "unknown"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "dynamic"
         },
         {
           "name": "sbomb:path:canonical",
@@ -1077,6 +1378,14 @@
           "value": "unknown"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "abs:crypto.lib"
         }
@@ -1102,6 +1411,14 @@
         {
           "name": "sbomb:component:scope",
           "value": "unknown"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-object"
         },
         {
           "name": "sbomb:path:canonical",
@@ -1131,6 +1448,14 @@
           "value": "unknown"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "dynamic"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "abs:ucrtbased.dll"
         }
@@ -1156,6 +1481,14 @@
         {
           "name": "sbomb:component:scope",
           "value": "project"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
         },
         {
           "name": "sbomb:path:canonical",
@@ -1189,6 +1522,14 @@
           "value": "project-header"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "header-only"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "project:crypto.h"
         }
@@ -1216,6 +1557,14 @@
           "value": "project"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-object"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "project:main.c"
         }
@@ -1225,6 +1574,7 @@
       "type": "library",
       "name": "unknown:abs/crypto.lib",
       "bom-ref": "component:unknown-abs-crypto.lib",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -1246,8 +1596,24 @@
           "value": "structured"
         },
         {
+          "name": "sbomb:component:archiveMembersUsed",
+          "value": "1/2"
+        },
+        {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:root",
@@ -1279,6 +1645,7 @@
       "type": "library",
       "name": "unknown:abs/KERNEL32.dll",
       "bom-ref": "component:unknown-abs-kernel32.dll",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -1302,6 +1669,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "dynamic"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -1329,6 +1708,7 @@
       "type": "library",
       "name": "unknown:abs/main.c.obj",
       "bom-ref": "component:unknown-abs-main.c.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -1352,6 +1732,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-object"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -1379,6 +1771,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib",
       "bom-ref": "component:unknown-abs-msvcrtd.lib",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -1402,6 +1795,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -1429,6 +1834,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(amdsecgs.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-amdsecgs.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -1452,6 +1858,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -1479,6 +1897,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(argv_mode.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-argv_mode.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -1502,6 +1921,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -1529,6 +1960,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(commit_mode.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-commit_mode.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -1552,6 +1984,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -1579,6 +2023,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(cpu_disp.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-cpu_disp.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -1602,6 +2047,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -1629,6 +2086,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(default_local_stdio_options.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-default_local_stdio_options.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -1652,6 +2110,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -1679,6 +2149,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(denormal_control.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-denormal_control.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -1702,6 +2173,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -1729,6 +2212,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(dyn_tls_dtor.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-dyn_tls_dtor.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -1752,6 +2236,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -1779,6 +2275,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(dyn_tls_init.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-dyn_tls_init.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -1802,6 +2299,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -1829,6 +2338,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(env_mode.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-env_mode.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -1852,6 +2362,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -1879,6 +2401,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(error.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-error.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -1902,6 +2425,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -1929,6 +2464,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(exe_main.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-exe_main.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -1952,6 +2488,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -1979,6 +2527,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(file_mode.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-file_mode.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -2002,6 +2551,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -2029,6 +2590,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(gs_report.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-gs_report.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -2052,6 +2614,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -2079,6 +2653,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(gs_support.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-gs_support.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -2102,6 +2677,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -2129,6 +2716,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(gshandler.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-gshandler.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -2152,6 +2740,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -2179,6 +2779,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(guard_dispatch.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-guard_dispatch.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -2202,6 +2803,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -2229,6 +2842,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(guard_support.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-guard_support.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -2252,6 +2866,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -2279,6 +2905,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(guard_xfg_dispatch.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-guard_xfg_dispatch.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -2302,6 +2929,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -2329,6 +2968,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(init.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-init.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -2352,6 +2992,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -2379,6 +3031,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(initsect.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-initsect.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -2402,6 +3055,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -2429,6 +3094,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(invalid_parameter_handler.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-invalid_parameter_handler.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -2452,6 +3118,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -2479,6 +3157,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(matherr.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-matherr.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -2502,6 +3181,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -2529,6 +3220,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(matherr_detection.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-matherr_detection.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -2552,6 +3244,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -2579,6 +3283,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(new_mode.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-new_mode.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -2602,6 +3307,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -2629,6 +3346,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(pdblkup.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-pdblkup.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -2652,6 +3370,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -2679,6 +3409,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(thread_locale.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-thread_locale.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -2702,6 +3433,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -2729,6 +3472,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(tncleanup.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-tncleanup.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -2752,6 +3496,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -2779,6 +3535,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(ucrt_detection.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-ucrt_detection.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -2802,6 +3559,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -2829,6 +3598,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(ucrt_stubs.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-ucrt_stubs.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -2852,6 +3622,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -2879,6 +3661,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(userapi.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-userapi.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -2902,6 +3685,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -2929,6 +3724,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(utility.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-utility.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -2952,6 +3748,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -2979,6 +3787,7 @@
       "type": "library",
       "name": "unknown:abs/MSVCRTD.lib(utility_desktop.obj)",
       "bom-ref": "component:unknown-abs-msvcrtd.lib-utility_desktop.obj",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -3002,6 +3811,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -3029,6 +3850,7 @@
       "type": "library",
       "name": "unknown:abs/ucrtbased.dll",
       "bom-ref": "component:unknown-abs-ucrtbased.dll",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -3052,6 +3874,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "dynamic"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",
@@ -3079,6 +3913,7 @@
       "type": "library",
       "name": "unknown:abs/VCRUNTIME140D.dll",
       "bom-ref": "component:unknown-abs-vcruntime140d.dll",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -3102,6 +3937,18 @@
         {
           "name": "sbomb:component:detectedBy",
           "value": "unresolved"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "dynamic"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:scope",

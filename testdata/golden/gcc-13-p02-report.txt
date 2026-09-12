@@ -116,6 +116,12 @@ info
 - FOSS_COPYRIGHT_MISSING: no copyright statement was found in the component's files or in its retained licence artifacts
     subject: component/toolchain:gnu-13.3.0
     remediation: If the component carries a notice sbomb did not recognize, record it in components[].copyright.
+- FOSS_MODIFICATION_UNKNOWN: whether this component was modified could not be established, so it is reported as unknown rather than as unmodified
+    subject: component/component:p02-static
+    remediation: No repository and no package-manager patch record were found at the component root; a curated components[] entry is the only way to state this.
+- FOSS_MODIFICATION_UNKNOWN: whether this component was modified could not be established, so it is reported as unknown rather than as unmodified
+    subject: component/toolchain:gnu-13.3.0
+    remediation: No repository and no package-manager patch record were found at the component root; a curated components[] entry is the only way to state this.
 - REPRODUCIBLE_MODE_OMITS_TIMESTAMP: the document omits metadata.timestamp and is therefore not a CRA deliverable SBOM
     subject: run//__fixture_build__
 - UNKNOWN_PURL: no package type could be asserted, so no purl is emitted

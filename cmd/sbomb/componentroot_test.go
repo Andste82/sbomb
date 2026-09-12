@@ -81,6 +81,11 @@ func findingIDs(t *testing.T, path string) map[string]bool {
 //     all, which is the shape a licence-file boundary exists for;
 //   - multi-license carries LICENSE-MIT and LICENSE-APACHE and no file called
 //     LICENSE, so a boundary list of exact names never saw it.
+//
+// gpl-gen is in the document on gcc-ninja only, where the build graph names
+// the inputs of the generating rule (section 16); its root and its licence are
+// resolved exactly like a linked component's, which is the point -- a
+// build-time-only component is described, not omitted.
 func TestFOSSFixtureComponentRoots(t *testing.T) {
 	want := map[string]string{
 		"component:project":       "project:",
@@ -91,6 +96,7 @@ func TestFOSSFixtureComponentRoots(t *testing.T) {
 		"component:multi-license": "project:dep/multi-license",
 		"component:nocopyright":   "project:dep/nocopyright",
 	}
+	generatorRoot := map[string]string{"component:gpl-gen": "project:dep/gpl-gen"}
 	wantLicenses := map[string]string{
 		"component:project":       "MIT",
 		"component:apache-lib":    "Apache-2.0",
@@ -100,8 +106,13 @@ func TestFOSSFixtureComponentRoots(t *testing.T) {
 		"component:multi-license": "MIT OR Apache-2.0",
 		"component:nocopyright":   "0BSD",
 	}
+	generatorLicense := map[string]string{"component:gpl-gen": "GPL-2.0-only"}
 	for _, toolchain := range []string{"gcc-ninja", "gcc-make"} {
 		t.Run(toolchain, func(t *testing.T) {
+			want, wantLicenses := want, wantLicenses
+			if toolchain == "gcc-ninja" {
+				want, wantLicenses = merged(want, generatorRoot), merged(wantLicenses, generatorLicense)
+			}
 			directory := t.TempDir()
 			output := filepath.Join(directory, "out.cdx.json")
 			findingsPath := filepath.Join(directory, "findings.json")
@@ -149,6 +160,18 @@ func TestFOSSFixtureComponentRoots(t *testing.T) {
 			}
 		})
 	}
+}
+
+// merged is one expectation map plus the entries a toolchain adds to it.
+func merged(base, extra map[string]string) map[string]string {
+	out := make(map[string]string, len(base)+len(extra))
+	for key, value := range base {
+		out[key] = value
+	}
+	for key, value := range extra {
+		out[key] = value
+	}
+	return out
 }
 
 // The licence texts that reach F4 are the ones the root carries, and a

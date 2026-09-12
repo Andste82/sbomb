@@ -11,6 +11,12 @@
       "properties": {
         "sbomb:component:scope": [
           "build"
+        ],
+        "sbomb:file:distributionRole": [
+          "distributed"
+        ],
+        "sbomb:file:linkageForm": [
+          "static-object"
         ]
       }
     },
@@ -27,6 +33,12 @@
         ],
         "sbomb:evidence:header:class": [
           "project-header"
+        ],
+        "sbomb:file:distributionRole": [
+          "distributed"
+        ],
+        "sbomb:file:linkageForm": [
+          "header-only"
         ]
       }
     },
@@ -40,6 +52,12 @@
       "properties": {
         "sbomb:component:scope": [
           "project"
+        ],
+        "sbomb:file:distributionRole": [
+          "distributed"
+        ],
+        "sbomb:file:linkageForm": [
+          "static-archive-member"
         ]
       }
     },
@@ -53,6 +71,12 @@
       "properties": {
         "sbomb:component:scope": [
           "project"
+        ],
+        "sbomb:file:distributionRole": [
+          "distributed"
+        ],
+        "sbomb:file:linkageForm": [
+          "static-archive-member"
         ]
       }
     },
@@ -69,6 +93,31 @@
         ],
         "sbomb:evidence:header:class": [
           "project-header"
+        ],
+        "sbomb:file:distributionRole": [
+          "distributed"
+        ],
+        "sbomb:file:linkageForm": [
+          "header-only"
+        ]
+      }
+    },
+    {
+      "canonical": "project:dep/gpl-gen/table_gen.c",
+      "class": "source",
+      "hashes": {
+        "SHA-256": "0fc1a9accdc2f926915e2055cc8606fe5cc656de79706ba5d965d6168a647c8b"
+      },
+      "sizeBytes": 808,
+      "properties": {
+        "sbomb:component:scope": [
+          "project"
+        ],
+        "sbomb:file:distributionRole": [
+          "build-time-only"
+        ],
+        "sbomb:file:linkageForm": [
+          "build-tool"
         ]
       }
     },
@@ -85,6 +134,12 @@
         ],
         "sbomb:evidence:header:class": [
           "project-header"
+        ],
+        "sbomb:file:distributionRole": [
+          "distributed"
+        ],
+        "sbomb:file:linkageForm": [
+          "header-only"
         ]
       }
     },
@@ -98,6 +153,12 @@
       "properties": {
         "sbomb:component:scope": [
           "project"
+        ],
+        "sbomb:file:distributionRole": [
+          "distributed"
+        ],
+        "sbomb:file:linkageForm": [
+          "static-archive-member"
         ]
       }
     },
@@ -111,6 +172,12 @@
       "properties": {
         "sbomb:component:scope": [
           "project"
+        ],
+        "sbomb:file:distributionRole": [
+          "distributed"
+        ],
+        "sbomb:file:linkageForm": [
+          "static-archive-member"
         ]
       }
     },
@@ -127,6 +194,12 @@
         ],
         "sbomb:evidence:header:class": [
           "project-header"
+        ],
+        "sbomb:file:distributionRole": [
+          "distributed"
+        ],
+        "sbomb:file:linkageForm": [
+          "header-only"
         ]
       }
     },
@@ -140,6 +213,12 @@
       "properties": {
         "sbomb:component:scope": [
           "project"
+        ],
+        "sbomb:file:distributionRole": [
+          "distributed"
+        ],
+        "sbomb:file:linkageForm": [
+          "static-archive-member"
         ]
       }
     },
@@ -156,6 +235,12 @@
         ],
         "sbomb:evidence:header:class": [
           "project-header"
+        ],
+        "sbomb:file:distributionRole": [
+          "distributed"
+        ],
+        "sbomb:file:linkageForm": [
+          "header-only"
         ]
       }
     },
@@ -169,6 +254,12 @@
       "properties": {
         "sbomb:component:scope": [
           "project"
+        ],
+        "sbomb:file:distributionRole": [
+          "distributed"
+        ],
+        "sbomb:file:linkageForm": [
+          "static-archive-member"
         ]
       }
     },
@@ -185,6 +276,12 @@
         ],
         "sbomb:evidence:header:class": [
           "project-header"
+        ],
+        "sbomb:file:distributionRole": [
+          "distributed"
+        ],
+        "sbomb:file:linkageForm": [
+          "header-only"
         ]
       }
     },
@@ -198,6 +295,12 @@
       "properties": {
         "sbomb:component:scope": [
           "project"
+        ],
+        "sbomb:file:distributionRole": [
+          "distributed"
+        ],
+        "sbomb:file:linkageForm": [
+          "static-archive-member"
         ]
       }
     },
@@ -214,6 +317,12 @@
         ],
         "sbomb:evidence:header:class": [
           "project-header"
+        ],
+        "sbomb:file:distributionRole": [
+          "distributed"
+        ],
+        "sbomb:file:linkageForm": [
+          "header-only"
         ]
       }
     },
@@ -227,6 +336,12 @@
       "properties": {
         "sbomb:component:scope": [
           "project"
+        ],
+        "sbomb:file:distributionRole": [
+          "distributed"
+        ],
+        "sbomb:file:linkageForm": [
+          "static-archive-member"
         ]
       }
     },
@@ -240,6 +355,12 @@
       "properties": {
         "sbomb:component:scope": [
           "project"
+        ],
+        "sbomb:file:distributionRole": [
+          "distributed"
+        ],
+        "sbomb:file:linkageForm": [
+          "static-object"
         ]
       }
     }
@@ -275,6 +396,20 @@
           "sha256": "4bd971475aab8e30017fb65c7f5a6c4da171ee8ee25b3580fad812227f8cb2a2",
           "sizeBytes": 1513,
           "detectedId": "BSD-3-Clause",
+          "technique": "spdx-template"
+        }
+      ]
+    },
+    {
+      "id": "component:gpl-gen",
+      "name": "gpl-gen",
+      "licenseArtifacts": [
+        {
+          "kind": "license",
+          "file": "project:dep/gpl-gen/LICENSE",
+          "sha256": "d8263ec29367df2e648c0eca1b908e725e8b638280aab0641c196b9efa37f4f9",
+          "sizeBytes": 17712,
+          "detectedId": "GPL-2.0-only",
           "technique": "spdx-template"
         }
       ]

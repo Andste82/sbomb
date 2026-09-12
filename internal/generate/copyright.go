@@ -111,7 +111,13 @@ func (r *componentResolver) resolveComponentCopyright(component *domain.Componen
 		component.Copyright = strings.TrimSpace(curated.Copyright)
 	}
 
-	if len(kept) == 0 && component.Copyright == "" {
+	// A distributed component alone (section 24.5): the notice MIT and the BSD
+	// family oblige a distributor to reproduce is owed for what is shipped,
+	// and a build-time-only code generator ships nothing. Section 22.10 asked
+	// every mapped component until the role was a resolved fact, because
+	// narrowing it before then would have meant guessing which components are
+	// distributed.
+	if component.DistributionRole == domain.RoleDistributed && len(kept) == 0 && component.Copyright == "" {
 		findings = append(findings, componentFinding("FOSS_COPYRIGHT_MISSING", domain.SeverityInfo, component,
 			"no copyright statement was found in the component's files or in its retained licence artifacts",
 			"If the component carries a notice sbomb did not recognize, record it in components[].copyright."))

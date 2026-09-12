@@ -2,7 +2,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "version": 1,
-  "serialNumber": "urn:uuid:9be806f0-d64e-55af-9b76-c83e4cabd3a0",
+  "serialNumber": "urn:uuid:e9a30a4c-0db0-528b-be93-89d1008d9221",
   "metadata": {
     "tools": [
       {
@@ -58,6 +58,7 @@
       "type": "application",
       "name": "project",
       "bom-ref": "component:project",
+      "scope": "required",
       "licenses": [
         {
           "expression": "MIT"
@@ -77,8 +78,28 @@
           "value": "unstructured"
         },
         {
+          "name": "sbomb:component:archiveMembersUsed",
+          "value": "1/1"
+        },
+        {
           "name": "sbomb:component:detectedBy",
           "value": "anchor:project"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-object"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:root",
@@ -140,6 +161,14 @@
           "value": "build"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-object"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "build:generated/table.c"
         }
@@ -177,6 +206,14 @@
           "value": "project-header"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "header-only"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "project:dep/apache-lib/include/apache_lib.h"
         }
@@ -210,6 +247,14 @@
           "value": "project"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "project:dep/apache-lib/src/apache_one.c"
         }
@@ -241,6 +286,14 @@
         {
           "name": "sbomb:component:scope",
           "value": "project"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
         },
         {
           "name": "sbomb:path:canonical",
@@ -280,8 +333,57 @@
           "value": "project-header"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "header-only"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "project:dep/bsd-hdr/include/bsd_hdr.h"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "table_gen.c",
+      "bom-ref": "file:project:dep/gpl-gen/table_gen.c",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "0fc1a9accdc2f926915e2055cc8606fe5cc656de79706ba5d965d6168a647c8b"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "build-time-only"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "build-tool"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/gpl-gen/table_gen.c"
         }
       ]
     },
@@ -317,6 +419,14 @@
           "value": "project-header"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "header-only"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "project:dep/lgpl-lib/include/lgpl_lib.h"
         }
@@ -350,6 +460,14 @@
           "value": "project"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "project:dep/lgpl-lib/src/lgpl_core.c"
         }
@@ -381,6 +499,14 @@
         {
           "name": "sbomb:component:scope",
           "value": "project"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
         },
         {
           "name": "sbomb:path:canonical",
@@ -420,6 +546,14 @@
           "value": "project-header"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "header-only"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "project:dep/mit-lib/include/mit_lib.h"
         }
@@ -451,6 +585,14 @@
         {
           "name": "sbomb:component:scope",
           "value": "project"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
         },
         {
           "name": "sbomb:path:canonical",
@@ -490,6 +632,14 @@
           "value": "project-header"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "header-only"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "project:dep/multi-license/include/multi.h"
         }
@@ -521,6 +671,14 @@
         {
           "name": "sbomb:component:scope",
           "value": "project"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
         },
         {
           "name": "sbomb:path:canonical",
@@ -560,6 +718,14 @@
           "value": "project-header"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "header-only"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "project:dep/nocopyright/include/nocopyright.h"
         }
@@ -591,6 +757,14 @@
         {
           "name": "sbomb:component:scope",
           "value": "project"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
         },
         {
           "name": "sbomb:path:canonical",
@@ -630,6 +804,14 @@
           "value": "project-header"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "header-only"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "project:dep/nolicense/include/nolicense.h"
         }
@@ -661,6 +843,14 @@
         {
           "name": "sbomb:component:scope",
           "value": "project"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
         },
         {
           "name": "sbomb:path:canonical",
@@ -696,6 +886,14 @@
           "value": "project"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-object"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "project:src/main.c"
         }
@@ -705,6 +903,7 @@
       "type": "library",
       "name": "apache-lib",
       "bom-ref": "component:apache-lib",
+      "scope": "required",
       "licenses": [
         {
           "expression": "Apache-2.0"
@@ -724,12 +923,28 @@
           "value": "structured"
         },
         {
+          "name": "sbomb:component:archiveMembersUsed",
+          "value": "2/2"
+        },
+        {
           "name": "sbomb:component:detectedBy",
           "value": "package-metadata:LICENSE"
         },
         {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
           "name": "sbomb:component:licenseFile",
           "value": "project:dep/apache-lib/LICENSE@sha256:0b8f6fef304298b6a8a8ad91e7a5b0b2255231f39c8fc4ab84774f8e22d07f98"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:noticeFile",
@@ -768,6 +983,7 @@
       "type": "library",
       "name": "bsd-hdr",
       "bom-ref": "component:bsd-hdr",
+      "scope": "required",
       "licenses": [
         {
           "expression": "BSD-3-Clause"
@@ -791,8 +1007,24 @@
           "value": "package-metadata:LICENSE"
         },
         {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:headerOnly",
+          "value": "true"
+        },
+        {
           "name": "sbomb:component:licenseFile",
           "value": "project:dep/bsd-hdr/LICENSE@sha256:4bd971475aab8e30017fb65c7f5a6c4da171ee8ee25b3580fad812227f8cb2a2"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "header-only"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:root",
@@ -825,11 +1057,12 @@
     },
     {
       "type": "library",
-      "name": "lgpl-lib",
-      "bom-ref": "component:lgpl-lib",
+      "name": "gpl-gen",
+      "bom-ref": "component:gpl-gen",
+      "scope": "excluded",
       "licenses": [
         {
-          "expression": "LGPL-2.1-only"
+          "expression": "GPL-2.0-only"
         }
       ],
       "properties": [
@@ -850,8 +1083,102 @@
           "value": "package-metadata:LICENSE"
         },
         {
+          "name": "sbomb:component:distributionRole",
+          "value": "build-time-only"
+        },
+        {
+          "name": "sbomb:component:licenseFile",
+          "value": "project:dep/gpl-gen/LICENSE@sha256:d8263ec29367df2e648c0eca1b908e725e8b638280aab0641c196b9efa37f4f9"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "build-tool"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:component:root",
+          "value": "project:dep/gpl-gen"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "third-party"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "file-level"
+        },
+        {
+          "name": "sbomb:license:source",
+          "value": "project:dep/gpl-gen/table_gen.c"
+        },
+        {
+          "name": "sbomb:license:technique",
+          "value": "spdx-identifier"
+        }
+      ],
+      "evidence": {
+        "copyright": [
+          {
+            "text": "Copyright (C) 1989, 1991 Free Software Foundation, Inc."
+          },
+          {
+            "text": "Copyright (C) 2026 Fixture GPL Generator Authors"
+          },
+          {
+            "text": "Copyright (C) yyyy>  name of author>"
+          }
+        ]
+      }
+    },
+    {
+      "type": "library",
+      "name": "lgpl-lib",
+      "bom-ref": "component:lgpl-lib",
+      "scope": "required",
+      "licenses": [
+        {
+          "expression": "LGPL-2.1-only"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:archiveMembersUsed",
+          "value": "2/2"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "package-metadata:LICENSE"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
           "name": "sbomb:component:licenseFile",
           "value": "project:dep/lgpl-lib/LICENSE@sha256:b5af363e432a5f6ba35216c5feaf4a54461fc7916eec64f17453cb24a70ecf2d"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:root",
@@ -892,6 +1219,7 @@
       "type": "library",
       "name": "mit-lib",
       "bom-ref": "component:mit-lib",
+      "scope": "required",
       "licenses": [
         {
           "expression": "MIT"
@@ -911,12 +1239,28 @@
           "value": "structured"
         },
         {
+          "name": "sbomb:component:archiveMembersUsed",
+          "value": "1/3"
+        },
+        {
           "name": "sbomb:component:detectedBy",
           "value": "package-metadata:LICENSE"
         },
         {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
           "name": "sbomb:component:licenseFile",
           "value": "project:dep/mit-lib/LICENSE@sha256:931fcdc2d230c2d176c937a73a35d00af205d8414ec6526c83654fadb5d2f52d"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:root",
@@ -951,6 +1295,7 @@
       "type": "library",
       "name": "multi-license",
       "bom-ref": "component:multi-license",
+      "scope": "required",
       "licenses": [
         {
           "expression": "MIT OR Apache-2.0"
@@ -970,8 +1315,16 @@
           "value": "structured"
         },
         {
+          "name": "sbomb:component:archiveMembersUsed",
+          "value": "1/1"
+        },
+        {
           "name": "sbomb:component:detectedBy",
           "value": "package-metadata:LICENSE-APACHE"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
         },
         {
           "name": "sbomb:component:licenseFile",
@@ -980,6 +1333,14 @@
         {
           "name": "sbomb:component:licenseFile",
           "value": "project:dep/multi-license/LICENSE-MIT@sha256:59d026162035ee799ad4a49867be3ef92276bfe13250cf10796ec0d3b856596e"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:root",
@@ -1014,6 +1375,7 @@
       "type": "library",
       "name": "nocopyright",
       "bom-ref": "component:nocopyright",
+      "scope": "required",
       "licenses": [
         {
           "expression": "0BSD"
@@ -1033,12 +1395,28 @@
           "value": "structured"
         },
         {
+          "name": "sbomb:component:archiveMembersUsed",
+          "value": "1/1"
+        },
+        {
           "name": "sbomb:component:detectedBy",
           "value": "package-metadata:LICENSE"
         },
         {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
           "name": "sbomb:component:licenseFile",
           "value": "project:dep/nocopyright/LICENSE@sha256:6fd46bc279753ff2f06019924d5e4877729545e72c93165d2fb3bab0bdeebec2"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:root",
@@ -1076,6 +1454,12 @@
       "ref": "component:bsd-hdr",
       "dependsOn": [
         "file:project:dep/bsd-hdr/include/bsd_hdr.h"
+      ]
+    },
+    {
+      "ref": "component:gpl-gen",
+      "dependsOn": [
+        "file:project:dep/gpl-gen/table_gen.c"
       ]
     },
     {
@@ -1132,6 +1516,9 @@
       "ref": "file:project:dep/bsd-hdr/include/bsd_hdr.h"
     },
     {
+      "ref": "file:project:dep/gpl-gen/table_gen.c"
+    },
+    {
       "ref": "file:project:dep/lgpl-lib/include/lgpl_lib.h"
     },
     {
@@ -1172,6 +1559,7 @@
       "dependsOn": [
         "component:apache-lib",
         "component:bsd-hdr",
+        "component:gpl-gen",
         "component:lgpl-lib",
         "component:mit-lib",
         "component:multi-license",

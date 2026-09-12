@@ -178,7 +178,7 @@ func TestALicenceWithoutItsTextIsReported(t *testing.T) {
 	file := domain.UsedFile{ID: fileID("project", "dep/headeronly/src/only.c")}
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
 		map[string]string{file.ID.Canonical(): source}, map[string]string{"project": root}, nil)
-	component := &domain.Component{ID: "component:headeronly", Name: "headeronly", DetectedBy: "package-metadata:LICENSE-MIT"}
+	component := &domain.Component{ID: "component:headeronly", Name: "headeronly", DetectedBy: "package-metadata:LICENSE-MIT", DistributionRole: domain.RoleDistributed}
 	findings := resolver.enrichComponent(component, []domain.UsedFile{file})
 
 	if hasFindingID(findings, "FOSS_LICENSE_TEXT_MISSING") {
@@ -195,7 +195,7 @@ func TestALicenceWithoutItsTextIsReported(t *testing.T) {
 	}
 	bare := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
 		map[string]string{file.ID.Canonical(): source}, map[string]string{"project": root}, nil)
-	bareComponent := &domain.Component{ID: "component:headeronly", Name: "headeronly"}
+	bareComponent := &domain.Component{ID: "component:headeronly", Name: "headeronly", DistributionRole: domain.RoleDistributed}
 	findings = bare.enrichComponent(bareComponent, []domain.UsedFile{file})
 	if len(bareComponent.LicenseArtifacts) != 0 {
 		t.Errorf("retained %#v from a root that carries nothing", bareComponent.LicenseArtifacts)

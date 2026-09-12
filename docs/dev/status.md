@@ -221,6 +221,37 @@
   the paths it opens so that the same run with and without the observer can be
   shown to open the same set. `internal/inventory` learns nothing about
   licences.
+- Sections 24.5 and 16: **what is distributed, how it got there, and whether
+  it was changed.** Three attributes, all out of the evidence graph and nothing
+  else -- and one evidence source added to the graph, because the graph did not
+  contain the case the attributes exist for.
+  The distribution role is `distributed` unless a node is reachable from an
+  artifact *exclusively* through `generator-input`, `generator-output` or
+  `toolchain` edges -- stated in that direction so that an evidence type added
+  later cannot remove a component from an attribution document by omission, and
+  a regression test pins it with an evidence type the derivation has never
+  seen. It reaches the document as `component.scope` (`excluded` for
+  build-time-only, `required` otherwise) and as
+  `sbomb:component:distributionRole`, which are two axes rather than one. The
+  linkage form is one of seven values per component, sorted, with
+  `sbomb:component:archiveMembersUsed` = `<used>/<total>` read from the archive
+  index where the linker extracted members -- `1/3` for the fixture's MIT
+  library -- and absent where no archive could be read. `header-only` and
+  `generated-source` are aggregate conclusions rather than per-file ones
+  (deviation D44), and `EnvironmentProvided` now shares the `dynamic` test with
+  the linkage form, which closed a condition that was unreachable from any real
+  run. The modification status of section 19.4 is tri-state: `true` from a
+  dirty checkout at the component root or from a patch a Conan `conandata.yml`
+  or a vcpkg `portfile.cmake` records, `false` only after a positive check, and
+  `unknown` for everything else including introspection being off. It reaches
+  `component.pedigree`, written **only** after a positive check, with
+  `sbomb:component:modified` beside it because pedigree cannot say `unknown`.
+  The git root must be the component root itself, or a vendored library would
+  inherit the enclosing project's dirty state, and "standing on a tag" is
+  decided by the absence of the whole `-<count>-g<hash>` suffix rather than of
+  the two characters `-g`, so a tag called `v1.0-gamma` is a tag. Both patch
+  readers are bounded by section 30 item 10 and report `INPUT_LIMIT_EXCEEDED`
+  rather than passing a refused record off as "no patches".
 
 ## Known Gaps
 
@@ -296,21 +327,44 @@ outputs contain the paths.
 
 The FOSS attribution export is planned in a branch of its own
 (`docs/dev/foss/`), eight milestones from the fixture to the rendered notices
-document. F1 to F4 have landed: the fixture, the source harvest, the inventory
+document. F1 to F6 have landed: the fixture, the source harvest, the inventory
 dump, the source-tree relocation that lets the fixture be read at all, the
 component root as a resolved fact, the retention of the licence and notice
-bytes those roots carry, and the copyright statements of section 22.10. What is
-not built is the rest of what the notices document is made of: the distribution
-role, the linkage form and the tri-state modification status (F6), the `foss`
-subcommand and `--foss-out` with the four documents they write (F7), and the
-user documentation and CI wiring (F8). No obligation is named yet, and nothing
+bytes those roots carry, the copyright statements of section 22.10, and the
+distribution role, linkage form and modification status of sections 24.5 and
+19.4. What is not built is the rendering: the `foss` subcommand and
+`--foss-out` with the four documents they write (F7), and the user
+documentation and CI wiring (F8). No obligation is named yet, and nothing
 renders the attribution material -- it is in the document and nowhere else.
 
-One consequence of F5 is visible and is not a defect of the implementation:
-`FOSS_COPYRIGHT_MISSING` is asked of every mapped component, a build tool
-included, because the distribution role that would narrow it is F6's work. It
-is informational and gates nothing, and `UNKNOWN_LICENSE` already treats such a
-component the same way.
+Now that the distribution role is a resolved fact, `FOSS_LICENSE_TEXT_MISSING`
+and `FOSS_COPYRIGHT_MISSING` are asked only of a distributed component (open
+question Q11): a build tool with no notice is not an attribution gap.
+
+Section 16's second generator-input source -- the Ninja build graph's edge
+inputs for the generating rule -- is read as part of this, because without it
+the fixture's GPL-2.0 code generator was in no document at all and the
+milestone's first test could not be written. `p14-foss` now carries
+`component:gpl-gen` as `GPL-2.0-only`, `build-time-only`, `build-tool`,
+`scope: excluded`: a GPL-2.0 generator described and excluded rather than
+unseen, which is the case the whole attribution track exists for. Only the
+explicit inputs of an edge are read and an input the build produced is followed
+eight edges deep, so the generator's own source enters the graph through its
+object mapping; order-only inputs are not read, because a CMake build graph
+puts its target ordering set there and reading it made the two *unextracted*
+members of the fixture's MIT archive build-time-only files of the document
+(deviation D45).
+
+One gap of F6 remains, and one of section 16 takes its place. The corpus
+carries no `.git` -- the harvest skips it -- so every fixture component's
+modification status is `unknown`, and the tri-state is exercised over
+repositories a unit test builds in a temporary directory (open question Q9).
+And section 16 lists no evidence source that answers for the Makefiles
+generator, which records the same dependency in `build.make`: built with Make,
+`p14-foss` does not carry the generator, and `MISSING_GENERATOR_INPUT_EVIDENCE`
+-- which section 16 requires for exactly this and which no run emitted before
+-- is what names the difference. One project, two build systems, two used-file
+sets (open question Q14).
 
 What is left is not phase work:
 

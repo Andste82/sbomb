@@ -111,11 +111,21 @@ func TestRelocatedSourceTreeResolvesLicences(t *testing.T) {
 			t.Errorf("licence of %s = %q, want %q", ref, licenses[ref], expression)
 		}
 	}
-	// The generator is not in the document at all -- nothing links it -- so its
-	// GPL text must not have been picked up by anything either.
+	// The generator's GPL text belongs to the generator and to nothing else.
+	// It is a component here because the build graph names it as the input of
+	// the file it wrote (section 16), and it is excluded from distribution --
+	// but the licence of a neighbouring directory must never land on a
+	// component that does not carry it, which is what this asserts.
+	if licenses["component:gpl-gen"] != "GPL-2.0-only" {
+		t.Errorf("licence of component:gpl-gen = %q, want GPL-2.0-only",
+			licenses["component:gpl-gen"])
+	}
 	for ref, expression := range licenses {
+		if ref == "component:gpl-gen" {
+			continue
+		}
 		if strings.HasPrefix(expression, "GPL-2.0") {
-			t.Errorf("%s carries %q; nothing of the code generator is linked", ref, expression)
+			t.Errorf("%s carries %q; only the code generator is under it", ref, expression)
 		}
 	}
 }

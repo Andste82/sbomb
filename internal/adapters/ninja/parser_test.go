@@ -162,3 +162,32 @@ func TestTokenize(t *testing.T) {
 		}
 	}
 }
+
+// An order-only input is not an input the rule consumed, and the separator
+// that introduces it is "||" and not "|". Reading them as explicit inputs is
+// what made a CMake target ordering set look like the inputs of a generating
+// rule (deviation D45): every library of the build stands after the "||" of a
+// custom command.
+func TestOrderOnlyInputsAreNotExplicitInputs(t *testing.T) {
+	input := `build generated/table.c: CUSTOM_COMMAND table_gen || libmit.a libapache.a
+build app.o: CXX_COMPILER app.cpp | pch.h || phony_target
+`
+	f, err := ParseFile(strings.NewReader(input))
+	if err != nil {
+		t.Fatalf("ParseFile failed: %v", err)
+	}
+	generated, ok := f.Edges["generated/table.c"]
+	if !ok {
+		t.Fatal("the custom command edge is missing")
+	}
+	if len(generated.Inputs) != 1 || generated.Inputs[0] != "table_gen" {
+		t.Errorf("inputs = %v, want only the generator the rule declared", generated.Inputs)
+	}
+	object, ok := f.Edges["app.o"]
+	if !ok {
+		t.Fatal("the compile edge is missing")
+	}
+	if len(object.Inputs) != 1 || object.Inputs[0] != "app.cpp" {
+		t.Errorf("inputs = %v, want the source alone", object.Inputs)
+	}
+}

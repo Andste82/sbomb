@@ -785,7 +785,7 @@ Out of scope: linker scripts (unless `includeLinkerScripts`), CMake files, docum
 
 A header-only library is included when a header belonging to its component appears in the dependencies of a used translation unit. The tool MUST NOT require a dedicated object file.
 
-A header-only component is a normal grouping component containing file components. It receives property `sbomb:component:headerOnly=true`.
+A header-only component is a normal grouping component containing file components. It receives property `sbomb:component:headerOnly=true` — which is a conclusion about the component and is decided in §24.5: a component is header-only when no file of it contributed object code, so a library whose header was read *and* whose archive member was extracted is not header-only however many headers it has.
 
 ---
 
@@ -802,12 +802,20 @@ schema.yaml -> generator -> generated.c -> generated.o -> firmware
 Generator input evidence sources, in priority order:
 
 1. CMake File API custom-command `dependencies`/`byproducts`.
-2. Ninja `build` edge inputs for the generating rule (including implicit and order-only inputs; order-only inputs are recorded with strength `weak`).
+2. Ninja `build` edge inputs for the generating rule.
 3. Depfile emitted by the generator.
 
 An explicit `generators[]` mapping was a fourth source. It is removed: it is an unverifiable assertion from a configuration file in a tool that otherwise records only what it can prove, and no build has needed it (deviation D20).
 
-If a generated file is used but no generator input evidence exists, emit `MISSING_GENERATOR_INPUT_EVIDENCE`.
+If a generated file is used but no generator input evidence exists, emit `MISSING_GENERATOR_INPUT_EVIDENCE`. The finding is emitted per generated file the document represents, because the absence is not a detail: a generated source whose inputs are unknown means the generator behind it — and its licence — is not described by the document, and silence there cannot be told apart from a build that generated nothing.
+
+**[Amended in v3.1: source 2 is implemented, and what it reads is stated.]** Source 2 reads the **explicit** inputs of the edge that produces the file. Order-only inputs are **not** read, which is a change from the earlier wording: a CMake-generated build graph puts its target ordering set there, so every library of the build would become an input of every generated file (deviation D45). Implicit inputs are not read either, for the same reason and with less cost: CMake records a custom command's `DEPENDS` among the explicit inputs.
+
+An input that the build graph itself produces is followed, because that is how a generator's own code enters the graph: the generator is an input of the file it wrote, and the source it was compiled from is an input of it. The chain is followed at most `8` edges deep (§30). An **object** is never a node on this chain — it is a transient build artifact (§13.1) and §13.2 has already answered what it was compiled from, so the chain is recorded to that source directly; where no mapping claimed the object, the build graph is asked for its inputs instead.
+
+The consequence is the one §24.5 turns on: everything below a `generator-input` edge is reachable from the artifact only through that edge, so a code generator and its sources are `build-time-only` and the file it wrote is `distributed`. A generator whose licence differs from the product's is therefore described and excluded rather than unseen.
+
+Sources 1 and 3 are not implemented, and neither is any source that answers for the Makefiles generator — `build.make` records the same dependency and §16 does not list it. A project with a code generator therefore yields a smaller used-file set when it was built with Make than with Ninja, and `MISSING_GENERATOR_INPUT_EVIDENCE` is what names the difference (open question Q14).
 
 Classification: `generated-source`, `generated-header`, `generated-binary`, `generated-asset`, `generated-config`.
 
@@ -952,6 +960,25 @@ Git repository boundaries MAY be used as component boundaries. Git metadata MAY 
 Git URLs MUST be normalized: `git@host:org/repo.git` → `https://host/org/repo`, credentials stripped. If the working tree is dirty, property `sbomb:component:vcsDirty=true` is set and `VCS_DIRTY` is emitted (informational).
 
 The repository URL MUST be written as an external reference of type `vcs`, not as a property: CycloneDX specifies a field for it and §28.1 gives the specified field precedence. It is emitted at both specification versions. `sbomb:component:vcsCommit` and `sbomb:component:vcsDirty` qualify that URL and sit in the reference's property bag at 1.7, where external references have one, and on the component at 1.6. Neither is ever a stand-in for a supplier.
+
+**Modification status is tri-state.** Apache-2.0 §4(b) and GPL-2.0 §2(a) oblige a distributor to state that modified files were changed, so an attribution export has to report, per component, whether it was modified. Three states, and the third is not a formality:
+
+| Signal | Result |
+|---|---|
+| The component root's git tree is dirty | `true` |
+| Package metadata records applied patches | `true` |
+| A git root was found at the component root, was clean, and stood exactly on its recorded tag | `false` |
+| Anything else, including `--allow-introspection` being off | `unknown` |
+
+`false` MUST be emitted only after a positive check. **Absence of information is `unknown`, never `false`**: reporting a check that never ran as "not modified" turns a gap into a claim, and it is the one error an auditor will find.
+
+The git root MUST be the component root itself — a `.git` directory or file directly in it. Asking git from inside the root would answer for the nearest *enclosing* repository, so a library copied into a project's tree would inherit the project's dirty state, and an edit to the manufacturer's own code would be published as a modification of a third-party component. The two commands used are the ones §9.2 permits: `git describe --tags --always --dirty` answers both questions at once, and `git rev-parse HEAD` is what distinguishes a tag from the abbreviated commit `--always` falls back to — an abbreviated hash is a prefix of the full commit and a tag name is not. "Standing exactly on a tag" is decided by the absence of the whole distance suffix `-<count>-g<hash>` at the end of the answer, not by the presence of the two characters `-g`: a tag may contain them (`v1.0-gamma`), and reading such a tag as a distance would report `unknown` for a component standing exactly on it. That commit is also what the document's pedigree records.
+
+Patch evidence is read from the package metadata **directly in the component root** and nowhere else, in the manner of an enricher (§21): a Conan recipe's `conandata.yml` `patches:` block, and the patch file names a vcpkg `portfile.cmake` applies. Neither the patch nor its content is ever read — sbomb records *that* a patch was applied, which is why `pedigree.patches[].diff` stays empty (requirement R6). Both readers are bounded by §30 item 10: a record file over 1 MiB is not read and at most 64 patches per component are listed, and either breach emits `INPUT_LIMIT_EXCEEDED` rather than passing for "no patch record". What each record says about a patch — the file name, and the description where the metadata gives one — reaches the document in `pedigree.notes`, because the schema lets `pedigree.patches[]` carry nothing but its type, diff and resolves, and `resolves` is for the issues a patch closes.
+
+**Comparison against the recorded upstream is not implemented.** Counting commits ahead of a tag needs `git rev-list --count <upstream>..HEAD`, which §9.2 does not permit, and that allowlist is a security boundary rather than a convenience. A clean checkout that does not stand on a tag is therefore `unknown` and not `false`. What growing the allowlist would cost is recorded in `docs/dev/open-questions.md`.
+
+Where the status is `unknown`, `FOSS_MODIFICATION_UNKNOWN` (info) is emitted. It gates nothing: it says that a question was asked and could not be answered, which is the whole reason the third state exists.
 
 ---
 
@@ -1188,6 +1215,8 @@ A `notice` or `copyright` artifact records **no** identifier and **no** techniqu
 
 **No substitution, ever.** Where a component carries no text, none is invented. A canonical SPDX text MUST NOT be put in its place, and the absence is reported as `FOSS_LICENSE_TEXT_MISSING` — which is precisely the case where the attribution obligation cannot be satisfied from what the tool saw. Silence would look complete and a substituted text would look correct; both are worse than the finding.
 
+The finding is emitted for a **distributed** component (§24.5) and for no other. A build-time-only code generator with a licence identifier and no retained text is not an attribution gap: nothing of it is shipped, so there is no notice to reproduce and no source request to answer.
+
 **Reads.** Retention reads nothing §22.1 and §23 do not already permit: the component root is listed once, and each recognized license file it carries is read **once for that root** — memoized, so two components resolving to one root read it once between them. The identification of §22.2 step 5 and the observation of §22.4 consume those retained bytes rather than opening the file a second time — before this they opened the same file twice. What retention does add is the read of a license file that step 5 never reached because a file-level SPDX identifier (step 2) answered first: §23 admits "license files of mapped components" precisely so that the text can be kept, and a component whose header states `MIT` still owes its recipients the file. The reads are counted, so that the bound is checked rather than promised.
 
 **Limits, consistent with §30.** At most **8** retained artifacts per component, at most **1 MiB** each. Exceeding either bound bounds the **list**: a file over the size limit is not retained at all, and the candidates past the count limit are not retained. A retained file is **never truncated** — a truncated license is not a license, and a truncated NOTICE is not a notice. Either exclusion emits `FOSS_LICENSE_ARTIFACT_LIMIT` (info) naming what was dropped and why. The count is consulted in the order of §22.3, so the grants survive a bound that the attribution material does not.
@@ -1225,7 +1254,7 @@ A **holder** must be stated; the year is optional, as REUSE 3.3 has it. A holder
 
 **Observation and conclusion are separate**, exactly as §22.4 requires for licences. What was read is an observation and reaches `components[].evidence.copyright[].text` (§28). The single concluded notice, `components[].copyright`, is written from curated configuration (`components[].copyright`) **only**; nothing sbomb read is ever promoted into it.
 
-A mapped component with neither an observed statement nor a curated conclusion emits `FOSS_COPYRIGHT_MISSING` (info). Every mapped component is asked, including one the product only builds with: until the distribution role of §24.5 is a resolved fact, narrowing the question would mean guessing which components are distributed, and "no notice was found" is the same true statement about a build tool as about a shipped library. It is the treatment `UNKNOWN_LICENSE` already gives such a component.
+A **distributed** component (§24.5) with neither an observed statement nor a curated conclusion emits `FOSS_COPYRIGHT_MISSING` (info). A build-time-only component is not asked, for the reason `FOSS_LICENSE_TEXT_MISSING` is not asked of one either: the notice MIT and the BSD family oblige a distributor to reproduce is owed for what is shipped, and a code generator ships nothing. Before the distribution role was a resolved fact every mapped component was asked, because narrowing the question would have meant guessing which ones are distributed.
 
 **Ordering.** Statements are ordered by text, per §29.
 
@@ -1278,11 +1307,53 @@ The **pkg-config** reader of §21 closes part of this gap from files alone, with
 
 Toolchain anchors and implicit include dirs are obtained from `toolchains-v1` (File API) when available; otherwise, with introspection enabled, from `<compiler> -print-search-dirs` / `-E -v -x c++ /dev/null` / `cl /Bv`. Without either, `TOOLCHAIN_LAYOUT_UNKNOWN` is emitted and system-header classification falls back to path heuristics with confidence `low`.
 
-### 24.5 Dynamic Dependencies
+### 24.5 Distribution Role and Linkage Form
+
+**[New in v3.1.]** §24.1 to §24.4 separate files by *where they live*. This section separates them by *what they are for*, which is a different question and the one an attribution obligation turns on: a GPL-2.0 code generator that produced a lookup table is not a GPL-2.0 component of the product, and naming it in an attribution document invites a source request that was never triggered (requirement R1).
+
+**Distribution role.** Per node and per component, two values:
+
+| Value | Meaning |
+|---|---|
+| `build-time-only` | Reachable from an artifact **exclusively** through `generator-input`, `generator-output` or `toolchain` edges |
+| `distributed` | Everything else that is reachable |
+
+The definition is stated in this direction deliberately, and the direction is normative. §8.3 defines fourteen evidence types and the implementation emits six; an allowlist of "distributing" types would make `build-time-only` the default for anything unlisted, so adding an evidence type later could remove a component from an attribution document by omission. **Omission MUST fail towards inclusion.** An evidence type the derivation does not recognise therefore carries its chain on unchanged and leaves the node `distributed`.
+
+Formally: a node is `distributed` when at least one chain from an artifact reaches it without crossing one of the three build-time edge types, and `build-time-only` when it is reachable and no such chain exists. A file reachable both as a generator input and as a compiled source is `distributed` — the generator read it, *and* it is in the artifact. A component is `distributed` when any of its files is; one file inside the product makes the component present in the product.
+
+This is a pure graph derivation. No path is inspected, no directory name means anything, and no list of component names is consulted.
+
+**Linkage form.** How a file's contribution reached the artifact. Per file, one value; per component, the set of its files' values, sorted:
+
+| Value | Meaning |
+|---|---|
+| `static-archive-member` | Members the linker extracted from a static archive |
+| `static-object` | Object files linked directly |
+| `dynamic` | A shared library referenced, not embedded |
+| `header-only` | Headers only, no object contribution |
+| `embedded-asset` | Embedded by packaging, not by the linker |
+| `generated-source` | Contributed only through generated sources |
+| `build-tool` | `build-time-only` per the role above |
+
+The per-file value is decided by the chain that carried the file, and a file several chains reach publishes the most direct of them (`static-object`, `static-archive-member`, `dynamic`, `embedded-asset`, `header-only`, `build-tool`, in that order). An evidence type the derivation does not recognise carries the chain on **unchanged** — the same direction the role question is asked in — so the form the chain had established before it survives, and a chain that met no recognised type at all establishes **no** form: the file then carries none, because an unrecognised chain is silence and not a linkage form.
+
+Two of the seven values are worded exclusively above and are therefore **aggregate** conclusions, not per-file ones:
+
+* `header-only` survives the aggregation only where no file of the component contributed object code. A library whose header was read *and* whose archive member was extracted is not header-only, however many headers it has. Where it does survive as the component's only form, `sbomb:component:headerOnly=true` is emitted — the entry reserved in appendix B becomes emitted here.
+* `generated-source` is added where every object-contributing file of the component is a file the build produced. It is added *beside* the form the linker saw rather than replacing it, because both are true: the object was linked, and the source it came from was generated. A file the build produced is one whose identity is in the build root (§7.2) — the build root is a registered anchor, and nothing in a build tree was written by hand, so this is identity and not a layout heuristic.
+
+A component the role derivation calls `build-time-only` always carries `build-tool`, so the two attributes cannot disagree.
+
+**`EnvironmentProvided` and `dynamic` are the same question** and MUST be answered by the same test. A component is provided by the environment when its files live where the distribution keeps them (`system` scope) *and* the artifact references them dynamically — which is the `dynamic` linkage form. A system archive linked statically is inside the artifact and is not provided by anything.
+
+**Archive arithmetic.** For a component carrying `static-archive-member`, `sbomb:component:archiveMembersUsed` is `<used>/<total>`, where `used` is the number of members the link evidence proves were extracted and `total` is the number of members the archive itself holds. The denominator comes from the archive index and from nowhere else: the build system's declared inputs say what was *meant* to be archived. Where no archive of the component could be read, the property is **not emitted** — a ratio against a guessed denominator would be worse than silence.
+
+### 24.6 Dynamic Dependencies
 
 For hosted executables, the tool MAY record the `DT_NEEDED` (ELF) or import table (PE) entries of the artifact when `--include-runtime-libraries` is set. Resolution of a soname to a concrete file uses the link-time library paths only; runtime loader search is not simulated. `dlopen`-loaded libraries are explicitly out of scope.
 
-### 24.6 Linker Scripts
+### 24.7 Linker Scripts
 
 Linker scripts and memory layout files are excluded by default (`includeLinkerScripts=false`). When included they are classified `linker-script`, `memory-layout`, or `linker-config` and grouped under the `build-environment` component.
 
@@ -1412,6 +1483,27 @@ CycloneDX **1.7** MAY be written on request, via `--spec-version 1.7` or `output
 | `metadata.distributionConstraints.tlp`, written only when `output.tlp` is set | a TLP cannot be written; setting `output.tlp` at 1.6 is a usage error rather than a silent omission |
 
 `component.externalReferences` is **not** in that table: the `vcs` reference type predates 1.6, so the repository URL is emitted at both versions and `sbomb:component:vcsUrl` is removed from appendix B.
+
+Two further fields carry FOSS data at **both** versions, and each keeps a property beside it. Neither property is redundant, and the reason is recorded here so that neither is later removed as such:
+
+| Datum | Specified field | Property beside it | Why the property is still needed |
+|---|---|---|---|
+| Modification status (§19.4) | `component.pedigree` — `commits[].uid` for the resolved commit, `patches[]` for what a package manager recorded, `notes` for the signal that decided the answer | `sbomb:component:modified` (`true` \| `false` \| `unknown`) | `pedigree` cannot express `unknown`. An **absent pedigree node does not mean "unmodified"**, so the third state would be lost at the document boundary, and losing it would undo the point of §19.4 |
+| Distribution role (§24.5) | `component.scope` — `excluded` for `build-time-only`, `required` otherwise | `sbomb:component:distributionRole` | the two are not the same axis: `scope` is runtime reachability, the role is presence in the artifact |
+
+**`component.pedigree` is written only after a positive check.** An `unknown` status produces **no** pedigree node at all, so a consumer that reads only the field cannot mistake the third state for the second. `patches[].diff` and `patches[].resolves` stay absent: sbomb records that a patch was applied, not its content (requirement R6) and not which issue it closed. The schema gives a patch no field for its own name, so the patch file names reach the document through `pedigree.notes`. `commits[]` carries `uid` alone — an author, a committer and a message are personal data no attribution obligation asks for.
+
+**`component.scope` is not the same axis as the role, and the mapping is defined rather than assumed.** CycloneDX defines `excluded` as usage for test and other non-runtime purposes, not reachable within a call graph at runtime; §24.5's role says whether the component is inside the artifact. They agree on the two common cases and diverge on one:
+
+| Case | §24.5 role | `scope` |
+|---|---|---|
+| Statically linked archive member | `distributed` | `required` |
+| Build-time code generator | `build-time-only` | `excluded` |
+| Dynamically linked system library | not in the artifact, but `distributed` for licence purposes | `required` — it is reachable at runtime |
+
+The third row is why the mapping is stated as "`excluded` for `build-time-only`, `required` otherwise" rather than as a rule about embedding: a dynamically linked library is `distributed` under §24.5, so it lands on `required` with no special case. A component whose role was never derived carries **no** `scope` at all; the schema's own default for an absent scope is `required`, so silence and the common answer agree and nothing is asserted that was not derived. `scope` is written on grouping components; a file component's answer is carried by `sbomb:file:distributionRole`.
+
+`sbomb:component:scope` is a **different** property again, with the values `project | third-party | sdk | toolchain | system`, and it is untouched by any of this.
 
 The `citations` structure is not emitted. `evidence.identity` cannot carry a licence technique — its `field` enum admits identity fields only, and its `methods[].technique` vocabulary does not include the SPDX techniques of §22.3 — so `sbomb:license:technique` has no standard field and remains a property.
 
@@ -1548,6 +1640,9 @@ Mandatory ordering rules:
 | findings | `(id, subject.kind, subject.ref, message)` |
 | retained license artifacts (§22.9) | `(kind, canonical path)` |
 | copyright statements (§22.10) | `text` |
+| `pedigree.commits[]` | `uid` |
+| `pedigree.patches[]` | `type` |
+| `sbomb:component:linkageForm` | value |
 
 All sorting uses byte-wise comparison of UTF-8, not locale collation.
 
@@ -1572,6 +1667,8 @@ Concrete requirements:
 7. Redaction (`--redact-unanchored-paths`) MUST apply to the SBOM, the findings JSON, and the review report equally.
 8. The tool MUST NOT make network requests. There is no online license or vulnerability lookup.
 9. Retained license artifacts are bounded: at most 8 per component and at most 1 MiB each, and an artifact over the bound is dropped from the list rather than truncated (§22.9).
+10. Patch records are bounded: at most 1 MiB per record file and at most 64 patches per component (§19.4). Both breaches emit `INPUT_LIMIT_EXCEEDED`. A record file over the bound is not read at all — a refused record is not a record that says "no patches" — and a list cut short still leaves the component `modified`, because the answer does not depend on the count.
+11. Generator-input chains are bounded: the inputs of a generated file are followed at most 8 edges deep through the build graph (§16), which is a refusal to walk a build graph that describes a cycle.
 
 ---
 
@@ -2239,10 +2336,11 @@ Severity shown is the default and may be changed via `policy.severityOverrides`.
 | `UNKNOWN_PURL` | info | — | No package type assertable |
 | `UNKNOWN_LICENSE` | warning | `failOnUnknownLicense` | Component license is NOASSERTION |
 | `LICENSE_CONFLICT` | warning | `failOnReviewRequired` | Conflicting license evidence |
-| `FOSS_LICENSE_TEXT_MISSING` | info | — | Component has a license identifier but carries no retained text (§22.9) |
+| `FOSS_LICENSE_TEXT_MISSING` | info | — | Distributed component has a license identifier but carries no retained text (§22.9) |
 | `FOSS_LICENSE_ARTIFACT_LIMIT` | info | — | More recognized license files, or a larger one, than the retention limit of §22.9 |
-| `FOSS_COPYRIGHT_MISSING` | info | — | Component carries no copyright statement and none was curated (§22.10) |
+| `FOSS_COPYRIGHT_MISSING` | info | — | Distributed component carries no copyright statement and none was curated (§22.10) |
 | `FOSS_COPYRIGHT_LIMIT` | info | — | More distinct copyright statements than the limit of §22.10 |
+| `FOSS_MODIFICATION_UNKNOWN` | info | — | Modification status could not be established, so it is reported as unknown rather than as unmodified (§19.4) |
 | `MISSING_FILE_HASH` | warning | `failOnMissingHash` | File unavailable or unreadable |
 | `UNANCHORED_FILE` | warning | `failOnUnanchoredFile` | File matched no anchor |
 | `VCS_DIRTY` | info | `failOnReviewRequired` | Component working tree is dirty |
@@ -2308,6 +2406,10 @@ sbomb:component:vcsCommit        sbomb:component:vcsTag
 sbomb:component:vcsDirty
 sbomb:component:licenseFile      (repeated, <canonicalPath>@sha256:<hex>)
 sbomb:component:noticeFile       (repeated, <canonicalPath>@sha256:<hex>)
+sbomb:component:distributionRole (distributed | build-time-only)
+sbomb:component:linkageForm      (repeated, sorted)
+sbomb:component:archiveMembersUsed
+sbomb:component:modified         (true | false | unknown)
 sbomb:license:source             sbomb:license:evidenceClass
 sbomb:license:confidence         sbomb:license:review
 sbomb:license:reason             sbomb:license:conflictingValue
@@ -2317,6 +2419,8 @@ sbomb:cdx:executableProperty     (executable | non-executable)   [BSI TR-03183-2
 sbomb:cdx:archiveProperty        (archive | no-archive)          [BSI TR-03183-2]
 sbomb:cdx:structuredProperty     (structured | unstructured)     [BSI TR-03183-2]
 ```
+
+`sbomb:component:distributionRole` and `sbomb:component:modified` each accompany a specified field rather than replacing it — `component.scope` and `component.pedigree` respectively — and §28.1 says why each is still needed: `scope` is a different axis, and `pedigree` cannot say `unknown`. Neither is redundant and neither may be removed as such.
 
 **Go binary components (`sbomb self`)**
 
@@ -2332,6 +2436,8 @@ sbomb:go:replaces                (module@version the linker substituted)
 ```
 sbomb:path:canonical             sbomb:file:anchor
 sbomb:file:role                  sbomb:file:class
+sbomb:file:distributionRole      (distributed | build-time-only)
+sbomb:file:linkageForm
 sbomb:evidence:header:class      sbomb:file:size
 sbomb:file:missing               sbomb:file:resolvedTarget
 sbomb:evidence:type              (repeated, sorted)
@@ -2640,7 +2746,7 @@ Every included file MUST be explainable as a concrete chain of build inputs and 
 | §11.2–11.4 | Link evidence reordered: `--dependency-file` and DWARF before map parsing |
 | §14.5 | **New** precompiled-header handling |
 | §17.3 | LTO impact corrected: file-level attribution usually survives |
-| §24.3, §24.5 | **New** OS-package attribution and dynamic-dependency handling |
+| §24.3, §24.6 | **New** OS-package attribution and dynamic-dependency handling |
 | §32.4, §32.5 | Exit-code precedence defined; schema-validation vs stdlib-only contradiction resolved |
 | §3 | Project root, intermediate file, strength vs confidence all given normative definitions |
 | §6.1 | `--output` with multiple artifacts is now an explicit usage error |

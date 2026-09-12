@@ -42,6 +42,12 @@ type compileEvidence struct {
 	// lto records that a compile command asked for link-time optimization
 	// (section 17.2).
 	lto bool
+	// buildEdges maps every output of the Ninja build graph to the inputs the
+	// edge that produces it declares. It is the second generator-input
+	// evidence source of section 16, and it is recorded here because the file
+	// it comes from is already open and parsed for the object mappings:
+	// reading build.ninja a third time would buy nothing.
+	buildEdges map[string][]string
 	// findings are what the compile-side adapters could not obtain, named
 	// rather than passed over in silence (section 9.2).
 	findings []domain.Finding
@@ -53,6 +59,7 @@ func newCompileEvidence() *compileEvidence {
 		objectHeaders:        map[string][]string{},
 		strategy:             map[string]string{},
 		objectForcedIncludes: map[string][]string{},
+		buildEdges:           map[string][]string{},
 	}
 }
 
@@ -65,6 +72,35 @@ func (c *compileEvidence) addSource(object, source, strategy string) {
 	}
 	c.objectSources[object] = source
 	c.strategy[object] = strategy
+}
+
+// recordBuildEdge remembers which inputs an edge of the Ninja build graph
+// declares, for every output it produces. Section 16 asks for the inputs of
+// the rule that generated a file, and the rule is found by its output.
+//
+// Only the explicit inputs are kept, which is what the parser returns. For a
+// CMake-generated build graph they are exactly the DEPENDS of the custom
+// command; the order-only list of the same edge is CMake's target ordering
+// set, which names every library of the build and would make each of them an
+// input of every generated file (deviation D45).
+func (c *compileEvidence) recordBuildEdge(rule ninja.Rule) {
+	for _, output := range rule.Outputs {
+		// An implicit output is separated from the explicit ones by a bare
+		// "|", which the tokenizer hands over as a token of its own. The
+		// parser expands variables in inputs and not in outputs, so an
+		// implicit output is not a path that could be matched against a node
+		// anyway.
+		if output == "|" {
+			break
+		}
+		if output == "" {
+			continue
+		}
+		if _, taken := c.buildEdges[output]; taken {
+			continue
+		}
+		c.buildEdges[output] = rule.Inputs
+	}
 }
 
 func (c *compileEvidence) addHeaders(object string, headers []string) {
@@ -207,7 +243,11 @@ func collectCompileEvidence(buildDir string, commands []compiledb.Command, comma
 		file.Close()
 		if parseErr == nil {
 			for _, rule := range parsed.Rules {
-				if len(rule.Outputs) == 0 || !isObjectPath(rule.Outputs[0]) {
+				if len(rule.Outputs) == 0 {
+					continue
+				}
+				evidence.recordBuildEdge(rule)
+				if !isObjectPath(rule.Outputs[0]) {
 					continue
 				}
 				for _, input := range rule.Inputs {
@@ -401,6 +441,13 @@ func buildEvidenceGraph(
 			Attributes: map[string]string{"scope": string(scope)},
 		})
 	}
+
+	// Section 16: the build graph names the inputs of the rule that produced a
+	// generated file. It runs after the object-to-source mapping, because a
+	// generator the build compiled is reached through its own object and that
+	// object's source has to be mapped already for the generator's sources to
+	// be in the graph at all.
+	addGeneratorEvidence(graph, b, compile, logger)
 
 	// Section 18: what a package or image manifest declares. It runs before
 	// the reachability filter and adds only edges, so a manifest describing
@@ -713,6 +760,21 @@ func representInSBOM(graph *evidence.Graph, node domain.Node) (bool, string) {
 			return true, "prebuilt external archive"
 		}
 		return false, ""
+	case domain.NodeGenerator:
+		// Section 13.1 again, for the tool rather than for the object: a
+		// generator the build compiled is a transient build artifact whose
+		// inputs are represented, and what belongs in the document is the
+		// source it was built from. A generator that came from outside the
+		// build tree is a file nothing else accounts for, so it must appear.
+		if !strings.HasPrefix(string(node.ID), "build:") {
+			return true, "generator outside the build tree"
+		}
+		for _, edge := range graph.EdgesFrom(node.ID) {
+			if edge.Type == "generator-input" {
+				return false, ""
+			}
+		}
+		return true, "generator inputs unresolved"
 	default:
 		return true, ""
 	}
