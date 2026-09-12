@@ -340,8 +340,10 @@ first, then package-manager metadata (vcpkg, Conan, FetchContent and CPM.cmake,
 the ESP-IDF component manager, the west manifest of a Zephyr workspace, git
 submodules), then a configured CMake target,
 then the nearest ancestor directory holding a package manifest (`conanfile.txt`, `vcpkg.json`, `idf_component.yml`,
-`Cargo.toml`, `west.yml`) **or a licence file** (`LICENSE`, `LICENCE`,
-`COPYING`), then the anchor root, and finally an explicit `unknown:` component
+`Cargo.toml`, `west.yml`) **or a licence file** — `LICENSE`, `LICENCE`,
+`COPYING` or `LICENSE-<id>`, spelled in any case and with an optional `.txt` or
+`.md`, so a library carrying `LICENSE-MIT` and `LICENSE-APACHE` and nothing
+else is recognized — then the anchor root, and finally an explicit `unknown:` component
 flagged for review. **A file is never dropped because its component could not be
 determined.**
 

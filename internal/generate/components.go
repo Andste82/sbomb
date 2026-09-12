@@ -42,20 +42,6 @@ var packageMetadataFiles = []string{
 	"west.yml",
 }
 
-// licenseBoundaryFiles mark a directory as the root of a distinct component
-// even when it carries no package manifest. A library that was simply copied
-// into the source tree usually has nothing else: no conanfile, no vcpkg.json,
-// and a CMakeLists.txt that cannot be read without interpreting CMake.
-//
-// NOTICE and COPYRIGHT are deliberately absent. They are attribution material,
-// not a licence grant, and a directory that carries only a NOTICE is not
-// thereby a separate work.
-var licenseBoundaryFiles = []string{
-	"LICENSE", "LICENSE.txt", "LICENSE.md",
-	"LICENCE", "LICENCE.txt", "LICENCE.md",
-	"COPYING", "COPYING.txt", "COPYING.md",
-}
-
 // bundledSBOMFiles mark a directory as the root of a distinct component in the
 // same way a licence file does: a dependency that ships its own SBOM says with
 // it that it is a separate piece of software, and it is often the only thing
@@ -135,6 +121,12 @@ type componentResolver struct {
 	// image manifest above it maps no file, so nothing in it can widen the used
 	// set.
 	pkgConfigByComponent map[string]*pkgConfigComponent
+	// licenseBoundaries is what licenseBoundaryIn answered for one directory,
+	// keyed by that directory, with the empty string for a directory that
+	// carries no licence grant. The upward walk of strategy 6 asks about the
+	// same ancestor directories once per used file, and section 31 does not
+	// pay for the same answer twice.
+	licenseBoundaries map[string]string
 }
 
 // systemPackageResult is what the pkg-config reader answered about one used
@@ -741,10 +733,8 @@ func (r *componentResolver) nearestPackageRoot(file domain.UsedFile) (root, mani
 		// project's own component after its directory. A bundled SBOM is the
 		// same kind of statement under the same exception.
 		if !atBoundary {
-			for _, name := range licenseBoundaryFiles {
-				if info, err := os.Stat(filepath.Join(dir, name)); err == nil && !info.IsDir() {
-					return dir, name, true
-				}
+			if name, ok := r.licenseBoundaryIn(dir); ok {
+				return dir, name, true
 			}
 			for _, name := range bundledSBOMFiles {
 				if info, err := os.Stat(filepath.Join(dir, name)); err == nil && !info.IsDir() {
@@ -1215,6 +1205,57 @@ func recognizedLicenseFile(name string) (int, bool) {
 		return licenseRankLicenseID, true
 	}
 	return 0, false
+}
+
+// licenseGrant says whether a rank of section 22.3 belongs to a file that
+// grants a licence, as opposed to one that reproduces attribution material.
+// Only a grant marks a component boundary: a directory that carries its own
+// licence is a distinct work by convention, while a directory that carries
+// only a NOTICE or a COPYRIGHT is not thereby a separate work.
+func licenseGrant(rank int) bool {
+	switch rank {
+	case licenseRankLicense, licenseRankLicenseID, licenseRankCopying:
+		return true
+	}
+	return false
+}
+
+// licenseBoundaryIn names the licence file that makes dir the root of a
+// distinct component, if it carries one. A library that was simply copied into
+// the source tree usually has nothing else: no conanfile, no vcpkg.json, and a
+// CMakeLists.txt that cannot be read without interpreting CMake.
+//
+// The names are the ones section 22.3 recognizes, matched the way that section
+// matches them -- case-insensitively, with an optional .txt or .md, and
+// LICENSE-<id> as a family -- rather than as a list of exact names to stat. A
+// component carrying LICENSE-MIT and LICENSE-APACHE side by side carries no
+// file called LICENSE at all, and a fixed list left it invisible: its sources
+// dissolved into whatever enclosed them, and the attribution export named the
+// enclosing project as the holder of both texts.
+//
+// Matching a name requires listing the directory, which section 31 would
+// otherwise pay for once per used file per ancestor directory. It is paid once
+// per directory instead, because the answer is cached: the walk asks about the
+// same ancestors for every file under them, so the listing is amortized to
+// fewer reads than the nine stats it replaces. The fixed-name stat lists that
+// remain -- package manifests and bundled SBOMs -- keep their form, because
+// neither has a matching rule that a name alone cannot express.
+func (r *componentResolver) licenseBoundaryIn(dir string) (string, bool) {
+	if cached, known := r.licenseBoundaries[dir]; known {
+		return cached, cached != ""
+	}
+	marker := ""
+	for _, name := range licenseFilesIn(dir) {
+		if rank, ok := recognizedLicenseFile(name); ok && licenseGrant(rank) {
+			marker = name
+			break
+		}
+	}
+	if r.licenseBoundaries == nil {
+		r.licenseBoundaries = map[string]string{}
+	}
+	r.licenseBoundaries[dir] = marker
+	return marker, marker != ""
 }
 
 // licenseFilesIn lists the recognized licence files a component root carries,
