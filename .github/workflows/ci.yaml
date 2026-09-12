@@ -79,6 +79,55 @@ jobs:
             exit 1
           fi
 
+  # The four FOSS attribution outputs of section 32.6 are a house format with
+  # no schema, so nothing but a golden keeps them from drifting. This is the
+  # one job that will notice a changed notices layout, and it also runs the
+  # command the composite action runs, because "the attribution step exits 0
+  # and leaves four files" is the property a release pipeline depends on.
+  foss-outputs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: The four attribution outputs are unchanged
+        run: |
+          set -euo pipefail
+          go test ./cmd/sbomb -run 'TestFOSS|TestBothEntryPoints|TestOutOverwrites' -count 1
+          # -update writes the goldens rather than comparing them. No test run
+          # in CI passes it, so a diff here means one of them writes into
+          # testdata/golden by another route.
+          if ! git diff --quiet -- testdata/golden/foss; then
+            echo "the FOSS goldens were rewritten by the test run:" >&2
+            git diff --stat -- testdata/golden/foss >&2
+            exit 1
+          fi
+      - name: The attribution step of the action produces four files and gates nothing
+        run: |
+          set -euo pipefail
+          # The build directory is copied because sbomb writes evidence.json
+          # into it, and the corpus is a committed artifact.
+          cp -r testdata/fixtures/gcc-ninja/p14-foss/build "$RUNNER_TEMP/p14-build"
+          # The strict profile is the interesting one: its gates would fail
+          # this fixture in `generate`, and `foss` evaluates none of them.
+          go run ./cmd/sbomb foss \
+            --build-dir "$RUNNER_TEMP/p14-build" \
+            --source-dir testdata/fixtures/p14-foss-src \
+            --policy strict --out "$RUNNER_TEMP/p14-foss" --reproducible
+          for name in THIRD-PARTY-NOTICES.txt foss-review.txt foss-review.json source-obligations.txt; do
+            test -s "$RUNNER_TEMP/p14-foss/$name" || { echo "missing $name" >&2; exit 1; }
+          done
+          # Nothing resembling corresponding source: section 32.6's structural
+          # guarantee, checked on what the action would upload.
+          found=$(find "$RUNNER_TEMP/p14-foss" -type f \
+            \( -name '*.c' -o -name '*.h' -o -name '*.patch' -o -name '*.tar*' -o -name '*.zip' \) -print)
+          if [ -n "$found" ]; then
+            echo "the attribution outputs contain source material:" >&2
+            echo "$found" >&2
+            exit 1
+          fi
+
   # MSVC fixtures are generated on Windows because the compiler and linker
   # evidence cannot be produced by the Linux corpus job. The runner validates
   # that the native corpus can still be regenerated and parsed. Exact bytes

@@ -28,6 +28,17 @@ inputs:
     description: CycloneDX output path
     required: false
     default: sbomb.cdx.json
+  foss:
+    description: >
+      Also write the four FOSS attribution outputs of docs/foss.md and upload
+      the directory as a build artifact. Attribution is informational: this
+      step cannot fail the workflow, whatever it finds.
+    required: false
+    default: "false"
+  foss-out:
+    description: Directory the FOSS attribution outputs are written into
+    required: false
+    default: sbomb-foss
   path-flavor:
     description: >
       Path comparison flavor (posix or windows). Empty means the host's, which
@@ -94,3 +105,33 @@ runs:
         if [[ -n "$SBOMB_PATH_FLAVOR" ]]; then args+=(--path-flavor "$SBOMB_PATH_FLAVOR"); fi
         if [[ "$SBOMB_REPRODUCIBLE" == "true" ]]; then args+=(--reproducible); fi
         "$RUNNER_TEMP/sbomb/$SBOMB_ASSET" "${args[@]}"
+    # Attribution is a second rendering of the same build, and it is never a
+    # verdict: `sbomb foss` evaluates no policy gate and no exit code of it
+    # depends on licence content. continue-on-error keeps even a crash here
+    # from turning a good build red -- a missing notices file is a thing to
+    # fix, not a reason to block a release pipeline that produced a valid SBOM.
+    - name: FOSS attribution outputs
+      if: inputs.foss == 'true'
+      continue-on-error: true
+      shell: bash
+      env:
+        SBOMB_BUILD_DIR: ${{ inputs.build-dir }}
+        SBOMB_REPRODUCIBLE: ${{ inputs.reproducible }}
+        SBOMB_CONFIG: ${{ inputs.config }}
+        SBOMB_POLICY: ${{ inputs.policy }}
+        SBOMB_FOSS_OUT: ${{ inputs.foss-out }}
+      run: |
+        set -euo pipefail
+        args=(foss --build-dir "$SBOMB_BUILD_DIR" --out "$SBOMB_FOSS_OUT" --policy "$SBOMB_POLICY")
+        if [[ -n "$SBOMB_CONFIG" ]]; then args+=(--config "$SBOMB_CONFIG"); fi
+        if [[ "$SBOMB_REPRODUCIBLE" == "true" ]]; then args+=(--reproducible); fi
+        "$RUNNER_TEMP/sbomb/$SBOMB_ASSET" "${args[@]}"
+        ls -l "$SBOMB_FOSS_OUT"
+    - name: Upload the FOSS attribution outputs
+      if: inputs.foss == 'true'
+      continue-on-error: true
+      uses: actions/upload-artifact@v4
+      with:
+        name: sbomb-foss-${{ runner.os }}-${{ runner.arch }}
+        path: ${{ inputs.foss-out }}/
+        if-no-files-found: error

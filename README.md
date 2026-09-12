@@ -315,6 +315,7 @@ silently disable a policy gate.
 | [Configuration](docs/configuration.md) | The JSON file, anchors, components, policy |
 | [Findings](docs/findings.md) | Every diagnostic identifier and what it means |
 | [Properties](docs/properties.md) | The `sbomb:` properties a document carries |
+| [FOSS attribution](docs/foss.md) | The four attribution outputs, and what sbomb refuses to decide |
 | [CI](docs/ci.md) | The GitHub Action and the release workflow |
 | [Windows](docs/windows.md) | Notes for Windows hosts |
 
