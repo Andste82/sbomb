@@ -54,10 +54,18 @@ type Tool struct {
 }
 
 type Component struct {
-	Type     string                `json:"type,omitempty"`
-	Name     string                `json:"name,omitempty"`
-	Version  string                `json:"version,omitempty"`
-	BomRef   string                `json:"bom-ref,omitempty"`
+	Type    string `json:"type,omitempty"`
+	Name    string `json:"name,omitempty"`
+	Version string `json:"version,omitempty"`
+	BomRef  string `json:"bom-ref,omitempty"`
+	// Scope is CycloneDX's own vocabulary for what a component is there for:
+	// "required", "optional" or "excluded". It is written from the
+	// distribution role of section 24.5 -- "excluded" for build-time-only,
+	// "required" otherwise -- and the two are not the same axis, which is why
+	// sbomb:component:distributionRole stays beside it rather than being
+	// replaced by it. sbomb:component:scope is a different property again
+	// (project | third-party | sdk | toolchain | system) and is untouched.
+	Scope    string                `json:"scope,omitempty"`
 	PURL     string                `json:"purl,omitempty"`
 	Supplier *OrganizationalEntity `json:"supplier,omitempty"`
 	// IsExternal is CycloneDX 1.7 and later: the environment is expected to
@@ -71,8 +79,48 @@ type Component struct {
 	// evidence.copyright (section 22.10).
 	Copyright          string              `json:"copyright,omitempty"`
 	ExternalReferences []ExternalReference `json:"externalReferences,omitempty"`
-	Properties         []Property          `json:"properties,omitempty"`
-	Evidence           *Evidence           `json:"evidence,omitempty"`
+	// Pedigree is where CycloneDX says a component differs from its upstream
+	// (specification section 19.4). It is written only when something was
+	// positively established: an absent pedigree node does not mean
+	// "unmodified", and the third state of the tri-state lives in
+	// sbomb:component:modified because this field cannot express it.
+	Pedigree   *Pedigree  `json:"pedigree,omitempty"`
+	Properties []Property `json:"properties,omitempty"`
+	Evidence   *Evidence  `json:"evidence,omitempty"`
+}
+
+// Pedigree carries the component's ancestry. sbomb fills the three parts it
+// has evidence for: the commit the checkout stands on, the patches a package
+// manager recorded as applied, and a note naming the signal that decided the
+// modification status.
+type Pedigree struct {
+	Commits []Commit `json:"commits,omitempty"`
+	Patches []Patch  `json:"patches,omitempty"`
+	Notes   string   `json:"notes,omitempty"`
+}
+
+// Commit identifies one revision. Only uid is written: an author, a committer
+// and a message are personal data that section 30.7 has no rule for and that
+// no attribution obligation asks for.
+type Commit struct {
+	UID string `json:"uid,omitempty"`
+}
+
+// Patch records that a patch was applied, never what it contained. The schema
+// gives a patch exactly three fields -- type, diff and resolves -- and forbids
+// any other, so the name of the patch file has nowhere to go here and reaches
+// the document through pedigree.notes instead.
+//
+// `diff` stays absent on purpose: sbomb does not own the patch, and a partial
+// diff inside an SBOM would read as corresponding source while being
+// materially incomplete (requirement R6). `resolves` stays absent because
+// sbomb knows that a patch was applied and nothing about which issue it
+// closes.
+type Patch struct {
+	// Type is the CycloneDX enum: unofficial, monkey, backport or
+	// cherry-pick. A patch a package manager applied is "unofficial" unless
+	// the manager itself says which kind it is.
+	Type string `json:"type"`
 }
 
 // ExternalReference points at something about the component that lives

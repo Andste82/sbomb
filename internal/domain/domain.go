@@ -154,6 +154,30 @@ type Component struct {
 	// the files live -- a system archive linked statically is bundled into the
 	// artifact and is not provided by anything.
 	EnvironmentProvided bool
+	// DistributionRole says whether the component is inside what is
+	// distributed or only helped build it (section 24.5). It is derived from
+	// the evidence graph alone: "distributed" unless every path from an
+	// artifact to every one of the component's files runs through a
+	// generator-input, generator-output or toolchain edge.
+	DistributionRole string
+	// LinkageForms is how the component's files reach the artifact (section
+	// 24.5), sorted and deduplicated. A component may carry several: a
+	// library can be a static archive member in one artifact and a header in
+	// another.
+	LinkageForms []string
+	// ArchiveMembersUsed is "<used>/<total>" for a component the linker took
+	// members out of a static archive for, and empty when no archive index
+	// could be read. It is the number that makes section 12 visible in the
+	// document: three members compiled, one extracted.
+	ArchiveMembersUsed string
+	// HeaderOnly says the component contributed no object code at all. It is
+	// a conclusion about the component and not about one file, which is why
+	// it is a field and not one of LinkageForms.
+	HeaderOnly bool
+	// Modification is what section 19.4 could establish about whether this
+	// component was modified. Three states, because absence of information is
+	// not evidence of an unmodified tree.
+	Modification ModificationRecord
 	// LicenseArtifacts are the recognized license files the component root
 	// carries, kept verbatim (section 22.9). They are the deliverable an
 	// attribution obligation is satisfied with: for MIT and the BSD family
@@ -175,6 +199,91 @@ type Component struct {
 	Properties map[string][]string
 	Files      []FileID
 }
+
+// ModificationStatus is the tri-state of section 19.4. The third state is the
+// point of it: an absent answer must never be published as "not modified",
+// because that turns a check nobody ran into a claim.
+type ModificationStatus string
+
+const (
+	// ModificationUnknown is the default, and the value a component keeps
+	// whenever no positive check ran -- including when introspection is off.
+	ModificationUnknown ModificationStatus = "unknown"
+	// ModificationModified was established: a dirty tree, or package metadata
+	// recording an applied patch.
+	ModificationModified ModificationStatus = "true"
+	// ModificationUnmodified was established: a git root at the component
+	// root, clean, standing exactly on the tag it records.
+	ModificationUnmodified ModificationStatus = "false"
+)
+
+// ModificationRecord is the evidence behind a modification status, so that the
+// document can carry the signal that decided the answer rather than the answer
+// alone. CycloneDX has a field for exactly this -- component.pedigree -- and
+// what is collected here is what fills it.
+type ModificationRecord struct {
+	// Status is the tri-state answer. The zero value is the empty string,
+	// which callers read as ModificationUnknown; the derivation that fills
+	// this record -- resolveModification in internal/generate -- always sets
+	// one of the three.
+	Status ModificationStatus
+	// Signal names, in one line of prose, what decided the answer. It becomes
+	// pedigree.notes, because a pedigree without it says that something was
+	// established and not what.
+	Signal string
+	// Commit is the commit the component root's checkout stands on, when it
+	// was read. It becomes pedigree.commits[].uid.
+	Commit string
+	// Patches are the patches a package manager recorded as applied. They
+	// become pedigree.patches[], and any one of them makes Status "true".
+	Patches []Patch
+}
+
+// Patch is one patch a package manager recorded as applied to a component.
+// sbomb records that a patch was applied, never its content: pedigree.diff
+// stays empty, because a diff is material sbomb does not own (requirement R6).
+type Patch struct {
+	// File is the patch as the metadata names it -- a file name, not a path
+	// that has been resolved against anything.
+	File string
+	// Type is the CycloneDX patches[].type enum. A patch a manager applied is
+	// "unofficial" unless the manager itself says which kind it is.
+	Type string
+	// Description is what the metadata says about the patch, when it says
+	// anything. It does not reach pedigree.patches[].resolves -- that field is
+	// for the issues a patch closes -- and is carried into pedigree.notes
+	// beside the file name instead.
+	Description string
+	// Source is the file the record was read from, so that a reviewer can
+	// check it.
+	Source string
+}
+
+// PatchType values, which are the CycloneDX enum and nothing else.
+const (
+	PatchUnofficial = "unofficial"
+	PatchMonkey     = "monkey"
+	PatchBackport   = "backport"
+	PatchCherryPick = "cherry-pick"
+)
+
+// Distribution roles of section 24.5.
+const (
+	RoleDistributed   = "distributed"
+	RoleBuildTimeOnly = "build-time-only"
+)
+
+// Linkage forms of section 24.5. The list is closed: a form nothing can
+// establish is not emitted rather than guessed.
+const (
+	LinkageStaticArchiveMember = "static-archive-member"
+	LinkageStaticObject        = "static-object"
+	LinkageDynamic             = "dynamic"
+	LinkageHeaderOnly          = "header-only"
+	LinkageEmbeddedAsset       = "embedded-asset"
+	LinkageGeneratedSource     = "generated-source"
+	LinkageBuildTool           = "build-tool"
+)
 
 // CopyrightStatement is one copyright notice as a file states it (section
 // 22.10). Nothing in Text has been rewritten: no year range is reformatted,

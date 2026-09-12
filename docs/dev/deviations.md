@@ -1926,3 +1926,112 @@ plainly has a holder, while a false one is a fabricated attribution in a
 document carrying the manufacturer's name. Nothing in section 22.10 infers a
 holder, and a rule that recognized prose as a notice would have been an
 inference with a regular expression in front of it.
+
+## D44 — Two of the seven linkage forms are aggregate conclusions, and `EnvironmentProvided` shares the `dynamic` test
+
+Section 24.5 lists seven linkage forms and states them per component. Two of
+the seven are worded **exclusively** — `header-only` is "headers only, no
+object contribution" and `generated-source` is "contributed only through
+generated sources" — and a component's forms are the union of its files'. Those
+two facts cannot both be taken literally per file.
+
+`mit-lib` in the fixture shows why. Its used files are `mit_lib.h`, which the
+compiler read, and `src/mit_a.c`, whose object the linker extracted from
+`libmit_lib.a`. Taken per file and unioned, its forms would be
+`{header-only, static-archive-member}` — and "header-only" would be published
+for a library that contributed object code, which is the opposite of what the
+value means. The milestone's own expected answer for `mit-lib` is
+`static-archive-member` alone.
+
+**What is implemented.** Five of the seven are decided per file, by the chain
+that carried the file: `static-archive-member`, `static-object`, `dynamic`,
+`embedded-asset` and `build-tool`, plus `header-only` as the per-file answer
+for a file that reached the artifact by a header dependency alone. The
+aggregation then applies the two exclusivity clauses:
+
+* `header-only` is dropped from a component that has any object-contributing
+  file, and `sbomb:component:headerOnly=true` is emitted where it survives as
+  the component's only form;
+* `generated-source` is **added** where every object-contributing file of the
+  component is one the build produced. Added, not substituted: the object
+  really was linked directly, and replacing `static-object` with
+  `generated-source` would lose that.
+
+A component the role derivation calls `build-time-only` always carries
+`build-tool`, so the role and the form cannot disagree.
+
+**The second half is a defect that this made visible.**
+`domain.Component.EnvironmentProvided` is meant to distinguish the `dynamic`
+case, and the milestone requires the two to agree. They could not: the test was
+`file.Class == domain.FileClassSharedLibrary`, and `fileClassOf`
+(`internal/generate/generate.go`) never produces that class — an archive and a
+shared library both arrive as `domain.NodeArchive` from `kindForPath`, and the
+class is derived from the node kind. So the second condition of
+`environmentProvided` was unreachable from any real run, and `isExternal` could
+never be written at 1.7.
+
+`environmentProvided` now reads the `dynamic` linkage form instead of testing
+the class again. Sharing the test is what keeps the field and the form in
+agreement structurally rather than by discipline, and it closes the defect. The
+test that pinned the old behaviour (`internal/generate/external_test.go`) now
+builds its cases out of a graph; it asserts the same distinction — system scope
+plus a dynamically referenced library, and not a statically linked system
+archive — through the mechanism that can actually answer it.
+
+`fileClassOf` is deliberately **not** changed to produce
+`FileClassSharedLibrary`. It feeds `sbomb:file:class` and the three BSI
+properties of section 1.5(3), so a shared library would change from
+"unstructured" to "executable" in every document that contains one, and that is
+a separate decision about a separate section.
+
+## D45 — Only the explicit inputs of a generating rule are read, and only Ninja has them
+
+Section 16 lists three sources of generator-input evidence and words the
+second one as "Ninja `build` edge inputs for the generating rule (including
+implicit and order-only inputs; order-only inputs are recorded with strength
+`weak`)". Reading the order-only list is what that sentence asks for, and it
+cannot be done.
+
+A CMake-generated build graph puts its **target ordering set** there. The
+custom command of `p14-foss` is
+
+```
+build generated/table.c | ...: CUSTOM_COMMAND table_gen || libapache_lib.a \
+  liblgpl_lib.a libmit_lib.a libmulti_lib.a libnocopyright_lib.a \
+  libnolicense_lib.a table_gen
+```
+
+so every static library of the build stands after the `||`. Read as generator
+inputs, they make every archive of the project an input of every generated
+file — and because everything below a `generator-input` edge is build-time-only
+(section 24.5), the unextracted members of those archives then enter the
+used-file set through the generator. Measured on the fixture before the rule
+was narrowed: `mit_b.c` and `mit_c.c`, the two members the linker never
+extracted, appeared in the document as `build-time-only`. That is the one
+property the whole tool exists for, broken by an ordering artifact.
+
+**What is implemented.** The explicit inputs, and nothing else. CMake records a
+custom command's `DEPENDS` among them, which is the list the section actually
+wants; implicit inputs are not read either, for the same reason and at no
+observed cost. An input the build graph itself produces is followed, bounded at
+eight edges (section 30 item 11), so a generator's own sources enter the graph
+through it.
+
+**A parser defect came with it.** `parseBuildRule`
+(`internal/adapters/ninja/parser.go`) ended the explicit input list at the
+token `|` and not at `||`, so for an edge whose only separator is the
+order-only one every order-only input had always been reported as an explicit
+input. Nothing read those edges before this milestone: the two existing callers
+filter the inputs by suffix, for a source of an object and for the objects of
+an archive, and an order-only phony target is neither. The fix is one token
+wide and changes no golden.
+
+**Only Ninja answers.** Source 1 — the CMake File API custom-command
+`dependencies`/`byproducts` — does not exist in the File API's codemodel, and
+source 3 needs a generator that emits a depfile. The Makefiles generator writes
+the same dependency into `build.make` (`generated/table.c: table_gen`) and
+section 16 does not list it as a source. So a project with a code generator
+yields a smaller used-file set when it was built with Make than with Ninja, and
+`MISSING_GENERATOR_INPUT_EVIDENCE` is what names the difference. Recorded as
+open question Q14; inventing a fourth source is what deviation D20 already
+refused once.

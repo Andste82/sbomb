@@ -444,6 +444,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	reachable := usedFiles(graph, artifactIDs, outcome.excludedByGC)
 	logger.Info("Reachable from a deliverable: %d node(s) [%s]", len(reachable), describeCounts(reachable))
 	findings = append(findings, unresolvedObjects(graph, reachable, anchorResult)...)
+	findings = append(findings, missingGeneratorInputFindings(graph, reachable)...)
 	findings = append(findings, evidenceQualityFindings(graph, reachable, anchorResult, options.Policy)...)
 
 	// 9. Inventory: scope filter, representation rules, hashing.
@@ -486,6 +487,12 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		})
 	}
 	used = inventory.MergeUsedFiles(used)
+	// Section 24.5: what is distributed, and how it got into the artifact.
+	// Both come out of the graph that already exists -- no path is inspected
+	// and no directory name means anything -- and both are settled before the
+	// files are hashed so that the file records carry them.
+	attributes := deriveGraphAttributes(graph, artifactIDs, outcome.excludedByGC, b.physical, logger)
+	applyFileAttributes(used, attributes)
 	// Section 22.10 rides on the hashing pass: the copyright statements are
 	// taken from the bytes the digest already needed, so the read below is
 	// the only one either of them causes (decision Q9).
@@ -609,7 +616,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	if projectVersionSource == "cmake" {
 		logger.Info("Project version %q read from CMAKE_PROJECT_VERSION", cfg.Project.Version)
 	}
-	document, findings := buildDocument(cfg, projectVersionSource, resolver, deliverables, used, findings, run)
+	document, findings := buildDocument(cfg, projectVersionSource, resolver, deliverables, used, findings, run, attributes)
 	// The configuration names the serialization; an empty value is the
 	// writer's default rather than a guess made here (section 32.2).
 	format := cfg.Output.Format

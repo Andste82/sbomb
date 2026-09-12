@@ -162,11 +162,15 @@ func parseBuildRule(line string, vars map[string]string) (Rule, error) {
 	_ = tokens[0] // ruleName could be stored in Rule if needed
 	inputs := tokens[1:]
 
-	// Separate implicit and order-only inputs
+	// Separate implicit and order-only inputs. Both separators end the
+	// explicit list: "|" introduces implicit inputs and "||" the order-only
+	// ones, and an order-only input is not something the rule consumed. Ninja
+	// writes the two as tokens of their own, so the test is on the token --
+	// stopping only at "|" left every order-only input in the explicit list,
+	// which for a CMake build graph is the whole target ordering set.
 	var explicitInputs []string
 	for _, inp := range inputs {
-		if inp == "|" {
-			// Rest are implicit/order-only, skip for now
+		if inp == "|" || inp == "||" {
 			break
 		}
 		explicitInputs = append(explicitInputs, inp)

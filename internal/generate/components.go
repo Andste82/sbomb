@@ -947,6 +947,10 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 	// BSD the holder is inside the licence text.
 	findings = append(findings, r.resolveComponentCopyright(component, files, curated, hasCurated)...)
 
+	// Modification status (section 19.4), tri-state. It needs the component
+	// root, which is why it comes after it is settled.
+	findings = append(findings, r.resolveModification(component, rootInfo)...)
+
 	// A component with no hashable file cannot carry a component hash
 	// (section 1.5(1) via the MISSING_COMPONENT_HASH gate).
 	var hashed int
@@ -1135,7 +1139,15 @@ func (r *componentResolver) resolveComponentLicense(component *domain.Component,
 	// been. No canonical SPDX text is ever put there instead -- for MIT and
 	// the BSD family that text carries a placeholder where the rights holder
 	// belongs, so substituting it ships a template where a notice was owed.
-	if hasResolvedLicense(component.Licenses) && !hasRetainedGrant(component.LicenseArtifacts) {
+	//
+	// The question is asked of a distributed component alone (section 24.5,
+	// open question Q11). A build-time-only code generator with a licence
+	// identifier and no retained text is not an attribution gap: nothing of
+	// it is shipped, so there is no notice to reproduce. Until the role was a
+	// resolved fact this could not be narrowed without guessing, and the
+	// finding over-reported on purpose.
+	if component.DistributionRole == domain.RoleDistributed &&
+		hasResolvedLicense(component.Licenses) && !hasRetainedGrant(component.LicenseArtifacts) {
 		findings = append(findings, componentFinding("FOSS_LICENSE_TEXT_MISSING", domain.SeverityInfo, component,
 			fmt.Sprintf("the licence is %s, and no licence text was retained for this component",
 				renderedLicense(component.Licenses[0])),

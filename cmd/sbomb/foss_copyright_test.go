@@ -81,8 +81,32 @@ func TestFOSSFixtureCopyrightStatements(t *testing.T) {
 		// 0BSD with no notice in the sources and none in the licence file.
 		"component:nocopyright": nil,
 	}
+	// The GPL-2.0 code generator is a component on gcc-ninja only (section
+	// 16, open question Q14). Its notices are read exactly like a linked
+	// component's: its own source header, the Free Software Foundation's
+	// notice on the licence text, and the placeholder from the "how to apply"
+	// appendix of that text -- the same three shapes lgpl-lib shows, and the
+	// reason a build-time-only component is described rather than dropped.
+	generator := map[string][]string{
+		"component:gpl-gen": {
+			"Copyright (C) 1989, 1991 Free Software Foundation, Inc.",
+			"Copyright (C) 2026 Fixture GPL Generator Authors",
+			"Copyright (C) yyyy>  name of author>",
+		},
+	}
 	for _, toolchain := range []string{"gcc-ninja", "gcc-make"} {
 		t.Run(toolchain, func(t *testing.T) {
+			want := want
+			if toolchain == "gcc-ninja" {
+				merged := make(map[string][]string, len(want)+len(generator))
+				for ref, statements := range want {
+					merged[ref] = statements
+				}
+				for ref, statements := range generator {
+					merged[ref] = statements
+				}
+				want = merged
+			}
 			buildDir := testutil.CorpusBuildDir(t, toolchain, "p14-foss")
 			output := filepath.Join(t.TempDir(), "foss.cdx.json")
 			code, _, stderr := execute([]string{"generate", "--build-dir", buildDir, "--policy", "lenient",

@@ -13,7 +13,7 @@ not understand them can ignore them; one that does can audit the answer.
 ## Catalogue
 
 <!-- BEGIN GENERATED CATALOGUE -->
-This build writes 37 of the 74 properties below. The rest are specified and
+This build writes 44 of the 80 properties below. The rest are specified and
 reserved: they describe evidence this version does not yet record, and no
 document sbomb writes will contain them. They are listed and marked so that the
 table is the whole catalogue rather than a snapshot of one version.
@@ -35,9 +35,13 @@ table is the whole catalogue rather than a snapshot of one version.
 | `sbomb:cdx:archiveProperty` | Grouping components | archive | no-archive | emitted |
 | `sbomb:cdx:executableProperty` | Grouping components | executable | non-executable | emitted |
 | `sbomb:cdx:structuredProperty` | Grouping components | structured | unstructured | emitted |
+| `sbomb:component:archiveMembersUsed` | Grouping components | — | emitted |
 | `sbomb:component:detectedBy` | Grouping components | — | emitted |
-| `sbomb:component:headerOnly` | Grouping components | — | reserved |
+| `sbomb:component:distributionRole` | Grouping components | distributed | build-time-only | emitted |
+| `sbomb:component:headerOnly` | Grouping components | — | emitted |
 | `sbomb:component:licenseFile` | Grouping components | repeated, <canonicalPath>@sha256:<hex> | emitted |
+| `sbomb:component:linkageForm` | Grouping components | repeated, sorted | emitted |
+| `sbomb:component:modified` | Grouping components | true | false | unknown | emitted |
 | `sbomb:component:noticeFile` | Grouping components | repeated, <canonicalPath>@sha256:<hex> | emitted |
 | `sbomb:component:root` | Grouping components | — | emitted |
 | `sbomb:component:scope` | Grouping components | project | third-party | sdk | toolchain | system | emitted |
@@ -64,7 +68,9 @@ table is the whole catalogue rather than a snapshot of one version.
 | `sbomb:evidence:unity:parent` | File components | — | reserved |
 | `sbomb:file:anchor` | File components | — | reserved |
 | `sbomb:file:class` | File components | — | reserved |
+| `sbomb:file:distributionRole` | File components | distributed | build-time-only | emitted |
 | `sbomb:file:headerClass` | File components | — | reserved |
+| `sbomb:file:linkageForm` | File components | — | emitted |
 | `sbomb:file:missing` | File components | — | reserved |
 | `sbomb:file:path` | File components | — | reserved |
 | `sbomb:file:resolvedTarget` | File components | — | reserved |

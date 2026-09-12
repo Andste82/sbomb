@@ -185,8 +185,33 @@ What the corpus does carry is the dirty content: the bytes harvested from
 all, and they differ from `tools/fixtures/projects/p14-foss/`. Whatever route
 F6 takes, the tree it needs is already committed.
 
-Milestone F6 is where it has to be settled, because that is where modification
-status is derived.
+**Settled in F6: none of the three routes, because none was needed.** The
+modification derivation asks git through the `exec.Runner` of section 9.2 —
+`git describe --tags --always --dirty` and `git rev-parse HEAD` — and takes the
+component root from `componentRootResult`. Both inputs are parameters, so every
+state the tri-state has is reachable in a unit test over a temporary directory
+that the test itself turns into a repository
+(`internal/generate/modification_test.go`): clean on its tag, dirty, no
+repository at all, a repository with introspection off, clean but off its tag,
+and a vendored directory inside a dirty enclosing repository. That last one is
+the case a committed corpus repository would *not* have caught, because the
+corpus has no nesting.
+
+So the corpus keeps no `.git`, every fixture component reports `unknown`, and
+`cmd/sbomb/componentattributes_test.go` asserts exactly that — including that an
+unknown status writes no `pedigree` node, which is the property an auditor
+depends on. The test that needs a repository builds one; the test that needs a
+corpus reads the corpus. Route 3 was the honest one and it turns out not to need
+the corpus at all.
+
+What it still costs is worth stating: no test exercises the derivation over
+*harvested* build evidence whose component roots are git repositories, so the
+interaction between relocation (section 7.9) and the git check is untested. The
+physical root is what the check is handed, and relocation is what produces it,
+so a relocated tree that carries a repository would be answered from the
+relocated copy — which is correct, and is not asserted anywhere. It becomes
+testable the day the corpus carries a repository, for whatever reason makes that
+worth doing.
 
 ## Q10 — Is a resolved single identifier an `expression` or a `license.id`?
 
@@ -242,10 +267,25 @@ Three answers, none of them obviously right:
   plan says, and which is a third criterion again — a build-time-only code
   generator under GPL is not in the notices document either.
 
-It is settled in F6, where the role exists and all three criteria can be
-compared against one corpus instead of argued about. Until then the finding is
-informational, gates nothing, and over-reports rather than under-reports, which
-is the right direction for a compliance signal.
+**Settled in F6: the third answer, which is what the plan says.** The finding is
+restricted to a `distributed` component (section 24.5), and
+`FOSS_COPYRIGHT_MISSING` is restricted the same way — section 22.10 said it
+asked every mapped component only "until the distribution role of §24.5 is a
+resolved fact", and it now is. A build-time-only code generator with a licence
+identifier and no retained text is not an attribution gap: nothing of it is
+shipped, so there is no notice to reproduce and no source request to answer.
+
+The first two answers were both rejected for the same reason. Leaving it as it
+is would keep reporting a gap for components the export does not describe, and
+restricting it to `type != application` would agree with the notices document at
+the price of never reporting the one gap an auditor asks about — a manufacturer
+shipping MIT code with no LICENSE file of its own.
+
+What this changes on the corpus is nothing, which is the point: `p14-foss`'s own
+application is `distributed`, so the finding still fires for it, and the
+criterion that was chosen is the one that also excludes the GPL-2.0 generator
+the moment a fixture puts one in a document. It was narrowed on a criterion, not
+on an observation.
 
 ---
 
@@ -279,3 +319,105 @@ settled where the fixture is next regenerated for another reason — F6 or F7 �
 by repairing the licence files in `tools/fixtures/projects/p14-foss` and
 re-harvesting, so that the corpus and the committed tree change together. Until then the fixture also documents, accidentally, that extraction is
 mechanical: it stores what the file says.
+
+---
+
+## Q13 — Should `§9.2` permit `git rev-list --count <upstream>..HEAD`?
+
+Section 19.4's modification status has three states and reaches `false` only
+from a clean checkout standing exactly on its recorded tag. A clean checkout
+four commits past its tag is `unknown`, and it is the commonest real shape of a
+vendored dependency somebody has fixed and committed: the tree is clean, the tag
+is still `v1.2.0`, and the component *is* modified.
+
+Answering it needs one command:
+
+```
+git -C <root> rev-list --count <tag>..HEAD
+```
+
+which returns a number, reads nothing outside the repository, writes nothing,
+and would turn that case from `unknown` into `true` with a count beside it.
+
+**What it costs is not the command, it is the allowlist.** Section 9.2 is a
+security boundary and the table in `internal/exec/exec.go` is its enforcement:
+five shapes the specification lists are absent because nothing could call them
+without guessing (deviation D29), and two more were removed because the
+permitted shape did not answer the question (D30). `rev-list` is the first entry
+that would take a **caller-supplied revision** in an argument slot rather than a
+path. A revision is not a path, so `checkPath` does not apply to it, and a tag
+name comes out of a repository sbomb was pointed at — which is untrusted input
+by section 30. `git rev-list --count <x>..HEAD` with a hostile `<x>` is not
+known to be exploitable, and "not known to be" is not the standard an allowlist
+is held to: the argument would have to be that the revision slot is validated
+against a grammar before it is passed, and that grammar would have to be
+written and tested.
+
+Three things would have to land together, and none of them belongs in a
+milestone about deriving attributes:
+
+1. a revision slot in the allowlist table, with validation of its own —
+   `PathSlots` has no equivalent for revisions today;
+2. the security argument in section 9.2, stated rather than assumed;
+3. a fixture with a repository in it, because a counting rule nothing counts is
+   an untested branch (see Q9).
+
+Until then the restriction is stated in section 19.4 rather than worked around,
+and the state it produces is `unknown` — which is the answer that cannot be
+wrong.
+
+---
+
+## Q14 — Two of section 16's three generator-input sources are still unread, and no source answers for the Makefiles generator
+
+Section 16 lists three sources of generator-input evidence in priority order:
+CMake File API custom-command `dependencies`/`byproducts`, Ninja `build` edge
+inputs for the generating rule, and a depfile the generator emitted. **Source 2
+is now implemented** (`internal/generate/generator.go`, deviation D45) and with
+it the case the whole attribution track turns on: `p14-foss` compiles
+`dep/gpl-gen/table_gen.c` into a `table_gen` executable, runs it during the
+build and links the `generated/table.c` it produced, and the document now
+carries `component:gpl-gen` as `GPL-2.0-only`, `build-time-only`, `build-tool`,
+`scope: excluded` — a GPL-2.0 generator described and excluded rather than
+unseen. What remains open is the other two sources and, more importantly, the
+gap between build systems.
+
+**Source 1 cannot be read as written.** The CMake File API's codemodel has no
+custom-command object: a generated file appears among a target's sources with
+`isGenerated`, and nothing in the reply says what produced it. Either the
+section names something the File API does not have, or it means the
+`backtraceGraph`, which records where in the CMake code a source was added and
+not what generated it. Settling that is a reading of the File API schema, not a
+decision.
+
+**Source 3 needs a build that emits one.** A generator's own depfile is read
+the way any depfile is; what is missing is a fixture whose generator writes
+one, and a rule for associating it with the output (`--depfile` is the
+generator's own flag, and sbomb cannot know it was passed).
+
+**The gap that matters is the Makefiles generator.** It records the same
+dependency — `generated/table.c: table_gen` in `CMakeFiles/<target>.dir/
+build.make`, which the Makefiles adapter already reads line by line for object
+sources and archive inputs — and section 16 lists no source that covers it. The
+consequence is visible in the corpus and asserted by the tests: built with
+Ninja, `p14-foss` carries the generator as a component; built with Make, it does
+not and `MISSING_GENERATOR_INPUT_EVIDENCE` says why. One project, two build
+systems, two used-file sets — which is exactly the property
+`TestEvidenceChainYieldsTheSameFilesAcrossToolchains` exists to defend for a
+project without a generator.
+
+Adding it means amending section 16 with a fourth source, and deviation D20
+refused a fourth source once before — for a different reason, an unverifiable
+assertion from a configuration file, where this one would be a build system's
+own rule file. The work is:
+
+1. a generic output-to-prerequisites map from `build.make`, which the adapter
+   discards today;
+2. a rule for the bookkeeping prerequisites Make carries that Ninja does not —
+   `flags.make`, `compiler_depend.ts`, `link.txt` stand beside the object in
+   the same rule, and none of them is a generator input;
+3. the amendment, because `build.make` is evidence section 16 does not list.
+
+Item 2 is the whole difficulty: with no rule for it, a generator input list
+would name CMake's own bookkeeping files as inputs of the product, and a
+suffix list is the kind of heuristic section 19.2 exists to keep out.

@@ -1600,7 +1600,7 @@ func TestDescribingRootsAddsNoComponentToTheDocument(t *testing.T) {
 		pkgmanager.FieldSupplier: "Example Ltd",
 	}, pkgmanager.RankBundledSBOM), nil, &seen)
 
-	groups, _ := groupFilesByComponent(resolver, []domain.UsedFile{mainFile, tinyFile})
+	groups, _ := groupFilesByComponent(resolver, []domain.UsedFile{mainFile, tinyFile}, &graphAttributes{})
 
 	if len(groups) != 2 {
 		t.Fatalf("components = %#v, want the two the used files reached", groups)

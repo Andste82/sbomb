@@ -319,6 +319,12 @@ func componentToCyclone(component domain.Component, ref, specVersion string, opt
 	// leaves the fact to sbomb:component:scope and the build-environment
 	// grouping of section 24.2, which both versions carry.
 	out.IsExternal = component.EnvironmentProvided && externalComponentsAllowed(specVersion)
+	// The specified field for "this is a build tool, not part of the product"
+	// (section 28.1: where the format has a field, the field wins). It is
+	// written from the distribution role and nothing else, so a consumer that
+	// has never heard of sbomb reads the common case out of the document.
+	out.Scope = scopeForRole(component.DistributionRole)
+	out.Pedigree = pedigreeToCyclone(component.Modification)
 	out.ExternalReferences, out.Properties = vcsToCyclone(component.VCS, specVersion)
 	out.Properties = append(out.Properties, propertiesFromMap(component.Properties)...)
 	if component.Scope != "" {
@@ -326,6 +332,92 @@ func componentToCyclone(component domain.Component, ref, specVersion string, opt
 	}
 	out.Properties = append(out.Properties, bsiProperties(domain.FileClassUnknown, out.Type)...)
 	return out
+}
+
+// scopeForRole maps the distribution role of section 24.5 onto the CycloneDX
+// scope enum.
+//
+// The two are not the same axis, and the mapping is therefore defined rather
+// than assumed. CycloneDX defines "excluded" as usage for test and other
+// non-runtime purposes, not reachable within a call graph at runtime; sbomb's
+// role says whether the component is inside the artifact. They agree on the
+// two common cases -- a statically linked archive member is required, a
+// build-time code generator is excluded -- and diverge on one: a dynamically
+// linked system library is not in the artifact and is still required at
+// runtime, and still needs attribution. That case is "distributed" for sbomb,
+// so this mapping gets it right without a special case, and
+// sbomb:component:distributionRole keeps the evidence-based meaning.
+//
+// A component whose role was never derived is written with no scope at all.
+// The schema's own default for an absent scope is "required", so silence and
+// the common answer agree, and nothing is asserted that was not derived.
+func scopeForRole(role string) string {
+	switch role {
+	case domain.RoleBuildTimeOnly:
+		return "excluded"
+	case domain.RoleDistributed:
+		return "required"
+	default:
+		return ""
+	}
+}
+
+// pedigreeToCyclone renders what section 19.4 established about modification.
+//
+// Only a positive answer produces a node. An absent pedigree does not mean
+// "unmodified", so writing an empty one for an unknown status would let a
+// consumer that reads only the field mistake the third state for the second --
+// which is precisely what the tri-state exists to prevent. The status itself
+// is always written, as sbomb:component:modified, because pedigree has no way
+// to say "unknown".
+func pedigreeToCyclone(record domain.ModificationRecord) *Pedigree {
+	if record.Status != domain.ModificationModified && record.Status != domain.ModificationUnmodified {
+		return nil
+	}
+	pedigree := &Pedigree{Notes: record.Signal}
+	if record.Commit != "" {
+		pedigree.Commits = []Commit{{UID: record.Commit}}
+	}
+	// One entry per patch the metadata recorded, ordered by type -- the
+	// schema forbids a patch carrying anything but its type, diff and
+	// resolves, so what the record says about each patch reaches the document
+	// through notes. resolves is not that place: it is for the issues a patch
+	// closes, and a description is not an issue.
+	names := make([]string, 0, len(record.Patches))
+	for _, patch := range record.Patches {
+		pedigree.Patches = append(pedigree.Patches, Patch{Type: patch.Type})
+		if label := patchLabel(patch); label != "" {
+			names = append(names, label)
+		}
+	}
+	sort.SliceStable(pedigree.Patches, func(i, j int) bool {
+		return pedigree.Patches[i].Type < pedigree.Patches[j].Type
+	})
+	if len(names) > 0 {
+		sort.Strings(names)
+		pedigree.Notes = strings.TrimSpace(pedigree.Notes + " (" + strings.Join(names, ", ") + ")")
+	}
+	if pedigree.Notes == "" && len(pedigree.Commits) == 0 && len(pedigree.Patches) == 0 {
+		return nil
+	}
+	return pedigree
+}
+
+// patchLabel names one patch in pedigree.notes: the file the record names, the
+// description it gives, or both. A record may carry either alone -- a Conan
+// recipe can patch by payload and describe what it did without naming a file --
+// so neither is assumed to be there.
+func patchLabel(patch domain.Patch) string {
+	file := strings.Join(strings.Fields(patch.File), " ")
+	description := strings.Join(strings.Fields(patch.Description), " ")
+	switch {
+	case file != "" && description != "":
+		return file + ": " + description
+	case file != "":
+		return file
+	default:
+		return description
+	}
 }
 
 func fileToCyclone(file domain.UsedFile, ref string) Component {

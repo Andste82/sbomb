@@ -2,7 +2,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.7",
   "version": 1,
-  "serialNumber": "urn:uuid:b0f206cc-d4ff-5501-aba6-38603f2ed542",
+  "serialNumber": "urn:uuid:600ab440-b868-5751-8655-ad033999233d",
   "metadata": {
     "tools": [
       {
@@ -58,6 +58,7 @@
       "type": "application",
       "name": "project",
       "bom-ref": "component:project",
+      "scope": "required",
       "licenses": [
         {
           "license": {
@@ -79,8 +80,28 @@
           "value": "unstructured"
         },
         {
+          "name": "sbomb:component:archiveMembersUsed",
+          "value": "1/2"
+        },
+        {
           "name": "sbomb:component:detectedBy",
           "value": "anchor:project"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-object"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:root",
@@ -126,6 +147,14 @@
           "value": "project"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "project:crypto.c"
         }
@@ -157,6 +186,14 @@
           "value": "project-header"
         },
         {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "header-only"
+        },
+        {
           "name": "sbomb:path:canonical",
           "value": "project:crypto.h"
         }
@@ -182,6 +219,14 @@
         {
           "name": "sbomb:component:scope",
           "value": "project"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-object"
         },
         {
           "name": "sbomb:path:canonical",

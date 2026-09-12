@@ -28,8 +28,11 @@ func copyrightOf(t *testing.T, root, name string, files []domain.UsedFile,
 	}
 	resolver := newComponentResolver(cfg, physical, map[string]string{"project": root}, nil)
 	resolver.setCopyrightStatements(observed)
+	// The role is settled before a component is described (section 24.5), so
+	// the helper sets it the way groupFilesByComponent does. FOSS_COPYRIGHT_
+	// MISSING is about a distributed component and nothing else.
 	component := &domain.Component{ID: "component:" + name, Name: name,
-		DetectedBy: "package-metadata:LICENSE"}
+		DetectedBy: "package-metadata:LICENSE", DistributionRole: domain.RoleDistributed}
 	findings := resolver.enrichComponent(component, files)
 	return component, findings
 }

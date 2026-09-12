@@ -14,7 +14,7 @@ same build produce identical output.
 
 <!-- BEGIN GENERATED CATALOGUE -->
 
-This build emits 53 of the 62 identifiers below. The rest are specified and
+This build emits 54 of the 63 identifiers below. The rest are specified and
 reserved: they describe evidence this version does not yet read, and a run will
 never report them. They are listed and marked so that the table is the whole
 catalogue rather than a snapshot of one version.
@@ -35,9 +35,10 @@ catalogue rather than a snapshot of one version.
 | `DYNAMIC_DEPENDENCIES_IGNORED` | info | — | Artifact has `DT_NEEDED`/imports while `systemLibraries=exclude` | emitted |
 | `EVIDENCE_UNREADABLE` | warning | — | A metadata file was found but could not be parsed, so nothing was taken from it | emitted |
 | `FOSS_COPYRIGHT_LIMIT` | info | — | More distinct copyright statements than the limit of §22.10 | emitted |
-| `FOSS_COPYRIGHT_MISSING` | info | — | Component carries no copyright statement and none was curated (§22.10) | emitted |
+| `FOSS_COPYRIGHT_MISSING` | info | — | Distributed component carries no copyright statement and none was curated (§22.10) | emitted |
 | `FOSS_LICENSE_ARTIFACT_LIMIT` | info | — | More recognized license files, or a larger one, than the retention limit of §22.9 | emitted |
-| `FOSS_LICENSE_TEXT_MISSING` | info | — | Component has a license identifier but carries no retained text (§22.9) | emitted |
+| `FOSS_LICENSE_TEXT_MISSING` | info | — | Distributed component has a license identifier but carries no retained text (§22.9) | emitted |
+| `FOSS_MODIFICATION_UNKNOWN` | info | — | Modification status could not be established, so it is reported as unknown rather than as unmodified (§19.4) | emitted |
 | `HEADER_EVIDENCE_FALLBACK` | info | — | A CU had no DWARF coverage; depfile used instead | emitted |
 | `INPUT_LIMIT_EXCEEDED` | warning | — | A parser limit of §30 was reached | emitted |
 | `INTERNAL_INVARIANT_VIOLATION` | error | always (exit 70) | A graph invariant of §8.8 or a `bom-ref` uniqueness assertion of §28.4 failed | emitted |

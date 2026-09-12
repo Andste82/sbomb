@@ -36,6 +36,7 @@ func buildDocument(
 	files []domain.UsedFile,
 	findings []domain.Finding,
 	run sbomwriter.RunMetadata,
+	attributes *graphAttributes,
 ) (*sbomwriter.Document, []domain.Finding) {
 	document := &sbomwriter.Document{
 		Product: productComponent(cfg, versionSource, deliverables),
@@ -43,7 +44,7 @@ func buildDocument(
 		Run:     run,
 	}
 
-	groups, componentFindings := groupFilesByComponent(resolver, files)
+	groups, componentFindings := groupFilesByComponent(resolver, files, attributes)
 	findings = append(findings, componentFindings...)
 	document.Findings = findings
 	relations := make([]sbomwriter.Relation, 0, len(groups)+1)
@@ -191,7 +192,7 @@ type fileGroup struct {
 // groupFilesByComponent maps every used file onto exactly one component using
 // the priority order of section 19.2, then fills in the CRA fields each
 // component needs.
-func groupFilesByComponent(resolver *componentResolver, files []domain.UsedFile) ([]fileGroup, []domain.Finding) {
+func groupFilesByComponent(resolver *componentResolver, files []domain.UsedFile, attributes *graphAttributes) ([]fileGroup, []domain.Finding) {
 	byComponentID := map[string]*fileGroup{}
 	order := []string{}
 
@@ -231,8 +232,13 @@ func groupFilesByComponent(resolver *componentResolver, files []domain.UsedFile)
 		sort.Slice(group.files, func(i, j int) bool {
 			return group.files[i].ID.Canonical() < group.files[j].ID.Canonical()
 		})
+		// The three attributes of section 24.5 are settled before the
+		// component is described, because two findings are about a
+		// distributed component and nothing else: a build-time-only code
+		// generator with no notice file is not an attribution gap.
+		applyComponentAttributes(&group.component, group.files, attributes)
 		findings = append(findings, resolver.enrichComponent(&group.component, group.files)...)
-		group.component.EnvironmentProvided = environmentProvided(group.component, group.files)
+		group.component.EnvironmentProvided = environmentProvided(group.component)
 		groups = append(groups, *group)
 	}
 	// Which packages reached no component at all is only decidable once every
@@ -259,13 +265,20 @@ func groupFilesByComponent(resolver *componentResolver, files []domain.UsedFile)
 // have to live where the distribution keeps them, and the artifact has to link
 // against them dynamically -- a system archive linked statically ends up inside
 // the artifact, and calling that "provided by the environment" would be false.
-// A shared library among the component's files is the evidence for the second.
-func environmentProvided(component domain.Component, files []domain.UsedFile) bool {
+//
+// The second condition is the `dynamic` linkage form of section 24.5, and it
+// is read from there rather than tested again here. The two are the same
+// question, and they were answered by two different tests until F6: this one
+// looked for domain.FileClassSharedLibrary, which fileClassOf never produces,
+// so the whole condition was unreachable. Sharing the test is what keeps the
+// field and the linkage form in agreement, which is what the milestone
+// requires of them.
+func environmentProvided(component domain.Component) bool {
 	if component.Scope != string(anchors.ScopeSystem) {
 		return false
 	}
-	for _, file := range files {
-		if file.Class == domain.FileClassSharedLibrary {
+	for _, form := range component.LinkageForms {
+		if form == domain.LinkageDynamic {
 			return true
 		}
 	}
