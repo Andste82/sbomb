@@ -27,7 +27,7 @@ func Toolchains() []string {
 }
 
 func Projects() []string {
-	return []string{"p01-hello", "p02-static", "p03-dupnames", "p04-generated", "p05-headeronly", "p06-unity", "p07-pch", "p08-gcsections", "p09-lto", "p10-fetchcontent", "p11-conan", "p12-assets", "p13-prebuilt", "p14-foss"}
+	return []string{"p01-hello", "p02-static", "p03-dupnames", "p04-generated", "p05-headeronly", "p06-unity", "p07-pch", "p08-gcsections", "p09-lto", "p10-fetchcontent", "p11-conan", "p12-assets", "p13-prebuilt", "p14-foss", "p15-shared"}
 }
 
 // FossSourceTree is where the harvested source tree of the FOSS fixture lives,
@@ -43,6 +43,10 @@ const FossSourceTree = "p14-foss-src"
 var projectToolchains = map[string][]string{
 	"p11-conan": {"gcc-ninja", "gcc-make", "clang-ninja"},
 	"p14-foss":  {"gcc-ninja", "gcc-make"},
+	// An assembly whose two deliverables share a component. Cross-compiling it
+	// to bare metal says nothing extra, and a Windows build of it cannot be
+	// produced where the corpus is regenerated.
+	"p15-shared": {"gcc-ninja", "gcc-make"},
 }
 
 func AllPairs() [][2]string {

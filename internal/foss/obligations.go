@@ -39,6 +39,13 @@ func renderObligations(m model, s style) string {
 		owing++
 		s.bullet(&b, strings.Join([]string{heading(candidate), candidate.license,
 			listOrDash(candidate.linkage)}, " - "))
+		if len(candidate.deliverables) > 0 {
+			// Which deliverable owes it. LGPL-2.1 section 6 asks for what is
+			// needed to relink *the application*, so a component two
+			// deliverables share owes two different things and the reader has
+			// to know which is which.
+			s.prose(&b, "  ", "Reached from: "+strings.Join(candidate.deliverables, ", "))
+		}
 		for _, sentence := range candidate.assessment.Prose() {
 			s.prose(&b, "  ", sentence)
 		}

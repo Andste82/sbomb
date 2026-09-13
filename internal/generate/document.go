@@ -33,15 +33,17 @@ func buildDocument(
 	versionSource string,
 	resolver *componentResolver,
 	deliverables []Deliverable,
+	artifactIDs []domain.NodeID,
 	files []domain.UsedFile,
 	findings []domain.Finding,
 	run sbomwriter.RunMetadata,
 	attributes *graphAttributes,
 ) (*sbomwriter.Document, []domain.Finding) {
 	document := &sbomwriter.Document{
-		Product: productComponent(cfg, versionSource, deliverables),
-		Files:   files,
-		Run:     run,
+		Product:   productComponent(cfg, versionSource, deliverables),
+		Artifacts: artifactComponents(deliverables, artifactIDs),
+		Files:     files,
+		Run:       run,
 	}
 
 	groups, componentFindings := groupFilesByComponent(resolver, files, attributes)
@@ -82,10 +84,80 @@ func buildDocument(
 		relations = append(relations, sbomwriter.Relation{From: buildEnvironmentID, To: buildEnvironmentTargets})
 	}
 	sort.Strings(productTargets)
+	// Section 6.2: in assembly mode each artifact is a component and a direct
+	// dependency of the root, and what a component belongs to is what its
+	// files were reached from (section 6.3). Without this the artifacts would
+	// be components nothing points at, and a consumer walking the product's
+	// dependencies would not find them at all.
+	if len(document.Artifacts) > 0 {
+		relations = append(relations, artifactRelations(document.Artifacts, groups, productTargets)...)
+		productTargets = artifactTargets(document.Artifacts)
+	}
 	relations = append(relations, sbomwriter.Relation{From: productID, To: productTargets})
 	sort.Slice(relations, func(i, j int) bool { return relations[i].From < relations[j].From })
 	document.Relations = relations
 	return document, findings
+}
+
+// artifactRelations hangs each grouping component under the artifacts its
+// files were reached from, which is what sbomb:evidence:artifacts records per
+// file (section 6.3). A component several artifacts share is named under each
+// of them and still appears once as a component, which is the whole point of
+// that section -- and of decision Q10 of the FOSS plan, where the same
+// question is asked about obligations.
+//
+// A component whose files name no artifact stays under the product, so nothing
+// can fall out of the document because the property was missing.
+func artifactRelations(artifacts []domain.Component, groups []fileGroup, productTargets []string) []sbomwriter.Relation {
+	byArtifact := map[string][]string{}
+	claimed := map[string]bool{}
+	for _, group := range groups {
+		for _, file := range group.files {
+			for _, ref := range file.Properties["sbomb:evidence:artifacts"] {
+				id := strings.TrimPrefix(ref, "artifact:")
+				if !contains(byArtifact[id], group.component.ID) {
+					byArtifact[id] = append(byArtifact[id], group.component.ID)
+				}
+				claimed[group.component.ID] = true
+			}
+		}
+	}
+	relations := make([]sbomwriter.Relation, 0, len(artifacts)+1)
+	for _, artifact := range artifacts {
+		targets := byArtifact[artifact.ID]
+		sort.Strings(targets)
+		relations = append(relations, sbomwriter.Relation{From: artifact.ID, To: targets})
+	}
+	var unclaimed []string
+	for _, target := range productTargets {
+		if !claimed[target] {
+			unclaimed = append(unclaimed, target)
+		}
+	}
+	if len(unclaimed) > 0 {
+		sort.Strings(unclaimed)
+		relations = append(relations, sbomwriter.Relation{From: productID, To: unclaimed})
+	}
+	return relations
+}
+
+// artifactTargets is the artifacts in the order section 29 sorts them.
+func artifactTargets(artifacts []domain.Component) []string {
+	out := make([]string, 0, len(artifacts))
+	for _, artifact := range artifacts {
+		out = append(out, artifact.ID)
+	}
+	sort.Strings(out)
+	return out
+}
+
+func contains(list []string, value string) bool {
+	for _, entry := range list {
+		if entry == value {
+			return true
+		}
+	}
+	return false
 }
 
 // projectFromCMake fills the product's name and version from what the build
@@ -129,6 +201,35 @@ func projectFromCMake(cfg *config.Config, model *cmakeapi.Model) string {
 }
 
 // productComponent describes what the SBOM is about. In single-artifact mode
+// artifactComponents names the deliverables of an assembly, so that a reader
+// of the document can say which of them a component reached. In
+// single-artifact mode there is nothing to distinguish -- every component
+// reaches the one deliverable -- and the list stays empty, which is what
+// sbomwriter.Document promises about the field.
+//
+// The identity is the artifact node's, so the refs here and the
+// sbomb:evidence:artifacts of a file are the same strings (section 28.4).
+func artifactComponents(deliverables []Deliverable, artifactIDs []domain.NodeID) []domain.Component {
+	if len(deliverables) < 2 || len(artifactIDs) != len(deliverables) {
+		return nil
+	}
+	out := make([]domain.Component, 0, len(deliverables))
+	for i, deliverable := range deliverables {
+		// The identity the graph gave the artifact, minus the kind the writer
+		// puts back (§28.4): the refs a file's sbomb:evidence:artifacts names
+		// and the refs of these components have to be the same strings, or the
+		// breakdown of decision Q10 matches nothing.
+		id := strings.TrimPrefix(string(artifactIDs[i]), "artifact:")
+		out = append(out, domain.Component{
+			ID:   id,
+			Name: baseName(deliverable.EvidencePath),
+			Type: cycloneTypeForRole(deliverable.Role),
+		})
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
+	return out
+}
+
 // the root component is the deliverable itself (section 6.1).
 func productComponent(cfg config.Config, versionSource string, deliverables []Deliverable) domain.Component {
 	name := cfg.Project.Name

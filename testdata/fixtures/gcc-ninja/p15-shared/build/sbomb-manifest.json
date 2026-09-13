@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "outputs": [
+    {
+      "path": "/__fixture_build__/image.img",
+      "kind": "image",
+      "inputs": [
+        { "path": "/__fixture_src__/dep/shared-lib/data/table.bin", "role": "asset" }
+      ]
+    }
+  ]
+}

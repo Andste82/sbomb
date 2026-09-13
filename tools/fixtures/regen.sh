@@ -55,7 +55,7 @@ if [[ "${1:-}" == "--only" ]]; then
   shift 2
 fi
 
-PROJECTS=(p01-hello p02-static p03-dupnames p04-generated p05-headeronly p06-unity p07-pch p08-gcsections p09-lto p10-fetchcontent p11-conan p12-assets p13-prebuilt p14-foss)
+PROJECTS=(p01-hello p02-static p03-dupnames p04-generated p05-headeronly p06-unity p07-pch p08-gcsections p09-lto p10-fetchcontent p11-conan p12-assets p13-prebuilt p14-foss p15-shared)
 
 # Some projects only make sense for some toolchains. A Conan package is built
 # for one target, so linking it into an ARM or Windows binary is not a fixture
@@ -67,6 +67,7 @@ PROJECTS=(p01-hello p02-static p03-dupnames p04-generated p05-headeronly p06-uni
 declare -A PROJECT_TOOLCHAINS=(
   [p11-conan]="gcc-ninja gcc-make clang-ninja"
   [p14-foss]="gcc-ninja gcc-make"
+  [p15-shared]="gcc-ninja gcc-make"
 )
 
 # The one project whose sources are committed, and where they land. The

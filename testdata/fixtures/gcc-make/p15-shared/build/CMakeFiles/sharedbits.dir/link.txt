@@ -1,0 +1,2 @@
+/usr/bin/ar qc libsharedbits.a "CMakeFiles/sharedbits.dir/dep/shared-lib/src/shared_bits.c.o"
+/usr/bin/ranlib libsharedbits.a
