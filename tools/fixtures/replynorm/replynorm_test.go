@@ -151,11 +151,15 @@ func TestAnArrayThisCannotCutIsRefused(t *testing.T) {
 func TestARenameOntoAnotherDocumentIsRefused(t *testing.T) {
 	content := []byte("{\n\t\"kind\" : \"codemodel\"\n}")
 	digest := replyHash(content)
+	// The same bytes under two names: one correct, one not. The misnamed one is
+	// renamed to the digest of its content, which is the name the other
+	// already holds, and the other is correctly named so nothing renames it
+	// out of the way first. Two different contents would have made the outcome
+	// depend on which name the map yielded first -- it passed here and failed
+	// in CI, which is what a map-ordered test does.
 	documents := map[string][]byte{
-		// This one is misnamed, so it will be renamed to its digest -- which
-		// is the name the second one already holds.
 		"codemodel-v2-00000000000000000000.json": content,
-		"codemodel-v2-" + digest + ".json":       []byte("{\n\t\"kind\" : \"other\"\n}"),
+		"codemodel-v2-" + digest + ".json":       content,
 	}
 	if err := rename(documents); err == nil {
 		t.Error("a rename onto an existing document was accepted")
