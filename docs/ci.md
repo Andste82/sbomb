@@ -23,6 +23,7 @@ here is a version that goes stale the next time one is cut.
 |---|---|---|
 | `version` | — | Release tag to download |
 | `build-dir` | the workspace | The CMake build directory |
+| `source-dir` | — | The source tree, where it is now. Needed when the build directory was restored somewhere else than it was built — building in one job and describing the result in another (§7.9) |
 | `config` | — | Configuration file |
 | `policy` | `default` | Policy profile |
 | `output` | `sbomb.cdx.json` | Where the document goes |
@@ -30,6 +31,7 @@ here is a version that goes stale the next time one is cut.
 | `foss-out` | `sbomb-foss` | Where those four files go |
 | `reproducible` | `false` | Omit the timestamp |
 | `path-flavor` | the host's | Pin to `posix` when comparing across platforms |
+| `artifact-suffix` | — | Appended to the uploaded artifact's name. A matrix that varies anything but the platform needs it: two legs uploading under one name make the second a 409 that is swallowed, and one leg's attribution disappears |
 | `token` | `${{ github.token }}` | Needed while the repository is private; pass `""` to download anonymously |
 | `repository` | this repository | Where the release lives |
 
@@ -58,6 +60,11 @@ SBOM red. It reads the same `config` and `policy` as the document.
     policy: cra
     foss: true
 ```
+
+**Without `source-dir` a restored build resolves no licence.** The attribution
+document is still written, and still exits 0, and every entry in it says the
+text could not be established — because the sources are not where the build
+recorded them. That is the ordinary CI split, and it is what the input is for.
 
 `path-flavor` is empty by default, which means the host's. Pin it to `posix`
 when a document produced on a Windows runner has to be byte-identical to one

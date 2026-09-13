@@ -106,8 +106,12 @@ jobs:
       - name: The attribution step of the action produces four files and gates nothing
         run: |
           set -euo pipefail
-          # The build directory is copied because sbomb writes evidence.json
-          # into it, and the corpus is a committed artifact.
+          # --source-dir is what the action's `source-dir` input emits. It is
+          # given here because the corpus records the sentinel source root and
+          # the sources live elsewhere in the repository; a build whose tree is
+          # where it was built needs neither. Without it this fixture resolves
+          # no licence at all and the four files below are still written, which
+          # is why their presence is checked *and* their content is.
           cp -r testdata/fixtures/gcc-ninja/p14-foss/build "$RUNNER_TEMP/p14-build"
           # The strict profile is the interesting one: its gates would fail
           # this fixture in `generate`, and `foss` evaluates none of them.
@@ -118,6 +122,14 @@ jobs:
           for name in THIRD-PARTY-NOTICES.txt foss-review.txt foss-review.json source-obligations.txt; do
             test -s "$RUNNER_TEMP/p14-foss/$name" || { echo "missing $name" >&2; exit 1; }
           done
+          # Four files are written whether or not anything was resolved, so
+          # their presence is not the assertion. A notices document that
+          # reached the licence texts is: without --source-dir this is 767
+          # bytes of "attribution incomplete" and the step would still pass.
+          if ! grep -q "Permission is hereby granted" "$RUNNER_TEMP/p14-foss/THIRD-PARTY-NOTICES.txt"; then
+            echo "the notices document carries no licence text" >&2
+            exit 1
+          fi
           # Nothing resembling corresponding source: section 32.6's structural
           # guarantee, checked on what the action would upload.
           found=$(find "$RUNNER_TEMP/p14-foss" -type f \

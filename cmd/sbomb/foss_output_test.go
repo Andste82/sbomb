@@ -601,3 +601,23 @@ func TestFOSSRefusesAnInvalidFormatBeforeDiscovering(t *testing.T) {
 		t.Fatalf("generate --foss-format = code %d, stderr %q; want an unknown-flag error", code, stderr)
 	}
 }
+
+// Section 32.6: the two entry points are one discovery, so they have to
+// compare paths the same way. `sbomb foss` rejected --path-flavor outright, so
+// a Windows runner with `path-flavor: posix` pinned produced an SBOM under one
+// comparison and notices under another -- from one build, describing component
+// sets that can differ.
+func TestFOSSTakesThePathFlavor(t *testing.T) {
+	buildDir := testutil.CorpusBuildDir(t, "gcc-ninja", "p14-foss")
+	out := t.TempDir()
+	code, _, stderr := execute([]string{"foss", "--build-dir", buildDir,
+		"--source-dir", testutil.CorpusSourceTree(t), "--path-flavor", "posix", "--out", out})
+	if code != 0 || stderr != "" {
+		t.Fatalf("foss --path-flavor posix = code %d, stderr %q", code, stderr)
+	}
+	// And it is checked rather than passed through.
+	code, _, stderr = execute([]string{"foss", "--build-dir", buildDir, "--path-flavor", "nonsense", "--out", out})
+	if code == 0 || !strings.Contains(stderr, "invalid value for --path-flavor") {
+		t.Errorf("an invalid flavor = code %d, stderr %q", code, stderr)
+	}
+}

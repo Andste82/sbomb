@@ -454,3 +454,80 @@ func TestALicenceThatIsASymlinkIsRefusedUnderStrictSymlinks(t *testing.T) {
 		t.Errorf("retained %d artifact(s) without --strict-symlinks, want the linked file read", len(got.artifacts))
 	}
 }
+
+// `LICENSE-<id>` is a family of names, and the eight characters it begins with
+// are also how a licence *checker* names its own files. Recognizing those made
+// their directory a component of its own -- `tools/license-header.txt` turns
+// `tools/` into a third-party component, `src/license-header.txt` re-parents
+// the whole source tree -- and section 22.9 then published the template, or
+// the Python script, as that component's retained licence text.
+func TestOnlyAFileNamedAfterALicenceIsOne(t *testing.T) {
+	for _, name := range []string{
+		"LICENSE-MIT", "LICENSE-APACHE", "LICENSE-Apache-2.0", "LICENSE-GPL-2.0-or-later.txt",
+		"LICENSE-0BSD", "license-mit.md", "LICENSE-LGPL-2.1-only",
+	} {
+		if _, ok := recognizedLicenseFile(name); !ok {
+			t.Errorf("%q names a licence and was not recognized", name)
+		}
+	}
+	// What a licence-header checker ships, and what a policy script is called.
+	for _, name := range []string{
+		"license-header.txt", "LICENSE-HEADER.txt", "license-check.py",
+		"LICENSE-scanner.sh", "LICENSE-policy", "LICENSE-",
+	} {
+		if _, ok := recognizedLicenseFile(name); ok {
+			t.Errorf("%q is not a licence file and was recognized as one", name)
+		}
+	}
+}
+
+// A directory can be searchable and not listable -- 0711 is ordinary for a
+// vendored tree unpacked under a restrictive umask -- and a stat of a child
+// needs only the search bit. The listing that replaced nine stats must not
+// turn such a root into "no licence here", because the component then
+// dissolves into whatever encloses it and the enclosing project's licence is
+// decided by the dependency's own header.
+func TestAnUnlistableRootStillYieldsItsLicence(t *testing.T) {
+	if os.Getuid() == 0 {
+		t.Skip("root ignores the read bit")
+	}
+	root := t.TempDir()
+	write(t, filepath.Join(root, "LICENSE"), mitText)
+	if err := os.Chmod(root, 0o711); err != nil {
+		t.Skipf("the mode could not be set: %v", err)
+	}
+	t.Cleanup(func() { _ = os.Chmod(root, 0o755) })
+
+	if got := licenseFilesIn(root); len(got) != 1 || got[0] != "LICENSE" {
+		t.Errorf("licenseFilesIn = %v, want the LICENSE a stat can still see", got)
+	}
+}
+
+// os.Stat followed a symbolic link and DirEntry.Type does not. A LICENSE whose
+// target is a directory, or one whose target is gone -- what a harvested or
+// relocated tree leaves behind -- would otherwise mark a component boundary
+// and then be unreadable at the root it created.
+func TestALinkedLicenceIsJudgedByItsTarget(t *testing.T) {
+	root := t.TempDir()
+	if err := os.Symlink(filepath.Join(root, "nowhere"), filepath.Join(root, "LICENSE")); err != nil {
+		t.Skipf("symlinks are not available: %v", err)
+	}
+	if err := os.Mkdir(filepath.Join(root, "texts"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(filepath.Join(root, "texts"), filepath.Join(root, "COPYING")); err != nil {
+		t.Fatal(err)
+	}
+	if got := licenseFilesIn(root); len(got) != 0 {
+		t.Errorf("licenseFilesIn = %v, want neither the dangling link nor the linked directory", got)
+	}
+
+	// A link to a real file is a licence file, as it was before.
+	write(t, filepath.Join(root, "real.txt"), mitText)
+	if err := os.Symlink(filepath.Join(root, "real.txt"), filepath.Join(root, "NOTICE")); err != nil {
+		t.Fatal(err)
+	}
+	if got := licenseFilesIn(root); len(got) != 1 || got[0] != "NOTICE" {
+		t.Errorf("licenseFilesIn = %v, want the link that resolves to a file", got)
+	}
+}

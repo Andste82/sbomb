@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"unicode"
 
 	"github.com/example/sbomb/internal/adapters/pkgmanager"
 	"github.com/example/sbomb/internal/anchors"
@@ -1554,7 +1555,24 @@ func recognizedLicenseFile(name string) (int, bool) {
 		return licenseRankCopyright, true
 	}
 	if upper := strings.ToUpper(stem); strings.HasPrefix(upper, "LICENSE-") && len(upper) > len("LICENSE-") {
-		return licenseRankLicenseID, true
+		// `LICENSE-<id>` is a licence file; `license-header.txt`,
+		// `license-check.py` and `LICENSE-scanner.sh` are the tooling a
+		// licence *checker* ships, and they begin with the same eight
+		// characters. Only .txt and .md are recognized extensions, so a stem
+		// that still ends in one after those were stripped is a file of some
+		// other kind -- and section 19.2 would otherwise make its directory a
+		// component of its own and section 22.9 publish the script as that
+		// component's licence text.
+		//
+		// Two questions, because one does not settle it. A final dot-segment
+		// of letters alone is an extension rather than a version, which
+		// excludes `license-check.py`. And what follows the dash has to name a
+		// licence -- `MIT` is one, `APACHE` opens `Apache-2.0`, and `HEADER`
+		// opens nothing -- which is what excludes the `license-header.txt` a
+		// licence-header checker ships.
+		if !endsInAnUnrecognizedExtension(stem) && license.NamesALicence(stem[len("LICENSE-"):]) {
+			return licenseRankLicenseID, true
+		}
 	}
 	return 0, false
 }
@@ -1610,6 +1628,51 @@ func (r *componentResolver) licenseBoundaryIn(dir string) (string, bool) {
 	return marker, marker != ""
 }
 
+// endsInAnUnrecognizedExtension reports whether what is left of a name after
+// the recognized extensions were stripped still carries one. Section 22.3
+// recognizes .txt and .md and nothing else, so anything else after the last dot
+// says the file is not the licence it is named after.
+func endsInAnUnrecognizedExtension(stem string) bool {
+	dot := strings.LastIndexByte(stem, '.')
+	if dot < 0 || dot == len(stem)-1 {
+		return false
+	}
+	for _, r := range stem[dot+1:] {
+		if !unicode.IsLetter(r) {
+			return false
+		}
+	}
+	return true
+}
+
+// statForLicenseFiles is the fallback for a directory that cannot be listed. It
+// asks for the fixed names of section 22.3 and nothing else: the LICENSE-<id>
+// form is a family and cannot be enumerated, so a root that carries only one of
+// those and refuses a listing is not recognized -- which is a narrower loss
+// than losing the root altogether.
+func statForLicenseFiles(root string) []string {
+	var names []string
+	for _, name := range []string{
+		"LICENSE", "LICENSE.txt", "LICENSE.md",
+		"LICENCE", "LICENCE.txt", "LICENCE.md",
+		"COPYING", "COPYING.txt", "COPYING.md",
+		"NOTICE", "COPYRIGHT",
+	} {
+		if info, err := os.Stat(filepath.Join(root, name)); err == nil && !info.IsDir() {
+			names = append(names, name)
+		}
+	}
+	sort.SliceStable(names, func(i, j int) bool {
+		left, _ := recognizedLicenseFile(names[i])
+		right, _ := recognizedLicenseFile(names[j])
+		if left != right {
+			return left < right
+		}
+		return names[i] < names[j]
+	})
+	return names
+}
+
 // licenseFilesIn lists the recognized licence files a component root carries,
 // in the order they are to be consulted: by rank, then by name. A directory is
 // read in no defined order, and section 29 requires the same evidence to
@@ -1621,7 +1684,13 @@ func licenseFilesIn(root string) []string {
 	}
 	entries, err := os.ReadDir(root)
 	if err != nil {
-		return nil
+		// A directory can be searchable and not listable -- mode 0711 is
+		// ordinary for a vendored tree unpacked under a restrictive umask --
+		// and a stat of a child needs only the search bit. Falling back to
+		// asking for the names of section 22.3 keeps such a root a component
+		// instead of dissolving it into whatever encloses it, which is the
+		// failure this listing was introduced to fix rather than to cause.
+		return statForLicenseFiles(root)
 	}
 	type candidate struct {
 		rank int
@@ -1631,6 +1700,17 @@ func licenseFilesIn(root string) []string {
 	for _, entry := range entries {
 		if entry.IsDir() {
 			continue
+		}
+		// os.Stat followed a symbolic link and DirEntry.Type does not, so a
+		// LICENSE that links to a directory, or one whose target is gone --
+		// which is what a harvested or relocated tree leaves behind (section
+		// 7.9) -- would mark a component boundary here and then be unreadable
+		// at its root. The link is followed for the same answer stat gave.
+		if entry.Type()&os.ModeSymlink != 0 {
+			info, err := os.Stat(filepath.Join(root, entry.Name()))
+			if err != nil || info.IsDir() {
+				continue
+			}
 		}
 		if rank, ok := recognizedLicenseFile(entry.Name()); ok {
 			candidates = append(candidates, candidate{rank: rank, name: entry.Name()})

@@ -13,6 +13,15 @@ inputs:
     description: Build directory to read evidence from
     required: false
     default: ${{ github.workspace }}
+  source-dir:
+    description: >-
+      Source tree the build was made from, where it is now. Needed when the
+      build directory was restored somewhere else than it was built -- the
+      ordinary split of building in one job and describing the result in
+      another (section 7.9). Without it a relocated build resolves no licence
+      and the attribution document says so on every entry.
+    required: false
+    default: ''
   reproducible:
     description: Omit the timestamp and derive a stable serial number
     required: false
@@ -47,6 +56,15 @@ inputs:
       differ in case sensitivity, so the same evidence otherwise yields two
       different documents by design (section 7.3).
     required: false
+  artifact-suffix:
+    description: >-
+      Appended to the uploaded artifact's name. A matrix that varies anything
+      but the platform -- a build type, a target board -- uploads once per leg
+      under one name otherwise, and upload-artifact answers the second one with
+      a 409 that continue-on-error swallows: one leg's attribution disappears
+      without a red run.
+    required: false
+    default: ''
   token:
     description: >
       Token used to download the release. Needed only while the repository is
@@ -97,10 +115,12 @@ runs:
         SBOMB_CONFIG: ${{ inputs.config }}
         SBOMB_POLICY: ${{ inputs.policy }}
         SBOMB_OUTPUT: ${{ inputs.output }}
+        SBOMB_SOURCE_DIR: ${{ inputs.source-dir }}
         SBOMB_PATH_FLAVOR: ${{ inputs.path-flavor }}
       run: |
         set -euo pipefail
         args=(generate --build-dir "$SBOMB_BUILD_DIR" --output "$SBOMB_OUTPUT" --policy "$SBOMB_POLICY")
+        if [[ -n "$SBOMB_SOURCE_DIR" ]]; then args+=(--source-dir "$SBOMB_SOURCE_DIR"); fi
         if [[ -n "$SBOMB_CONFIG" ]]; then args+=(--config "$SBOMB_CONFIG"); fi
         if [[ -n "$SBOMB_PATH_FLAVOR" ]]; then args+=(--path-flavor "$SBOMB_PATH_FLAVOR"); fi
         if [[ "$SBOMB_REPRODUCIBLE" == "true" ]]; then args+=(--reproducible); fi
@@ -120,10 +140,14 @@ runs:
         SBOMB_CONFIG: ${{ inputs.config }}
         SBOMB_POLICY: ${{ inputs.policy }}
         SBOMB_FOSS_OUT: ${{ inputs.foss-out }}
+        SBOMB_SOURCE_DIR: ${{ inputs.source-dir }}
+        SBOMB_PATH_FLAVOR: ${{ inputs.path-flavor }}
       run: |
         set -euo pipefail
         args=(foss --build-dir "$SBOMB_BUILD_DIR" --out "$SBOMB_FOSS_OUT" --policy "$SBOMB_POLICY")
+        if [[ -n "$SBOMB_SOURCE_DIR" ]]; then args+=(--source-dir "$SBOMB_SOURCE_DIR"); fi
         if [[ -n "$SBOMB_CONFIG" ]]; then args+=(--config "$SBOMB_CONFIG"); fi
+        if [[ -n "$SBOMB_PATH_FLAVOR" ]]; then args+=(--path-flavor "$SBOMB_PATH_FLAVOR"); fi
         if [[ "$SBOMB_REPRODUCIBLE" == "true" ]]; then args+=(--reproducible); fi
         "$RUNNER_TEMP/sbomb/$SBOMB_ASSET" "${args[@]}"
         ls -l "$SBOMB_FOSS_OUT"
@@ -132,6 +156,6 @@ runs:
       continue-on-error: true
       uses: actions/upload-artifact@v4
       with:
-        name: sbomb-foss-${{ runner.os }}-${{ runner.arch }}
+        name: sbomb-foss-${{ runner.os }}-${{ runner.arch }}${{ inputs.artifact-suffix }}
         path: ${{ inputs.foss-out }}/
         if-no-files-found: error
