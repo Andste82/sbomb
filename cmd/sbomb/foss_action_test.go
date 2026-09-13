@@ -112,3 +112,42 @@ func TestTheActionCannotGateTheBuildOnAttribution(t *testing.T) {
 		t.Errorf("found %d attribution steps, want the run and the upload", attribution)
 	}
 }
+
+// The tests above run the command the action runs and read what action.yaml
+// declares. Neither executes the shell in it that assembles the arguments, and
+// that line is the action's only content of its own.
+//
+// The smoke-test workflow is where it is executed: it calls the action for
+// real, on two operating systems, against a published release. It covered the
+// SBOM step alone, so this asserts that it asks for the attribution step too
+// and looks at what that step wrote. Without the assertion, dropping
+// `foss: "true"` from the workflow would remove the coverage and nothing would
+// say so.
+//
+// It runs against a release rather than against the working tree, which is
+// what the workflow is for and is also its limit: a break in the action is
+// found when a release is made, not in the pull request that caused it
+// (open question Q18).
+func TestTheSmokeTestExercisesTheAttributionStep(t *testing.T) {
+	path := filepath.Join(testutil.RepoRoot(t), ".github", "workflows", "smoke-test.yaml")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	workflow := string(data)
+	if !strings.Contains(workflow, "uses: ./.github/actions/sbomb") {
+		t.Fatal("the smoke test does not call the action, so it exercises none of its shell")
+	}
+	for _, want := range []string{
+		`foss: "true"`,
+		"foss-out: smoke-foss",
+		foss.NoticesFile,
+		foss.ReviewTextFile,
+		foss.ReviewJSONFile,
+		foss.ObligationsFile,
+	} {
+		if !strings.Contains(workflow, want) {
+			t.Errorf("the smoke test does not mention %q, so the attribution step is unchecked there", want)
+		}
+	}
+}

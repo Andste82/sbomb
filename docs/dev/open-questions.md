@@ -403,38 +403,30 @@ the two callers unable to choose. Nothing had to be built for it — the
 no-op, which is what §32.2 says about a flag that cannot be honoured. The
 number stays reserved so that references to Q18 and later keep their meaning.
 
-## Q18 — Nothing tests the composite action end to end
+## Q18 — reserved
 
-Milestone F8 lists "an Action run on the fixture uploads four files and exits 0
-even when components are incomplete" as a test. It cannot be run from this
-repository. A composite action needs a runner, and its first step downloads a
-released binary — so an end-to-end run would test a release that does not yet
-carry the command under test, and on the very first release that does, the
-workflow would be testing the published artifact rather than the tree.
+**Settled: the smoke-test workflow already ran the action, and now runs its
+attribution step too.** The question had weighed a shared argument script
+against a production input that skips the download, and both were answers to a
+premise that was wrong: `.github/workflows/smoke-test.yaml` calls the action
+for real (`uses: ./.github/actions/sbomb`), on two operating systems, against a
+published release. It asked for the SBOM step alone, so the attribution step
+was the only part of the action nothing executed.
 
-What exists instead is the property split in two, which is what the `foss-out`
-and `foss` steps were built to make possible:
-`TestTheActionsAttributionStepProducesFourFilesOnAnIncompleteFixture` runs the
-command the step runs and asserts the four files and exit 0 on a fixture whose
-notices document carries the incompleteness marker;
-`TestTheActionCannotGateTheBuildOnAttribution` reads `action.yaml` and asserts
-the input, the condition, the upload and `continue-on-error` on both steps; and
-the `foss-outputs` CI job runs the first half outside the test binary.
+`foss: "true"` in that call, and a step that checks the four documents of
+§32.6 are there and not empty, is the whole change. The step cannot fail the
+workflow -- attribution is informational and the action marks it
+`continue-on-error` -- so the files are what says it ran.
+`TestTheSmokeTestExercisesTheAttributionStep` asserts the workflow still asks
+for it, because dropping the input would remove the coverage silently.
 
-The seam nothing checks is that the shell in `action.yaml` assembles the same
-arguments the test does. Two ways to close it, neither obviously right:
-
-* Have the action call a script committed here (`scripts/foss.sh`) that the
-  test also calls, so there is one argument assembly. It costs a file and makes
-  the action depend on a checkout of this repository, which composite actions
-  otherwise do not need.
-* Run the action in CI against a locally built binary, by giving it an input
-  that skips the download. That is a production flag existing only for a test,
-  which §32 rejects elsewhere.
-
-Deciding it needs no evidence, only a view on how much a composite action's
-shell is worth insuring. Recorded so that the gap is a decision rather than an
-oversight.
+The residual is what the smoke test is: it runs against a **release**, not
+against the working tree, and it is called by the release workflow once the
+release exists. A break in the action's own shell is therefore found when a
+release is made and not in the pull request that caused it. Closing that too
+would mean testing a binary the release does not carry, which is the
+contradiction the question started from. The number stays reserved so that
+references to Q19 keep their meaning.
 
 ## Q19 — `explain --component` answers nothing, and fixing it means changing `evidence.json`
 

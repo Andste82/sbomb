@@ -2,6 +2,29 @@
 
 ## 0.17.0
 
+### The smoke test exercises the action's attribution step
+
+The composite action's only content of its own is the shell that assembles
+sbomb's arguments. Two tests covered everything around it -- one runs the
+command the step runs, the other reads `action.yaml` for the input, the
+condition and the upload -- and neither executed that line for the attribution
+step. A typo in a flag there would have reached a release, and the first person
+to find out would have been a user.
+
+`.github/workflows/smoke-test.yaml` already called the action for real, on two
+operating systems, against a published release; it asked for the SBOM step
+alone. It now asks for `foss: "true"` as well and checks that the four
+documents of §32.6 are there and not empty. The step cannot fail a workflow --
+attribution is informational and the action marks it `continue-on-error` -- so
+the files are what says it ran.
+
+Open question Q18 had weighed a shared argument script against a production
+input that skips the download. Both were answers to a premise that was wrong:
+the action was being run all along, just without this step. The residual is
+what a smoke test is -- it runs against a release rather than the working tree,
+so a break is found when a release is made rather than in the pull request that
+caused it.
+
 ### A waived finding says who accepted it
 
 A waiver states four things -- which finding, for which subject, why, and by
