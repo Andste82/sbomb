@@ -24,8 +24,11 @@ whose archive member is linked into an application and whose data file is
 packed into an image. It runs on the two GCC toolchains, like `p14-foss`, so
 no Windows fixture had to be regenerated for it.
 
-Single-artifact documents do not change: the property is written only where
-there is more than one deliverable to distinguish.
+Single-artifact documents do not change: assembly mode decides, and a
+toolchain component still hangs under the synthetic build-environment
+component alone — §24.2 keeps it off the product's dependency path, and
+hanging components under the deliverables that reached them would have put it
+straight back.
 
 ### The corpus normalizer can no longer lose what it was asked to sort
 

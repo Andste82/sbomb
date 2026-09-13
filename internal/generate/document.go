@@ -41,7 +41,7 @@ func buildDocument(
 ) (*sbomwriter.Document, []domain.Finding) {
 	document := &sbomwriter.Document{
 		Product:   productComponent(cfg, versionSource, deliverables),
-		Artifacts: artifactComponents(deliverables, artifactIDs),
+		Artifacts: artifactComponents(cfg.Mode, deliverables, artifactIDs),
 		Files:     files,
 		Run:       run,
 	}
@@ -112,6 +112,17 @@ func artifactRelations(artifacts []domain.Component, groups []fileGroup, product
 	byArtifact := map[string][]string{}
 	claimed := map[string]bool{}
 	for _, group := range groups {
+		// Section 24.2 is normative and this is the one place that could break
+		// it: a toolchain or system component is not a dependency of the
+		// product but of the synthetic build-environment component, and
+		// hanging it under a deliverable would put it back on the product's
+		// own dependency path -- "toolchain files MUST NOT silently appear as
+		// ordinary project dependencies". Its files are reached from an
+		// artifact like any other, so the role has to be asked here rather
+		// than inferred from reachability.
+		if isBuildEnvironment(group.component.Scope) {
+			continue
+		}
 		for _, file := range group.files {
 			for _, ref := range file.Properties["sbomb:evidence:artifacts"] {
 				id := strings.TrimPrefix(ref, "artifact:")
@@ -209,10 +220,16 @@ func projectFromCMake(cfg *config.Config, model *cmakeapi.Model) string {
 //
 // The identity is the artifact node's, so the refs here and the
 // sbomb:evidence:artifacts of a file are the same strings (section 28.4).
-func artifactComponents(deliverables []Deliverable, artifactIDs []domain.NodeID) []domain.Component {
-	if len(deliverables) < 2 || len(artifactIDs) != len(deliverables) {
+func artifactComponents(mode string, deliverables []Deliverable, artifactIDs []domain.NodeID) []domain.Component {
+	// The mode decides, not the number of deliverables. Section 6.2 is about
+	// assembly mode and says "each artifact", so an assembly of one still
+	// names its deliverable -- and a single-artifact run of two configured
+	// artifacts is a configuration sbomb reports rather than a shape to
+	// impose.
+	if mode != "assembly" || len(artifactIDs) != len(deliverables) {
 		return nil
 	}
+	seen := map[string]bool{}
 	out := make([]domain.Component, 0, len(deliverables))
 	for i, deliverable := range deliverables {
 		// The identity the graph gave the artifact, minus the kind the writer
@@ -220,6 +237,14 @@ func artifactComponents(deliverables []Deliverable, artifactIDs []domain.NodeID)
 		// and the refs of these components have to be the same strings, or the
 		// breakdown of decision Q10 matches nothing.
 		id := strings.TrimPrefix(string(artifactIDs[i]), "artifact:")
+		// Two configured artifacts can name one file -- "app" and "./app" --
+		// and they are then one deliverable. Emitting the component twice
+		// would collide on its bom-ref and stop the run with an internal
+		// invariant, which is a defect reported as a crash.
+		if seen[id] {
+			continue
+		}
+		seen[id] = true
 		out = append(out, domain.Component{
 			ID:   id,
 			Name: baseName(deliverable.EvidencePath),

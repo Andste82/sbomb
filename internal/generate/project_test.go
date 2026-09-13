@@ -4,7 +4,9 @@ import (
 	"testing"
 
 	"github.com/example/sbomb/internal/adapters/cmakeapi"
+	"github.com/example/sbomb/internal/anchors"
 	"github.com/example/sbomb/internal/config"
+	"github.com/example/sbomb/internal/domain"
 )
 
 func cmakeModel(name, version string) *cmakeapi.Model {
@@ -101,5 +103,76 @@ func TestTheProductRecordsWhereItsVersionCameFrom(t *testing.T) {
 	unsourced := productComponent(cfg, "", nil)
 	if unsourced.VersionSource != "" {
 		t.Errorf("VersionSource = %q, want empty", unsourced.VersionSource)
+	}
+}
+
+// Section 24.2 is normative about where a toolchain component hangs: not under
+// the product but under the synthetic build-environment component, because
+// "toolchain files MUST NOT silently appear as ordinary project dependencies".
+// Its files are reached from an artifact like every other file, so hanging
+// components under the artifacts that reached them puts it straight back on
+// the product's dependency path -- product -> artifact -> gnu-13.3.0 -- unless
+// the role is asked.
+func TestABuildEnvironmentComponentHangsUnderNoArtifact(t *testing.T) {
+	artifacts := []domain.Component{{ID: "build:app", Name: "app", Type: "application"}}
+	groups := []fileGroup{
+		{
+			component: domain.Component{ID: "component:lib", Scope: string(anchors.ScopeThirdParty)},
+			files: []domain.UsedFile{{
+				ID:         domain.FileID{Anchor: "project", RelPath: "lib.c"},
+				Properties: map[string][]string{"sbomb:evidence:artifacts": {"artifact:build:app"}},
+			}},
+		},
+		{
+			component: domain.Component{ID: "component:gnu", Scope: string(anchors.ScopeToolchain)},
+			files: []domain.UsedFile{{
+				ID:         domain.FileID{Anchor: "toolchain:gnu", RelPath: "libgcc.a"},
+				Properties: map[string][]string{"sbomb:evidence:artifacts": {"artifact:build:app"}},
+			}},
+		},
+	}
+
+	for _, relation := range artifactRelations(artifacts, groups, []string{"component:lib", "component:gnu"}) {
+		if relation.From != "build:app" {
+			continue
+		}
+		for _, target := range relation.To {
+			if target == "component:gnu" {
+				t.Errorf("the toolchain component hangs under the deliverable: %v", relation.To)
+			}
+		}
+	}
+}
+
+// Section 6.2 is about assembly mode and says "each artifact", so an assembly
+// of one still names its deliverable -- and a single-artifact run that happens
+// to configure two artifacts is a configuration sbomb reports rather than a
+// shape to impose on the document. The count decided both before.
+func TestTheModeDecidesWhetherArtifactsAreComponents(t *testing.T) {
+	deliverables := []Deliverable{{EvidencePath: "app", Role: "application"}}
+	ids := []domain.NodeID{"artifact:build:app"}
+
+	if got := artifactComponents("assembly", deliverables, ids); len(got) != 1 || got[0].ID != "build:app" {
+		t.Errorf("an assembly of one names %#v, want its one deliverable", got)
+	}
+	two := append(deliverables, Deliverable{EvidencePath: "image.img", Role: "image"})
+	twoIDs := append(ids, "artifact:build:image.img")
+	if got := artifactComponents("single", two, twoIDs); got != nil {
+		t.Errorf("single mode was given the assembly shape: %#v", got)
+	}
+}
+
+// Two configured artifacts can name one file -- "app" and "./app" -- and they
+// are then one deliverable. Emitting the component twice collides on its
+// bom-ref and stops the run with an internal invariant, which is a defect
+// reported as a crash.
+func TestTwoConfiguredPathsToOneFileAreOneArtifact(t *testing.T) {
+	deliverables := []Deliverable{
+		{EvidencePath: "app", Role: "application"},
+		{EvidencePath: "./app", Role: "application"},
+	}
+	ids := []domain.NodeID{"artifact:build:app", "artifact:build:app"}
+	if got := artifactComponents("assembly", deliverables, ids); len(got) != 1 {
+		t.Errorf("one file named twice produced %d components, want one", len(got))
 	}
 }
