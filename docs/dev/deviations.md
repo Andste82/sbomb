@@ -2059,28 +2059,41 @@ a relative path to every anchor the dump registered, taking a unique match and
 naming the candidates when two anchors carry one relative path, because
 choosing would make the answer depend on map order.
 
-## D47 — The distance is measured from the nearest tag, not from the recorded one
+## D47 — The modification status is answerable only where a revision was declared
 
-§19.4 reports a clean checkout standing a positive number of commits past its
-tag as `modified`, and takes the count out of the `git describe --tags --always
---dirty` answer that §9.2 already permits. The tag that count is measured from
-is whichever one git finds **nearest and reachable**, and that is not always the
-release the component was pinned to.
+§19.4 settles `modified` by comparing the commit the checkout stands on against
+the revision a package manager declared for the component. Where nothing was
+declared the answer is `unknown`, and three ordinary situations fall into it.
 
-The case it misses: a maintainer fixes a vendored dependency, commits, and tags
-their own result — `v1.2.0-acme1`. `git describe` names that tag with distance
-zero, so the status is `false` although the component is modified relative to
-upstream. The case it gets right is the ordinary one, where nobody tagged
-anything and the nearest tag is still the upstream release.
+**No manager owns the component.** A directory found by the marker file of
+§19.2 — the common shape of a vendored dependency — has nobody who declared
+anything about it. Its checkout is the only source there is, and a checkout
+cannot corroborate itself: git cannot tell a release tag from any other, so
+standing on one says nothing about standing on *the* release. This is the
+deliberate loss. Before it, such a component published `false`, which was a
+claim resting on the tag's name alone.
 
-Measuring against a *recorded* revision needs `git rev-list --count
-<upstream>..HEAD`. That is not a matter of adding a line to the allowlist of
-§9.2: every command it permits takes paths in its argument slots, `checkPath`
-validates them, and a revision is not a path — it comes out of a repository
-sbomb was merely pointed at, which §30 treats as untrusted input. A revision
-slot with a grammar of its own would have to be written, tested and argued for
-in §9.2 first. Open question Q13 records what that costs.
+**The manager declared a version rather than a revision.** Conan states
+`zlib/1.2.13`, vcpkg a port version, an ESP-IDF manifest a version field. A
+version names a release, not a point in a repository, and reading a tag name
+out of it would assume a naming convention the project never promised. The
+patch records of §19.4 are those managers' own channel and are unaffected.
 
-So the status is right where it is derived and incomplete where somebody tagged
-over their own change, and it is never `false` because nothing was checked --
-`unknown` covers that, as it did before.
+**The declared tag is not in the checkout.** A shallow clone — `--depth 1`,
+which is what most CI jobs do — has no history and usually no tags, so
+`git show-ref --tags` finds nothing to resolve the declared name against. The
+comparison is by object name rather than by history precisely so that a shallow
+clone *can* answer where the tag was fetched (a `--branch <tag>` clone carries
+it) or where the declaration is a commit; where neither holds, the answer is
+`unknown`.
+
+What is published in all three cases is what was actually read: the declared
+revision, the commit, the dirty flag, and `FOSS_MODIFICATION_UNKNOWN` carrying
+the reason in its message. A consumer holding the upstream can finish the
+comparison sbomb could not.
+
+Two further limits are inherent rather than chosen. A tag that was moved onto
+another commit locally resolves to that commit, and no check inside the
+repository can see it. And a distance is measured only when `git describe`
+answers with the declared tag itself; against any other tag the count says
+nothing about the declared revision, so it is not reported.

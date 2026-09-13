@@ -228,6 +228,10 @@ func (a west) projectFor(options Options, topdir, source, manifestPath string, i
 	if revision == "" && defaults != nil {
 		revision = defaults.scalarAt("revision")
 	}
+	// What the manifest asked for, kept as written for section 19.4. Both
+	// shapes are recorded: a commit resolves to itself and a tag through
+	// `git show-ref --tags`.
+	entry.DeclaredRevision = revision
 	if westIsCommit(revision) {
 		// Section 20.2 point 5: a commit is published as a version only when
 		// the configuration asks for it. A manifest that pins a project to a

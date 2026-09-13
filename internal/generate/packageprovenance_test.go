@@ -158,10 +158,16 @@ func TestOnlyTheOriginThatWonIsPublished(t *testing.T) {
 	if !strings.Contains(component.PURL, "@1.3.0") {
 		t.Errorf("purl = %q, want the version that won in it", component.PURL)
 	}
-	// Nothing anywhere in the document may carry the displaced tag: the losing
-	// contribution is kept for a report that does not exist yet, and until it
-	// does it is invisible.
-	if found := valuesMentioning(result.Document, "1.2.0"); len(found) != 0 {
+	// No field that carries a *version* may show the displaced tag: the losing
+	// contribution is kept for a report that does not exist yet, and the
+	// ranking of section 21.1 is what decides which value is published.
+	//
+	// sbomb:component:declaredRevision is not such a field and is excluded by
+	// name. Section 19.4 publishes what the manager declared beside what the
+	// checkout answered, precisely so the two can be seen to differ -- it is a
+	// fact about the declaration, not a second version competing with the one
+	// that won.
+	if found := valuesMentioning(result.Document, "1.2.0", "sbomb:component:declaredRevision"); len(found) != 0 {
 		t.Errorf("the displaced tag reached the document as %v", found)
 	}
 }
@@ -169,7 +175,11 @@ func TestOnlyTheOriginThatWonIsPublished(t *testing.T) {
 // valuesMentioning collects every published field of every component that
 // carries a value, so a test can state that a losing claim reached none of
 // them -- the product and the artifacts included.
-func valuesMentioning(document *sbomwriter.Document, value string) []string {
+func valuesMentioning(document *sbomwriter.Document, value string, except ...string) []string {
+	excluded := map[string]bool{}
+	for _, name := range except {
+		excluded[name] = true
+	}
 	components := []domain.Component{document.Product}
 	components = append(components, document.Artifacts...)
 	components = append(components, document.Components...)
@@ -187,6 +197,9 @@ func valuesMentioning(document *sbomwriter.Document, value string) []string {
 			}
 		}
 		for name, values := range component.Properties {
+			if excluded[name] {
+				continue
+			}
 			for _, entry := range values {
 				if strings.Contains(entry, value) {
 					found = append(found, component.ID+" "+name+"="+entry)

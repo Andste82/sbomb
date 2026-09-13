@@ -513,6 +513,7 @@ ninja --version
 git -C <dir> rev-parse HEAD
 git -C <dir> describe --tags --always --dirty
 git -C <dir> config --get remote.origin.url
+git -C <dir> show-ref --tags
 git -C <dir> status --porcelain
 <compiler> --version | -dumpmachine | -print-search-dirs
 dpkg -S <path>        (only when systemLibraries adapter enabled)
@@ -965,23 +966,36 @@ The repository URL MUST be written as an external reference of type `vcs`, not a
 
 | Signal | Result |
 |---|---|
-| The component root's git tree is dirty | `true` |
 | Package metadata records applied patches | `true` |
-| A git root was found at the component root, was clean, and stood exactly on its tag | `false` |
-| A git root was found, was clean, and stood a positive number of commits past its tag | `true` |
-| Anything else — no reachable tag, HEAD unreadable, no git root, `--allow-introspection` off | `unknown` |
+| The component root's git tree is dirty | `true` |
+| The **declared revision** is known and resolves to the commit the checkout stands on | `false` |
+| The declared revision is known and resolves to a different commit | `true` |
+| The checkout stands a positive number of commits past the **declared** tag | `true`, with the count |
+| Anything else — no declared revision, a declared revision that resolves to nothing here, no git root, `--allow-introspection` off | `unknown` |
 
 An answer with no distance suffix is a tag only once `git rev-parse HEAD` says it is not the abbreviated commit `--always` falls back to. Where HEAD cannot be read the two cannot be told apart, and the result is `unknown`: the other readers of that answer lower their confidence (§20.3), and a status has no confidence to lower.
 
 `false` MUST be emitted only after a positive check. **Absence of information is `unknown`, never `false`**: reporting a check that never ran as "not modified" turns a gap into a claim, and it is the one error an auditor will find.
 
-The git root MUST be the component root itself — a `.git` directory or file directly in it. Asking git from inside the root would answer for the nearest *enclosing* repository, so a library copied into a project's tree would inherit the project's dirty state, and an edit to the manufacturer's own code would be published as a modification of a third-party component. The two commands used are the ones §9.2 permits: `git describe --tags --always --dirty` answers both questions at once, and `git rev-parse HEAD` is what distinguishes a tag from the abbreviated commit `--always` falls back to — an abbreviated hash is a prefix of the full commit and a tag name is not. "Standing exactly on a tag" is decided by the absence of the whole distance suffix `-<count>-g<hash>` at the end of the answer, not by the presence of the two characters `-g`: a tag may contain them (`v1.0-gamma`), and reading such a tag as a distance would report `unknown` for a component standing exactly on it. That commit is also what the document's pedigree records.
+The git root MUST be the component root itself — a `.git` directory or file directly in it. Asking git from inside the root would answer for the nearest *enclosing* repository, so a library copied into a project's tree would inherit the project's dirty state, and an edit to the manufacturer's own code would be published as a modification of a third-party component. The three commands used are the ones §9.2 permits: `git describe --tags --always --dirty` answers the dirty state and the distance at once, `git show-ref --tags` resolves a declared tag to its commit, and `git rev-parse HEAD` is what distinguishes a tag from the abbreviated commit `--always` falls back to — an abbreviated hash is a prefix of the full commit and a tag name is not. "Standing exactly on a tag" is decided by the absence of the whole distance suffix `-<count>-g<hash>` at the end of the answer, not by the presence of the two characters `-g`: a tag may contain them (`v1.0-gamma`), and reading such a tag as a distance would report `unknown` for a component standing exactly on it. That commit is also what the document's pedigree records.
 
 Patch evidence is read from the package metadata **directly in the component root** and nowhere else, in the manner of an enricher (§21): a Conan recipe's `conandata.yml` `patches:` block, and the patch file names a vcpkg `portfile.cmake` applies. Neither the patch nor its content is ever read — sbomb records *that* a patch was applied, which is why `pedigree.patches[].diff` stays empty (requirement R6). Both readers are bounded by §30 item 10: a record file over 1 MiB is not read and at most 64 patches per component are listed, and either breach emits `INPUT_LIMIT_EXCEEDED` rather than passing for "no patch record". What each record says about a patch — the file name, and the description where the metadata gives one — reaches the document in `pedigree.notes`, because the schema lets `pedigree.patches[]` carry nothing but its type, diff and resolves, and `resolves` is for the issues a patch closes.
 
-**The distance is read, not counted.** `git describe --tags --always --dirty` answers `<tag>-<count>-g<hash>` when HEAD stands past the nearest tag, so the number is already in the answer §9.2 permits and no command has to be added to the allowlist. A clean checkout standing a positive number of commits past its tag is `true`, with the count and the tag in the finding's signal, because a dependency somebody fixed and committed is the commonest shape of a modified component and reporting it as `unknown` reported "not checked" for something that had been checked.
+**A tag alone is not evidence.** A tag is a name a repository gives itself, and git cannot tell a release tag from any other: `v1.2.3`, `acme-1` and `poc-dingsbums` are the same kind of object. `git describe` answers with the *nearest reachable* tag, so a maintainer who tags their own fix stands on a tag at distance zero although the component differs from the release it was pinned to. Standing on **some** tag is therefore not a positive check, and a status derived from it alone MUST NOT be `false`.
 
-**Which tag it is measured from is not stated.** `git describe` names the nearest *reachable* tag, and a tag the maintainer added after their own change is nearer than the upstream release; in that case the distance is zero and the status is `false` although the component was modified. Establishing the distance from a *recorded* revision would need `git rev-list --count <upstream>..HEAD`, which §9.2 does not permit and whose argument slot would take a revision rather than a path — the allowlist is a security boundary, not a convenience. The residual is recorded as deviation D47 and the cost of closing it in `docs/dev/open-questions.md`.
+**The declared revision.** What makes the check positive is a second statement about this component that does not come from the checkout: a **revision** — a commit or a tag — that a package manager's own metadata names for it. `GIT_TAG` in a CMake `FetchContent` declaration, `revision:` in a west manifest, the revision a CPM lock records. It MUST be kept as it was written, beside the commit the checkout reports, and never overwritten by it: a declared revision and an observed commit that have been collapsed into one value can no longer disagree.
+
+A declared **version** is not a declared revision. `zlib/1.2.13` names a release, not a point in a repository, and reading a tag name out of it would assume a naming convention the project never promised. Where a manager states a version and no revision, the status is `unknown`.
+
+**Resolving a declared revision to a commit.** A declared revision that is a full 40-character hexadecimal object name is that commit. Otherwise it is a tag name, and `git show-ref --tags` maps the repository's tag names to their commits. The declared name is tried exactly as written and with a leading `v`, and in no other form: the `v` of `v1.2.3` is the one convention universal enough to state, and anything beyond it would be the guessing this section exists to refuse. A declared tag that the repository does not carry — which is the ordinary state of a shallow clone, where the history was never fetched — resolves to nothing, and the status is `unknown`.
+
+Resolution is by object name, not by history, which is what makes the positive answer reachable in a shallow clone: `git rev-parse HEAD` and `git show-ref --tags` both answer without a history to walk. The distance in the fifth row needs one, and is a refinement rather than the foundation — where it cannot be measured the answer above it still holds.
+
+**`true` says "not the declared state", and no more.** A checkout whose commit differs from the declared revision is not the revision that was asked for. Whether somebody patched it or the manifest has fallen behind a newer upstream cannot be told apart from inside the repository, so the signal MUST state what was compared and MUST NOT attribute the difference to anyone.
+
+**What is published regardless of the answer.** The declared revision (`sbomb:component:declaredRevision`), the commit the checkout stands on and the dirty flag are recorded whenever they were read, including where the status is `unknown`. They are facts a consumer can check against an upstream it has; the status is a conclusion drawn from them, and the facts are the more useful of the two.
+
+The commit reaches the document through `pedigree.commits[]` for a settled status and through the external reference of a component whose manager recorded a repository. A component that is `unknown` and that no manager owns has neither — an `unknown` status MUST fill no pedigree — so there it is written as `sbomb:component:vcsCommit` on the component, which is the same property the reference carries and the same place §28 puts it at 1.6. What remains out of reach is recorded as deviation D47.
 
 **`version` is not where a deviation goes.** The version of a component is the release it derives from (§20.3), so a checkout past its tag publishes the tag and states the rest as its modification status, its `pedigree` and the commit in its purl. Publishing `1.2.0-4-gdeadbee` there would say the opposite of the truth to every consumer that compares versions: under semantic versioning a pre-release sorts *below* the release, so an advisory fixed in 1.2.0 would keep matching a checkout that stands after it. Where `git describe --always` falls back to the abbreviated commit, because no tag is reachable at all, **no version is claimed**: a commit identifies content and does not order against a range. `UNKNOWN_VERSION` says so, and the commit is published as a commit.
 
@@ -2572,6 +2586,7 @@ sbomb:component:scope            (project | third-party | sdk | toolchain | syst
 sbomb:component:headerOnly
 sbomb:component:vcsCommit        sbomb:component:vcsTag
 sbomb:component:vcsDirty
+sbomb:component:declaredRevision
 sbomb:component:licenseFile      (repeated, <canonicalPath>@sha256:<hex>)
 sbomb:component:noticeFile       (repeated, <canonicalPath>@sha256:<hex>)
 sbomb:component:distributionRole (distributed | build-time-only)

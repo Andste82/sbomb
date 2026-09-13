@@ -95,6 +95,11 @@ func (a fetchContent) Discover(options Options) ([]Package, []domain.Finding) {
 		if repository != "" {
 			found.VCSURL = NormalizeVCSURL(repository)
 		}
+		// The revision the declaration asked for, as it was written. Section
+		// 19.4 compares it against the commit the checkout stands on, and the
+		// version claim below cannot serve for that: it has had its leading
+		// `v` removed, and a tag name is not a version.
+		found.DeclaredRevision = tag
 		// CPM drives FetchContent, so a package the lock names was fetched by
 		// CPM and the document should say so. The anchor keeps naming
 		// FetchContent, because the anchor is about the path identity and

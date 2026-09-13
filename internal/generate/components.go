@@ -959,7 +959,7 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 
 	// Modification status (section 19.4), tri-state. It needs the component
 	// root, which is why it comes after it is settled.
-	findings = append(findings, r.resolveModification(component, rootInfo)...)
+	findings = append(findings, r.resolveModification(component, rootInfo, declaredRevisionOf(managed, isManaged))...)
 
 	// What the licence asks for beyond attribution (section 32.6). After the
 	// licences, because it classifies the expression they resolved, and after

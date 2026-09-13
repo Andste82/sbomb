@@ -1,0 +1,381 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "version": 1,
+  "serialNumber": "urn:uuid:6bb49e0d-242f-5a40-9169-39d482bc8bc0",
+  "metadata": {
+    "tools": [
+      {
+        "vendor": "sbomb",
+        "name": "sbomb",
+        "version": "0.0.0-test"
+      }
+    ],
+    "component": {
+      "type": "application",
+      "name": "fcapp",
+      "bom-ref": "product:fcapp",
+      "properties": [
+        {
+          "name": "sbomb:artifact:role",
+          "value": "application"
+        },
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        }
+      ]
+    },
+    "properties": [
+      {
+        "name": "sbomb:run:specVersion",
+        "value": "1.6"
+      },
+      {
+        "name": "sbomb:run:toolVersion",
+        "value": "0.0.0-test"
+      },
+      {
+        "name": "sbomb:build:config",
+        "value": "Debug"
+      },
+      {
+        "name": "sbomb:build:generator",
+        "value": "Ninja"
+      }
+    ]
+  },
+  "components": [
+    {
+      "type": "application",
+      "name": "project",
+      "bom-ref": "component:project",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "name": "NOASSERTION"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "anchor:project"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-object"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:component:root",
+          "value": "project:"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:license:reason",
+          "value": "no-evidence"
+        },
+        {
+          "name": "sbomb:license:review",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "tinylog.c",
+      "bom-ref": "file:build:_deps/tinylog-src/tinylog.c",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "build"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "build:_deps/tinylog-src/tinylog.c"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "tinylog.h",
+      "bom-ref": "file:build:_deps/tinylog-src/tinylog.h",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "build"
+        },
+        {
+          "name": "sbomb:evidence:header:class",
+          "value": "generated-header"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "header-only"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "build:_deps/tinylog-src/tinylog.h"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "main.c",
+      "bom-ref": "file:project:main.c",
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-object"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:main.c"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "tinylog",
+      "version": "1.2.0",
+      "bom-ref": "component:tinylog",
+      "scope": "required",
+      "purl": "pkg:generic/tinylog@1.2.0?vcs_url=git%2B%2F__fixture_src__%2Fdep%2Ftinylog%40bef99de91c8a51ad80682833e1a7b15dbbff2b90",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "externalReferences": [
+        {
+          "url": "/__fixture_src__/dep/tinylog",
+          "type": "vcs"
+        }
+      ],
+      "pedigree": {
+        "commits": [
+          {
+            "uid": "bef99de91c8a51ad80682833e1a7b15dbbff2b90"
+          }
+        ],
+        "notes": "the component root's checkout is clean and stands on the declared revision v1.2.0"
+      },
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:archiveMembersUsed",
+          "value": "1/1"
+        },
+        {
+          "name": "sbomb:component:declaredRevision",
+          "value": "v1.2.0"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "fetchcontent"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:licenseFile",
+          "value": "build:_deps/tinylog-src/LICENSE@sha256:a7637c2b70876aca181d298d012813a9bd2879b13fff83c2d3a4f6e380a3ab0c"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "generated-source"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "false"
+        },
+        {
+          "name": "sbomb:component:root",
+          "value": "build:_deps/tinylog-src"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "third-party"
+        },
+        {
+          "name": "sbomb:component:vcsCommit",
+          "value": "bef99de91c8a51ad80682833e1a7b15dbbff2b90"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "component-level"
+        },
+        {
+          "name": "sbomb:license:source",
+          "value": "LICENSE"
+        },
+        {
+          "name": "sbomb:license:technique",
+          "value": "spdx-digest"
+        }
+      ],
+      "evidence": {
+        "identity": [
+          {
+            "field": "version",
+            "concludedValue": "1.2.0",
+            "confidence": 0.9,
+            "methods": [
+              {
+                "technique": "other",
+                "value": "git-describe",
+                "confidence": 0.9
+              }
+            ]
+          }
+        ],
+        "copyright": [
+          {
+            "text": "Copyright (c) 2026 Tinylog Authors"
+          }
+        ]
+      }
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "component:project",
+      "dependsOn": [
+        "file:project:main.c"
+      ]
+    },
+    {
+      "ref": "component:tinylog",
+      "dependsOn": [
+        "file:build:_deps/tinylog-src/tinylog.c",
+        "file:build:_deps/tinylog-src/tinylog.h"
+      ]
+    },
+    {
+      "ref": "file:build:_deps/tinylog-src/tinylog.c"
+    },
+    {
+      "ref": "file:build:_deps/tinylog-src/tinylog.h"
+    },
+    {
+      "ref": "file:project:main.c"
+    },
+    {
+      "ref": "product:fcapp",
+      "dependsOn": [
+        "component:project",
+        "component:tinylog"
+      ]
+    }
+  ]
+}

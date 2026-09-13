@@ -2,7 +2,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "version": 1,
-  "serialNumber": "urn:uuid:efdbd819-6c59-53fa-9b8a-ba8b759e549d",
+  "serialNumber": "urn:uuid:8dce5935-4945-5e10-af06-9bd8bb7e402b",
   "metadata": {
     "tools": [
       {
@@ -1040,14 +1040,6 @@
           }
         }
       ],
-      "pedigree": {
-        "commits": [
-          {
-            "uid": "6682d4e20a52ed84605c1cdb6a2f91136be9164c"
-          }
-        ],
-        "notes": "the component root's checkout is clean and stands 1 commit(s) past its tag v1.2.0"
-      },
       "properties": [
         {
           "name": "sbomb:cdx:archiveProperty",
@@ -1083,7 +1075,7 @@
         },
         {
           "name": "sbomb:component:modified",
-          "value": "true"
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:noticeFile",
@@ -1096,6 +1088,10 @@
         {
           "name": "sbomb:component:scope",
           "value": "third-party"
+        },
+        {
+          "name": "sbomb:component:vcsCommit",
+          "value": "6682d4e20a52ed84605c1cdb6a2f91136be9164c"
         },
         {
           "name": "sbomb:license:evidenceClass",
@@ -1130,14 +1126,6 @@
           }
         }
       ],
-      "pedigree": {
-        "commits": [
-          {
-            "uid": "b031bf50d1becb30ce42d1013657353de5bf4bc1"
-          }
-        ],
-        "notes": "the component root's checkout is clean and stands on its recorded tag v1.2.0"
-      },
       "properties": [
         {
           "name": "sbomb:cdx:archiveProperty",
@@ -1173,7 +1161,7 @@
         },
         {
           "name": "sbomb:component:modified",
-          "value": "false"
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:root",
@@ -1182,6 +1170,10 @@
         {
           "name": "sbomb:component:scope",
           "value": "third-party"
+        },
+        {
+          "name": "sbomb:component:vcsCommit",
+          "value": "b031bf50d1becb30ce42d1013657353de5bf4bc1"
         },
         {
           "name": "sbomb:license:evidenceClass",
@@ -1216,14 +1208,6 @@
           }
         }
       ],
-      "pedigree": {
-        "commits": [
-          {
-            "uid": "f31cfd79aa04cd89ec26865564fbc5238b47d64d"
-          }
-        ],
-        "notes": "the component root's checkout is clean and stands on its recorded tag v1.2.0"
-      },
       "properties": [
         {
           "name": "sbomb:cdx:archiveProperty",
@@ -1255,7 +1239,7 @@
         },
         {
           "name": "sbomb:component:modified",
-          "value": "false"
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:root",
@@ -1264,6 +1248,10 @@
         {
           "name": "sbomb:component:scope",
           "value": "third-party"
+        },
+        {
+          "name": "sbomb:component:vcsCommit",
+          "value": "f31cfd79aa04cd89ec26865564fbc5238b47d64d"
         },
         {
           "name": "sbomb:license:evidenceClass",
@@ -1363,6 +1351,10 @@
           "value": "relinking"
         },
         {
+          "name": "sbomb:component:vcsCommit",
+          "value": "a2e4ed43597fea837ae4a749d65619aeabe2fb6e"
+        },
+        {
           "name": "sbomb:license:evidenceClass",
           "value": "file-level"
         },
@@ -1398,14 +1390,6 @@
           }
         }
       ],
-      "pedigree": {
-        "commits": [
-          {
-            "uid": "3355a64c774022cfc6af2883ba89fd0b5a2cf176"
-          }
-        ],
-        "notes": "the component root's checkout is clean and stands on its recorded tag v1.2.0"
-      },
       "properties": [
         {
           "name": "sbomb:cdx:archiveProperty",
@@ -1441,7 +1425,7 @@
         },
         {
           "name": "sbomb:component:modified",
-          "value": "false"
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:root",
@@ -1450,6 +1434,10 @@
         {
           "name": "sbomb:component:scope",
           "value": "third-party"
+        },
+        {
+          "name": "sbomb:component:vcsCommit",
+          "value": "3355a64c774022cfc6af2883ba89fd0b5a2cf176"
         },
         {
           "name": "sbomb:license:evidenceClass",
@@ -1482,14 +1470,6 @@
           "expression": "MIT OR Apache-2.0"
         }
       ],
-      "pedigree": {
-        "commits": [
-          {
-            "uid": "0f8a3d7512153643cfb3a36e80b57d5e5b9d4789"
-          }
-        ],
-        "notes": "the component root's checkout is clean and stands on its recorded tag v1.2.0"
-      },
       "properties": [
         {
           "name": "sbomb:cdx:archiveProperty",
@@ -1529,7 +1509,7 @@
         },
         {
           "name": "sbomb:component:modified",
-          "value": "false"
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:root",
@@ -1538,6 +1518,10 @@
         {
           "name": "sbomb:component:scope",
           "value": "third-party"
+        },
+        {
+          "name": "sbomb:component:vcsCommit",
+          "value": "0f8a3d7512153643cfb3a36e80b57d5e5b9d4789"
         },
         {
           "name": "sbomb:license:evidenceClass",
@@ -1572,14 +1556,6 @@
           }
         }
       ],
-      "pedigree": {
-        "commits": [
-          {
-            "uid": "2395c0085b927d2268ae06124686b8728b309eeb"
-          }
-        ],
-        "notes": "the component root's checkout is clean and stands on its recorded tag v1.2.0"
-      },
       "properties": [
         {
           "name": "sbomb:cdx:archiveProperty",
@@ -1615,7 +1591,7 @@
         },
         {
           "name": "sbomb:component:modified",
-          "value": "false"
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:root",
@@ -1624,6 +1600,10 @@
         {
           "name": "sbomb:component:scope",
           "value": "third-party"
+        },
+        {
+          "name": "sbomb:component:vcsCommit",
+          "value": "2395c0085b927d2268ae06124686b8728b309eeb"
         },
         {
           "name": "sbomb:license:evidenceClass",
@@ -1651,14 +1631,6 @@
           }
         }
       ],
-      "pedigree": {
-        "commits": [
-          {
-            "uid": "dd4dfb1063eb4a9ed72bb3f237d88223ebfea8cf"
-          }
-        ],
-        "notes": "the component root's checkout is clean and stands on its recorded tag v1.2.0"
-      },
       "properties": [
         {
           "name": "sbomb:cdx:archiveProperty",
@@ -1694,7 +1666,7 @@
         },
         {
           "name": "sbomb:component:modified",
-          "value": "false"
+          "value": "unknown"
         },
         {
           "name": "sbomb:component:root",
@@ -1703,6 +1675,10 @@
         {
           "name": "sbomb:component:scope",
           "value": "third-party"
+        },
+        {
+          "name": "sbomb:component:vcsCommit",
+          "value": "dd4dfb1063eb4a9ed72bb3f237d88223ebfea8cf"
         },
         {
           "name": "sbomb:license:evidenceClass",
