@@ -97,7 +97,7 @@ added to it.
 
 ## Q7 — reserved
 
-The FOSS attribution plan (`docs/dev/foss/decisions.md`, on its own branch)
+The FOSS attribution plan (`docs/dev/foss/decisions.md`)
 refers to Q7 by number: two versions of one package in a single assembly,
 milestone F7. The number is held so the reference keeps pointing at what it was
 written for.

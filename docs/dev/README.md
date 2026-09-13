@@ -43,6 +43,7 @@ scripts/release.sh build                # the release artifacts and their SBOMs
 | [deviations.md](deviations.md) | Where the implementation departs from the specification, and what was observed that forced it. Recorded per section 0.2. |
 | [open-questions.md](open-questions.md) | What the specification does not settle and which affects output. Recorded rather than guessed at. |
 | [dependencies.md](dependencies.md) | Every third-party module, what it does, and what removing it would cost. |
+| [foss/](foss/) | The plan the FOSS attribution export was built from: requirements, gap analysis, the specification amendments it needed, the decisions, and the eight milestones. Built and merged; kept as the record of why. |
 
 Two catalogues in the user documentation are generated from the specification
 and annotated with what the code does: `docs/findings.md` from appendix A by

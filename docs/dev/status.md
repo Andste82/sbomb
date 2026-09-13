@@ -391,9 +391,8 @@ Nothing in section 30 is assumed any more: point 7, that
 the review report, is now covered by a test that also proves the unredacted
 outputs contain the paths.
 
-The FOSS attribution export is planned in a branch of its own
-(`docs/dev/foss/`), eight milestones from the fixture to the rendered notices
-document. All eight have landed: the fixture, the source harvest, the inventory
+The FOSS attribution export was planned in `docs/dev/foss/`, eight milestones
+from the fixture to the rendered notices document. All eight have landed: the fixture, the source harvest, the inventory
 dump, the source-tree relocation that lets the fixture be read at all, the
 component root as a resolved fact, the retention of the licence and notice
 bytes those roots carry, the copyright statements of section 22.10, the
