@@ -156,8 +156,18 @@ func addGeneratorInputs(
 				continue
 			}
 			if produced {
-				if !expanded[identity] {
-					expanded[identity] = true
+				// An object is not a node on this chain, so what reaches the
+				// document here is the recursion: it attaches the object's own
+				// inputs to *this* parent. Memoizing it by the object alone
+				// would give the second of two generated files that share a
+				// tool object no edge at all -- a spurious
+				// MISSING_GENERATOR_INPUT_EVIDENCE, and its generator's licence
+				// attributed to nothing. The guard is therefore per parent,
+				// which is what the doc comment above promises: both edges, one
+				// walk each. Cycles stay bounded by maxGeneratorChainDepth.
+				key := string(fromID) + "\x00" + identity
+				if !expanded[key] {
+					expanded[key] = true
 					added += addGeneratorInputs(graph, b, build, fromID, identity, depth+1, expanded)
 				}
 				continue
@@ -187,12 +197,27 @@ func attachGeneratorInput(
 		return 0
 	}
 	_, produced := build.inputs[canonical]
-	graph.AddNode(domain.Node{
-		ID:         domain.NodeID(canonical),
-		Kind:       generatorNodeKind(canonical, produced),
-		File:       &domain.FileID{Anchor: anchorOf(canonical), RelPath: relOf(canonical)},
-		Attributes: map[string]string{"scope": string(scope)},
-	})
+	// A node the graph already holds keeps what it is. AddNode replaces, and
+	// this walk classifies by one question alone -- did the build produce this
+	// file -- which is true of a generated source that was then compiled into
+	// the artifact. Replacing it would call that source a generator, and
+	// section 13.1 keeps a build-anchored generator whose inputs resolved out
+	// of the document: the file would leave the SBOM with its licence, while
+	// still being in the product. The same replacement discarded an archive
+	// member's attributes, which two readers of the graph depend on.
+	//
+	// The edge below is added either way, because being an input of a rule is
+	// true whatever else the file is. This mirrors the source-mapping loop of
+	// section 13.2, which skips a node the graph already holds for the same
+	// reason.
+	if _, known := graph.Node(domain.NodeID(canonical)); !known {
+		graph.AddNode(domain.Node{
+			ID:         domain.NodeID(canonical),
+			Kind:       generatorNodeKind(canonical, produced),
+			File:       &domain.FileID{Anchor: anchorOf(canonical), RelPath: relOf(canonical)},
+			Attributes: map[string]string{"scope": string(scope)},
+		})
+	}
 	graph.AddEdge(domain.Edge{
 		From: fromID, To: domain.NodeID(canonical),
 		Type: "generator-input", Strength: "generated", Confidence: domain.ConfidenceHigh,
