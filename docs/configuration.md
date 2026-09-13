@@ -604,20 +604,30 @@ A finding you have judged and accepted belongs in a waiver, with a reason and
 an expiry — not in a permanently loosened gate.
 
 ```json
-[
-  {
-    "id": "UNKNOWN_LICENSE",
-    "subject": "component:go/example.com/one",
-    "reason": "Vendor confirmed BSD-3-Clause by mail, ticket SEC-412",
-    "approvedBy": "a.steinbart",
-    "expires": "2027-01-31"
-  }
-]
+{
+  "waivers": [
+    {
+      "id": "UNKNOWN_LICENSE",
+      "subject": "component:go/example.com/one",
+      "reason": "Vendor confirmed BSD-3-Clause by mail, ticket SEC-412",
+      "approvedBy": "a.steinbart",
+      "expires": "2027-01-31"
+    }
+  ]
+}
 ```
 
 `id` accepts `*` for any finding. An expired waiver stops suppressing and is
 reported as `WAIVER_EXPIRED`; one that matches nothing is reported as
 `WAIVER_UNUSED`, so the file cannot quietly rot.
+
+A waiver silences a finding; it states nothing about the component. Where you
+know something sbomb could not find — a licence, a version, a copyright holder
+— the place for it is a `components[]` entry, which changes the document.
+
+All three values reach the report: `reason`, `approvedBy` and `expires` appear
+beside the waived finding in the review record and in `findings.json`, under
+`waiver`.
 
 Select it with `--waivers <file>` or `policy.waiversFile`.
 

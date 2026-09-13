@@ -2,6 +2,35 @@
 
 ## 0.17.0
 
+### A waived finding says who accepted it
+
+A waiver states four things -- which finding, for which subject, why, and by
+whom until when. Only the reason reached the report: `policy.Evaluate` copied
+it onto the finding and dropped `approvedBy` and `expires`, which have no
+fields on `domain.Finding`. An audit asks for the approver before it asks for
+the reason, because a reason is an assertion and the approver is the person
+answering for it.
+
+A waived finding now carries a `waiver` object with all three, in
+`findings.json` and in both review records. One object rather than three fields
+beside `waived`: `waiverReason` was already there, so three fields would have
+carried the reason twice. The object replaces it, and the findings document is
+at `schemaVersion` 2 -- removing a field is what the version is for.
+`WAIVER_EXPIRED` names the same three values in its `detail`.
+
+**`docs/configuration.md` showed a waiver file the loader cannot read.** The
+example was a bare JSON array; `policy.LoadWaivers` reads an object with a
+`waivers` key. Copying it produced `cannot unmarshal array into Go value` and
+exit 1. The example is corrected, and `tools/docexamples` now runs waiver
+examples through the real loader too -- it skipped them before, as "something
+else", which is why nothing caught this. Re-run against the old example, it
+fails as it should.
+
+Also documented there, because it is the confusion the question came from: a
+waiver silences a finding and states nothing about the component. Where you
+know something sbomb could not find, the place for it is a `components[]`
+entry, which changes the document. Open question Q16 is closed.
+
 ### `generate` can choose the FOSS rendering too
 
 `sbomb foss --format text|markdown` could select the rendering; `generate

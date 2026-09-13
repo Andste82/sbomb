@@ -192,19 +192,31 @@ func Evaluate(findings []domain.Finding, cfg Config, waivers []Waiver, now time.
 		if severity, ok := cfg.SeverityOverrides[f.ID]; ok {
 			f.Severity = severity
 		}
-		matched, waiverUsed, waiverReason, expired := matchWaiver(f, waivers, now)
+		matched, waiverUsed, expired := matchWaiver(f, waivers, now)
 		if matched {
 			used[waiverKey(waiverUsed)] = true
 		}
 		if matched && !expired {
 			f.Waived = true
-			f.WaiverReason = waiverReason
+			// All three, not the reason alone: who accepted the finding and
+			// until when are what an audit asks for, and they were read here
+			// already (section 26.1).
+			f.Waiver = &domain.WaiverRecord{
+				Reason:     waiverUsed.Reason,
+				ApprovedBy: waiverUsed.ApprovedBy,
+				Expires:    waiverUsed.Expires,
+			}
 			out = append(out, f)
 			continue
 		}
 		if matched && expired {
 			out = append(out, f)
-			out = append(out, newFinding("WAIVER_EXPIRED", domain.SeverityWarning, f.Subject, fmt.Sprintf("waiver for %s expired", f.ID), map[string]any{"waiver": waiverReason}))
+			out = append(out, newFinding("WAIVER_EXPIRED", domain.SeverityWarning, f.Subject,
+				fmt.Sprintf("waiver for %s expired", f.ID), map[string]any{
+					"waiver":     waiverUsed.Reason,
+					"approvedBy": waiverUsed.ApprovedBy,
+					"expires":    waiverUsed.Expires,
+				}))
 			continue
 		}
 		out = append(out, f)
@@ -291,20 +303,16 @@ func shouldFail(f domain.Finding, cfg Config) bool {
 	}
 }
 
-func matchWaiver(f domain.Finding, waivers []Waiver, now time.Time) (matched bool, used Waiver, reason string, expired bool) {
+func matchWaiver(f domain.Finding, waivers []Waiver, now time.Time) (matched bool, used Waiver, expired bool) {
 	for _, w := range waivers {
 		if w.ID != "*" && w.ID != f.ID {
 			continue
 		}
 		if matchesSubject(w.Subject, f.Subject.Ref) {
-			matched = true
-			used = w
-			reason = w.Reason
-			expired = isExpired(w, now)
-			return matched, used, reason, expired
+			return true, w, isExpired(w, now)
 		}
 	}
-	return false, Waiver{}, "", false
+	return false, Waiver{}, false
 }
 
 func matchesSubject(pattern, ref string) bool {
@@ -375,7 +383,11 @@ func WriteFindingsJSON(path string, findings []domain.Finding) error {
 		return nil
 	}
 	payload := map[string]any{
-		"schemaVersion": 1,
+		// 2 since a finding carries `waiver` as an object rather than
+		// `waiverReason` as a string (section 26.1). The version exists for
+		// exactly this, and a shape that changes without it makes every
+		// consumer guess.
+		"schemaVersion": 2,
 		"toolVersion":   "sbomb",
 		"findings":      findings,
 		"summary": map[string]int{

@@ -1418,9 +1418,18 @@ The first concrete embedded SDK adapter targets **ESP-IDF** (Milestone 20).
   "evidence": ["link:firmware.map#L1204"],
   "remediation": "Add a components[] entry with path \"dep/foo\".",
   "waived": false,
-  "waiverReason": null
+  "waiver": null
 }
 ```
+
+`waiver` is present only on a waived finding, and carries what the waiver that silenced it said:
+
+```json
+"waived": true,
+"waiver": { "reason": "Vendor confirmed BSD-3-Clause, ticket SEC-412", "approvedBy": "a.steinbart", "expires": "2027-01-31" }
+```
+
+All three travel together because they are one statement — somebody accepted this finding, for this reason, until this date — and an audit asks for the approver before it asks for the reason: a reason is an assertion, and the approver is the person answering for it. They are one object rather than three fields beside `waived` so that the reason is not carried twice. The expiry is reproduced as the waiver file wrote it (§33.3), which is a date or an RFC 3339 timestamp; a waiver past it silences nothing and raises `WAIVER_EXPIRED` instead, whose `detail` names the same three values.
 
 `severity` ∈ `error` | `warning` | `info`. Severity is a *default* per finding ID (Appendix A) and can be overridden per ID in `policy.severityOverrides`.
 
@@ -1431,7 +1440,7 @@ The first concrete embedded SDK adapter targets **ESP-IDF** (Milestone 20).
 Findings are always available as machine-readable JSON via `--findings-json <path>`. The document is:
 
 ```json
-{ "schemaVersion": 1, "toolVersion": "...", "findings": [ ... ], "summary": { "error": 0, "warning": 3, "info": 12, "waived": 1 } }
+{ "schemaVersion": 2, "toolVersion": "...", "findings": [ ... ], "summary": { "error": 0, "warning": 3, "info": 12, "waived": 1 } }
 ```
 
 Findings MUST be sorted by `(id, subject.kind, subject.ref, message)`.

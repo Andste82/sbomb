@@ -256,7 +256,7 @@ func renderFindings(b *strings.Builder, s style, m model) {
 			continue
 		}
 		s.bullet(b, fmt.Sprintf("%s [%s] %s: %s (waived: %s)", finding.ID, finding.Severity,
-			finding.Subject.Ref, finding.Message, valueOrDash(finding.WaiverReason)))
+			finding.Subject.Ref, finding.Message, waiverSummary(finding.Waiver)))
 	}
 }
 
@@ -298,4 +298,28 @@ func listOrDash(values []string) string {
 	sorted := append([]string{}, values...)
 	sort.Strings(sorted)
 	return strings.Join(sorted, ", ")
+}
+
+// waiverSummary renders what the waiver said: the reason, then who accepted it
+// and until when where the waiver states them. This record is the one an
+// auditor reads, so the approver belongs in it -- a reason is an assertion and
+// the approver is the person answering for it (section 26.1).
+func waiverSummary(record *domain.WaiverRecord) string {
+	if record == nil {
+		return "-"
+	}
+	parts := make([]string, 0, 3)
+	if record.Reason != "" {
+		parts = append(parts, record.Reason)
+	}
+	if record.ApprovedBy != "" {
+		parts = append(parts, "approved by "+record.ApprovedBy)
+	}
+	if record.Expires != "" {
+		parts = append(parts, "expires "+record.Expires)
+	}
+	if len(parts) == 0 {
+		return "-"
+	}
+	return strings.Join(parts, "; ")
 }

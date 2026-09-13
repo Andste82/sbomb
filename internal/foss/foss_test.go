@@ -152,7 +152,11 @@ func TestNoRetainedTextProducesTheIncompletenessMarker(t *testing.T) {
 		ID: "FOSS_LICENSE_TEXT_MISSING", Severity: domain.SeverityInfo,
 		Subject: domain.Subject{Kind: "component", Ref: nolicense.ID},
 		Message: "no licence text was retained", Waived: true,
-		WaiverReason: "Vendor confirmed proprietary; ticket SEC-1234.",
+		Waiver: &domain.WaiverRecord{
+			Reason:     "Vendor confirmed proprietary; ticket SEC-1234.",
+			ApprovedBy: "a.steinbart",
+			Expires:    "2027-01-31",
+		},
 	}
 	for _, findings := range [][]domain.Finding{nil, {waived}} {
 		files := render(t, foss.Input{Document: documentOf(nolicense), Findings: findings})
