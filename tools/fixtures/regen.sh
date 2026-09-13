@@ -435,7 +435,17 @@ QUERY
   # the same defect and is still waived in check-reproducible.sh for that
   # reason.
   if [[ "$project" == "$FOSS_PROJECT" ]]; then
-    "$replynorm" "$build_out/.cmake/api/v1/reply"
+    # Checked explicitly, because this function is called as
+    # `generate_one ... || failures=$((failures + 1))` and a command in a `||`
+    # list runs with errexit off for its whole body. A refusal here -- which is
+    # what replynorm answers when it would have written something it could not
+    # verify -- would otherwise be stepped over: the harvest would continue,
+    # manifest.json would be written, failures would stay 0, and the run would
+    # report a regenerated corpus carrying a reply nobody normalized.
+    if ! "$replynorm" "$build_out/.cmake/api/v1/reply"; then
+      log "  FAILED (replynorm refused the reply): $toolchain/$project"
+      return 1
+    fi
   fi
 
   # Generator-specific evidence.

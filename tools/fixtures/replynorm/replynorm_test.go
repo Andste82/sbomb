@@ -115,3 +115,49 @@ func TestSortDependenciesLeavesADocumentWithoutOneAlone(t *testing.T) {
 		t.Fatalf("document changed: %q", sorted)
 	}
 }
+
+// The sort reorders the same elements with the same separators, so it cannot
+// change the length of the array body. A body this cannot cut into objects
+// used to yield zero elements and no error, and the caller wrote the result
+// back: on a copy of gcc-ninja/p14-foss that turned an eight-element
+// dependency array into an empty one, renamed the document to the digest of
+// the damaged content, followed every reference to it, and exited 0.
+//
+// What is committed here is the evidence every golden rests on, so the loss
+// has to be an error rather than an empty result.
+func TestAnArrayThisCannotCutIsRefused(t *testing.T) {
+	document := "{\n\t\"dependencies\" : \n\t[\n\t\t\"a\",\n\t\t\"b\"\n\t],\n\t\"name\" : \"x\"\n}"
+	if _, err := sortDependencies([]byte(document)); err == nil {
+		t.Error("an array of non-objects was accepted, and accepting it empties the array")
+	}
+
+	// What the reply really holds is still sorted, and byte for byte.
+	objects := "{\n\t\"dependencies\" : \n\t[\n\t\t{\n\t\t\t\"id\" : \"b\"\n\t\t},\n\t\t{\n\t\t\t\"id\" : \"a\"\n\t\t}\n\t]\n}"
+	sorted, err := sortDependencies([]byte(objects))
+	if err != nil {
+		t.Fatalf("a well-formed array was refused: %v", err)
+	}
+	if len(sorted) != len(objects) {
+		t.Errorf("sorting changed %d bytes into %d", len(objects), len(sorted))
+	}
+	if !strings.Contains(string(sorted), "\"id\" : \"a\"\n\t\t},") {
+		t.Errorf("the array was not sorted:\n%s", sorted)
+	}
+}
+
+// A document renamed onto another document's name would drop that other one
+// from the map, and write() then deletes its file: the corpus loses a reply
+// nobody asked it to lose.
+func TestARenameOntoAnotherDocumentIsRefused(t *testing.T) {
+	content := []byte("{\n\t\"kind\" : \"codemodel\"\n}")
+	digest := replyHash(content)
+	documents := map[string][]byte{
+		// This one is misnamed, so it will be renamed to its digest -- which
+		// is the name the second one already holds.
+		"codemodel-v2-00000000000000000000.json": content,
+		"codemodel-v2-" + digest + ".json":       []byte("{\n\t\"kind\" : \"other\"\n}"),
+	}
+	if err := rename(documents); err == nil {
+		t.Error("a rename onto an existing document was accepted")
+	}
+}
