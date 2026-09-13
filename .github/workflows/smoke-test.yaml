@@ -61,6 +61,14 @@ jobs:
           # evidence yields two different documents on purpose (section 7.3).
           path-flavor: posix
           output: smoke.cdx.json
+          # The second rendering of the same run. It is here because this is
+          # the only place the action's own shell is executed: the unit tests
+          # run the command the step runs, and read action.yaml to check the
+          # condition and the upload, but nothing else executes the line that
+          # assembles the arguments. Without this the FOSS step could be broken
+          # in a release and the first person to find out would be a user.
+          foss: "true"
+          foss-out: smoke-foss
 
       # The property the whole tool exists for: p02-static compiles unused.c
       # into an archive the linker never extracts, so it must not appear, while
@@ -77,6 +85,21 @@ jobs:
             echo "an archive member the linker never extracted is in the SBOM" >&2
             exit 1
           fi
+
+      # The step cannot fail the workflow -- attribution is informational and
+      # the action marks it continue-on-error -- so the files are what says it
+      # ran. Section 32.6 names these four and no others.
+      - name: The four attribution documents are there
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in THIRD-PARTY-NOTICES.txt foss-review.txt foss-review.json source-obligations.txt; do
+            test -s "smoke-foss/$name" || {
+              echo "the attribution step wrote no $name" >&2; exit 1; }
+          done
+          # And the notices document is the one that ships, so it has to name
+          # what was linked rather than be an empty shell.
+          grep -q "THIRD-PARTY NOTICES" smoke-foss/THIRD-PARTY-NOTICES.txt
 
       - name: Keep the hash
         shell: bash
