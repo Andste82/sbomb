@@ -119,6 +119,7 @@ fossapp: liblgpl_lib.a
 fossapp: libmulti_lib.a
 fossapp: libnolicense_lib.a
 fossapp: libnocopyright_lib.a
+fossapp: libvendored_mix.a
 fossapp: CMakeFiles/fossapp.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/__fixture_build__/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking C executable fossapp"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/fossapp.dir/link.txt --verbose=$(VERBOSE)

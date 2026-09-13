@@ -50,6 +50,9 @@ func TestFOSSFixtureLinkedObjectSet(t *testing.T) {
 		"file:project:dep/nocopyright/src/nocopyright.c",
 		"file:project:dep/nolicense/include/nolicense.h",
 		"file:project:dep/nolicense/src/nolicense.c",
+		"file:project:dep/vendored-mix/include/vendored_mix.h",
+		"file:project:dep/vendored-mix/src/mix_core.c",
+		"file:project:dep/vendored-mix/src/mix_vendored_crc.c",
 		"file:project:src/main.c",
 	}
 	// Section 16's second evidence source is the Ninja build graph, so only

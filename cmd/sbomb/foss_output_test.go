@@ -315,7 +315,7 @@ func TestTheDefaultProfileKeepsSbombsOwnGroupingOutOfTheNotices(t *testing.T) {
 	if !strings.Contains(section[:strings.Index(section, "LICENCE VIEW")], "- build-environment") {
 		t.Errorf("build-environment is not named in the review record:\n%s", review)
 	}
-	for _, line := range []string{"components                     7", "no distribution role           1"} {
+	for _, line := range []string{"components                     8", "no distribution role           1"} {
 		if !strings.Contains(review, line) {
 			t.Errorf("the completeness block does not state %q:\n%s", line, review)
 		}

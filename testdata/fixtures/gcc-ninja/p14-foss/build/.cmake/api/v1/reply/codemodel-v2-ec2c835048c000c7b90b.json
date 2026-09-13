@@ -7,7 +7,7 @@
 				{
 					"build" : ".",
 					"hasInstallRule" : true,
-					"jsonFile" : "directory-.-Debug-b1d15b4ae8e720c2a666.json",
+					"jsonFile" : "directory-.-Debug-2ad86f689b1ab249b1d3.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.20"
@@ -23,7 +23,8 @@
 						4,
 						5,
 						6,
-						7
+						7,
+						8
 					]
 				}
 			],
@@ -45,7 +46,8 @@
 						4,
 						5,
 						6,
-						7
+						7,
+						8
 					]
 				}
 			],
@@ -61,7 +63,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "fossapp::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-fossapp-Debug-9451fd3ad89ad40aa811.json",
+					"jsonFile" : "target-fossapp-Debug-68eb58dfca792de36fbd.json",
 					"name" : "fossapp",
 					"projectIndex" : 0
 				},
@@ -105,6 +107,13 @@
 					"id" : "table_gen::@6890427a1f51a3e7e1df",
 					"jsonFile" : "target-table_gen-Debug-92f689885b8218e1c014.json",
 					"name" : "table_gen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "vendored_mix::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-vendored_mix-Debug-f4d46e6a8e92fe304cbd.json",
+					"name" : "vendored_mix",
 					"projectIndex" : 0
 				}
 			]

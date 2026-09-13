@@ -139,6 +139,8 @@ func TestFOSSFixtureComponentAttributes(t *testing.T) {
 			forms: []string{"static-archive-member"}, members: "1/1"},
 		"component:nocopyright": {scope: "required", role: "distributed", modified: "unknown",
 			forms: []string{"static-archive-member"}, members: "1/1"},
+		"component:vendored-mix": {scope: "required", role: "distributed", modified: "unknown",
+			forms: []string{"static-archive-member"}, members: "2/2"},
 	}
 	generator := map[string]attributed{
 		"component:gpl-gen": {scope: "excluded", role: "build-time-only", modified: "unknown",

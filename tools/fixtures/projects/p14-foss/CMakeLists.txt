@@ -53,10 +53,18 @@ target_include_directories(nolicense_lib PUBLIC dep/nolicense/include)
 add_library(nocopyright_lib STATIC dep/nocopyright/src/nocopyright.c)
 target_include_directories(nocopyright_lib PUBLIC dep/nocopyright/include)
 
+# A directory assembled from two upstreams: its LICENSE and its own source say
+# MIT, and one file copied in from elsewhere still declares GPL-2.0-only. Both
+# readings are right, which is what separates this from a conflict (22.5).
+add_library(vendored_mix STATIC
+  dep/vendored-mix/src/mix_core.c
+  dep/vendored-mix/src/mix_vendored_crc.c)
+target_include_directories(vendored_mix PUBLIC dep/vendored-mix/include)
+
 # Header-only: a LICENSE beside an include/ directory, nothing else.
 add_library(bsd_hdr INTERFACE)
 target_include_directories(bsd_hdr INTERFACE dep/bsd-hdr/include)
 
 fixture_executable(fossapp src/main.c "${CMAKE_CURRENT_BINARY_DIR}/generated/table.c")
 target_link_libraries(fossapp PRIVATE
-  mit_lib apache_lib lgpl_lib multi_lib nolicense_lib nocopyright_lib bsd_hdr)
+  mit_lib apache_lib lgpl_lib multi_lib nolicense_lib nocopyright_lib vendored_mix bsd_hdr)

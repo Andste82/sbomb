@@ -253,6 +253,19 @@ nocopyright_lib/fast:
 .PHONY : nocopyright_lib/fast
 
 #=============================================================================
+# Target rules for targets named vendored_mix
+
+# Build rule for target.
+vendored_mix: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 vendored_mix
+.PHONY : vendored_mix
+
+# fast build rule for target.
+vendored_mix/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/vendored_mix.dir/build.make CMakeFiles/vendored_mix.dir/build
+.PHONY : vendored_mix/fast
+
+#=============================================================================
 # Target rules for targets named fossapp
 
 # Build rule for target.
@@ -529,6 +542,54 @@ dep/nolicense/src/nolicense.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/nolicense_lib.dir/build.make CMakeFiles/nolicense_lib.dir/dep/nolicense/src/nolicense.c.s
 .PHONY : dep/nolicense/src/nolicense.c.s
 
+dep/vendored-mix/src/mix_core.o: dep/vendored-mix/src/mix_core.c.o
+.PHONY : dep/vendored-mix/src/mix_core.o
+
+# target to build an object file
+dep/vendored-mix/src/mix_core.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/vendored_mix.dir/build.make CMakeFiles/vendored_mix.dir/dep/vendored-mix/src/mix_core.c.o
+.PHONY : dep/vendored-mix/src/mix_core.c.o
+
+dep/vendored-mix/src/mix_core.i: dep/vendored-mix/src/mix_core.c.i
+.PHONY : dep/vendored-mix/src/mix_core.i
+
+# target to preprocess a source file
+dep/vendored-mix/src/mix_core.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/vendored_mix.dir/build.make CMakeFiles/vendored_mix.dir/dep/vendored-mix/src/mix_core.c.i
+.PHONY : dep/vendored-mix/src/mix_core.c.i
+
+dep/vendored-mix/src/mix_core.s: dep/vendored-mix/src/mix_core.c.s
+.PHONY : dep/vendored-mix/src/mix_core.s
+
+# target to generate assembly for a file
+dep/vendored-mix/src/mix_core.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/vendored_mix.dir/build.make CMakeFiles/vendored_mix.dir/dep/vendored-mix/src/mix_core.c.s
+.PHONY : dep/vendored-mix/src/mix_core.c.s
+
+dep/vendored-mix/src/mix_vendored_crc.o: dep/vendored-mix/src/mix_vendored_crc.c.o
+.PHONY : dep/vendored-mix/src/mix_vendored_crc.o
+
+# target to build an object file
+dep/vendored-mix/src/mix_vendored_crc.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/vendored_mix.dir/build.make CMakeFiles/vendored_mix.dir/dep/vendored-mix/src/mix_vendored_crc.c.o
+.PHONY : dep/vendored-mix/src/mix_vendored_crc.c.o
+
+dep/vendored-mix/src/mix_vendored_crc.i: dep/vendored-mix/src/mix_vendored_crc.c.i
+.PHONY : dep/vendored-mix/src/mix_vendored_crc.i
+
+# target to preprocess a source file
+dep/vendored-mix/src/mix_vendored_crc.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/vendored_mix.dir/build.make CMakeFiles/vendored_mix.dir/dep/vendored-mix/src/mix_vendored_crc.c.i
+.PHONY : dep/vendored-mix/src/mix_vendored_crc.c.i
+
+dep/vendored-mix/src/mix_vendored_crc.s: dep/vendored-mix/src/mix_vendored_crc.c.s
+.PHONY : dep/vendored-mix/src/mix_vendored_crc.s
+
+# target to generate assembly for a file
+dep/vendored-mix/src/mix_vendored_crc.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/vendored_mix.dir/build.make CMakeFiles/vendored_mix.dir/dep/vendored-mix/src/mix_vendored_crc.c.s
+.PHONY : dep/vendored-mix/src/mix_vendored_crc.c.s
+
 generated/table.o: generated/table.c.o
 .PHONY : generated/table.o
 
@@ -597,6 +658,7 @@ help:
 	@echo "... nocopyright_lib"
 	@echo "... nolicense_lib"
 	@echo "... table_gen"
+	@echo "... vendored_mix"
 	@echo "... dep/apache-lib/src/apache_one.o"
 	@echo "... dep/apache-lib/src/apache_one.i"
 	@echo "... dep/apache-lib/src/apache_one.s"
@@ -630,6 +692,12 @@ help:
 	@echo "... dep/nolicense/src/nolicense.o"
 	@echo "... dep/nolicense/src/nolicense.i"
 	@echo "... dep/nolicense/src/nolicense.s"
+	@echo "... dep/vendored-mix/src/mix_core.o"
+	@echo "... dep/vendored-mix/src/mix_core.i"
+	@echo "... dep/vendored-mix/src/mix_core.s"
+	@echo "... dep/vendored-mix/src/mix_vendored_crc.o"
+	@echo "... dep/vendored-mix/src/mix_vendored_crc.i"
+	@echo "... dep/vendored-mix/src/mix_vendored_crc.s"
 	@echo "... generated/table.o"
 	@echo "... generated/table.i"
 	@echo "... generated/table.s"

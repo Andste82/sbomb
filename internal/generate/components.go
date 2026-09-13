@@ -75,11 +75,14 @@ type componentResolver struct {
 	// limits is the run's own bounds, used wherever this resolver opens a
 	// file: section 30.5 refuses a symbolic link under --strict-symlinks and
 	// the input ceiling refuses an oversized file before allocating for it.
-	limits      limits.Config
-	physical    map[string]string
-	projectName string
-	anchorRoots map[string]string
-	logger      *Logger
+	limits limits.Config
+	// declaredIdentifiers is the SPDX expression each file stated about
+	// itself, keyed by canonical identity (section 22.5).
+	declaredIdentifiers map[string]string
+	physical            map[string]string
+	projectName         string
+	anchorRoots         map[string]string
+	logger              *Logger
 	// packages are what the package-manager adapters proved, keyed by the
 	// canonical identity prefix their roots correspond to. This is strategy 2
 	// of section 19.2, which outranks everything except curated configuration.
@@ -1146,7 +1149,59 @@ func (r *componentResolver) resolveComponentLicense(component *domain.Component,
 		}
 	}
 	findings = append(findings, r.licenseCompletenessFindings(component)...)
+	findings = append(findings, r.divergenceFindings(component, files)...)
 	return findings
+}
+
+// divergenceFindings reports the identifiers this component's files declared
+// that its own resolved licence does not account for (section 22.5).
+//
+// Two sources disagreeing about one licence is a conflict and is reported as
+// one. Files declaring different identifiers is not that: a directory
+// assembled from two upstreams carries two licences, and both readings are
+// right. What makes it worth saying is only the part the component did not
+// state -- a dependency that resolved to "MIT OR Apache-2.0" whose files
+// declare MIT and Apache-2.0 has said what it is, and repeating it would put
+// an info finding on every dual-licensed dependency there is.
+func (r *componentResolver) divergenceFindings(component *domain.Component, files []domain.UsedFile) []domain.Finding {
+	if len(r.declaredIdentifiers) == 0 || len(component.Licenses) == 0 {
+		return nil
+	}
+	resolved := component.Licenses[0].Expression
+	if resolved == "" {
+		// Nothing was resolved, and section 22.7 already says so with a reason
+		// code. Listing what the files declared beside it would be a second
+		// answer to a question that was answered "none".
+		return nil
+	}
+	accounted := map[string]bool{}
+	for _, id := range license.IdentifiersIn(resolved) {
+		accounted[id] = true
+	}
+	unaccounted := map[string]bool{}
+	for _, file := range files {
+		declared := r.declaredIdentifiers[file.ID.Canonical()]
+		if declared == "" {
+			continue
+		}
+		for _, id := range license.IdentifiersIn(declared) {
+			if !accounted[id] {
+				unaccounted[id] = true
+			}
+		}
+	}
+	if len(unaccounted) == 0 {
+		return nil
+	}
+	names := make([]string, 0, len(unaccounted))
+	for id := range unaccounted {
+		names = append(names, id)
+	}
+	sort.Strings(names)
+	return []domain.Finding{componentFinding("FOSS_PER_FILE_LICENSE_DIVERGENCE", domain.SeverityInfo, component,
+		fmt.Sprintf("the component resolved to %s, and its files also declare %s",
+			resolved, strings.Join(names, ", ")),
+		"Check whether the component is one work or two; where it is two, map them with components[] so each is described under its own licence.")}
 }
 
 // licenseCompletenessFindings is requirement R10 for the licence text: where a

@@ -81,6 +81,12 @@ func TestFOSSFixtureCopyrightStatements(t *testing.T) {
 		"component:multi-license": {"Copyright (c) 2026 Fixture Dual Licensed Authors"},
 		// 0BSD with no notice in the sources and none in the licence file.
 		"component:nocopyright": nil,
+		// Two upstreams in one directory, so two holders. Section 22.10 reads
+		// them the same way whether or not they agree about the licence.
+		"component:vendored-mix": {
+			"Copyright (c) 2026 Fixture Upstream CRC Authors",
+			"Copyright (c) 2026 Fixture Vendored Mix Authors",
+		},
 	}
 	// The GPL-2.0 code generator is a component on gcc-ninja only (section
 	// 16, open question Q14). Its notices are read exactly like a linked

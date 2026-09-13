@@ -24,22 +24,48 @@ type copyrightCollector struct {
 	// several goroutines at once.
 	mu     sync.Mutex
 	byFile map[string][]string
+	// declared is the identifier each file stated about itself, for the
+	// per-file divergence of section 22.5. It is collected here because the
+	// bytes are already in memory for the digest, which is the same reason
+	// section 22.10 reads them here (decision Q9).
+	declared map[string]string
 }
 
 func newCopyrightCollector() *copyrightCollector {
-	return &copyrightCollector{byFile: map[string][]string{}}
+	return &copyrightCollector{byFile: map[string][]string{}, declared: map[string]string{}}
 }
 
 // observe is the inventory.HashOptions callback. It is safe for concurrent
 // use, as that field requires.
 func (c *copyrightCollector) observe(id domain.FileID, data []byte) {
 	statements := license.ExtractCopyright(data)
-	if len(statements) == 0 {
+	identifier := license.DeclaredIdentifier(data)
+	if len(statements) == 0 && identifier == "" {
 		return
 	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	c.byFile[id.Canonical()] = statements
+	if len(statements) > 0 {
+		c.byFile[id.Canonical()] = statements
+	}
+	if identifier != "" {
+		c.declared[id.Canonical()] = identifier
+	}
+}
+
+// identifiers is what each file declared about itself, keyed by canonical
+// identity.
+func (c *copyrightCollector) identifiers() map[string]string {
+	if c == nil {
+		return map[string]string{}
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	out := make(map[string]string, len(c.declared))
+	for id, expression := range c.declared {
+		out[id] = expression
+	}
+	return out
 }
 
 // statements is what was found, keyed by canonical file identity. A collector
@@ -59,6 +85,12 @@ func (c *copyrightCollector) statements() map[string][]string {
 // read for their hash, or from bytes section 22.9 retained.
 func (r *componentResolver) setCopyrightStatements(byFile map[string][]string) {
 	r.copyrights = byFile
+}
+
+// setDeclaredIdentifiers hands the resolver what each file declared about
+// itself, for the divergence of section 22.5.
+func (r *componentResolver) setDeclaredIdentifiers(byFile map[string]string) {
+	r.declaredIdentifiers = byFile
 }
 
 // resolveComponentCopyright is section 22.10 for one component: the statements

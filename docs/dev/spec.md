@@ -1188,6 +1188,12 @@ Conflicting evidence MUST NOT be resolved silently. Example: configured `MIT`, f
 
 Multiple licenses within a component MUST NOT be combined into an SPDX expression unless their legal relationship is explicitly known (i.e. the expression came verbatim from a single source).
 
+**Divergence is not conflict.** Two sources disagreeing about one component's licence is a conflict: one of them is wrong, and the paragraphs above report it. Files of one component *declaring different identifiers* is a different situation, and both readings can be right — a directory assembled from two upstreams carries two licences rather than a disputed one.
+
+It is reported where, and only where, the component's own resolved licence does not account for it. A component that resolved to `MIT OR Apache-2.0` and whose files declare `MIT` and `Apache-2.0` has stated what it is, and saying so again would be noise on every dual-licensed dependency. A component that resolved to `MIT` and whose files also declare `GPL-2.0-only` has not: the identifier that reached the document is one of several that were present, and which one it is depends on the order the files were read. Every declared identifier the resolved expression does not name is listed in `FOSS_PER_FILE_LICENSE_DIVERGENCE` (info), which gates nothing — it says a reviewer has something to look at, not that the answer is wrong.
+
+The identifiers come from technique 1 of §22.3 alone, read while the files are hashed (§22.10 rides on the same pass): what a file *declared* about itself is the only reading that can diverge, because the other three techniques recognize a licence text and a source file is not one.
+
 ### 22.6 Confidence
 
 ```
@@ -2498,6 +2504,7 @@ Severity shown is the default and may be changed via `policy.severityOverrides`.
 | `FOSS_LICENSE_TEXT_MISSING` | info | — | Distributed component has a license identifier but carries no retained text (§22.9) |
 | `FOSS_LICENSE_ARTIFACT_LIMIT` | info | — | More recognized license files, or a larger one, than the retention limit of §22.9 |
 | `FOSS_COPYRIGHT_MISSING` | info | — | Distributed component carries no copyright statement and none was curated (§22.10) |
+| `FOSS_PER_FILE_LICENSE_DIVERGENCE` | info | — | Files of one component declare an identifier the component's own licence does not account for (§22.5) |
 | `FOSS_COPYRIGHT_LIMIT` | info | — | More distinct copyright statements than the limit of §22.10 |
 | `FOSS_MODIFICATION_UNKNOWN` | info | — | Modification status could not be established, so it is reported as unknown rather than as unmodified (§19.4) |
 | `FOSS_LICENSE_UNCLASSIFIED` | info | — | The license identifier is on neither obligation list of §32.6, so nothing is claimed about it and nothing is ruled out |

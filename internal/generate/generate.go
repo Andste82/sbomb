@@ -623,6 +623,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	// ones in its licence and notice files come from the bytes section 22.9
 	// retained.
 	resolver.setCopyrightStatements(copyrights.statements())
+	resolver.setDeclaredIdentifiers(copyrights.identifiers())
 	// A path below the build directory being read has to be expressed in the
 	// logical build root first (section 7.6), exactly as every other path the
 	// adapters hand over. A path outside it -- a package cache -- is already
