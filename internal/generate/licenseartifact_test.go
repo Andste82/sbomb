@@ -10,6 +10,7 @@ import (
 
 	"github.com/example/sbomb/internal/config"
 	"github.com/example/sbomb/internal/domain"
+	"github.com/example/sbomb/internal/limits"
 	"github.com/example/sbomb/internal/testutil"
 )
 
@@ -177,7 +178,7 @@ func TestALicenceWithoutItsTextIsReported(t *testing.T) {
 
 	file := domain.UsedFile{ID: fileID("project", "dep/headeronly/src/only.c")}
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		map[string]string{file.ID.Canonical(): source}, map[string]string{"project": root}, nil)
+		map[string]string{file.ID.Canonical(): source}, map[string]string{"project": root}, limits.Config{}, nil)
 	component := &domain.Component{ID: "component:headeronly", Name: "headeronly", DetectedBy: "package-metadata:LICENSE-MIT", DistributionRole: domain.RoleDistributed}
 	findings := resolver.enrichComponent(component, []domain.UsedFile{file})
 
@@ -194,7 +195,7 @@ func TestALicenceWithoutItsTextIsReported(t *testing.T) {
 		t.Fatal(err)
 	}
 	bare := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		map[string]string{file.ID.Canonical(): source}, map[string]string{"project": root}, nil)
+		map[string]string{file.ID.Canonical(): source}, map[string]string{"project": root}, limits.Config{}, nil)
 	bareComponent := &domain.Component{ID: "component:headeronly", Name: "headeronly", DistributionRole: domain.RoleDistributed}
 	findings = bare.enrichComponent(bareComponent, []domain.UsedFile{file})
 	if len(bareComponent.LicenseArtifacts) != 0 {
@@ -216,7 +217,7 @@ func TestAComponentWithNoLicenceAtAllReportsOnlyTheUnknownLicence(t *testing.T) 
 
 	file := domain.UsedFile{ID: fileID("project", "dep/nolicense/src/nolicense.c")}
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		map[string]string{file.ID.Canonical(): source}, map[string]string{"project": root}, nil)
+		map[string]string{file.ID.Canonical(): source}, map[string]string{"project": root}, limits.Config{}, nil)
 	component := &domain.Component{ID: "component:nolicense", Name: "nolicense", DetectedBy: "package-metadata:vcpkg.json"}
 	findings := resolver.enrichComponent(component, []domain.UsedFile{file})
 
@@ -306,7 +307,7 @@ func TestRetentionReadsEachFileOnceAndNothingButThePermittedSet(t *testing.T) {
 
 	file := domain.UsedFile{ID: fileID("project", "dep/lib/src/lib.c")}
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		map[string]string{file.ID.Canonical(): source}, map[string]string{"project": root}, nil)
+		map[string]string{file.ID.Canonical(): source}, map[string]string{"project": root}, limits.Config{}, nil)
 	component := &domain.Component{ID: "component:lib", Name: "lib", DetectedBy: "package-metadata:LICENSE"}
 	resolver.enrichComponent(component, []domain.UsedFile{file})
 
@@ -388,4 +389,68 @@ func findingIDs(findings []domain.Finding) []string {
 		ids = append(ids, finding.ID)
 	}
 	return ids
+}
+
+// The bound of section 22.9 is on what the document carries, not on what the
+// tool concludes. A vendored dependency whose root holds a concatenation of
+// bundled texts -- GPL with its exceptions, a bundle of third-party licences --
+// has a LICENSE over the limit, and before retention existed step 5 of section
+// 22.2 read it and resolved the identifier. Letting the retention bound answer
+// NOASSERTION would turn a limit on bytes into a statement about the
+// component: UNKNOWN_LICENSE at warning severity, sbomb:license:review, and a
+// failed build under failOn.unknownLicense -- announced by an info finding.
+func TestAnOversizedLicenceIsStillIdentified(t *testing.T) {
+	root := t.TempDir()
+	// A licence file that states its identifier and then carries more text
+	// than the bound keeps: the bundled terms of everything a vendored
+	// dependency ships. Technique 1 of section 22.3 answers it whatever its
+	// size, which is exactly why the size must not decide.
+	oversized := "SPDX-License-Identifier: MIT\n\n" + mitText + "\n" +
+		strings.Repeat("Bundled third-party terms follow.\n", 40_000)
+	write(t, filepath.Join(root, "LICENSE"), oversized)
+
+	retained := retain(t, "bundled", root)
+	if len(retained.artifacts) != 0 {
+		t.Fatalf("retained %d artifact(s), want none: the bytes are over the bound", len(retained.artifacts))
+	}
+	if len(retained.dropped) != 1 || !strings.Contains(retained.dropped[0], "over the limit") {
+		t.Fatalf("dropped = %v, want the oversized LICENSE named with its reason", retained.dropped)
+	}
+	found, ok := licenseFromRetained(retained)
+	if !ok || found.Expression != "MIT" {
+		t.Errorf("licenseFromRetained = %#v (ok=%v), want MIT read from the file that was too large to keep",
+			found, ok)
+	}
+	if found.Evidence != "component-level" || found.Source != "LICENSE" {
+		t.Errorf("finding = %#v, want the component-level evidence and the file that stated it", found)
+	}
+}
+
+// Section 30.5: with --strict-symlinks a symbolic link in the final component
+// is refused. A LICENSE that is a link out of the component root would
+// otherwise be read, hashed, and published as sbomb:component:licenseFile on
+// every run -- and with licenseTextInSBOM: evidence its bytes would be
+// base64-encoded into the document.
+func TestALicenceThatIsASymlinkIsRefusedUnderStrictSymlinks(t *testing.T) {
+	outside := filepath.Join(t.TempDir(), "elsewhere.txt")
+	write(t, outside, "Not this component's licence.\n")
+	root := t.TempDir()
+	if err := os.Symlink(outside, filepath.Join(root, "LICENSE")); err != nil {
+		t.Skipf("symlinks are not available: %v", err)
+	}
+
+	strict := &componentResolver{limits: limits.Config{StrictSymlinks: true}}
+	retained := strict.retainLicenseArtifacts(domain.FileID{Anchor: "project", RelPath: "dep/linked"}, root)
+	for _, artifact := range retained.artifacts {
+		if artifact.Kind == domain.LicenseArtifactLicense {
+			t.Errorf("a linked LICENSE was retained: %q", artifact.File.Canonical())
+		}
+	}
+
+	// Without the flag it is read, which is the default and is what makes the
+	// flag worth having.
+	lenient := &componentResolver{limits: limits.Config{}}
+	if got := lenient.retainLicenseArtifacts(domain.FileID{Anchor: "project", RelPath: "dep/linked"}, root); len(got.artifacts) != 1 {
+		t.Errorf("retained %d artifact(s) without --strict-symlinks, want the linked file read", len(got.artifacts))
+	}
 }

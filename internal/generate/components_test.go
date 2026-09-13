@@ -14,6 +14,7 @@ import (
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/evidence"
 	"github.com/example/sbomb/internal/exec"
+	"github.com/example/sbomb/internal/limits"
 	"github.com/example/sbomb/internal/pathmodel"
 )
 
@@ -38,7 +39,7 @@ func TestCuratedConfigurationOutranksEveryOtherStrategy(t *testing.T) {
 		Project:    config.Project{Name: "firmware"},
 		Components: []config.Component{{Path: "dep/mbedtls", Name: "mbedtls", Type: "library"}},
 	}
-	resolver := newComponentResolver(cfg, physical, map[string]string{"project": root}, nil)
+	resolver := newComponentResolver(cfg, physical, map[string]string{"project": root}, limits.Config{}, nil)
 
 	id, name, _, _, detectedBy := resolver.resolve(file)
 	if name != "mbedtls" || detectedBy != "curated" {
@@ -59,7 +60,7 @@ func TestNearestPackageManifestNamesTheComponent(t *testing.T) {
 	physical := map[string]string{file.ID.Canonical(): filepath.Join(vendor, "cbor.c")}
 
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		physical, map[string]string{"project": root}, nil)
+		physical, map[string]string{"project": root}, limits.Config{}, nil)
 
 	_, name, _, _, detectedBy := resolver.resolve(file)
 	if name != "tinycbor" {
@@ -85,7 +86,7 @@ func TestPackageSearchStopsAtTheAnchorRoot(t *testing.T) {
 	physical := map[string]string{file.ID.Canonical(): filepath.Join(root, "src", "main.c")}
 
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		physical, map[string]string{"project": root}, nil)
+		physical, map[string]string{"project": root}, limits.Config{}, nil)
 
 	_, name, _, _, detectedBy := resolver.resolve(file)
 	if name != "firmware" || detectedBy != "anchor:project" {
@@ -95,7 +96,7 @@ func TestPackageSearchStopsAtTheAnchorRoot(t *testing.T) {
 
 func TestFilesWithNoAnchorBecomeAnUnknownComponent(t *testing.T) {
 	file := domain.UsedFile{ID: fileID("abs", "opt/vendor/blob.a")}
-	resolver := newComponentResolver(config.Config{}, map[string]string{}, map[string]string{}, nil)
+	resolver := newComponentResolver(config.Config{}, map[string]string{}, map[string]string{}, limits.Config{}, nil)
 
 	_, name, _, scope, detectedBy := resolver.resolve(file)
 	if name != "unknown:abs/opt" {
@@ -113,7 +114,7 @@ func TestCuratedMetadataFillsTheCRAFields(t *testing.T) {
 			Supplier: "Trusted Firmware", License: "Apache-2.0",
 		}},
 	}
-	resolver := newComponentResolver(cfg, map[string]string{}, map[string]string{}, nil)
+	resolver := newComponentResolver(cfg, map[string]string{}, map[string]string{}, limits.Config{}, nil)
 	component := domain.Component{ID: "component:mbedtls", Name: "mbedtls"}
 	files := []domain.UsedFile{{ID: fileID("project", "dep/mbedtls/aes.c"), Hashes: map[string]string{"SHA-256": "x"}}}
 
@@ -137,7 +138,7 @@ func TestCuratedMetadataFillsTheCRAFields(t *testing.T) {
 }
 
 func TestMissingCRAFieldsAreReportedIndividually(t *testing.T) {
-	resolver := newComponentResolver(config.Config{}, map[string]string{}, map[string]string{}, nil)
+	resolver := newComponentResolver(config.Config{}, map[string]string{}, map[string]string{}, limits.Config{}, nil)
 	component := domain.Component{ID: "component:mystery", Name: "mystery"}
 
 	findings := resolver.enrichComponent(&component, []domain.UsedFile{{ID: fileID("project", "a.c")}})
@@ -168,7 +169,7 @@ func TestLicenseConflictKeepsTheCuratedValueAndRecordsTheOther(t *testing.T) {
 	}
 	cfg := config.Config{Components: []config.Component{{Path: "dep", Name: "mbedtls", License: "Apache-2.0"}}}
 	file := domain.UsedFile{ID: fileID("project", "dep/aes.c")}
-	resolver := newComponentResolver(cfg, map[string]string{file.ID.Canonical(): source}, map[string]string{}, nil)
+	resolver := newComponentResolver(cfg, map[string]string{file.ID.Canonical(): source}, map[string]string{}, limits.Config{}, nil)
 	component := domain.Component{ID: "component:mbedtls", Name: "mbedtls"}
 
 	findings := resolver.enrichComponent(&component, []domain.UsedFile{file})
@@ -211,7 +212,7 @@ func TestLicenseComesFromTheComponentRootOnly(t *testing.T) {
 		t.Fatal(err)
 	}
 	file := domain.UsedFile{ID: fileID("project", "dep/tiny/tiny.c")}
-	resolver := newComponentResolver(config.Config{}, map[string]string{file.ID.Canonical(): source}, map[string]string{}, nil)
+	resolver := newComponentResolver(config.Config{}, map[string]string{file.ID.Canonical(): source}, map[string]string{}, limits.Config{}, nil)
 	component := domain.Component{ID: "component:tiny", Name: "tiny"}
 
 	resolver.enrichComponent(&component, []domain.UsedFile{file})
@@ -231,7 +232,7 @@ func TestUnrecognizedLicenseTextIsNoAssertion(t *testing.T) {
 		t.Fatal(err)
 	}
 	file := domain.UsedFile{ID: fileID("project", "a.c")}
-	resolver := newComponentResolver(config.Config{}, map[string]string{file.ID.Canonical(): source}, map[string]string{}, nil)
+	resolver := newComponentResolver(config.Config{}, map[string]string{file.ID.Canonical(): source}, map[string]string{}, limits.Config{}, nil)
 	component := domain.Component{ID: "component:a", Name: "a"}
 
 	resolver.enrichComponent(&component, []domain.UsedFile{file})
@@ -246,7 +247,7 @@ func TestUnrecognizedLicenseTextIsNoAssertion(t *testing.T) {
 }
 
 func TestPurlIsAssertedOnlyFromAPackageAnchor(t *testing.T) {
-	resolver := newComponentResolver(config.Config{}, map[string]string{}, map[string]string{}, nil)
+	resolver := newComponentResolver(config.Config{}, map[string]string{}, map[string]string{}, limits.Config{}, nil)
 
 	packaged := domain.Component{ID: "pkg:conan/mbedtls", Name: "mbedtls"}
 	resolver.enrichComponent(&packaged, []domain.UsedFile{{ID: fileID("pkg:conan/mbedtls", "aes.c")}})
@@ -326,7 +327,7 @@ func TestLicenceFileMarksAComponentThatHasNoManifest(t *testing.T) {
 		file.ID.Canonical(): filepath.Join(root, "third_party", "tinyjson", "include", "tinyjson.h"),
 	}
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		physical, map[string]string{"project": root}, nil)
+		physical, map[string]string{"project": root}, limits.Config{}, nil)
 
 	_, name, _, _, detectedBy := resolver.resolve(file)
 	if name != "tinyjson" {
@@ -347,7 +348,7 @@ func TestTheProjectsOwnLicenceIsNotABoundary(t *testing.T) {
 	file := domain.UsedFile{ID: fileID("project", "src/main.c")}
 	physical := map[string]string{file.ID.Canonical(): filepath.Join(root, "src", "main.c")}
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		physical, map[string]string{"project": root}, nil)
+		physical, map[string]string{"project": root}, limits.Config{}, nil)
 
 	_, name, _, _, detectedBy := resolver.resolve(file)
 	if name != "firmware" || detectedBy != "anchor:project" {
@@ -365,7 +366,7 @@ func TestNoticeAloneIsNotABoundary(t *testing.T) {
 	file := domain.UsedFile{ID: fileID("project", "src/vendorbits/helper.c")}
 	physical := map[string]string{file.ID.Canonical(): filepath.Join(root, "src", "vendorbits", "helper.c")}
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		physical, map[string]string{"project": root}, nil)
+		physical, map[string]string{"project": root}, limits.Config{}, nil)
 
 	if _, name, _, _, _ := resolver.resolve(file); name != "firmware" {
 		t.Errorf("component name = %q, want firmware; a NOTICE must not define a component", name)
@@ -393,7 +394,7 @@ func TestABundledSBOMMarksAComponentThatHasNoLicenceFile(t *testing.T) {
 		file.ID.Canonical(): filepath.Join(root, "third_party", "tinyjson", "include", "tinyjson.h"),
 	}
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		physical, map[string]string{"project": root}, nil)
+		physical, map[string]string{"project": root}, limits.Config{}, nil)
 
 	_, name, _, _, detectedBy := resolver.resolve(file)
 	// Named after its directory and never after the document: the name settles
@@ -418,7 +419,7 @@ func TestTheProjectsOwnSBOMIsNotABoundary(t *testing.T) {
 	file := domain.UsedFile{ID: fileID("project", "src/main.c")}
 	physical := map[string]string{file.ID.Canonical(): filepath.Join(root, "src", "main.c")}
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		physical, map[string]string{"project": root}, nil)
+		physical, map[string]string{"project": root}, limits.Config{}, nil)
 
 	_, name, _, _, detectedBy := resolver.resolve(file)
 	if name != "firmware" || detectedBy != "anchor:project" {
@@ -438,7 +439,7 @@ func TestAMarkerRootIsDescribedByTheDocumentThatMarkedIt(t *testing.T) {
 
 	file := domain.UsedFile{ID: fileID("project", "third_party/tinyjson/tinyjson.c")}
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		map[string]string{file.ID.Canonical(): source}, map[string]string{"project": root}, nil)
+		map[string]string{file.ID.Canonical(): source}, map[string]string{"project": root}, limits.Config{}, nil)
 	component := domain.Component{ID: "component:tinyjson", Name: "tinyjson"}
 
 	findings := resolver.enrichComponent(&component, []domain.UsedFile{file})
@@ -483,7 +484,7 @@ func TestComponentRootDoesNotFollowTheUsedFiles(t *testing.T) {
 		all = append(all, file)
 	}
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		physical, map[string]string{"project": root}, nil)
+		physical, map[string]string{"project": root}, limits.Config{}, nil)
 
 	// The linker keeping one source or all three must not move the root.
 	for _, files := range [][]domain.UsedFile{all[:1], all} {
@@ -512,7 +513,7 @@ func TestLicenceResolvesFromTheComponentRootNotTheSourceDirectory(t *testing.T) 
 	file := domain.UsedFile{ID: fileID("project", "dep/mit-lib/src/a.c")}
 	physical := map[string]string{file.ID.Canonical(): filepath.Join(root, "dep", "mit-lib", "src", "a.c")}
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		physical, map[string]string{"project": root}, nil)
+		physical, map[string]string{"project": root}, limits.Config{}, nil)
 
 	component := &domain.Component{ID: "component:mit-lib", Name: "mit-lib", DetectedBy: "package-metadata:LICENSE"}
 	resolver.enrichComponent(component, []domain.UsedFile{file})
@@ -534,7 +535,7 @@ func TestGuessedRootIsReported(t *testing.T) {
 	file := domain.UsedFile{ID: fileID("abs", "opt/vendor/blob.c")}
 	physical := map[string]string{file.ID.Canonical(): filepath.Join(root, "src", "main.c")}
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		physical, map[string]string{"project": root}, nil)
+		physical, map[string]string{"project": root}, limits.Config{}, nil)
 
 	component := &domain.Component{ID: "unknown:abs/opt", Name: "unknown:abs/opt", DetectedBy: "unresolved"}
 	findings := resolver.enrichComponent(component, []domain.UsedFile{file})
@@ -558,7 +559,7 @@ func TestConfiguredCMakeTargetMapsItsSources(t *testing.T) {
 		Project:    config.Project{Name: "firmware"},
 		Components: []config.Component{{Targets: config.StringList{"crypto"}, Type: "library"}},
 	}
-	resolver := newComponentResolver(cfg, map[string]string{}, map[string]string{}, nil)
+	resolver := newComponentResolver(cfg, map[string]string{}, map[string]string{}, limits.Config{}, nil)
 	resolver.setTargets(map[string]string{file.ID.Canonical(): "crypto"})
 
 	_, name, componentType, _, detectedBy := resolver.resolve(file)
@@ -581,7 +582,7 @@ func TestCuratedPathOutranksATarget(t *testing.T) {
 			{Path: "libs/crypto", Name: "by-path"},
 		},
 	}
-	resolver := newComponentResolver(cfg, map[string]string{}, map[string]string{}, nil)
+	resolver := newComponentResolver(cfg, map[string]string{}, map[string]string{}, limits.Config{}, nil)
 	resolver.setTargets(map[string]string{file.ID.Canonical(): "crypto"})
 
 	if _, name, _, _, _ := resolver.resolve(file); name != "by-path" {
@@ -774,7 +775,7 @@ func TestVersionFromReachesTheDocument(t *testing.T) {
 		VersionFrom: config.StringList{"header:include/version.h:MBEDTLS_VERSION_STRING"},
 	}}}
 	file := domain.UsedFile{ID: fileID("project", "dep/aes.c")}
-	resolver := newComponentResolver(cfg, map[string]string{file.ID.Canonical(): source}, map[string]string{}, nil)
+	resolver := newComponentResolver(cfg, map[string]string{file.ID.Canonical(): source}, map[string]string{}, limits.Config{}, nil)
 	component := domain.Component{ID: "component:mbedtls", Name: "mbedtls"}
 
 	findings := resolver.enrichComponent(&component, []domain.UsedFile{file})
@@ -796,7 +797,7 @@ func TestVersionFromGitWithoutIntrospectionSaysWhatIsMissing(t *testing.T) {
 	cfg := config.Config{Components: []config.Component{{
 		Path: "dep", Name: "mbedtls", VersionFrom: config.StringList{"git"},
 	}}}
-	resolver := newComponentResolver(cfg, map[string]string{}, map[string]string{}, nil)
+	resolver := newComponentResolver(cfg, map[string]string{}, map[string]string{}, limits.Config{}, nil)
 	component := domain.Component{ID: "component:mbedtls", Name: "mbedtls"}
 
 	findings := resolver.enrichComponent(&component, []domain.UsedFile{{ID: fileID("project", "dep/aes.c")}})
@@ -827,7 +828,7 @@ func TestVersionFromGitBlamesThePermissionOnlyWhenItIsMissing(t *testing.T) {
 	cfg := config.Config{Components: []config.Component{{
 		Path: "dep", Name: "mbedtls", VersionFrom: config.StringList{"git"},
 	}}}
-	resolver := newComponentResolver(cfg, map[string]string{}, map[string]string{}, nil)
+	resolver := newComponentResolver(cfg, map[string]string{}, map[string]string{}, limits.Config{}, nil)
 	resolver.setIntrospection(&exec.Runner{Features: exec.Features{Git: true}}, context.Background())
 	component := domain.Component{ID: "component:mbedtls", Name: "mbedtls"}
 
@@ -859,7 +860,7 @@ func TestVersionFromGitBlamesThePermissionOnlyWhenItIsMissing(t *testing.T) {
 // it comes back -- `dpkg -S` answers a name and an architecture, so a component
 // built from it would still raise two of these three.
 func TestASystemLibrarySaysWhatIsMissingAboutIt(t *testing.T) {
-	resolver := newComponentResolver(config.Config{}, map[string]string{}, map[string]string{}, nil)
+	resolver := newComponentResolver(config.Config{}, map[string]string{}, map[string]string{}, limits.Config{}, nil)
 	component := domain.Component{ID: "anchor:sysroot", Name: "sysroot"}
 
 	findings := resolver.enrichComponent(&component,
@@ -897,7 +898,7 @@ func identityFor(byPath map[string]domain.FileID) packagePaths {
 // the manufacturer's own code.
 func TestAFileUnderASecondPackageRootBelongsToThePackage(t *testing.T) {
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		map[string]string{}, map[string]string{}, nil)
+		map[string]string{}, map[string]string{}, limits.Config{}, nil)
 	resolver.setPackages([]pkgmanager.Package{{
 		Name:      "tinylog",
 		Roots:     []string{"/bd/_deps/tinylog-src", "/bd/_deps/tinylog-build"},
@@ -928,7 +929,7 @@ func TestAFileUnderASecondPackageRootBelongsToThePackage(t *testing.T) {
 // installed, and a list beats a prefix.
 func TestAnExactFileClaimBeatsALongerRootOfAnotherPackage(t *testing.T) {
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		map[string]string{}, map[string]string{}, nil)
+		map[string]string{}, map[string]string{}, limits.Config{}, nil)
 	resolver.setPackages([]pkgmanager.Package{
 		{
 			Name:    "tinyfmt",
@@ -962,7 +963,7 @@ func TestAnExactFileClaimBeatsALongerRootOfAnotherPackage(t *testing.T) {
 // three that were used (section 31).
 func TestListedFilesAreLookedUpButNotRegistered(t *testing.T) {
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		map[string]string{}, map[string]string{}, nil)
+		map[string]string{}, map[string]string{}, limits.Config{}, nil)
 	byPath := map[string]domain.FileID{
 		"/bd/vcpkg_installed/x64-linux/share/tinyfmt":     fileID("build", "vcpkg_installed/x64-linux/share/tinyfmt"),
 		"/bd/vcpkg_installed/x64-linux/include/tinyfmt.h": fileID("build", "vcpkg_installed/x64-linux/include/tinyfmt.h"),
@@ -996,7 +997,7 @@ func TestListedFilesAreLookedUpButNotRegistered(t *testing.T) {
 // awarded to whichever package was read first.
 func TestAFileTwoPackagesClaimIsMappedByNeither(t *testing.T) {
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		map[string]string{}, map[string]string{}, nil)
+		map[string]string{}, map[string]string{}, limits.Config{}, nil)
 	findings := resolver.setPackages([]pkgmanager.Package{
 		{Name: "left", Roots: []string{"/bd/left"}, Files: []string{"/bd/shared/util.h"}, Manager: "vcpkg"},
 		{Name: "right", Roots: []string{"/bd/right"}, Files: []string{"/bd/shared/util.h"}, Manager: "conan"},
@@ -1030,7 +1031,7 @@ func TestAFileTwoPackagesClaimIsMappedByNeither(t *testing.T) {
 // either.
 func TestOnePackageClaimingItsOwnFileIsNoConflict(t *testing.T) {
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		map[string]string{}, map[string]string{}, nil)
+		map[string]string{}, map[string]string{}, limits.Config{}, nil)
 	findings := resolver.setPackages([]pkgmanager.Package{
 		{Name: "left", Roots: []string{"/bd/left-src", "/bd/left-build"},
 			Files: []string{"/bd/shared/util.h"}, Manager: "fetchcontent"},
@@ -1053,7 +1054,7 @@ func TestOnePackageClaimingItsOwnFileIsNoConflict(t *testing.T) {
 // It was passed over before and it is passed over now, without a word.
 func TestAListedFileUnderNoAnchorIsSkippedAndNotReported(t *testing.T) {
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		map[string]string{}, map[string]string{}, nil)
+		map[string]string{}, map[string]string{}, limits.Config{}, nil)
 	findings := resolver.setPackages([]pkgmanager.Package{
 		{Name: "left", Roots: []string{"/bd/left"}, Files: []string{"/elsewhere/stray.h"}, Manager: "vcpkg"},
 		{Name: "right", Roots: []string{"/bd/right"}, Files: []string{"/elsewhere/stray.h"}, Manager: "conan"},
@@ -1072,7 +1073,7 @@ func TestAListedFileUnderNoAnchorIsSkippedAndNotReported(t *testing.T) {
 func TestTheInnerOfTwoNestedPackagesStillWins(t *testing.T) {
 	build := func() *componentResolver {
 		resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-			map[string]string{}, map[string]string{}, nil)
+			map[string]string{}, map[string]string{}, limits.Config{}, nil)
 		resolver.setPackages([]pkgmanager.Package{
 			{Name: "outer", Roots: []string{"/src/dir"}, Manager: "submodule"},
 			{Name: "inner", Roots: []string{"/src/dir/inner"}, Manager: "submodule"},
@@ -1095,7 +1096,7 @@ func TestTheInnerOfTwoNestedPackagesStillWins(t *testing.T) {
 // library I installed not in the SBOM" had no answer in the findings.
 func TestAPackageNoUsedFileBelongsToIsReported(t *testing.T) {
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		map[string]string{}, map[string]string{}, nil)
+		map[string]string{}, map[string]string{}, limits.Config{}, nil)
 	resolver.setPackages([]pkgmanager.Package{
 		{Name: "linked", Roots: []string{"/bd/linked"}, Manager: "conan"},
 		{Name: "installed-only", Roots: []string{"/bd/installed-only"}, Manager: "conan"},
@@ -1126,7 +1127,7 @@ func TestACuratedlyMappedPackageIsNotReportedAsUnlinked(t *testing.T) {
 		Project:    config.Project{Name: "firmware"},
 		Components: []config.Component{{Path: "vendor", Name: "vendor-blob"}},
 	}
-	resolver := newComponentResolver(cfg, map[string]string{}, map[string]string{}, nil)
+	resolver := newComponentResolver(cfg, map[string]string{}, map[string]string{}, limits.Config{}, nil)
 	resolver.setPackages([]pkgmanager.Package{
 		{Name: "tinycbor", Roots: []string{"/src/vendor/tinycbor"}, Manager: "conan"},
 	}, identityFor(map[string]domain.FileID{
@@ -1149,7 +1150,7 @@ func TestACuratedlyMappedPackageIsNotReportedAsUnlinked(t *testing.T) {
 // unused while one of its headers is in the document.
 func TestAPackageLinkedOnlyThroughItsFileListIsNotReportedAsUnlinked(t *testing.T) {
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		map[string]string{}, map[string]string{}, nil)
+		map[string]string{}, map[string]string{}, limits.Config{}, nil)
 	resolver.setPackages([]pkgmanager.Package{{
 		Name:    "tinyfmt",
 		Roots:   []string{"/bd/vcpkg_installed/x64-linux/share/tinyfmt"},
@@ -1171,7 +1172,7 @@ func TestAPackageLinkedOnlyThroughItsFileListIsNotReportedAsUnlinked(t *testing.
 // missing component twice.
 func TestAPackageWithSeveralRootsIsReportedOnce(t *testing.T) {
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		map[string]string{}, map[string]string{}, nil)
+		map[string]string{}, map[string]string{}, limits.Config{}, nil)
 	resolver.setPackages([]pkgmanager.Package{{
 		Name:    "tinylog",
 		Roots:   []string{"/bd/_deps/tinylog-src", "/bd/_deps/tinylog-build"},
@@ -1238,7 +1239,7 @@ func TestAMarkerRootIsDescribedByAReader(t *testing.T) {
 	}
 	file := domain.UsedFile{ID: fileID("project", "dep/tiny/tiny.c")}
 	resolver := newComponentResolver(config.Config{}, map[string]string{file.ID.Canonical(): source},
-		map[string]string{"project": root}, nil)
+		map[string]string{"project": root}, limits.Config{}, nil)
 	var seen []pkgmanager.ComponentRoot
 	resolver.enrich = stubEnrichment(describedPackage(t, map[pkgmanager.Field]string{
 		pkgmanager.FieldVersion:  "3.0.1",
@@ -1307,7 +1308,7 @@ func TestCuratedMetadataOutranksAReader(t *testing.T) {
 	}}}
 	file := domain.UsedFile{ID: fileID("project", "dep/tiny/tiny.c")}
 	resolver := newComponentResolver(cfg, map[string]string{file.ID.Canonical(): source},
-		map[string]string{"project": root}, nil)
+		map[string]string{"project": root}, limits.Config{}, nil)
 	resolver.enrich = stubEnrichment(describedPackage(t, map[pkgmanager.Field]string{
 		pkgmanager.FieldVersion:  "3.0.1",
 		pkgmanager.FieldSupplier: "Example Ltd",
@@ -1348,7 +1349,7 @@ func TestACuratedVersionFromKeepsAReaderOutOfTheVersion(t *testing.T) {
 	}}}
 	file := domain.UsedFile{ID: fileID("project", "dep/tiny/tiny.c")}
 	resolver := newComponentResolver(cfg, map[string]string{file.ID.Canonical(): source},
-		map[string]string{"project": root}, nil)
+		map[string]string{"project": root}, limits.Config{}, nil)
 	resolver.enrich = stubEnrichment(describedPackage(t, map[pkgmanager.Field]string{
 		pkgmanager.FieldVersion: "3.0.1",
 	}, pkgmanager.RankBundledSBOM), nil, nil)
@@ -1385,7 +1386,7 @@ func TestARootAPackageManagerOwnsIsNotDescribedAgain(t *testing.T) {
 	}
 	file := domain.UsedFile{ID: fileID("project", "dep/tiny/tiny.c")}
 	resolver := newComponentResolver(config.Config{}, map[string]string{file.ID.Canonical(): source},
-		map[string]string{"project": root}, nil)
+		map[string]string{"project": root}, limits.Config{}, nil)
 	var described pkgmanager.Package
 	described.Take(pkgmanager.FieldVersion, pkgmanager.Claim{
 		Value: "2.0.0", Source: "conan", Rank: pkgmanager.RankInstallState, Confidence: domain.ConfidenceHigh,
@@ -1423,7 +1424,7 @@ func TestAGuessedRootIsNeverRead(t *testing.T) {
 	}
 	file := domain.UsedFile{ID: fileID("project", "src/a.c")}
 	resolver := newComponentResolver(config.Config{}, map[string]string{file.ID.Canonical(): source},
-		map[string]string{"project": root}, nil)
+		map[string]string{"project": root}, limits.Config{}, nil)
 	var seen []pkgmanager.ComponentRoot
 	resolver.enrich = stubEnrichment(describedPackage(t, map[pkgmanager.Field]string{
 		pkgmanager.FieldVersion: "3.0.1",
@@ -1461,7 +1462,7 @@ func TestAGuessedRootIsNeverReadByTheRealReader(t *testing.T) {
 
 	file := domain.UsedFile{ID: fileID("project", "src/a.c")}
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		map[string]string{file.ID.Canonical(): source}, map[string]string{"project": root}, nil)
+		map[string]string{file.ID.Canonical(): source}, map[string]string{"project": root}, limits.Config{}, nil)
 	component := domain.Component{ID: "component:a", Name: "a"}
 
 	findings := resolver.enrichComponent(&component, []domain.UsedFile{file})
@@ -1497,7 +1498,7 @@ func TestAReaderFindingReachesTheReport(t *testing.T) {
 	}
 	file := domain.UsedFile{ID: fileID("project", "dep/tiny/tiny.c")}
 	resolver := newComponentResolver(config.Config{}, map[string]string{file.ID.Canonical(): source},
-		map[string]string{"project": root}, nil)
+		map[string]string{"project": root}, limits.Config{}, nil)
 	resolver.enrich = stubEnrichment(pkgmanager.Package{}, []domain.Finding{{
 		ID: "INPUT_LIMIT_EXCEEDED", Severity: domain.SeverityWarning,
 		Subject: domain.Subject{Kind: "evidence", Ref: filepath.Join(componentRoot, "manifest")},
@@ -1531,7 +1532,7 @@ func TestAReaderFindingReachesTheReport(t *testing.T) {
 func TestADescribedPackageThatNoFileReachesIsStillNotLinked(t *testing.T) {
 	root := t.TempDir()
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		map[string]string{}, map[string]string{"project": root}, nil)
+		map[string]string{}, map[string]string{"project": root}, limits.Config{}, nil)
 	var described pkgmanager.Package
 	described.Name = "tinyfmt"
 	described.Manager = "vcpkg"
@@ -1593,7 +1594,7 @@ func TestDescribingRootsAddsNoComponentToTheDocument(t *testing.T) {
 		map[string]string{
 			mainFile.ID.Canonical(): main,
 			tinyFile.ID.Canonical(): tiny,
-		}, map[string]string{"project": root}, nil)
+		}, map[string]string{"project": root}, limits.Config{}, nil)
 	var seen []pkgmanager.ComponentRoot
 	resolver.enrich = stubEnrichment(describedPackage(t, map[pkgmanager.Field]string{
 		pkgmanager.FieldVersion:  "3.0.1",
@@ -1718,7 +1719,7 @@ func TestAFileThatIsNotThereNamesNoComponent(t *testing.T) {
 	absent := domain.UsedFile{ID: fileID("abs", "gone/header.h"), Missing: true}
 	physical := map[string]string{absent.ID.Canonical(): filepath.Join(root, "gone", "header.h")}
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		physical, map[string]string{"project": root}, nil)
+		physical, map[string]string{"project": root}, limits.Config{}, nil)
 
 	_, name, _, _, detectedBy := resolver.resolve(absent)
 	if detectedBy == "package-metadata:vcpkg.json" {
@@ -1758,7 +1759,7 @@ func TestAFileThatIsNotThereDoesNotMoveTheComponentRoot(t *testing.T) {
 		files[2].ID.Canonical(): filepath.Join(root, "elsewhere", "c.c"),
 	}
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		physical, map[string]string{"project": root}, nil)
+		physical, map[string]string{"project": root}, limits.Config{}, nil)
 
 	if got, want := resolver.componentRoot(files), filepath.Join(root, "lib", "src"); got != want {
 		t.Errorf("componentRoot = %q, want %q; the absent file moved the root up", got, want)

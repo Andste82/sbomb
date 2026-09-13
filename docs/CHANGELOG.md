@@ -2,6 +2,50 @@
 
 ## 0.17.0
 
+### A limit on what the document carries no longer decides what the tool concludes
+
+Retention of §22.9 bounds a licence file at 1 MiB. The bound also skipped the
+file before anything read it, so step 5 of §22.2 and the observation path of
+§22.4 never saw it: a vendored dependency whose `LICENSE` is a concatenation of
+bundled texts resolved to its identifier before retention existed and resolved
+to NOASSERTION afterwards — with `UNKNOWN_LICENSE` at warning severity,
+`sbomb:license:review`, and a failed build under `failOn.unknownLicense`,
+announced by an info finding about a size limit. Such a file is read for
+identification now and its bytes are released again; only the retention is
+bounded, and the finding still names what was not kept.
+
+Licence reads also go through the run's own limits rather than around them. A
+`LICENSE` that is a symbolic link out of the component root was followed even
+under `--strict-symlinks`, and a FIFO reports size 0, so the bound never
+applied to it.
+
+### `acknowledgement` says who stated the licence
+
+CycloneDX draws one line there: `declared` is what the authors of a component
+state, `concluded` is what somebody worked out. Every retained text was
+published as `declared`, including identifiers sbomb had concluded by matching
+a digest or an SPDX template — analysis presented as the component's own word.
+Only technique 1 of §22.3, the component writing `SPDX-License-Identifier` into
+its own file, is a declaration now.
+
+Two smaller cases went with it. A curated value that overrode a conflicting
+licence file was published as `declared`, the opposite of the truth, because
+the test for "was this curated" read a source field that §22.5 fills with the
+file's name. And an entry that recognized nothing carried
+`{"name": "NOASSERTION", "acknowledgement": "declared"}` — a statement about a
+non-statement; the field is omitted there.
+
+Three goldens change accordingly.
+
+### `FOSS_LICENSE_TEXT_MISSING` is not raised where there was nowhere to look
+
+A component the pkg-config metadata named has no component root — a `.pc` file
+says where a package installed its libraries, not which directory the component
+owns — and §22.1 forbids searching a sysroot for licence files. The finding
+asked whether a root that could have carried the text did not, so on a
+distribution build it stood against every system library, for a root the tool
+was never allowed to read.
+
 ### A licence's own conditions are no longer published as attribution
 
 A licence text wraps, and a wrap can put the word at the start of a line. The

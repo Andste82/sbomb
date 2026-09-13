@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/example/sbomb/internal/domain"
+	"github.com/example/sbomb/internal/license"
 	"github.com/example/sbomb/internal/pathmodel"
 	"github.com/example/sbomb/internal/sbomwriter"
 )
@@ -556,6 +557,29 @@ func observedCopyrightToCyclone(statements []domain.CopyrightStatement) []Copyri
 // no slot for the verbatim text of a *listed* licence as a component carries
 // it.
 //
+// acknowledgementFor says whether the identifier beside these bytes is the
+// component's own statement or somebody's conclusion, which is the distinction
+// CycloneDX draws and the one a consumer filters on.
+//
+// Only technique 1 of section 22.3 is a declaration: the component wrote
+// `SPDX-License-Identifier` into its own file. A digest, a template or a
+// normalized-text match is analysis -- sbomb compared the bytes against a
+// catalogue and concluded -- and publishing that as `declared` tells a reader
+// the authors said something they did not.
+//
+// Where nothing was recognized the field is left off altogether. The entry
+// carries NOASSERTION, and calling a non-statement "declared" states something
+// about it.
+func acknowledgementFor(artifact domain.LicenseArtifact, curated bool) string {
+	if artifact.DetectedID == "" {
+		return ""
+	}
+	if curated || artifact.Technique != license.TechniqueIdentifier {
+		return "concluded"
+	}
+	return "declared"
+}
+
 // Only a grant is written. A NOTICE is retained for reproduction and section
 // 22.2 has removed it from the identification chain; putting its bytes into an
 // array called evidence.licenses would put it straight back.
@@ -563,14 +587,19 @@ func withRetainedText(observed []License, component domain.Component, options sb
 	if options.LicenseText != sbomwriter.LicenseTextEvidence {
 		return observed
 	}
-	// "declared" is a statement by the component about itself, which is what a
-	// licence file in its own root is. Where a curated value decided the
-	// identifier, the identifier is somebody's conclusion even though the
-	// bytes are the component's.
-	acknowledgement := "declared"
-	if len(component.Licenses) > 0 && component.Licenses[0].Source == "curated" {
-		acknowledgement = "concluded"
-	}
+	// CycloneDX draws one line here: `declared` is what the authors of the
+	// component state, `concluded` is what somebody worked out. Both halves of
+	// that were wrong before.
+	//
+	// A curated value is a conclusion whatever else happened. Testing the
+	// source for "curated" missed the case that matters most -- section 22.5's
+	// conflict, where a reviewer overrode what the file said, and
+	// ResolveConflict carries the *file's* name as the source -- so the
+	// override was published as the component's own declaration. The reason
+	// code is what survives both paths.
+	curated := len(component.Licenses) > 0 &&
+		(component.Licenses[0].Source == "curated" ||
+			component.Licenses[0].Reason == license.ReasonConflictingEvidence)
 	for _, artifact := range component.LicenseArtifacts {
 		if artifact.Kind != domain.LicenseArtifactLicense {
 			continue
@@ -583,10 +612,10 @@ func withRetainedText(observed []License, component domain.Component, options sb
 		// An observation already naming this licence is the same statement
 		// about the same file. The text attaches to it rather than adding a
 		// second entry claiming the licence twice.
-		if attached := attachToObserved(observed, artifact.DetectedID, text, acknowledgement); attached {
+		if attached := attachToObserved(observed, artifact.DetectedID, text, acknowledgementFor(artifact, curated)); attached {
 			continue
 		}
-		identifier := &LicenseIdentifier{Text: text, Acknowledgement: acknowledgement}
+		identifier := &LicenseIdentifier{Text: text, Acknowledgement: acknowledgementFor(artifact, curated)}
 		switch {
 		case artifact.DetectedID == "":
 			// None of the techniques of section 22.3 recognized the text, and

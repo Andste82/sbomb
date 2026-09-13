@@ -12,6 +12,7 @@ import (
 
 	"github.com/example/sbomb/internal/config"
 	"github.com/example/sbomb/internal/domain"
+	"github.com/example/sbomb/internal/limits"
 )
 
 // Section 19.4, tri-state. The corpus cannot state these cases: the harvest
@@ -59,7 +60,7 @@ func modificationOf(t *testing.T, root string, features sbombexec.Features) (*do
 	source := filepath.Join(root, "src", "lib.c")
 	file := domain.UsedFile{ID: fileID("project", "src/lib.c")}
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		map[string]string{file.ID.Canonical(): source}, map[string]string{"project": root}, nil)
+		map[string]string{file.ID.Canonical(): source}, map[string]string{"project": root}, limits.Config{}, nil)
 	resolver.setIntrospection(&sbombexec.Runner{Features: features, Anchors: []string{root}}, context.Background())
 	component := &domain.Component{ID: "component:lib", Name: "lib"}
 	findings := resolver.resolveModification(component, componentRootResult{
@@ -272,7 +273,7 @@ func TestAnEnclosingRepositoryDoesNotDecideAVendoredComponent(t *testing.T) {
 	file := domain.UsedFile{ID: fileID("project", "dep/vendored/src/lib.c")}
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
 		map[string]string{file.ID.Canonical(): filepath.Join(inner, "src", "lib.c")},
-		map[string]string{"project": outer}, nil)
+		map[string]string{"project": outer}, limits.Config{}, nil)
 	resolver.setIntrospection(&sbombexec.Runner{
 		Features: sbombexec.Features{Git: true}, Anchors: []string{outer}}, context.Background())
 	component := &domain.Component{ID: "component:vendored", Name: "vendored"}

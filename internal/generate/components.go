@@ -17,6 +17,7 @@ import (
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/exec"
 	"github.com/example/sbomb/internal/license"
+	"github.com/example/sbomb/internal/limits"
 	"github.com/example/sbomb/internal/version"
 )
 
@@ -70,6 +71,10 @@ var bundledSBOMFiles = []string{
 type componentResolver struct {
 	curated     *componentmap.Mapper
 	curatedByID map[string]config.Component
+	// limits is the run's own bounds, used wherever this resolver opens a
+	// file: section 30.5 refuses a symbolic link under --strict-symlinks and
+	// the input ceiling refuses an oversized file before allocating for it.
+	limits      limits.Config
 	physical    map[string]string
 	projectName string
 	anchorRoots map[string]string
@@ -203,7 +208,7 @@ type resolvedPackage struct {
 	primary bool
 }
 
-func newComponentResolver(cfg config.Config, physical map[string]string, anchorRoots map[string]string, logger *Logger) *componentResolver {
+func newComponentResolver(cfg config.Config, physical map[string]string, anchorRoots map[string]string, bounds limits.Config, logger *Logger) *componentResolver {
 	rules := make([]componentmap.Rule, 0, len(cfg.Components))
 	curatedByID := make(map[string]config.Component, len(cfg.Components))
 	curatedByTarget := map[string]config.Component{}
@@ -228,6 +233,7 @@ func newComponentResolver(cfg config.Config, physical map[string]string, anchorR
 	}
 	return &componentResolver{
 		curated:         componentmap.NewMapper(rules),
+		limits:          bounds,
 		curatedByID:     curatedByID,
 		curatedByTarget: curatedByTarget,
 		physical:        physical,
@@ -1138,7 +1144,14 @@ func (r *componentResolver) resolveComponentLicense(component *domain.Component,
 			component.Properties = addProperty(component.Properties, "sbomb:license:source", component.Licenses[0].Source)
 		}
 	}
+	findings = append(findings, r.licenseCompletenessFindings(component)...)
+	return findings
+}
 
+// licenseCompletenessFindings is requirement R10 for the licence text: where a
+// component's licence was settled and its own text was not retained, the
+// document says so rather than leaving a reader to notice.
+func (r *componentResolver) licenseCompletenessFindings(component *domain.Component) []domain.Finding {
 	// Section 22.9 and requirement R10: an identifier without the text is the
 	// one case where the attribution obligation cannot be satisfied from what
 	// the tool saw, and it is said at the point where the entry would have
@@ -1152,14 +1165,24 @@ func (r *componentResolver) resolveComponentLicense(component *domain.Component,
 	// it is shipped, so there is no notice to reproduce. Until the role was a
 	// resolved fact this could not be narrowed without guessing, and the
 	// finding over-reported on purpose.
-	if component.DistributionRole == domain.RoleDistributed &&
+	// And it is asked only where there was somewhere to look. A component the
+	// pkg-config metadata named has no component root at all (section 19.2,
+	// strategy 6a): a .pc file names where a package installed its libraries,
+	// not a directory the component owns, and section 22.1 forbids searching a
+	// sysroot for licence files. Reporting "no licence text was retained"
+	// against a root nobody was allowed to read would put the finding on every
+	// system library of every distribution build -- and those are distributed,
+	// so the role does not narrow it.
+	if component.Root != nil &&
+		component.DistributionRole == domain.RoleDistributed &&
 		hasResolvedLicense(component.Licenses) && !hasRetainedGrant(component.LicenseArtifacts) {
-		findings = append(findings, componentFinding("FOSS_LICENSE_TEXT_MISSING", domain.SeverityInfo, component,
+		return []domain.Finding{componentFinding("FOSS_LICENSE_TEXT_MISSING", domain.SeverityInfo, component,
 			fmt.Sprintf("the licence is %s, and no licence text was retained for this component",
 				renderedLicense(component.Licenses[0])),
-			"Place the component's own licence file in its root, or record the text with the component by hand; sbomb never substitutes a canonical SPDX text."))
+			"Place the component's own licence file in its root, or record the text with the component by hand; sbomb never substitutes a canonical SPDX text.")}
 	}
-	return findings
+	return nil
+
 }
 
 // hasResolvedLicense says whether a licence was actually settled, as opposed
@@ -1252,6 +1275,13 @@ type retainedLicenses struct {
 	detected []domain.LicenseFinding
 	// dropped names what a limit excluded, for FOSS_LICENSE_ARTIFACT_LIMIT.
 	dropped []string
+	// unretained and unretainedObserved are what a file too large to keep
+	// still stated. The bound of section 30 is on the bytes this document
+	// carries, not on what the tool may conclude: before retention existed,
+	// step 5 of section 22.2 read a licence file of any size, and a bound on
+	// keeping must not turn a resolved licence into NOASSERTION.
+	unretained         domain.LicenseFinding
+	unretainedObserved []domain.LicenseFinding
 }
 
 // retainLicenseArtifacts keeps the bytes of every recognized licence file the
@@ -1283,10 +1313,12 @@ func (r *componentResolver) retainLicenseArtifacts(rootID domain.FileID, root st
 		}
 		path := filepath.Join(root, name)
 		// The size is asked before the bytes are, so that a licence file the
-		// size of a disk image is refused rather than allocated for.
-		if info, err := os.Stat(path); err == nil && info.Size() > maxLicenseArtifactBytes {
+		// size of a disk image is refused rather than allocated for. The run's
+		// own ceiling still applies below and is what bounds the read.
+		if info, err := r.limits.Stat(path); err == nil && info.Size() > maxLicenseArtifactBytes {
 			retained.dropped = append(retained.dropped,
 				fmt.Sprintf("%s (%d bytes, over the limit of %d)", name, info.Size(), maxLicenseArtifactBytes))
+			r.identifyUnretained(&retained, path, name)
 			continue
 		}
 		data, err := r.readForLicense(path)
@@ -1331,7 +1363,41 @@ func (r *componentResolver) readForLicense(path string) ([]byte, error) {
 		r.licenseReads = map[string]int{}
 	}
 	r.licenseReads[path]++
-	return os.ReadFile(path)
+	// Through the run's limits, not around them: section 30.5 refuses a
+	// symbolic link in the final component under --strict-symlinks, and the
+	// input ceiling refuses a file before allocating for it. A LICENSE that is
+	// a link to somewhere else, or a FIFO that os.Stat reports as empty, would
+	// otherwise be read and its digest published on every run.
+	return r.limits.ReadFile(path)
+}
+
+// identifyUnretained asks a licence file that is too large to keep what it
+// states. Section 22.2 does not know about retention, and a component whose
+// LICENSE is a concatenation of bundled texts resolved before section 22.9
+// existed: letting the retention bound answer NOASSERTION would make a limit on
+// what the document carries into a statement about the component.
+//
+// The bytes are released as soon as the question is answered. Only a grant is
+// asked, for the reason section 22.2 gives: a NOTICE that quotes a licence is
+// not evidence of what applies.
+func (r *componentResolver) identifyUnretained(retained *retainedLicenses, path, name string) {
+	if licenseArtifactKind(name) != domain.LicenseArtifactLicense {
+		return
+	}
+	data, err := r.readForLicense(path)
+	if err != nil {
+		return
+	}
+	if retained.unretained.Expression == "" {
+		if found := license.ResolveFromText(string(data), name); found.Expression != "" {
+			found.Evidence = "component-level"
+			found.Source = name
+			retained.unretained = found
+		}
+	}
+	if len(retained.unretainedObserved) == 0 {
+		retained.unretainedObserved = license.ObserveFindings(string(data), name)
+	}
 }
 
 // licenseArtifactKind maps a recognized file name onto the kind of obligation
@@ -1393,6 +1459,9 @@ func licenseFromRetained(retained retainedLicenses) (domain.LicenseFinding, bool
 		found.Source = baseNameOf(artifact.File.RelPath)
 		return found, true
 	}
+	if retained.unretained.Expression != "" {
+		return retained.unretained, true
+	}
 	return domain.LicenseFinding{}, false
 }
 
@@ -1413,7 +1482,7 @@ func licenseEvidenceFromRetained(retained retainedLicenses) []domain.LicenseFind
 			return observed
 		}
 	}
-	return nil
+	return retained.unretainedObserved
 }
 
 // baseNameOf is the last segment of a canonical relative path, which is always

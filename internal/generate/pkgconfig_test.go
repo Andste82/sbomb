@@ -11,6 +11,9 @@ import (
 	"github.com/example/sbomb/internal/pathmodel"
 	"github.com/example/sbomb/internal/policy"
 	"github.com/example/sbomb/internal/sbomwriter"
+
+	"github.com/example/sbomb/internal/domain"
+	"github.com/example/sbomb/internal/limits"
 )
 
 // The tests in this file run the whole pipeline, because what they ask is not
@@ -429,4 +432,44 @@ func hasFinding(document *sbomwriter.Document, id, subject string) bool {
 		}
 	}
 	return false
+}
+
+// A component the pkg-config metadata named has no component root: a .pc file
+// says where a package installed its libraries, not which directory the
+// component owns, and section 22.1 forbids searching a sysroot for licence
+// files. FOSS_LICENSE_TEXT_MISSING asks whether a root that could have carried
+// the text did not, so asking it of a component with no root at all would put
+// it on every system library of every distribution build -- which are
+// distributed, so the role narrows nothing there.
+func TestNoLicenceTextIsDemandedOfAComponentWithNoRoot(t *testing.T) {
+	component := &domain.Component{
+		ID:               "component:libfoo",
+		Name:             "libfoo",
+		Root:             nil,
+		DistributionRole: domain.RoleDistributed,
+		Licenses: []domain.LicenseFinding{{
+			Expression: "MIT", Evidence: "component-level", Confidence: domain.ConfidenceHigh,
+		}},
+	}
+	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
+		map[string]string{}, map[string]string{}, limits.Config{}, nil)
+
+	for _, finding := range resolver.licenseCompletenessFindings(component) {
+		if finding.ID == "FOSS_LICENSE_TEXT_MISSING" {
+			t.Errorf("the finding was raised for a component with no root: %q", finding.Message)
+		}
+	}
+
+	// With a root it is raised, which is the case it exists for.
+	root := domain.FileID{Anchor: "project", RelPath: "dep/libfoo"}
+	component.Root = &root
+	var raised bool
+	for _, finding := range resolver.licenseCompletenessFindings(component) {
+		if finding.ID == "FOSS_LICENSE_TEXT_MISSING" {
+			raised = true
+		}
+	}
+	if !raised {
+		t.Error("the finding was not raised for a component whose root carried no text")
+	}
 }

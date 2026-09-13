@@ -8,6 +8,7 @@ import (
 	"github.com/example/sbomb/internal/adapters/pkgmanager"
 	"github.com/example/sbomb/internal/config"
 	"github.com/example/sbomb/internal/domain"
+	"github.com/example/sbomb/internal/limits"
 )
 
 // Section 19.2: the component root is a resolved fact. The tests here are the
@@ -54,7 +55,7 @@ func TestTheComponentRootFollowsTheMappingPriority(t *testing.T) {
 	// Nothing named a root, and no marker is there to find: the deepest common
 	// directory of the used files is all that is left, and it is src/.
 	plain := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		physical, map[string]string{"project": root}, nil)
+		physical, map[string]string{"project": root}, limits.Config{}, nil)
 	fallback := plain.resolveRoot(component(), []domain.UsedFile{file})
 	if fallback.Source != rootSourceUsedFiles {
 		t.Errorf("with nothing to go on: root came from %q, want %q", fallback.Source, rootSourceUsedFiles)
@@ -66,7 +67,7 @@ func TestTheComponentRootFollowsTheMappingPriority(t *testing.T) {
 	// A package manager stated where the package lives, which outranks the
 	// files (strategy 2 against the last resort).
 	managed := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		physical, map[string]string{"project": root}, nil)
+		physical, map[string]string{"project": root}, limits.Config{}, nil)
 	managed.setPackages([]pkgmanager.Package{{
 		Name:      "mit-lib",
 		Roots:     []string{depRoot},
@@ -86,7 +87,7 @@ func TestTheComponentRootFollowsTheMappingPriority(t *testing.T) {
 		Project:    config.Project{Name: "firmware"},
 		Components: []config.Component{{Path: "dep/mit-lib", Name: "mit-lib"}},
 	}
-	curated := newComponentResolver(cfg, physical, map[string]string{"project": root}, nil)
+	curated := newComponentResolver(cfg, physical, map[string]string{"project": root}, limits.Config{}, nil)
 	curated.setPackages([]pkgmanager.Package{{
 		Name:      "mit-lib",
 		Roots:     []string{depRoot},
@@ -121,7 +122,7 @@ func TestTheLicenceDoesNotDependOnWhichFilesTheLinkerKept(t *testing.T) {
 		all = append(all, file)
 	}
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		physical, map[string]string{"project": root}, nil)
+		physical, map[string]string{"project": root}, limits.Config{}, nil)
 
 	for _, files := range [][]domain.UsedFile{all[:1], all} {
 		component := &domain.Component{ID: "component:mit-lib", Name: "mit-lib", DetectedBy: "package-metadata:LICENSE"}
@@ -151,7 +152,7 @@ func TestALicenceIdFileMarksAComponentOfItsOwn(t *testing.T) {
 
 	file := domain.UsedFile{ID: fileID("project", "dep/multi-license/src/multi.c")}
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		map[string]string{file.ID.Canonical(): source}, map[string]string{"project": root}, nil)
+		map[string]string{file.ID.Canonical(): source}, map[string]string{"project": root}, limits.Config{}, nil)
 
 	_, name, _, _, detectedBy := resolver.resolve(file)
 	if name != "multi-license" {
@@ -191,7 +192,7 @@ func TestAttributionMaterialAloneMarksNoBoundary(t *testing.T) {
 		file := domain.UsedFile{ID: fileID("project", "src/vendorbits/helper.c")}
 		physical := map[string]string{file.ID.Canonical(): filepath.Join(root, "src", "vendorbits", "helper.c")}
 		resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-			physical, map[string]string{"project": root}, nil)
+			physical, map[string]string{"project": root}, limits.Config{}, nil)
 
 		if _, got, _, _, _ := resolver.resolve(file); got != "firmware" {
 			t.Errorf("a directory carrying only %s became component %q", name, got)
@@ -211,7 +212,7 @@ func TestABoundaryLicenceFileIsRecognizedWhateverItsCase(t *testing.T) {
 
 		file := domain.UsedFile{ID: fileID("project", "dep/tinylib/tinylib.c")}
 		resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-			map[string]string{file.ID.Canonical(): source}, map[string]string{"project": root}, nil)
+			map[string]string{file.ID.Canonical(): source}, map[string]string{"project": root}, limits.Config{}, nil)
 
 		if _, got, _, _, _ := resolver.resolve(file); got != "tinylib" {
 			t.Errorf("a library whose licence file is called %q became component %q", name, got)
@@ -243,7 +244,7 @@ func TestTheNearerLicenceFileSplitsTheInnerLibraryOut(t *testing.T) {
 		map[string]string{
 			outerFile.ID.Canonical(): outerSource,
 			innerFile.ID.Canonical(): innerSource,
-		}, map[string]string{"project": root}, nil)
+		}, map[string]string{"project": root}, limits.Config{}, nil)
 
 	// The longest matching prefix wins, so the inner file never lands in the
 	// outer component (section 19.2).
@@ -288,7 +289,7 @@ func TestAComponentWithNoLicenceFileNeverGetsTheProjectsOwn(t *testing.T) {
 
 	file := domain.UsedFile{ID: fileID("project", "dep/vendored/src/x.c")}
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		map[string]string{file.ID.Canonical(): source}, map[string]string{"project": root}, nil)
+		map[string]string{file.ID.Canonical(): source}, map[string]string{"project": root}, limits.Config{}, nil)
 
 	component := &domain.Component{ID: "component:vendored", Name: "vendored", DetectedBy: "package-metadata:vcpkg.json"}
 	findings := resolver.enrichComponent(component, []domain.UsedFile{file})
@@ -332,7 +333,7 @@ func TestTheLicenceBoundaryOfADirectoryIsReadOnce(t *testing.T) {
 		files = append(files, file)
 	}
 	resolver := newComponentResolver(config.Config{Project: config.Project{Name: "firmware"}},
-		physical, map[string]string{"project": root}, nil)
+		physical, map[string]string{"project": root}, limits.Config{}, nil)
 
 	for _, file := range files {
 		resolver.nearestPackageRoot(file)
