@@ -2,6 +2,27 @@
 
 ## 0.17.0
 
+### A document shows what a modified component looks like
+
+Every golden reported `sbomb:component:modified: unknown`, because the corpus
+commits no `.git` for a run to read — the honest answer, and one that told a
+reader nothing about the shape of the others. Nothing asserted the interaction
+between the status and the source-tree relocation of §7.9 either, although the
+check is handed the physical component root and relocation is what produces it.
+
+Both are covered now without the corpus carrying a repository. The two trees
+the history is made of are already committed — the project the harness builds
+is what the tag names, the harvested tree is what was compiled — so a test
+rebuilds the repositories from them with the same fixed identity and date
+`tools/fixtures/regen.sh` uses, and runs `generate` over the corpus's own build
+evidence with `--source-dir` pointing at the result. The new golden carries all
+three states in one document: a dependency modified by its dirty tree, one
+modified by standing a commit past its tag, and one unmodified on its tag, each
+with its pedigree and commit.
+
+Open question Q9 is settled by that, and the goldens of the ordinary run still
+say `unknown`.
+
 ### A dependency somebody fixed and committed is reported as modified
 
 A vendored dependency with a clean tree, its tag untouched and a few commits on

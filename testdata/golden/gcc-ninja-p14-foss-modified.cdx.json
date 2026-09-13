@@ -1,0 +1,1643 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "version": 1,
+  "serialNumber": "urn:uuid:98d16bf5-2637-5f92-bffe-c52cf512d833",
+  "metadata": {
+    "tools": [
+      {
+        "vendor": "sbomb",
+        "name": "sbomb",
+        "version": "0.0.0-test"
+      }
+    ],
+    "component": {
+      "type": "application",
+      "name": "fossapp",
+      "bom-ref": "product:fossapp",
+      "properties": [
+        {
+          "name": "sbomb:artifact:role",
+          "value": "application"
+        },
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        }
+      ]
+    },
+    "properties": [
+      {
+        "name": "sbomb:run:specVersion",
+        "value": "1.6"
+      },
+      {
+        "name": "sbomb:run:toolVersion",
+        "value": "0.0.0-test"
+      },
+      {
+        "name": "sbomb:build:config",
+        "value": "Debug"
+      },
+      {
+        "name": "sbomb:build:generator",
+        "value": "Ninja"
+      }
+    ]
+  },
+  "components": [
+    {
+      "type": "application",
+      "name": "project",
+      "bom-ref": "component:project",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "unstructured"
+        },
+        {
+          "name": "sbomb:component:archiveMembersUsed",
+          "value": "1/1"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "anchor:project"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-object"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "unknown"
+        },
+        {
+          "name": "sbomb:component:root",
+          "value": "project:"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "file-level"
+        },
+        {
+          "name": "sbomb:license:source",
+          "value": "project:src/main.c"
+        },
+        {
+          "name": "sbomb:license:technique",
+          "value": "spdx-identifier"
+        }
+      ],
+      "evidence": {
+        "copyright": [
+          {
+            "text": "Copyright (c) 2026 Fixture Unlicensed Authors"
+          },
+          {
+            "text": "Copyright (c) 2026 sbomb fixture authors"
+          }
+        ]
+      }
+    },
+    {
+      "type": "file",
+      "name": "table.c",
+      "bom-ref": "file:build:generated/table.c",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "e1f86d9804ada8505f7a07c96b8bc3dc0c5e736b4227402ecf1d88087d7fae0b"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "build"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-object"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "build:generated/table.c"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "apache_lib.h",
+      "bom-ref": "file:project:dep/apache-lib/include/apache_lib.h",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "276eb9575be113a794f3789409437404a2b60045bbbd09aef2523db15a4b720d"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:evidence:header:class",
+          "value": "project-header"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "header-only"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/apache-lib/include/apache_lib.h"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "apache_one.c",
+      "bom-ref": "file:project:dep/apache-lib/src/apache_one.c",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "82ff9ab94c732e37bf89695cc17c57d3c3f539521cdcfa30248044d4c68f4c47"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/apache-lib/src/apache_one.c"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "apache_two.c",
+      "bom-ref": "file:project:dep/apache-lib/src/apache_two.c",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "17f3f78e4db04aaed9609f69d84327f051ef05832c332fe2fbbdb40066a56f6d"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/apache-lib/src/apache_two.c"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "bsd_hdr.h",
+      "bom-ref": "file:project:dep/bsd-hdr/include/bsd_hdr.h",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "b440f5903223b3a73894bc91ccec2c661302205f409b74fd174b7f0de20fa93d"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:evidence:header:class",
+          "value": "project-header"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "header-only"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/bsd-hdr/include/bsd_hdr.h"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "table_gen.c",
+      "bom-ref": "file:project:dep/gpl-gen/table_gen.c",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "0fc1a9accdc2f926915e2055cc8606fe5cc656de79706ba5d965d6168a647c8b"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "build-time-only"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "build-tool"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/gpl-gen/table_gen.c"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "lgpl_lib.h",
+      "bom-ref": "file:project:dep/lgpl-lib/include/lgpl_lib.h",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "f7fd638c0e4823c696c610a8b1019065e335b8dd59cd33ccc6dd17ef22ea1c0e"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:evidence:header:class",
+          "value": "project-header"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "header-only"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/lgpl-lib/include/lgpl_lib.h"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "lgpl_core.c",
+      "bom-ref": "file:project:dep/lgpl-lib/src/lgpl_core.c",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "6b2ef29c847374d7937429440ad2d2d85dec26c77f0da5a216fcd6292548a33e"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/lgpl-lib/src/lgpl_core.c"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "lgpl_extra.c",
+      "bom-ref": "file:project:dep/lgpl-lib/src/lgpl_extra.c",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "4446475e8917e5484af96db6353aa6d0a6ee7e729feebd2c39d3da02e2858d73"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/lgpl-lib/src/lgpl_extra.c"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "mit_lib.h",
+      "bom-ref": "file:project:dep/mit-lib/include/mit_lib.h",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "5de679e7144d715e468c751004cdfa3c70072fac6876568dd139e87e2853a90c"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:evidence:header:class",
+          "value": "project-header"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "header-only"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/mit-lib/include/mit_lib.h"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "mit_a.c",
+      "bom-ref": "file:project:dep/mit-lib/src/mit_a.c",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "6d8a045c61248f33f7acd4ceebc41d709361632f2727fa229f95fd45efc2d14d"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/mit-lib/src/mit_a.c"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "multi.h",
+      "bom-ref": "file:project:dep/multi-license/include/multi.h",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "b2ca841a99e63effd2eff4f3ff951baadca75ea3fa00ff537a7b6181532825e4"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:evidence:header:class",
+          "value": "project-header"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "header-only"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/multi-license/include/multi.h"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "multi.c",
+      "bom-ref": "file:project:dep/multi-license/src/multi.c",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "b5ad33121d4d1761c87f00529f300cb49f8e7525f24fb3e517f9b7d5ce64b4d4"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/multi-license/src/multi.c"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "nocopyright.h",
+      "bom-ref": "file:project:dep/nocopyright/include/nocopyright.h",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "6edd8b836dc7737777c270b88dba18a0d527e4c06033cd4b672b3fa3ca57e461"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:evidence:header:class",
+          "value": "project-header"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "header-only"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/nocopyright/include/nocopyright.h"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "nocopyright.c",
+      "bom-ref": "file:project:dep/nocopyright/src/nocopyright.c",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "34758173c7c791ae856efdb33c7f860c69e8c50e4dbda96261a746175e718ee7"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/nocopyright/src/nocopyright.c"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "nolicense.h",
+      "bom-ref": "file:project:dep/nolicense/include/nolicense.h",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "48297112fd9548f6232a8c68db803cbf69b4ea3f6794f32e070f772369eee672"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:evidence:header:class",
+          "value": "project-header"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "header-only"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/nolicense/include/nolicense.h"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "nolicense.c",
+      "bom-ref": "file:project:dep/nolicense/src/nolicense.c",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "13ffe47de986df0b8435a1046f4954a3563151aba635e64a3c5b44480c98b5be"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/nolicense/src/nolicense.c"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "main.c",
+      "bom-ref": "file:project:src/main.c",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "9a3878e3886a7b19746abefb0579cc913b665ea6ab5f3e8dfd818e674d2deae5"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-object"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:src/main.c"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "apache-lib",
+      "bom-ref": "component:apache-lib",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "pedigree": {
+        "commits": [
+          {
+            "uid": "6682d4e20a52ed84605c1cdb6a2f91136be9164c"
+          }
+        ],
+        "notes": "the component root's checkout is clean and stands 1 commit(s) past its tag v1.2.0"
+      },
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:archiveMembersUsed",
+          "value": "2/2"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "package-metadata:LICENSE"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:licenseFile",
+          "value": "project:dep/apache-lib/LICENSE@sha256:0b8f6fef304298b6a8a8ad91e7a5b0b2255231f39c8fc4ab84774f8e22d07f98"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:component:noticeFile",
+          "value": "project:dep/apache-lib/NOTICE@sha256:c499743d9175cc82bc99be3600c9303257d66a55ada9c7b3f78323a3c2d7610c"
+        },
+        {
+          "name": "sbomb:component:root",
+          "value": "project:dep/apache-lib"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "third-party"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "file-level"
+        },
+        {
+          "name": "sbomb:license:source",
+          "value": "project:dep/apache-lib/include/apache_lib.h"
+        },
+        {
+          "name": "sbomb:license:technique",
+          "value": "spdx-identifier"
+        }
+      ],
+      "evidence": {
+        "copyright": [
+          {
+            "text": "Copyright 2026 Fixture Apache Library Authors"
+          }
+        ]
+      }
+    },
+    {
+      "type": "library",
+      "name": "bsd-hdr",
+      "bom-ref": "component:bsd-hdr",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-3-Clause"
+          }
+        }
+      ],
+      "pedigree": {
+        "commits": [
+          {
+            "uid": "b031bf50d1becb30ce42d1013657353de5bf4bc1"
+          }
+        ],
+        "notes": "the component root's checkout is clean and stands on its recorded tag v1.2.0"
+      },
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "package-metadata:LICENSE"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:headerOnly",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:component:licenseFile",
+          "value": "project:dep/bsd-hdr/LICENSE@sha256:4bd971475aab8e30017fb65c7f5a6c4da171ee8ee25b3580fad812227f8cb2a2"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "header-only"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "false"
+        },
+        {
+          "name": "sbomb:component:root",
+          "value": "project:dep/bsd-hdr"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "third-party"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "file-level"
+        },
+        {
+          "name": "sbomb:license:source",
+          "value": "project:dep/bsd-hdr/include/bsd_hdr.h"
+        },
+        {
+          "name": "sbomb:license:technique",
+          "value": "spdx-identifier"
+        }
+      ],
+      "evidence": {
+        "copyright": [
+          {
+            "text": "Copyright (c) 2026, Fixture BSD Header Authors"
+          }
+        ]
+      }
+    },
+    {
+      "type": "library",
+      "name": "gpl-gen",
+      "bom-ref": "component:gpl-gen",
+      "scope": "excluded",
+      "licenses": [
+        {
+          "license": {
+            "id": "GPL-2.0-only"
+          }
+        }
+      ],
+      "pedigree": {
+        "commits": [
+          {
+            "uid": "f31cfd79aa04cd89ec26865564fbc5238b47d64d"
+          }
+        ],
+        "notes": "the component root's checkout is clean and stands on its recorded tag v1.2.0"
+      },
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "package-metadata:LICENSE"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "build-time-only"
+        },
+        {
+          "name": "sbomb:component:licenseFile",
+          "value": "project:dep/gpl-gen/LICENSE@sha256:fe84827856780d1c70e8a0248fc622b0516c8787fd560262356289f465907855"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "build-tool"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "false"
+        },
+        {
+          "name": "sbomb:component:root",
+          "value": "project:dep/gpl-gen"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "third-party"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "file-level"
+        },
+        {
+          "name": "sbomb:license:source",
+          "value": "project:dep/gpl-gen/table_gen.c"
+        },
+        {
+          "name": "sbomb:license:technique",
+          "value": "spdx-identifier"
+        }
+      ],
+      "evidence": {
+        "copyright": [
+          {
+            "text": "Copyright (C) 1989, 1991 Free Software Foundation, Inc."
+          },
+          {
+            "text": "Copyright (C) 2026 Fixture GPL Generator Authors"
+          }
+        ]
+      }
+    },
+    {
+      "type": "library",
+      "name": "lgpl-lib",
+      "bom-ref": "component:lgpl-lib",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "LGPL-2.1-only"
+          }
+        }
+      ],
+      "pedigree": {
+        "commits": [
+          {
+            "uid": "a2e4ed43597fea837ae4a749d65619aeabe2fb6e"
+          }
+        ],
+        "notes": "the component root's checkout has uncommitted changes"
+      },
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:archiveMembersUsed",
+          "value": "2/2"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "package-metadata:LICENSE"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:licenseFile",
+          "value": "project:dep/lgpl-lib/LICENSE@sha256:504f56052b78bda68423747cc50aa469ec5412654c000c87e181de257d2cfc86"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "true"
+        },
+        {
+          "name": "sbomb:component:root",
+          "value": "project:dep/lgpl-lib"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "third-party"
+        },
+        {
+          "name": "sbomb:component:sourceObligation",
+          "value": "library-source"
+        },
+        {
+          "name": "sbomb:component:sourceObligation",
+          "value": "relinking"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "file-level"
+        },
+        {
+          "name": "sbomb:license:source",
+          "value": "project:dep/lgpl-lib/include/lgpl_lib.h"
+        },
+        {
+          "name": "sbomb:license:technique",
+          "value": "spdx-identifier"
+        }
+      ],
+      "evidence": {
+        "copyright": [
+          {
+            "text": "Copyright (C) 1991, 1999 Free Software Foundation, Inc."
+          },
+          {
+            "text": "Copyright (C) 2026 Fixture LGPL Library Authors"
+          }
+        ]
+      }
+    },
+    {
+      "type": "library",
+      "name": "mit-lib",
+      "bom-ref": "component:mit-lib",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "pedigree": {
+        "commits": [
+          {
+            "uid": "3355a64c774022cfc6af2883ba89fd0b5a2cf176"
+          }
+        ],
+        "notes": "the component root's checkout is clean and stands on its recorded tag v1.2.0"
+      },
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:archiveMembersUsed",
+          "value": "1/3"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "package-metadata:LICENSE"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:licenseFile",
+          "value": "project:dep/mit-lib/LICENSE@sha256:931fcdc2d230c2d176c937a73a35d00af205d8414ec6526c83654fadb5d2f52d"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "false"
+        },
+        {
+          "name": "sbomb:component:root",
+          "value": "project:dep/mit-lib"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "third-party"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "file-level"
+        },
+        {
+          "name": "sbomb:license:source",
+          "value": "project:dep/mit-lib/include/mit_lib.h"
+        },
+        {
+          "name": "sbomb:license:technique",
+          "value": "spdx-identifier"
+        }
+      ],
+      "evidence": {
+        "copyright": [
+          {
+            "text": "Copyright (c) 2026 Fixture MIT Library Authors"
+          }
+        ]
+      }
+    },
+    {
+      "type": "library",
+      "name": "multi-license",
+      "bom-ref": "component:multi-license",
+      "scope": "required",
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "pedigree": {
+        "commits": [
+          {
+            "uid": "0f8a3d7512153643cfb3a36e80b57d5e5b9d4789"
+          }
+        ],
+        "notes": "the component root's checkout is clean and stands on its recorded tag v1.2.0"
+      },
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:archiveMembersUsed",
+          "value": "1/1"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "package-metadata:LICENSE-APACHE"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:licenseFile",
+          "value": "project:dep/multi-license/LICENSE-APACHE@sha256:0b8f6fef304298b6a8a8ad91e7a5b0b2255231f39c8fc4ab84774f8e22d07f98"
+        },
+        {
+          "name": "sbomb:component:licenseFile",
+          "value": "project:dep/multi-license/LICENSE-MIT@sha256:59d026162035ee799ad4a49867be3ef92276bfe13250cf10796ec0d3b856596e"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "false"
+        },
+        {
+          "name": "sbomb:component:root",
+          "value": "project:dep/multi-license"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "third-party"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "file-level"
+        },
+        {
+          "name": "sbomb:license:source",
+          "value": "project:dep/multi-license/include/multi.h"
+        },
+        {
+          "name": "sbomb:license:technique",
+          "value": "spdx-identifier"
+        }
+      ],
+      "evidence": {
+        "copyright": [
+          {
+            "text": "Copyright (c) 2026 Fixture Dual Licensed Authors"
+          }
+        ]
+      }
+    },
+    {
+      "type": "library",
+      "name": "nocopyright",
+      "bom-ref": "component:nocopyright",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "0BSD"
+          }
+        }
+      ],
+      "pedigree": {
+        "commits": [
+          {
+            "uid": "2395c0085b927d2268ae06124686b8728b309eeb"
+          }
+        ],
+        "notes": "the component root's checkout is clean and stands on its recorded tag v1.2.0"
+      },
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:archiveMembersUsed",
+          "value": "1/1"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "package-metadata:LICENSE"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:licenseFile",
+          "value": "project:dep/nocopyright/LICENSE@sha256:6fd46bc279753ff2f06019924d5e4877729545e72c93165d2fb3bab0bdeebec2"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "false"
+        },
+        {
+          "name": "sbomb:component:root",
+          "value": "project:dep/nocopyright"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "third-party"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "file-level"
+        },
+        {
+          "name": "sbomb:license:source",
+          "value": "project:dep/nocopyright/include/nocopyright.h"
+        },
+        {
+          "name": "sbomb:license:technique",
+          "value": "spdx-identifier"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "component:apache-lib",
+      "dependsOn": [
+        "file:project:dep/apache-lib/include/apache_lib.h",
+        "file:project:dep/apache-lib/src/apache_one.c",
+        "file:project:dep/apache-lib/src/apache_two.c"
+      ]
+    },
+    {
+      "ref": "component:bsd-hdr",
+      "dependsOn": [
+        "file:project:dep/bsd-hdr/include/bsd_hdr.h"
+      ]
+    },
+    {
+      "ref": "component:gpl-gen",
+      "dependsOn": [
+        "file:project:dep/gpl-gen/table_gen.c"
+      ]
+    },
+    {
+      "ref": "component:lgpl-lib",
+      "dependsOn": [
+        "file:project:dep/lgpl-lib/include/lgpl_lib.h",
+        "file:project:dep/lgpl-lib/src/lgpl_core.c",
+        "file:project:dep/lgpl-lib/src/lgpl_extra.c"
+      ]
+    },
+    {
+      "ref": "component:mit-lib",
+      "dependsOn": [
+        "file:project:dep/mit-lib/include/mit_lib.h",
+        "file:project:dep/mit-lib/src/mit_a.c"
+      ]
+    },
+    {
+      "ref": "component:multi-license",
+      "dependsOn": [
+        "file:project:dep/multi-license/include/multi.h",
+        "file:project:dep/multi-license/src/multi.c"
+      ]
+    },
+    {
+      "ref": "component:nocopyright",
+      "dependsOn": [
+        "file:project:dep/nocopyright/include/nocopyright.h",
+        "file:project:dep/nocopyright/src/nocopyright.c"
+      ]
+    },
+    {
+      "ref": "component:project",
+      "dependsOn": [
+        "file:build:generated/table.c",
+        "file:project:dep/nolicense/include/nolicense.h",
+        "file:project:dep/nolicense/src/nolicense.c",
+        "file:project:src/main.c"
+      ]
+    },
+    {
+      "ref": "file:build:generated/table.c"
+    },
+    {
+      "ref": "file:project:dep/apache-lib/include/apache_lib.h"
+    },
+    {
+      "ref": "file:project:dep/apache-lib/src/apache_one.c"
+    },
+    {
+      "ref": "file:project:dep/apache-lib/src/apache_two.c"
+    },
+    {
+      "ref": "file:project:dep/bsd-hdr/include/bsd_hdr.h"
+    },
+    {
+      "ref": "file:project:dep/gpl-gen/table_gen.c"
+    },
+    {
+      "ref": "file:project:dep/lgpl-lib/include/lgpl_lib.h"
+    },
+    {
+      "ref": "file:project:dep/lgpl-lib/src/lgpl_core.c"
+    },
+    {
+      "ref": "file:project:dep/lgpl-lib/src/lgpl_extra.c"
+    },
+    {
+      "ref": "file:project:dep/mit-lib/include/mit_lib.h"
+    },
+    {
+      "ref": "file:project:dep/mit-lib/src/mit_a.c"
+    },
+    {
+      "ref": "file:project:dep/multi-license/include/multi.h"
+    },
+    {
+      "ref": "file:project:dep/multi-license/src/multi.c"
+    },
+    {
+      "ref": "file:project:dep/nocopyright/include/nocopyright.h"
+    },
+    {
+      "ref": "file:project:dep/nocopyright/src/nocopyright.c"
+    },
+    {
+      "ref": "file:project:dep/nolicense/include/nolicense.h"
+    },
+    {
+      "ref": "file:project:dep/nolicense/src/nolicense.c"
+    },
+    {
+      "ref": "file:project:src/main.c"
+    },
+    {
+      "ref": "product:fossapp",
+      "dependsOn": [
+        "component:apache-lib",
+        "component:bsd-hdr",
+        "component:gpl-gen",
+        "component:lgpl-lib",
+        "component:mit-lib",
+        "component:multi-license",
+        "component:nocopyright",
+        "component:project"
+      ]
+    }
+  ]
+}
