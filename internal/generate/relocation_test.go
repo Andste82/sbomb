@@ -254,3 +254,79 @@ func TestRelocationIsInactiveWithoutTwoRoots(t *testing.T) {
 		t.Errorf("physicalFor = (%q, %v), want the recorded path", got, readable)
 	}
 }
+
+// The two source roots are compared as strings, so they have to be in one
+// spelling. Normalizing separators alone is not that: the flavor's own
+// normalizer cleans, the anchor registry beside this compares cleaned paths,
+// and a root that arrives uncleaned would agree with neither.
+//
+// Both directions are wrong, and the second one silently. A trailing slash on
+// --source-dir naming the very tree the build recorded would count as a
+// relocation; an uncleaned *logical* root would match no evidence path at all,
+// so physicalFor would hand the logical path back as readable and a run on the
+// machine that still has the original checkout would read the wrong tree --
+// without a refusal and without a finding.
+func TestASourceRootIsComparedInOneSpelling(t *testing.T) {
+	flavor := pathmodel.PosixFlavor{}
+	for _, testCase := range []struct {
+		name     string
+		logical  string
+		physical string
+		want     bool
+	}{
+		{name: "the same tree", logical: "/ci/proj", physical: "/ci/proj", want: false},
+		{name: "a trailing slash is the same tree", logical: "/ci/proj", physical: "/ci/proj/", want: false},
+		{name: "a doubled separator is the same tree", logical: "/ci//proj", physical: "/ci/proj", want: false},
+		{name: "a dot segment is the same tree", logical: "/ci/./proj", physical: "/ci/proj", want: false},
+		{name: "another tree is a relocation", logical: "/ci/proj", physical: "/restore/proj", want: true},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			b := newBuilder(evidence.New(), assembledAnchors(t), "/bd", "/bd", NewLogger(0, nil))
+			b.setSourceRoots(testCase.logical, testCase.physical, flavor)
+			if got := b.relocatesSource(); got != testCase.want {
+				t.Errorf("relocatesSource() = %v, want %v (logical %q, physical %q)",
+					got, testCase.want, b.logicalSource, b.physicalSource)
+			}
+		})
+	}
+
+	// And the reading direction: an uncleaned logical root still translates a
+	// path recorded under it, which is what makes the refusal of rule 3 reach
+	// the files it is about.
+	b := newBuilder(evidence.New(), assembledAnchors(t), "/bd", "/bd", NewLogger(0, nil))
+	b.setSourceRoots("/ci//proj/.", "/restore/proj", flavor)
+	physical, readable := b.physicalFor("/ci/proj/src/main.c")
+	if !readable || physical != filepath.Join("/restore/proj", "src", "main.c") {
+		t.Errorf("physicalFor = %q (readable=%v), want the path under the relocated tree", physical, readable)
+	}
+}
+
+// Findings() hands over what the builder recorded and forgets it. identify()
+// keeps running after the first call -- the package adapters register their
+// roots through it (generate.go) -- and an UNANCHORED_FILE or a
+// MISSING_FILE_HASH raised by one of those late calls used to be appended to a
+// slice nobody read again: the run refused the read, correctly, and said so
+// nowhere.
+func TestTheBuilderHandsOverEachFindingOnce(t *testing.T) {
+	b := newBuilder(evidence.New(), assembledAnchors(t), "/bd", "/bd", NewLogger(0, nil))
+	b.setSourceRoots("/ci/proj", "/restore/proj", pathmodel.PosixFlavor{})
+
+	// A path under the logical source root whose relocated form leaves the
+	// physical one: rule 3 of section 7.9 refuses the read and records it.
+	b.identify("/ci/proj/../outside/secret.h")
+	first := b.Findings()
+	if len(first) == 0 {
+		t.Fatal("the refused read recorded no finding")
+	}
+
+	// Nothing happened since, so there is nothing to hand over again.
+	if second := b.Findings(); len(second) != 0 {
+		t.Errorf("the same findings were handed over twice: %v", findingIDs(second))
+	}
+
+	// What happens after the first call is still reported.
+	b.identify("/ci/proj/../elsewhere/other.h")
+	if third := b.Findings(); len(third) == 0 {
+		t.Error("a finding raised after the first hand-over was lost")
+	}
+}

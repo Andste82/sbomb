@@ -690,6 +690,15 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 	}
 	// Command line over configuration, per section 32.2.
 	if sourceDir != "" {
+		// Absolute, so that a user who types `--source-dir .` is not mistaken
+		// for one who configured nothing: section 3 defaults project.root to
+		// "." when it is unset, and the relocation of section 7.9 tells the two
+		// apart by that string. Without this, `.` silently did nothing -- no
+		// relocation, every licence NOASSERTION, and SOURCE_TREE_UNAVAILABLE
+		// advising the user to do what they had just done.
+		if absolute, err := filepath.Abs(sourceDir); err == nil {
+			sourceDir = absolute
+		}
 		loadedCfg.Project.Root = sourceDir
 	}
 	if mode != "" {

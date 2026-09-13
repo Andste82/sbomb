@@ -2,6 +2,43 @@
 
 ## 0.17.0
 
+### `--source-dir .` relocates like any other path
+
+§3 defaults `project.root` to `"."` when nothing configured it, and the
+relocation of §7.9 told a configured root from an unconfigured one by that
+string. So a user standing in a restored source tree and typing the shortest
+thing that names it got no relocation at all — every licence NOASSERTION, and
+`SOURCE_TREE_UNAVAILABLE` advising them to point `--source-dir` at the tree
+they had just pointed it at. `--source-dir ./` and an absolute path worked, and
+nothing said why. The flag is resolved to an absolute path now, so a path the
+user typed is never mistaken for a default nobody set.
+
+### A source root is compared in one spelling
+
+Both roots are normalized the way the anchor registry beside them already
+normalizes: separators *and* cleaning. A trailing slash on `--source-dir`
+naming the very tree the build recorded counted as a relocation, and — the
+quiet direction — an uncleaned logical root such as `/ci//proj` matched no
+evidence path at all, so the physical translation handed the logical path back
+as readable and a run on the machine that still had the original checkout read
+the wrong tree, without a refusal and without a finding.
+
+### Two findings about a package root are no longer dropped
+
+The builder's findings were collected before the package adapters registered
+their roots, and registering goes through the same path that raises
+`UNANCHORED_FILE` and `MISSING_FILE_HASH`. A package root that was unanchored,
+or whose relocated read was refused, was refused correctly and reported
+nowhere. The builder now hands over what it has and forgets it, and the run
+asks again after the adapters have run.
+
+### A licence file a package manager placed no longer puts a host path in the document
+
+`sbomb:license:source` carried the absolute path the file was read from —
+`/home/ci/.conan2/p/…/licenses/LICENSE` — so two runs of one build on two
+machines produced two documents. It names the file, as the retained-artifact
+path beside it already does.
+
 ### One component's copyright no longer reaches another of the same name
 
 The licence view of §32.6 was matched on the component name from end to end —
