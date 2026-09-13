@@ -2,6 +2,24 @@
 
 ## 0.17.0
 
+### The corpus normalizer can no longer lose what it was asked to sort
+
+`replynorm` sorts the dependency array of a CMake File API reply so the corpus
+does not churn on every regeneration. Where it could not cut the array into
+objects it returned zero elements and no error, and the caller wrote that back:
+an eight-element dependency array became an empty one, the document was renamed
+to the digest of the damaged content, every reference followed it, and the run
+exited 0. The sort reorders the same elements with the same separators, so it
+cannot change the length of the body — that is asserted now, and an array of
+non-objects is refused rather than emptied.
+
+Two smaller guards went with it. A document renamed onto another document's
+name used to drop that other one from the map, and the writer then deleted its
+file. And a refusal from the normalizer was stepped over by `regen.sh`: the
+function that calls it runs with `errexit` off, because it is invoked in a `||`
+list, so the harvest continued, the manifest was written, and the run reported
+a regenerated corpus carrying a reply nobody had normalized.
+
 ### A licence checker's own files no longer make a component
 
 `LICENSE-<id>` is a recognized file name of §22.3, and the eight characters it

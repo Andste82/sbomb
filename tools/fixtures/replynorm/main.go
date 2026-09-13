@@ -92,7 +92,9 @@ func normalizeReplyDir(replyDir string) error {
 		}
 		documents[name] = sorted
 	}
-	rename(documents)
+	if err := rename(documents); err != nil {
+		return err
+	}
 
 	return write(replyDir, names, documents)
 }
@@ -144,9 +146,20 @@ func sortDependencies(content []byte) ([]byte, error) {
 		return elementID(elements[i]) < elementID(elements[j])
 	})
 
+	// Reordering the same elements with the same separators cannot change the
+	// length, so a difference means something was dropped rather than sorted.
+	// The check is here because what this function writes is written back over
+	// the committed corpus, and a silent loss there is a loss of the evidence
+	// every golden rests on.
+	sorted := strings.Join(elements, ",\n")
+	if len(sorted) != len(body) {
+		return nil, fmt.Errorf("%w: sorting the dependencies changed %d bytes into %d",
+			errMalformed, len(body), len(sorted))
+	}
+
 	var out bytes.Buffer
 	out.WriteString(text[:bodyStart])
-	out.WriteString(strings.Join(elements, ",\n"))
+	out.WriteString(sorted)
 	out.WriteString(text[bodyStart+end:])
 	return out.Bytes(), nil
 }
@@ -187,6 +200,13 @@ func splitObjects(body string) ([]string, error) {
 	if depth != 0 || inString {
 		return nil, fmt.Errorf("%w: unbalanced array element", errMalformed)
 	}
+	if len(elements) == 0 && strings.TrimSpace(body) != "" {
+		// A body that holds something this cannot cut into objects is not an
+		// empty array: saying so would hand the caller an empty result to
+		// write back, and what it would write back is a corpus with its
+		// dependencies gone.
+		return nil, fmt.Errorf("%w: array elements are not objects", errMalformed)
+	}
 	return elements, nil
 }
 
@@ -211,7 +231,7 @@ func elementID(element string) string {
 // the old name is rewritten. That changes the referring document in turn, so
 // this repeats until nothing moves -- three rounds at most, target to
 // codemodel to index.
-func rename(documents map[string][]byte) {
+func rename(documents map[string][]byte) error {
 	for {
 		renamed := false
 		for name, content := range documents {
@@ -225,6 +245,12 @@ func rename(documents map[string][]byte) {
 			}
 			newName := match[1] + digest + ".json"
 			delete(documents, name)
+			if _, taken := documents[newName]; taken {
+				// The new name is another document's. Overwriting it would drop
+				// that document from the map, and write() then deletes its file:
+				// the corpus would lose a reply nobody asked it to lose.
+				return fmt.Errorf("%w: %s would take the name of %s", errMalformed, name, newName)
+			}
 			documents[newName] = content
 			for other, otherContent := range documents {
 				documents[other] = bytes.ReplaceAll(otherContent, []byte(name), []byte(newName))
@@ -233,7 +259,7 @@ func rename(documents map[string][]byte) {
 			break
 		}
 		if !renamed {
-			return
+			return nil
 		}
 	}
 }
