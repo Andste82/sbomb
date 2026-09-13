@@ -18,6 +18,11 @@ sbomb generate --build-dir build --output build/app.cdx.json --foss-out build/fo
 sbomb foss --build-dir build --out build/foss
 ```
 
+Both write the same four files, byte for byte, for the same build. The
+rendering is plain text; `--foss-format markdown` on `generate` and
+`--format markdown` on `foss` write the markdown one instead. Selecting a
+rendering without asking for the output is a usage error, not a silent no-op.
+
 | File | Ships with the product | What it is |
 |---|:--:|---|
 | `THIRD-PARTY-NOTICES.txt` | **yes** | The attribution document. The licence text each component actually carries, verbatim, its copyright statements, and its origin |

@@ -2,6 +2,21 @@
 
 ## 0.17.0
 
+### `generate` can choose the FOSS rendering too
+
+`sbomb foss --format text|markdown` could select the rendering; `generate
+--foss-out` always wrote plain text, so a user who wanted the markdown one had
+to run a second command. §32.6 requires both entry points to produce
+byte-identical files for the same build, and a rendering only one of them could
+reach was the closest thing to a contradiction of that.
+
+`generate --foss-format text|markdown` is the other half. It is spelled
+`--foss-format` because `--format` on `generate` already names the SBOM writer.
+Nothing had to be built for it: both entry points fill the same struct and
+`generate` was simply leaving the field empty. Passing it without `--foss-out`
+is a usage error rather than a silent no-op, refused before anything is read.
+Open question Q17 is closed.
+
 ### "Not modified" now requires somebody to have said what should be there
 
 The modification status rested on a tag. A clean checkout standing exactly on

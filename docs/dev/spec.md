@@ -1789,6 +1789,7 @@ sbomb generate \
 | `--adapter` | — | Force an adapter, `<class>=<id>` (repeatable) |
 | `--inventory-dump` | — | Internal inventory dump path (§40) |
 | `--foss-out` | — | Directory for the four FOSS documents of §32.6 |
+| `--foss-format` | `text` | `text` \| `markdown`. The rendering `--foss-out` writes; a usage error without it |
 
 Five of these are specified and not implemented, each waiting on the feature it
 belongs to rather than on effort:
@@ -1805,6 +1806,13 @@ the SBOM. It is a further rendering of one run, like `--review-report` and
 
 `--foss-out` is in the same row: it writes the four documents of §32.6 from the
 same discovery and changes neither the document nor the exit code.
+`--foss-format` selects the rendering it writes, with the same two values and
+the same default as `foss --format`, because the two entry points MUST produce
+byte-identical files for the same build and a rendering only one of them can
+reach would break that. It is a usage error without `--foss-out`: a flag that
+selects the shape of an output nobody asked for has nothing to act on, and
+accepting it silently would be the "accepted and ignored" this section forbids
+one paragraph above.
 
 Nine further flags were specified and are removed rather than built; deviation
 D22 gives the reason for each.
@@ -1857,7 +1865,7 @@ row §32.2 already contains: `--review-report`, `--findings-json`,
 discovery.
 
 ```
-sbomb generate --build-dir <dir> [--source-dir <dir>] --output app.cdx.json --foss-out <dir>
+sbomb generate --build-dir <dir> [--source-dir <dir>] --output app.cdx.json --foss-out <dir> [--foss-format text|markdown]
 sbomb foss     --build-dir <dir> [--source-dir <dir>] --out <dir> [--format text|markdown] [--reproducible]
 ```
 

@@ -576,11 +576,6 @@ func TestFOSSMarkdownFormat(t *testing.T) {
 // TestFOSSRefusesAnInvalidFormatBeforeDiscovering: a typo in the rendering
 // flag must be refused before a full discovery runs, not after it, and
 // nothing may be created on the strength of the refused argument.
-//
-// The rendering flag exists on `foss` alone. `generate --foss-out` writes the
-// text rendering: the milestone's flag surface is --foss-out on generate and
-// --format on foss, and an equivalent of --format on generate is surface
-// nobody asked for (open-questions.md).
 func TestFOSSRefusesAnInvalidFormatBeforeDiscovering(t *testing.T) {
 	directory := t.TempDir()
 	outDir := filepath.Join(directory, "foss")
@@ -593,12 +588,61 @@ func TestFOSSRefusesAnInvalidFormatBeforeDiscovering(t *testing.T) {
 	if _, err := os.Stat(outDir); err == nil {
 		t.Error("the output directory was created although the run was refused")
 	}
-	// And `generate` has no rendering flag of its own to typo.
+
+	// The same on `generate`, whose flag is spelled --foss-format because
+	// --format there already names the SBOM writer.
+	generated := filepath.Join(directory, "generated")
 	code, _, stderr = execute([]string{"generate", "--build-dir", directory,
 		"--output", filepath.Join(directory, "out.cdx.json"),
-		"--foss-out", filepath.Join(directory, "generated"), "--foss-format", "markdown"})
+		"--foss-out", generated, "--foss-format", "html"})
 	if code != 1 || !strings.Contains(stderr, "--foss-format") {
-		t.Fatalf("generate --foss-format = code %d, stderr %q; want an unknown-flag error", code, stderr)
+		t.Fatalf("generate --foss-format html = code %d, stderr %q; want a usage error naming the flag", code, stderr)
+	}
+	if _, err := os.Stat(generated); err == nil {
+		t.Error("the output directory was created although the run was refused")
+	}
+
+	// And a rendering selected for an output nobody asked for is refused too,
+	// rather than accepted and ignored (section 32.2).
+	code, _, stderr = execute([]string{"generate", "--build-dir", directory,
+		"--output", filepath.Join(directory, "out.cdx.json"),
+		"--foss-format", "markdown"})
+	if code != 1 || !strings.Contains(stderr, "--foss-format") {
+		t.Fatalf("generate --foss-format without --foss-out = code %d, stderr %q; want a usage error", code, stderr)
+	}
+}
+
+// Section 32.6: the two entry points must produce byte-identical files for the
+// same build, so a rendering only one of them can reach would break that.
+// `generate --foss-format` is the other half of `foss --format`.
+func TestGenerateWritesTheSameMarkdownAsFoss(t *testing.T) {
+	buildDir := testutil.CorpusBuildDir(t, "gcc-ninja", "p14-foss")
+	source := testutil.CorpusSourceTree(t)
+	directory := t.TempDir()
+
+	fromFoss := filepath.Join(directory, "foss")
+	code, _, stderr := execute([]string{"foss", "--build-dir", buildDir, "--policy", "lenient",
+		"--source-dir", source, "--out", fromFoss, "--format", "markdown", "--reproducible"})
+	if code != 0 || stderr != "" {
+		t.Fatalf("foss --format markdown = code %d, stderr %q", code, stderr)
+	}
+
+	fromGenerate := filepath.Join(directory, "generated")
+	code, _, stderr = execute([]string{"generate", "--build-dir", buildDir, "--policy", "lenient",
+		"--source-dir", source, "--output", filepath.Join(directory, "out.cdx.json"),
+		"--foss-out", fromGenerate, "--foss-format", "markdown", "--reproducible"})
+	if code != 0 || stderr != "" {
+		t.Fatalf("generate --foss-format markdown = code %d, stderr %q", code, stderr)
+	}
+
+	written, expected := readFOSS(t, fromGenerate), readFOSS(t, fromFoss)
+	if !strings.HasPrefix(written[foss.NoticesFile], "# THIRD-PARTY NOTICES") {
+		t.Error("generate --foss-format markdown wrote the text rendering")
+	}
+	for name, want := range expected {
+		if written[name] != want {
+			t.Errorf("%s differs between the two entry points", name)
+		}
 	}
 }
 
