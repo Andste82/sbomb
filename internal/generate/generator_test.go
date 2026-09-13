@@ -177,3 +177,91 @@ func TestOnlyAFileTheBuildProducedIsAskedAboutAtAll(t *testing.T) {
 		}
 	}
 }
+
+// A generated source can be two things at once: compiled into the artifact,
+// and read by a second rule that generates something else. The walk classifies
+// an input by one question -- did the build produce this file -- and AddNode
+// replaces, so walking the second rule used to call the first rule's output a
+// generator. Section 13.1 keeps a build-anchored generator whose inputs
+// resolved out of the document, so the file left the SBOM with its licence
+// while still being in the product.
+func TestAGeneratedSourceThatAnotherRuleReadsStaysASource(t *testing.T) {
+	graph := evidence.New()
+	b := newBuilder(graph, assembledAnchors(t), "/bd", "/bd", NewLogger(0, nil))
+	graph.AddNode(domain.Node{ID: testArtifact, Kind: domain.NodeArtifact})
+	graph.AddNode(domain.Node{ID: "build:app.o", Kind: domain.NodeObject})
+	graph.AddNode(domain.Node{ID: "build:generated/table.c", Kind: domain.NodeSource,
+		File: &domain.FileID{Anchor: "build", RelPath: "generated/table.c"}})
+	graph.AddNode(domain.Node{ID: "build:generated/other.c", Kind: domain.NodeSource,
+		File: &domain.FileID{Anchor: "build", RelPath: "generated/other.c"}})
+	graph.AddEdge(domain.Edge{From: testArtifact, To: "build:app.o", Type: "link",
+		Strength: "linked", Confidence: domain.ConfidenceHigh, Source: "test", Adapter: "test"})
+	graph.AddEdge(domain.Edge{From: "build:app.o", To: "build:generated/table.c", Type: "source-mapping",
+		Strength: "derived", Confidence: domain.ConfidenceHigh, Source: "test", Adapter: "test"})
+
+	compile := newCompileEvidence()
+	compile.buildEdges = map[string][]string{
+		"generated/table.c": {"table_gen"},
+		"table_gen":         {"CMakeFiles/table_gen.dir/gen.c.o"},
+		"generated/other.c": {"generated/table.c"},
+	}
+	compile.addSource("CMakeFiles/table_gen.dir/gen.c.o", "/src/dep/gpl-gen/table_gen.c", "ninja-buildgraph")
+	addGeneratorEvidence(graph, b, compile, NewLogger(0, nil))
+
+	node, known := graph.Node("build:generated/table.c")
+	if !known {
+		t.Fatal("the generated source left the graph")
+	}
+	if node.Kind != domain.NodeSource {
+		t.Errorf("the generated source is a %q node, want %q", node.Kind, domain.NodeSource)
+	}
+	if represented, _ := representInSBOM(graph, node); !represented {
+		t.Error("a source compiled into the artifact is not represented in the document")
+	}
+	// Being read by the second rule is still recorded, because it is true.
+	var edges int
+	for _, edge := range graph.EdgesFrom("build:generated/other.c") {
+		if edge.Type == "generator-input" && edge.To == "build:generated/table.c" {
+			edges++
+		}
+	}
+	if edges != 1 {
+		t.Errorf("generator-input edges from the second rule = %d, want 1", edges)
+	}
+}
+
+// Two generated files can share one tool object that no source mapping
+// claimed. An object is not a node of this chain, so what reaches the document
+// is the recursion that attaches the object's own inputs to the parent --
+// memoized by the object alone, the second parent got nothing: no edge, a
+// spurious MISSING_GENERATOR_INPUT_EVIDENCE, and the generator's licence
+// attributed to one of the two files only.
+func TestTwoGeneratedFilesSharingAToolObjectAreBothAttributed(t *testing.T) {
+	graph := evidence.New()
+	b := newBuilder(graph, assembledAnchors(t), "/bd", "/bd", NewLogger(0, nil))
+	graph.AddNode(domain.Node{ID: testArtifact, Kind: domain.NodeArtifact})
+	for _, name := range []string{"generated/a.c", "generated/b.c"} {
+		graph.AddNode(domain.Node{ID: domain.NodeID("build:" + name), Kind: domain.NodeSource,
+			File: &domain.FileID{Anchor: "build", RelPath: name}})
+	}
+
+	compile := newCompileEvidence()
+	compile.buildEdges = map[string][]string{
+		"generated/a.c":           {"CMakeFiles/tool.dir/x.o"},
+		"generated/b.c":           {"CMakeFiles/tool.dir/x.o"},
+		"CMakeFiles/tool.dir/x.o": {"/src/tool.c"},
+	}
+	addGeneratorEvidence(graph, b, compile, NewLogger(0, nil))
+
+	for _, from := range []domain.NodeID{"build:generated/a.c", "build:generated/b.c"} {
+		var edges int
+		for _, edge := range graph.EdgesFrom(from) {
+			if edge.Type == "generator-input" && edge.To == "project:tool.c" {
+				edges++
+			}
+		}
+		if edges != 1 {
+			t.Errorf("%s has %d generator-input edge(s) to the tool's source, want 1", from, edges)
+		}
+	}
+}
