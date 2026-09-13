@@ -2,6 +2,56 @@
 
 ## 0.17.0
 
+### A licence checker's own files no longer make a component
+
+`LICENSE-<id>` is a recognized file name of §22.3, and the eight characters it
+begins with are also how a licence *checker* names what it ships.
+`license-header.txt` — the standard template for header checkers —
+`LICENSE-HEADER.txt`, `license-check.py` and `LICENSE-scanner.sh` were all read
+as licence files. Since the boundary markers of §19.2 use the same list, any
+directory holding one became a third-party component named after itself:
+`tools/license-header.txt` turns `tools/` into a component, `src/license-header.txt`
+re-parents the whole source tree, and §22.9 then publishes the template — or
+the Python script — as that component's retained licence text.
+
+Two questions decide it now. A final dot-segment of letters alone is an
+extension rather than a version, and what follows the dash has to name a
+licence: `MIT` is one, `APACHE` opens `Apache-2.0`, `HEADER` opens nothing. The
+identifiers come from the two tables this repository already embeds.
+
+### A root that cannot be listed keeps its licence
+
+The directory listing that replaced nine `stat` calls returns nothing when
+`os.ReadDir` fails, and a directory can be searchable without being listable —
+mode 0711 is ordinary for a vendored tree unpacked under a restrictive umask,
+and a `stat` of a child needs only the search bit. The component dissolved into
+whatever enclosed it, which is the failure the listing was introduced to fix. A
+failed listing now falls back to asking for the fixed names of §22.3.
+
+A symbolic link is also judged by its target again. `os.Stat` followed one and
+`DirEntry.Type` does not, so a `LICENSE` pointing at a directory, or one whose
+target is gone — what a harvested or relocated tree leaves behind — marked a
+component boundary and was then unreadable at the root it had created.
+
+### The composite action can describe a restored build
+
+It had no `source-dir` input, so the split the relocation of §7.9 exists for —
+building in one job and describing the result in another — could not be
+expressed through it. The attribution step wrote four files, exited 0 and
+`continue-on-error` kept the run green while every entry said the licence text
+could not be established. There is a `source-dir` input now, passed to both
+commands.
+
+`sbomb foss` accepts `--path-flavor` as well. It rejected the flag outright, so
+a Windows runner with `path-flavor: posix` pinned compared paths one way for
+the document and another for the notices — two component sets from one build,
+which is the disagreement §32.6 exists to rule out.
+
+And the uploaded artifact's name takes an `artifact-suffix`. A matrix that
+varies anything but the platform uploaded every leg under one name, and
+`upload-artifact` answers the second with a 409 that `continue-on-error`
+swallows: one leg's attribution disappeared without a red run.
+
 ### `--source-dir .` relocates like any other path
 
 §3 defaults `project.root` to `"."` when nothing configured it, and the

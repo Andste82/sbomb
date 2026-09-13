@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 
 	"github.com/example/sbomb/internal/domain"
 )
@@ -264,4 +265,61 @@ func KnownIdentifiers() map[string]bool {
 		}
 	}
 	return ids
+}
+
+// spdxIdentifiers is every identifier the embedded digest table names, which
+// is the SPDX licence list as of the version spdxhashes.go records. It is the
+// value side of that map rather than a second table: one generated file, one
+// source of truth.
+// Both embedded tables are read, because neither is the whole list on its own:
+// the digest table is keyed by normalized text and 739 licences share 698 of
+// them, so the identifiers that differ only in a clause the normalization
+// removes -- `GPL-2.0-only` and `GPL-2.0-or-later` -- are not both in it. The
+// templates carry one entry per identifier and fill that gap. Decompressing
+// them is what technique 4 already pays for, and this pays it once.
+var spdxIdentifiers = sync.OnceValue(func() []string {
+	seen := map[string]bool{}
+	ids := make([]string, 0, len(knownLicenseHashes))
+	add := func(id string) {
+		if upper := strings.ToUpper(id); upper != "" && !seen[upper] {
+			seen[upper] = true
+			ids = append(ids, upper)
+		}
+	}
+	for _, id := range knownLicenseHashes {
+		add(id)
+	}
+	if fromTemplates, err := TemplateIDs(); err == nil {
+		for _, id := range fromTemplates {
+			add(id)
+		}
+	}
+	return ids
+})
+
+// NamesALicence reports whether a string is an SPDX identifier or the start of
+// one, compared without case.
+//
+// It answers one question, for the `LICENSE-<id>` form of section 22.3: is
+// what follows the dash a licence, or something else that happens to begin
+// with the same eight characters. `MIT` is an identifier; `APACHE` is how a
+// project spells `LICENSE-APACHE` beside `LICENSE-MIT`, and it opens
+// `Apache-2.0`; `HEADER`, as in the `license-header.txt` a licence-header
+// checker ships, opens nothing at all.
+//
+// A prefix is enough on purpose. Requiring the whole identifier would reject
+// `LICENSE-APACHE`, which is the commonest spelling of the case the form
+// exists for, and the question here is only whether a file name names a
+// licence -- what licence it stated is read from its bytes.
+func NamesALicence(candidate string) bool {
+	candidate = strings.ToUpper(strings.TrimSpace(candidate))
+	if candidate == "" {
+		return false
+	}
+	for _, id := range spdxIdentifiers() {
+		if strings.HasPrefix(id, candidate) {
+			return true
+		}
+	}
+	return false
 }

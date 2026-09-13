@@ -90,6 +90,11 @@ func fossView(view *generate.FOSSView) foss.View {
 // is informational.
 func handleFOSS(args []string, verbosity int) (int, string, string) {
 	buildDir, sourceDir, out := "", "", ""
+	// Section 32.6: the FOSS outputs are a second rendering of one discovery,
+	// so the discovery has to be the same one -- and a run that compares paths
+	// one way for the document and another way for the notices can describe
+	// two different component sets from one build.
+	pathFlavor := ""
 	format, specVersion, configName, mode := "", "", "", ""
 	cfgPath, policyName, waiversPath := "", "", ""
 	repro, redactUnanchored := false, false
@@ -119,6 +124,14 @@ func handleFOSS(args []string, verbosity int) (int, string, string) {
 			i++
 		case strings.HasPrefix(args[i], "--source-dir="):
 			sourceDir = strings.TrimPrefix(args[i], "--source-dir=")
+		case args[i] == "--path-flavor":
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --path-flavor\n"
+			}
+			pathFlavor = args[i+1]
+			i++
+		case strings.HasPrefix(args[i], "--path-flavor="):
+			pathFlavor = strings.TrimPrefix(args[i], "--path-flavor=")
 		case args[i] == "--out":
 			if i+1 >= len(args) {
 				return 1, "", "missing value for --out\n"
@@ -281,8 +294,19 @@ func handleFOSS(args []string, verbosity int) (int, string, string) {
 		cliLogger.Info("Introspection enabled: %s", strings.Join(exec.AllowlistFor(introspection), "; "))
 	}
 
+	flavor := pathmodel.DefaultFlavor()
+	switch pathFlavor {
+	case "", "auto":
+	case "posix":
+		flavor = pathmodel.PosixFlavor{}
+	case "windows":
+		flavor = pathmodel.WindowsFlavor{}
+	default:
+		return 1, logBuf.String(), "invalid value for --path-flavor: " + pathFlavor + "\n"
+	}
+
 	generated, err := generate.RunWithOptions(loadedCfg, buildDir, repro, generate.Options{
-		PathFlavor:            pathmodel.DefaultFlavor(),
+		PathFlavor:            flavor,
 		Verbosity:             verbosity,
 		LogWriter:             logWriter,
 		RedactUnanchoredPaths: redactUnanchored,

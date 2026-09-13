@@ -1845,7 +1845,11 @@ sbomb foss     --build-dir <dir> [--source-dir <dir>] --out <dir> [--format text
 is wanted on disk. Beside the flags above it accepts the discovery and policy
 flags of §32.2 that still have a meaning without an SBOM on disk:
 `--config`, `--config-name`, `--mode`, `--spec-version`, `--policy`,
-`--waivers`, `--redact-unanchored-paths` and `--allow-introspection`. It never
+`--waivers`, `--redact-unanchored-paths`, `--allow-introspection` and
+`--path-flavor`. The last one is not optional to carry: a run that compares
+paths one way for the document and another way for the notices describes two
+component sets from one build, which is the disagreement this section exists to
+rule out. It never
 creates the build directory: it reads a build tree and writes only into
 `--out`. **Both entry points share one discovery and one renderer,
 and neither workflow runs discovery twice.** This is not a performance note:
