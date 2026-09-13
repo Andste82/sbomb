@@ -179,6 +179,51 @@ code is not the question, whether its interface was used is. `foss-review.txt`
 states the difference per component and in total, so the two views are visible
 rather than implied.
 
+## "Was this component modified?"
+
+Apache-2.0 §4(b) and GPL-2.0 §2(a) oblige you to say which files you changed,
+so the review record answers per component — with three answers, not two.
+
+| Answer | What sbomb saw |
+|---|---|
+| **yes** | The package metadata records an applied patch, the working tree has uncommitted changes, or the checkout stands past the revision that was declared for it |
+| **no** | The checkout stands exactly on the revision that was declared for it |
+| **unknown** | There was nothing to compare the checkout against |
+
+The middle column is the whole point of the third answer. A `no` is only
+truthful if somebody actually checked, and checking needs two statements about
+the component: what the checkout is, and what it was supposed to be. The second
+one comes from your build — a `GIT_TAG` in a `FetchContent` declaration, a
+`revision:` in a west manifest, the revision a CPM lock recorded.
+
+Where that second statement is missing, the answer is `unknown`. That is the
+ordinary case for:
+
+* a dependency you copied into your tree, which no package manager declares;
+* a manager that states a *version* rather than a revision (Conan, vcpkg) — a
+  version names a release, not a point in a repository, and guessing a tag name
+  out of it would be guessing;
+* a shallow clone (`git clone --depth 1`), which is what most CI jobs do: the
+  tag the declaration names was never fetched, so there is nothing here to
+  resolve it against.
+
+A tag on its own is not enough, and this is the reason a component you never
+touched can still read `unknown`. Git cannot tell a release tag from any other
+— `v1.2.3`, `acme-1` and `poc-dingsbums` are one kind of object to it — so
+"the checkout stands on some tag" is not evidence that it stands on *the*
+release. It is exactly the case where somebody tags their own fix, which is
+when a wrong `no` would matter most.
+
+What you always get, whatever the answer: the declared revision, the commit the
+checkout stands on and the dirty flag, as
+`sbomb:component:declaredRevision`, `sbomb:component:vcsCommit` and
+`sbomb:component:vcsDirty`. Those are facts you can check against an upstream
+you have; the answer above is a conclusion drawn from them.
+
+`FOSS_MODIFICATION_UNKNOWN` names which of these it was and what would change
+it — fetching the tag the declaration points at, declaring a revision in the
+first place, or nothing, where the component root is not a checkout at all.
+
 ## Findings
 
 Everything the FOSS view establishes or fails to establish is informational —

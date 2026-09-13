@@ -236,6 +236,10 @@ type ModificationRecord struct {
 	// pedigree.notes, because a pedigree without it says that something was
 	// established and not what.
 	Signal string
+	// Remediation is what would let the question be answered, for the finding
+	// an unknown status raises. It travels with the signal because the two are
+	// about the same gap, and which gap it is decides both.
+	Remediation string
 	// Commit is the commit the component root's checkout stands on, when it
 	// was read. It becomes pedigree.commits[].uid.
 	Commit string

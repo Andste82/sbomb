@@ -72,6 +72,15 @@ type Package struct {
 	Commit string
 	Dirty  bool
 
+	// DeclaredRevision is the revision this manager's own metadata names for
+	// the package -- a commit or a tag, exactly as it was written. It is kept
+	// apart from Commit on purpose: Commit is what the checkout reports, and a
+	// declared revision that has been collapsed into the observed one can no
+	// longer disagree with it, which is the whole question section 19.4 asks.
+	// A declared *version* does not belong here; a version names a release and
+	// not a point in a repository.
+	DeclaredRevision string
+
 	// Manager names the adapter, for sbomb:component:detectedBy.
 	Manager string
 	// AnchorKey is the anchor this package should be registered under.

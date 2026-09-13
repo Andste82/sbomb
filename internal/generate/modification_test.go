@@ -54,8 +54,17 @@ func git(t *testing.T, root string, args ...string) {
 	}
 }
 
-// modificationOf derives the status for a component rooted at root.
+// modificationOf derives the status for a component rooted at root, with no
+// package manager having declared a revision for it.
 func modificationOf(t *testing.T, root string, features sbombexec.Features) (*domain.Component, []domain.Finding) {
+	t.Helper()
+	return modificationOfDeclared(t, root, "", features)
+}
+
+// modificationOfDeclared is the same with a declared revision beside it, which
+// is what section 19.4 needs before it may answer anything but unknown for a
+// clean tree.
+func modificationOfDeclared(t *testing.T, root, declared string, features sbombexec.Features) (*domain.Component, []domain.Finding) {
 	t.Helper()
 	source := filepath.Join(root, "src", "lib.c")
 	file := domain.UsedFile{ID: fileID("project", "src/lib.c")}
@@ -65,7 +74,7 @@ func modificationOf(t *testing.T, root string, features sbombexec.Features) (*do
 	component := &domain.Component{ID: "component:lib", Name: "lib"}
 	findings := resolver.resolveModification(component, componentRootResult{
 		ID: domain.FileID{Anchor: "project"}, Physical: root, Source: "curated",
-	})
+	}, declared)
 	return component, findings
 }
 
@@ -79,12 +88,12 @@ func modificationTree(t *testing.T) string {
 
 // The four cases the milestone lists, each with the finding that goes with it.
 func TestModificationStatusIsTriState(t *testing.T) {
-	t.Run("a clean checkout standing on its tag is false", func(t *testing.T) {
+	t.Run("a clean checkout standing on its declared revision is false", func(t *testing.T) {
 		root := modificationTree(t)
 		if !gitRepository(t, root) {
 			t.Skip("git is not available")
 		}
-		component, findings := modificationOf(t, root, sbombexec.Features{Git: true})
+		component, findings := modificationOfDeclared(t, root, "v1.2.0", sbombexec.Features{Git: true})
 		if component.Modification.Status != domain.ModificationUnmodified {
 			t.Errorf("status = %q, want %q (%s)", component.Modification.Status,
 				domain.ModificationUnmodified, component.Modification.Signal)
@@ -206,14 +215,12 @@ func TestACommentedPatchNameIsNotAPatch(t *testing.T) {
 	}
 }
 
-// A clean checkout that does not stand on a tag is unknown and not false.
-// Counting the commits between HEAD and the tag needs `git rev-list`, which
-// section 9.2 does not permit, and a clean tree some distance past a tag is
-// not an unmodified component.
-// A dependency somebody fixed and committed: clean tree, tag untouched, HEAD
-// past it. It is the commonest shape of a modified component, and the count is
-// in the `git describe` answer already, so nothing has to be counted.
-func TestACleanCheckoutPastItsTagIsModified(t *testing.T) {
+// A dependency somebody fixed and committed: clean tree, the declared tag
+// untouched, HEAD past it. It is the commonest shape of a modified component,
+// and the count is in the `git describe` answer already, so nothing has to be
+// counted -- but only because the tag describe answered with is the declared
+// one, which is what makes the distance about the right tag (section 19.4).
+func TestACleanCheckoutPastItsDeclaredRevisionIsModified(t *testing.T) {
 	root := modificationTree(t)
 	if !gitRepository(t, root) {
 		t.Skip("git is not available")
@@ -225,33 +232,105 @@ func TestACleanCheckoutPastItsTagIsModified(t *testing.T) {
 		git(t, root, "commit", "-qm", "fix", "--no-gpg-sign")
 	}
 
-	component, _ := modificationOf(t, root, sbombexec.Features{Git: true})
+	component, _ := modificationOfDeclared(t, root, "v1.2.0", sbombexec.Features{Git: true})
 	if component.Modification.Status != domain.ModificationModified {
 		t.Errorf("status = %q, want %q (%s)", component.Modification.Status,
 			domain.ModificationModified, component.Modification.Signal)
 	}
-	if !strings.Contains(component.Modification.Signal, "2 commit(s) past its tag v1.2.0") {
+	if !strings.Contains(component.Modification.Signal, "2 commit(s) past the declared revision v1.2.0") {
 		t.Errorf("signal = %q, want the distance and the tag it is measured from", component.Modification.Signal)
 	}
 }
 
-// No tag at all: `--always` answers with the abbreviated commit, and there is
-// nothing the checkout could have deviated from. Unknown is the answer that
-// cannot be wrong.
-func TestACheckoutWithNoTagIsUnknown(t *testing.T) {
+// The declared tag is not in this repository. That is the ordinary state of the
+// shallow clone a CI job checks out -- the history, and with it the tag, was
+// never fetched -- and it is unknown rather than modified: nothing was compared,
+// so nothing was found to differ.
+func TestADeclaredTagThisCheckoutDoesNotCarryIsUnknown(t *testing.T) {
 	root := modificationTree(t)
 	if !gitRepository(t, root) {
 		t.Skip("git is not available")
 	}
 	git(t, root, "tag", "-d", "v1.2.0")
 
-	component, _ := modificationOf(t, root, sbombexec.Features{Git: true})
+	component, _ := modificationOfDeclared(t, root, "v1.2.0", sbombexec.Features{Git: true})
 	if component.Modification.Status != domain.ModificationUnknown {
 		t.Errorf("status = %q, want %q (%s)", component.Modification.Status,
 			domain.ModificationUnknown, component.Modification.Signal)
 	}
-	if !strings.Contains(component.Modification.Signal, "no reachable tag") {
-		t.Errorf("signal = %q, want the absence of a tag as the reason", component.Modification.Signal)
+	if !strings.Contains(component.Modification.Signal, "names no commit in this checkout") {
+		t.Errorf("signal = %q, want the missing tag as the reason", component.Modification.Signal)
+	}
+}
+
+// The heart of section 19.4: a tag is a name a repository gives itself, and git
+// cannot tell a release tag from any other. A clean checkout standing on one,
+// with nobody having declared what should be there, is unknown -- it used to be
+// `false`, which was a claim resting on the checkout corroborating itself.
+func TestACleanCheckoutOnATagNobodyDeclaredIsUnknown(t *testing.T) {
+	root := modificationTree(t)
+	if !gitRepository(t, root) {
+		t.Skip("git is not available")
+	}
+	// A tag no release ever had, nearer than the one above, exactly as a
+	// maintainer tagging their own fix would leave it.
+	write(t, filepath.Join(root, "src", "lib.c"), "int lib(void){return 7;}\n")
+	git(t, root, "add", "-A")
+	git(t, root, "commit", "-qm", "our own fix", "--no-gpg-sign")
+	git(t, root, "tag", "-f", "poc-dingsbums")
+
+	component, findings := modificationOf(t, root, sbombexec.Features{Git: true})
+	if component.Modification.Status != domain.ModificationUnknown {
+		t.Errorf("status = %q, want %q (%s)", component.Modification.Status,
+			domain.ModificationUnknown, component.Modification.Signal)
+	}
+	if !strings.Contains(component.Modification.Signal, "no package manager declared a revision") {
+		t.Errorf("signal = %q, want the missing declaration as the reason", component.Modification.Signal)
+	}
+	if !hasFindingID(findings, "FOSS_MODIFICATION_UNKNOWN") {
+		t.Errorf("findings = %v, want FOSS_MODIFICATION_UNKNOWN", findingIDs(findings))
+	}
+}
+
+// And the same checkout answers `false` once somebody declares the revision it
+// actually stands on, which is what separates the two.
+func TestTheSameCheckoutIsUnmodifiedOnceARevisionIsDeclared(t *testing.T) {
+	root := modificationTree(t)
+	if !gitRepository(t, root) {
+		t.Skip("git is not available")
+	}
+	component, _ := modificationOfDeclared(t, root, "1.2.0", sbombexec.Features{Git: true})
+	if component.Modification.Status != domain.ModificationUnmodified {
+		t.Errorf("status = %q, want %q (%s): the declared 1.2.0 names the tag v1.2.0",
+			component.Modification.Status, domain.ModificationUnmodified, component.Modification.Signal)
+	}
+}
+
+// A declared revision that is a commit needs no tag and no history, which is
+// the case a shallow clone can still answer.
+func TestADeclaredCommitIsComparedDirectly(t *testing.T) {
+	root := modificationTree(t)
+	if !gitRepository(t, root) {
+		t.Skip("git is not available")
+	}
+	head := gitOutput(t, root, "rev-parse", "HEAD")
+
+	onIt, _ := modificationOfDeclared(t, root, head, sbombexec.Features{Git: true})
+	if onIt.Modification.Status != domain.ModificationUnmodified {
+		t.Errorf("status = %q, want %q (%s)", onIt.Modification.Status,
+			domain.ModificationUnmodified, onIt.Modification.Signal)
+	}
+
+	// A commit that is not this one. Forty hexadecimal characters, so it is
+	// read as an object name rather than as a tag.
+	elsewhere, _ := modificationOfDeclared(t, root, strings.Repeat("a", 40), sbombexec.Features{Git: true})
+	if elsewhere.Modification.Status != domain.ModificationModified {
+		t.Errorf("status = %q, want %q (%s)", elsewhere.Modification.Status,
+			domain.ModificationModified, elsewhere.Modification.Signal)
+	}
+	if strings.Contains(elsewhere.Modification.Signal, "past") {
+		t.Errorf("signal = %q: nothing was counted, so nothing may be said about a distance",
+			elsewhere.Modification.Signal)
 	}
 }
 
@@ -279,7 +358,7 @@ func TestAnEnclosingRepositoryDoesNotDecideAVendoredComponent(t *testing.T) {
 	component := &domain.Component{ID: "component:vendored", Name: "vendored"}
 	resolver.resolveModification(component, componentRootResult{
 		ID: domain.FileID{Anchor: "project", RelPath: "dep/vendored"}, Physical: inner, Source: "marker:LICENSE",
-	})
+	}, "")
 
 	if component.Modification.Status != domain.ModificationUnknown {
 		t.Errorf("status = %q, want %q: the dirty tree is the project's, not this component's",
@@ -299,12 +378,12 @@ func TestTheDistanceSuffixIsTheOneGitWrites(t *testing.T) {
 	git(t, root, "add", "-A")
 	git(t, root, "commit", "-qm", "past the tag", "--no-gpg-sign")
 
-	component, _ := modificationOf(t, root, sbombexec.Features{Git: true})
+	component, _ := modificationOfDeclared(t, root, "v1.0-gamma", sbombexec.Features{Git: true})
 	if component.Modification.Status != domain.ModificationModified {
 		t.Errorf("status = %q, want %q one commit past a tag named v1.0-gamma (%s)",
 			component.Modification.Status, domain.ModificationModified, component.Modification.Signal)
 	}
-	if !strings.Contains(component.Modification.Signal, "1 commit(s) past its tag v1.0-gamma") {
+	if !strings.Contains(component.Modification.Signal, "1 commit(s) past the declared revision v1.0-gamma") {
 		t.Errorf("signal = %q, want the tag read whole even though its name carries -g",
 			component.Modification.Signal)
 	}
@@ -312,7 +391,7 @@ func TestTheDistanceSuffixIsTheOneGitWrites(t *testing.T) {
 	// And standing on that same tag is "false": the tag's name is not a
 	// distance.
 	git(t, root, "tag", "-f", "v1.0-gamma")
-	onTag, _ := modificationOf(t, root, sbombexec.Features{Git: true})
+	onTag, _ := modificationOfDeclared(t, root, "v1.0-gamma", sbombexec.Features{Git: true})
 	if onTag.Modification.Status != domain.ModificationUnmodified {
 		t.Errorf("status = %q, want %q standing on v1.0-gamma (%s)",
 			onTag.Modification.Status, domain.ModificationUnmodified, onTag.Modification.Signal)
@@ -386,4 +465,15 @@ func TestAPatchFindingNamesTheComponent(t *testing.T) {
 	if !seen {
 		t.Fatalf("no INPUT_LIMIT_EXCEEDED for a patch record over the bound; findings = %#v", findings)
 	}
+}
+
+// gitOutput runs one git command and returns its trimmed output.
+func gitOutput(t *testing.T, root string, args ...string) string {
+	t.Helper()
+	command := exec.Command("git", append([]string{"-C", root}, args...)...)
+	out, err := command.Output()
+	if err != nil {
+		t.Fatalf("git %v: %v", args, err)
+	}
+	return strings.TrimSpace(string(out))
 }

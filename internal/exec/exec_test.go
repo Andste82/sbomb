@@ -165,10 +165,10 @@ func TestTimeoutIsApplied(t *testing.T) {
 
 func TestAllowlistIsExhaustiveAndStable(t *testing.T) {
 	entries := Allowlist()
-	// Five table shapes and three compiler probes. Seven of the shapes section
+	// Six table shapes and three compiler probes. Seven of the shapes section
 	// 9.2 lists were removed because nothing could call them; deviations D29
 	// and D30 say why, and this number is what keeps them from creeping back.
-	if len(entries) != 8 {
+	if len(entries) != 9 {
 		t.Errorf("allowlist has %d entries; section 9.2 lists a fixed set", len(entries))
 	}
 	for _, entry := range entries {
@@ -183,8 +183,8 @@ func TestAllowlistIsExhaustiveAndStable(t *testing.T) {
 // this run does not have.
 func TestAllowlistForNamesOnlyTheEnabledGroups(t *testing.T) {
 	entries := AllowlistFor(Features{Git: true})
-	if len(entries) != 3 {
-		t.Fatalf("AllowlistFor(git) = %v; want the three git shapes", entries)
+	if len(entries) != 4 {
+		t.Fatalf("AllowlistFor(git) = %v; want the four git shapes", entries)
 	}
 	for _, entry := range entries {
 		if !strings.HasPrefix(entry, "git ") {

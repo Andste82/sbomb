@@ -90,6 +90,13 @@ var allowlist = []command{
 	{Name: "git", Fixed: []string{"-C", "", "rev-parse", "HEAD"}, PathSlots: []int{1}, Feature: "git"},
 	{Name: "git", Fixed: []string{"-C", "", "describe", "--tags", "--always", "--dirty"}, PathSlots: []int{1}, Feature: "git"},
 	{Name: "git", Fixed: []string{"-C", "", "config", "--get", "remote.origin.url"}, PathSlots: []int{1}, Feature: "git"},
+	// Section 19.4 resolves a declared tag to its commit with this. Its
+	// argument shape is fixed like every other entry here: the tag name is
+	// matched inside sbomb, against the answer, rather than handed to git --
+	// a revision in an argument slot would be the first value on this list
+	// that `checkPath` cannot validate, and the allowlist is a security
+	// boundary rather than a convenience.
+	{Name: "git", Fixed: []string{"-C", "", "show-ref", "--tags"}, PathSlots: []int{1}, Feature: "git"},
 }
 
 // compilerProbes are the argument shapes permitted for any compiler. The

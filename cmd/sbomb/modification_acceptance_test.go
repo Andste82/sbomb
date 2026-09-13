@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/example/sbomb/internal/testutil"
@@ -74,28 +75,46 @@ func TestModificationStatusOverRelocatedRepositories(t *testing.T) {
 	}
 	status := map[string]string{}
 	pedigree := map[string]bool{}
+	commit := map[string]string{}
 	for _, component := range document.Components {
 		for _, property := range component.Properties {
-			if property.Name == "sbomb:component:modified" {
+			switch property.Name {
+			case "sbomb:component:modified":
 				status[component.BomRef] = property.Value
+			case "sbomb:component:vcsCommit":
+				commit[component.BomRef] = property.Value
 			}
 		}
 		pedigree[component.BomRef] = component.Pedigree != nil
 	}
-	for ref, want := range map[string]string{
-		// Compiled from a tree that is not the tree its tag names.
-		"component:lgpl-lib": "true",
-		// Clean, and one commit past its tag: the commonest shape of a
-		// dependency somebody fixed, and `unknown` before D47.
-		"component:apache-lib": "true",
-		// Clean and standing on its tag.
-		"component:mit-lib": "false",
-	} {
-		if status[ref] != want {
-			t.Errorf("%s is %q, want %q", ref, status[ref], want)
+	// Compiled from a tree that is not the tree its tag names. A dirty tree
+	// needs nobody's corroboration: the edit is in front of git, not inferred
+	// from a name.
+	if status["component:lgpl-lib"] != "true" {
+		t.Errorf("component:lgpl-lib is %q, want %q", status["component:lgpl-lib"], "true")
+	}
+	if !pedigree["component:lgpl-lib"] {
+		t.Error("component:lgpl-lib carries no pedigree, and a settled status is what fills it")
+	}
+
+	// The other two are clean, stand on or past a tag, and no package manager
+	// owns them -- `dep/*` is found by the marker file of section 19.2 and
+	// nothing else. Section 19.4: a tag is a name the repository gives itself,
+	// so there is nothing here to hold the checkout against, and the answer is
+	// unknown rather than the `false` and `true` this asserted before.
+	for _, ref := range []string{"component:mit-lib", "component:apache-lib"} {
+		if status[ref] != "unknown" {
+			t.Errorf("%s is %q, want %q", ref, status[ref], "unknown")
 		}
-		if !pedigree[ref] {
-			t.Errorf("%s carries no pedigree, and a settled status is what fills it", ref)
+		if pedigree[ref] {
+			t.Errorf("%s carries a pedigree; an unknown status must fill none, or an absent one would read as unmodified", ref)
+		}
+		// The fact the answer could not be drawn from is published anyway: an
+		// unknown status fills no pedigree, so without this the commit would
+		// reach the document nowhere, and it is what lets a consumer holding
+		// the upstream finish the comparison sbomb could not.
+		if commit[ref] == "" {
+			t.Errorf("%s publishes no commit, and it is the one fact that was read", ref)
 		}
 	}
 
@@ -192,4 +211,122 @@ func fixtureGit(t *testing.T, dir string, args ...string) {
 	if output, err := command.CombinedOutput(); err != nil {
 		t.Fatalf("git %v in %s: %v\n%s", args, dir, err, output)
 	}
+}
+
+// The other half of section 19.4, which the FOSS fixture cannot show: a
+// component whose revision somebody declared.
+//
+// `p10-fetchcontent` pins `tinylog` to `GIT_TAG v1.2.0`, and the populate
+// script CMake generated out of that declaration is in the committed corpus.
+// That is the second statement the status needs -- one that does not come from
+// the checkout -- so this is where `false` and `true` can be established at
+// document level at all.
+//
+// The repository is built here for the same reason it is in the test above:
+// git will not put a path with a `.git` component into an index, and a
+// harvested index churns (open question Q9). What is committed is the tree.
+func TestModificationStatusAgainstADeclaredRevision(t *testing.T) {
+	if _, err := exec.LookPath("git"); err != nil {
+		t.Skip("git is required to build the fixture repositories")
+	}
+
+	run := func(t *testing.T, prepare func(t *testing.T, checkout string)) (map[string]string, map[string]string, []byte) {
+		t.Helper()
+		buildDir := testutil.CorpusBuildDir(t, "gcc-ninja", "p10-fetchcontent")
+		checkout := filepath.Join(buildDir, "_deps", "tinylog-src")
+		fixtureGit(t, checkout, "init", "-q", "-b", "main")
+		fixtureGit(t, checkout, "add", "-A")
+		fixtureGit(t, checkout, "commit", "-qm", "tinylog v1.2.0", "--no-gpg-sign")
+		fixtureGit(t, checkout, "tag", "-f", "v1.2.0")
+		if prepare != nil {
+			prepare(t, checkout)
+		}
+
+		output := filepath.Join(t.TempDir(), "out.cdx.json")
+		code, _, stderr := execute([]string{"generate", "--build-dir", buildDir, "--policy", "lenient",
+			"--allow-introspection=git", "--output", output, "--reproducible"})
+		if code != 0 || stderr != "" {
+			t.Fatalf("generate = code %d, stderr %q", code, stderr)
+		}
+		data, err := os.ReadFile(output)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var document struct {
+			Components []struct {
+				BomRef     string `json:"bom-ref"`
+				Properties []struct {
+					Name  string `json:"name"`
+					Value string `json:"value"`
+				} `json:"properties"`
+				Pedigree *struct {
+					Notes string `json:"notes"`
+				} `json:"pedigree"`
+			} `json:"components"`
+		}
+		if err := json.Unmarshal(data, &document); err != nil {
+			t.Fatal(err)
+		}
+		properties := map[string]string{}
+		notes := map[string]string{}
+		for _, component := range document.Components {
+			for _, property := range component.Properties {
+				properties[component.BomRef+" "+property.Name] = property.Value
+			}
+			if component.Pedigree != nil {
+				notes[component.BomRef] = component.Pedigree.Notes
+			}
+		}
+		return properties, notes, data
+	}
+
+	t.Run("standing on the declared revision", func(t *testing.T) {
+		properties, notes, document := run(t, nil)
+		if got := properties["component:tinylog sbomb:component:modified"]; got != "false" {
+			t.Errorf("modified = %q, want %q (%s)", got, "false", notes["component:tinylog"])
+		}
+		// Published whatever the answer: it is the fact the answer was drawn
+		// from, and a consumer can check it against an upstream of its own.
+		if got := properties["component:tinylog sbomb:component:declaredRevision"]; got != "v1.2.0" {
+			t.Errorf("declaredRevision = %q, want v1.2.0", got)
+		}
+		assertGolden(t, "gcc-ninja-p10-fetchcontent-declared.cdx.json", document)
+	})
+
+	t.Run("a commit past the declared revision", func(t *testing.T) {
+		properties, notes, _ := run(t, func(t *testing.T, checkout string) {
+			if err := os.WriteFile(filepath.Join(checkout, "DOWNSTREAM-FIX.md"),
+				[]byte("A fix committed on top of v1.2.0.\n"), 0o600); err != nil {
+				t.Fatal(err)
+			}
+			fixtureGit(t, checkout, "add", "-A")
+			fixtureGit(t, checkout, "commit", "-qm", "downstream fix", "--no-gpg-sign")
+		})
+		if got := properties["component:tinylog sbomb:component:modified"]; got != "true" {
+			t.Errorf("modified = %q, want %q (%s)", got, "true", notes["component:tinylog"])
+		}
+		if !strings.Contains(notes["component:tinylog"], "1 commit(s) past the declared revision v1.2.0") {
+			t.Errorf("notes = %q, want the distance to the declared tag", notes["component:tinylog"])
+		}
+	})
+
+	t.Run("a tag the maintainer added is not the declared one", func(t *testing.T) {
+		properties, notes, _ := run(t, func(t *testing.T, checkout string) {
+			if err := os.WriteFile(filepath.Join(checkout, "DOWNSTREAM-FIX.md"),
+				[]byte("A fix committed on top of v1.2.0.\n"), 0o600); err != nil {
+				t.Fatal(err)
+			}
+			fixtureGit(t, checkout, "add", "-A")
+			fixtureGit(t, checkout, "commit", "-qm", "downstream fix", "--no-gpg-sign")
+			// Nearer than v1.2.0, so `git describe` answers with this one. It
+			// is what used to make this checkout "unmodified" at distance zero.
+			fixtureGit(t, checkout, "tag", "-f", "acme-1")
+		})
+		if got := properties["component:tinylog sbomb:component:modified"]; got != "true" {
+			t.Errorf("modified = %q, want %q (%s): a tag somebody else's release never had", got, "true", notes["component:tinylog"])
+		}
+		if !strings.Contains(notes["component:tinylog"], "v1.2.0") {
+			t.Errorf("notes = %q, want the declared revision named, not the tag git happened to find", notes["component:tinylog"])
+		}
+	})
 }

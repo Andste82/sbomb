@@ -2,6 +2,70 @@
 
 ## 0.17.0
 
+### "Not modified" now requires somebody to have said what should be there
+
+The modification status rested on a tag. A clean checkout standing exactly on
+one was published as `modified: false` — and a tag is a name a repository gives
+itself. Git cannot tell a release tag from any other: `v1.2.3`, `acme-1` and
+`poc-dingsbums` are one kind of object to it. A maintainer who fixes a vendored
+dependency, commits and tags their own result stands on a tag at distance zero,
+and the document said the component was unmodified. That is the case a wrong
+`false` matters most in, and it was the case the rule got wrong.
+
+What makes the check positive is a second statement that does not come from the
+checkout: the **revision a package manager declared** for the component — a
+`GIT_TAG` in a `FetchContent` declaration, a `revision:` in a west manifest, the
+revision a CPM lock recorded. It is now kept as it was written, beside the
+commit the checkout reports and never collapsed into it, and the two are
+compared. Equal means unmodified; different means this is not the revision that
+was asked for, and the signal says exactly that rather than attributing the
+difference to anyone.
+
+A declared *version* is not a declared revision. `zlib/1.2.13` names a release,
+not a point in a repository, and reading a tag name out of it would assume a
+naming convention the project never promised — so Conan and vcpkg components
+answer `unknown` unless their own patch records say otherwise. That channel is
+unchanged, and so is the dirty tree, which needs nobody's corroboration.
+
+The comparison is by object name rather than by history, which is what keeps the
+positive answer reachable in the shallow clone most CI jobs check out:
+`rev-parse HEAD` and the one new command, `git show-ref --tags`, both answer
+without a history to walk. The declared name is tried as written and with a
+leading `v`, and in no other form. `git describe`'s distance survives as a
+refinement: it is reported only where the tag describe answered with is the
+declared one, because a count against any other tag says nothing about the
+declared revision.
+
+`git show-ref --tags` is on the §9.2 allowlist in the same shape as every other
+entry — fixed arguments, one path slot. The tag name is matched inside sbomb,
+against the answer, rather than handed to git: a revision in an argument slot
+would have been the first value on that list `checkPath` cannot validate. That
+is what open question Q13 asked about, and it is now answered without touching
+the boundary.
+
+**What this costs:** `unknown` is a much more common answer. A vendored
+directory no manager owns, a manager that declares versions, a shallow clone
+without the tag — all three now say "nothing was compared" instead of
+"unmodified". That is the point: the old answer was a claim resting on the
+checkout corroborating itself. What is published whatever the answer is the
+declared revision (`sbomb:component:declaredRevision`, new), the commit and the
+dirty flag, so a consumer holding the upstream can finish the comparison sbomb
+could not — and `FOSS_MODIFICATION_UNKNOWN` now carries the reason in its
+message and a remediation that names which gap it was.
+
+The commit needed a place to go for exactly that case. An `unknown` status may
+fill no pedigree, or an absent pedigree would read as "unmodified", so a
+component that is `unknown` and that no package manager owns used to publish
+the commit nowhere at all. It is now written as `sbomb:component:vcsCommit` on
+the component — the same property an external reference carries, in the place
+§28 already puts it at 1.6. One remediation text changed with it: it used to
+recommend a curated `components[]` entry for a component root that is not a
+checkout, and no such field exists.
+
+The FOSS fixture's goldens move accordingly, and `p10-fetchcontent` — which
+declares `GIT_TAG v1.2.0` — is where a settled status is now asserted at
+document level.
+
 ### A file that declares a licence its component does not is now reported
 
 A dependency directory is not always one upstream. A file copied in from

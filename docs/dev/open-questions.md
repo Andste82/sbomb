@@ -193,7 +193,7 @@ SPDX schema that validates the document. The cost this question was raised
 about turned out to be three goldens, all of them the FOSS fixture's. The
 number stays reserved so that references to Q11 and later keep their meaning.
 
-## Q11 — Does `FOSS_LICENSE_TEXT_MISSING` apply to the manufacturer's own code?
+## Q11 — reserved
 
 The finding is defined for a component with a resolved licence identifier and no
 retained text. The FOSS plan's own table narrows it to a **distributed**
@@ -255,49 +255,35 @@ between the two licences and is not normalized, and
 licence text closes a placeholder it never opened. The number stays reserved so
 that references to Q13 and later keep their meaning.
 
-## Q13 — Should `§9.2` permit `git rev-list --count <upstream>..HEAD`?
+## Q13 — reserved
 
-**Narrowed. The premise this question was written on was wrong.** It said that
-§9.2 permits no command that counts commits past a tag. It does:
-`git describe --tags --always --dirty`, which the allowlist already carries and
-which §19.4 already calls, answers `<tag>-<count>-g<hash>`. The count was being
-matched and discarded. Since deviation D47 it is read, and a clean checkout
-standing past its tag is `modified` rather than `unknown` — with no change to
-the allowlist at all.
+**Settled: no, and it turned out not to be needed.** The question asked whether
+§9.2 should permit a command that takes a caller-supplied *revision* in an
+argument slot, so that the distance could be measured from a recorded revision
+rather than from the nearest reachable tag. It should not, and the comparison
+the question was after is reachable without it.
 
-What is left is narrower and still real: the count is measured from the
-**nearest reachable** tag. A maintainer who tags their own fix (`v1.2.0-acme1`)
-gets distance zero and therefore `false`, although the component is modified
-relative to the release it was pinned to. Measuring from a *recorded* revision
-is what would need `rev-list`, and that is where the original cost applies:
+Two observations closed it. The first is that the comparison never needed a
+distance: what says whether a checkout is the declared state is whether its
+commit **is** the declared one, and equality of object names is not a question
+about history. The second is that resolving a declared tag to its commit can be
+done with `git show-ref --tags`, whose argument shape is as fixed as every other
+entry on the allowlist — the tag name is matched inside sbomb, against the
+answer, rather than handed to git. No revision slot, no grammar to validate, no
+security argument to write.
 
-**What it costs is not the command, it is the allowlist.** §9.2 is a security
-boundary and the table in `internal/exec/exec.go` is its enforcement: five
-shapes the specification lists are absent because nothing could call them
-without guessing (deviation D29), and two more were removed because the
-permitted shape did not answer the question (D30). `rev-list` is the first entry
-that would take a **caller-supplied revision** in an argument slot rather than a
-path. A revision is not a path, so `checkPath` does not apply to it, and a tag
-name comes out of a repository sbomb was pointed at — which is untrusted input
-by §30. `git rev-list --count <x>..HEAD` with a hostile `<x>` is not known to be
-exploitable, and "not known to be" is not the standard an allowlist is held to:
-the argument would have to be that the revision slot is validated against a
-grammar before it is passed, and that grammar would have to be written and
-tested.
+What was built instead is in §19.4: a package manager's declared revision is
+kept as it was written, beside the commit the checkout reports and never
+collapsed into it, and the two are compared. `git describe`'s distance survives
+as a refinement — it is reported only where the tag describe answered with is
+the declared one, because a count against any other tag says nothing about the
+declared revision.
 
-Two things would then have to land together:
-
-1. a revision slot in the allowlist table, with validation of its own —
-   `PathSlots` has no equivalent for revisions today;
-2. the security argument in §9.2, stated rather than assumed.
-
-The third thing the question used to list — a fixture with a repository in it —
-is no longer a precondition for the *rule*, because the rule is covered by
-tests that build a repository from real git in a temporary directory
-(`internal/generate/modification_test.go`). It remains a precondition for
-seeing any of this in a golden document, which is Q9.
-
----
+The residual is deviation D47, and it is a different residual than before: not
+"the distance is measured from the wrong tag" but "there are components nobody
+declared a revision for", which is a gap in the evidence rather than in the
+rule. The number stays reserved so that references to Q14 and later keep their
+meaning.
 
 ## Q14 — Two of section 16's three generator-input sources are still unread, and no source answers for the Makefiles generator
 
