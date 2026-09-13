@@ -89,13 +89,18 @@ func Patches(root string) ([]domain.Patch, []domain.Finding) {
 	return patches, findings
 }
 
-// patchEvidenceFinding names the component the record belongs to, not the path
-// it was read from: the path is a physical location of section 7.9 and does not
-// belong in a finding that a relocated run must state identically.
+// patchEvidenceFinding leaves the subject empty for the caller to fill. This
+// reader is handed a directory and knows no component: naming one after the
+// directory's base name states a physical location of section 7.9 in a finding
+// that a relocated run must state identically -- for the project's own
+// component that base name is the checkout directory, which moves -- and it
+// resolves to no component in the document, because every other component
+// finding names the identity (`component:<name>`) rather than a directory.
 func patchEvidenceFinding(id, root, message string) domain.Finding {
+	_ = root
 	return domain.Finding{
 		ID: id, Severity: domain.SeverityWarning,
-		Subject: domain.Subject{Kind: "component", Ref: filepath.Base(root)},
+		Subject: domain.Subject{Kind: "component"},
 		Message: message,
 	}
 }

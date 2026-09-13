@@ -2,6 +2,33 @@
 
 ## 0.17.0
 
+### Three defects a code review found in the FOSS track
+
+**The notices document said attribution was incomplete where it was not.** The
+licence view of §32.6 reads the narrowed headers of a component to recover
+copyright statements the component's own files do not carry. It was handed a
+mapper for *logical paths* while the headers it reads are canonical identities,
+so every read resolved to nothing and was skipped at Debug level. On the
+fixture the toolchain runtime therefore shipped
+`[no copyright statement found in component - attribution incomplete]` where
+two statements were readable all along — the Free Software Foundation's and the
+GNU Toolchain Authors'.
+
+**A commit could be published as an unmodified tag.** `git describe --always`
+answers with the abbreviated commit where no tag is reachable, and only
+`git rev-parse HEAD` tells that from a tag. Where HEAD could not be read, the
+modification status called the answer a tag and reported `false` — "stands on
+its recorded tag a1b2c3d" — which is the one thing the tri-state exists to
+prevent: a check that never ran, published as "not modified". It is `unknown`
+now, and §19.4 says so.
+
+**A patch finding named a directory.** `INPUT_LIMIT_EXCEEDED` and
+`EVIDENCE_UNREADABLE` from the patch reader carried the component root's base
+name as their subject, which resolves to no component in the document and, for
+the project's own component, is the checkout directory — so a relocated run
+stated it differently. The reader names no component now and the caller, which
+has one, fills in the identity.
+
 ### A document shows what a modified component looks like
 
 Every golden reported `sbomb:component:modified: unknown`, because the corpus

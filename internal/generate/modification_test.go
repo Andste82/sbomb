@@ -317,3 +317,72 @@ func TestTheDistanceSuffixIsTheOneGitWrites(t *testing.T) {
 			onTag.Modification.Status, domain.ModificationUnmodified, onTag.Modification.Signal)
 	}
 }
+
+// `false` is the one state that may never be reached without a positive check.
+// `git describe --always` answers with the abbreviated commit where no tag is
+// reachable, and only HEAD tells that from a tag -- so when HEAD cannot be
+// read, the answer is unknown rather than "stands on its tag <hash>". The four
+// other readers of a describe answer lower their confidence in that case
+// (version.DescribeCheckout reports it as Ambiguous); this one has no
+// confidence to lower.
+func TestAnAnswerThatCannotBeToldFromACommitIsUnknown(t *testing.T) {
+	if _, err := exec.LookPath("sh"); err != nil {
+		t.Skip("the stand-in is a shell script")
+	}
+	root := modificationTree(t)
+	if !gitRepository(t, root) {
+		t.Skip("git is not available")
+	}
+
+	// A stand-in git that describes the checkout and refuses to say what HEAD
+	// is, which is the shape of the failure: both commands are allowlisted, and
+	// one of them answered.
+	standIn := t.TempDir()
+	script := "#!/bin/sh\n" +
+		"for arg in \"$@\"; do\n" +
+		"  case \"$arg\" in\n" +
+		"    describe) printf 'a1b2c3d\\n'; exit 0 ;;\n" +
+		"    rev-parse) exit 1 ;;\n" +
+		"  esac\n" +
+		"done\n" +
+		"exit 1\n"
+	if err := os.WriteFile(filepath.Join(standIn, "git"), []byte(script), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", standIn+string(os.PathListSeparator)+os.Getenv("PATH"))
+
+	component, _ := modificationOf(t, root, sbombexec.Features{Git: true})
+	if component.Modification.Status != domain.ModificationUnknown {
+		t.Errorf("status = %q, want %q: a bare commit read as a tag publishes 'not modified' for a check that never ran (%s)",
+			component.Modification.Status, domain.ModificationUnknown, component.Modification.Signal)
+	}
+	if !strings.Contains(component.Modification.Signal, "HEAD could not be read") {
+		t.Errorf("signal = %q, want the unreadable HEAD as the reason", component.Modification.Signal)
+	}
+}
+
+// A finding a patch reader produced names the component, not the directory it
+// read. The reader is handed a root and knows no component; the caller does,
+// and a finding whose subject is a directory base name resolves to nothing in
+// the document -- and moves when the tree is relocated (section 7.9), which is
+// what the reader's own comment says must not happen.
+func TestAPatchFindingNamesTheComponent(t *testing.T) {
+	root := modificationTree(t)
+	oversized := strings.Repeat("# padding\n", 200_000)
+	write(t, filepath.Join(root, "conandata.yml"), oversized+"patches:\n  - patch_file: a.patch\n")
+
+	component, findings := modificationOf(t, root, sbombexec.Features{})
+	var seen bool
+	for _, finding := range findings {
+		if finding.ID != "INPUT_LIMIT_EXCEEDED" {
+			continue
+		}
+		seen = true
+		if finding.Subject.Ref != component.ID {
+			t.Errorf("subject = %q, want the component id %q", finding.Subject.Ref, component.ID)
+		}
+	}
+	if !seen {
+		t.Fatalf("no INPUT_LIMIT_EXCEEDED for a patch record over the bound; findings = %#v", findings)
+	}
+}

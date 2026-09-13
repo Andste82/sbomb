@@ -701,7 +701,15 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	// nothing the document carries, which is what makes --foss-out an output
 	// selector rather than a content switch (decision B1).
 	if options.FOSSView {
-		result.FOSSView = fossView(narrowing, document, b.physicalFor, options.Limits, logger)
+		// The headers of a narrowing count are canonical identities, not
+		// logical paths: they are built from anchorOf/relOf above. physicalFor
+		// maps a *logical path* and would answer nothing for every one of
+		// them, so the reads that produce the extra copyright statements would
+		// all be skipped, silently and at Debug level.
+		result.FOSSView = fossView(narrowing, document, func(canonical string) (string, bool) {
+			path, ok := b.physical[canonical]
+			return path, ok
+		}, options.Limits, logger)
 	}
 	return result, nil
 }

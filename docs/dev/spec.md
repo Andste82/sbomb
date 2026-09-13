@@ -969,7 +969,9 @@ The repository URL MUST be written as an external reference of type `vcs`, not a
 | Package metadata records applied patches | `true` |
 | A git root was found at the component root, was clean, and stood exactly on its tag | `false` |
 | A git root was found, was clean, and stood a positive number of commits past its tag | `true` |
-| Anything else — no reachable tag, no git root, `--allow-introspection` off | `unknown` |
+| Anything else — no reachable tag, HEAD unreadable, no git root, `--allow-introspection` off | `unknown` |
+
+An answer with no distance suffix is a tag only once `git rev-parse HEAD` says it is not the abbreviated commit `--always` falls back to. Where HEAD cannot be read the two cannot be told apart, and the result is `unknown`: the other readers of that answer lower their confidence (§20.3), and a status has no confidence to lower.
 
 `false` MUST be emitted only after a positive check. **Absence of information is `unknown`, never `false`**: reporting a check that never ran as "not modified" turns a gap into a claim, and it is the one error an auditor will find.
 
