@@ -78,14 +78,18 @@ type View struct {
 
 // ViewDelta is one component's share of the difference between the two views.
 type ViewDelta struct {
-	Component  string
-	Narrowed   int
-	Copyrights []domain.CopyrightStatement
+	Component string
+	// ComponentID is what the delta is matched on: a name can belong to two
+	// components, and sortEntries breaks its tie on the bom-ref for that
+	// reason.
+	ComponentID string
+	Narrowed    int
+	Copyrights  []domain.CopyrightStatement
 }
 
-func (v View) deltaFor(name string) ViewDelta {
+func (v View) deltaFor(id string) ViewDelta {
 	for _, delta := range v.Deltas {
-		if delta.Component == name {
+		if delta.ComponentID == id {
 			return delta
 		}
 	}

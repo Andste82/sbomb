@@ -41,6 +41,11 @@ type FOSSViewDelta struct {
 	// Component is the component name, which is what the review record
 	// prints and what the notices document is ordered by.
 	Component string
+	// ComponentID is the identity the view is keyed on. A name can belong to
+	// two components -- section 29 sorts on the name and breaks the tie on the
+	// bom-ref for exactly that reason -- and keying on it would hand both of
+	// them the first one's statements.
+	ComponentID string
 	// Narrowed is how many headers of this component the DWARF set excluded.
 	Narrowed int
 	// Copyrights are the statements the narrowed headers state that the
@@ -54,12 +59,12 @@ type FOSSViewDelta struct {
 // component that has none. The renderer asks per component, and a lookup that
 // answers "nothing" for an absent component keeps every call site free of a
 // second branch.
-func (v *FOSSView) DeltaFor(name string) FOSSViewDelta {
+func (v *FOSSView) DeltaFor(id string) FOSSViewDelta {
 	if v == nil {
 		return FOSSViewDelta{}
 	}
 	for _, delta := range v.Components {
-		if delta.Component == name {
+		if delta.ComponentID == id {
 			return delta
 		}
 	}
@@ -81,13 +86,18 @@ func fossView(narrowing []NarrowingCount, document *sbomwriter.Document,
 	existing := copyrightsByComponent(document)
 	for _, entry := range narrowing {
 		view.NarrowedTotal += entry.Count
-		delta := FOSSViewDelta{Component: entry.Component, Narrowed: entry.Count}
-		if reads[entry.Component] {
-			delta.Copyrights = narrowedHeaderCopyright(entry.Headers, existing[entry.Component], resolve, bounds, logger)
+		delta := FOSSViewDelta{Component: entry.Component, ComponentID: entry.ComponentID, Narrowed: entry.Count}
+		if reads[entry.ComponentID] {
+			delta.Copyrights = narrowedHeaderCopyright(entry.Headers, existing[entry.ComponentID], resolve, bounds, logger)
 		}
 		view.Components = append(view.Components, delta)
 	}
-	sort.Slice(view.Components, func(i, j int) bool { return view.Components[i].Component < view.Components[j].Component })
+	sort.Slice(view.Components, func(i, j int) bool {
+		if view.Components[i].Component != view.Components[j].Component {
+			return view.Components[i].Component < view.Components[j].Component
+		}
+		return view.Components[i].ComponentID < view.Components[j].ComponentID
+	})
 	return view
 }
 
@@ -109,7 +119,7 @@ func fossReportedComponents(document *sbomwriter.Document) map[string]bool {
 		if !foss.Reported(component) {
 			continue
 		}
-		reported[component.Name] = true
+		reported[bomRefOfComponent(component)] = true
 	}
 	return reported
 }
@@ -126,7 +136,7 @@ func copyrightsByComponent(document *sbomwriter.Document) map[string]map[string]
 		for _, statement := range component.Copyrights {
 			known[statement.Text] = true
 		}
-		out[component.Name] = known
+		out[bomRefOfComponent(component)] = known
 	}
 	return out
 }
@@ -179,4 +189,13 @@ func readCopyrightWindow(path string, bounds limits.Config) ([]byte, error) {
 	// A limited reader rather than one Read call: a short read is legal and
 	// would silently cut a statement in half.
 	return io.ReadAll(io.LimitReader(file, license.CopyrightWindow))
+}
+
+// bomRefOfComponent is the identity the document carries for a component, which
+// is what the view keys on: a name can belong to two of them.
+func bomRefOfComponent(component domain.Component) string {
+	if component.BomRef != "" {
+		return component.BomRef
+	}
+	return component.ID
 }

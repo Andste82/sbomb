@@ -572,9 +572,10 @@ func TestTheUnionViewAddsCopyrightStatements(t *testing.T) {
 		View: foss.View{
 			NarrowedTotal: 3,
 			Deltas: []foss.ViewDelta{{
-				Component:  "alpha",
-				Narrowed:   3,
-				Copyrights: []domain.CopyrightStatement{statement("Copyright (c) 2026 Holder B")},
+				Component:   "alpha",
+				ComponentID: "component:alpha",
+				Narrowed:    3,
+				Copyrights:  []domain.CopyrightStatement{statement("Copyright (c) 2026 Holder B")},
 			}},
 		},
 	})
@@ -593,4 +594,46 @@ func contains(values []string, want string) bool {
 		}
 	}
 	return false
+}
+
+// Two components can carry one name: section 29 sorts entries by name and
+// breaks the tie on the bom-ref for exactly that reason, and open question Q7
+// records two versions of one package in a single assembly. The licence view
+// is therefore matched on the identity. Keyed by name, both of them took the
+// first delta's statements, and the shippable notices document attributed one
+// component's copyright to another.
+func TestTwoComponentsOfOneNameKeepTheirOwnStatements(t *testing.T) {
+	first := component("mbedtls", func(c *domain.Component) {
+		c.ID = "pkg:conan/mbedtls@2.28"
+		c.BomRef = "pkg:conan/mbedtls@2.28"
+		c.Version = "2.28"
+	})
+	second := component("mbedtls", func(c *domain.Component) {
+		c.ID = "pkg:conan/mbedtls@3.5"
+		c.BomRef = "pkg:conan/mbedtls@3.5"
+		c.Version = "3.5"
+	})
+	files := render(t, foss.Input{
+		Document: documentOf(first, second),
+		View: foss.View{
+			NarrowedTotal: 2,
+			Deltas: []foss.ViewDelta{{
+				Component:   "mbedtls",
+				ComponentID: "pkg:conan/mbedtls@3.5",
+				Narrowed:    1,
+				Copyrights:  []domain.CopyrightStatement{statement("Copyright (c) 2026 Only The Newer One")},
+			}},
+		},
+	})
+
+	notices := files[foss.NoticesFile]
+	if strings.Count(notices, "Only The Newer One") != 1 {
+		t.Errorf("the statement of one component reached %d entries:\n%s",
+			strings.Count(notices, "Only The Newer One"), notices)
+	}
+	// And it reached the right one: the entry that carries 3.5.
+	newer := notices[strings.Index(notices, "3.5"):]
+	if !strings.Contains(newer, "Only The Newer One") {
+		t.Errorf("the statement did not reach the component it belongs to:\n%s", notices)
+	}
 }

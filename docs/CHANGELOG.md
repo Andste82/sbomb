@@ -2,6 +2,17 @@
 
 ## 0.17.0
 
+### One component's copyright no longer reaches another of the same name
+
+The licence view of §32.6 was matched on the component name from end to end —
+the narrowing counts, the read set, what each component already states, and the
+delta the renderer asks for. Two components can carry one name: §29 sorts the
+notices by name and breaks the tie on the bom-ref for exactly that reason, and
+open question Q7 records two versions of one package in a single assembly. Both
+of them took the first delta's statements, so the shippable notices document
+attributed one component's copyright to another. The whole path is keyed on the
+identity now; the name is what is printed, not what is matched.
+
 ### A limit on what the document carries no longer decides what the tool concludes
 
 Retention of §22.9 bounds a licence file at 1 MiB. The bound also skipped the
