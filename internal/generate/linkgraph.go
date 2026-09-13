@@ -118,17 +118,41 @@ func newBuilder(graph *evidence.Graph, anchorResult *anchors.Result, logicalBuil
 // most runs -- the two roots are then equal -- and because a builder made by a
 // test has no source tree at all.
 func (b *builder) setSourceRoots(logical, physical string, flavor pathmodel.Flavor) {
-	b.logicalSource = strings.TrimSuffix(pathmodel.NormalizeSeparators(logical), "/")
-	b.physicalSource = physical
 	b.flavor = flavor
+	b.logicalSource = normalizedRoot(logical, flavor)
+	b.physicalSource = normalizedRoot(physical, flavor)
+}
+
+// normalizedRoot is a source root in the one spelling everything below compares
+// against. Separators alone are not enough: the flavor's own normalizer cleans,
+// and the anchor registry beside this already compares cleaned paths, so a root
+// that arrives as `/ci//proj` or with a `.` segment would match no evidence
+// path at all -- relativeUnder would miss every one of them, physicalFor would
+// hand back the logical path as readable, and a run on the machine that still
+// has the original checkout beside it would read the wrong tree without a
+// refusal and without a finding. A trailing slash is dropped for the same
+// reason in the other direction: `--source-dir /restore/proj/` naming the very
+// tree the build recorded would otherwise count as a relocation.
+func normalizedRoot(root string, flavor pathmodel.Flavor) string {
+	if root == "" {
+		return ""
+	}
+	normalized := flavor.Normalize(root)
+	if normalized == "/" {
+		return normalized
+	}
+	return strings.TrimSuffix(normalized, "/")
 }
 
 // relocatesSource reports whether a path under the logical source root has to
 // be translated before it can be read. Nothing is translated when the two roots
 // are the same string, so a run on the machine that built pays nothing for this.
 func (b *builder) relocatesSource() bool {
+	// Both roots were put in one spelling when they were set, so this is a
+	// string comparison and not a second normalization that could disagree
+	// with the first.
 	return b.logicalSource != "" && b.physicalSource != "" &&
-		pathmodel.NormalizeSeparators(b.physicalSource) != b.logicalSource
+		b.physicalSource != b.logicalSource
 }
 
 // setIntrospection hands over the runner an archive fallback may ask ninja
@@ -715,9 +739,17 @@ func (b *builder) loadNinjaArchiveInputs(buildDir string) {
 }
 
 // Findings returns the findings accumulated while building the graph.
+// Findings hands over what the builder recorded and forgets it, so that a
+// caller which asks again gets what happened since rather than a second copy
+// of everything. identify() still runs after the first call -- the package
+// adapters register their roots through it -- and an UNANCHORED_FILE or a
+// MISSING_FILE_HASH from one of those late calls used to be recorded into a
+// slice nobody read again.
 func (b *builder) Findings() []domain.Finding {
 	sort.SliceStable(b.findings, func(i, j int) bool { return b.findings[i].ID < b.findings[j].ID })
-	return b.findings
+	taken := b.findings
+	b.findings = nil
+	return taken
 }
 
 func kindForPath(path string) domain.NodeKind {

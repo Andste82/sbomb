@@ -269,3 +269,78 @@ func equalStrings(a, b []string) bool {
 	}
 	return true
 }
+
+// `--source-dir .` is a path like any other. Section 3 defaults project.root
+// to "." when nothing configured it, and the relocation of section 7.9 told
+// the two apart by that string -- so a user standing in the restored source
+// tree and typing the shortest thing that names it got no relocation at all:
+// every licence NOASSERTION, and SOURCE_TREE_UNAVAILABLE advising them to
+// point --source-dir at the tree they had just pointed it at.
+func TestADotSourceDirRelocatesLikeAnyOtherPath(t *testing.T) {
+	buildDir := testutil.CorpusBuildDir(t, "gcc-ninja", "p14-foss")
+	tree := testutil.CorpusSourceTreeCopy(t)
+
+	licencesOf := func(args ...string) map[string]string {
+		t.Helper()
+		output := filepath.Join(t.TempDir(), "out.cdx.json")
+		code, _, stderr := execute(append([]string{"generate", "--build-dir", buildDir,
+			"--policy", "lenient", "--output", output, "--reproducible"}, args...))
+		if code != 0 || stderr != "" {
+			t.Fatalf("generate %v = code %d, stderr %q", args, code, stderr)
+		}
+		data, err := os.ReadFile(output)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var document struct {
+			Components []struct {
+				Name     string `json:"name"`
+				Licenses []struct {
+					License *struct {
+						ID   string `json:"id"`
+						Name string `json:"name"`
+					} `json:"license"`
+					Expression string `json:"expression"`
+				} `json:"licenses"`
+			} `json:"components"`
+		}
+		if err := json.Unmarshal(data, &document); err != nil {
+			t.Fatal(err)
+		}
+		out := map[string]string{}
+		for _, component := range document.Components {
+			for _, entry := range component.Licenses {
+				switch {
+				case entry.Expression != "":
+					out[component.Name] = entry.Expression
+				case entry.License != nil && entry.License.ID != "":
+					out[component.Name] = entry.License.ID
+				case entry.License != nil:
+					out[component.Name] = entry.License.Name
+				}
+			}
+		}
+		return out
+	}
+
+	absolute := licencesOf("--source-dir", tree)
+	if absolute["mit-lib"] != "MIT" {
+		t.Fatalf("the absolute path resolved mit-lib to %q, want MIT", absolute["mit-lib"])
+	}
+
+	// The same tree, named as the working directory.
+	previous, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chdir(tree); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.Chdir(previous) })
+
+	dotted := licencesOf("--source-dir", ".")
+	if dotted["mit-lib"] != absolute["mit-lib"] {
+		t.Errorf("`--source-dir .` resolved mit-lib to %q, want %q as the absolute path did",
+			dotted["mit-lib"], absolute["mit-lib"])
+	}
+}

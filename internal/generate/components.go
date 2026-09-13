@@ -1248,6 +1248,13 @@ func (r *componentResolver) licenseFromPackageManager(name string) (domain.Licen
 	if err != nil || found.Expression == "" {
 		return domain.LicenseFinding{}, false
 	}
+	// The file name, not the path it was read from. ResolveFile names the path
+	// it opened, which is where a package cache happens to sit on this machine
+	// -- section 7.8 keeps such a path out of the document, and publishing it
+	// as sbomb:license:source made two runs on two machines produce two
+	// documents from one build. licenseFromRetained says the same thing about
+	// the same field a few lines below.
+	found.Source = filepath.Base(managed.LicenseFile)
 	found.Evidence = "component-level"
 	return found, true
 }

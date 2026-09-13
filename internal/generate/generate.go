@@ -635,6 +635,10 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		},
 	})
 	findings = append(findings, packageConflicts...)
+	// Again, because registering a package root goes through identify: a root
+	// the adapters reported that is unanchored, or whose read was refused,
+	// says so here and nowhere earlier.
+	findings = append(findings, b.Findings()...)
 	if replyModel != nil {
 		byFile, targetConflicts := targetsByFile(replyModel, b)
 		resolver.setTargets(byFile)
