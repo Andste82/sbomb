@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.17.0
+## 0.18.0
 
 ### `explain --component` answers
 
@@ -1141,18 +1141,6 @@ what a component is licensed under. Component mapping replaced it before the
 first published release, and the walk was left standing: unreachable from any
 run, and asserted by a test. Both are gone.
 
-### MSVC and Visual Studio builds are supported
-
-MSVC builds using Ninja or Ninja Multi-Config are supported through compiler,
-Ninja dependency and linker-map evidence. Visual Studio 17 2022 builds are
-supported through MSBuild `.tlog` evidence, including object/source mappings,
-headers and link inputs. Use `--config-name` for a multi-config build and
-`--path-flavor windows` when analyzing Windows evidence from Linux.
-
-PDB parsing remains out of scope. MSVC header evidence therefore comes from
-`/showIncludes`, Ninja dependencies or MSBuild TLogs, and a build may report
-`DEBUG_INFO_UNAVAILABLE` where a DWARF-based build would provide debug evidence.
-
 ### A copied-in library can now get its version from the manifest lying beside it
 
 A library somebody vendored into your tree — no package manager, no lock file,
@@ -1595,6 +1583,20 @@ structure the next step needs, put in place on its own so that it can be
 reviewed on its own.
 `docs/dev/spec.md` §21.1 states the ranking, and deviation D32 says why it was
 needed and why the checkout sits above the declarations.
+
+## 0.17.0
+
+### MSVC and Visual Studio builds are supported
+
+MSVC builds using Ninja or Ninja Multi-Config are supported through compiler,
+Ninja dependency and linker-map evidence. Visual Studio 17 2022 builds are
+supported through MSBuild `.tlog` evidence, including object/source mappings,
+headers and link inputs. Use `--config-name` for a multi-config build and
+`--path-flavor windows` when analyzing Windows evidence from Linux.
+
+PDB parsing remains out of scope. MSVC header evidence therefore comes from
+`/showIncludes`, Ninja dependencies or MSBuild TLogs, and a build may report
+`DEBUG_INFO_UNAVAILABLE` where a DWARF-based build would provide debug evidence.
 
 ### The introspection allowlist now describes what sbomb can actually do
 
