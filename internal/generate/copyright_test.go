@@ -9,6 +9,7 @@ import (
 	"github.com/example/sbomb/internal/config"
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/license"
+	"github.com/example/sbomb/internal/limits"
 	"github.com/example/sbomb/internal/testutil"
 )
 
@@ -26,7 +27,7 @@ func copyrightOf(t *testing.T, root, name string, files []domain.UsedFile,
 	if curated.Path != "" {
 		cfg.Components = []config.Component{curated}
 	}
-	resolver := newComponentResolver(cfg, physical, map[string]string{"project": root}, nil)
+	resolver := newComponentResolver(cfg, physical, map[string]string{"project": root}, limits.Config{}, nil)
 	resolver.setCopyrightStatements(observed)
 	// The role is settled before a component is described (section 24.5), so
 	// the helper sets it the way groupFilesByComponent does. FOSS_COPYRIGHT_

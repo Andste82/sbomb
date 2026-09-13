@@ -83,10 +83,13 @@ func TestARetainedLicenceTextSurvivesTheDocumentUnchanged(t *testing.T) {
 			if string(decoded) != retainedMIT {
 				t.Errorf("decoded text = %q, want the retained bytes", decoded)
 			}
-			// The text came out of the component's own file, so the claim is
-			// declared rather than concluded.
-			if entry.Acknowledgement != "declared" {
-				t.Errorf("acknowledgement = %q, want declared", entry.Acknowledgement)
+			// The identifier here came from a digest match: sbomb compared
+			// the bytes against the SPDX catalogue and concluded. Only
+			// technique 1 -- the component writing SPDX-License-Identifier
+			// into its own file -- is a declaration, and the field is what a
+			// consumer filters on to tell the two apart.
+			if entry.Acknowledgement != "concluded" {
+				t.Errorf("acknowledgement = %q, want concluded for a digest match", entry.Acknowledgement)
 			}
 			// A NOTICE is retained for reproduction and is not licence
 			// evidence; requirement R4 turns on the two not being confused.
@@ -230,5 +233,64 @@ func TestARetainedTextAttachesToAnObservationOfTheSameLicence(t *testing.T) {
 	}
 	if licenses[0].License.Text == nil {
 		t.Error("the observation did not receive the retained text")
+	}
+}
+
+// CycloneDX draws one line in `acknowledgement`: `declared` is what the
+// authors of a component state, `concluded` is what somebody worked out. Only
+// technique 1 of section 22.3 is the first -- the component wrote
+// SPDX-License-Identifier into its own file. A digest, a template or a
+// normalized-text match is the second, whatever else is true of the bytes, and
+// a curated value is a conclusion by definition.
+func TestAcknowledgementSaysWhoStatedTheIdentifier(t *testing.T) {
+	for _, testCase := range []struct {
+		name      string
+		technique string
+		detected  string
+		curated   string
+		want      string
+	}{
+		{name: "the component wrote the identifier", technique: "spdx-identifier", detected: "MIT", want: "declared"},
+		{name: "a digest match is analysis", technique: "spdx-digest", detected: "MIT", want: "concluded"},
+		{name: "a template match is analysis", technique: "spdx-template", detected: "MIT", want: "concluded"},
+		{name: "a curated value overrides both", technique: "spdx-identifier", detected: "MIT", curated: "Apache-2.0", want: "concluded"},
+		{name: "nothing recognized states nothing", technique: "", detected: "", want: ""},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			document := licenseTextDocument()
+			document.Components[0].LicenseArtifacts = []domain.LicenseArtifact{{
+				Kind:       domain.LicenseArtifactLicense,
+				File:       domain.FileID{Anchor: "project", RelPath: "dep/mit-lib/LICENSE"},
+				SHA256:     strings.Repeat("f", 64),
+				Bytes:      []byte(retainedMIT),
+				DetectedID: testCase.detected,
+				Technique:  testCase.technique,
+			}}
+			if testCase.curated != "" {
+				document.Components[0].Licenses = []domain.LicenseFinding{{
+					Expression: testCase.curated, Evidence: "component-level", Source: "curated",
+				}}
+			}
+			data, err := MarshalDocument(document, sbomwriter.Options{
+				SpecVersion: Version16, LicenseText: sbomwriter.LicenseTextEvidence, Reproducible: true,
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := Validate(data); err != nil {
+				t.Fatalf("the document is invalid: %v", err)
+			}
+			component := componentNamed(t, data, "mit-lib")
+			if component.Evidence == nil || len(component.Evidence.Licenses) != 1 {
+				t.Fatalf("evidence.licenses = %#v, want the one retained grant", component.Evidence)
+			}
+			entry := component.Evidence.Licenses[0].License
+			if entry == nil {
+				t.Fatal("the retained text is not in the document")
+			}
+			if entry.Acknowledgement != testCase.want {
+				t.Errorf("acknowledgement = %q, want %q", entry.Acknowledgement, testCase.want)
+			}
+		})
 	}
 }

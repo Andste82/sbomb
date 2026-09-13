@@ -590,7 +590,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 			anchorRoots[anchor.Key] = physical
 		}
 	}
-	resolver := newComponentResolver(cfg, b.physical, anchorRoots, logger)
+	resolver := newComponentResolver(cfg, b.physical, anchorRoots, options.Limits, logger)
 	// The same runner the package-manager adapters used: it already carries
 	// the run's anchors and its log, and a second one would be a second truth
 	// about what sbomb is allowed to execute.

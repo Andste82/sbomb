@@ -127,8 +127,13 @@ func TestTheDocumentCarriesTheComponentsOwnLicenceBytes(t *testing.T) {
 	}
 
 	mit := byComponent["mit-lib"]
-	if len(mit) != 1 || mit[0].id != "MIT" || mit[0].acknowledgement != "declared" {
-		t.Fatalf("mit-lib carries %#v, want one declared MIT text", mit)
+	// `concluded`, not `declared`: the fixture's LICENSE is the MIT text with
+	// its holder filled in and no SPDX-License-Identifier line, so technique 4
+	// recognized it -- sbomb compared the bytes against the SPDX templates and
+	// worked the identifier out. CycloneDX reserves `declared` for what the
+	// authors of a component state about it.
+	if len(mit) != 1 || mit[0].id != "MIT" || mit[0].acknowledgement != "concluded" {
+		t.Fatalf("mit-lib carries %#v, want one concluded MIT text", mit)
 	}
 	onDisk, err := os.ReadFile(filepath.Join(testutil.CorpusSourceTree(t), "dep", "mit-lib", "LICENSE"))
 	if err != nil {
