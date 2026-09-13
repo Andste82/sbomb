@@ -18,6 +18,7 @@ import (
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/evidence"
 	"github.com/example/sbomb/internal/exec"
+	"github.com/example/sbomb/internal/foss"
 	"github.com/example/sbomb/internal/generate"
 	"github.com/example/sbomb/internal/inventory"
 	"github.com/example/sbomb/internal/limits"
@@ -406,6 +407,7 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 	// content switch -- the document is byte-identical with and without it
 	// (decision B1).
 	fossOut := ""
+	fossFormat := ""
 	var introspectionGroups []string
 	var bounds limits.Config
 	for i := 0; i < len(args); i++ {
@@ -612,6 +614,14 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 			i++
 		case strings.HasPrefix(args[i], "--foss-out="):
 			fossOut = strings.TrimPrefix(args[i], "--foss-out=")
+		case args[i] == "--foss-format":
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --foss-format\n"
+			}
+			fossFormat = args[i+1]
+			i++
+		case strings.HasPrefix(args[i], "--foss-format="):
+			fossFormat = strings.TrimPrefix(args[i], "--foss-format=")
 		case args[i] == "--findings-json":
 			if i+1 >= len(args) {
 				return 1, "", "missing value for --findings-json\n"
@@ -647,6 +657,18 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 	}
 	if buildDir == "" {
 		return 1, "", "--build-dir is required\n"
+	}
+	// Same reasoning for the FOSS rendering: refused before anything is read.
+	// A rendering selected for an output nobody asked for has nothing to act
+	// on, and section 32.2 forbids accepting a flag and ignoring it.
+	if fossFormat != "" {
+		if fossOut == "" {
+			return 1, "", "--foss-format selects the rendering --foss-out writes, and there is no --foss-out\n"
+		}
+		if fossFormat != foss.FormatText && fossFormat != foss.FormatMarkdown {
+			return 1, "", fmt.Sprintf("invalid value for --foss-format: %s; use %s or %s\n",
+				fossFormat, foss.FormatText, foss.FormatMarkdown)
+		}
 	}
 	// A version no writer emits is a usage error, refused here rather than at
 	// the write: nothing should be read, created or discovered on the strength
@@ -866,6 +888,7 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 			SpecVersion:  loadedCfg.Output.SpecVersion,
 			TLP:          loadedCfg.Output.TLP,
 			Reproducible: repro,
+			Format:       fossFormat,
 		}); err != nil {
 			return 1, logBuf.String(), err.Error() + "\n"
 		}

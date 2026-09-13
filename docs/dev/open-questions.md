@@ -379,26 +379,25 @@ rather than in the waiver file, the change is a `waiver` sub-object on the
 finding rather than three more top-level strings, and it belongs with whatever
 else widens that schema next.
 
-## Q17 — `generate --foss-out` writes the text rendering and cannot select markdown
+## Q17 — reserved
 
-§32.6 gives `sbomb foss` a `--format text|markdown` and gives `generate` only
-`--foss-out <dir>`. Milestone F7 lists exactly that flag surface, so `generate`
-has no rendering flag: `--foss-out` writes the text rendering, and a user who
-wants the markdown one runs `sbomb foss`. An earlier draft of F7 did add
-`--foss-format` to `generate`; it was removed as surface no milestone asked
-for.
+**Settled: the flag was built.** `generate --foss-format text|markdown`
+selects the rendering `--foss-out` writes, with the same two values and the
+same default as `foss --format`. It is spelled `--foss-format` because
+`--format` on `generate` already names the SBOM writer.
 
-The asymmetry is real rather than principled. `--review-report` has
-`--report-format` beside it, which is the same shape of question, and a CI job
-that produces the SBOM and the notices in one run is exactly the case where the
-rendering would be chosen. Against it: every flag on `generate` is a flag
-forever, the renderings are house style anyway (§32.6), and the two entry
-points are one code path — so whatever is decided must keep them
-byte-identical, which is asserted today for the text rendering only.
+The question had recorded the flag as absent because no milestone asked for
+it, which is a reason to leave surface out and not a reason a user can act on.
+§32.6 requires the two entry points to produce byte-identical files for the
+same build, and a rendering only one of them could reach was the closest thing
+to a contradiction of that: the same discovery, the same renderer, and one of
+the two callers unable to choose. Nothing had to be built for it — the
+`Format` field was already on the struct both entry points fill
+(`cmd/sbomb/foss.go`), and `generate` was the only caller leaving it empty.
 
-Deciding it needs no evidence and no fixture, only a view on whether `generate`
-should carry a second output's rendering flag. Recorded here so that the
-asymmetry is a decision and not an oversight.
+`--foss-format` without `--foss-out` is a usage error rather than a silent
+no-op, which is what §32.2 says about a flag that cannot be honoured. The
+number stays reserved so that references to Q18 and later keep their meaning.
 
 ## Q18 — Nothing tests the composite action end to end
 
