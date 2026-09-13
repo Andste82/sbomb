@@ -6,7 +6,9 @@ evaluation. Use `--findings-json <path>` for machine-readable output and
 the nine sections of the specification.
 
 The JSON field names are normative: `id`, `severity`, `subject`, `message`,
-`detail`, `evidence`, `remediation`, `waived`, `waiverReason`. Findings are
+`detail`, `evidence`, `remediation`, `waived`, `waiver`. `waiver` is present on
+a waived finding only and carries `reason`, `approvedBy` and `expires` as the
+waiver file stated them. Findings are
 sorted by `(id, subject.kind, subject.ref, message)` so that two runs of the
 same build produce identical output.
 

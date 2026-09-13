@@ -19,6 +19,7 @@ import (
 	"strings"
 
 	"github.com/example/sbomb/internal/config"
+	"github.com/example/sbomb/internal/policy"
 )
 
 var fence = regexp.MustCompile("(?s)```json\\n(.*?)```")
@@ -49,6 +50,14 @@ func main() {
 			continue
 		}
 		for index, match := range fence.FindAllStringSubmatch(string(data), -1) {
+			if looksLikeWaivers(match[1]) {
+				checked++
+				if err := loadWaiverExample(match[1]); err != nil {
+					failed++
+					fmt.Fprintf(os.Stderr, "%s block %d: %v\n", document, index+1, err)
+				}
+				continue
+			}
 			var probe map[string]json.RawMessage
 			if json.Unmarshal([]byte(match[1]), &probe) != nil {
 				continue
@@ -87,6 +96,35 @@ func withField(section json.RawMessage, name, value string) json.RawMessage {
 		return section
 	}
 	return completed
+}
+
+// looksLikeWaivers recognizes a waiver example by what a waiver entry contains
+// rather than by the shape of the document around it. The shape is exactly
+// what a wrong example gets wrong: docs/configuration.md showed a bare array
+// for a file the loader reads as an object, and a check keyed on the object
+// would have skipped it as "something else".
+func looksLikeWaivers(block string) bool {
+	return strings.Contains(block, `"id"`) &&
+		strings.Contains(block, `"subject"`) &&
+		strings.Contains(block, `"reason"`)
+}
+
+// loadWaiverExample runs a block through the loader a real run uses, from a
+// file, because that is the only entry point there is.
+func loadWaiverExample(block string) error {
+	file := filepath.Join(os.TempDir(), "docexamples-waivers.json")
+	if err := os.WriteFile(file, []byte(block), 0o600); err != nil {
+		return err
+	}
+	defer os.Remove(file)
+	waivers, err := policy.LoadWaivers(file)
+	if err != nil {
+		return err
+	}
+	if len(waivers) == 0 {
+		return fmt.Errorf("the example parses but states no waiver, so a reader copying it silences nothing")
+	}
+	return nil
 }
 
 func looksLikeConfiguration(probe map[string]json.RawMessage) bool {

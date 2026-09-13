@@ -204,7 +204,7 @@ func RenderReview(in ReviewInput) string {
 			b.WriteString("waived\n")
 		}
 		waived++
-		fmt.Fprintf(&b, "- %s: %s (%s)\n", finding.ID, finding.Subject.Ref, finding.WaiverReason)
+		fmt.Fprintf(&b, "- %s: %s (%s)\n", finding.ID, finding.Subject.Ref, waiverSummary(finding.Waiver))
 	}
 
 	// 8. Policy result.
@@ -350,4 +350,28 @@ func sortedKeys(counts map[string]int) []string {
 	}
 	sort.Strings(keys)
 	return keys
+}
+
+// waiverSummary renders what the waiver said, in one line: the reason, then
+// who accepted it and until when where the waiver states them. A waiver
+// without a reason is still a waiver, so the dash stands in rather than
+// leaving an empty pair of brackets.
+func waiverSummary(record *domain.WaiverRecord) string {
+	if record == nil {
+		return "-"
+	}
+	parts := make([]string, 0, 3)
+	if record.Reason != "" {
+		parts = append(parts, record.Reason)
+	}
+	if record.ApprovedBy != "" {
+		parts = append(parts, "approved by "+record.ApprovedBy)
+	}
+	if record.Expires != "" {
+		parts = append(parts, "expires "+record.Expires)
+	}
+	if len(parts) == 0 {
+		return "-"
+	}
+	return strings.Join(parts, "; ")
 }

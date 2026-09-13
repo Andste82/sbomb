@@ -407,10 +407,12 @@ func TestAWaiverDoesNotChangeTheNoticesDocument(t *testing.T) {
 		"[no copyright statement found in component - attribution incomplete]") {
 		t.Error("the incompleteness marker was removed by a waiver")
 	}
+	// Section 26.1: the record carries what the waiver said, and the approver
+	// is the part an audit asks for before it asks for the reason.
 	review := waived[foss.ReviewTextFile]
 	if !strings.Contains(review, "FOSS_COPYRIGHT_MISSING") ||
-		!strings.Contains(review, "(waived: upstream carries no notice, confirmed by review)") {
-		t.Errorf("the waived finding is not in the review record with its reason:\n%s", review)
+		!strings.Contains(review, "(waived: upstream carries no notice, confirmed by review; approved by a.steinbart; expires 2099-01-31)") {
+		t.Errorf("the waived finding is not in the review record with what the waiver said:\n%s", review)
 	}
 }
 

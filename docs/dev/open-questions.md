@@ -362,22 +362,26 @@ are MIT's, and the finding is the only thing that says a GPL file is in the
 deliverable. The number stays reserved so that references to Q16 and later keep
 their meaning.
 
-## Q16 — The review record shows a waiver's reason and not its approver
+## Q16 — reserved
 
-Decision Q11 says a waived FOSS finding "keeps its reason, approver and expiry
-in the report". `foss-review.txt` prints the reason, because that is what the
-finding carries: `policy.Evaluate` copies `waiver.reason` onto
-`domain.Finding.WaiverReason` and drops `approvedBy` and `expires`
-(`internal/policy/policy.go`). The approver and the expiry are in the waiver
-file, which is committed beside the configuration.
+**Settled: all three reach the report.** A waived finding carries a `waiver`
+object with `reason`, `approvedBy` and `expires`, in `findings.json` and in
+both review records. Decision Q11 of the FOSS plan had asked for exactly that,
+and the question recorded why F7 left it: carrying the approver meant widening
+`domain.Finding`, which is the findings JSON, whose field names appendix A is
+normative about.
 
-Carrying them would mean widening `domain.Finding` — and therefore the findings
-JSON, which is a format other tools read (appendix A is normative about its
-field names). That is a change to a consumed format for information that is one
-file away, so F7 left it alone. If an auditor wants the approver in the record
-rather than in the waiver file, the change is a `waiver` sub-object on the
-finding rather than three more top-level strings, and it belongs with whatever
-else widens that schema next.
+Widening it was the right call, and the shape the question sketched is the one
+that was built: one object rather than three fields beside `waived`. Three
+fields would have carried the reason twice, since `waiverReason` was already
+there; the object replaces it. An audit asks for the approver before it asks
+for the reason -- a reason is an assertion, and the approver is the person
+answering for it -- so an acceptance decision that records who accepted it
+nowhere is the wrong half to keep.
+
+Removing a field is what `schemaVersion` exists for, and the findings document
+is at 2. The number stays reserved so that references to Q17 and later keep
+their meaning.
 
 ## Q17 — reserved
 

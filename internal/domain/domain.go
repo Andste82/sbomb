@@ -378,15 +378,34 @@ const (
 // names are normative: a consumer greps for "id" and "severity", not for Go
 // field names.
 type Finding struct {
-	ID           string         `json:"id"`
-	Severity     Severity       `json:"severity"`
-	Subject      Subject        `json:"subject"`
-	Message      string         `json:"message"`
-	Detail       map[string]any `json:"detail,omitempty"`
-	Evidence     []string       `json:"evidence,omitempty"`
-	Remediation  string         `json:"remediation,omitempty"`
-	Waived       bool           `json:"waived"`
-	WaiverReason string         `json:"waiverReason,omitempty"`
+	ID          string         `json:"id"`
+	Severity    Severity       `json:"severity"`
+	Subject     Subject        `json:"subject"`
+	Message     string         `json:"message"`
+	Detail      map[string]any `json:"detail,omitempty"`
+	Evidence    []string       `json:"evidence,omitempty"`
+	Remediation string         `json:"remediation,omitempty"`
+	Waived      bool           `json:"waived"`
+	Waiver      *WaiverRecord  `json:"waiver,omitempty"`
+}
+
+// WaiverRecord is what the waiver that silenced a finding said. All three
+// values travel together because they are one statement: somebody accepted
+// this finding, for this reason, until this date.
+//
+// They are one object rather than three fields beside Waived so that the
+// reason is not carried twice -- an earlier shape had waiverReason on the
+// finding and the rest in the waiver file, and a reader had to know that the
+// two belonged together.
+type WaiverRecord struct {
+	Reason string `json:"reason,omitempty"`
+	// ApprovedBy is who accepted the finding. It is the part an audit asks
+	// for: a reason is an assertion, and this is the person answering for it.
+	ApprovedBy string `json:"approvedBy,omitempty"`
+	// Expires is the day the acceptance stops, as the waiver file wrote it --
+	// a date or an RFC 3339 timestamp. A waiver past it does not silence
+	// anything and raises WAIVER_EXPIRED instead.
+	Expires string `json:"expires,omitempty"`
 }
 
 type Subject struct {
