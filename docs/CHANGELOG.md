@@ -2,6 +2,33 @@
 
 ## 0.17.0
 
+### A file that declares a licence its component does not is now reported
+
+A dependency directory is not always one upstream. A file copied in from
+another project keeps its own `SPDX-License-Identifier`, and §22.2 stops at the
+first identifier it reads -- so the component resolves to whichever file came
+first, its obligations are that licence's obligations, and nothing in the
+document says the other licence is in the deliverable at all.
+
+`FOSS_PER_FILE_LICENSE_DIVERGENCE` (info, §22.5) says it. The threshold is what
+the component states about itself: an identifier the resolved expression
+accounts for is not reported, so a dual-licensed dependency that resolved to
+`MIT OR Apache-2.0` stays silent whether its files say `MIT`, `Apache-2.0` or
+both. What is reported is the leftover -- the `GPL-2.0-only` inside a component
+that resolved to `MIT`.
+
+This is not `LICENSE_CONFLICT`, and §22.5 now says why: a conflict is two
+sources disagreeing about one licence, and this is two upstreams in one
+directory, where both readings are right. The remediation is accordingly
+different -- map the two with `components[]` so each is described under its own
+licence, rather than decide which of them is wrong.
+
+The identifiers ride the hashing pass that already reads every used file for
+copyright notices, so no file is opened a second time for this. `p14-foss`
+gained `dep/vendored-mix` as the case: MIT by its `LICENSE` and by its own
+source, with one vendored file still declaring `GPL-2.0-only`. This closes the
+last open question of the FOSS attribution track, Q15.
+
 ### An assembly says which deliverable pulled in a component
 
 §6.2 and §6.3 have always required it: in assembly mode each artifact is a

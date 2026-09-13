@@ -13,6 +13,10 @@ libnolicense_lib.a(nolicense.c.o)
                               CMakeFiles/fossapp.dir/src/main.c.o (nolicense_sum)
 libnocopyright_lib.a(nocopyright.c.o)
                               CMakeFiles/fossapp.dir/src/main.c.o (nocopyright_mix)
+libvendored_mix.a(mix_core.c.o)
+                              CMakeFiles/fossapp.dir/src/main.c.o (mix_core)
+libvendored_mix.a(mix_vendored_crc.c.o)
+                              libvendored_mix.a(mix_core.c.o) (mix_vendored_crc)
 
 Merging program properties
 
@@ -74,6 +78,14 @@ Discarded input sections
  .note.gnu.property
                 0x0000000000000000       0x20 libnocopyright_lib.a(nocopyright.c.o)
  .note.GNU-stack
+                0x0000000000000000        0x0 libvendored_mix.a(mix_core.c.o)
+ .note.gnu.property
+                0x0000000000000000       0x20 libvendored_mix.a(mix_core.c.o)
+ .note.GNU-stack
+                0x0000000000000000        0x0 libvendored_mix.a(mix_vendored_crc.c.o)
+ .note.gnu.property
+                0x0000000000000000       0x20 libvendored_mix.a(mix_vendored_crc.c.o)
+ .note.GNU-stack
                 0x0000000000000000        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o
  .note.gnu.property
                 0x0000000000000000       0x20 /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o
@@ -100,6 +112,7 @@ LOAD liblgpl_lib.a
 LOAD libmulti_lib.a
 LOAD libnolicense_lib.a
 LOAD libnocopyright_lib.a
+LOAD libvendored_mix.a
 LOAD /usr/lib/gcc/x86_64-linux-gnu/13/libgcc.a
 LOAD /usr/lib/gcc/x86_64-linux-gnu/13/libgcc_s.so
 START GROUP
@@ -228,7 +241,7 @@ LOAD /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
  .plt.sec       0x0000000000001050       0x10 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
                 0x0000000000001050                printf@@GLIBC_2.2.5
 
-.text           0x0000000000001060      0x25d
+.text           0x0000000000001060      0x2a2
  *(.text.unlikely .text.*_unlikely .text.unlikely.*)
  *(.text.exit .text.exit.*)
  *(.text.startup .text.startup.*)
@@ -240,34 +253,38 @@ LOAD /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
  .text          0x0000000000001086        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o
  *fill*         0x0000000000001086        0xa 
  .text          0x0000000000001090       0xb9 /usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o
- .text          0x0000000000001149       0xb8 CMakeFiles/fossapp.dir/src/main.c.o
+ .text          0x0000000000001149       0xc5 CMakeFiles/fossapp.dir/src/main.c.o
                 0x0000000000001157                main
- .text          0x0000000000001201        0x0 CMakeFiles/fossapp.dir/generated/table.c.o
- .text          0x0000000000001201       0x13 libmit_lib.a(mit_a.c.o)
-                0x0000000000001201                mit_used_a
- .text          0x0000000000001214       0x12 libapache_lib.a(apache_one.c.o)
-                0x0000000000001214                apache_one
- .text          0x0000000000001226       0x16 libapache_lib.a(apache_two.c.o)
-                0x0000000000001226                apache_two
- .text          0x000000000000123c       0x13 liblgpl_lib.a(lgpl_core.c.o)
-                0x000000000000123c                lgpl_core
- .text          0x000000000000124f       0x13 liblgpl_lib.a(lgpl_extra.c.o)
-                0x000000000000124f                lgpl_extra
- .text          0x0000000000001262       0x35 libmulti_lib.a(multi.c.o)
-                0x0000000000001262                multi_pick
- .text          0x0000000000001297       0x13 libnolicense_lib.a(nolicense.c.o)
-                0x0000000000001297                nolicense_sum
- .text          0x00000000000012aa       0x13 libnocopyright_lib.a(nocopyright.c.o)
-                0x00000000000012aa                nocopyright_mix
- .text          0x00000000000012bd        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o
- .text          0x00000000000012bd        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
+ .text          0x000000000000120e        0x0 CMakeFiles/fossapp.dir/generated/table.c.o
+ .text          0x000000000000120e       0x13 libmit_lib.a(mit_a.c.o)
+                0x000000000000120e                mit_used_a
+ .text          0x0000000000001221       0x12 libapache_lib.a(apache_one.c.o)
+                0x0000000000001221                apache_one
+ .text          0x0000000000001233       0x16 libapache_lib.a(apache_two.c.o)
+                0x0000000000001233                apache_two
+ .text          0x0000000000001249       0x13 liblgpl_lib.a(lgpl_core.c.o)
+                0x0000000000001249                lgpl_core
+ .text          0x000000000000125c       0x13 liblgpl_lib.a(lgpl_extra.c.o)
+                0x000000000000125c                lgpl_extra
+ .text          0x000000000000126f       0x35 libmulti_lib.a(multi.c.o)
+                0x000000000000126f                multi_pick
+ .text          0x00000000000012a4       0x13 libnolicense_lib.a(nolicense.c.o)
+                0x00000000000012a4                nolicense_sum
+ .text          0x00000000000012b7       0x13 libnocopyright_lib.a(nocopyright.c.o)
+                0x00000000000012b7                nocopyright_mix
+ .text          0x00000000000012ca       0x1e libvendored_mix.a(mix_core.c.o)
+                0x00000000000012ca                mix_core
+ .text          0x00000000000012e8       0x1a libvendored_mix.a(mix_vendored_crc.c.o)
+                0x00000000000012e8                mix_vendored_crc
+ .text          0x0000000000001302        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o
+ .text          0x0000000000001302        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
  *(.gnu.warning)
 
-.fini           0x00000000000012c0        0xd
+.fini           0x0000000000001304        0xd
  *(SORT_NONE(.fini))
- .fini          0x00000000000012c0        0x8 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o
-                0x00000000000012c0                _fini
- .fini          0x00000000000012c8        0x5 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
+ .fini          0x0000000000001304        0x8 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crti.o
+                0x0000000000001304                _fini
+ .fini          0x000000000000130c        0x5 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
                 [!provide]                        PROVIDE (__etext = .)
                 [!provide]                        PROVIDE (_etext = .)
                 [!provide]                        PROVIDE (etext = .)
@@ -286,48 +303,52 @@ LOAD /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
 .rodata1
  *(.rodata1)
 
-.eh_frame_hdr   0x0000000000002040       0x7c
+.eh_frame_hdr   0x0000000000002040       0x8c
  *(.eh_frame_hdr)
- .eh_frame_hdr  0x0000000000002040       0x7c /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+ .eh_frame_hdr  0x0000000000002040       0x8c /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
                 0x0000000000002040                __GNU_EH_FRAME_HDR
  *(.eh_frame_entry .eh_frame_entry.*)
 
-.eh_frame       0x00000000000020c0      0x1cc
+.eh_frame       0x00000000000020d0      0x20c
  *(.eh_frame)
- .eh_frame      0x00000000000020c0       0x30 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+ .eh_frame      0x00000000000020d0       0x30 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
                                          0x2c (size before relaxing)
- *fill*         0x00000000000020f0        0x0 
- .eh_frame      0x00000000000020f0       0x28 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+ *fill*         0x0000000000002100        0x0 
+ .eh_frame      0x0000000000002100       0x28 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
                                          0x40 (size before relaxing)
- .eh_frame      0x0000000000002118       0x18 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+ .eh_frame      0x0000000000002128       0x18 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
                                          0x30 (size before relaxing)
- .eh_frame      0x0000000000002130       0x18 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+ .eh_frame      0x0000000000002140       0x18 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
                                          0x30 (size before relaxing)
- .eh_frame      0x0000000000002148       0x40 CMakeFiles/fossapp.dir/src/main.c.o
+ .eh_frame      0x0000000000002158       0x40 CMakeFiles/fossapp.dir/src/main.c.o
                                          0x58 (size before relaxing)
- .eh_frame      0x0000000000002188       0x20 libmit_lib.a(mit_a.c.o)
+ .eh_frame      0x0000000000002198       0x20 libmit_lib.a(mit_a.c.o)
                                          0x38 (size before relaxing)
- .eh_frame      0x00000000000021a8       0x20 libapache_lib.a(apache_one.c.o)
+ .eh_frame      0x00000000000021b8       0x20 libapache_lib.a(apache_one.c.o)
                                          0x38 (size before relaxing)
- .eh_frame      0x00000000000021c8       0x20 libapache_lib.a(apache_two.c.o)
+ .eh_frame      0x00000000000021d8       0x20 libapache_lib.a(apache_two.c.o)
                                          0x38 (size before relaxing)
- .eh_frame      0x00000000000021e8       0x20 liblgpl_lib.a(lgpl_core.c.o)
+ .eh_frame      0x00000000000021f8       0x20 liblgpl_lib.a(lgpl_core.c.o)
                                          0x38 (size before relaxing)
- .eh_frame      0x0000000000002208       0x20 liblgpl_lib.a(lgpl_extra.c.o)
+ .eh_frame      0x0000000000002218       0x20 liblgpl_lib.a(lgpl_extra.c.o)
                                          0x38 (size before relaxing)
- .eh_frame      0x0000000000002228       0x20 libmulti_lib.a(multi.c.o)
+ .eh_frame      0x0000000000002238       0x20 libmulti_lib.a(multi.c.o)
                                          0x38 (size before relaxing)
- .eh_frame      0x0000000000002248       0x20 libnolicense_lib.a(nolicense.c.o)
+ .eh_frame      0x0000000000002258       0x20 libnolicense_lib.a(nolicense.c.o)
                                          0x38 (size before relaxing)
- .eh_frame      0x0000000000002268       0x20 libnocopyright_lib.a(nocopyright.c.o)
+ .eh_frame      0x0000000000002278       0x20 libnocopyright_lib.a(nocopyright.c.o)
                                          0x38 (size before relaxing)
- .eh_frame      0x0000000000002288        0x4 /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o
+ .eh_frame      0x0000000000002298       0x20 libvendored_mix.a(mix_core.c.o)
+                                         0x38 (size before relaxing)
+ .eh_frame      0x00000000000022b8       0x20 libvendored_mix.a(mix_vendored_crc.c.o)
+                                         0x38 (size before relaxing)
+ .eh_frame      0x00000000000022d8        0x4 /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o
  *(.eh_frame.*)
 
-.sframe         0x000000000000228c        0x0
+.sframe         0x00000000000022dc        0x0
  *(.sframe)
- .sframe        0x000000000000228c        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
- .sframe        0x000000000000228c        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+ .sframe        0x00000000000022dc        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
+ .sframe        0x00000000000022dc        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/Scrt1.o
  *(.sframe.*)
 
 .gcc_except_table
@@ -442,6 +463,8 @@ LOAD /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
  .data          0x0000000000004010        0x0 libmulti_lib.a(multi.c.o)
  .data          0x0000000000004010        0x0 libnolicense_lib.a(nolicense.c.o)
  .data          0x0000000000004010        0x0 libnocopyright_lib.a(nocopyright.c.o)
+ .data          0x0000000000004010        0x0 libvendored_mix.a(mix_core.c.o)
+ .data          0x0000000000004010        0x0 libvendored_mix.a(mix_vendored_crc.c.o)
  .data          0x0000000000004010        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o
  .data          0x0000000000004010        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
 
@@ -476,6 +499,8 @@ LOAD /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
  .bss           0x0000000000004011        0x0 libmulti_lib.a(multi.c.o)
  .bss           0x0000000000004011        0x0 libnolicense_lib.a(nolicense.c.o)
  .bss           0x0000000000004011        0x0 libnocopyright_lib.a(nocopyright.c.o)
+ .bss           0x0000000000004011        0x0 libvendored_mix.a(mix_core.c.o)
+ .bss           0x0000000000004011        0x0 libvendored_mix.a(mix_vendored_crc.c.o)
  .bss           0x0000000000004011        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o
  .bss           0x0000000000004011        0x0 /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
  *(COMMON)
@@ -532,6 +557,8 @@ LOAD /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
  .comment       0x000000000000002d       0x2e libmulti_lib.a(multi.c.o)
  .comment       0x000000000000002d       0x2e libnolicense_lib.a(nolicense.c.o)
  .comment       0x000000000000002d       0x2e libnocopyright_lib.a(nocopyright.c.o)
+ .comment       0x000000000000002d       0x2e libvendored_mix.a(mix_core.c.o)
+ .comment       0x000000000000002d       0x2e libvendored_mix.a(mix_vendored_crc.c.o)
  .comment       0x000000000000002d       0x2e /usr/lib/gcc/x86_64-linux-gnu/13/crtendS.o
 
 .gnu.build.attributes
@@ -549,7 +576,7 @@ LOAD /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
 .debug_sfnames
  *(.debug_sfnames)
 
-.debug_aranges  0x0000000000000000      0x1d0
+.debug_aranges  0x0000000000000000      0x230
  *(.debug_aranges)
  .debug_aranges
                 0x0000000000000000       0x30 CMakeFiles/fossapp.dir/src/main.c.o
@@ -571,24 +598,30 @@ LOAD /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
                 0x0000000000000170       0x30 libnolicense_lib.a(nolicense.c.o)
  .debug_aranges
                 0x00000000000001a0       0x30 libnocopyright_lib.a(nocopyright.c.o)
+ .debug_aranges
+                0x00000000000001d0       0x30 libvendored_mix.a(mix_core.c.o)
+ .debug_aranges
+                0x0000000000000200       0x30 libvendored_mix.a(mix_vendored_crc.c.o)
 
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x0000000000000000      0x55c
+.debug_info     0x0000000000000000      0x653
  *(.debug_info .gnu.linkonce.wi.*)
- .debug_info    0x0000000000000000      0x1bf CMakeFiles/fossapp.dir/src/main.c.o
- .debug_info    0x00000000000001bf       0x5d CMakeFiles/fossapp.dir/generated/table.c.o
- .debug_info    0x000000000000021c       0x68 libmit_lib.a(mit_a.c.o)
- .debug_info    0x0000000000000284       0x68 libapache_lib.a(apache_one.c.o)
- .debug_info    0x00000000000002ec       0x68 libapache_lib.a(apache_two.c.o)
- .debug_info    0x0000000000000354       0x68 liblgpl_lib.a(lgpl_core.c.o)
- .debug_info    0x00000000000003bc       0x68 liblgpl_lib.a(lgpl_extra.c.o)
- .debug_info    0x0000000000000424       0x68 libmulti_lib.a(multi.c.o)
- .debug_info    0x000000000000048c       0x68 libnolicense_lib.a(nolicense.c.o)
- .debug_info    0x00000000000004f4       0x68 libnocopyright_lib.a(nocopyright.c.o)
+ .debug_info    0x0000000000000000      0x1d4 CMakeFiles/fossapp.dir/src/main.c.o
+ .debug_info    0x00000000000001d4       0x5d CMakeFiles/fossapp.dir/generated/table.c.o
+ .debug_info    0x0000000000000231       0x68 libmit_lib.a(mit_a.c.o)
+ .debug_info    0x0000000000000299       0x68 libapache_lib.a(apache_one.c.o)
+ .debug_info    0x0000000000000301       0x68 libapache_lib.a(apache_two.c.o)
+ .debug_info    0x0000000000000369       0x68 liblgpl_lib.a(lgpl_core.c.o)
+ .debug_info    0x00000000000003d1       0x68 liblgpl_lib.a(lgpl_extra.c.o)
+ .debug_info    0x0000000000000439       0x68 libmulti_lib.a(multi.c.o)
+ .debug_info    0x00000000000004a1       0x68 libnolicense_lib.a(nolicense.c.o)
+ .debug_info    0x0000000000000509       0x68 libnocopyright_lib.a(nocopyright.c.o)
+ .debug_info    0x0000000000000571       0x7a libvendored_mix.a(mix_core.c.o)
+ .debug_info    0x00000000000005eb       0x68 libvendored_mix.a(mix_vendored_crc.c.o)
 
-.debug_abbrev   0x0000000000000000      0x3ac
+.debug_abbrev   0x0000000000000000      0x462
  *(.debug_abbrev)
  .debug_abbrev  0x0000000000000000       0xf2 CMakeFiles/fossapp.dir/src/main.c.o
  .debug_abbrev  0x00000000000000f2       0x52 CMakeFiles/fossapp.dir/generated/table.c.o
@@ -600,36 +633,42 @@ LOAD /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
  .debug_abbrev  0x00000000000002c5       0x4d libmulti_lib.a(multi.c.o)
  .debug_abbrev  0x0000000000000312       0x4d libnolicense_lib.a(nolicense.c.o)
  .debug_abbrev  0x000000000000035f       0x4d libnocopyright_lib.a(nocopyright.c.o)
+ .debug_abbrev  0x00000000000003ac       0x69 libvendored_mix.a(mix_core.c.o)
+ .debug_abbrev  0x0000000000000415       0x4d libvendored_mix.a(mix_vendored_crc.c.o)
 
-.debug_line     0x0000000000000000      0x3e2
+.debug_line     0x0000000000000000      0x4b0
  *(.debug_line .debug_line.* .debug_line_end)
- .debug_line    0x0000000000000000      0x107 CMakeFiles/fossapp.dir/src/main.c.o
- .debug_line    0x0000000000000107       0x3a CMakeFiles/fossapp.dir/generated/table.c.o
- .debug_line    0x0000000000000141       0x53 libmit_lib.a(mit_a.c.o)
- .debug_line    0x0000000000000194       0x53 libapache_lib.a(apache_one.c.o)
- .debug_line    0x00000000000001e7       0x53 libapache_lib.a(apache_two.c.o)
- .debug_line    0x000000000000023a       0x53 liblgpl_lib.a(lgpl_core.c.o)
- .debug_line    0x000000000000028d       0x53 liblgpl_lib.a(lgpl_extra.c.o)
- .debug_line    0x00000000000002e0       0x5c libmulti_lib.a(multi.c.o)
- .debug_line    0x000000000000033c       0x53 libnolicense_lib.a(nolicense.c.o)
- .debug_line    0x000000000000038f       0x53 libnocopyright_lib.a(nocopyright.c.o)
+ .debug_line    0x0000000000000000      0x11a CMakeFiles/fossapp.dir/src/main.c.o
+ .debug_line    0x000000000000011a       0x3a CMakeFiles/fossapp.dir/generated/table.c.o
+ .debug_line    0x0000000000000154       0x53 libmit_lib.a(mit_a.c.o)
+ .debug_line    0x00000000000001a7       0x53 libapache_lib.a(apache_one.c.o)
+ .debug_line    0x00000000000001fa       0x53 libapache_lib.a(apache_two.c.o)
+ .debug_line    0x000000000000024d       0x53 liblgpl_lib.a(lgpl_core.c.o)
+ .debug_line    0x00000000000002a0       0x53 liblgpl_lib.a(lgpl_extra.c.o)
+ .debug_line    0x00000000000002f3       0x5c libmulti_lib.a(multi.c.o)
+ .debug_line    0x000000000000034f       0x53 libnolicense_lib.a(nolicense.c.o)
+ .debug_line    0x00000000000003a2       0x53 libnocopyright_lib.a(nocopyright.c.o)
+ .debug_line    0x00000000000003f5       0x63 libvendored_mix.a(mix_core.c.o)
+ .debug_line    0x0000000000000458       0x58 libvendored_mix.a(mix_vendored_crc.c.o)
 
 .debug_frame
  *(.debug_frame)
 
-.debug_str      0x0000000000000000      0x160
+.debug_str      0x0000000000000000      0x17a
  *(.debug_str)
- .debug_str     0x0000000000000000      0x160 CMakeFiles/fossapp.dir/src/main.c.o
-                                        0x17e (size before relaxing)
- .debug_str     0x0000000000000160       0xab CMakeFiles/fossapp.dir/generated/table.c.o
- .debug_str     0x0000000000000160       0x9f libmit_lib.a(mit_a.c.o)
- .debug_str     0x0000000000000160       0x9f libapache_lib.a(apache_one.c.o)
- .debug_str     0x0000000000000160       0x9f libapache_lib.a(apache_two.c.o)
- .debug_str     0x0000000000000160       0x9e liblgpl_lib.a(lgpl_core.c.o)
- .debug_str     0x0000000000000160       0x9f liblgpl_lib.a(lgpl_extra.c.o)
- .debug_str     0x0000000000000160       0x9f libmulti_lib.a(multi.c.o)
- .debug_str     0x0000000000000160       0xa2 libnolicense_lib.a(nolicense.c.o)
- .debug_str     0x0000000000000160       0xa4 libnocopyright_lib.a(nocopyright.c.o)
+ .debug_str     0x0000000000000000      0x17a CMakeFiles/fossapp.dir/src/main.c.o
+                                        0x187 (size before relaxing)
+ .debug_str     0x000000000000017a       0xab CMakeFiles/fossapp.dir/generated/table.c.o
+ .debug_str     0x000000000000017a       0x9f libmit_lib.a(mit_a.c.o)
+ .debug_str     0x000000000000017a       0x9f libapache_lib.a(apache_one.c.o)
+ .debug_str     0x000000000000017a       0x9f libapache_lib.a(apache_two.c.o)
+ .debug_str     0x000000000000017a       0x9e liblgpl_lib.a(lgpl_core.c.o)
+ .debug_str     0x000000000000017a       0x9f liblgpl_lib.a(lgpl_extra.c.o)
+ .debug_str     0x000000000000017a       0x9f libmulti_lib.a(multi.c.o)
+ .debug_str     0x000000000000017a       0xa2 libnolicense_lib.a(nolicense.c.o)
+ .debug_str     0x000000000000017a       0xa4 libnocopyright_lib.a(nocopyright.c.o)
+ .debug_str     0x000000000000017a       0xae libvendored_mix.a(mix_core.c.o)
+ .debug_str     0x000000000000017a       0xa5 libvendored_mix.a(mix_vendored_crc.c.o)
 
 .debug_loc
  *(.debug_loc)
@@ -659,29 +698,33 @@ LOAD /usr/lib/gcc/x86_64-linux-gnu/13/../../../x86_64-linux-gnu/crtn.o
  *(.debug_addr)
 
 .debug_line_str
-                0x0000000000000000      0x44b
+                0x0000000000000000      0x514
  *(.debug_line_str)
  .debug_line_str
-                0x0000000000000000      0x44b CMakeFiles/fossapp.dir/src/main.c.o
-                                        0x1db (size before relaxing)
+                0x0000000000000000      0x514 CMakeFiles/fossapp.dir/src/main.c.o
+                                        0x214 (size before relaxing)
  .debug_line_str
-                0x000000000000044b       0x78 CMakeFiles/fossapp.dir/generated/table.c.o
+                0x0000000000000514       0x78 CMakeFiles/fossapp.dir/generated/table.c.o
  .debug_line_str
-                0x000000000000044b       0x80 libmit_lib.a(mit_a.c.o)
+                0x0000000000000514       0x80 libmit_lib.a(mit_a.c.o)
  .debug_line_str
-                0x000000000000044b       0x95 libapache_lib.a(apache_one.c.o)
+                0x0000000000000514       0x95 libapache_lib.a(apache_one.c.o)
  .debug_line_str
-                0x000000000000044b       0x95 libapache_lib.a(apache_two.c.o)
+                0x0000000000000514       0x95 libapache_lib.a(apache_two.c.o)
  .debug_line_str
-                0x000000000000044b       0x8e liblgpl_lib.a(lgpl_core.c.o)
+                0x0000000000000514       0x8e liblgpl_lib.a(lgpl_core.c.o)
  .debug_line_str
-                0x000000000000044b       0x91 liblgpl_lib.a(lgpl_extra.c.o)
+                0x0000000000000514       0x91 liblgpl_lib.a(lgpl_extra.c.o)
  .debug_line_str
-                0x000000000000044b       0x8c libmulti_lib.a(multi.c.o)
+                0x0000000000000514       0x8c libmulti_lib.a(multi.c.o)
  .debug_line_str
-                0x000000000000044b       0x90 libnolicense_lib.a(nolicense.c.o)
+                0x0000000000000514       0x90 libnolicense_lib.a(nolicense.c.o)
  .debug_line_str
-                0x000000000000044b       0x9a libnocopyright_lib.a(nocopyright.c.o)
+                0x0000000000000514       0x9a libnocopyright_lib.a(nocopyright.c.o)
+ .debug_line_str
+                0x0000000000000514       0xcc libvendored_mix.a(mix_core.c.o)
+ .debug_line_str
+                0x0000000000000514       0xab libvendored_mix.a(mix_vendored_crc.c.o)
 
 .debug_loclists
  *(.debug_loclists)

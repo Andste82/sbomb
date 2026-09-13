@@ -67,13 +67,25 @@
 },
 {
   "directory": "/__fixture_build__",
-  "command": "/usr/bin/cc -I/__fixture_src__/dep/mit-lib/include -I/__fixture_src__/dep/apache-lib/include -I/__fixture_src__/dep/lgpl-lib/include -I/__fixture_src__/dep/multi-license/include -I/__fixture_src__/dep/nolicense/include -I/__fixture_src__/dep/nocopyright/include -I/__fixture_src__/dep/bsd-hdr/include -g -o CMakeFiles/fossapp.dir/src/main.c.o -c /__fixture_src__/src/main.c",
+  "command": "/usr/bin/cc -I/__fixture_src__/dep/vendored-mix/include -g -o CMakeFiles/vendored_mix.dir/dep/vendored-mix/src/mix_core.c.o -c /__fixture_src__/dep/vendored-mix/src/mix_core.c",
+  "file": "/__fixture_src__/dep/vendored-mix/src/mix_core.c",
+  "output": "CMakeFiles/vendored_mix.dir/dep/vendored-mix/src/mix_core.c.o"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/cc -I/__fixture_src__/dep/vendored-mix/include -g -o CMakeFiles/vendored_mix.dir/dep/vendored-mix/src/mix_vendored_crc.c.o -c /__fixture_src__/dep/vendored-mix/src/mix_vendored_crc.c",
+  "file": "/__fixture_src__/dep/vendored-mix/src/mix_vendored_crc.c",
+  "output": "CMakeFiles/vendored_mix.dir/dep/vendored-mix/src/mix_vendored_crc.c.o"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/cc -I/__fixture_src__/dep/mit-lib/include -I/__fixture_src__/dep/apache-lib/include -I/__fixture_src__/dep/lgpl-lib/include -I/__fixture_src__/dep/multi-license/include -I/__fixture_src__/dep/nolicense/include -I/__fixture_src__/dep/nocopyright/include -I/__fixture_src__/dep/vendored-mix/include -I/__fixture_src__/dep/bsd-hdr/include -g -o CMakeFiles/fossapp.dir/src/main.c.o -c /__fixture_src__/src/main.c",
   "file": "/__fixture_src__/src/main.c",
   "output": "CMakeFiles/fossapp.dir/src/main.c.o"
 },
 {
   "directory": "/__fixture_build__",
-  "command": "/usr/bin/cc -I/__fixture_src__/dep/mit-lib/include -I/__fixture_src__/dep/apache-lib/include -I/__fixture_src__/dep/lgpl-lib/include -I/__fixture_src__/dep/multi-license/include -I/__fixture_src__/dep/nolicense/include -I/__fixture_src__/dep/nocopyright/include -I/__fixture_src__/dep/bsd-hdr/include -g -o CMakeFiles/fossapp.dir/generated/table.c.o -c /__fixture_build__/generated/table.c",
+  "command": "/usr/bin/cc -I/__fixture_src__/dep/mit-lib/include -I/__fixture_src__/dep/apache-lib/include -I/__fixture_src__/dep/lgpl-lib/include -I/__fixture_src__/dep/multi-license/include -I/__fixture_src__/dep/nolicense/include -I/__fixture_src__/dep/nocopyright/include -I/__fixture_src__/dep/vendored-mix/include -I/__fixture_src__/dep/bsd-hdr/include -g -o CMakeFiles/fossapp.dir/generated/table.c.o -c /__fixture_build__/generated/table.c",
   "file": "/__fixture_build__/generated/table.c",
   "output": "CMakeFiles/fossapp.dir/generated/table.c.o"
 }

@@ -355,29 +355,26 @@ suffix list is the kind of heuristic section 19.2 exists to keep out.
 
 ---
 
-## Q15 — `FOSS_PER_FILE_LICENSE_DIVERGENCE` is specified by no milestone
+## Q15 — reserved
 
-`docs/dev/foss/spec-delta.md` §10 lists ten new findings for the attribution
-track. Nine of them are claimed by a milestone and are now emitted. The tenth,
-`FOSS_PER_FILE_LICENSE_DIVERGENCE` (info — "files of one component carry
-different SPDX identifiers"), appears in no milestone's deliverables or tests,
-so F7 did not add it to appendix A: a catalogue entry nothing emits describes a
-document sbomb does not produce, and the two generated catalogues are checked
-against the code.
+**Settled: what the component states about itself is enough; the rest is
+reported.** The threshold is not "two distinct identifiers" -- that would put an
+info finding on every dual-licensed dependency there is, `dep/multi-license`
+included, which resolves to `MIT OR Apache-2.0` and has already said what it is.
+It is the identifier the component's own resolved expression does not account
+for: §22.2 stops at the first identifier it reads, so a directory assembled from
+two upstreams resolves to one of them and says nothing about the other.
+`FOSS_PER_FILE_LICENSE_DIVERGENCE` (info) names what was left over, and §22.5
+separates it from `LICENSE_CONFLICT`: two sources disagreeing about one licence
+is a conflict, two upstreams in one directory is not -- both readings are right,
+and the component has two licences rather than a disputed one.
 
-It is not redundant. §22.5 already reports `LICENSE_CONFLICT` when two sources
-disagree about *one* component's licence, and §22.2 decides the component's
-identifier from the file-level evidence — but a component whose files carry
-`MIT` in one directory and `GPL-2.0-only` in another is a different situation
-from a conflict: both readings are correct, and the component has two licences
-rather than a disputed one. The fixture's `dep/multi-license` is the benign form
-(one dual-licensed dependency); the form worth a finding is a directory that was
-assembled from two upstreams.
-
-Deciding it needs two things this milestone had no mandate for: what the
-threshold is (any two distinct identifiers? or only where neither is implied by
-the component's own expression?), and a fixture that exhibits the malignant
-case. Recorded here rather than guessed.
+The malignant case the question asked for is `p14-foss`'s `dep/vendored-mix`:
+its `LICENSE` and its own source say MIT, and one file copied in from elsewhere
+still declares `GPL-2.0-only`. The component resolves to MIT, its obligations
+are MIT's, and the finding is the only thing that says a GPL file is in the
+deliverable. The number stays reserved so that references to Q16 and later keep
+their meaning.
 
 ## Q16 — The review record shows a waiver's reason and not its approver
 

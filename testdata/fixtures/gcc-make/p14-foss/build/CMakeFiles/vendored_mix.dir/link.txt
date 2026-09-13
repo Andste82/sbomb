@@ -1,0 +1,2 @@
+/usr/bin/ar qc libvendored_mix.a "CMakeFiles/vendored_mix.dir/dep/vendored-mix/src/mix_core.c.o" "CMakeFiles/vendored_mix.dir/dep/vendored-mix/src/mix_vendored_crc.c.o"
+/usr/bin/ranlib libvendored_mix.a

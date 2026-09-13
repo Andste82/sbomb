@@ -1768,3 +1768,68 @@ func TestAFileThatIsNotThereDoesNotMoveTheComponentRoot(t *testing.T) {
 		t.Errorf("componentRoot of only-absent files = %q, want no root at all", got)
 	}
 }
+
+// Section 22.5: a directory assembled from two upstreams carries two licences.
+// Both readings are right, so it is not a conflict -- but the identifier the
+// component's own licence does not account for is worth saying once.
+func TestFilesDeclaringALicenceTheComponentDoesNotAccountForAreReported(t *testing.T) {
+	root := t.TempDir()
+	write := func(name, body string) domain.UsedFile {
+		path := filepath.Join(root, name)
+		if err := os.WriteFile(path, []byte(body), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		return domain.UsedFile{ID: fileID("project", "dep/"+name)}
+	}
+	core := write("core.c", "/* SPDX-License-Identifier: MIT */\nint core(void){return 0;}\n")
+	crc := write("crc.c", "/* SPDX-License-Identifier: GPL-2.0-only */\nint crc(void){return 0;}\n")
+	files := []domain.UsedFile{core, crc}
+	physical := map[string]string{
+		core.ID.Canonical(): filepath.Join(root, "core.c"),
+		crc.ID.Canonical():  filepath.Join(root, "crc.c"),
+	}
+
+	resolver := newComponentResolver(config.Config{}, physical, map[string]string{}, limits.Config{}, nil)
+	resolver.setDeclaredIdentifiers(map[string]string{
+		core.ID.Canonical(): "MIT",
+		crc.ID.Canonical():  "GPL-2.0-only",
+	})
+	component := domain.Component{ID: "component:vendored", Name: "vendored"}
+
+	findings := resolver.enrichComponent(&component, files)
+
+	divergence := findingsWithID(findings, "FOSS_PER_FILE_LICENSE_DIVERGENCE")
+	if len(divergence) != 1 {
+		t.Fatalf("findings = %+v, want one FOSS_PER_FILE_LICENSE_DIVERGENCE", findings)
+	}
+	if !strings.Contains(divergence[0].Message, "GPL-2.0-only") {
+		t.Errorf("message = %q, want the unaccounted GPL-2.0-only in it", divergence[0].Message)
+	}
+	if strings.Contains(divergence[0].Message, "declare MIT,") {
+		t.Errorf("message = %q, want only what the licence does not account for", divergence[0].Message)
+	}
+	if len(findingsWithID(findings, "LICENSE_CONFLICT")) != 0 {
+		t.Error("two upstreams in one directory is a divergence, not a conflict")
+	}
+}
+
+// The other half of the rule: a dual-licensed component states both of the
+// identifiers its files declare, so there is nothing left to report. Without
+// this, every dual-licensed dependency there is would carry a finding.
+func TestADualLicensedComponentAccountsForWhatItsFilesDeclare(t *testing.T) {
+	root := t.TempDir()
+	path := filepath.Join(root, "multi.c")
+	if err := os.WriteFile(path, []byte("/* SPDX-License-Identifier: MIT OR Apache-2.0 */\nint multi(void){return 0;}\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	file := domain.UsedFile{ID: fileID("project", "dep/multi.c")}
+	resolver := newComponentResolver(config.Config{}, map[string]string{file.ID.Canonical(): path}, map[string]string{}, limits.Config{}, nil)
+	resolver.setDeclaredIdentifiers(map[string]string{file.ID.Canonical(): "MIT OR Apache-2.0"})
+	component := domain.Component{ID: "component:multi", Name: "multi"}
+
+	findings := resolver.enrichComponent(&component, []domain.UsedFile{file})
+
+	if reported := findingsWithID(findings, "FOSS_PER_FILE_LICENSE_DIVERGENCE"); len(reported) != 0 {
+		t.Errorf("findings = %+v, want silence: the component said what it is", reported)
+	}
+}

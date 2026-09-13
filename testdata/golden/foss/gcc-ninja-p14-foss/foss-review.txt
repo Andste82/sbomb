@@ -98,6 +98,19 @@ DISTRIBUTED COMPONENTS
   copyright statements:      0
   source obligation:         -
   retained licence:          LICENSE (project:dep/nocopyright/LICENSE, sha256:6fd46bc279753ff2f06019924d5e4877729545e72c93165d2fb3bab0bdeebec2)
+- vendored-mix
+  bom-ref:                   component:vendored-mix
+  version:                   -
+  licence:                   MIT (file-level)
+  origin:                    -
+  distribution role:         distributed
+  linkage form:              static-archive-member
+  modified:                  unknown
+  used files:                3
+  narrowing delta:           0 header(s), 0 additional copyright statement(s)
+  copyright statements:      2
+  source obligation:         -
+  retained licence:          LICENSE (project:dep/vendored-mix/LICENSE, sha256:6c266bb793425c487074cc6d2106024537fd728f6caa2ff59f882d5ca6570182)
 
 BUILD-TIME-ONLY COMPONENTS
 
@@ -124,15 +137,15 @@ headers narrowed away:       25
 
 COMPLETENESS
 
-  components                     6
-  with resolved licence          6 / 6
-  with retained licence text     6 / 6
-  with copyright statements      5 / 6
-  with resolved version          0 / 6
-  modification status unknown    6
+  components                     7
+  with resolved licence          7 / 7
+  with retained licence text     7 / 7
+  with copyright statements      6 / 7
+  with resolved version          0 / 7
+  modification status unknown    7
   licence view vs. SBOM view     +25 files
   build-time-only components     1
-  unique retained texts          7
+  unique retained texts          8
 
 FINDINGS
 
@@ -146,4 +159,6 @@ FINDINGS
 - FOSS_MODIFICATION_UNKNOWN [info] component:multi-license: whether this component was modified could not be established, so it is reported as unknown rather than as unmodified
 - FOSS_MODIFICATION_UNKNOWN [info] component:nocopyright: whether this component was modified could not be established, so it is reported as unknown rather than as unmodified
 - FOSS_MODIFICATION_UNKNOWN [info] component:project: whether this component was modified could not be established, so it is reported as unknown rather than as unmodified
+- FOSS_MODIFICATION_UNKNOWN [info] component:vendored-mix: whether this component was modified could not be established, so it is reported as unknown rather than as unmodified
+- FOSS_PER_FILE_LICENSE_DIVERGENCE [info] component:vendored-mix: the component resolved to MIT, and its files also declare GPL-2.0-only
 - FOSS_SOURCE_OBLIGATION [info] component:lgpl-lib: the licence LGPL-2.1-only triggers a source obligation (library-source, relinking); sbomb names it and does not produce the material

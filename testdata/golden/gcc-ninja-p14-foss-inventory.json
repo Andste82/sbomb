@@ -346,12 +346,72 @@
       }
     },
     {
+      "canonical": "project:dep/vendored-mix/include/vendored_mix.h",
+      "class": "header",
+      "hashes": {
+        "SHA-256": "11da68ae40c921e72d4e7b3d3a4dd6102fddbdad6a30fdf77d0db392677004b1"
+      },
+      "sizeBytes": 200,
+      "properties": {
+        "sbomb:component:scope": [
+          "project"
+        ],
+        "sbomb:evidence:header:class": [
+          "project-header"
+        ],
+        "sbomb:file:distributionRole": [
+          "distributed"
+        ],
+        "sbomb:file:linkageForm": [
+          "header-only"
+        ]
+      }
+    },
+    {
+      "canonical": "project:dep/vendored-mix/src/mix_core.c",
+      "class": "source",
+      "hashes": {
+        "SHA-256": "cfb6a7837c29b6993332ff454e2fa9ddd30b10667e622049cc2149b582d0b4b0"
+      },
+      "sizeBytes": 182,
+      "properties": {
+        "sbomb:component:scope": [
+          "project"
+        ],
+        "sbomb:file:distributionRole": [
+          "distributed"
+        ],
+        "sbomb:file:linkageForm": [
+          "static-archive-member"
+        ]
+      }
+    },
+    {
+      "canonical": "project:dep/vendored-mix/src/mix_vendored_crc.c",
+      "class": "source",
+      "hashes": {
+        "SHA-256": "e51327f6fe7fbc1731b2960cc0d1eade551e071eec8192873ba7982a03fece3f"
+      },
+      "sizeBytes": 348,
+      "properties": {
+        "sbomb:component:scope": [
+          "project"
+        ],
+        "sbomb:file:distributionRole": [
+          "distributed"
+        ],
+        "sbomb:file:linkageForm": [
+          "static-archive-member"
+        ]
+      }
+    },
+    {
       "canonical": "project:src/main.c",
       "class": "source",
       "hashes": {
-        "SHA-256": "9a3878e3886a7b19746abefb0579cc913b665ea6ab5f3e8dfd818e674d2deae5"
+        "SHA-256": "534570a1b61643417e1f753e4893e309347559678dd815fe314fdd64475aed6f"
       },
-      "sizeBytes": 831,
+      "sizeBytes": 884,
       "properties": {
         "sbomb:component:scope": [
           "project"
@@ -479,6 +539,20 @@
     {
       "id": "component:project",
       "name": "project"
+    },
+    {
+      "id": "component:vendored-mix",
+      "name": "vendored-mix",
+      "licenseArtifacts": [
+        {
+          "kind": "license",
+          "file": "project:dep/vendored-mix/LICENSE",
+          "sha256": "6c266bb793425c487074cc6d2106024537fd728f6caa2ff59f882d5ca6570182",
+          "sizeBytes": 1085,
+          "detectedId": "MIT",
+          "technique": "spdx-digest"
+        }
+      ]
     }
   ]
 }

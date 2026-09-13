@@ -14,6 +14,7 @@
 #include "multi.h"
 #include "nocopyright.h"
 #include "nolicense.h"
+#include "vendored_mix.h"
 
 extern const int foss_table[8];
 
@@ -29,6 +30,7 @@ int main(void)
     total += multi_pick(6);
     total += nolicense_sum(7);
     total += nocopyright_mix(8);
+    total += mix_core(10);
     total += bsd_scale(9);
 
     printf("p14-foss total %d\n", total);

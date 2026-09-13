@@ -30,7 +30,7 @@
 			{
 				"command" : 1,
 				"file" : 1,
-				"line" : 60,
+				"line" : 68,
 				"parent" : 0
 			},
 			{
@@ -54,7 +54,7 @@
 			{
 				"command" : 4,
 				"file" : 1,
-				"line" : 61,
+				"line" : 69,
 				"parent" : 0
 			},
 			{
@@ -102,6 +102,10 @@
 				},
 				{
 					"backtrace" : 5,
+					"path" : "/__fixture_src__/dep/vendored-mix/include"
+				},
+				{
+					"backtrace" : 5,
 					"path" : "/__fixture_src__/dep/bsd-hdr/include"
 				}
 			],
@@ -142,6 +146,10 @@
 		{
 			"backtrace" : 6,
 			"id" : "table_gen::@6890427a1f51a3e7e1df"
+		},
+		{
+			"backtrace" : 5,
+			"id" : "vendored_mix::@6890427a1f51a3e7e1df"
 		}
 	],
 	"id" : "fossapp::@6890427a1f51a3e7e1df",
@@ -209,6 +217,11 @@
 			{
 				"backtrace" : 5,
 				"fragment" : "libnocopyright_lib.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 5,
+				"fragment" : "libvendored_mix.a",
 				"role" : "libraries"
 			}
 		],

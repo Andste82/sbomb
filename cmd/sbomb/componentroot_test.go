@@ -95,6 +95,7 @@ func TestFOSSFixtureComponentRoots(t *testing.T) {
 		"component:mit-lib":       "project:dep/mit-lib",
 		"component:multi-license": "project:dep/multi-license",
 		"component:nocopyright":   "project:dep/nocopyright",
+		"component:vendored-mix":  "project:dep/vendored-mix",
 	}
 	generatorRoot := map[string]string{"component:gpl-gen": "project:dep/gpl-gen"}
 	wantLicenses := map[string]string{
@@ -105,6 +106,11 @@ func TestFOSSFixtureComponentRoots(t *testing.T) {
 		"component:mit-lib":       "MIT",
 		"component:multi-license": "MIT OR Apache-2.0",
 		"component:nocopyright":   "0BSD",
+		// Section 22.2 stops at the first identifier it reads, so the
+		// GPL-2.0-only file copied into this directory does not change what
+		// the component resolves to. Section 22.5 reports it instead
+		// (FOSS_PER_FILE_LICENSE_DIVERGENCE).
+		"component:vendored-mix": "MIT",
 	}
 	generatorLicense := map[string]string{"component:gpl-gen": "GPL-2.0-only"}
 	for _, toolchain := range []string{"gcc-ninja", "gcc-make"} {

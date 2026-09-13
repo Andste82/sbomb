@@ -323,3 +323,48 @@ func NamesALicence(candidate string) bool {
 	}
 	return false
 }
+
+// DeclaredIdentifier is technique 1 of section 22.3 alone: the SPDX expression
+// a file states about itself, or the empty string.
+//
+// It exists beside ResolveFromText so that a caller which only wants what a
+// file *declared* does not pay for the three techniques that follow -- the
+// digest, the templates and the normalized comparison are about recognizing a
+// licence *text*, and a source file is not one.
+func DeclaredIdentifier(data []byte) string {
+	if expression, ok := extractSPDXExpression(string(data)); ok {
+		return expression
+	}
+	return ""
+}
+
+// IdentifiersIn is every SPDX identifier an expression names, so that a caller
+// can ask whether an expression accounts for one. The expression grammar's
+// operators and parentheses are separators here and nothing else: this answers
+// "is this licence named in there", not "what does the expression mean".
+func IdentifiersIn(expression string) []string {
+	fields := strings.FieldsFunc(expression, func(r rune) bool {
+		return r == ' ' || r == '\t' || r == '\r' || r == '\n' || r == '(' || r == ')'
+	})
+	out := make([]string, 0, len(fields))
+	var afterWith bool
+	for _, field := range fields {
+		operator := strings.ToUpper(field)
+		if afterWith {
+			// The operand of WITH is an exception rather than a licence: it
+			// qualifies the licence it follows instead of being one more
+			// thing the component is under.
+			afterWith = false
+			continue
+		}
+		switch operator {
+		case "AND", "OR", "":
+			continue
+		case "WITH":
+			afterWith = true
+			continue
+		}
+		out = append(out, field)
+	}
+	return out
+}

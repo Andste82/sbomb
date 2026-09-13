@@ -321,18 +321,62 @@ build libnocopyright_lib.a: C_STATIC_LIBRARY_LINKER__nocopyright_lib_Debug CMake
   TARGET_PDB = libnocopyright_lib.pdb
 
 # =============================================================================
+# Object build statements for STATIC_LIBRARY target vendored_mix
+
+
+#############################################
+# Order-only phony target for vendored_mix
+
+build cmake_object_order_depends_target_vendored_mix: phony || CMakeFiles/vendored_mix.dir
+
+build CMakeFiles/vendored_mix.dir/dep/vendored-mix/src/mix_core.c.o: C_COMPILER__vendored_mix_unscanned_Debug /__fixture_src__/dep/vendored-mix/src/mix_core.c || cmake_object_order_depends_target_vendored_mix
+  DEP_FILE = CMakeFiles/vendored_mix.dir/dep/vendored-mix/src/mix_core.c.o.d
+  FLAGS = -g
+  INCLUDES = -I/__fixture_src__/dep/vendored-mix/include
+  OBJECT_DIR = CMakeFiles/vendored_mix.dir
+  OBJECT_FILE_DIR = CMakeFiles/vendored_mix.dir/dep/vendored-mix/src
+  TARGET_COMPILE_PDB = CMakeFiles/vendored_mix.dir/vendored_mix.pdb
+  TARGET_PDB = libvendored_mix.pdb
+
+build CMakeFiles/vendored_mix.dir/dep/vendored-mix/src/mix_vendored_crc.c.o: C_COMPILER__vendored_mix_unscanned_Debug /__fixture_src__/dep/vendored-mix/src/mix_vendored_crc.c || cmake_object_order_depends_target_vendored_mix
+  DEP_FILE = CMakeFiles/vendored_mix.dir/dep/vendored-mix/src/mix_vendored_crc.c.o.d
+  FLAGS = -g
+  INCLUDES = -I/__fixture_src__/dep/vendored-mix/include
+  OBJECT_DIR = CMakeFiles/vendored_mix.dir
+  OBJECT_FILE_DIR = CMakeFiles/vendored_mix.dir/dep/vendored-mix/src
+  TARGET_COMPILE_PDB = CMakeFiles/vendored_mix.dir/vendored_mix.pdb
+  TARGET_PDB = libvendored_mix.pdb
+
+
+# =============================================================================
+# Link build statements for STATIC_LIBRARY target vendored_mix
+
+
+#############################################
+# Link the static library libvendored_mix.a
+
+build libvendored_mix.a: C_STATIC_LIBRARY_LINKER__vendored_mix_Debug CMakeFiles/vendored_mix.dir/dep/vendored-mix/src/mix_core.c.o CMakeFiles/vendored_mix.dir/dep/vendored-mix/src/mix_vendored_crc.c.o
+  LANGUAGE_COMPILE_FLAGS = -g
+  OBJECT_DIR = CMakeFiles/vendored_mix.dir
+  POST_BUILD = :
+  PRE_LINK = :
+  TARGET_COMPILE_PDB = CMakeFiles/vendored_mix.dir/vendored_mix.pdb
+  TARGET_FILE = libvendored_mix.a
+  TARGET_PDB = libvendored_mix.pdb
+
+# =============================================================================
 # Object build statements for EXECUTABLE target fossapp
 
 
 #############################################
 # Order-only phony target for fossapp
 
-build cmake_object_order_depends_target_fossapp: phony || cmake_object_order_depends_target_apache_lib cmake_object_order_depends_target_lgpl_lib cmake_object_order_depends_target_mit_lib cmake_object_order_depends_target_multi_lib cmake_object_order_depends_target_nocopyright_lib cmake_object_order_depends_target_nolicense_lib generated/table.c table_gen
+build cmake_object_order_depends_target_fossapp: phony || cmake_object_order_depends_target_apache_lib cmake_object_order_depends_target_lgpl_lib cmake_object_order_depends_target_mit_lib cmake_object_order_depends_target_multi_lib cmake_object_order_depends_target_nocopyright_lib cmake_object_order_depends_target_nolicense_lib cmake_object_order_depends_target_vendored_mix generated/table.c table_gen
 
 build CMakeFiles/fossapp.dir/src/main.c.o: C_COMPILER__fossapp_unscanned_Debug /__fixture_src__/src/main.c || cmake_object_order_depends_target_fossapp
   DEP_FILE = CMakeFiles/fossapp.dir/src/main.c.o.d
   FLAGS = -g
-  INCLUDES = -I/__fixture_src__/dep/mit-lib/include -I/__fixture_src__/dep/apache-lib/include -I/__fixture_src__/dep/lgpl-lib/include -I/__fixture_src__/dep/multi-license/include -I/__fixture_src__/dep/nolicense/include -I/__fixture_src__/dep/nocopyright/include -I/__fixture_src__/dep/bsd-hdr/include
+  INCLUDES = -I/__fixture_src__/dep/mit-lib/include -I/__fixture_src__/dep/apache-lib/include -I/__fixture_src__/dep/lgpl-lib/include -I/__fixture_src__/dep/multi-license/include -I/__fixture_src__/dep/nolicense/include -I/__fixture_src__/dep/nocopyright/include -I/__fixture_src__/dep/vendored-mix/include -I/__fixture_src__/dep/bsd-hdr/include
   OBJECT_DIR = CMakeFiles/fossapp.dir
   OBJECT_FILE_DIR = CMakeFiles/fossapp.dir/src
   TARGET_COMPILE_PDB = CMakeFiles/fossapp.dir/
@@ -341,7 +385,7 @@ build CMakeFiles/fossapp.dir/src/main.c.o: C_COMPILER__fossapp_unscanned_Debug /
 build CMakeFiles/fossapp.dir/generated/table.c.o: C_COMPILER__fossapp_unscanned_Debug /__fixture_build__/generated/table.c || cmake_object_order_depends_target_fossapp
   DEP_FILE = CMakeFiles/fossapp.dir/generated/table.c.o.d
   FLAGS = -g
-  INCLUDES = -I/__fixture_src__/dep/mit-lib/include -I/__fixture_src__/dep/apache-lib/include -I/__fixture_src__/dep/lgpl-lib/include -I/__fixture_src__/dep/multi-license/include -I/__fixture_src__/dep/nolicense/include -I/__fixture_src__/dep/nocopyright/include -I/__fixture_src__/dep/bsd-hdr/include
+  INCLUDES = -I/__fixture_src__/dep/mit-lib/include -I/__fixture_src__/dep/apache-lib/include -I/__fixture_src__/dep/lgpl-lib/include -I/__fixture_src__/dep/multi-license/include -I/__fixture_src__/dep/nolicense/include -I/__fixture_src__/dep/nocopyright/include -I/__fixture_src__/dep/vendored-mix/include -I/__fixture_src__/dep/bsd-hdr/include
   OBJECT_DIR = CMakeFiles/fossapp.dir
   OBJECT_FILE_DIR = CMakeFiles/fossapp.dir/generated
   TARGET_COMPILE_PDB = CMakeFiles/fossapp.dir/
@@ -355,10 +399,10 @@ build CMakeFiles/fossapp.dir/generated/table.c.o: C_COMPILER__fossapp_unscanned_
 #############################################
 # Link the executable fossapp
 
-build fossapp: C_EXECUTABLE_LINKER__fossapp_Debug CMakeFiles/fossapp.dir/src/main.c.o CMakeFiles/fossapp.dir/generated/table.c.o | libmit_lib.a libapache_lib.a liblgpl_lib.a libmulti_lib.a libnolicense_lib.a libnocopyright_lib.a || libapache_lib.a liblgpl_lib.a libmit_lib.a libmulti_lib.a libnocopyright_lib.a libnolicense_lib.a table_gen
+build fossapp: C_EXECUTABLE_LINKER__fossapp_Debug CMakeFiles/fossapp.dir/src/main.c.o CMakeFiles/fossapp.dir/generated/table.c.o | libmit_lib.a libapache_lib.a liblgpl_lib.a libmulti_lib.a libnolicense_lib.a libnocopyright_lib.a libvendored_mix.a || libapache_lib.a liblgpl_lib.a libmit_lib.a libmulti_lib.a libnocopyright_lib.a libnolicense_lib.a libvendored_mix.a table_gen
   FLAGS = -g
   LINK_FLAGS = -Wl,-Map=/__fixture_build__/fossapp.map -Wl,--dependency-file=/__fixture_build__/fossapp.d
-  LINK_LIBRARIES = libmit_lib.a  libapache_lib.a  liblgpl_lib.a  libmulti_lib.a  libnolicense_lib.a  libnocopyright_lib.a
+  LINK_LIBRARIES = libmit_lib.a  libapache_lib.a  liblgpl_lib.a  libmulti_lib.a  libnolicense_lib.a  libnocopyright_lib.a  libvendored_mix.a
   OBJECT_DIR = CMakeFiles/fossapp.dir
   POST_BUILD = :
   PRE_LINK = :
@@ -435,7 +479,7 @@ build install/strip: phony CMakeFiles/install/strip.util
 #############################################
 # Custom command for generated/table.c
 
-build generated/table.c | ${cmake_ninja_workdir}generated/table.c: CUSTOM_COMMAND table_gen || libapache_lib.a liblgpl_lib.a libmit_lib.a libmulti_lib.a libnocopyright_lib.a libnolicense_lib.a table_gen
+build generated/table.c | ${cmake_ninja_workdir}generated/table.c: CUSTOM_COMMAND table_gen || libapache_lib.a liblgpl_lib.a libmit_lib.a libmulti_lib.a libnocopyright_lib.a libnolicense_lib.a libvendored_mix.a table_gen
   COMMAND = cd /__fixture_build__ && /usr/bin/cmake -E make_directory /__fixture_build__/generated && /__fixture_build__/table_gen /__fixture_build__/generated/table.c
   DESC = Generating table.c with the GPL-2.0 generator
   restat = 1
@@ -455,6 +499,8 @@ build nocopyright_lib: phony libnocopyright_lib.a
 
 build nolicense_lib: phony libnolicense_lib.a
 
+build vendored_mix: phony libvendored_mix.a
+
 # =============================================================================
 # Folder targets.
 
@@ -463,7 +509,7 @@ build nolicense_lib: phony libnolicense_lib.a
 #############################################
 # Folder: /__fixture_build__
 
-build all: phony table_gen libmit_lib.a libapache_lib.a liblgpl_lib.a libmulti_lib.a libnolicense_lib.a libnocopyright_lib.a fossapp
+build all: phony table_gen libmit_lib.a libapache_lib.a liblgpl_lib.a libmulti_lib.a libnolicense_lib.a libnocopyright_lib.a libvendored_mix.a fossapp
 
 # =============================================================================
 # Built-in targets

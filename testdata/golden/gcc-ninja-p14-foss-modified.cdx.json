@@ -2,7 +2,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "version": 1,
-  "serialNumber": "urn:uuid:98d16bf5-2637-5f92-bffe-c52cf512d833",
+  "serialNumber": "urn:uuid:efdbd819-6c59-53fa-9b8a-ba8b759e549d",
   "metadata": {
     "tools": [
       {
@@ -862,12 +862,139 @@
     },
     {
       "type": "file",
+      "name": "vendored_mix.h",
+      "bom-ref": "file:project:dep/vendored-mix/include/vendored_mix.h",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "11da68ae40c921e72d4e7b3d3a4dd6102fddbdad6a30fdf77d0db392677004b1"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:evidence:header:class",
+          "value": "project-header"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "header-only"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/vendored-mix/include/vendored_mix.h"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "mix_core.c",
+      "bom-ref": "file:project:dep/vendored-mix/src/mix_core.c",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "cfb6a7837c29b6993332ff454e2fa9ddd30b10667e622049cc2149b582d0b4b0"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/vendored-mix/src/mix_core.c"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "mix_vendored_crc.c",
+      "bom-ref": "file:project:dep/vendored-mix/src/mix_vendored_crc.c",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "e51327f6fe7fbc1731b2960cc0d1eade551e071eec8192873ba7982a03fece3f"
+        }
+      ],
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "project"
+        },
+        {
+          "name": "sbomb:file:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:file:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:path:canonical",
+          "value": "project:dep/vendored-mix/src/mix_vendored_crc.c"
+        }
+      ]
+    },
+    {
+      "type": "file",
       "name": "main.c",
       "bom-ref": "file:project:src/main.c",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "9a3878e3886a7b19746abefb0579cc913b665ea6ab5f3e8dfd818e674d2deae5"
+          "content": "534570a1b61643417e1f753e4893e309347559678dd815fe314fdd64475aed6f"
         }
       ],
       "properties": [
@@ -1511,6 +1638,95 @@
           "value": "spdx-identifier"
         }
       ]
+    },
+    {
+      "type": "library",
+      "name": "vendored-mix",
+      "bom-ref": "component:vendored-mix",
+      "scope": "required",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "pedigree": {
+        "commits": [
+          {
+            "uid": "dd4dfb1063eb4a9ed72bb3f237d88223ebfea8cf"
+          }
+        ],
+        "notes": "the component root's checkout is clean and stands on its recorded tag v1.2.0"
+      },
+      "properties": [
+        {
+          "name": "sbomb:cdx:archiveProperty",
+          "value": "no-archive"
+        },
+        {
+          "name": "sbomb:cdx:executableProperty",
+          "value": "non-executable"
+        },
+        {
+          "name": "sbomb:cdx:structuredProperty",
+          "value": "structured"
+        },
+        {
+          "name": "sbomb:component:archiveMembersUsed",
+          "value": "2/2"
+        },
+        {
+          "name": "sbomb:component:detectedBy",
+          "value": "package-metadata:LICENSE"
+        },
+        {
+          "name": "sbomb:component:distributionRole",
+          "value": "distributed"
+        },
+        {
+          "name": "sbomb:component:licenseFile",
+          "value": "project:dep/vendored-mix/LICENSE@sha256:6c266bb793425c487074cc6d2106024537fd728f6caa2ff59f882d5ca6570182"
+        },
+        {
+          "name": "sbomb:component:linkageForm",
+          "value": "static-archive-member"
+        },
+        {
+          "name": "sbomb:component:modified",
+          "value": "false"
+        },
+        {
+          "name": "sbomb:component:root",
+          "value": "project:dep/vendored-mix"
+        },
+        {
+          "name": "sbomb:component:scope",
+          "value": "third-party"
+        },
+        {
+          "name": "sbomb:license:evidenceClass",
+          "value": "file-level"
+        },
+        {
+          "name": "sbomb:license:source",
+          "value": "project:dep/vendored-mix/include/vendored_mix.h"
+        },
+        {
+          "name": "sbomb:license:technique",
+          "value": "spdx-identifier"
+        }
+      ],
+      "evidence": {
+        "copyright": [
+          {
+            "text": "Copyright (c) 2026 Fixture Upstream CRC Authors"
+          },
+          {
+            "text": "Copyright (c) 2026 Fixture Vendored Mix Authors"
+          }
+        ]
+      }
     }
   ],
   "dependencies": [
@@ -1573,6 +1789,14 @@
       ]
     },
     {
+      "ref": "component:vendored-mix",
+      "dependsOn": [
+        "file:project:dep/vendored-mix/include/vendored_mix.h",
+        "file:project:dep/vendored-mix/src/mix_core.c",
+        "file:project:dep/vendored-mix/src/mix_vendored_crc.c"
+      ]
+    },
+    {
       "ref": "file:build:generated/table.c"
     },
     {
@@ -1624,6 +1848,15 @@
       "ref": "file:project:dep/nolicense/src/nolicense.c"
     },
     {
+      "ref": "file:project:dep/vendored-mix/include/vendored_mix.h"
+    },
+    {
+      "ref": "file:project:dep/vendored-mix/src/mix_core.c"
+    },
+    {
+      "ref": "file:project:dep/vendored-mix/src/mix_vendored_crc.c"
+    },
+    {
       "ref": "file:project:src/main.c"
     },
     {
@@ -1636,7 +1869,8 @@
         "component:mit-lib",
         "component:multi-license",
         "component:nocopyright",
-        "component:project"
+        "component:project",
+        "component:vendored-mix"
       ]
     }
   ]

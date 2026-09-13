@@ -159,3 +159,26 @@ func TestSPDXIdentifierKeepsCompoundExpressions(t *testing.T) {
 		}
 	}
 }
+
+func TestIdentifiersInNamesTheLicencesAndNotTheOperators(t *testing.T) {
+	for expression, want := range map[string][]string{
+		"MIT":                                  {"MIT"},
+		"MIT OR Apache-2.0":                    {"MIT", "Apache-2.0"},
+		"(MIT OR Apache-2.0) AND BSD-3-Clause": {"MIT", "Apache-2.0", "BSD-3-Clause"},
+		"GPL-2.0-only WITH Classpath-exception-2.0":         {"GPL-2.0-only"},
+		"GPL-2.0-only WITH Classpath-exception-2.0 AND MIT": {"GPL-2.0-only", "MIT"},
+		"": nil,
+	} {
+		got := IdentifiersIn(expression)
+		if len(got) != len(want) {
+			t.Errorf("IdentifiersIn(%q) = %v, want %v", expression, got, want)
+			continue
+		}
+		for i := range want {
+			if got[i] != want[i] {
+				t.Errorf("IdentifiersIn(%q) = %v, want %v", expression, got, want)
+				break
+			}
+		}
+	}
+}

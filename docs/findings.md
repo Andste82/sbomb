@@ -14,7 +14,7 @@ same build produce identical output.
 
 <!-- BEGIN GENERATED CATALOGUE -->
 
-This build emits 56 of the 65 identifiers below. The rest are specified and
+This build emits 57 of the 66 identifiers below. The rest are specified and
 reserved: they describe evidence this version does not yet read, and a run will
 never report them. They are listed and marked so that the table is the whole
 catalogue rather than a snapshot of one version.
@@ -40,6 +40,7 @@ catalogue rather than a snapshot of one version.
 | `FOSS_LICENSE_TEXT_MISSING` | info | — | Distributed component has a license identifier but carries no retained text (§22.9) | emitted |
 | `FOSS_LICENSE_UNCLASSIFIED` | info | — | The license identifier is on neither obligation list of §32.6, so nothing is claimed about it and nothing is ruled out | emitted |
 | `FOSS_MODIFICATION_UNKNOWN` | info | — | Modification status could not be established, so it is reported as unknown rather than as unmodified (§19.4) | emitted |
+| `FOSS_PER_FILE_LICENSE_DIVERGENCE` | info | — | Files of one component declare an identifier the component's own licence does not account for (§22.5) | emitted |
 | `FOSS_SOURCE_OBLIGATION` | info | — | A distributed component's license triggers a source obligation, which §32.6 names and does not produce | emitted |
 | `HEADER_EVIDENCE_FALLBACK` | info | — | A CU had no DWARF coverage; depfile used instead | emitted |
 | `INPUT_LIMIT_EXCEEDED` | warning | — | A parser limit of §30 was reached | emitted |

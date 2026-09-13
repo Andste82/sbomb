@@ -29,4 +29,5 @@ CMakeFiles/fossapp.dir/src/main.c.o: /__fixture_src__/src/main.c \
  /__fixture_src__/dep/mit-lib/include/mit_lib.h \
  /__fixture_src__/dep/multi-license/include/multi.h \
  /__fixture_src__/dep/nocopyright/include/nocopyright.h \
- /__fixture_src__/dep/nolicense/include/nolicense.h
+ /__fixture_src__/dep/nolicense/include/nolicense.h \
+ /__fixture_src__/dep/vendored-mix/include/vendored_mix.h
