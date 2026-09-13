@@ -233,13 +233,16 @@ func hashOne(file domain.UsedFile, options HashOptions) domain.UsedFile {
 	if err != nil {
 		return unreadable()
 	}
-	if options.Observe != nil {
-		// Before the digest rather than after it, so that nothing can be
-		// observed that was not also hashed.
-		options.Observe(clone.ID, data)
-	}
 	clone.SizeBytes = info.Size()
 	sum := sha256.Sum256(data)
+	if options.Observe != nil {
+		// After the digest, not before it. The intent is that nothing is
+		// observed that was not also hashed, and calling it here satisfies
+		// that just as well -- while a callback that wrote into the slice
+		// could otherwise change the digest this run publishes, silently,
+		// from a package that has no business deciding what a file hashes to.
+		options.Observe(clone.ID, data)
+	}
 	// CycloneDX names the algorithm "SHA-256"; the inventory dump and the
 	// SBOM must agree on one spelling (section 28.6).
 	clone.Hashes[HashAlgorithmSHA256] = hex.EncodeToString(sum[:])

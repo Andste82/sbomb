@@ -1,6 +1,7 @@
 package license
 
 import (
+	"bytes"
 	"regexp"
 	"sort"
 	"strings"
@@ -68,6 +69,10 @@ var (
 	// its own: something is named.
 	holderText = regexp.MustCompile(`[\pL\pN]`)
 
+	// copyrightWord locates the word itself, so that its case can be read. A
+	// notice is written with a capital; a wrapped line of licence prose is not.
+	copyrightWord = regexp.MustCompile(`(?i)copyrights?`)
+
 	// placeholderGroup is the bracketed form a licence's own "how to apply
 	// this licence" appendix uses where the holder belongs:
 	// `Copyright [yyyy] [name of copyright owner]` in Apache-2.0,
@@ -105,13 +110,80 @@ func ExtractCopyright(data []byte) []string {
 	if len(window) == 0 {
 		return nil
 	}
+	// Nothing below can match a window that does not carry the word at all,
+	// and most files do not. Three regular expressions per line over 64 KiB is
+	// the cost this avoids: section 31 budgets 15 seconds for a whole run, and
+	// the scan below is a byte comparison that stops at the first hit.
+	if !containsFold(window, "copyright") {
+		return nil
+	}
 	var found []string
+	previous := ""
 	for _, line := range strings.Split(window, "\n") {
-		if statement, ok := copyrightInLine(line); ok {
+		// The line above is carried rather than the answer about it: whether
+		// it finished its sentence is asked only where a lowercase word made
+		// the question matter, which is a handful of lines in a corpus rather
+		// than every line of every file.
+		if statement, ok := copyrightInLine(line, previous); ok {
 			found = append(found, statement)
 		}
+		previous = line
 	}
 	return found
+}
+
+// continuesASentence reports whether the next line carries on the sentence this
+// one started. A licence text wraps, and a wrap can put the word at the start
+// of a line: the ISC text ends a line with "provided that the above" and
+// begins the next with "copyright notice and this permission notice appear in
+// all copies." Section 22.10 asks for a notice, and that is prose.
+//
+// The question is asked structurally rather than by looking for words: a line
+// that ends a sentence, or ends nothing at all, cannot be continued. Only a
+// *lowercase* word is judged by it, so a notice written at the start of a line
+// in the ordinary way is never affected by what stands above it.
+func continuesASentence(line string) bool {
+	body := strings.TrimRight(line[len(commentLeader.FindString(line)):], " \t\r")
+	body = commentTerminator.ReplaceAllString(body, "")
+	body = strings.TrimRight(body, " \t")
+	if body == "" {
+		return false
+	}
+	switch body[len(body)-1] {
+	case '.', ':', ';', '!', '?':
+		return false
+	}
+	// A comma ends nothing, so the line below it is still the same sentence.
+	return true
+}
+
+// containsFold reports whether text holds needle, compared without case and
+// without allocating: lowering a 64 KiB window to ask one question would cost
+// a copy of every file the tool hashes. needle must already be lowercase.
+func containsFold(text, needle string) bool {
+	for i := 0; i+len(needle) <= len(text); i++ {
+		if lowerASCII(text[i]) != needle[0] {
+			continue
+		}
+		matched := true
+		for j := 1; j < len(needle); j++ {
+			if lowerASCII(text[i+j]) != needle[j] {
+				matched = false
+				break
+			}
+		}
+		if matched {
+			return true
+		}
+	}
+	return false
+}
+
+func lowerASCII(b byte) byte {
+	if b >= 'A' && b <= 'Z' {
+		return b + ('a' - 'A')
+	}
+	return b
 }
 
 // copyrightSearchWindow is the first CopyrightWindow bytes, cut back to the
@@ -122,7 +194,9 @@ func copyrightSearchWindow(data []byte) string {
 		return string(data)
 	}
 	window := data[:CopyrightWindow]
-	if cut := strings.LastIndexByte(string(window), '\n'); cut >= 0 {
+	// bytes rather than strings: converting the window to ask where its last
+	// line break is would copy 64 KiB of every large file for one index.
+	if cut := bytes.LastIndexByte(window, '\n'); cut >= 0 {
 		return string(window[:cut])
 	}
 	return ""
@@ -130,7 +204,14 @@ func copyrightSearchWindow(data []byte) string {
 
 // copyrightInLine recognizes the two forms of section 22.10 in one line and
 // returns the statement, which begins where the notice begins.
-func copyrightInLine(line string) (string, bool) {
+func copyrightInLine(line, previous string) (string, bool) {
+	// Both forms carry the word -- `SPDX-FileCopyrightText:` holds it too --
+	// so a line without it cannot match either, and asking three regular
+	// expressions is the cost this avoids on nearly every line of nearly every
+	// file.
+	if !containsFold(line, "copyright") {
+		return "", false
+	}
 	line = strings.TrimRight(line, " \t\r")
 	if tag := spdxCopyrightTag.FindStringIndex(line); tag != nil {
 		// Form 1. The statement is what the tag introduces; the tag itself is
@@ -141,11 +222,26 @@ func copyrightInLine(line string) (string, bool) {
 		if !ok || !namesAHolder(statement) {
 			return "", false
 		}
+		// SPDX and REUSE reserve two values for "there is no copyright to
+		// state" and "it was not established". Storing either as a statement
+		// publishes the absence of a notice as a notice, and it suppresses the
+		// FOSS_COPYRIGHT_MISSING that says the attribution is incomplete.
+		switch strings.TrimSpace(statement) {
+		case "NONE", "NOASSERTION":
+			return "", false
+		}
 		return statement, true
 	}
 	body := line[len(commentLeader.FindString(line)):]
 	match := classicNotice.FindStringSubmatchIndex(body)
 	if match == nil {
+		return "", false
+	}
+	// A lowercase word carrying on the sentence above it is wrapped prose, not
+	// a notice. Every convention writes a notice with a capital -- `Copyright`,
+	// `COPYRIGHT` -- and a licence's own conditions are the text that wraps.
+	if word := copyrightWord.FindStringIndex(body); word != nil && body[word[0]] == 'c' &&
+		continuesASentence(previous) {
 		return "", false
 	}
 	// Submatch 1 is the holder. A line that is the word alone, or the word
