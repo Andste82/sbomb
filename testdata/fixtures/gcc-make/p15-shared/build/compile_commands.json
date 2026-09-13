@@ -1,0 +1,14 @@
+[
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/cc  -I/__fixture_src__/dep/shared-lib/include -g -o CMakeFiles/sharedbits.dir/dep/shared-lib/src/shared_bits.c.o -c /__fixture_src__/dep/shared-lib/src/shared_bits.c",
+  "file": "/__fixture_src__/dep/shared-lib/src/shared_bits.c",
+  "output": "CMakeFiles/sharedbits.dir/dep/shared-lib/src/shared_bits.c.o"
+},
+{
+  "directory": "/__fixture_build__",
+  "command": "/usr/bin/cc  -I/__fixture_src__/dep/shared-lib/include -g -o CMakeFiles/app.dir/src/main.c.o -c /__fixture_src__/src/main.c",
+  "file": "/__fixture_src__/src/main.c",
+  "output": "CMakeFiles/app.dir/src/main.c.o"
+}
+]

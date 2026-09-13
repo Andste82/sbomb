@@ -473,7 +473,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 
 	// 8. The reachability filter. This is what makes the output evidence-based
 	//    rather than a listing of everything the adapters happened to see.
-	reachable := usedFiles(graph, artifactIDs, outcome.excludedByGC)
+	reachable, artifactsOfNode := usedFilesByArtifact(graph, artifactIDs, outcome.excludedByGC)
 	logger.Info("Reachable from a deliverable: %d node(s) [%s]", len(reachable), describeCounts(reachable))
 	findings = append(findings, unresolvedObjects(graph, reachable, anchorResult)...)
 	findings = append(findings, missingGeneratorInputFindings(graph, reachable)...)
@@ -507,6 +507,15 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		canonical := string(node.ID)
 		logger.Trace("Used file: %s (%s, scope %s)", canonical, node.Kind, scope)
 		properties := map[string][]string{"sbomb:component:scope": {string(scope)}}
+		// Section 24.5 and decision Q10: which deliverable reached this file.
+		// Only in assembly mode -- with one deliverable every file reaches it,
+		// and a property saying so on every file of every document would be
+		// noise the reader has to skip.
+		if len(artifactIDs) > 1 {
+			if refs := artifactRefs(artifactsOfNode[node.ID]); len(refs) > 0 {
+				properties["sbomb:evidence:artifacts"] = refs
+			}
+		}
 		if node.Kind == domain.NodeHeader {
 			// Section 14.4: the class that decided inclusion is part of the
 			// record, so a reviewer can see why a header is here.
@@ -652,7 +661,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	if projectVersionSource == "cmake" {
 		logger.Info("Project version %q read from CMAKE_PROJECT_VERSION", cfg.Project.Version)
 	}
-	document, findings := buildDocument(cfg, projectVersionSource, resolver, deliverables, used, findings, run, attributes)
+	document, findings := buildDocument(cfg, projectVersionSource, resolver, deliverables, artifactIDs, used, findings, run, attributes)
 	// The configuration names the serialization; an empty value is the
 	// writer's default rather than a guess made here (section 32.2).
 	format := cfg.Output.Format
@@ -1089,4 +1098,16 @@ func anchorRootList(result *anchors.Result) []string {
 		}
 	}
 	return roots
+}
+
+// artifactRefs turns the artifact node ids a file was reached from into the
+// bom-refs the document carries for them, so that a reader of the property can
+// look the deliverable up rather than parse a node id (section 28.4).
+func artifactRefs(nodeIDs []string) []string {
+	refs := make([]string, 0, len(nodeIDs))
+	for _, id := range nodeIDs {
+		refs = append(refs, "artifact:"+strings.TrimPrefix(id, "artifact:"))
+	}
+	sort.Strings(refs)
+	return refs
 }

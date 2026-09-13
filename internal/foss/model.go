@@ -82,8 +82,16 @@ type entry struct {
 	modifiedSignal string
 	usedFiles      int
 	obligations    []string
-	artifacts      []domain.LicenseArtifact
-	copyrights     []domain.CopyrightStatement
+	// deliverables are the artifacts of an assembly this component was
+	// reached from, empty in single-artifact mode. The obligation of a
+	// copyleft licence attaches to a deliverable rather than to the product --
+	// LGPL-2.1 section 6 asks for what is needed to relink *the application*
+	// -- so a component two deliverables share owes two different things, and
+	// naming them is the difference between an obligation somebody can act on
+	// and one they have to go looking for.
+	deliverables []string
+	artifacts    []domain.LicenseArtifact
+	copyrights   []domain.CopyrightStatement
 	// narrowed is how many headers of this component the SBOM view dropped
 	// and the licence view keeps.
 	narrowed int
@@ -148,6 +156,25 @@ func build(in Input) model {
 	sortEntries(m.buildTimeOnly)
 	sortEntries(m.roleUnestablished)
 	m.byArtifact = componentsPerArtifact(in)
+	// The obligation of a copyleft licence attaches to a deliverable, so each
+	// entry is told which ones reached it. The map is by name because that is
+	// what the breakdown prints; two components of one name would share the
+	// list, which over-reports rather than losing anything -- and Q7 records
+	// that case.
+	reachedBy := map[string][]string{}
+	for artifact, names := range m.byArtifact {
+		for _, name := range names {
+			reachedBy[name] = append(reachedBy[name], artifact)
+		}
+	}
+	for _, group := range [][]entry{m.distributed, m.buildTimeOnly, m.roleUnestablished} {
+		for i := range group {
+			if reached := reachedBy[group[i].name]; len(reached) > 0 {
+				sort.Strings(reached)
+				group[i].deliverables = reached
+			}
+		}
+	}
 
 	// Which component prints which text is decided after the order is fixed,
 	// so that the same run always prints the same bytes under the same

@@ -711,11 +711,34 @@ func collectObjects(paths []string) []string {
 // premise of the tool (section 4.1): a file belongs in the SBOM only when a
 // chain of evidence connects it to a final deliverable.
 func usedFiles(graph *evidence.Graph, artifactIDs []domain.NodeID, excluded map[string]bool) []domain.Node {
+	nodes, _ := usedFilesByArtifact(graph, artifactIDs, excluded)
+	return nodes
+}
+
+// usedFilesByArtifact is the same derivation, keeping which deliverable each
+// file was reached from rather than only that one was.
+//
+// The union is what the SBOM's file set is; the per-artifact answer is what
+// decision Q10 of the FOSS plan asks for in assembly mode. A component two
+// deliverables reach appears once (§6.3), and the obligation it carries can
+// still differ between them: LGPL-2.1 §6 attaches the relinking obligation to
+// the deliverable a library was statically linked into, not to the product.
+// Nothing extra is walked -- the loop already visits every artifact.
+func usedFilesByArtifact(
+	graph *evidence.Graph,
+	artifactIDs []domain.NodeID,
+	excluded map[string]bool,
+) ([]domain.Node, map[domain.NodeID][]string) {
 	reachable := map[domain.NodeID]bool{}
+	byNode := map[domain.NodeID][]string{}
 	for _, artifactID := range artifactIDs {
 		for id := range graph.ReachableExcept(artifactID, excluded) {
 			reachable[id] = true
+			byNode[id] = append(byNode[id], string(artifactID))
 		}
+	}
+	for id := range byNode {
+		sort.Strings(byNode[id])
 	}
 	out := make([]domain.Node, 0, len(reachable))
 	for _, node := range graph.Nodes() {
@@ -725,7 +748,7 @@ func usedFiles(graph *evidence.Graph, artifactIDs []domain.NodeID, excluded map[
 		out = append(out, node)
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
-	return out
+	return out, byNode
 }
 
 // representInSBOM applies the representation rules of sections 12 and 13.1:

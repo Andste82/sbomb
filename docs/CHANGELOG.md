@@ -2,6 +2,31 @@
 
 ## 0.17.0
 
+### An assembly says which deliverable pulled in a component
+
+§6.2 and §6.3 have always required it: in assembly mode each artifact is a
+component and a direct dependency of the root, a file several artifacts use
+appears once, and `sbomb:evidence:artifacts` lists the artifacts whose chains
+reach it. None of the three was implemented. The property was in the catalogue
+as emitted and nobody wrote it, the artifact list on the document was never
+filled, and the `COMPONENTS PER ARTIFACT` section of the review record — which
+decision Q10 of the FOSS plan describes as the question that actually gets
+asked — could not render at all.
+
+It matters for one reason in particular. A component two deliverables share
+appears once, and what it owes can still differ between them: LGPL-2.1 §6
+attaches the relinking obligation to the deliverable a library was statically
+linked into, not to the product. `source-obligations.txt` names the
+deliverables now, beside the linkage forms it already named.
+
+The new fixture `p15-shared` carries exactly that case: one LGPL-2.1 component
+whose archive member is linked into an application and whose data file is
+packed into an image. It runs on the two GCC toolchains, like `p14-foss`, so
+no Windows fixture had to be regenerated for it.
+
+Single-artifact documents do not change: the property is written only where
+there is more than one deliverable to distinguish.
+
 ### The corpus normalizer can no longer lose what it was asked to sort
 
 `replynorm` sorts the dependency array of a CMake File API reply so the corpus

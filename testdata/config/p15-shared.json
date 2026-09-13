@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "project": {
+    "name": "p15-shared",
+    "root": "/__fixture_src__"
+  },
+  "build": {
+    "dir": "/__fixture_build__"
+  },
+  "mode": "assembly",
+  "artifacts": [
+    {
+      "path": "app",
+      "role": "application"
+    },
+    {
+      "path": "image.img",
+      "role": "image"
+    }
+  ],
+  "output": {
+    "format": "cyclonedx-json",
+    "specVersion": "1.6",
+    "reproducible": true
+  },
+  "policy": {
+    "profile": "lenient"
+  }
+}

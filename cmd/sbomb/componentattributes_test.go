@@ -8,6 +8,8 @@ import (
 	"testing"
 
 	"github.com/example/sbomb/internal/testutil"
+
+	"os"
 )
 
 // Section 24.5, against the corpus. The unit tests in internal/generate state
@@ -312,5 +314,110 @@ func TestAGeneratorInputIsBuildTimeOnlyInTheCorpus(t *testing.T) {
 		t.Errorf("component:p12-assets = %+v, want a distributed component", entry)
 	} else if strings.Join(entry.forms, ",") != "build-tool,embedded-asset,static-object" {
 		t.Errorf("forms = %v, want all three the files establish", entry.forms)
+	}
+}
+
+// Section 6.2 and 6.3, and decision Q10 of the FOSS plan, over the corpus: an
+// assembly whose two deliverables share a component. dep/shared-lib is one
+// component -- LGPL-2.1, its licence file marks the boundary -- and it reaches
+// the two deliverables in two different ways: its archive member is statically
+// linked into `app`, and one of its data files is packed into `image.img`.
+//
+// That is the case the obligation turns on. LGPL-2.1 section 6 attaches the
+// relinking obligation to the deliverable a library was linked into, so a
+// component two deliverables share owes two different things, and a document
+// that says only "it is in the product" cannot be acted on.
+func TestAnAssemblyNamesWhichDeliverableReachedAComponent(t *testing.T) {
+	buildDir := testutil.CorpusBuildDir(t, "gcc-ninja", "p15-shared")
+	configPath := filepath.Join("..", "..", "testdata", "config", "p15-shared.json")
+	output := filepath.Join(t.TempDir(), "p15.cdx.json")
+	code, _, stderr := execute([]string{"generate", "--build-dir", buildDir, "--config", configPath,
+		"--source-dir", filepath.Join("..", "..", "tools", "fixtures", "projects", "p15-shared"),
+		"--output", output, "--reproducible"})
+	if code != 0 || stderr != "" {
+		t.Fatalf("generate = code %d, stderr %q", code, stderr)
+	}
+	data, err := os.ReadFile(output)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var document struct {
+		Components []struct {
+			Type       string `json:"type"`
+			BomRef     string `json:"bom-ref"`
+			Properties []struct {
+				Name  string `json:"name"`
+				Value string `json:"value"`
+			} `json:"properties"`
+		} `json:"components"`
+		Dependencies []struct {
+			Ref       string   `json:"ref"`
+			DependsOn []string `json:"dependsOn"`
+		} `json:"dependencies"`
+	}
+	if err := json.Unmarshal(data, &document); err != nil {
+		t.Fatal(err)
+	}
+
+	// Each artifact is a component of the type its role maps to (section 6.2).
+	kinds := map[string]string{}
+	for _, component := range document.Components {
+		kinds[component.BomRef] = component.Type
+	}
+	for ref, want := range map[string]string{
+		"artifact:build:app":       "application",
+		"artifact:build:image.img": "firmware",
+	} {
+		if kinds[ref] != want {
+			t.Errorf("%s is a %q component, want %q", ref, kinds[ref], want)
+		}
+	}
+
+	depends := map[string][]string{}
+	for _, relation := range document.Dependencies {
+		depends[relation.Ref] = relation.DependsOn
+	}
+	// The product's dependencies are the deliverables, and the shared
+	// component hangs under both of them while appearing once.
+	if got := depends["product:p15-shared"]; len(got) != 2 {
+		t.Errorf("the product depends on %v, want the two deliverables", got)
+	}
+	for _, artifact := range []string{"artifact:build:app", "artifact:build:image.img"} {
+		var found bool
+		for _, target := range depends[artifact] {
+			if target == "component:shared-lib" {
+				found = true
+			}
+		}
+		if !found {
+			t.Errorf("%s does not depend on the component it reached: %v", artifact, depends[artifact])
+		}
+	}
+	var shared int
+	for _, component := range document.Components {
+		if component.BomRef == "component:shared-lib" {
+			shared++
+		}
+	}
+	if shared != 1 {
+		t.Errorf("the shared component appears %d times, want once (section 6.3)", shared)
+	}
+
+	// And each of its files says which deliverable reached it.
+	artifactsOf := map[string][]string{}
+	for _, component := range document.Components {
+		for _, property := range component.Properties {
+			if property.Name == "sbomb:evidence:artifacts" {
+				artifactsOf[component.BomRef] = append(artifactsOf[component.BomRef], property.Value)
+			}
+		}
+	}
+	for ref, want := range map[string]string{
+		"file:project:dep/shared-lib/src/shared_bits.c": "artifact:build:app",
+		"file:project:dep/shared-lib/data/table.bin":    "artifact:build:image.img",
+	} {
+		if got := artifactsOf[ref]; len(got) != 1 || got[0] != want {
+			t.Errorf("%s names %v, want %q", ref, got, want)
+		}
 	}
 }

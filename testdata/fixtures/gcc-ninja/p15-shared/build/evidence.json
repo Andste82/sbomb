@@ -1,0 +1,519 @@
+{
+  "schemaVersion": 1,
+  "toolVersion": "0.0.0",
+  "anchors": [
+    {
+      "key": "abs"
+    },
+    {
+      "key": "build"
+    },
+    {
+      "key": "project"
+    },
+    {
+      "key": "toolchain:gnu-13.3.0"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "abs:lib/x86_64-linux-gnu/libc.so.6",
+      "kind": "archive",
+      "attributes": {
+        "scope": "system"
+      }
+    },
+    {
+      "id": "abs:lib64/ld-linux-x86-64.so.2",
+      "kind": "archive",
+      "attributes": {
+        "scope": "system"
+      }
+    },
+    {
+      "id": "artifact:build:app",
+      "kind": "artifact",
+      "attributes": {
+        "discoveredBy": "configuration",
+        "path": "build:app",
+        "role": "application"
+      }
+    },
+    {
+      "id": "artifact:build:image.img",
+      "kind": "artifact",
+      "attributes": {
+        "discoveredBy": "configuration",
+        "path": "build:image.img",
+        "role": "image"
+      }
+    },
+    {
+      "id": "build:CMakeFiles/app.dir/src/main.c.o",
+      "kind": "object",
+      "attributes": {
+        "scope": "build"
+      }
+    },
+    {
+      "id": "build:CMakeFiles/sharedbits.dir/dep/shared-lib/src/shared_bits.c.o",
+      "kind": "object",
+      "attributes": {
+        "archive": "build:libsharedbits.a",
+        "member": "shared_bits.c.o",
+        "scope": "build"
+      }
+    },
+    {
+      "id": "build:libc.so.6",
+      "kind": "archive",
+      "attributes": {
+        "scope": "build"
+      }
+    },
+    {
+      "id": "build:libsharedbits.a",
+      "kind": "archive",
+      "attributes": {
+        "scope": "build"
+      }
+    },
+    {
+      "id": "project:dep/shared-lib/data/table.bin",
+      "kind": "asset",
+      "attributes": {
+        "role": "asset",
+        "scope": "project"
+      }
+    },
+    {
+      "id": "project:dep/shared-lib/include/shared_bits.h",
+      "kind": "header",
+      "attributes": {
+        "headerClass": "project-header",
+        "scope": "project"
+      }
+    },
+    {
+      "id": "project:dep/shared-lib/src/shared_bits.c",
+      "kind": "source",
+      "attributes": {
+        "scope": "project"
+      }
+    },
+    {
+      "id": "project:src/main.c",
+      "kind": "source",
+      "attributes": {
+        "scope": "project"
+      }
+    },
+    {
+      "id": "toolchain:gnu-13.3.0:include/stdc-predef.h",
+      "kind": "header",
+      "attributes": {
+        "headerClass": "compiler-runtime-header",
+        "scope": "toolchain"
+      }
+    },
+    {
+      "id": "toolchain:gnu-13.3.0:lib/gcc/x86_64-linux-gnu/13/crtbeginS.o",
+      "kind": "object",
+      "attributes": {
+        "scope": "toolchain"
+      }
+    },
+    {
+      "id": "toolchain:gnu-13.3.0:lib/gcc/x86_64-linux-gnu/13/crtendS.o",
+      "kind": "object",
+      "attributes": {
+        "scope": "toolchain"
+      }
+    },
+    {
+      "id": "toolchain:gnu-13.3.0:lib/gcc/x86_64-linux-gnu/13/libgcc.a",
+      "kind": "archive",
+      "attributes": {
+        "scope": "toolchain"
+      }
+    },
+    {
+      "id": "toolchain:gnu-13.3.0:lib/gcc/x86_64-linux-gnu/13/libgcc_s.so",
+      "kind": "archive",
+      "attributes": {
+        "scope": "toolchain"
+      }
+    },
+    {
+      "id": "toolchain:gnu-13.3.0:lib/x86_64-linux-gnu/Scrt1.o",
+      "kind": "object",
+      "attributes": {
+        "scope": "toolchain"
+      }
+    },
+    {
+      "id": "toolchain:gnu-13.3.0:lib/x86_64-linux-gnu/crti.o",
+      "kind": "object",
+      "attributes": {
+        "scope": "toolchain"
+      }
+    },
+    {
+      "id": "toolchain:gnu-13.3.0:lib/x86_64-linux-gnu/crtn.o",
+      "kind": "object",
+      "attributes": {
+        "scope": "toolchain"
+      }
+    },
+    {
+      "id": "toolchain:gnu-13.3.0:lib/x86_64-linux-gnu/libc.so",
+      "kind": "archive",
+      "attributes": {
+        "scope": "toolchain"
+      }
+    },
+    {
+      "id": "toolchain:gnu-13.3.0:lib/x86_64-linux-gnu/libc_nonshared.a",
+      "kind": "archive",
+      "attributes": {
+        "scope": "toolchain"
+      }
+    },
+    {
+      "id": "toolchain:gnu-13.3.0:lib/x86_64-linux-gnu/libgcc_s.so.1",
+      "kind": "archive",
+      "attributes": {
+        "scope": "toolchain"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "artifact:build:app",
+      "to": "abs:lib/x86_64-linux-gnu/libc.so.6",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "gnu-ld:app.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "abs:lib/x86_64-linux-gnu/libc.so.6",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "ld:app.d",
+      "adapter": "linker-depfile"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "abs:lib64/ld-linux-x86-64.so.2",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "gnu-ld:app.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "abs:lib64/ld-linux-x86-64.so.2",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "ld:app.d",
+      "adapter": "linker-depfile"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "build:CMakeFiles/app.dir/src/main.c.o",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "gnu-ld:app.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "build:CMakeFiles/app.dir/src/main.c.o",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "ld:app.d",
+      "adapter": "linker-depfile"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "build:libc.so.6",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "gnu-ld:app.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "build:libsharedbits.a",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "gnu-ld:app.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "build:libsharedbits.a",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "ld:app.d",
+      "adapter": "linker-depfile"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "toolchain:gnu-13.3.0:lib/gcc/x86_64-linux-gnu/13/crtbeginS.o",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "gnu-ld:app.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "toolchain:gnu-13.3.0:lib/gcc/x86_64-linux-gnu/13/crtbeginS.o",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "ld:app.d",
+      "adapter": "linker-depfile"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "toolchain:gnu-13.3.0:lib/gcc/x86_64-linux-gnu/13/crtendS.o",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "gnu-ld:app.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "toolchain:gnu-13.3.0:lib/gcc/x86_64-linux-gnu/13/crtendS.o",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "ld:app.d",
+      "adapter": "linker-depfile"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "toolchain:gnu-13.3.0:lib/gcc/x86_64-linux-gnu/13/libgcc.a",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "gnu-ld:app.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "toolchain:gnu-13.3.0:lib/gcc/x86_64-linux-gnu/13/libgcc.a",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "ld:app.d",
+      "adapter": "linker-depfile"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "toolchain:gnu-13.3.0:lib/gcc/x86_64-linux-gnu/13/libgcc_s.so",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "gnu-ld:app.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "toolchain:gnu-13.3.0:lib/gcc/x86_64-linux-gnu/13/libgcc_s.so",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "ld:app.d",
+      "adapter": "linker-depfile"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "toolchain:gnu-13.3.0:lib/x86_64-linux-gnu/Scrt1.o",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "gnu-ld:app.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "toolchain:gnu-13.3.0:lib/x86_64-linux-gnu/Scrt1.o",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "ld:app.d",
+      "adapter": "linker-depfile"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "toolchain:gnu-13.3.0:lib/x86_64-linux-gnu/crti.o",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "gnu-ld:app.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "toolchain:gnu-13.3.0:lib/x86_64-linux-gnu/crti.o",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "ld:app.d",
+      "adapter": "linker-depfile"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "toolchain:gnu-13.3.0:lib/x86_64-linux-gnu/crtn.o",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "gnu-ld:app.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "toolchain:gnu-13.3.0:lib/x86_64-linux-gnu/crtn.o",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "ld:app.d",
+      "adapter": "linker-depfile"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "toolchain:gnu-13.3.0:lib/x86_64-linux-gnu/libc.so",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "gnu-ld:app.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "toolchain:gnu-13.3.0:lib/x86_64-linux-gnu/libc.so",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "ld:app.d",
+      "adapter": "linker-depfile"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "toolchain:gnu-13.3.0:lib/x86_64-linux-gnu/libc_nonshared.a",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "gnu-ld:app.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "toolchain:gnu-13.3.0:lib/x86_64-linux-gnu/libc_nonshared.a",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "ld:app.d",
+      "adapter": "linker-depfile"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "toolchain:gnu-13.3.0:lib/x86_64-linux-gnu/libgcc_s.so.1",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "gnu-ld:app.map",
+      "adapter": "linker-map"
+    },
+    {
+      "from": "artifact:build:app",
+      "to": "toolchain:gnu-13.3.0:lib/x86_64-linux-gnu/libgcc_s.so.1",
+      "type": "link",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "ld:app.d",
+      "adapter": "linker-depfile"
+    },
+    {
+      "from": "artifact:build:image.img",
+      "to": "project:dep/shared-lib/data/table.bin",
+      "type": "packaging",
+      "strength": "packaged",
+      "confidence": "high",
+      "source": "manifest:sbomb-manifest.json",
+      "adapter": "manifest"
+    },
+    {
+      "from": "build:CMakeFiles/app.dir/src/main.c.o",
+      "to": "project:dep/shared-lib/include/shared_bits.h",
+      "type": "header-dependency",
+      "strength": "derived",
+      "confidence": "high",
+      "source": "debug-info+depfile",
+      "adapter": "binfmt"
+    },
+    {
+      "from": "build:CMakeFiles/app.dir/src/main.c.o",
+      "to": "project:src/main.c",
+      "type": "source-mapping",
+      "strength": "derived",
+      "confidence": "high",
+      "source": "ninja-buildgraph:object-source-mapping",
+      "adapter": "resolver"
+    },
+    {
+      "from": "build:CMakeFiles/sharedbits.dir/dep/shared-lib/src/shared_bits.c.o",
+      "to": "project:dep/shared-lib/include/shared_bits.h",
+      "type": "header-dependency",
+      "strength": "derived",
+      "confidence": "medium",
+      "source": "depfile",
+      "adapter": "depfiles"
+    },
+    {
+      "from": "build:CMakeFiles/sharedbits.dir/dep/shared-lib/src/shared_bits.c.o",
+      "to": "project:dep/shared-lib/src/shared_bits.c",
+      "type": "source-mapping",
+      "strength": "derived",
+      "confidence": "high",
+      "source": "ninja-buildgraph:object-source-mapping",
+      "adapter": "resolver"
+    },
+    {
+      "from": "build:CMakeFiles/sharedbits.dir/dep/shared-lib/src/shared_bits.c.o",
+      "to": "toolchain:gnu-13.3.0:include/stdc-predef.h",
+      "type": "header-dependency",
+      "strength": "derived",
+      "confidence": "medium",
+      "source": "depfile",
+      "adapter": "depfiles"
+    },
+    {
+      "from": "build:libsharedbits.a",
+      "to": "build:CMakeFiles/sharedbits.dir/dep/shared-lib/src/shared_bits.c.o",
+      "type": "archive-member",
+      "strength": "linked",
+      "confidence": "high",
+      "source": "gnu-ld:app.map",
+      "adapter": "linker-map",
+      "attributes": {
+        "member": "shared_bits.c.o"
+      }
+    }
+  ]
+}
