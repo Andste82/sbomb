@@ -214,7 +214,7 @@ ordinary case for:
 
 A tag on its own is not enough, and this is the reason a component you never
 touched can still read `unknown`. Git cannot tell a release tag from any other
-— `v1.2.3`, `acme-1` and `poc-dingsbums` are one kind of object to it — so
+— `v1.2`, `acme-1` and `poc-dingsbums` are one kind of object to it — so
 "the checkout stands on some tag" is not evidence that it stands on *the*
 release. It is exactly the case where somebody tags their own fix, which is
 when a wrong `no` would matter most.
