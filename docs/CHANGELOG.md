@@ -2,6 +2,35 @@
 
 ## 0.17.0
 
+### `explain --component` answers
+
+Section 32.3 documents three subjects for `explain`, and one of them answered
+nothing on every project. `--file` and `--bom-ref` reach a node of the evidence
+dump; `--component` never could, because the dump carries source, header,
+object, archive and artifact nodes and no component. Component mapping happens
+a layer above the graph and its result was not written back into it.
+
+The mapping is in the **document**: §28's dependency cascade gives every
+grouping component a `dependsOn` list of its `file:` refs, and a file bom-ref
+is its identity behind that prefix — the key the graph uses. So
+`explain --component <name> --sbom <file>` expands the name there and explains
+each file from the dump. No format change, no second discovery, and the
+layering stays as §35 has it.
+
+The document is named rather than guessed: a build directory holds any number
+of them, and picking one would decide the answer by accident. Three refusals
+say which of three things went wrong — no document named, no such component in
+it, or none of its files in this dump. The last means the two describe
+different builds, which is not the same answer as an absent chain: "no evidence
+chain" is the wording for a subject that is in the graph and unreachable, and
+for a component it would read as "this component is not in your product".
+
+The assumption was checked before it was built rather than after: all nine
+golden documents, every grouping component carrying its files, none missing.
+Open question Q19 is closed and deviation D46 rewritten — what remains of it is
+that one subcommand reads two files, which follows from where the two facts
+are.
+
 ### The smoke test exercises the action's attribution step
 
 The composite action's only content of its own is the shell that assembles

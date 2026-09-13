@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -905,6 +906,7 @@ func handleExplain(args []string) (int, string, string) {
 	fileRef := ""
 	component := ""
 	bomRef := ""
+	sbomPath := ""
 	format := "text"
 	for i := 0; i < len(args); i++ {
 		switch {
@@ -940,6 +942,14 @@ func handleExplain(args []string) (int, string, string) {
 			i++
 		case strings.HasPrefix(args[i], "--bom-ref="):
 			bomRef = strings.TrimPrefix(args[i], "--bom-ref=")
+		case args[i] == "--sbom":
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --sbom\n"
+			}
+			sbomPath = args[i+1]
+			i++
+		case strings.HasPrefix(args[i], "--sbom="):
+			sbomPath = strings.TrimPrefix(args[i], "--sbom=")
 		case args[i] == "--format":
 			if i+1 >= len(args) {
 				return 1, "", "missing value for --format\n"
@@ -958,13 +968,16 @@ func handleExplain(args []string) (int, string, string) {
 	if fileRef == "" && component == "" && bomRef == "" {
 		return 1, "", "one of --file, --component, or --bom-ref is required\n"
 	}
-	if component != "" {
-		// Section 32.3 documents this subject and the evidence dump cannot
-		// answer it: it carries source, header, object, archive and artifact
-		// nodes, and no component node. Saying so beats "no evidence chain",
-		// which reads as "that component is not in the product". Deviation D46,
-		// open question Q19.
-		return 1, "", "--component cannot be answered from the evidence dump, which carries files and artifacts and no components (deviation D46). Use --file or --bom-ref, or sbomb foss for what was seen about a component.\n"
+	if component != "" && sbomPath == "" {
+		// Section 32.3: the dump carries no component node, because component
+		// mapping happens above the graph and its result is not written back
+		// into it. The document states the mapping, so it has to be named --
+		// and named rather than guessed, since a directory holds any number of
+		// documents and picking one would decide the answer by accident.
+		return 1, "", "--component needs --sbom <file>: the evidence dump carries files and artifacts and no components, and the document is where the mapping is (section 32.3)\n"
+	}
+	if component == "" && sbomPath != "" {
+		return 1, "", "--sbom is read for --component, and there is no --component\n"
 	}
 	if buildDir == "" {
 		return 1, "", "--build-dir is required\n"
@@ -974,12 +987,33 @@ func handleExplain(args []string) (int, string, string) {
 		return 1, "", err.Error() + "\n"
 	}
 
+	var text string
+	if component != "" {
+		files, resolveErr := componentFilesFromSBOM(g, sbomPath, component)
+		if resolveErr != "" {
+			return 1, "", resolveErr
+		}
+		if strings.EqualFold(format, "json") {
+			text, err = report.RenderExplainComponentJSON(g, component, files)
+		} else if strings.EqualFold(format, "text") {
+			text, err = report.RenderExplainComponent(g, component, files)
+		} else {
+			return 1, "", fmt.Sprintf("unsupported explain format: %s\n", format)
+		}
+		if err != nil {
+			return 1, "", err.Error() + "\n"
+		}
+		if strings.EqualFold(format, "text") && !strings.HasSuffix(text, "\n") {
+			text += "\n"
+		}
+		return 0, text, ""
+	}
+
 	subject, subjectErr := explainSubject(g, fileRef, bomRef)
 	if subjectErr != "" {
 		return 1, "", subjectErr
 	}
 
-	var text string
 	if strings.EqualFold(format, "json") {
 		text, err = report.RenderExplainJSON(g, subject)
 	} else if strings.EqualFold(format, "text") {
@@ -1114,4 +1148,91 @@ func parseSize(value string) (int64, error) {
 		return 0, fmt.Errorf("must be positive")
 	}
 	return number * multiplier, nil
+}
+
+// componentFilesFromSBOM expands a component name to the file identities the
+// document says it groups.
+//
+// The mapping is there and nowhere else: section 28's dependency cascade gives
+// every grouping component a dependsOn list of its `file:` refs, and a file
+// bom-ref is its identity behind that prefix (section 28.4) -- which is the
+// key the evidence graph uses. So the expansion is a lookup, not a search.
+//
+// Three refusals, each saying which of three different things went wrong: the
+// document cannot be read, the name is not in it, or the name is in it and
+// none of its files is in this dump. The last one means the two describe
+// different builds, and reporting it as an absent chain would read as "that
+// component is not in the product".
+func componentFilesFromSBOM(g *evidence.Graph, path, component string) ([]string, string) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err.Error() + "\n"
+	}
+	var document struct {
+		Components []struct {
+			BomRef string `json:"bom-ref"`
+			Name   string `json:"name"`
+		} `json:"components"`
+		Dependencies []struct {
+			Ref       string   `json:"ref"`
+			DependsOn []string `json:"dependsOn"`
+		} `json:"dependencies"`
+	}
+	if err := json.Unmarshal(data, &document); err != nil {
+		return nil, fmt.Sprintf("%s is not a document this can read: %v\n", path, err)
+	}
+
+	// By bom-ref first, because that is what the document is keyed by and what
+	// the review report prints; by name second, because that is what a person
+	// types. A toolchain component is a grouping component too and its ref
+	// carries its own prefix.
+	ref := ""
+	for _, candidate := range []string{component, "component:" + component, "toolchain:" + component} {
+		for _, entry := range document.Components {
+			if entry.BomRef == candidate {
+				ref = entry.BomRef
+				break
+			}
+		}
+		if ref != "" {
+			break
+		}
+	}
+	if ref == "" {
+		for _, entry := range document.Components {
+			if entry.Name == component {
+				ref = entry.BomRef
+				break
+			}
+		}
+	}
+	if ref == "" {
+		return nil, fmt.Sprintf("%s names no component %s\n", path, component)
+	}
+
+	files := make([]string, 0)
+	for _, dependency := range document.Dependencies {
+		if dependency.Ref != ref {
+			continue
+		}
+		for _, on := range dependency.DependsOn {
+			if identity, found := strings.CutPrefix(on, "file:"); found {
+				files = append(files, identity)
+			}
+		}
+	}
+	if len(files) == 0 {
+		return nil, fmt.Sprintf("%s groups no file under %s, so there is nothing to explain\n", path, ref)
+	}
+	known := 0
+	for _, identity := range files {
+		if _, ok := g.Node(domain.NodeID(identity)); ok {
+			known++
+		}
+	}
+	if known == 0 {
+		return nil, fmt.Sprintf("no file of %s is in this build directory's evidence: %s describes a different build\n", ref, path)
+	}
+	sort.Strings(files)
+	return files, ""
 }
