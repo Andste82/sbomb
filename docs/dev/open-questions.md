@@ -428,61 +428,30 @@ would mean testing a binary the release does not carry, which is the
 contradiction the question started from. The number stays reserved so that
 references to Q19 keep their meaning.
 
-## Q19 — `explain --component` answers nothing, and fixing it means changing `evidence.json`
+## Q19 — reserved
 
-§32.3 specifies three subjects for `explain`:
+**Settled: the third way, and it cost no format change.** The question listed
+three, and the first two were the ones decision Q20 had already refused:
+component nodes in the evidence dump, which is a format change to a file other
+tools read and makes the dump depend on the layer above it; and `explain`
+running discovery of its own, which would stop it being a reader and let it
+answer about a build nobody made.
 
-```
-sbomb explain --build-dir build/debug --file dep/mbedtls/include/mbedtls/aes.h
-sbomb explain --build-dir build/debug --component mbedtls
-sbomb explain --build-dir build/debug --bom-ref file:project:src/main.cpp
-```
+The third was to read the document beside the dump, and it holds up. §28's
+dependency cascade gives every grouping component a `dependsOn` list of its
+`file:` refs, and a file bom-ref is its identity behind that prefix — the key
+the graph uses. It was checked against every golden document before it was
+built: nine documents, every grouping component carrying its files, none
+missing, and the bom-ref `component:<name>` makes the name unique per document
+so the expansion is a lookup rather than a search.
 
-The three flags exist, and all three are the same thing: `--file`,
-`--component` and `--bom-ref` set one `subject` string, which is looked up as a
-node id in the evidence graph loaded from the dump (`cmd/sbomb/main.go`,
-`handleExplain`). The graph carries source, header, object, archive and
-artifact nodes. It carries **no component nodes** — component mapping happens
-above the graph, in `internal/componentmap` and `internal/generate`, and
-nothing writes its result back into it. So every component name answers `no
-evidence chain for <name>` and exits 1, on every project. Verified on
-`p14-foss`: `--component mit-lib` fails while `--file
-project:dep/mit-lib/src/mit_a.c` prints the archive-member and link hops to
-`artifact:build:fossapp`.
+`explain --component <name> --sbom <file>` expands the name and explains each
+file. The document is named rather than guessed, because a build directory
+holds any number of them. Three refusals say which of three things went wrong:
+no document named, no such component in it, or none of its files in this dump —
+the last meaning the two describe different builds, which is not the same
+answer as an absent chain.
 
-It surfaced while writing `docs/foss.md`. Decision Q20 declined a FOSS mode for
-`explain` on the grounds that "is this library really in our product?" is
-already answered by `explain --component`; it is not, and the documentation
-names `--file` instead, which is true and which the review record's identifiers
-line up with.
-
-What a fix costs is exactly what Q20 refused to spend. The subject has to
-resolve to a set of file nodes, which means either:
-
-* **Components in the dump.** Appendix C gains component nodes, or a
-  component-to-files index beside the nodes. That is a format change to a file
-  other tools read, and it makes the dump depend on the component mapping — a
-  layer above it (§35).
-* **`explain` runs discovery.** It would stop being a reader of the dump, and
-  a second run on a tree that has changed answers about a build nobody made.
-* **`explain` reads the SBOM.** The document already states the mapping: the
-  §28 dependency cascade gives every grouping component a `dependsOn` list of
-  its `file:` refs, so `explain --component mit-lib` could take the document
-  beside the build directory, expand the name to those file ids, and explain
-  each of them from the dump. It needs no format change and no second
-  discovery, but it makes one subcommand read two files, and it answers nothing
-  where no document was kept.
-
-None of the three is obviously right, the third is cheap, and the flag is
-specified — so this is a defect with a real cost of repair rather than an
-oversight.
-
-**Two thirds of it are fixed; the component subject is what is left.** §32.3
-spells its other two examples as a path relative to a root and as a `file:`
-bom-ref, and neither reached a node either, because the graph is keyed by
-canonical identity. `explainSubject` (`cmd/sbomb/main.go`) now takes the `file:`
-prefix off a bom-ref and offers a relative path to every anchor of the dump,
-naming the candidates rather than choosing when two anchors carry one path. So
-both documented forms work, and the third says what it cannot do instead of
-answering "no evidence chain" — which read as "that component is not in the
-product". Deviation D46 records the gap that remains.
+What is left is that one subcommand reads two files where the other subjects
+read one. That follows from where the two facts are, and deviation D46 records
+it.

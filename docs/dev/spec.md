@@ -1832,11 +1832,15 @@ Every `--include-*` / `--fail-on-*` flag overrides the corresponding policy valu
 
 ```
 sbomb explain --build-dir build/debug --file dep/mbedtls/include/mbedtls/aes.h
-sbomb explain --build-dir build/debug --component mbedtls
+sbomb explain --build-dir build/debug --sbom app.cdx.json --component mbedtls
 sbomb explain --build-dir build/debug --bom-ref file:project:src/main.cpp
 ```
 
 Prints all evidence chains from the file/component to every reaching final deliverable, with evidence type, source, adapter, strength, and confidence per hop. `--format json` prints the same as structured data. Exit 0 if found, 3 if the subject exists but has no chain (should be impossible), 1 if the subject is unknown.
+
+`--component` names a grouping component, and the evidence dump carries none: component mapping happens above the graph (§35) and its result is not written back into it. The mapping is in the **document** instead — §28's dependency cascade gives every grouping component a `dependsOn` list of its `file:` refs — so `--component` takes `--sbom <file>` beside `--build-dir`, expands the name to those files and explains each of them from the dump. The document is named rather than guessed: a directory holds any number of them, and picking one would make the answer depend on which.
+
+A component is looked up by its bom-ref (`component:<name>`, `toolchain:<name>`) and then by its `name`, in that order. Where none of its files is a node of the dump, the document describes a different build than the build directory does, and that MUST be reported as such rather than as an absent chain: a subject that cannot be found and a subject that was never in this product are different answers to the question `explain` is asked.
 
 ### 32.4 Exit Codes
 

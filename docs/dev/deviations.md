@@ -2036,7 +2036,7 @@ yields a smaller used-file set when it was built with Make than with Ninja, and
 open question Q14; inventing a fourth source is what deviation D20 already
 refused once.
 
-## D46 — `explain --component` refuses instead of answering
+## D46 — `explain --component` reads the document as well as the dump
 
 §32.3 documents three subjects for `explain`, and one of them cannot be served
 by the file it reads. The evidence dump of appendix C carries source, header,
@@ -2044,12 +2044,27 @@ object, archive and artifact nodes; it carries no component, because the
 component mapping of §19.2 is a layer above the graph (§35) and decision Q20 of
 the FOSS plan refused to change the dump's format for this.
 
-Until that is decided (open question Q19), `--component` exits 1 with a message
-naming what it cannot do and pointing at `--file`, `--bom-ref` and
-`sbomb foss`. It used to print "no evidence chain for <name>", which is the
-wording for a subject that *is* in the graph and unreachable — for a component
-it read as "this component is not in your product", which is the opposite of
-what the tool knows.
+The mapping is in the **document** instead: §28's dependency cascade gives
+every grouping component a `dependsOn` list of its `file:` refs, and a file
+bom-ref is its identity behind that prefix (§28.4) — which is the key the graph
+uses. So `--component` takes `--sbom <file>`, expands the name there and
+explains each file from the dump. Neither the dump's format nor the layering
+changes, and no second discovery runs.
+
+The deviation that remains is that one subcommand now reads two files, where
+the other two subjects read one. It follows from where the two facts are: the
+chains are in the dump and the grouping is in the document, and the only ways
+to avoid the split are the two decision Q20 refused — putting components in the
+dump, or having `explain` discover them itself, which would make it answer
+about a build nobody made.
+
+The document is named rather than guessed. A build directory holds any number
+of documents, and picking one would decide the answer by accident. Where the
+files of the named component are in the document but in no node of the dump,
+the two describe different builds, and that is reported as such: "no evidence
+chain" is the wording for a subject that *is* in the graph and unreachable, and
+for a component it would read as "this component is not in your product",
+which is the opposite of what the tool knows.
 
 The other two subjects of §32.3 are served as specified. Both of its examples
 are spelled the way a human writes them — a path relative to a root, and a

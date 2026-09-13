@@ -173,13 +173,19 @@ from. `sbomb explain` reads it from there. `--evidence-dump` moves it, and
 
 ```bash
 sbomb explain --build-dir build/debug --file project:src/main.c
-sbomb explain --build-dir build/debug --component mbedtls
 sbomb explain --build-dir build/debug --bom-ref file:project:src/main.c
+sbomb explain --build-dir build/debug --sbom app.cdx.json --component mbedtls
 ```
 
 Prints the evidence chains from the selected item back to the deliverable. This
 is the answer to "why is this here?" — and, when it prints nothing, to "why is
 this *not* here?".
+
+`--component` needs the document as well: `evidence.json` holds files, objects,
+archives and artifacts, and which of them belong to one component is decided
+above that and written into the SBOM. So the name is looked up there, and every
+file it groups is explained from the graph. Name the document rather than let
+sbomb pick one — a build directory can hold several.
 
 ### validate
 
