@@ -135,8 +135,13 @@ func TestAPatchRecordOverTheBoundIsReported(t *testing.T) {
 			if len(findings) != 1 || findings[0].ID != "INPUT_LIMIT_EXCEEDED" {
 				t.Fatalf("findings = %#v, want one INPUT_LIMIT_EXCEEDED", findings)
 			}
-			if findings[0].Subject.Ref != filepath.Base(root) {
-				t.Errorf("subject = %q, want the component and not a path", findings[0].Subject.Ref)
+			// This reader is handed a directory and knows no component, so it
+			// names none: the caller, which has one, fills the subject in. The
+			// base name it used to put here is a physical path of section 7.9
+			// -- for the project's own component it is the checkout directory
+			// -- and it resolved to no component in the document.
+			if findings[0].Subject.Kind != "component" || findings[0].Subject.Ref != "" {
+				t.Errorf("subject = %+v, want the kind alone for the caller to name", findings[0].Subject)
 			}
 		})
 	}

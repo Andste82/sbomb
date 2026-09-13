@@ -34,7 +34,15 @@ func (r *componentResolver) resolveModification(component *domain.Component, roo
 	// A patch a manager recorded is the strongest signal there is: it names
 	// the change rather than detecting that one happened.
 	patches, patchFindings := pkgmanager.Patches(rootInfo.Physical)
-	findings = append(findings, patchFindings...)
+	for _, finding := range patchFindings {
+		// The reader works on a directory and has no component to name, so it
+		// leaves the subject to the caller. Naming it after the directory --
+		// which is what it used to do -- states a physical path of section 7.9
+		// in a finding a relocated run must state identically, and it resolves
+		// to no component in the document either.
+		finding.Subject = domain.Subject{Kind: "component", Ref: component.ID}
+		findings = append(findings, finding)
+	}
 	if len(patches) > 0 {
 		record.Patches = patches
 		record.Status = domain.ModificationModified
@@ -108,6 +116,14 @@ func (r *componentResolver) readGitModification(root string, record *domain.Modi
 		return
 	}
 	switch {
+	case checkout.Ambiguous:
+		// HEAD could not be read, so the answer cannot be told from the
+		// abbreviated commit `--always` falls back to: it may be a tag and it
+		// may be a hash. `false` requires a positive check and this is not
+		// one -- which is the whole reason the third state exists. The four
+		// other readers of this answer lower their confidence here; this one
+		// has no confidence to lower, so it answers unknown.
+		record.Signal = "the component root's checkout is clean, and HEAD could not be read, so a tag cannot be told from a commit"
 	case checkout.Tagged && checkout.Distance == 0:
 		record.Status = domain.ModificationUnmodified
 		record.Signal = fmt.Sprintf("the component root's checkout is clean and stands on its recorded tag %s", checkout.Tag)

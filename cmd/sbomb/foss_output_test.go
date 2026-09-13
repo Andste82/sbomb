@@ -323,24 +323,53 @@ func TestTheDefaultProfileKeepsSbombsOwnGroupingOutOfTheNotices(t *testing.T) {
 }
 
 // TestTheIncompletenessMarkersReachTheNoticesDocumentOnTheFixture is
-// requirement R10 end to end. Under the default profile the toolchain runtime
-// is a component with neither a retained licence text nor a copyright
-// statement -- no source tree of GCC was read -- so both markers stand where
-// the entry would have been, and no canonical SPDX text is substituted for
-// either.
+// requirement R10 end to end: where the text or the statement could not be
+// established, the document says so at the point the entry would have been,
+// and no canonical SPDX text is substituted for either.
+//
+// Two components carry one marker each, and which marker is the point. The
+// toolchain runtime has no retained licence text -- no source tree of GCC was
+// read -- but it does have copyright statements, because the narrowed headers
+// of section 32.6 are its own headers and they carry the FSF's notices. The
+// fixture's `nocopyright` dependency is the other way round: a licence file
+// and no notice anywhere in it. A marker that stood in both places would say
+// nothing about which of the two things was missing.
 func TestTheIncompletenessMarkersReachTheNoticesDocumentOnTheFixture(t *testing.T) {
 	files := runFOSSUnderTheDefaultProfile(t)
 	notices := files[foss.NoticesFile]
-	entry := notices[strings.Index(notices, "gnu-13.3.0"):]
-	entry = entry[:strings.Index(entry, "================")]
-	if !strings.Contains(entry, "[licence text not found in component - attribution incomplete]") {
-		t.Errorf("the missing-text marker is not in the entry:\n%s", entry)
+	entryOf := func(name string) string {
+		start := strings.Index(notices, name)
+		if start < 0 {
+			t.Fatalf("the notices document has no entry for %s", name)
+		}
+		entry := notices[start:]
+		// The last entry has no separator after it.
+		if end := strings.Index(entry, "================"); end >= 0 {
+			entry = entry[:end]
+		}
+		return entry
 	}
-	if !strings.Contains(entry, "[no copyright statement found in component - attribution incomplete]") {
-		t.Errorf("the missing-copyright marker is not in the entry:\n%s", entry)
+
+	toolchain := entryOf("gnu-13.3.0")
+	if !strings.Contains(toolchain, "[licence text not found in component - attribution incomplete]") {
+		t.Errorf("the missing-text marker is not in the toolchain entry:\n%s", toolchain)
 	}
-	if !strings.Contains(entry, "Licence: not established (NOASSERTION)") {
-		t.Errorf("a licence was asserted for a component that resolved to none:\n%s", entry)
+	if !strings.Contains(toolchain, "Licence: not established (NOASSERTION)") {
+		t.Errorf("a licence was asserted for a component that resolved to none:\n%s", toolchain)
+	}
+	// The statements the licence view reads out of the narrowed headers. They
+	// reach the shipped document, which is what makes the missing-copyright
+	// marker absent here rather than unreported.
+	if !strings.Contains(toolchain, "Free Software Foundation") {
+		t.Errorf("the toolchain entry carries no copyright statement, and its own headers state one:\n%s", toolchain)
+	}
+	if strings.Contains(toolchain, "[no copyright statement found in component") {
+		t.Errorf("the missing-copyright marker stands although statements were found:\n%s", toolchain)
+	}
+
+	bare := entryOf("nocopyright")
+	if !strings.Contains(bare, "[no copyright statement found in component - attribution incomplete]") {
+		t.Errorf("the missing-copyright marker is not in the entry that exists to have none:\n%s", bare)
 	}
 }
 
