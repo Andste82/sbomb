@@ -2,6 +2,35 @@
 
 ## 0.17.0
 
+### A licence's own conditions are no longer published as attribution
+
+A licence text wraps, and a wrap can put the word at the start of a line. The
+canonical ISC text ends one with "provided that the above" and begins the next
+with "copyright notice and this permission notice appear in all copies." —
+which §22.10 stored as a copyright statement. Since §22.9 retains `LICENSE`
+files and the extractor reads their bytes, every ISC dependency would have
+published that sentence as its attribution, in the SBOM and in the shipped
+notices. A notice is now distinguished from wrapped prose structurally: a
+lowercase word that carries on the sentence above it is prose, and a notice
+written with a capital is a notice wherever it stands.
+
+`SPDX-FileCopyrightText: NONE` and `NOASSERTION` are no longer stored either.
+They are the reserved values for "there is no copyright to state" and "it was
+not established", so storing them published the absence of a notice as a notice
+— and suppressed the `FOSS_COPYRIGHT_MISSING` that says the attribution is
+incomplete.
+
+### Copyright extraction is 35 to 46 times faster
+
+It runs over the first 64 KiB of every file a run hashes, and it ran three
+regular expressions per line to do it. Both forms it recognizes carry the word
+— the REUSE tag spells it inside `SPDX-FileCopyrightText` — so a
+case-insensitive scan now decides, once for the window and once per line,
+whether anything else has to run: 7.4 ms to 0.16 ms for a 64 KiB file with no
+notice, 7.2 ms to 0.21 ms for one with a notice. `BenchmarkExtractCopyright`
+keeps the number honest. The window is also no longer copied to ask where its
+last line break is.
+
 ### Two ways a generated file could lose its place in the document
 
 Both are in the build-graph walk of §16, and both were found by reproducing

@@ -276,3 +276,101 @@ func FuzzCopyright(f *testing.F) {
 		}
 	})
 }
+
+// A licence text wraps, and a wrap can put the word at the start of a line.
+// The ISC text ends a line with "provided that the above" and begins the next
+// with "copyright notice and this permission notice appear in all copies." --
+// which section 22.10 must not store, because publishing a licence's own
+// conditions as attribution is inventing a notice nobody wrote. Section 22.9
+// retains LICENSE files and the extractor reads their bytes, so every ISC
+// dependency would have carried it.
+func TestWrappedLicenceProseIsNotANotice(t *testing.T) {
+	const isc = "ISC License\n\n" +
+		"Copyright (c) 2004 Internet Systems Consortium\n\n" +
+		"Permission to use, copy, modify, and distribute this software for any\n" +
+		"purpose with or without fee is hereby granted, provided that the above\n" +
+		"copyright notice and this permission notice appear in all copies.\n"
+
+	got := ExtractCopyright([]byte(isc))
+	want := []string{"Copyright (c) 2004 Internet Systems Consortium"}
+	if len(got) != len(want) || got[0] != want[0] {
+		t.Errorf("ExtractCopyright = %q, want %q", got, want)
+	}
+}
+
+// The rule is structural and asks about the line above, not about words in the
+// line: a notice written with a capital is a notice wherever it stands, and a
+// lowercase one is still read where nothing was being continued.
+func TestTheSentenceRuleOnlyJudgesALowercaseWord(t *testing.T) {
+	for _, testCase := range []struct {
+		name string
+		text string
+		want []string
+	}{{
+		name: "a capitalised notice under an unfinished line",
+		text: "This product bundles software developed by\nCopyright (c) 2026 Acme Inc.\n",
+		want: []string{"Copyright (c) 2026 Acme Inc."},
+	}, {
+		name: "two notices in a row, neither ending a sentence",
+		text: "Copyright (c) 2001 A Author\nCopyright (c) 2002 B Author\n",
+		want: []string{"Copyright (c) 2001 A Author", "Copyright (c) 2002 B Author"},
+	}, {
+		name: "a lowercase word after a full stop is a new statement",
+		text: "All rights reserved.\ncopyright 2026 Acme Inc.\n",
+		want: []string{"copyright 2026 Acme Inc."},
+	}, {
+		name: "a lowercase word carrying on a sentence is prose",
+		text: "granted, provided that the above\ncopyright notice appears in all copies.\n",
+		want: nil,
+	}} {
+		t.Run(testCase.name, func(t *testing.T) {
+			got := ExtractCopyright([]byte(testCase.text))
+			if len(got) != len(testCase.want) {
+				t.Fatalf("ExtractCopyright = %q, want %q", got, testCase.want)
+			}
+			for i := range got {
+				if got[i] != testCase.want[i] {
+					t.Errorf("statement %d = %q, want %q", i, got[i], testCase.want[i])
+				}
+			}
+		})
+	}
+}
+
+// SPDX and REUSE reserve NONE and NOASSERTION for "there is no copyright to
+// state" and "it was not established". Storing either publishes the absence of
+// a notice as a notice, and it suppresses FOSS_COPYRIGHT_MISSING, which is the
+// finding that says the attribution is incomplete.
+func TestTheReservedCopyrightValuesAreNotStatements(t *testing.T) {
+	for _, value := range []string{"NONE", "NOASSERTION"} {
+		if got := ExtractCopyright([]byte("SPDX-FileCopyrightText: " + value + "\n")); len(got) != 0 {
+			t.Errorf("%s was stored as %q", value, got)
+		}
+	}
+}
+
+// The extraction runs over the first 64 KiB of every file the run hashes, so
+// its cost is paid once per file of the product rather than once per
+// component. Section 31 budgets fifteen seconds for a whole run; three regular
+// expressions per line would spend a good part of that on files that carry no
+// notice at all. Both forms of section 22.10 hold the word -- the REUSE tag
+// spells it inside `SPDX-FileCopyrightText` -- so a case-insensitive scan
+// decides, for the window and again for each line, whether anything below has
+// to run.
+func BenchmarkExtractCopyright(b *testing.B) {
+	plain := strings.Repeat("int function_with_a_reasonably_long_name(void) { return 0; }\n", 1100)
+	for _, testCase := range []struct {
+		name string
+		data []byte
+	}{
+		{"a file with no notice", []byte(plain)},
+		{"a file with one notice", []byte("/* Copyright (c) 2026 Acme Inc. */\n" + plain)},
+	} {
+		b.Run(testCase.name, func(b *testing.B) {
+			b.SetBytes(int64(len(testCase.data)))
+			for i := 0; i < b.N; i++ {
+				ExtractCopyright(testCase.data)
+			}
+		})
+	}
+}
