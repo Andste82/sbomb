@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/example/sbomb/tools/fixtures"
+	"io/fs"
 )
 
 func TestFixtureCorpusPresent(t *testing.T) {
@@ -246,4 +247,33 @@ func generatedIntoTheBuildTree(path string) bool {
 		strings.Contains(slashed, "/build/generated/") ||
 		strings.HasPrefix(base, "cmake_pch.") ||
 		strings.HasPrefix(base, "unity_")
+}
+
+// sbomb writes its evidence dump into the build directory it was pointed at,
+// so a manual run against a committed fixture leaves one behind -- and the
+// next `git add -A` commits the tool's own output as the tool's own input.
+// regen.sh removes it before harvesting for that reason
+// ("sbomb's own output must never become fixture input"), and this is the same
+// rule stated where a stray copy would be noticed.
+//
+// msvc-vs17/p02-static is the one exception: `sbomb explain` reads the dump
+// out of the build directory, and that fixture carries one on purpose so the
+// command can be exercised against the corpus.
+func TestNoFixtureCarriesAStrayEvidenceDump(t *testing.T) {
+	const deliberate = "msvc-vs17/p02-static"
+	root := filepath.Join("..", "..", "testdata", "fixtures")
+	err := filepath.WalkDir(root, func(path string, entry fs.DirEntry, err error) error {
+		if err != nil || entry.IsDir() || entry.Name() != "evidence.json" {
+			return err
+		}
+		relative := filepath.ToSlash(strings.TrimPrefix(path, root+string(filepath.Separator)))
+		if strings.HasPrefix(relative, deliberate+"/") {
+			return nil
+		}
+		t.Errorf("%s is sbomb's own output committed as its own input; regen.sh removes it before harvesting", relative)
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
 }
