@@ -136,89 +136,48 @@ a cache root often lies inside a home directory that is itself remapped. And
 whether a replacement may introduce a path that no anchor covers, which section
 30.4 refuses for a symlink and would have to refuse here for the same reason.
 
-## Q9 — How does a fixture carry a git repository?
+## Q9 — reserved
 
-`tools/fixtures/regen.sh` turns every `dep/*/` of a fixture into a git
-repository with a fixed identity, date and tag, and leaves one of `p14-foss`'s
-dependencies dirty after the commit. That is what section 19.4's modification
-status is read from, and the harvested source tree does not carry it: the
-harvest skips `.git`, because git tracks a nested repository as a gitlink and
-not as files, so committing one would need it renamed and the tool taught to
-look for the new name.
+**Settled: it does not, and it turns out not to need to.**
 
-What that costs is narrow and real: a run over the committed corpus can see
-that `dep/lgpl-lib` differs from the tree that produced the tag only if it can
-ask git, and it cannot. The modification status of every fixture component is
-therefore `unknown` there, which is the honest answer and not the interesting
-one.
+`tools/fixtures/regen.sh` turns every `dep/*/` of `p14-foss` into a repository
+with a fixed identity, date and tag, and leaves one of them dirty. The harvest
+skips `.git`, so the committed corpus carries none and every fixture component
+reports `unknown` there. Three routes were considered for changing that, and
+two facts were measured while F1 was written: git will not put a path with a
+`.git` component into its index at all, so any committed repository needs
+renaming and a materialization step; and a harvested `.git/index` stores each
+entry's `ctime`, `mtime`, `dev` and `ino`, which are drawn fresh on every
+regeneration and would put back exactly the churn `tools/fixtures/replynorm`
+was written to remove.
 
-Three routes exist and none is obviously right. Harvest `.git` under another
-name and give sbomb a way to be pointed at it -- that is a production feature
-invented for a test. Record the expected answer in the fixture's manifest and
-assert against that -- which tests the assertion rather than the tool. Or build
-the repository in a temporary directory at test time from the committed tree,
-which is honest but makes the test non-hermetic and toolchain-dependent, the
-same trade Q1 records for built artifacts.
+Neither cost has to be paid. What the corpus already commits is the two trees
+the history is made of: `tools/fixtures/projects/p14-foss` is what the tag
+names, and `testdata/fixtures/p14-foss-src` is what was compiled. A test
+rebuilds the repositories from them with regen.sh's own identity and date, so
+every commit hash is the same on every machine — `internal/testutil` copies a
+tree with a fixed `0o644`, so the tree entries do not depend on the checkout's
+permissions either.
 
-Two things were measured while F1 was written, so that whoever settles this
-starts from facts rather than from the first route that looks plausible.
+Both things the question was still costing are closed by that:
 
-Renaming is not optional in any route that commits the repository. Git will not
-put a path with a `.git` component into the index at all -- not only a nested
-repository as a gitlink: `git add -f p14-foss-src/dep/mit-lib/.git/HEAD`
-succeeds and adds nothing. Something therefore has to put the name back before
-a repository exists on disk, which is a materialization step in the test and
-not a property of the corpus.
+* **The tri-state over the corpus's own build evidence**, through the source
+  tree relocation of §7.9. `cmd/sbomb/modification_acceptance_test.go` runs
+  `generate --build-dir <corpus> --source-dir <materialized tree>` and asserts
+  the answers come from the relocated copy: `lgpl-lib` modified by its dirty
+  tree, `apache-lib` modified by standing a commit past its tag, `mit-lib`
+  unmodified on its tag, each with its `pedigree`.
+* **A document that shows what a settled status looks like.**
+  `testdata/golden/gcc-ninja-p14-foss-modified.cdx.json` carries all three
+  states and seven commit uids. Every other golden shows `unknown`, which is
+  the honest answer for a corpus with no repository and tells a reader nothing
+  about the shape of the others.
 
-A harvested repository is not reproducible as it stands. `.git/index` stores
-each entry's `ctime`, `mtime`, `dev` and `ino`, which are drawn fresh on every
-regeneration, so committing the directory as `git add` left it would put the
-churn that `tools/fixtures/replynorm` was written to remove straight back.
-Deleting the index is not a way out: git then reports every tracked file as
-both deleted and untracked, which is a wrong answer rather than `unknown`.
-Rebuilding it with `git read-tree HEAD` writes zeroed stat fields and is
-reproducible, and git falls back to comparing content when the stat cache does
-not match, so the answers stay right.
-
-What the corpus does carry is the dirty content: the bytes harvested from
-`dep/lgpl-lib/src/lgpl_extra.c` are the bytes that were compiled, comment and
-all, and they differ from `tools/fixtures/projects/p14-foss/`. Whatever route
-F6 takes, the tree it needs is already committed.
-
-**Settled in F6: none of the three routes, because none was needed.** The
-modification derivation asks git through the `exec.Runner` of section 9.2 —
-`git describe --tags --always --dirty` and `git rev-parse HEAD` — and takes the
-component root from `componentRootResult`. Both inputs are parameters, so every
-state the tri-state has is reachable in a unit test over a temporary directory
-that the test itself turns into a repository
-(`internal/generate/modification_test.go`): clean on its tag, dirty, no
-repository at all, a repository with introspection off, clean but off its tag,
-and a vendored directory inside a dirty enclosing repository. That last one is
-the case a committed corpus repository would *not* have caught, because the
-corpus has no nesting.
-
-So the corpus keeps no `.git`, every fixture component reports `unknown`, and
-`cmd/sbomb/componentattributes_test.go` asserts exactly that — including that an
-unknown status writes no `pedigree` node, which is the property an auditor
-depends on. The test that needs a repository builds one; the test that needs a
-corpus reads the corpus. Route 3 was the honest one and it turns out not to need
-the corpus at all.
-
-What it still costs is worth stating: no test exercises the derivation over
-*harvested* build evidence whose component roots are git repositories, so the
-interaction between relocation (section 7.9) and the git check is untested. The
-physical root is what the check is handed, and relocation is what produces it,
-so a relocated tree that carries a repository would be answered from the
-relocated copy — which is correct, and is not asserted anywhere. It becomes
-testable the day the corpus carries a repository, for whatever reason makes that
-worth doing.
-
-**It also blocks the document-level evidence for D47.** The distance rule of
-§19.4 is covered by tests that build a repository with real git in a temporary
-directory, so the rule itself is not waiting on this question. What is waiting
-is any golden that shows a `modified` component at all: over the committed
-corpus every component is `unknown`, because there is no `.git` for the run to
-read.
+So the corpus keeps no `.git`, `regen.sh` is unchanged, and the goldens of the
+ordinary run still say `unknown` — which remains correct, because there is
+nothing there to read. The test that needs a repository builds one out of what
+is committed. The number stays reserved so that references to Q10 and later
+keep their meaning.
 
 ---
 
