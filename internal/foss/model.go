@@ -174,7 +174,7 @@ func build(in Input) model {
 
 // newEntry is one component's row, with the licence view merged in.
 func newEntry(component domain.Component, usedFiles int, view View) entry {
-	delta := view.deltaFor(component.Name)
+	delta := view.deltaFor(bomRefOf(component))
 	row := entry{
 		name:           component.Name,
 		bomRef:         bomRefOf(component),

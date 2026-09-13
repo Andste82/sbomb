@@ -101,9 +101,9 @@ func TestTheFOSSViewReadsOnlyTheComponentsItReports(t *testing.T) {
 		},
 	}}
 	narrowing := []NarrowingCount{
-		{Component: "reported", Count: 1, Headers: []string{"project:reported.h"}},
-		{Component: "toolchain", Count: 4, Headers: []string{"toolchain:ignored.h"}},
-		{Component: "build-environment", Count: 2, Headers: []string{"toolchain:synthetic.h"}},
+		{Component: "reported", ComponentID: "component:reported", Count: 1, Headers: []string{"project:reported.h"}},
+		{Component: "toolchain", ComponentID: "component:toolchain", Count: 4, Headers: []string{"toolchain:ignored.h"}},
+		{Component: "build-environment", ComponentID: "component:build-environment", Count: 2, Headers: []string{"toolchain:synthetic.h"}},
 	}
 	var asked []string
 	resolve := func(canonical string) (string, bool) {
@@ -126,24 +126,24 @@ func TestTheFOSSViewReadsOnlyTheComponentsItReports(t *testing.T) {
 	// The read set is the renderer's own predicate and not a second spelling
 	// of it, so the two cannot drift apart.
 	for _, candidate := range document.Components {
-		if foss.Reported(candidate) != fossReportedComponents(document)[candidate.Name] {
+		if foss.Reported(candidate) != fossReportedComponents(document)[bomRefOfComponent(candidate)] {
 			t.Errorf("the read set disagrees with foss.Reported about %s", candidate.Name)
 		}
 	}
 	if len(asked) != 1 || asked[0] != "project:reported.h" {
 		t.Errorf("resolved %v; want only the reported component's header", asked)
 	}
-	reported := view.DeltaFor("reported")
+	reported := view.DeltaFor("component:reported")
 	if len(reported.Copyrights) != 1 || reported.Copyrights[0].Text != "Copyright (c) 2026 Reported Header Authors" {
 		t.Errorf("copyright from the narrowed header = %+v", reported.Copyrights)
 	}
 	if reported.Copyrights[0].File.Canonical() != "project:reported.h" {
 		t.Errorf("the statement records %q rather than the file it came from", reported.Copyrights[0].File.Canonical())
 	}
-	if ignored := view.DeltaFor("toolchain"); ignored.Narrowed != 4 || len(ignored.Copyrights) != 0 {
+	if ignored := view.DeltaFor("component:toolchain"); ignored.Narrowed != 4 || len(ignored.Copyrights) != 0 {
 		t.Errorf("the unreported component = %+v; want it counted and not read", ignored)
 	}
-	if synthetic := view.DeltaFor("build-environment"); synthetic.Narrowed != 2 || len(synthetic.Copyrights) != 0 {
+	if synthetic := view.DeltaFor("component:build-environment"); synthetic.Narrowed != 2 || len(synthetic.Copyrights) != 0 {
 		t.Errorf("the component with no role = %+v; want it counted and not read", synthetic)
 	}
 }
@@ -165,7 +165,7 @@ func TestTheUnionViewDropsWhatTheComponentAlreadyStates(t *testing.T) {
 	view := fossView([]NarrowingCount{{Component: "alpha", Count: 1, Headers: []string{"project:narrowed.h"}}},
 		document, func(string) (string, bool) { return filepath.Join(tree, "narrowed.h"), true },
 		limits.Config{}, NewLogger(0, nil))
-	if delta := view.DeltaFor("alpha"); len(delta.Copyrights) != 0 {
+	if delta := view.DeltaFor("component:alpha"); len(delta.Copyrights) != 0 {
 		t.Errorf("the delta repeats a statement the component already carries: %+v", delta.Copyrights)
 	}
 }
@@ -178,7 +178,7 @@ func TestDeltaForAnswersForAComponentWithNoDelta(t *testing.T) {
 		t.Errorf("a nil view answered %+v", got)
 	}
 	view := &FOSSView{Components: []FOSSViewDelta{{Component: "alpha", Narrowed: 2}}}
-	if got := view.DeltaFor("beta"); got.Narrowed != 0 {
+	if got := view.DeltaFor("component:beta"); got.Narrowed != 0 {
 		t.Errorf("an absent component answered %+v", got)
 	}
 }

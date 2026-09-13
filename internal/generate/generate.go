@@ -79,9 +79,16 @@ type Counters struct {
 // NarrowingCount is one component's share of the headers DWARF narrowing
 // removed, with the headers themselves for --report-chains all.
 type NarrowingCount struct {
-	Component string
-	Count     int
-	Headers   []string
+	// Component is the name, for the review report, and ComponentID is the
+	// identity everything else keys on. Two components of one name are an
+	// ordinary shape -- section 29 sorts entries by name and breaks the tie on
+	// the bom-ref, and open question Q7 records two versions of one package in
+	// one assembly -- so a licence view keyed by name would give both of them
+	// the first one's copyright statements.
+	Component   string
+	ComponentID string
+	Count       int
+	Headers     []string
 }
 
 // Run assembles the currently available build evidence into one deterministic
@@ -1009,6 +1016,7 @@ func narrowingByComponent(resolver *componentResolver, narrowed []narrowedHeader
 		return nil
 	}
 	byComponent := map[string][]string{}
+	nameOf := map[string]string{}
 	seen := map[string]bool{}
 	for _, entry := range narrowed {
 		if seen[entry.header] {
@@ -1016,15 +1024,23 @@ func narrowingByComponent(resolver *componentResolver, narrowed []narrowedHeader
 		}
 		seen[entry.header] = true
 		file := domain.UsedFile{ID: domain.FileID{Anchor: anchorOf(entry.header), RelPath: relOf(entry.header)}}
-		_, name, _, _, _ := resolver.resolve(file)
-		byComponent[name] = append(byComponent[name], entry.header)
+		id, name, _, _, _ := resolver.resolve(file)
+		byComponent[id] = append(byComponent[id], entry.header)
+		nameOf[id] = name
 	}
 	out := make([]NarrowingCount, 0, len(byComponent))
-	for name, headers := range byComponent {
+	for id, headers := range byComponent {
 		sort.Strings(headers)
-		out = append(out, NarrowingCount{Component: name, Count: len(headers), Headers: headers})
+		out = append(out, NarrowingCount{
+			Component: nameOf[id], ComponentID: id, Count: len(headers), Headers: headers,
+		})
 	}
-	sort.Slice(out, func(i, j int) bool { return out[i].Component < out[j].Component })
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].Component != out[j].Component {
+			return out[i].Component < out[j].Component
+		}
+		return out[i].ComponentID < out[j].ComponentID
+	})
 	return out
 }
 

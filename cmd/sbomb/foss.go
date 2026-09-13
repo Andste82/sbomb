@@ -72,9 +72,10 @@ func fossView(view *generate.FOSSView) foss.View {
 	out := foss.View{NarrowedTotal: view.NarrowedTotal}
 	for _, delta := range view.Components {
 		out.Deltas = append(out.Deltas, foss.ViewDelta{
-			Component:  delta.Component,
-			Narrowed:   delta.Narrowed,
-			Copyrights: delta.Copyrights,
+			Component:   delta.Component,
+			ComponentID: delta.ComponentID,
+			Narrowed:    delta.Narrowed,
+			Copyrights:  delta.Copyrights,
 		})
 	}
 	return out
