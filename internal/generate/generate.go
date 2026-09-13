@@ -507,11 +507,13 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		canonical := string(node.ID)
 		logger.Trace("Used file: %s (%s, scope %s)", canonical, node.Kind, scope)
 		properties := map[string][]string{"sbomb:component:scope": {string(scope)}}
-		// Section 24.5 and decision Q10: which deliverable reached this file.
-		// Only in assembly mode -- with one deliverable every file reaches it,
-		// and a property saying so on every file of every document would be
-		// noise the reader has to skip.
-		if len(artifactIDs) > 1 {
+		// Section 6.3 and decision Q10: which deliverable reached this file.
+		// Assembly mode alone, which is what section 6.3 is about: in
+		// single-artifact mode every file reaches the one deliverable, and a
+		// property saying so on every file of every document would be noise.
+		// The mode decides here and in artifactComponents, so a file can never
+		// name a ref no component carries.
+		if cfg.Mode == "assembly" {
 			if refs := artifactRefs(artifactsOfNode[node.ID]); len(refs) > 0 {
 				properties["sbomb:evidence:artifacts"] = refs
 			}
