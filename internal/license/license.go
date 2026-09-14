@@ -147,6 +147,14 @@ func ResolveConflict(curated, conflicting, source string) (domain.LicenseFinding
 }
 
 func extractSPDXExpression(text string) (string, bool) {
+	// The expression cannot be there if the tag is not, and the tag is a fixed
+	// string: a byte scan settles it for the overwhelming majority of files,
+	// which are source files that declare nothing. Running the regular
+	// expression over every one of them instead was 36% of a measured run --
+	// the same reason ExtractCopyright looks for its keyword first.
+	if !containsFold(text, "spdx-license-identifier") {
+		return "", false
+	}
 	matches := spdxExprPattern.FindStringSubmatch(text)
 	if len(matches) != 2 {
 		return "", false
