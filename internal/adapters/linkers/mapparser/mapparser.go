@@ -20,6 +20,9 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"unicode"
+	"unicode/utf8"
+	"unsafe"
 )
 
 const (
@@ -119,7 +122,17 @@ func Sniff(text string) string {
 	case strings.Contains(text, "IAR ELF Linker"):
 		return FormatIAR
 	}
-	for _, line := range strings.Split(text, "\n") {
+	// Only a map that carries none of the markers above reaches this loop, so
+	// it is the whole file that is walked here, line by line. Walking it with
+	// an index rather than strings.Split matters at map sizes: Split builds a
+	// header for every line of a 200 MB file before the first one is looked at.
+	for offset := 0; offset <= len(text); {
+		line := text[offset:]
+		if end := strings.IndexByte(line, '\n'); end >= 0 {
+			line, offset = line[:end], offset+end+1
+		} else {
+			offset = len(text) + 1
+		}
 		trimmed := strings.TrimSpace(line)
 		if strings.HasPrefix(trimmed, "VMA") && strings.Contains(trimmed, "LMA") &&
 			strings.Contains(trimmed, "Out") && strings.Contains(trimmed, "In") && strings.Contains(trimmed, "Symbol") {
@@ -175,13 +188,17 @@ func Parse(r io.Reader, format string) Result {
 	var allocated int
 
 	for scanner.Scan() {
-		line := scanner.Text()
+		line := lineOf(scanner.Bytes())
 		allocated += len(line)
 		if allocated > MaxInputSize {
 			result.Err = fmt.Errorf("map input exceeds %d bytes: %w", MaxInputSize, ErrInputLimitExceeded)
 			return result
 		}
-		if len(strings.Fields(line)) > MaxTokensLine {
+		// A field needs a byte of its own, so a line shorter than the limit
+		// cannot reach it and is not counted at all. Counting was a second
+		// walk over every one of the millions of lines of a large map, to
+		// prove each time what its length already says.
+		if len(line) > MaxTokensLine && fieldCountExceeds(line, MaxTokensLine) {
 			result.Err = fmt.Errorf("map line exceeds %d tokens: %w", MaxTokensLine, ErrInputLimitExceeded)
 			return result
 		}
@@ -216,6 +233,19 @@ func Parse(r io.Reader, format string) Result {
 	return result
 }
 
+// lineOf names the scanner's line without copying it. scanner.Text() copies
+// every line onto the heap, which on a 200 MB map is 200 MB of garbage for
+// lines that are almost all read once and thrown away. The string here borrows
+// the scanner's buffer instead, and is therefore only valid until the next
+// scan: nothing may keep it, which is why the recorder copies the few lines
+// that do become records.
+func lineOf(raw []byte) string {
+	if len(raw) == 0 {
+		return ""
+	}
+	return unsafe.String(&raw[0], len(raw))
+}
+
 type msvcSection int
 
 const (
@@ -246,11 +276,10 @@ func parseMSVCLine(line string, section msvcSection, emit func(Record), sawSecti
 }
 
 func parseMSVCInputLine(line string, emit func(Record)) {
-	fields := strings.Fields(line)
-	if len(fields) < 5 {
+	source, count := lastField(line)
+	if count < 5 {
 		return
 	}
-	source := fields[len(fields)-1]
 	if source == "<absolute>" || source == "<linker-defined>" {
 		return
 	}
@@ -275,19 +304,39 @@ func parseMSVCInputLine(line string, emit func(Record)) {
 	}
 }
 
+// recordKey identifies a record for deduplication. It is a struct rather than
+// the three fields joined into one string because the join allocated on every
+// emitted record, and a map file emits the same member once per contributed
+// section: on a large map that is one throwaway string per placement line.
+type recordKey struct {
+	kind    Kind
+	archive string
+	path    string
+}
+
 // recorder appends a record unless an identical one was already seen. Map
 // files name the same archive member once per contributed section, so without
 // deduplication a single member appears a dozen times.
 func newRecorder(result *Result) func(Record) {
-	seen := map[string]bool{}
+	seen := map[recordKey]bool{}
 	return func(record Record) {
 		if record.Path == "" {
 			return
 		}
-		key := string(record.Kind) + "\x00" + record.Archive + "\x00" + record.Path
+		key := recordKey{kind: record.Kind, archive: record.Archive, path: record.Path}
 		if seen[key] {
 			return
 		}
+		// A record that is kept outlives the line it was read from, and that
+		// line borrows a buffer the scanner overwrites (see lineOf), so the
+		// strings taken from it are copied here. Only records that survive
+		// deduplication are copied, which on a map is a few thousand of the
+		// millions of lines read.
+		record.Path = strings.Clone(record.Path)
+		record.Archive = strings.Clone(record.Archive)
+		record.Member = strings.Clone(record.Member)
+		record.Raw = strings.Clone(record.Raw)
+		key.archive, key.path = record.Archive, record.Path
 		seen[key] = true
 		result.Records = append(result.Records, record)
 	}
@@ -339,11 +388,8 @@ func parseGNULine(line string, section gnuSection, emit func(Record)) gnuSection
 		}
 	case gnuDiscarded:
 		// " .text.foo   0x0   0x2a   path/to/file.o"
-		fields := strings.Fields(trimmed)
-		if len(fields) > 0 {
-			if candidate := fields[len(fields)-1]; looksLikeFile(candidate) {
-				emit(Record{Kind: DiscardedSection, Path: candidate, Raw: line})
-			}
+		if candidate, count := lastField(trimmed); count > 0 && looksLikeFile(candidate) {
+			emit(Record{Kind: DiscardedSection, Path: candidate, Raw: line})
 		}
 	}
 	return section
@@ -354,25 +400,27 @@ func parseGNULine(line string, section gnuSection, emit func(Record)) gnuSection
 // contributed it. Symbol lines carry two fields, fill lines do not start with
 // a section name, and linker-script wildcards start with an asterisk.
 func placementLine(trimmed string) (string, uint64, string, bool) {
-	fields := strings.Fields(trimmed)
-	if len(fields) < 4 {
+	name, offset, ok := nextField(trimmed, 0)
+	if !ok || !strings.HasPrefix(name, ".") {
 		return "", 0, "", false
 	}
-	if !strings.HasPrefix(fields[0], ".") {
+	address, offset, ok := nextField(trimmed, offset)
+	if !ok || !strings.HasPrefix(address, "0x") {
 		return "", 0, "", false
 	}
-	if !strings.HasPrefix(fields[1], "0x") || !strings.HasPrefix(fields[2], "0x") {
+	sizeField, offset, ok := nextField(trimmed, offset)
+	if !ok || !strings.HasPrefix(sizeField, "0x") {
 		return "", 0, "", false
 	}
-	path := fields[3]
-	if !looksLikeFile(path) {
+	path, _, ok := nextField(trimmed, offset)
+	if !ok || !looksLikeFile(path) {
 		return "", 0, "", false
 	}
-	size, err := strconv.ParseUint(strings.TrimPrefix(fields[2], "0x"), 16, 64)
+	size, err := strconv.ParseUint(strings.TrimPrefix(sizeField, "0x"), 16, 64)
 	if err != nil {
 		return "", 0, "", false
 	}
-	return fields[0], size, path, true
+	return name, size, path, true
 }
 
 // nonImageSections are the section families that never occupy memory in the
@@ -401,11 +449,10 @@ func contributesToImage(name string, size uint64) bool {
 // parseGNUInclusionLine reads one entry of the archive-member or as-needed
 // block: the included file, then the file and symbol that required it.
 func parseGNUInclusionLine(line, trimmed string, section gnuSection, emit func(Record)) gnuSection {
-	fields := strings.Fields(trimmed)
-	if len(fields) == 0 {
+	included, _, ok := nextField(trimmed, 0)
+	if !ok {
 		return section
 	}
-	included := fields[0]
 	if archive, member, ok := splitArchiveMember(included); ok {
 		emit(Record{Kind: StaticArchive, Path: archive, Raw: line})
 		emit(Record{Kind: ArchiveMember, Path: archive + "(" + member + ")", Archive: archive, Member: member, Raw: line})
@@ -427,7 +474,12 @@ func parseGNUInclusionLine(line, trimmed string, section gnuSection, emit func(R
 // files; the "Out" column names output sections and the symbol column names
 // symbols, neither of which is evidence about inputs.
 func parseLLDLine(line string, emit func(Record)) {
-	for _, token := range strings.Fields(line) {
+	for offset := 0; ; {
+		token, next, ok := nextField(line, offset)
+		if !ok {
+			break
+		}
+		offset = next
 		match := lldInputColumn.FindStringSubmatch(token)
 		if match == nil {
 			continue
@@ -452,7 +504,12 @@ func parseLLDLine(line string, emit func(Record)) {
 // deliberately conservative: it records only tokens that are unambiguously
 // file paths with a known extension.
 func parseGenericLine(line string, emit func(Record)) {
-	for _, token := range strings.Fields(line) {
+	for offset := 0; ; {
+		token, next, ok := nextField(line, offset)
+		if !ok {
+			break
+		}
+		offset = next
 		token = strings.Trim(token, "[],;")
 		if archive, member, ok := splitArchiveMember(token); ok && looksLikeFile(archive) {
 			emit(Record{Kind: StaticArchive, Path: archive, Raw: line})
@@ -463,6 +520,92 @@ func parseGenericLine(line string, emit func(Record)) {
 			emit(Record{Kind: classify(token), Path: token, Raw: line})
 		}
 	}
+}
+
+// A map is read line by line and every line is looked at, so what one line
+// costs is multiplied by millions: the generated 200 MB map of section 31 has
+// about 2.6 million of them. strings.Fields is the natural way to reach the
+// fields of a line and is what this parser used, but it allocates a slice for
+// every line, whatever the parser then does with it -- and most lines are
+// symbol lines the parser discards after looking at one field. The helpers
+// below hand out the same fields without that slice, by walking the line in
+// place. They split where strings.Fields splits: a field is a run of
+// characters between runs of unicode.IsSpace, so which fields a line has is
+// unchanged, and so is every record built from them.
+
+// nextField returns the field that starts at or after offset, and the offset
+// to continue from. ok is false once the line holds no further field.
+func nextField(line string, offset int) (field string, next int, ok bool) {
+	index := offset
+	for index < len(line) {
+		space, size := spaceAt(line, index)
+		if !space {
+			break
+		}
+		index += size
+	}
+	if index >= len(line) {
+		return "", len(line), false
+	}
+	start := index
+	for index < len(line) {
+		space, size := spaceAt(line, index)
+		if space {
+			break
+		}
+		index += size
+	}
+	return line[start:index], index, true
+}
+
+// lastField returns the final field of a line and how many fields it has. The
+// count comes back with it because a caller that wants the last field also
+// wants to know whether the line was wide enough to be the line it is looking
+// for, and one walk answers both.
+func lastField(line string) (string, int) {
+	var last string
+	var count int
+	for offset := 0; ; count++ {
+		field, next, ok := nextField(line, offset)
+		if !ok {
+			return last, count
+		}
+		last, offset = field, next
+	}
+}
+
+// fieldCountExceeds reports whether a line has more than limit fields. It
+// stops as soon as it knows, so the pathological line the limit exists for
+// costs no more than the limit allows.
+func fieldCountExceeds(line string, limit int) bool {
+	count := 0
+	for offset := 0; ; {
+		_, next, ok := nextField(line, offset)
+		if !ok {
+			return false
+		}
+		count++
+		if count > limit {
+			return true
+		}
+		offset = next
+	}
+}
+
+// asciiSpace is the lookup strings.Fields uses for the byte range a map file
+// is almost entirely made of. Reading it is one indexed load where
+// unicode.IsSpace is a chain of comparisons, and this runs per byte of a file
+// that can be 200 MB.
+var asciiSpace = [utf8.RuneSelf]bool{'\t': true, '\n': true, '\v': true, '\f': true, '\r': true, ' ': true}
+
+// spaceAt reports whether the character at index is white space, and how many
+// bytes it occupies.
+func spaceAt(line string, index int) (bool, int) {
+	if c := line[index]; c < utf8.RuneSelf {
+		return asciiSpace[c], 1
+	}
+	r, size := utf8.DecodeRuneInString(line[index:])
+	return unicode.IsSpace(r), size
 }
 
 // fileExtensions are the suffixes a linker input can carry. A wildcard such as
