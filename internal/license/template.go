@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"unicode"
 )
 
 // The SPDX license list publishes, beside each license text, a
@@ -45,8 +46,28 @@ var templateBlob []byte
 // statement with a variable of its own, so removing those lines first would
 // take away text the template expects to see, and dropping a line is a
 // line-oriented operation that a template's variables cut across.
+//
+// It is one pass rather than the ToLower/Fields/Join it reads as, and the two
+// agree by construction: strings.ToLower lowercases rune by rune with no
+// special casing, so lowering while splitting yields the same string for one
+// allocation instead of three. Worth spelling out because every technique that
+// needs the normal form computes it again, which measured at 27% of a run.
 func looseNormalize(text string) string {
-	return strings.Join(strings.Fields(strings.ToLower(text)), " ")
+	var out strings.Builder
+	out.Grow(len(text))
+	pendingSpace := false
+	for _, r := range text {
+		if unicode.IsSpace(r) {
+			pendingSpace = out.Len() > 0
+			continue
+		}
+		if pendingSpace {
+			out.WriteRune(' ')
+			pendingSpace = false
+		}
+		out.WriteRune(unicode.ToLower(r))
+	}
+	return out.String()
 }
 
 // entry is one license's compiled matcher. Pattern is built and compiled on
@@ -148,9 +169,20 @@ func matchTemplates(text string) ([]string, error) {
 	if normalized == "" {
 		return nil, nil
 	}
+	index := templateIndex()
+	// The expression is anchored at both ends, so the whole text has to be the
+	// licence. A text longer than the longest template can hold is none of
+	// them, and saying so costs a comparison rather than 739 searches.
+	if len(normalized) > index.longestSpan {
+		return nil, nil
+	}
+	named := index.candidates(normalized)
 	var matched, deprecatedMatches []string
-	for _, candidate := range entries {
-		if candidate.anchor != "" && !strings.Contains(normalized, candidate.anchor) {
+	for position, candidate := range entries {
+		if len(normalized) > candidate.span() {
+			continue
+		}
+		if candidate.anchor != "" && (!named[int32(position)] || !anchoredIn(normalized, candidate.anchor)) {
 			continue
 		}
 		pattern, err := candidate.regexp()

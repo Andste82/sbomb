@@ -53,12 +53,16 @@ func Observe(text string) []Observation {
 		return nil
 	}
 
+	// No length bound here, and that is the point of Observe: it looks for a
+	// licence inside a larger file, so a long text rules nothing out. The
+	// anchor index still does, and it is the same one pass either way.
+	named := templateIndex().candidates(normalized)
 	var found []Observation
-	for _, candidate := range entries {
+	for position, candidate := range entries {
 		// A template with no invariant text of its own is skipped. It could
 		// match almost anywhere, and "this span is some licence" is not an
 		// observation worth making.
-		if candidate.anchor == "" || !strings.Contains(normalized, candidate.anchor) {
+		if candidate.anchor == "" || !named[int32(position)] || !anchoredIn(normalized, candidate.anchor) {
 			continue
 		}
 		pattern, err := candidate.unanchored()
