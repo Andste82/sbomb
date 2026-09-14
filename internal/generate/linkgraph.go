@@ -3,6 +3,7 @@ package generate
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -500,16 +501,40 @@ func readDepfile(path string) ([]depfile.Record, error) {
 	return depfile.ParseString(string(data))
 }
 
+// readMap reads one linker map and parses it. The map is the largest file this
+// tool ever opens -- 200 MB is ordinary for a firmware link (section 31) -- and
+// it is needed twice, once whole to sniff the format and once line by line to
+// parse it. Reading it as bytes and converting to a string for each of those
+// two uses copied the whole file twice over, so three copies of the map were
+// live at the same time. The file is read into a strings.Builder instead: its
+// String is the one copy, and both uses read from it.
 func readMap(path string) (mapparser.Result, error) {
-	data, err := os.ReadFile(path)
+	file, err := os.Open(path)
 	if err != nil {
 		return mapparser.Result{}, err
 	}
-	format := mapparser.Sniff(string(data))
+	defer file.Close()
+
+	var builder strings.Builder
+	if info, statErr := file.Stat(); statErr == nil {
+		// Sizing the builder up front is what keeps this to one copy: without
+		// it the builder doubles its way up to 200 MB, copying what it already
+		// holds each time. A size that turns out to be wrong costs nothing but
+		// the growth this avoids.
+		if size := info.Size(); size > 0 && int64(int(size)) == size {
+			builder.Grow(int(size))
+		}
+	}
+	if _, err := io.Copy(&builder, file); err != nil {
+		return mapparser.Result{}, err
+	}
+	text := builder.String()
+
+	format := mapparser.Sniff(text)
 	if format == "" {
 		return mapparser.Result{}, mapparser.ErrUnknownFormat
 	}
-	result := mapparser.Parse(strings.NewReader(string(data)), format)
+	result := mapparser.Parse(strings.NewReader(text), format)
 	return result, result.Err
 }
 
