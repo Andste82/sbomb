@@ -12,6 +12,7 @@ import (
 	"strings"
 	"sync"
 	"unicode"
+	"unicode/utf8"
 )
 
 // The SPDX license list publishes, beside each license text, a
@@ -53,21 +54,43 @@ var templateBlob []byte
 // allocation instead of three. Worth spelling out because every technique that
 // needs the normal form computes it again, which measured at 27% of a run.
 func looseNormalize(text string) string {
-	var out strings.Builder
-	out.Grow(len(text))
+	out := make([]byte, 0, len(text))
 	pendingSpace := false
-	for _, r := range text {
+	for i := 0; i < len(text); {
+		c := text[i]
+		if c < utf8.RuneSelf {
+			// The ASCII path, which is nearly every byte of nearly every
+			// licence: unicode.IsSpace and unicode.ToLower both go through a
+			// range table, and doing that per byte was 20% of a measured run.
+			switch {
+			case c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r':
+				pendingSpace = len(out) > 0
+			default:
+				if pendingSpace {
+					out = append(out, ' ')
+					pendingSpace = false
+				}
+				if c >= 'A' && c <= 'Z' {
+					c += 'a' - 'A'
+				}
+				out = append(out, c)
+			}
+			i++
+			continue
+		}
+		r, width := utf8.DecodeRuneInString(text[i:])
+		i += width
 		if unicode.IsSpace(r) {
-			pendingSpace = out.Len() > 0
+			pendingSpace = len(out) > 0
 			continue
 		}
 		if pendingSpace {
-			out.WriteRune(' ')
+			out = append(out, ' ')
 			pendingSpace = false
 		}
-		out.WriteRune(unicode.ToLower(r))
+		out = utf8.AppendRune(out, unicode.ToLower(r))
 	}
-	return out.String()
+	return string(out)
 }
 
 // entry is one license's compiled matcher. Pattern is built and compiled on

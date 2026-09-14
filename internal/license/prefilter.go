@@ -107,3 +107,18 @@ func (index *anchorIndex) candidates(text string) map[int32]bool {
 func anchoredIn(text, anchor string) bool {
 	return anchor == "" || strings.Contains(text, anchor)
 }
+
+// deprecatedByID says, for each identifier, whether SPDX has superseded it. It
+// is derived from the template table, which never changes after it is loaded,
+// so it is built once rather than per call.
+var deprecatedByID = sync.OnceValue(func() map[string]bool {
+	entries, err := loadTemplates()
+	if err != nil {
+		return map[string]bool{}
+	}
+	byID := make(map[string]bool, len(entries))
+	for _, e := range entries {
+		byID[e.id] = e.deprecated
+	}
+	return byID
+})
