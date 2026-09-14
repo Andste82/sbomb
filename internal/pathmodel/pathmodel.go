@@ -132,6 +132,17 @@ func normalizeWindows(p string) string {
 }
 
 func cleanPath(p, separator string) string {
+	// Normalization is on the path of every file identity the run forms, and
+	// nearly every path handed to it is already in the form it would produce:
+	// compilers, depfiles and linker maps mostly name files without an empty,
+	// "." or ".." segment in them. Recognizing that costs one pass over the
+	// bytes and lets the path be returned as it came, where the general route
+	// below would split it into a slice, filter that into a second slice and
+	// join the survivors into a third string. The general route still handles
+	// everything the check declines.
+	if isLexicallyClean(p, separator) {
+		return p
+	}
 	absolute := strings.HasPrefix(p, separator)
 	parts := strings.Split(p, separator)
 	cleaned := make([]string, 0, len(parts))
@@ -154,6 +165,55 @@ func cleanPath(p, separator string) string {
 		return separator + result
 	}
 	return result
+}
+
+// isLexicallyClean reports whether cleanPath would return p unchanged: p is
+// non-empty, no segment of it is empty, "." or "..", and it carries no
+// trailing separator, apart from the root itself, which is nothing but one.
+// It is deliberately conservative -- a false answer only means the general
+// route runs, never that a path is cleaned wrongly.
+//
+// The separators are found with IndexByte, the assembly routine that reads a
+// machine word at a time, rather than by a loop over the bytes: normalization
+// walks every path the run sees, and the segments between the separators are
+// most of what it walks.
+func isLexicallyClean(p, separator string) bool {
+	if len(separator) != 1 || p == "" {
+		return false
+	}
+	sep := separator[0]
+	rest := p
+	if rest[0] == sep {
+		rest = rest[1:]
+		if rest == "" {
+			// The root is its own clean form.
+			return true
+		}
+	}
+	for {
+		next := strings.IndexByte(rest, sep)
+		if next < 0 {
+			return isCleanSegment(rest)
+		}
+		if !isCleanSegment(rest[:next]) {
+			return false
+		}
+		rest = rest[next+1:]
+		if rest == "" {
+			// A trailing separator is dropped, so p is not its own form.
+			return false
+		}
+	}
+}
+
+// isCleanSegment reports whether a path segment survives cleaning as itself,
+// which the empty, current-directory and parent-directory segments do not.
+func isCleanSegment(segment string) bool {
+	switch segment {
+	case "", ".", "..":
+		return false
+	}
+	return true
 }
 
 func hasPathPrefix(path, prefix string, flavor Flavor) bool {

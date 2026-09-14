@@ -50,6 +50,16 @@ type Anchor struct {
 	Source string // where the anchor came from, for diagnostics
 }
 
+// preparedRoot is an anchor root reduced to the two things resolution asks of
+// it. Under the Windows flavor the comparison form is a lowercased copy of the
+// root, so deriving it per path would allocate a string for every anchor of
+// every file; the segment count would mean a walk over the root under both
+// flavors. Derived once at registration, neither costs anything afterwards.
+type preparedRoot struct {
+	comparison string // the root in the registry's comparison form
+	segments   int    // how many non-empty segments the root has
+}
+
 // Registry resolves absolute paths to (anchor, relative path) identities per
 // section 7.3. A registry is bound to one path flavor, because prefix
 // comparison is case-sensitive under POSIX and case-insensitive under Windows.
@@ -57,6 +67,11 @@ type Registry struct {
 	flavor Flavor
 	// anchors keeps registration order; resolution sorts by root length.
 	anchors []Anchor
+	// prepared holds what resolution needs of each anchor's root, in the same
+	// order as anchors. Resolution asks for both of these once per anchor for
+	// every path it is given, and neither can change after the anchor is
+	// registered, so both are derived where the anchor is added.
+	prepared []preparedRoot
 	// byRoot deduplicates on the comparison form of the root, so that a later
 	// registration cannot override an earlier one for the same directory.
 	byRoot map[string]string
@@ -111,6 +126,7 @@ func (r *Registry) Register(key, root, source string) (bool, error) {
 	r.byRoot[comparison] = key
 	r.byKey[key] = normalized
 	r.anchors = append(r.anchors, Anchor{Key: key, Root: normalized, Source: source})
+	r.prepared = append(r.prepared, preparedRoot{comparison: comparison, segments: countSegments(normalized)})
 	return true, nil
 }
 
@@ -170,8 +186,8 @@ func (r *Registry) ResolveIn(base, path string) domain.FileID {
 	// at registration, so the longest match is unique.
 	best := -1
 	bestLen := -1
-	for index, anchor := range r.anchors {
-		root := r.comparisonForm(anchor.Root)
+	for index := range r.prepared {
+		root := r.prepared[index].comparison
 		if !hasSegmentPrefix(comparison, root) {
 			continue
 		}
@@ -182,7 +198,7 @@ func (r *Registry) ResolveIn(base, path string) domain.FileID {
 	if best >= 0 {
 		return domain.FileID{
 			Anchor:  domain.AnchorKey(r.anchors[best].Key),
-			RelPath: relativeTo(normalized, r.anchors[best].Root),
+			RelPath: relativeTo(normalized, r.prepared[best].segments),
 		}
 	}
 	return domain.FileID{Anchor: domain.AnchorKey(AnchorAbs), RelPath: r.unanchoredRelPath(normalized)}
@@ -230,25 +246,107 @@ func hasSegmentPrefix(path, prefix string) bool {
 		// The filesystem root anchors everything below it.
 		return strings.HasPrefix(path, "/")
 	}
-	if path == prefix {
-		return true
+	if !strings.HasPrefix(path, prefix) {
+		return false
 	}
-	return strings.HasPrefix(path, prefix+"/")
+	// The prefix is a segment boundary when the path ends there or the byte
+	// after it opens a new segment. Reading that byte in place answers the
+	// same question as matching against prefix+"/" without building that
+	// string, which resolution would otherwise do for every anchor of every
+	// file it identifies.
+	return len(path) == len(prefix) || path[len(prefix)] == '/'
 }
 
-// relativeTo returns path expressed relative to root, in POSIX form and never
-// containing "..", because both are already lexically normalized.
+// relativeTo returns path with the leading rootSegments segments dropped, in
+// POSIX form and never containing "..", because both the path and the anchor
+// root it is measured against are already lexically normalized. rootSegments
+// is how many non-empty segments that root has, which the registry counted
+// when the anchor was registered.
 //
 // It drops whole segments rather than trimming a string prefix: under the
 // Windows flavor the match is case-insensitive, so the root and the path may
-// disagree in case, and a byte-wise trim would leave the path untouched.
-func relativeTo(path, root string) string {
-	rootSegments := splitSegments(root)
-	pathSegments := splitSegments(path)
-	if len(pathSegments) <= len(rootSegments) {
+// disagree in case, and a byte-wise trim would leave the path untouched. The
+// prefix is not even the same length in general, because lowercasing is not
+// obliged to preserve the width of a rune.
+//
+// It does not have to materialize those segments to drop them, though, and it
+// is called once per file per anchor, so it does not. The only thing it needs
+// of the path is where the segment after the dropped ones begins, and the
+// answer is then the tail of the path exactly as it already stands, which
+// costs nothing to return. The join over materialized segments is kept for the
+// paths where that tail is not the answer: one carrying an empty segment or a
+// trailing separator joins to something shorter than its own tail, and
+// resolution is asked about paths taken from build evidence, which is under no
+// obligation to be tidy.
+func relativeTo(path string, rootSegments int) string {
+	start := segmentStart(path, rootSegments)
+	if start < 0 {
 		return "."
 	}
-	return strings.Join(pathSegments[len(rootSegments):], "/")
+	if tail := path[start:]; isJoinedForm(tail) {
+		return tail
+	}
+	return strings.Join(splitSegments(path)[rootSegments:], "/")
+}
+
+// countSegments reports how many non-empty segments a path has, which is the
+// length splitSegments would have returned for it. Only registration asks
+// this, once per anchor.
+func countSegments(path string) int {
+	count := 0
+	for index := 0; index < len(path); {
+		for index < len(path) && path[index] == '/' {
+			index++
+		}
+		if index == len(path) {
+			break
+		}
+		count++
+		for index < len(path) && path[index] != '/' {
+			index++
+		}
+	}
+	return count
+}
+
+// segmentStart returns the byte offset at which the segment after the first
+// skip non-empty segments begins, or -1 when the path holds no further
+// segment -- the case where the path is the anchor root itself, or lies above
+// it, and relativeTo answers ".".
+//
+// The separators are found with IndexByte rather than by a loop over the
+// bytes, because IndexByte is the assembly routine that reads a machine word
+// at a time and this runs for every file the run identifies.
+func segmentStart(path string, skip int) int {
+	index := 0
+	for skipped := 0; skipped < skip; skipped++ {
+		for index < len(path) && path[index] == '/' {
+			index++
+		}
+		if index == len(path) {
+			return -1
+		}
+		next := strings.IndexByte(path[index:], '/')
+		if next < 0 {
+			return -1
+		}
+		index += next
+	}
+	for index < len(path) && path[index] == '/' {
+		index++
+	}
+	if index == len(path) {
+		return -1
+	}
+	return index
+}
+
+// isJoinedForm reports whether a non-empty tail that begins with a segment is
+// already spelled the way joining its segments with "/" would spell it: every
+// separator in it stands between two segments, rather than doubling another or
+// dangling at the end.
+func isJoinedForm(tail string) bool {
+	return !strings.Contains(tail, "//") && tail[len(tail)-1] != '/'
 }
 
 func splitSegments(path string) []string {
