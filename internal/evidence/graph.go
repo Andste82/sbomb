@@ -267,7 +267,11 @@ func (g *Graph) Reachable(from domain.NodeID) map[domain.NodeID]bool {
 			return
 		}
 		reachable[id] = true
-		for _, edge := range g.EdgesFrom(id) {
+		// The stored slice, not EdgesFrom, which copies it and sorts the copy
+		// on every call. This walk answers with a set, so what order it visits
+		// in cannot reach the answer -- which is why ReachableExcept below
+		// already reads the slice directly, and this is now the same.
+		for _, edge := range g.outgoingEdges[id] {
 			visit(edge.To)
 		}
 	}
@@ -397,7 +401,9 @@ func (g *Graph) detectCycle() bool {
 		}
 
 		color[id] = gray
-		for _, edge := range g.EdgesFrom(id) {
+		// The stored slice again, for the same reason: this answers whether a
+		// cycle exists, and a bool cannot carry an order.
+		for _, edge := range g.outgoingEdges[id] {
 			if visit(edge.To) {
 				return true
 			}
