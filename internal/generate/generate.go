@@ -142,9 +142,20 @@ func NewLogger(verbosity int, w io.Writer) *Logger {
 }
 
 func (l *Logger) Info(format string, args ...any) {
-	if l != nil && l.Verbosity >= 1 && l.Writer != nil {
+	if l.logsInfo() {
 		fmt.Fprintf(l.Writer, "[INFO] "+format+"\n", args...)
 	}
+}
+
+// logsInfo reports whether an Info line would reach the writer. Info asks the
+// same question inside itself, so a caller never has to -- the reason to ask
+// first is Go's argument evaluation, which happens before the call whatever
+// the verbosity is. A caller whose arguments are cheap should stay out of the
+// way and simply call Info. A caller that would have to build something large
+// in order to say nothing -- a sorted copy of the whole evidence graph, say --
+// asks here and builds it only when somebody is listening.
+func (l *Logger) logsInfo() bool {
+	return l != nil && l.Verbosity >= 1 && l.Writer != nil
 }
 
 func (l *Logger) Debug(format string, args ...any) {
@@ -469,7 +480,16 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	artifactIDs := outcome.artifactIDs
 	findings = append(findings, b.Findings()...)
 	findings = append(findings, outcome.findings...)
-	logger.Info("Evidence graph: %d node(s), %d edge(s) [%s]", len(graph.Nodes()), len(graph.Edges()), describeCounts(graph.Nodes()))
+	// Nodes() and Edges() each copy the whole graph and sort the copy, and the
+	// line below asks for three of those copies -- two of the nodes, one of
+	// the edges -- to describe a graph that at the default verbosity nobody
+	// will read about. The graph is the largest thing the run holds, so the
+	// summary is assembled only once it is going to be printed, and the node
+	// listing is taken once and used twice.
+	if logger.logsInfo() {
+		nodes := graph.Nodes()
+		logger.Info("Evidence graph: %d node(s), %d edge(s) [%s]", len(nodes), len(graph.Edges()), describeCounts(nodes))
+	}
 
 	// 8. The reachability filter. This is what makes the output evidence-based
 	//    rather than a listing of everything the adapters happened to see.
