@@ -505,12 +505,16 @@ func (s *licenceSource) detect(componentID, dir string) (domain.LicenseFinding, 
 		if err != nil {
 			continue
 		}
-		finding := license.ResolveFromText(string(data), s.label(path))
+		// One prepared text for both techniques: the observation below reads
+		// the same bytes the resolution just did, and shares the normal form
+		// it computed rather than building a second identical one.
+		examined := license.Prepare(string(data))
+		finding := examined.Resolve(s.label(path))
 		if finding.Expression == "" {
 			// The file may still hold complete licence texts without being any
 			// one of them -- two licences one after the other. Which ones are
 			// present is recorded as evidence; how they combine is not.
-			if observed := license.ObserveFindings(string(data), s.label(path)); len(observed) > 0 {
+			if observed := examined.ObserveFindings(s.label(path)); len(observed) > 0 {
 				s.observed[componentID] = observed
 				finding.Reason = license.ReasonLicenseCompositionUnresolved
 				return finding, []domain.Finding{componentFinding("UNKNOWN_LICENSE", domain.SeverityWarning, componentID,

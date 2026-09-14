@@ -43,12 +43,17 @@ type Observation struct {
 //
 // A file that is exactly one licence yields exactly that licence here too, so
 // callers use this only after the whole-file techniques have already failed.
-func Observe(text string) []Observation {
+func Observe(text string) []Observation { return Prepare(text).observe() }
+
+// observe is Observe over a text whose normal forms may already be computed.
+// The loose form is the one the whole-file techniques compared against, and
+// they run first in every caller, so asking for it again here is free.
+func (t *Text) observe() []Observation {
 	entries, err := loadTemplates()
 	if err != nil {
 		return nil
 	}
-	normalized := looseNormalize(text)
+	normalized := t.loose()
 	if normalized == "" {
 		return nil
 	}
@@ -137,7 +142,14 @@ func resolveOverlaps(found []Observation, entries []*entry) []Observation {
 // ObserveFindings is Observe rendered as license findings, for a component's
 // license evidence. The source is the file the texts were found in.
 func ObserveFindings(text, source string) []domain.LicenseFinding {
-	observations := Observe(text)
+	return Prepare(text).ObserveFindings(source)
+}
+
+// ObserveFindings on a prepared text is the same observation, sharing the
+// normal form with whatever else has been asked of those bytes. A caller that
+// resolves a file and then observes it uses this.
+func (t *Text) ObserveFindings(source string) []domain.LicenseFinding {
+	observations := t.observe()
 	if len(observations) == 0 {
 		return nil
 	}

@@ -41,7 +41,73 @@ const (
 // "MIT\nCopyright (c) 2009" as the expression.
 var spdxExprPattern = regexp.MustCompile(`(?i)SPDX-License-Identifier[ \t]*:[ \t]*([A-Za-z0-9.\-+()/ \t]+)`)
 
+// Text is one file's bytes together with the normal forms the techniques of
+// section 22.3 compare against. Both forms are derived from those bytes alone
+// and no technique changes them, so a caller that asks two questions of one
+// file -- what licence is this, and which licence texts are in it -- pays for
+// each form once instead of once per question.
+//
+// That pair of questions is how a file is actually examined: the resolution
+// order asks for the observation only when identification found nothing, so
+// the loose form was computed for the templates and then computed again, byte
+// for byte the same, for the observation. On a profile of the licence path
+// that second pass was part of the 38% looseNormalize cost, and the strict
+// form the digest table is keyed by another 22%.
+//
+// The forms are computed on first use rather than up front, because most files
+// need neither: a source file that carries SPDX-License-Identifier is answered
+// by technique 1 before either normalization is reached. A Text holds no state
+// beyond what its bytes determine -- two of them over the same bytes answer
+// identically -- and like any other value it belongs to one goroutine at a
+// time.
+type Text struct {
+	raw string
+
+	looseComputed bool
+	looseForm     string
+
+	strictComputed bool
+	strictForm     string
+}
+
+// Prepare wraps a text so that the techniques applied to it share its normal
+// forms. It is the entry point for a caller that asks more than one question
+// of the same bytes; ResolveFromText and ObserveFindings are the
+// single-question spellings and go through it too.
+func Prepare(text string) *Text { return &Text{raw: text} }
+
+// loose is the normal form a template is matched against (template.go): every
+// whitespace run collapsed to one space, lowercase, nothing removed.
+func (t *Text) loose() string {
+	if !t.looseComputed {
+		t.looseForm = looseNormalize(t.raw)
+		t.looseComputed = true
+	}
+	return t.looseForm
+}
+
+// strict is the normal form the embedded digest table is keyed by: the loose
+// one with copyright statements and punctuation-only lines dropped as well.
+func (t *Text) strict() string {
+	if !t.strictComputed {
+		t.strictForm = normalizeLicenseText(t.raw)
+		t.strictComputed = true
+	}
+	return t.strictForm
+}
+
+// ResolveFromText applies the techniques of section 22.3 to a text that is
+// examined once. A caller that also observes the same text prepares it first,
+// so that the two share the normal forms.
 func ResolveFromText(text, source string) domain.LicenseFinding {
+	return Prepare(text).Resolve(source)
+}
+
+// Resolve says which licence this text declares or is, in the order of section
+// 22.3: the identifier the text states about itself, the digest of its
+// normalized text, then the SPDX templates.
+func (t *Text) Resolve(source string) domain.LicenseFinding {
+	text := t.raw
 	if strings.TrimSpace(text) == "" {
 		return domain.LicenseFinding{
 			Name:       "NOASSERTION",
@@ -62,7 +128,7 @@ func ResolveFromText(text, source string) domain.LicenseFinding {
 			Technique:  TechniqueIdentifier,
 		}
 	}
-	if id, ok := lookupNormalizedHash(normalizeLicenseText(text)); ok {
+	if id, ok := lookupNormalizedHash(t.strict()); ok {
 		return domain.LicenseFinding{
 			Expression: id,
 			SPDXID:     id,
@@ -79,7 +145,7 @@ func ResolveFromText(text, source string) domain.LicenseFinding {
 	// after the digest has missed, because that is the case it exists for: a
 	// licence whose copyright holder has been filled in or whose clause list
 	// has been renumbered is unmatchable by digest and unmistakable here.
-	if matches, err := matchTemplates(text); err == nil {
+	if matches, err := matchTemplates(t.loose()); err == nil {
 		switch {
 		case len(matches) == 1:
 			return domain.LicenseFinding{
@@ -217,11 +283,31 @@ func normalizeLicenseText(text string) string {
 	return collapseSpaces(joined)
 }
 
+// collapseSpaces reduces every run of spaces to one. It reads the string once
+// and copies it at most once: replacing "  " with " " until none is left was a
+// fresh allocation and a fresh scan of the whole text per pass, and a licence
+// laid out in a column of double-spaced sentences pays that many times over.
+// The single pass is the same function -- a run of n spaces becomes one space
+// either way.
 func collapseSpaces(s string) string {
-	for strings.Contains(s, "  ") {
-		s = strings.ReplaceAll(s, "  ", " ")
+	doubled := strings.Index(s, "  ")
+	if doubled < 0 {
+		// Nothing to collapse, which is the common case once the lines have
+		// been trimmed and joined, so nothing is copied either.
+		return strings.TrimSpace(s)
 	}
-	return strings.TrimSpace(s)
+	out := make([]byte, 0, len(s))
+	// Everything up to and including the first space of that run is kept as
+	// it stands; from there each space is dropped when the byte before it in
+	// the original was a space too.
+	out = append(out, s[:doubled+1]...)
+	for i := doubled + 1; i < len(s); i++ {
+		if s[i] == ' ' && s[i-1] == ' ' {
+			continue
+		}
+		out = append(out, s[i])
+	}
+	return strings.TrimSpace(string(out))
 }
 
 // copyrightNotice matches a copyright *statement*, which the SPDX matching
