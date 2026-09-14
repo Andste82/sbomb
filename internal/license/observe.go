@@ -95,10 +95,15 @@ func Observe(text string) []Observation {
 // text quotes another -- the GPL appendix contains a notice, and several BSD
 // variants are one another's prefix -- would otherwise be reported twice.
 func resolveOverlaps(found []Observation, entries []*entry) []Observation {
-	deprecated := map[string]bool{}
-	for _, e := range entries {
-		deprecated[e.id] = e.deprecated
+	// Nothing can overlap nothing, and nothing can overlap one thing. Saying so
+	// first is what keeps a file that holds no licence at all -- which is
+	// almost every file of almost every project -- from paying for the table
+	// below: building it here cost 2.13 GB of the 6.63 GB a measured run
+	// allocated, and the garbage that produced was a third of its CPU.
+	if len(found) <= 1 {
+		return found
 	}
+	deprecated := deprecatedByID()
 	sort.Slice(found, func(i, j int) bool {
 		left, right := found[i], found[j]
 		if left.End-left.Start != right.End-right.Start {
