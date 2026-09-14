@@ -138,6 +138,23 @@ type componentResolver struct {
 	// same ancestor directories once per used file, and section 31 does not
 	// pay for the same answer twice.
 	licenseBoundaries map[string]string
+	// packageManifests and bundledSBOMs are what the fixed-name markers of the
+	// same walk answered for one directory, keyed by that directory, with the
+	// empty string for a directory that carries none. They are memoized for
+	// the reason licenseBoundaries above is: the upward walk of strategy 6
+	// asks the same ancestor directories about the same twelve names once per
+	// used file, and section 31 does not pay for the same answer twice.
+	//
+	// What is kept is the answer for a directory, not the outcome of a walk.
+	// Whether a marker found here actually bounds a component depends on the
+	// file the walk started from -- a licence or a bundled SBOM marks nothing
+	// at the walker's own anchor root -- and a directory reached from two
+	// anchors would otherwise be told the wrong thing by whichever file asked
+	// first. The stat result belongs to the directory alone, so it is what the
+	// memo holds; the anchor exception stays in the walk, where it can see
+	// which anchor is asking.
+	packageManifests map[string]string
+	bundledSBOMs     map[string]string
 	// licenseReads counts how often retention opened each path. It holds the
 	// recognized licence files of the mapped component roots and nothing else,
 	// so it is bounded by the retention limit per component rather than by the
@@ -751,10 +768,8 @@ func (r *componentResolver) nearestPackageRoot(file domain.UsedFile) (root, mani
 	dir := filepath.Dir(path)
 	for depth := 0; depth < 64 && dir != "" && dir != "/" && dir != "."; depth++ {
 		atBoundary := boundary != "" && filepath.Clean(dir) == filepath.Clean(boundary)
-		for _, name := range packageMetadataFiles {
-			if info, err := os.Stat(filepath.Join(dir, name)); err == nil && !info.IsDir() {
-				return dir, name, true
-			}
+		if name, ok := r.packageManifestIn(dir); ok {
+			return dir, name, true
 		}
 		// A licence file marks a boundary too, but never at the anchor root
 		// itself: a project's own top-level licence describes the project, not
@@ -765,10 +780,8 @@ func (r *componentResolver) nearestPackageRoot(file domain.UsedFile) (root, mani
 			if name, ok := r.licenseBoundaryIn(dir); ok {
 				return dir, name, true
 			}
-			for _, name := range bundledSBOMFiles {
-				if info, err := os.Stat(filepath.Join(dir, name)); err == nil && !info.IsDir() {
-					return dir, name, true
-				}
+			if name, ok := r.bundledSBOMIn(dir); ok {
+				return dir, name, true
 			}
 		}
 		if atBoundary {
@@ -781,6 +794,54 @@ func (r *componentResolver) nearestPackageRoot(file domain.UsedFile) (root, mani
 		dir = parent
 	}
 	return "", "", false
+}
+
+// packageManifestIn names the package manifest that makes dir the root of a
+// distinct component, if it carries one, and bundledSBOMIn does the same for a
+// bundled SBOM. Both answer from a memo, because the walk of nearestPackageRoot
+// asks about the same ancestor directories once per used file below them and
+// the answer depends on nothing but the directory.
+//
+// The two lists stay separate calls rather than one pass over both, so that a
+// directory the walk may not take a licence or an SBOM from -- the anchor root
+// of the file that is asking -- is never stat-ed for names that could not have
+// bounded anything there.
+func (r *componentResolver) packageManifestIn(dir string) (string, bool) {
+	if cached, known := r.packageManifests[dir]; known {
+		return cached, cached != ""
+	}
+	marker := firstFileIn(dir, packageMetadataFiles)
+	if r.packageManifests == nil {
+		r.packageManifests = map[string]string{}
+	}
+	r.packageManifests[dir] = marker
+	return marker, marker != ""
+}
+
+func (r *componentResolver) bundledSBOMIn(dir string) (string, bool) {
+	if cached, known := r.bundledSBOMs[dir]; known {
+		return cached, cached != ""
+	}
+	marker := firstFileIn(dir, bundledSBOMFiles)
+	if r.bundledSBOMs == nil {
+		r.bundledSBOMs = map[string]string{}
+	}
+	r.bundledSBOMs[dir] = marker
+	return marker, marker != ""
+}
+
+// firstFileIn names the first of names that exists in dir as something other
+// than a directory, in the order given, which is the order the marker lists
+// state their precedence in. It stats rather than lists the directory: the
+// names are fixed, so a stat each answers what a listing would, and it follows
+// a symbolic link the way the licence match deliberately does.
+func firstFileIn(dir string, names []string) string {
+	for _, name := range names {
+		if info, err := os.Stat(filepath.Join(dir, name)); err == nil && !info.IsDir() {
+			return name
+		}
+	}
+	return ""
 }
 
 func componentTypeOrDefault(value string) string {
