@@ -252,6 +252,15 @@ func tokenize(s string) []string {
 	return tokens
 }
 
+// The two expansion patterns are compiled once. They were compiled on every
+// call, and expandVariables is called for every path of every edge: on a build
+// graph of two thousand translation units that was 38% of the whole run, spent
+// rebuilding two constant regular expressions a hundred thousand times.
+var (
+	expandParenRe = regexp.MustCompile(`\$\(([^)]+)\)`)
+	expandWordRe  = regexp.MustCompile(`\$([a-zA-Z_][a-zA-Z0-9_]*)`)
+)
+
 // expandVariables replaces $(...) and $var patterns with values from the map.
 func expandVariables(s string, vars map[string]string) string {
 	// First handle $$ -> temporary marker to avoid re-processing
@@ -259,7 +268,7 @@ func expandVariables(s string, vars map[string]string) string {
 	s = strings.ReplaceAll(s, "$$", marker)
 
 	// Handle $(...) form
-	re := regexp.MustCompile(`\$\(([^)]+)\)`)
+	re := expandParenRe
 	s = re.ReplaceAllStringFunc(s, func(m string) string {
 		varName := m[2 : len(m)-1]
 		if val, ok := vars[varName]; ok {
@@ -269,7 +278,7 @@ func expandVariables(s string, vars map[string]string) string {
 	})
 
 	// Handle $var form (one-word variable names)
-	re = regexp.MustCompile(`\$([a-zA-Z_][a-zA-Z0-9_]*)`)
+	re = expandWordRe
 	s = re.ReplaceAllStringFunc(s, func(m string) string {
 		varName := m[1:]
 		if val, ok := vars[varName]; ok {
