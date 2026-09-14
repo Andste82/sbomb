@@ -183,12 +183,16 @@ func (e *entry) regexp() (*regexp.Regexp, error) {
 // text. More than one is possible -- several BSD variants differ only in a
 // clause one of them makes optional -- and the caller must treat that as an
 // ambiguity rather than pick one.
-func matchTemplates(text string) ([]string, error) {
+//
+// It is handed the loose normal form rather than the raw text, because whoever
+// asks this has usually asked something else of the same bytes already:
+// license.Text computes that form once and Observe compares against the very
+// same string.
+func matchTemplates(normalized string) ([]string, error) {
 	entries, err := loadTemplates()
 	if err != nil {
 		return nil, err
 	}
-	normalized := looseNormalize(text)
 	if normalized == "" {
 		return nil, nil
 	}
@@ -451,4 +455,4 @@ func TemplateIDs() ([]string, error) {
 
 // MatchTemplate exposes the matcher for tools and tests. It returns every
 // identifier whose template matches.
-func MatchTemplate(text string) ([]string, error) { return matchTemplates(text) }
+func MatchTemplate(text string) ([]string, error) { return matchTemplates(looseNormalize(text)) }

@@ -1104,13 +1104,19 @@ func (r *componentResolver) resolveComponentLicense(component *domain.Component,
 		// which directory --source-dir named -- while the document states what
 		// was read, in canonical form (section 7.8, appendix B).
 		ref := file.ID.Canonical()
-		if found := license.ResolveFromText(string(data), ref); found.Expression != "" {
+		// Both questions below are asked of these same bytes -- what licence
+		// is this, and which licence texts are in it -- and both compare
+		// against the same normalized form of them. Preparing the text once
+		// means that form is computed once instead of once per question, and
+		// the bytes become a string once instead of twice.
+		examined := license.Prepare(string(data))
+		if found := examined.Resolve(ref); found.Expression != "" {
 			fromFiles = found
 			observed = nil
 			break
 		}
 		if len(observed) == 0 {
-			observed = license.ObserveFindings(string(data), ref)
+			observed = examined.ObserveFindings(ref)
 		}
 	}
 	if fromFiles.Expression == "" && described.Value != "" {
@@ -1512,15 +1518,25 @@ func (r *componentResolver) identifyUnretained(retained *retainedLicenses, path,
 	if err != nil {
 		return
 	}
-	if retained.unretained.Expression == "" {
-		if found := license.ResolveFromText(string(data), name); found.Expression != "" {
+	// Which of the two questions are still open is settled before the bytes
+	// are touched. Both are then asked of one prepared text, so the normal
+	// form they share is computed once -- and a file with neither question
+	// left is not converted to a string at all, which matters here because
+	// this is the path for a licence file too large to keep.
+	identify, observe := retained.unretained.Expression == "", len(retained.unretainedObserved) == 0
+	if !identify && !observe {
+		return
+	}
+	examined := license.Prepare(string(data))
+	if identify {
+		if found := examined.Resolve(name); found.Expression != "" {
 			found.Evidence = "component-level"
 			found.Source = name
 			retained.unretained = found
 		}
 	}
-	if len(retained.unretainedObserved) == 0 {
-		retained.unretainedObserved = license.ObserveFindings(string(data), name)
+	if observe {
+		retained.unretainedObserved = examined.ObserveFindings(name)
 	}
 }
 
