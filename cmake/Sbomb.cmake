@@ -2,49 +2,36 @@ include_guard(GLOBAL)
 
 include(CheckLinkerFlag)
 
+# None of these is named after an sbomb_enable keyword, and none may be:
+# cmake_parse_arguments clears SBOMB_<KEYWORD> for every keyword a call omits,
+# and a cache variable of that name shows through the cleared one -- reaching
+# sbomb as though the call had named it. A cache variable that stands in for a
+# keyword outright carries the SBOMB_DEFAULT_ prefix; SBOMB_OUTPUT_DIR is a
+# setting of its own, naming the directory rather than the file OUTPUT names.
 set(SBOMB_LINK_EVIDENCE ON CACHE BOOL "Enable linker evidence flags for sbomb")
 set(SBOMB_EXECUTABLE "sbomb" CACHE FILEPATH "Path to the sbomb executable")
 set(SBOMB_OUTPUT_DIR "${CMAKE_BINARY_DIR}/sbom" CACHE PATH "Directory for sbomb output")
-
-# The configuration used when sbomb_enable is called without CONFIG, and only
-# when it exists.
-#
-# It is deliberately not called SBOMB_CONFIG. cmake_parse_arguments leaves
-# SBOMB_CONFIG undefined when the caller passed no CONFIG, and an undefined
-# normal variable lets a cache variable of the same name show through -- so a
-# cache SBOMB_CONFIG would be passed as --config exactly as though the caller
-# had asked for it, and every project without that file would fail at build
-# time on a configuration it never named.
 set(SBOMB_DEFAULT_CONFIG "${CMAKE_SOURCE_DIR}/sbomb.json"
     CACHE FILEPATH "Configuration used when sbomb_enable is called without CONFIG")
-
-# The FOSS output and its rendering, for the same reason and with the same
-# spelling: a cache SBOMB_FOSS_OUT would show through wherever a caller passed
-# no FOSS_OUT, and every target in the build -- including the ones a
-# FetchContent dependency enables -- would write its attribution documents to
-# the one directory, each overwriting the last.
 set(SBOMB_DEFAULT_FOSS_OUT ""
     CACHE PATH "FOSS attribution output directory used when sbomb_enable is called without FOSS_OUT")
 set(SBOMB_DEFAULT_FOSS_FORMAT ""
     CACHE STRING "FOSS rendering used when sbomb_enable is called without FOSS_FORMAT: text or markdown")
 
-# Set here, at include() time, and not inside sbomb_enable.
+# Set at include() time, before any target is defined, so that one configure
+# is enough. The generator decides whether to record a compile command as it
+# processes a target; a value arriving after that -- which is when sbomb_enable
+# runs, since a target must exist before it can be named -- reaches the cache
+# but misses the run, and the compile database appears only on the next
+# configure.
 #
-# That is the whole reason the SBOM target used to re-configure the project.
-# The generator decides whether to record a compile command when it processes
-# the target, so switching this on afterwards -- which is when sbomb_enable
-# runs, since the target has to exist before it can be named -- reaches the
-# cache and misses the run: the compile database appeared only on the *next*
-# configure. Set before any target is defined, one configure is enough.
-#
-# It follows that `include(Sbomb)` belongs above the targets it will be asked
-# about. Below them, this arrives too late again, sbomb finds no compile
-# database and says so with MISSING_COMPILE_EVIDENCE.
+# So `include(Sbomb)` belongs above the targets it is asked about. Below them
+# sbomb finds no compile database and says so with MISSING_COMPILE_EVIDENCE.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Export compile commands for sbomb" FORCE)
 
-# Being too late is silent otherwise: the build succeeds, the SBOM is written,
-# and it is quietly worse because no object could be traced to a source. Say so
-# at the moment it can still be moved.
+# Too late is otherwise silent: the build succeeds and the SBOM is written,
+# only with no object traced to a source. Say so while the include can still be
+# moved.
 get_property(_sbomb_existing_targets DIRECTORY PROPERTY BUILDSYSTEM_TARGETS)
 if(_sbomb_existing_targets)
   message(WARNING
@@ -78,13 +65,13 @@ function(sbomb_enable)
     return()
   endif()
 
-  # CMake 3.27 files the File API query for the run that is happening, so one
+  # From CMake 3.27 the File API query is filed for the run in progress, so one
   # configure leaves a reply and the SBOM target has nothing to prepare.
   #
-  # Below that the query is only read at the *start* of a run, so it takes
-  # effect on the next one. There the target still re-configures, because a
-  # reply that never arrives is not a degraded answer but no answer: sbomb
-  # would know no targets, no anchors and no toolchain.
+  # Below that the query is read only at the *start* of a run and takes effect
+  # on the next one, so there the target re-configures first. A reply that
+  # never arrives is not a degraded answer but no answer: sbomb knows no
+  # targets, no anchors and no toolchain.
   set(_sbomb_reconfigure "")
   if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.27")
     cmake_file_api(
@@ -112,16 +99,16 @@ function(sbomb_enable)
     if(NOT _sbomb_language)
       set(_sbomb_language C)
     endif()
-    # MAP and DEPFILE say "the build already produces this, here it is" -- not
-    # "write it here". Projects that set the flags in a toolchain file own
-    # them, and adding ours beside theirs would put the option on the link line
-    # twice, with the command-line order deciding which file wins.
+    # MAP and DEPFILE name a file the build already produces; they do not ask
+    # for one to be written. A project setting these flags in a toolchain file
+    # owns them, so no flag of ours joins them: the same option twice on the
+    # link line leaves command-line order to decide which file wins.
     #
-    # So a named path is passed to sbomb and nothing else happens. Whether it
-    # is really there is not decided here: CMake offers too many ways to reach
-    # the link line -- wrappers, response files, an overridden link rule -- for
-    # a scan of the flags to answer it. sbomb checks the file itself and
-    # refuses to run without it (CONFIGURED_EVIDENCE_MISSING).
+    # A named path is therefore passed to sbomb and nothing else happens.
+    # Whether the file is really there is not decided here -- wrappers,
+    # response files and overridden link rules put too much out of reach of a
+    # scan of the flags. sbomb checks the file itself and refuses to run
+    # without it (CONFIGURED_EVIDENCE_MISSING).
     if(MSVC)
       if(NOT SBOMB_MAP)
         target_link_options("${SBOMB_TARGET}" PRIVATE "/MAP:$<TARGET_FILE:${SBOMB_TARGET}>.map")
@@ -152,10 +139,9 @@ function(sbomb_enable)
     message(STATUS "sbomb: no linker evidence for ${SBOMB_TARGET}; a ${_sbomb_type} carries no linker flags")
   endif()
 
-  # SBOMB_CONFIG is the parsed argument and nothing else. The default is
-  # consulted only when the caller named none, and only when it is really
-  # there: passing --config for a file that does not exist turns a run that
-  # would have worked on defaults into a failure.
+  # The parsed argument first; the default only when the call named none, and
+  # only when the file is really there. --config for a file that does not exist
+  # fails a run that defaults alone would have carried.
   set(_sbomb_config "${SBOMB_CONFIG}")
   if(_sbomb_config)
     if(NOT EXISTS "${_sbomb_config}")
@@ -175,10 +161,9 @@ function(sbomb_enable)
     set(_sbomb_output_dir ".")
   endif()
 
-  # SBOMB_FOSS_OUT and SBOMB_FOSS_FORMAT are the parsed arguments and nothing
-  # else; the defaults are consulted only when the caller named none. The
-  # rendering default is taken only when there is an output for it to act on,
-  # so that setting it alone stays inert rather than failing every call below.
+  # The parsed arguments first; the defaults only when the call named none. The
+  # rendering default needs an output to act on, so on its own it stays inert
+  # rather than refusing every call at the check below.
   set(_sbomb_foss_out "${SBOMB_FOSS_OUT}")
   if(NOT _sbomb_foss_out)
     set(_sbomb_foss_out "${SBOMB_DEFAULT_FOSS_OUT}")
@@ -188,8 +173,8 @@ function(sbomb_enable)
     set(_sbomb_foss_format "${SBOMB_DEFAULT_FOSS_FORMAT}")
   endif()
 
-  # A rendering with no output to write has nothing to act on, and only a
-  # caller who passed FOSS_FORMAT can reach this.
+  # A rendering with no output to write has nothing to act on. Only a call that
+  # passed FOSS_FORMAT reaches this.
   if(_sbomb_foss_format AND NOT _sbomb_foss_out)
     message(FATAL_ERROR "sbomb_enable: FOSS_FORMAT requires FOSS_OUT")
   endif()
@@ -204,8 +189,8 @@ function(sbomb_enable)
   if(SBOMB_POLICY)
     list(APPEND _sbomb_command --policy "${SBOMB_POLICY}")
   endif()
-  # Without these the option would name a path nobody acts on: sbomb looks
-  # beside the artifact and nowhere else unless it is told.
+  # sbomb looks beside the artifact and nowhere else unless it is told, so a
+  # path the call named has to be passed on.
   if(SBOMB_MAP)
     list(APPEND _sbomb_command --map "${SBOMB_MAP}")
   endif()
