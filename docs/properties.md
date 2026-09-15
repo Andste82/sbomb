@@ -13,7 +13,7 @@ not understand them can ignore them; one that does can audit the answer.
 ## Catalogue
 
 <!-- BEGIN GENERATED CATALOGUE -->
-This build writes 47 of the 83 properties below. The rest are specified and
+This build writes 48 of the 84 properties below. The rest are specified and
 reserved: they describe evidence this version does not yet record, and no
 document sbomb writes will contain them. They are listed and marked so that the
 table is the whole catalogue rather than a snapshot of one version.
@@ -36,6 +36,7 @@ table is the whole catalogue rather than a snapshot of one version.
 | `sbomb:cdx:executableProperty` | Grouping components | executable | non-executable | emitted |
 | `sbomb:cdx:structuredProperty` | Grouping components | structured | unstructured | emitted |
 | `sbomb:component:archiveMembersUsed` | Grouping components | — | emitted |
+| `sbomb:component:cveExclusion` | Grouping components | repeated, <cve>: <reason> | emitted |
 | `sbomb:component:declaredRevision` | Grouping components | — | emitted |
 | `sbomb:component:detectedBy` | Grouping components | — | emitted |
 | `sbomb:component:distributionRole` | Grouping components | distributed | build-time-only | emitted |
