@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 
 	"github.com/example/sbomb/internal/adapters/pkgmanager"
 	"github.com/example/sbomb/internal/anchors"
@@ -1672,11 +1673,33 @@ const (
 // by its licence rather than by whichever name the filesystem returned first.
 // LICENSE and LICENCE share a rank: a spelling is not a statement.
 func recognizedLicenseFile(name string) (int, bool) {
+	// Every recognized name -- LICENSE, LICENCE, COPYING, NOTICE, COPYRIGHT
+	// and the LICENSE-<id> family -- begins with L, C or N whatever its case,
+	// and stripping an extension never changes the first byte. Deciding that
+	// here keeps the upper-casing below off every other file in the
+	// directory: a component root of twelve thousand entries reached it once
+	// per entry and allocated for each.
+	//
+	// Only an ASCII first byte is answered this way. A leading byte outside
+	// ASCII falls through to the full path, so the cheap answer is never a
+	// different answer.
+	if name == "" {
+		return 0, false
+	}
+	if first := name[0]; first < utf8.RuneSelf {
+		switch first {
+		case 'L', 'l', 'C', 'c', 'N', 'n':
+		default:
+			return 0, false
+		}
+	}
+
 	stem := name
 	if ext := filepath.Ext(stem); strings.EqualFold(ext, ".txt") || strings.EqualFold(ext, ".md") {
 		stem = strings.TrimSuffix(stem, ext)
 	}
-	switch strings.ToUpper(stem) {
+	upper := strings.ToUpper(stem)
+	switch upper {
 	case "LICENSE", "LICENCE":
 		return licenseRankLicense, true
 	case "COPYING":
@@ -1686,7 +1709,7 @@ func recognizedLicenseFile(name string) (int, bool) {
 	case "COPYRIGHT":
 		return licenseRankCopyright, true
 	}
-	if upper := strings.ToUpper(stem); strings.HasPrefix(upper, "LICENSE-") && len(upper) > len("LICENSE-") {
+	if strings.HasPrefix(upper, "LICENSE-") && len(upper) > len("LICENSE-") {
 		// `LICENSE-<id>` is a licence file; `license-header.txt`,
 		// `license-check.py` and `LICENSE-scanner.sh` are the tooling a
 		// licence *checker* ships, and they begin with the same eight
@@ -1814,7 +1837,18 @@ func licenseFilesIn(root string) []string {
 	if root == "" {
 		return nil
 	}
-	entries, err := os.ReadDir(root)
+	// Read without os.ReadDir's sort. It orders every name in the directory,
+	// and a component root can hold twelve thousand of them, while what is
+	// kept here is a handful that the rank-then-name sort below puts in order
+	// anyway. That sort settles the result completely -- a directory cannot
+	// hold two entries of the same name -- so the order the filesystem hands
+	// the names over in does not reach it.
+	directory, err := os.Open(root)
+	var entries []os.DirEntry
+	if err == nil {
+		entries, err = directory.ReadDir(-1)
+		directory.Close()
+	}
 	if err != nil {
 		// A directory can be searchable and not listable -- mode 0711 is
 		// ordinary for a vendored tree unpacked under a restrictive umask --
