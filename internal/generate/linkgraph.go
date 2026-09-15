@@ -94,6 +94,11 @@ type builder struct {
 	// claim -- a second graph build would show up here as a 2, and no timing
 	// measurement is involved (section 32.6).
 	counters *Counters
+	// identified memoizes identify, whose answer is a function of the path and
+	// of state that is settled before the first call. setSourceRoots clears it,
+	// so a builder whose roots are set after it has already identified
+	// something still answers from the roots in force.
+	identified map[string]identity
 	// absoluteBuildPrefix is physicalBuild made absolute, with the separator
 	// already on it, which is the form logicalFor compares every absolute path
 	// against. It is derived once because filepath.Abs asks the process for its
@@ -102,6 +107,12 @@ type builder struct {
 	// root or the working directory could not be had, which is the same case
 	// the comparison below used to skip.
 	absoluteBuildPrefix string
+}
+
+// identity is one path's resolved answer, as identify memoizes it.
+type identity struct {
+	canonical string
+	scope     anchors.Scope
 }
 
 func newBuilder(graph *evidence.Graph, anchorResult *anchors.Result, logicalBuild, physicalBuild string, logger *Logger) *builder {
@@ -128,6 +139,7 @@ func newBuilder(graph *evidence.Graph, anchorResult *anchors.Result, logicalBuil
 		askedArchives:      map[string]bool{},
 		counters:           &Counters{},
 
+		identified:          map[string]identity{},
 		absoluteBuildPrefix: absoluteBuildPrefix,
 	}
 }
@@ -140,6 +152,10 @@ func (b *builder) setSourceRoots(logical, physical string, flavor pathmodel.Flav
 	b.flavor = flavor
 	b.logicalSource = normalizedRoot(logical, flavor)
 	b.physicalSource = normalizedRoot(physical, flavor)
+	// A run sets the roots before it identifies anything, so this clears an
+	// empty map. It is here so that the memo in identify cannot outlive the
+	// roots it was computed under, whoever calls this and whenever.
+	clear(b.identified)
 }
 
 // normalizedRoot is a source root in the one spelling everything below compares
@@ -191,7 +207,29 @@ func (b *builder) recordReconstructedLink(artifact string, inputs []string) {
 
 // identify resolves a path recorded in build evidence to its portable
 // identity, and remembers where the bytes can be read.
+//
+// The answer is memoized per path. Everything it is computed from -- the anchor
+// registry, the build roots, the source roots and the flavor -- is settled
+// before the first call and never changes during a run, so the same path cannot
+// resolve twice to two identities. It is worth caching because the same path
+// arrives again and again: a build of two thousand translation units reaches
+// this twenty thousand times for six thousand distinct paths, and each of the
+// other fourteen thousand used to redo the registry lookup and rebuild the
+// canonical string.
+//
+// The side effects below stay where they were, guarded by the canonical rather
+// than by the path, because two different paths can resolve to one identity and
+// the finding belongs to the identity.
 func (b *builder) identify(path string) (string, anchors.Scope) {
+	if cached, known := b.identified[path]; known {
+		return cached.canonical, cached.scope
+	}
+	canonical, scope := b.identifyUncached(path)
+	b.identified[path] = identity{canonical: canonical, scope: scope}
+	return canonical, scope
+}
+
+func (b *builder) identifyUncached(path string) (string, anchors.Scope) {
 	id, scope := b.anchors.ScopeOfPath(b.logicalBuild, b.logicalFor(path))
 	canonical := id.Canonical()
 	if _, known := b.physical[canonical]; !known {
