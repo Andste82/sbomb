@@ -3,11 +3,16 @@
 # files were never committed, and CI failed on them for weeks while the local
 # tree was green.
 /sbomb
-/_demo
 /dist/
 .env
 *.test
 *.pdb
 
+# Claude Code Workspaces 
+.claude/
+
 # Devcontainer-local Claude Code state; not part of the project.
 .devcontainer/.claude-config/
+
+# Stuff
+/_demo/
