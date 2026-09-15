@@ -80,7 +80,7 @@ type Enricher interface {
 // carry one line about the version.
 var enrichers = []Enricher{
 	bundledSBOM{},
-	espidfsbom{},
+	bundledYAML{},
 	cmsisPack{},
 	cmakeConfigVersion{},
 	build2Manifest{},

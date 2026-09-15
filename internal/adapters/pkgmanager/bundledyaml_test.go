@@ -20,11 +20,11 @@ cve-exclude-list:
   - cve: CVE-2024-28115
     reason: MPU ports are not enabled
 `
-	if err := os.WriteFile(filepath.Join(root, idfSBOMName), []byte(manifest), 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(root, bundledYAMLName), []byte(manifest), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
-	contributions, findings := (espidfsbom{}).Enrich(ComponentRoot{Path: root, Name: "freertos"})
+	contributions, findings := (bundledYAML{}).Enrich(ComponentRoot{Path: root, Name: "freertos"})
 	if len(findings) != 0 {
 		t.Fatalf("findings = %#v", findings)
 	}
@@ -58,10 +58,10 @@ cve-exclude-list:
 
 func TestESPIDSbomEnricherRejectsMismatchedName(t *testing.T) {
 	root := t.TempDir()
-	if err := os.WriteFile(filepath.Join(root, idfSBOMName), []byte("name: other\nversion: 1.0.0\n"), 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(root, bundledYAMLName), []byte("name: other\nversion: 1.0.0\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	contributions, findings := (espidfsbom{}).Enrich(ComponentRoot{Path: root, Name: "freertos"})
+	contributions, findings := (bundledYAML{}).Enrich(ComponentRoot{Path: root, Name: "freertos"})
 	if len(contributions) != 0 {
 		t.Fatalf("contributions = %#v", contributions)
 	}
@@ -72,7 +72,7 @@ func TestESPIDSbomEnricherRejectsMismatchedName(t *testing.T) {
 
 func TestESPIDSbomEnricherVersionsGenericSubmodulePURL(t *testing.T) {
 	root := t.TempDir()
-	if err := os.WriteFile(filepath.Join(root, idfSBOMName), []byte("name: lwip\nversion: 2.1.3\n"), 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(root, bundledYAMLName), []byte("name: lwip\nversion: 2.1.3\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	pkg := Package{
