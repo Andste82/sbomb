@@ -1060,9 +1060,19 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 	return findings
 }
 
+// cpeVersion fills the {} an upstream CPE leaves for the version. A CPE whose
+// placeholder cannot be filled is not published: "{}" is no version, and a
+// consumer matching the string against a vulnerability feed would find nothing
+// while the document looks as though it had stated one.
 func cpeVersion(cpe, version string) string {
-	if cpe == "" || version == "" {
+	if cpe == "" {
+		return ""
+	}
+	if !strings.Contains(cpe, "{}") {
 		return cpe
+	}
+	if version == "" {
+		return ""
 	}
 	return strings.Replace(cpe, "{}", version, 1)
 }
