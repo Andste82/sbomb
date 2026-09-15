@@ -33,11 +33,11 @@ func TestEnrichmentLeavesPurlAloneWhenNoEnricherSpoke(t *testing.T) {
 	}
 }
 
-// The same package, with an ESP-IDF manifest beside it. The version reaches
+// The same package, with a bundled sbom.yml beside it. The version reaches
 // the purl, and both carry the source that really supplied it.
 func TestEnrichmentCarriesTheSourceThatSuppliedTheVersion(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, filepath.Join(dir, idfSBOMName), "name: tinyusb\nversion: 0.16.0\n")
+	writeFile(t, filepath.Join(dir, bundledYAMLName), "name: tinyusb\nversion: 0.16.0\n")
 
 	pkg := &Package{
 		Name:    "tinyusb",
@@ -56,8 +56,8 @@ func TestEnrichmentCarriesTheSourceThatSuppliedTheVersion(t *testing.T) {
 	if pkg.Version.Value != "0.16.0" {
 		t.Fatalf("version = %q, want 0.16.0", pkg.Version.Value)
 	}
-	if pkg.PURL.Source != "idf-sbom" {
-		t.Errorf("purl source = %q, want idf-sbom", pkg.PURL.Source)
+	if pkg.PURL.Source != "bundled-sbom" {
+		t.Errorf("purl source = %q, want bundled-sbom", pkg.PURL.Source)
 	}
 	if want := "pkg:generic/tinyusb@0.16.0"; len(pkg.PURL.Value) < len(want) || pkg.PURL.Value[:len(want)] != want {
 		t.Errorf("purl = %q, want it to start %q", pkg.PURL.Value, want)
