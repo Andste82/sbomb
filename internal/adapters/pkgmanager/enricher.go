@@ -104,6 +104,7 @@ func applyEnrichment(pkg *Package, root ComponentRoot) []domain.Finding {
 		return nil
 	}
 	findings := make([]domain.Finding, 0)
+	versionBefore := pkg.Version.Value
 	for _, enricher := range enrichers {
 		contributions, enricherFindings := enricher.Enrich(root)
 		findings = append(findings, enricherFindings...)
@@ -116,10 +117,19 @@ func applyEnrichment(pkg *Package, root ComponentRoot) []domain.Finding {
 			pkg.CVEExclusions = append(pkg.CVEExclusions, contribution.CVEExclusions...)
 		}
 	}
-	if pkg.Manager == "git-submodule" && pkg.Version.Value != "" && strings.HasPrefix(pkg.PURL.Value, "pkg:generic/") {
+	// A generic purl restates whichever version claim won, so a version an
+	// enricher supplied has to reach it too: the submodule adapter built the
+	// purl before any enricher had spoken.
+	//
+	// Only a version this run actually changed qualifies. Rebuilding the purl
+	// whenever one merely exists would restate the adapter's own version back
+	// at it under a source that never claimed it, and Take would file the
+	// byte-identical value in Superseded as though two origins had disagreed.
+	if pkg.Version.Value != versionBefore && pkg.Manager == "git-submodule" &&
+		strings.HasPrefix(pkg.PURL.Value, "pkg:generic/") {
 		pkg.Take(FieldPURL, Claim{
 			Value:  GenericPURL(pkg.Name, pkg.Version.Value, pkg.VCSURL, pkg.Commit),
-			Source: "idf-sbom",
+			Source: pkg.Version.Source,
 			Rank:   pkg.Version.Rank,
 		})
 	}
