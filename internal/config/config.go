@@ -171,6 +171,13 @@ type Component struct {
 	Copyright string `json:"copyright,omitempty"`
 	Supplier  string `json:"supplier,omitempty"`
 	PURL      string `json:"purl,omitempty"`
+	// CPE is the component's CPE 2.3 name, written to component.cpe. A purl
+	// follows mechanically from a manager, a name and a version; a cpe's
+	// vendor and product strings are NVD conventions that have to be looked
+	// up, so section 20.4 takes one only from an origin that states it
+	// outright -- this field, or a manifest the upstream shipped. A {}
+	// placeholder in place of the version is filled from the resolved version.
+	CPE string `json:"cpe,omitempty"`
 }
 
 func Load(path string) (Config, error) {

@@ -1073,7 +1073,11 @@ A `purl` MUST be emitted when, and only when, a package type and name can be ass
 | Curated with explicit `purl` | verbatim |
 | Otherwise | no purl; emit `UNKNOWN_PURL` (informational) |
 
-Purl components MUST be percent-encoded per the purl specification. `cpe` is emitted only when curated.
+Purl components MUST be percent-encoded per the purl specification.
+
+A `cpe` MUST be emitted only from an origin that states it outright: curated configuration, or a manifest the upstream shipped inside the package. It MUST NOT be derived. A purl follows mechanically from a manager, a name and a version, and is checkable against the package; a cpe's vendor and product strings are NVD conventions that have to be looked up, and a guessed one reports vulnerabilities the component does not have or hides the ones it does. Curated configuration outranks the upstream, which is how an operator corrects a cpe that is wrong about its own product.
+
+A cpe MAY leave `{}` in place of the version, which is filled from the version the component resolved to. A placeholder that cannot be filled MUST take the cpe with it and emit nothing: `{}` is no version, and the string would match nothing while reading as though a version had been stated.
 
 ### 20.5 Supplier and Author
 

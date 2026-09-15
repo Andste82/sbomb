@@ -289,6 +289,7 @@ func componentToCyclone(component domain.Component, ref, specVersion string, opt
 		Version:     component.Version,
 		BomRef:      ref,
 		PURL:        component.PURL,
+		CPE:         component.CPE,
 		Description: component.Description,
 	}
 	if out.Type == "" {
