@@ -2617,6 +2617,7 @@ sbomb:component:archiveMembersUsed
 sbomb:component:modified         (true | false | unknown)
 sbomb:component:sourceObligation (repeated, sorted)
 sbomb:component:originator
+sbomb:component:cveExclusion     (repeated, <cve>: <reason>)
 sbomb:license:source             sbomb:license:evidenceClass
 sbomb:license:confidence         sbomb:license:review
 sbomb:license:reason             sbomb:license:conflictingValue

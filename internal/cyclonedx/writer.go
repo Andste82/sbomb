@@ -333,7 +333,7 @@ func componentToCyclone(component domain.Component, ref, specVersion string, opt
 		out.Properties = append(out.Properties, Property{Name: "sbomb:component:originator", Value: component.Originator})
 	}
 	for _, exclusion := range component.CVEExclusions {
-		out.Properties = append(out.Properties, Property{Name: "sbomb:component:cve-exclusion", Value: exclusion.CVE + ": " + exclusion.Reason})
+		out.Properties = append(out.Properties, Property{Name: "sbomb:component:cveExclusion", Value: exclusion.CVE + ": " + exclusion.Reason})
 	}
 	out.Properties = append(out.Properties, propertiesFromMap(component.Properties)...)
 	if component.Scope != "" {
