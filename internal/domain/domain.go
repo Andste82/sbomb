@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -16,7 +15,11 @@ func (f FileID) Canonical() string {
 	if f.Anchor == "" {
 		return f.RelPath
 	}
-	return fmt.Sprintf("%s:%s", f.Anchor, strings.TrimPrefix(f.RelPath, "/"))
+	// Concatenated rather than formatted. This is on the path every recorded
+	// path takes to its identity, called twenty thousand times over a build of
+	// two thousand translation units, and fmt.Sprintf reaches the reflection
+	// machinery to join two strings with a colon.
+	return string(f.Anchor) + ":" + strings.TrimPrefix(f.RelPath, "/")
 }
 
 type NodeKind string
