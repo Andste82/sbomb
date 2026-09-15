@@ -959,7 +959,6 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 	if isManaged {
 		metadata = managed
 	}
-	component.CPE = cpeVersion(metadata.CPE.Value, component.Version)
 	component.Originator = metadata.Originator.Value
 	component.Description = metadata.Description.Value
 	for _, exclusion := range metadata.CVEExclusions {
@@ -1058,23 +1057,6 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 			"Add a components[] entry covering these paths."))
 	}
 	return findings
-}
-
-// cpeVersion fills the {} an upstream CPE leaves for the version. A CPE whose
-// placeholder cannot be filled is not published: "{}" is no version, and a
-// consumer matching the string against a vulnerability feed would find nothing
-// while the document looks as though it had stated one.
-func cpeVersion(cpe, version string) string {
-	if cpe == "" {
-		return ""
-	}
-	if !strings.Contains(cpe, "{}") {
-		return cpe
-	}
-	if version == "" {
-		return ""
-	}
-	return strings.Replace(cpe, "{}", version, 1)
 }
 
 // resolveComponentLicense applies the priority order of section 22.2, limited
