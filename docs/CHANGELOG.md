@@ -1,5 +1,53 @@
 # Changelog
 
+## 0.18.1
+
+### An archive member resolves to the same object on every run
+
+`memberObject` falls back to matching an archive by basename when the recorded
+identity is not a key of `archiveInputs`, and it took the first match out of a
+`range` over the map. Go offers a map's keys in an order it is free to vary
+between runs, so when two recorded archives shared a basename, which one
+answered was decided by the runtime.
+
+A Ninja build graph states that twice for every library CMake's FetchContent
+pulls in: the edge that archives the objects, and a phony alias for it whose
+only input is the library itself. Both are recorded, and only the first names
+an object. On the runs where the alias won, the member matched nothing, and the
+translation unit behind it -- together with the header it included -- was left
+out of the document. Measured on a FetchContent fixture, 4 of 20 runs
+disagreed, differing by a whole file component and by the serial number derived
+from the content; after the fix, 20 of 20 agree.
+
+The keys are now ranged in sorted order, so the choice is a property of the
+evidence rather than of the run, and an entry with no inputs is passed over
+instead of accepted.
+
+### The same document, with less work behind it
+
+Sixteen changes to the hot paths of a large build, none of which alters what
+is written. Each was taken from the profile and is reported there rather than
+as an end-to-end figure: on this machine two runs of one unchanged binary
+differ by more than most of them do individually. The two that carry most of it
+are licence detection, which stopped asking 739 templates one at a time and
+stopped building a 739-entry table for files that hold no licence, and path
+identity, which is now computed once per distinct path and remembered -- over a
+tree of two thousand translation units `identify` was called 20,012 times for
+6,004 distinct paths.
+
+The rest are of a kind: the Ninja build graph is parsed once and handed to the
+link side rather than parsed again, its two expansion patterns are compiled
+once rather than per path, the map parser stops copying the map and then every
+line of it, the walk to a component's package root stops re-stat-ing every
+ancestor, a licence scan decides on the first byte instead of upper-casing
+twelve thousand directory entries, and the graph summary is assembled only when
+somebody will read it.
+
+Output is unchanged throughout: the six digests of
+`scripts/determinism-check.sh` are what they were, and the committed fixtures
+generate the same documents under the old and the new binary. No test was
+modified for any of them.
+
 ## 0.18.0
 
 ### `explain --component` answers
