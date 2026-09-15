@@ -695,8 +695,24 @@ func (b *builder) memberObject(archiveCanonical, member string) (string, bool) {
 	candidates := b.archiveInputs[archiveCanonical]
 	if len(candidates) == 0 {
 		base := identityBase(archiveCanonical)
-		for key, inputs := range b.archiveInputs {
-			if identityBase(key) == base {
+		// Sorted, because several recorded archives can share a basename and
+		// the first match wins. A Ninja build graph states the same library
+		// twice -- once as the edge that archives the objects, and once as a
+		// phony alias for it -- so `tinylog.lib` and
+		// `_deps/tinylog-build/tinylog.lib` are both recorded, and only the
+		// first of them names an object. Ranging the map handed whichever of
+		// the two the runtime felt like offering, which put the member's
+		// translation unit in the document on some runs and not on others.
+		//
+		// An entry with no inputs is passed over rather than accepted. It is
+		// what the phony alias contributes, it cannot answer the question this
+		// loop is asking, and taking it only to find it empty two lines later
+		// is how the alias came to win at all.
+		for _, key := range sortedKeys(b.archiveInputs) {
+			if identityBase(key) != base {
+				continue
+			}
+			if inputs := b.archiveInputs[key]; len(inputs) > 0 {
 				candidates = inputs
 				break
 			}
