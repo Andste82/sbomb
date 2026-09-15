@@ -211,6 +211,11 @@ type Component struct {
 	Files      []FileID
 }
 
+// CVEExclusion is one entry of the list an upstream ships to say a CVE does
+// not apply to the version it shipped. It is recorded as the upstream stated
+// it and never acts on its own: sbomb does not scan for vulnerabilities, so an
+// exclusion here suppresses no finding and only carries the claim, and its
+// reason, to a reader who can weigh it.
 type CVEExclusion struct {
 	CVE    string
 	Reason string

@@ -36,7 +36,7 @@ table is the whole catalogue rather than a snapshot of one version.
 | `sbomb:cdx:executableProperty` | Grouping components | executable | non-executable | emitted |
 | `sbomb:cdx:structuredProperty` | Grouping components | structured | unstructured | emitted |
 | `sbomb:component:archiveMembersUsed` | Grouping components | — | emitted |
-| `sbomb:component:cveExclusion` | Grouping components | repeated, <cve>: <reason> | emitted |
+| `sbomb:component:cveExclusion` | Grouping components | repeated, <cve> or <cve>: <reason> | emitted |
 | `sbomb:component:declaredRevision` | Grouping components | — | emitted |
 | `sbomb:component:detectedBy` | Grouping components | — | emitted |
 | `sbomb:component:distributionRole` | Grouping components | distributed | build-time-only | emitted |
