@@ -94,9 +94,25 @@ type builder struct {
 	// claim -- a second graph build would show up here as a 2, and no timing
 	// measurement is involved (section 32.6).
 	counters *Counters
+	// absoluteBuildPrefix is physicalBuild made absolute, with the separator
+	// already on it, which is the form logicalFor compares every absolute path
+	// against. It is derived once because filepath.Abs asks the process for its
+	// working directory, and logicalFor is reached twenty thousand times over a
+	// build of two thousand translation units. Empty when there is no build
+	// root or the working directory could not be had, which is the same case
+	// the comparison below used to skip.
+	absoluteBuildPrefix string
 }
 
 func newBuilder(graph *evidence.Graph, anchorResult *anchors.Result, logicalBuild, physicalBuild string, logger *Logger) *builder {
+	// Derived here rather than per path, and only when there is a logical build
+	// root to rewrite into, which is the condition logicalFor tested first.
+	absoluteBuildPrefix := ""
+	if strings.TrimSuffix(logicalBuild, "/") != "" {
+		if absolute, err := filepath.Abs(physicalBuild); err == nil {
+			absoluteBuildPrefix = absolute + "/"
+		}
+	}
 	return &builder{
 		graph:              graph,
 		anchors:            anchorResult,
@@ -111,6 +127,8 @@ func newBuilder(graph *evidence.Graph, anchorResult *anchors.Result, logicalBuil
 		reconstructedLinks: map[string][]string{},
 		askedArchives:      map[string]bool{},
 		counters:           &Counters{},
+
+		absoluteBuildPrefix: absoluteBuildPrefix,
 	}
 }
 
@@ -235,11 +253,9 @@ func (b *builder) logicalFor(path string) string {
 	if !pathmodel.IsAbsolute(path) {
 		return path
 	}
-	if b.logicalBuild != "" {
-		if absoluteBuild, err := filepath.Abs(b.physicalBuild); err == nil {
-			if rel, found := strings.CutPrefix(path, absoluteBuild+"/"); found {
-				return b.logicalBuild + "/" + rel
-			}
+	if b.absoluteBuildPrefix != "" {
+		if rel, found := strings.CutPrefix(path, b.absoluteBuildPrefix); found {
+			return b.logicalBuild + "/" + rel
 		}
 	}
 	// The same inverse for the source tree (section 7.9): an adapter that read
