@@ -263,6 +263,8 @@ meant to.
 | `OUTPUT` | Where to write the document, instead of `<build>/sbom/<target>.cdx.json` |
 | `MAP` | Where the linker map **already is** |
 | `DEPFILE` | Where the link dependency file **already is** |
+| `FOSS_OUT` | Where to write the FOSS attribution documents; without it none are written |
+| `FOSS_FORMAT` | How `FOSS_OUT` renders them: `text` or `markdown`. Needs `FOSS_OUT` |
 
 `MAP` and `DEPFILE` say *the build already produces this, here it is* — not
 *write it here*. They exist for projects whose toolchain file sets
@@ -310,6 +312,8 @@ when you ask for it.
 | `SBOMB_EXECUTABLE` | `sbomb` | Path to the binary |
 | `SBOMB_OUTPUT_DIR` | `${CMAKE_BINARY_DIR}/sbom` | Where the documents go |
 | `SBOMB_LINK_EVIDENCE` | `ON` | Add the linker map and dependency-file flags |
+| `SBOMB_DEFAULT_FOSS_OUT` | none | `FOSS_OUT` for calls that name none |
+| `SBOMB_DEFAULT_FOSS_FORMAT` | none | `FOSS_FORMAT` for calls that name none |
 
 Linker flags are probed before use, so a toolchain that does not support them
 produces a status message rather than a broken link. They are added only to
