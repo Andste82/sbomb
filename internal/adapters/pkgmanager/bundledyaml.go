@@ -36,6 +36,10 @@ const bundledYAMLName = "sbom.yml"
 // A name and one field about it is the least that distinguishes the two. Asking
 // for all of them would refuse a component that simply has no supplier, and the
 // claims below already treat every field as optional.
+//
+// cpe is listed although no claim is taken from it: whether a document is one
+// of ours and which of its fields we use are two questions, and section 20.4
+// leaves the second one to curated configuration.
 var bundledYAMLFields = []string{"version", "cpe", "supplier", "originator", "description"}
 
 func (bundledYAML) Enrich(root ComponentRoot) ([]Contribution, []domain.Finding) {
@@ -87,10 +91,9 @@ func (bundledYAML) Enrich(root ComponentRoot) ([]Contribution, []domain.Finding)
 	claim := func(field Field, value string) Contribution {
 		return Contribution{Field: field, Claim: Claim{Value: value, Rank: RankBundledSBOM, Confidence: domain.ConfidenceHigh}}
 	}
-	contributions := make([]Contribution, 0, 5)
+	contributions := make([]Contribution, 0, 4)
 	contributions = append(contributions,
 		claim(FieldVersion, manifest.scalarAt("version")),
-		claim(FieldCPE, manifest.scalarAt("cpe")),
 		claim(FieldSupplier, organizationValue(manifest.scalarAt("supplier"))),
 		claim(FieldOriginator, organizationValue(manifest.scalarAt("originator"))),
 		claim(FieldDescription, manifest.scalarAt("description")),

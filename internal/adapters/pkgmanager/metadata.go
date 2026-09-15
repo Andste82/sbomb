@@ -53,7 +53,6 @@ const (
 	FieldLicense     Field = "license"
 	FieldSupplier    Field = "supplier"
 	FieldPURL        Field = "purl"
-	FieldCPE         Field = "cpe"
 	FieldOriginator  Field = "originator"
 	FieldDescription Field = "description"
 )
@@ -138,8 +137,6 @@ func (p *Package) claimFor(field Field) *Claim {
 		return &p.Supplier
 	case FieldPURL:
 		return &p.PURL
-	case FieldCPE:
-		return &p.CPE
 	case FieldOriginator:
 		return &p.Originator
 	case FieldDescription:

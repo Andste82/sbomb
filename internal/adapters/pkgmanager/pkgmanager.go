@@ -55,7 +55,6 @@ type Package struct {
 	// above a licence file found in the component root.
 	License     Claim
 	PURL        Claim
-	CPE         Claim
 	Originator  Claim
 	Description Claim
 	// CVEExclusions are upstream's documented applicability notes. They are
