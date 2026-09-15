@@ -44,7 +44,37 @@ endif()
 unset(_sbomb_existing_targets)
 
 function(sbomb_enable)
-  cmake_parse_arguments(SBOMB "" "TARGET;CONFIG;POLICY;MAP;DEPFILE;OUTPUT;FOSS_OUT;FOSS_FORMAT" "" ${ARGN})
+  set(_sbomb_keywords TARGET CONFIG POLICY MAP DEPFILE OUTPUT FOSS_OUT FOSS_FORMAT)
+  cmake_parse_arguments(SBOMB "" "${_sbomb_keywords}" "" ${ARGN})
+
+  # cmake_parse_arguments clears SBOMB_<KEYWORD> for every keyword this call
+  # omitted, and clearing a normal variable is what lets a cache variable of
+  # the same name show through it. The names above are therefore taken from
+  # the call and from nowhere else: each keyword the call did not pass is set
+  # empty here, covering any cache entry standing behind it.
+  #
+  # ARGN is walked the way the parser reads it: a keyword counts as passed only
+  # once a value that is not itself a keyword follows it. The parser never
+  # swallows a keyword as the previous one's value -- in CONFIG OUTPUT it
+  # leaves both without one -- and a walk that disagreed would call a keyword
+  # passed that the parser had cleared, and leave it unguarded.
+  set(_sbomb_named "")
+  set(_sbomb_pending "")
+  foreach(_sbomb_arg IN LISTS ARGN)
+    list(FIND _sbomb_keywords "${_sbomb_arg}" _sbomb_at)
+    if(NOT _sbomb_at EQUAL -1)
+      set(_sbomb_pending "${_sbomb_arg}")
+    elseif(NOT _sbomb_pending STREQUAL "")
+      list(APPEND _sbomb_named "${_sbomb_pending}")
+      set(_sbomb_pending "")
+    endif()
+  endforeach()
+  foreach(_sbomb_keyword IN LISTS _sbomb_keywords)
+    list(FIND _sbomb_named "${_sbomb_keyword}" _sbomb_at)
+    if(_sbomb_at EQUAL -1)
+      set("SBOMB_${_sbomb_keyword}" "")
+    endif()
+  endforeach()
 
   if(NOT SBOMB_TARGET)
     message(FATAL_ERROR "sbomb_enable requires TARGET <target>")

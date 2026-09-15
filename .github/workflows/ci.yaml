@@ -354,6 +354,57 @@ jobs:
           cmake --build "$work/build"
           cmake --build "$work/build" --target sbomb
           test -s "$work/build/sbom/app.cdx.json"
+      - name: A cache variable named after a keyword never reaches the command
+        run: |
+          set -euo pipefail
+          work="$RUNNER_TEMP/shadow"
+          mkdir -p "$work/src"
+          echo 'int main(void){return 0;}' > "$work/src/main.c"
+          echo '{}' > "$work/LEAKED.json"
+          cat > "$work/CMakeLists.txt" <<EOF
+          cmake_minimum_required(VERSION 3.20)
+          project(shadow C)
+          list(APPEND CMAKE_MODULE_PATH "$PWD/cmake")
+          include(Sbomb)
+          add_executable(app src/main.c)
+          sbomb_enable(TARGET app)
+          EOF
+          # cmake_parse_arguments clears SBOMB_<KEYWORD> for every keyword the
+          # call omitted, and a cache entry of that name shows through the
+          # cleared one unless the module guards it -- reaching sbomb as though
+          # the call had named it.
+          cmake -S "$work" -B "$work/build" \
+            -DSBOMB_EXECUTABLE="$PWD/dist/0.11.0/sbomb-linux-amd64" \
+            -DSBOMB_CONFIG="$work/LEAKED.json" \
+            -DSBOMB_POLICY=LEAKED \
+            -DSBOMB_MAP=/LEAKED/app.map \
+            -DSBOMB_DEPFILE=/LEAKED/app.d \
+            -DSBOMB_OUTPUT=/LEAKED/app.cdx.json \
+            -DSBOMB_FOSS_OUT=/LEAKED/foss \
+            -DSBOMB_FOSS_FORMAT=markdown > /dev/null
+          if grep -q LEAKED "$work/build/CMakeFiles/sbomb-app.dir/build.make"; then
+            echo "a cache variable reached the command although no call named it" >&2
+            grep -o 'sbomb generate .*' "$work/build/CMakeFiles/sbomb-app.dir/build.make" >&2 || true
+            exit 1
+          fi
+          # The guard must not cost the call its own arguments, nor the
+          # SBOMB_DEFAULT_ variables their purpose.
+          cat > "$work/CMakeLists.txt" <<EOF
+          cmake_minimum_required(VERSION 3.20)
+          project(shadow C)
+          list(APPEND CMAKE_MODULE_PATH "$PWD/cmake")
+          include(Sbomb)
+          add_executable(app src/main.c)
+          sbomb_enable(TARGET app POLICY lenient FOSS_OUT /WANTED/call)
+          EOF
+          rm -rf "$work/build"
+          cmake -S "$work" -B "$work/build" \
+            -DSBOMB_EXECUTABLE="$PWD/dist/0.11.0/sbomb-linux-amd64" \
+            -DSBOMB_DEFAULT_FOSS_FORMAT=markdown > /dev/null
+          rules="$work/build/CMakeFiles/sbomb-app.dir/build.make"
+          grep -q -- '--policy lenient' "$rules"
+          grep -q -- '--foss-out /WANTED/call' "$rules"
+          grep -q -- '--foss-format markdown' "$rules"
       - name: Including the module after a target is warned about
         run: |
           set -euo pipefail
