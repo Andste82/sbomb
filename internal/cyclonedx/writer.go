@@ -284,11 +284,13 @@ func buildDependencies(document *sbomwriter.Document, refs *refTable, productRef
 
 func componentToCyclone(component domain.Component, ref, specVersion string, options sbomwriter.Options) Component {
 	out := Component{
-		Type:    component.Type,
-		Name:    component.Name,
-		Version: component.Version,
-		BomRef:  ref,
-		PURL:    component.PURL,
+		Type:        component.Type,
+		Name:        component.Name,
+		Version:     component.Version,
+		BomRef:      ref,
+		PURL:        component.PURL,
+		CPE:         component.CPE,
+		Description: component.Description,
 	}
 	if out.Type == "" {
 		out.Type = "library"
@@ -327,6 +329,12 @@ func componentToCyclone(component domain.Component, ref, specVersion string, opt
 	out.Scope = scopeForRole(component.DistributionRole)
 	out.Pedigree = pedigreeToCyclone(component.Modification)
 	out.ExternalReferences, out.Properties = vcsToCyclone(component.VCS, specVersion)
+	if component.Originator != "" {
+		out.Properties = append(out.Properties, Property{Name: "sbomb:component:originator", Value: component.Originator})
+	}
+	for _, exclusion := range component.CVEExclusions {
+		out.Properties = append(out.Properties, Property{Name: "sbomb:component:cve-exclusion", Value: exclusion.CVE + ": " + exclusion.Reason})
+	}
 	out.Properties = append(out.Properties, propertiesFromMap(component.Properties)...)
 	if component.Scope != "" {
 		out.Properties = append(out.Properties, Property{Name: "sbomb:component:scope", Value: component.Scope})

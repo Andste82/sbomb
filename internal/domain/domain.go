@@ -138,6 +138,9 @@ type Component struct {
 	PURL          string
 	CPE           string
 	Supplier      string
+	Originator    string
+	Description   string
+	CVEExclusions []CVEExclusion
 	Root          *FileID
 	Scope         string
 	Licenses      []LicenseFinding
@@ -206,6 +209,11 @@ type Component struct {
 	Copyright  string
 	Properties map[string][]string
 	Files      []FileID
+}
+
+type CVEExclusion struct {
+	CVE    string
+	Reason string
 }
 
 // ModificationStatus is the tri-state of section 19.4. The third state is the

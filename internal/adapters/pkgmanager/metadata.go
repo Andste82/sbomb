@@ -49,10 +49,13 @@ const (
 type Field string
 
 const (
-	FieldVersion  Field = "version"
-	FieldLicense  Field = "license"
-	FieldSupplier Field = "supplier"
-	FieldPURL     Field = "purl"
+	FieldVersion     Field = "version"
+	FieldLicense     Field = "license"
+	FieldSupplier    Field = "supplier"
+	FieldPURL        Field = "purl"
+	FieldCPE         Field = "cpe"
+	FieldOriginator  Field = "originator"
+	FieldDescription Field = "description"
 )
 
 // Claim is one origin's statement about one metadata value.
@@ -79,8 +82,9 @@ type Claim struct {
 // the claims are the ones that lost, and a loser nobody can name a field for
 // cannot be reported.
 type Contribution struct {
-	Field Field
-	Claim Claim
+	Field         Field
+	Claim         Claim
+	CVEExclusions []CVEExclusion
 }
 
 // Take records one origin's claim about one field and keeps the strongest.
@@ -134,6 +138,12 @@ func (p *Package) claimFor(field Field) *Claim {
 		return &p.Supplier
 	case FieldPURL:
 		return &p.PURL
+	case FieldCPE:
+		return &p.CPE
+	case FieldOriginator:
+		return &p.Originator
+	case FieldDescription:
+		return &p.Description
 	}
 	return nil
 }
