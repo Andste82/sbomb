@@ -25,12 +25,12 @@ func (espidfsbom) Enrich(root ComponentRoot) ([]Contribution, []domain.Finding) 
 		return nil, nil
 	}
 	findings := make([]domain.Finding, 0)
-	manifest, ok := (&espidf{}).readYAMLFile(path, maxIDFManifestBytes, "ESP-IDF sbom.yml", &findings)
+	manifest, ok := (&espidf{}).readYAMLFile(path, maxIDFManifestBytes, idfSBOMName, &findings)
 	if !ok {
 		return nil, findings
 	}
 	name := manifest.scalarAt("name")
-	if root.Name != "" && name != "" && name != filepath.Base(root.Name) && name != root.Name {
+	if root.Name != "" && name != "" && name != root.Name {
 		findings = append(findings, domain.Finding{
 			ID: "COMPONENT_METADATA_MISMATCH", Severity: domain.SeverityWarning,
 			Subject: domain.Subject{Kind: "evidence", Ref: path},
