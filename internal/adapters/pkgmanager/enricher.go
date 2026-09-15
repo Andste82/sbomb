@@ -1,6 +1,10 @@
 package pkgmanager
 
-import "github.com/example/sbomb/internal/domain"
+import (
+	"strings"
+
+	"github.com/example/sbomb/internal/domain"
+)
 
 // This file holds the second kind of reader in this package. An adapter
 // enumerates packages and looks for them in the places a manager is known to
@@ -76,6 +80,7 @@ type Enricher interface {
 // carry one line about the version.
 var enrichers = []Enricher{
 	bundledSBOM{},
+	espidfsbom{},
 	cmsisPack{},
 	cmakeConfigVersion{},
 	build2Manifest{},
@@ -108,7 +113,15 @@ func applyEnrichment(pkg *Package, root ComponentRoot) []domain.Finding {
 				claim.Source = enricher.Source()
 			}
 			pkg.Take(contribution.Field, claim)
+			pkg.CVEExclusions = append(pkg.CVEExclusions, contribution.CVEExclusions...)
 		}
+	}
+	if pkg.Manager == "git-submodule" && pkg.Version.Value != "" && strings.HasPrefix(pkg.PURL.Value, "pkg:generic/") {
+		pkg.Take(FieldPURL, Claim{
+			Value:  GenericPURL(pkg.Name, pkg.Version.Value, pkg.VCSURL, pkg.Commit),
+			Source: "idf-sbom",
+			Rank:   pkg.Version.Rank,
+		})
 	}
 	return findings
 }
