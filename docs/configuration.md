@@ -281,7 +281,8 @@ from a directory name or a repository URL.
       "version": "3.5.0",
       "supplier": "Trusted Firmware",
       "license": "Apache-2.0",
-      "purl": "pkg:generic/mbedtls@3.5.0"
+      "purl": "pkg:generic/mbedtls@3.5.0",
+      "cpe": "cpe:2.3:a:arm:mbed_tls:{}:*:*:*:*:*:*:*"
     }
   ]
 }
@@ -300,6 +301,7 @@ from a directory name or a repository URL.
 | `license` | SPDX expression |
 | `copyright` | The component's copyright notice, as a conclusion |
 | `purl` | Package URL |
+| `cpe` | CPE 2.3 name; `{}` is filled with the resolved version |
 
 `path` selects a directory; `match` selects by glob instead. Use one or the
 other.

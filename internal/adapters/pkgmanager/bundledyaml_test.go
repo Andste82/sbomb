@@ -39,12 +39,8 @@ cve-exclude-list:
 	if values[FieldVersion].Value != "10.5.1" || values[FieldVersion].Rank != RankBundledSBOM {
 		t.Errorf("version = %#v", values[FieldVersion])
 	}
-	// No cpe is claimed: section 20.4 emits one only when curated, and there is
-	// no curated input for it. The key still marks the document as one of ours.
-	for _, contribution := range contributions {
-		if contribution.Field == "cpe" {
-			t.Errorf("a cpe was claimed: %#v", contribution.Claim)
-		}
+	if values[FieldCPE].Value != "cpe:2.3:o:amazon:freertos:{}:*:*:*:*:*:*:*" {
+		t.Errorf("cpe = %#v", values[FieldCPE])
 	}
 	if values[FieldSupplier].Value != "Espressif Systems (Shanghai) CO LTD" {
 		t.Errorf("supplier = %#v", values[FieldSupplier])

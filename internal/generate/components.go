@@ -955,6 +955,18 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 		component.VersionSource = described.Version.Source
 		component.VersionConf = described.Version.Confidence
 	}
+	// CPE (section 20.4): only from an origin that states it outright. A
+	// curated value is the operator's, and it settles the question -- an
+	// upstream's cpe can be wrong about its own product, and this is the way
+	// to say so.
+	if hasCurated && curated.CPE != "" {
+		component.CPE = cpeVersion(curated.CPE, component.Version)
+	} else if isManaged && managed.CPE.Value != "" {
+		component.CPE = cpeVersion(managed.CPE.Value, component.Version)
+	} else if described.CPE.Value != "" {
+		component.CPE = cpeVersion(described.CPE.Value, component.Version)
+	}
+
 	metadata := described
 	if isManaged {
 		metadata = managed
@@ -1057,6 +1069,23 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 			"Add a components[] entry covering these paths."))
 	}
 	return findings
+}
+
+// cpeVersion fills the {} a cpe leaves in place of the version. A placeholder
+// that cannot be filled takes the cpe with it: "{}" is no version, and a
+// consumer matching the string against a vulnerability feed would find nothing
+// while the document reads as though a version had been stated.
+func cpeVersion(cpe, version string) string {
+	if cpe == "" {
+		return ""
+	}
+	if !strings.Contains(cpe, "{}") {
+		return cpe
+	}
+	if version == "" {
+		return ""
+	}
+	return strings.Replace(cpe, "{}", version, 1)
 }
 
 // resolveComponentLicense applies the priority order of section 22.2, limited
