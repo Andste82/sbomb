@@ -5,8 +5,6 @@ include(CheckLinkerFlag)
 set(SBOMB_LINK_EVIDENCE ON CACHE BOOL "Enable linker evidence flags for sbomb")
 set(SBOMB_EXECUTABLE "sbomb" CACHE FILEPATH "Path to the sbomb executable")
 set(SBOMB_OUTPUT_DIR "${CMAKE_BINARY_DIR}/sbom" CACHE PATH "Directory for sbomb output")
-set(SBOMB_FOSS_OUT "" CACHE PATH "Directory for sbomb FOSS attribution output")
-set(SBOMB_FOSS_FORMAT "" CACHE STRING "FOSS output rendering: text or markdown")
 
 # The configuration used when sbomb_enable is called without CONFIG, and only
 # when it exists.
@@ -19,6 +17,16 @@ set(SBOMB_FOSS_FORMAT "" CACHE STRING "FOSS output rendering: text or markdown")
 # time on a configuration it never named.
 set(SBOMB_DEFAULT_CONFIG "${CMAKE_SOURCE_DIR}/sbomb.json"
     CACHE FILEPATH "Configuration used when sbomb_enable is called without CONFIG")
+
+# The FOSS output and its rendering, for the same reason and with the same
+# spelling: a cache SBOMB_FOSS_OUT would show through wherever a caller passed
+# no FOSS_OUT, and every target in the build -- including the ones a
+# FetchContent dependency enables -- would write its attribution documents to
+# the one directory, each overwriting the last.
+set(SBOMB_DEFAULT_FOSS_OUT ""
+    CACHE PATH "FOSS attribution output directory used when sbomb_enable is called without FOSS_OUT")
+set(SBOMB_DEFAULT_FOSS_FORMAT ""
+    CACHE STRING "FOSS rendering used when sbomb_enable is called without FOSS_FORMAT: text or markdown")
 
 # Set here, at include() time, and not inside sbomb_enable.
 #
@@ -167,11 +175,26 @@ function(sbomb_enable)
     set(_sbomb_output_dir ".")
   endif()
 
-  if(SBOMB_FOSS_FORMAT AND NOT SBOMB_FOSS_OUT)
+  # SBOMB_FOSS_OUT and SBOMB_FOSS_FORMAT are the parsed arguments and nothing
+  # else; the defaults are consulted only when the caller named none. The
+  # rendering default is taken only when there is an output for it to act on,
+  # so that setting it alone stays inert rather than failing every call below.
+  set(_sbomb_foss_out "${SBOMB_FOSS_OUT}")
+  if(NOT _sbomb_foss_out)
+    set(_sbomb_foss_out "${SBOMB_DEFAULT_FOSS_OUT}")
+  endif()
+  set(_sbomb_foss_format "${SBOMB_FOSS_FORMAT}")
+  if(NOT _sbomb_foss_format AND _sbomb_foss_out)
+    set(_sbomb_foss_format "${SBOMB_DEFAULT_FOSS_FORMAT}")
+  endif()
+
+  # A rendering with no output to write has nothing to act on, and only a
+  # caller who passed FOSS_FORMAT can reach this.
+  if(_sbomb_foss_format AND NOT _sbomb_foss_out)
     message(FATAL_ERROR "sbomb_enable: FOSS_FORMAT requires FOSS_OUT")
   endif()
-  if(SBOMB_FOSS_FORMAT AND NOT SBOMB_FOSS_FORMAT STREQUAL "text" AND NOT SBOMB_FOSS_FORMAT STREQUAL "markdown")
-    message(FATAL_ERROR "sbomb_enable: invalid FOSS_FORMAT '${SBOMB_FOSS_FORMAT}'; use text or markdown")
+  if(_sbomb_foss_format AND NOT _sbomb_foss_format STREQUAL "text" AND NOT _sbomb_foss_format STREQUAL "markdown")
+    message(FATAL_ERROR "sbomb_enable: invalid FOSS_FORMAT '${_sbomb_foss_format}'; use text or markdown")
   endif()
 
   set(_sbomb_command "${SBOMB_EXECUTABLE}" generate --build-dir "${CMAKE_BINARY_DIR}" --output "${_sbomb_output}")
@@ -189,11 +212,11 @@ function(sbomb_enable)
   if(SBOMB_DEPFILE)
     list(APPEND _sbomb_command --link-depfile "${SBOMB_DEPFILE}")
   endif()
-  if(SBOMB_FOSS_OUT)
-    list(APPEND _sbomb_command --foss-out "${SBOMB_FOSS_OUT}")
+  if(_sbomb_foss_out)
+    list(APPEND _sbomb_command --foss-out "${_sbomb_foss_out}")
   endif()
-  if(SBOMB_FOSS_FORMAT)
-    list(APPEND _sbomb_command --foss-format "${SBOMB_FOSS_FORMAT}")
+  if(_sbomb_foss_format)
+    list(APPEND _sbomb_command --foss-format "${_sbomb_foss_format}")
   endif()
   add_custom_target("sbomb-${SBOMB_TARGET}"
     COMMAND "${CMAKE_COMMAND}" -E make_directory "${_sbomb_output_dir}"
