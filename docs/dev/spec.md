@@ -2531,6 +2531,7 @@ Severity shown is the default and may be changed via `policy.severityOverrides`.
 | `STALE_CMAKE_CONFIGURATION` | warning | `failOnStaleBuildArtifacts` | CMake inputs newer than the File API reply |
 | `UNKNOWN_COMPONENT` | warning | `failOnUnknownComponent` | File could not be mapped to a component |
 | `COMPONENT_ROOT_UNRESOLVED` | info | — | Component root fell back to the common directory of the used files |
+| `COMPONENT_METADATA_MISMATCH` | warning | — | A metadata manifest in a component root names a different component than the root it lies in, so nothing was read from it |
 | `COMPONENT_MAPPING_CONFLICT` | info | — | Two sources claim the same file, root or name; the mapping or the metadata was decided by rank or given to neither, and the disagreement is reported |
 | `UNKNOWN_VERSION` | warning | `failOnUnknownVersion` | Component version could not be resolved |
 | `UNKNOWN_PURL` | info | — | No package type assertable |
@@ -2615,6 +2616,7 @@ sbomb:component:linkageForm      (repeated, sorted)
 sbomb:component:archiveMembersUsed
 sbomb:component:modified         (true | false | unknown)
 sbomb:component:sourceObligation (repeated, sorted)
+sbomb:component:originator
 sbomb:license:source             sbomb:license:evidenceClass
 sbomb:license:confidence         sbomb:license:review
 sbomb:license:reason             sbomb:license:conflictingValue
