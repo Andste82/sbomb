@@ -1,5 +1,40 @@
 # Changelog
 
+## 0.18.2
+
+### A CMake target can ask for the FOSS attribution documents
+
+`sbomb_enable` takes `FOSS_OUT` and, beside it, `FOSS_FORMAT`, passed on as
+`--foss-out` and `--foss-format`. A rendering named without an output is
+refused while CMake configures, rather than at the build that would have run
+the command: a rendering with no output to write has nothing to act on.
+
+`SBOMB_DEFAULT_FOSS_OUT` and `SBOMB_DEFAULT_FOSS_FORMAT` set the default for
+calls that name neither. The rendering default is taken only where there is an
+output for it to act on, so setting it alone stays inert instead of refusing
+every call.
+
+### An sbomb_enable argument comes from the call and from nowhere else
+
+`cmake_parse_arguments` clears `SBOMB_<KEYWORD>` for every keyword a call
+omits, and clearing a normal variable is precisely what lets a cache variable
+of the same name show through it. All eight keywords were open to this:
+`-DSBOMB_MAP=/x` arrived as `--map` for targets whose `sbomb_enable` never
+named `MAP`, and `-DSBOMB_CONFIG` likewise as `--config`.
+
+The module had avoided the trap by never declaring such a name itself, which
+leaves the names free for anyone else to set. They are guarded now: the call's
+own arguments are read out of `ARGN`, and each keyword the call did not pass is
+set empty, covering whatever stands behind it. `ARGN` is walked the way the
+parser reads it -- a keyword counts as passed only once a value that is not
+itself a keyword follows it -- so the guard clears exactly the keywords the
+parser left without a value.
+
+The first spelling of the FOSS defaults was `SBOMB_FOSS_OUT` and
+`SBOMB_FOSS_FORMAT`, which collided with those same parsed names. Setting
+`-DSBOMB_FOSS_FORMAT=markdown` then failed every `sbomb_enable` call while
+CMake configured, on a keyword no call had named.
+
 ## 0.18.1
 
 ### An archive member resolves to the same object on every run
