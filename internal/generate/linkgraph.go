@@ -734,20 +734,15 @@ func (b *builder) recordArchiveInputs(archivePath string, objects []string) {
 	b.archiveInputs[canonical] = append(b.archiveInputs[canonical], objects...)
 }
 
-// loadNinjaArchiveInputs reads build.ninja for the inputs of every archive it
-// produces. Without this an extracted member cannot be traced to a source.
-func (b *builder) loadNinjaArchiveInputs(buildDir string) {
-	file, err := os.Open(filepath.Join(buildDir, "build.ninja"))
-	if err != nil {
-		return
-	}
-	defer file.Close()
-	parsed, err := ninja.ParseFile(file)
-	if err != nil {
-		b.logger.Debug("build.ninja could not be parsed: %v", err)
-		return
-	}
-	for _, rule := range parsed.Rules {
+// loadNinjaArchiveInputs takes the inputs of every archive edge from the build
+// graph the compile side already parsed. Without this an extracted member
+// cannot be traced to a source.
+//
+// The rules arrive in file order and are consumed in it, because
+// recordArchiveInputs appends: two edges naming the same archive contribute in
+// the order build.ninja lists them, and that order reaches the document.
+func (b *builder) loadNinjaArchiveInputs(rules []ninja.Rule) {
+	for _, rule := range rules {
 		for _, output := range rule.Outputs {
 			if !strings.HasSuffix(output, ".a") && !strings.HasSuffix(output, ".lib") {
 				continue
