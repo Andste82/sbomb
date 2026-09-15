@@ -46,8 +46,16 @@ type compileEvidence struct {
 	// edge that produces it declares. It is the second generator-input
 	// evidence source of section 16, and it is recorded here because the file
 	// it comes from is already open and parsed for the object mappings:
-	// reading build.ninja a third time would buy nothing.
+	// reading build.ninja a second time would buy nothing.
 	buildEdges map[string][]string
+	// ninjaRules is the build graph as parsed, in file order. The link side
+	// wants the inputs of every archive edge and used to open and parse
+	// build.ninja again to get them, which was 11% of a run over a graph of
+	// two thousand translation units. It is carried rather than derived from
+	// buildEdges because the link side appends: a map would hand it the same
+	// edges in an order the runtime is free to change between runs, and
+	// section 29 requires the same evidence to produce the same document.
+	ninjaRules []ninja.Rule
 	// findings are what the compile-side adapters could not obtain, named
 	// rather than passed over in silence (section 9.2).
 	findings []domain.Finding
@@ -242,6 +250,7 @@ func collectCompileEvidence(buildDir string, commands []compiledb.Command, comma
 		parsed, parseErr := ninja.ParseFile(file)
 		file.Close()
 		if parseErr == nil {
+			evidence.ninjaRules = parsed.Rules
 			for _, rule := range parsed.Rules {
 				if len(rule.Outputs) == 0 {
 					continue
@@ -361,7 +370,7 @@ func buildEvidenceGraph(
 	cfg policy.Config,
 	logger *Logger,
 ) graphOutcome {
-	b.loadNinjaArchiveInputs(buildDir)
+	b.loadNinjaArchiveInputs(compile.ninjaRules)
 	// A Makefiles target records both the objects it archives and the command
 	// line that produced its artifact, in link.txt.
 	if makeBuild := compile.makeBuild; makeBuild != nil {
