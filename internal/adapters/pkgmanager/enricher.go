@@ -1,6 +1,10 @@
 package pkgmanager
 
-import "github.com/example/sbomb/internal/domain"
+import (
+	"strings"
+
+	"github.com/example/sbomb/internal/domain"
+)
 
 // This file holds the second kind of reader in this package. An adapter
 // enumerates packages and looks for them in the places a manager is known to
@@ -76,6 +80,7 @@ type Enricher interface {
 // carry one line about the version.
 var enrichers = []Enricher{
 	bundledSBOM{},
+	bundledYAML{},
 	cmsisPack{},
 	cmakeConfigVersion{},
 	build2Manifest{},
@@ -99,6 +104,7 @@ func applyEnrichment(pkg *Package, root ComponentRoot) []domain.Finding {
 		return nil
 	}
 	findings := make([]domain.Finding, 0)
+	versionBefore := pkg.Version.Value
 	for _, enricher := range enrichers {
 		contributions, enricherFindings := enricher.Enrich(root)
 		findings = append(findings, enricherFindings...)
@@ -108,7 +114,24 @@ func applyEnrichment(pkg *Package, root ComponentRoot) []domain.Finding {
 				claim.Source = enricher.Source()
 			}
 			pkg.Take(contribution.Field, claim)
+			pkg.CVEExclusions = append(pkg.CVEExclusions, contribution.CVEExclusions...)
 		}
+	}
+	// A generic purl restates whichever version claim won, so a version an
+	// enricher supplied has to reach it too: the submodule adapter built the
+	// purl before any enricher had spoken.
+	//
+	// Only a version this run actually changed qualifies. Rebuilding the purl
+	// whenever one merely exists would restate the adapter's own version back
+	// at it under a source that never claimed it, and Take would file the
+	// byte-identical value in Superseded as though two origins had disagreed.
+	if pkg.Version.Value != versionBefore && pkg.Manager == "git-submodule" &&
+		strings.HasPrefix(pkg.PURL.Value, "pkg:generic/") {
+		pkg.Take(FieldPURL, Claim{
+			Value:  GenericPURL(pkg.Name, pkg.Version.Value, pkg.VCSURL, pkg.Commit),
+			Source: pkg.Version.Source,
+			Rank:   pkg.Version.Rank,
+		})
 	}
 	return findings
 }

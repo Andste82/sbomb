@@ -53,8 +53,15 @@ type Package struct {
 	Supplier Claim
 	// License is the manager's declared expression, which section 22.2 ranks
 	// above a licence file found in the component root.
-	License Claim
-	PURL    Claim
+	License     Claim
+	PURL        Claim
+	CPE         Claim
+	Originator  Claim
+	Description Claim
+	// CVEExclusions are upstream's documented applicability notes. They are
+	// retained as evidence and never suppress vulnerability findings by
+	// themselves.
+	CVEExclusions []CVEExclusion
 
 	// Superseded holds every claim that lost, with the field it was about. It
 	// is filled here and read nowhere in this release; reporting a disagreement
@@ -85,6 +92,11 @@ type Package struct {
 	Manager string
 	// AnchorKey is the anchor this package should be registered under.
 	AnchorKey string
+}
+
+type CVEExclusion struct {
+	CVE    string
+	Reason string
 }
 
 // Root is the identity root, or the empty string for a package that names

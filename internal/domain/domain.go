@@ -138,6 +138,9 @@ type Component struct {
 	PURL          string
 	CPE           string
 	Supplier      string
+	Originator    string
+	Description   string
+	CVEExclusions []CVEExclusion
 	Root          *FileID
 	Scope         string
 	Licenses      []LicenseFinding
@@ -206,6 +209,16 @@ type Component struct {
 	Copyright  string
 	Properties map[string][]string
 	Files      []FileID
+}
+
+// CVEExclusion is one entry of the list an upstream ships to say a CVE does
+// not apply to the version it shipped. It is recorded as the upstream stated
+// it and never acts on its own: sbomb does not scan for vulnerabilities, so an
+// exclusion here suppresses no finding and only carries the claim, and its
+// reason, to a reader who can weigh it.
+type CVEExclusion struct {
+	CVE    string
+	Reason string
 }
 
 // ModificationStatus is the tri-state of section 19.4. The third state is the

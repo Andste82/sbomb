@@ -65,9 +65,11 @@ type Component struct {
 	// sbomb:component:distributionRole stays beside it rather than being
 	// replaced by it. sbomb:component:scope is a different property again
 	// (project | third-party | sdk | toolchain | system) and is untouched.
-	Scope    string                `json:"scope,omitempty"`
-	PURL     string                `json:"purl,omitempty"`
-	Supplier *OrganizationalEntity `json:"supplier,omitempty"`
+	Scope       string                `json:"scope,omitempty"`
+	PURL        string                `json:"purl,omitempty"`
+	CPE         string                `json:"cpe,omitempty"`
+	Description string                `json:"description,omitempty"`
+	Supplier    *OrganizationalEntity `json:"supplier,omitempty"`
 	// IsExternal is CycloneDX 1.7 and later: the environment is expected to
 	// provide this component rather than the assembly carrying it.
 	IsExternal bool      `json:"isExternal,omitempty"`
