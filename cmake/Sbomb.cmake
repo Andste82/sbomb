@@ -5,6 +5,8 @@ include(CheckLinkerFlag)
 set(SBOMB_LINK_EVIDENCE ON CACHE BOOL "Enable linker evidence flags for sbomb")
 set(SBOMB_EXECUTABLE "sbomb" CACHE FILEPATH "Path to the sbomb executable")
 set(SBOMB_OUTPUT_DIR "${CMAKE_BINARY_DIR}/sbom" CACHE PATH "Directory for sbomb output")
+set(SBOMB_FOSS_OUT "" CACHE PATH "Directory for sbomb FOSS attribution output")
+set(SBOMB_FOSS_FORMAT "" CACHE STRING "FOSS output rendering: text or markdown")
 
 # The configuration used when sbomb_enable is called without CONFIG, and only
 # when it exists.
@@ -47,7 +49,7 @@ endif()
 unset(_sbomb_existing_targets)
 
 function(sbomb_enable)
-  cmake_parse_arguments(SBOMB "" "TARGET;CONFIG;POLICY;MAP;DEPFILE;OUTPUT" "" ${ARGN})
+  cmake_parse_arguments(SBOMB "" "TARGET;CONFIG;POLICY;MAP;DEPFILE;OUTPUT;FOSS_OUT;FOSS_FORMAT" "" ${ARGN})
 
   if(NOT SBOMB_TARGET)
     message(FATAL_ERROR "sbomb_enable requires TARGET <target>")
@@ -165,6 +167,13 @@ function(sbomb_enable)
     set(_sbomb_output_dir ".")
   endif()
 
+  if(SBOMB_FOSS_FORMAT AND NOT SBOMB_FOSS_OUT)
+    message(FATAL_ERROR "sbomb_enable: FOSS_FORMAT requires FOSS_OUT")
+  endif()
+  if(SBOMB_FOSS_FORMAT AND NOT SBOMB_FOSS_FORMAT STREQUAL "text" AND NOT SBOMB_FOSS_FORMAT STREQUAL "markdown")
+    message(FATAL_ERROR "sbomb_enable: invalid FOSS_FORMAT '${SBOMB_FOSS_FORMAT}'; use text or markdown")
+  endif()
+
   set(_sbomb_command "${SBOMB_EXECUTABLE}" generate --build-dir "${CMAKE_BINARY_DIR}" --output "${_sbomb_output}")
   if(_sbomb_config)
     list(APPEND _sbomb_command --config "${_sbomb_config}")
@@ -179,6 +188,12 @@ function(sbomb_enable)
   endif()
   if(SBOMB_DEPFILE)
     list(APPEND _sbomb_command --link-depfile "${SBOMB_DEPFILE}")
+  endif()
+  if(SBOMB_FOSS_OUT)
+    list(APPEND _sbomb_command --foss-out "${SBOMB_FOSS_OUT}")
+  endif()
+  if(SBOMB_FOSS_FORMAT)
+    list(APPEND _sbomb_command --foss-format "${SBOMB_FOSS_FORMAT}")
   endif()
   add_custom_target("sbomb-${SBOMB_TARGET}"
     COMMAND "${CMAKE_COMMAND}" -E make_directory "${_sbomb_output_dir}"
