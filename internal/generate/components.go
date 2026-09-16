@@ -65,6 +65,11 @@ var packageMetadataFiles = []string{
 var bundledSBOMFiles = []string{
 	"sbom.cdx.json", "bom.cdx.json",
 	"sbom.spdx.json", "bom.spdx.json",
+	// The YAML an upstream writes instead, which internal/adapters/pkgmanager
+	// reads on a settled root. Without it here a dependency whose only marker
+	// is that file is never bounded as a component, so the reader never sees
+	// the very document that would have described it.
+	"sbom.yml",
 }
 
 // componentResolver maps used files onto components, following the priority
