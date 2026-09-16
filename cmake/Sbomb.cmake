@@ -83,6 +83,32 @@ function(sbomb_enable)
     message(FATAL_ERROR "sbomb_enable target does not exist: ${SBOMB_TARGET}")
   endif()
 
+  # Settled before the returns below, so that a call is answered the same way
+  # whatever kind of target it names: an ALIAS or an INTERFACE library is
+  # skipped, and skipping it must not swallow a FOSS_FORMAT that is not a
+  # rendering at all.
+  #
+  # The parsed arguments first; the defaults only when the call named none. The
+  # rendering default needs an output to act on, so on its own it stays inert
+  # rather than refusing every call at the check below.
+  set(_sbomb_foss_out "${SBOMB_FOSS_OUT}")
+  if(NOT _sbomb_foss_out)
+    set(_sbomb_foss_out "${SBOMB_DEFAULT_FOSS_OUT}")
+  endif()
+  set(_sbomb_foss_format "${SBOMB_FOSS_FORMAT}")
+  if(NOT _sbomb_foss_format AND _sbomb_foss_out)
+    set(_sbomb_foss_format "${SBOMB_DEFAULT_FOSS_FORMAT}")
+  endif()
+
+  # A rendering with no output to write has nothing to act on. Only a call that
+  # passed FOSS_FORMAT reaches this.
+  if(_sbomb_foss_format AND NOT _sbomb_foss_out)
+    message(FATAL_ERROR "sbomb_enable: FOSS_FORMAT requires FOSS_OUT")
+  endif()
+  if(_sbomb_foss_format AND NOT _sbomb_foss_format STREQUAL "text" AND NOT _sbomb_foss_format STREQUAL "markdown")
+    message(FATAL_ERROR "sbomb_enable: invalid FOSS_FORMAT '${_sbomb_foss_format}'; use text or markdown")
+  endif()
+
   get_target_property(_sbomb_alias "${SBOMB_TARGET}" ALIASED_TARGET)
   if(_sbomb_alias)
     message(WARNING "sbomb_enable ignored for ALIAS target ${SBOMB_TARGET}")
@@ -189,27 +215,6 @@ function(sbomb_enable)
   get_filename_component(_sbomb_output_dir "${_sbomb_output}" DIRECTORY)
   if(NOT _sbomb_output_dir)
     set(_sbomb_output_dir ".")
-  endif()
-
-  # The parsed arguments first; the defaults only when the call named none. The
-  # rendering default needs an output to act on, so on its own it stays inert
-  # rather than refusing every call at the check below.
-  set(_sbomb_foss_out "${SBOMB_FOSS_OUT}")
-  if(NOT _sbomb_foss_out)
-    set(_sbomb_foss_out "${SBOMB_DEFAULT_FOSS_OUT}")
-  endif()
-  set(_sbomb_foss_format "${SBOMB_FOSS_FORMAT}")
-  if(NOT _sbomb_foss_format AND _sbomb_foss_out)
-    set(_sbomb_foss_format "${SBOMB_DEFAULT_FOSS_FORMAT}")
-  endif()
-
-  # A rendering with no output to write has nothing to act on. Only a call that
-  # passed FOSS_FORMAT reaches this.
-  if(_sbomb_foss_format AND NOT _sbomb_foss_out)
-    message(FATAL_ERROR "sbomb_enable: FOSS_FORMAT requires FOSS_OUT")
-  endif()
-  if(_sbomb_foss_format AND NOT _sbomb_foss_format STREQUAL "text" AND NOT _sbomb_foss_format STREQUAL "markdown")
-    message(FATAL_ERROR "sbomb_enable: invalid FOSS_FORMAT '${_sbomb_foss_format}'; use text or markdown")
   endif()
 
   set(_sbomb_command "${SBOMB_EXECUTABLE}" generate --build-dir "${CMAKE_BINARY_DIR}" --output "${_sbomb_output}")
