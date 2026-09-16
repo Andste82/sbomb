@@ -1,5 +1,88 @@
 # Changelog
 
+## 0.19.0
+
+### A component's own sbom.yml is read
+
+An upstream that ships an `sbom.yml` at the root of its checkout is stating
+what that component is, and sbomb now takes it: `version`, `supplier`,
+`originator` and `description`, at rank `bundled-sbom`, beside the reader that
+has long taken the same statement out of `*.cdx.json` and `*.spdx.json`. A
+`cve-exclude-list` is carried through as `sbomb:component:cveExclusion`, which
+records the upstream's claim and suppresses no finding of its own.
+
+The file also marks the directory as a component, which the JSON forms already
+did. Without that a dependency whose only marker was the YAML was never bounded
+at all: its files fell to the deepest common directory of the used files, and
+the very document that would have described it was never opened.
+
+Espressif's esp-idf-sbom is what writes this file today, and the shape comes
+from there, but nothing about it is ESP-IDF's -- syft and SPDX-YAML use the
+name as well. A document is taken up only once it carries a name and one field
+about it; short of that it belongs to somebody else and is passed over in
+silence, because a warning there would fail a strict run over a file this
+reader has no business with.
+
+### A cpe can be curated, and a curated one settles the question
+
+`components[].cpe` joins the `purl`, `supplier` and `license` already there.
+Section 20.4 used to say a cpe is emitted only when curated while nothing could
+curate one, so the rule read as *never* and a cpe an upstream states about its
+own product had nowhere to go.
+
+What the rule guards against is a *derived* cpe. A purl follows mechanically
+from a manager, a name and a version and can be checked against the package; a
+cpe's vendor and product strings are NVD conventions that have to be looked up,
+and a guessed one reports vulnerabilities a component does not have or hides
+the ones it does. So the rule now names the two origins that state a cpe
+outright -- curated configuration and a manifest the upstream shipped --
+forbids deriving one, and ranks the configuration above the manifest. That
+ordering is the point: it is how an operator corrects a cpe that is wrong.
+
+A cpe may leave `{}` in place of the version, filled from the version the
+component resolved to. A placeholder that cannot be filled takes the cpe with
+it: `{}` is no version, and the string would match nothing in a vulnerability
+feed while reading as though a version had been stated.
+
+### The CMake module answers for what the call said
+
+`sbomb_enable` takes `FOSS_OUT` and `FOSS_FORMAT`, passed on as `--foss-out`
+and `--foss-format`, with `SBOMB_DEFAULT_FOSS_OUT` and
+`SBOMB_DEFAULT_FOSS_FORMAT` standing in where a call names neither.
+
+Three things it used to get wrong, all of them about an argument being read
+from somewhere other than the call:
+
+`cmake_parse_arguments` clears `SBOMB_<KEYWORD>` for every keyword a call
+omits, and clearing a normal variable is what lets a cache variable of the same
+name show through it. All eight keywords were open to it: `-DSBOMB_MAP=/x`
+arrived as `--map` for targets whose `sbomb_enable` never named `MAP`. The
+call's own arguments are now read out of `ARGN`, and each keyword it did not
+pass is set empty.
+
+A purl rebuilt after enrichment claimed the source `idf-sbom` for every
+git-submodule package, whether or not any manifest had been read, and
+`Claim.Source` is output rather than an internal label. It now carries the
+source that really supplied the version, and is rebuilt only when an enricher
+changed it.
+
+An invalid `FOSS_FORMAT` was refused on an executable and swallowed without a
+word on an ALIAS or an INTERFACE library, because the check sat behind the
+returns that skip those. It is about the arguments and not the target, so it
+runs before them.
+
+### A failed download is not a file that is missing
+
+Both installers answered every failure of the `SHA256SUMS` download with one
+sentence: the release has none. A 5xx, a reset connection and a timed-out
+request all read as a release with no checksums in it -- which is what happened
+during the v0.18.2 release, where the message named a release that had carried
+all twelve assets since it was published.
+
+A 404 is an answer and will not change on a second ask; anything else says
+nothing about the release. Both scripts draw that line now, retry the second
+kind, and say which of the two happened.
+
 ## 0.18.2
 
 ### A CMake target can ask for the FOSS attribution documents
