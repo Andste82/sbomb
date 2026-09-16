@@ -277,6 +277,57 @@ jobs:
           "$PWD/pinned-bin/sbomb" version | grep -q '0\.11\.0'
           ./install.sh --version 0.11.0 --bin-dir "$PWD/bare-bin"
           "$PWD/bare-bin/sbomb" version | grep -q '0\.11\.0'
+      - name: A download that failed is not reported as a file that is missing
+        run: |
+          set -eu
+          # A server that answers 404 for one path and 503 for another, so the
+          # two failures are real answers rather than a reading of the source.
+          # Confusing them is what made a transient failure during the v0.18.2
+          # release read as a release with no SHA256SUMS in it.
+          #
+          # It binds port 0 and reports what it got, so the step cannot collide
+          # with anything else on the runner.
+          python3 - > "$RUNNER_TEMP/port" <<'PY' &
+          import http.server, socketserver, sys
+          class H(http.server.BaseHTTPRequestHandler):
+              def do_GET(self):
+                  self.send_response(503 if self.path.startswith('/boom') else 404)
+                  self.end_headers()
+              def log_message(self, *a): pass
+          srv = socketserver.TCPServer(('127.0.0.1', 0), H)
+          print(srv.server_address[1], flush=True)
+          srv.serve_forever()
+          PY
+          server=$!
+          trap 'kill $server 2>/dev/null || true' EXIT
+          for _ in 1 2 3 4 5 6 7 8 9 10; do
+            port=$(cat "$RUNNER_TEMP/port" 2>/dev/null || true)
+            [ -n "$port" ] && break
+            sleep 1
+          done
+          test -n "$port"
+
+          # fetch() and fail() are taken out of the installer rather than
+          # reimplemented, so this tests what ships.
+          eval "$(sed -n '/^fail() {/,/^}/p' install.sh)"
+          eval "$(sed -n '/^fetch() {/,/^}/p' install.sh)"
+
+          missing=$(fetch "http://127.0.0.1:$port/gone" /dev/null SHA256SUMS 2>&1) || true
+          case "$missing" in
+            *"is not there"*) ;;
+            *) echo "a 404 was reported as: $missing" >&2; exit 1 ;;
+          esac
+
+          transient=$(fetch "http://127.0.0.1:$port/boom" /dev/null SHA256SUMS 2>&1) || true
+          case "$transient" in
+            *"worth retrying"*) ;;
+            *) echo "a 503 was reported as: $transient" >&2; exit 1 ;;
+          esac
+          # The one that must not happen: a transient failure claiming the file
+          # is not in the release.
+          case "$transient" in
+            *"is not there"*) echo "a 503 was reported as a missing file" >&2; exit 1 ;;
+          esac
       - name: Refuses a release that does not exist
         run: |
           set -eu

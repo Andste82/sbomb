@@ -40,6 +40,35 @@ fail() {
 	exit 1
 }
 
+# Fetch one file, telling the two kinds of failure apart.
+#
+# A 404 is an answer: the file is not in that release, and asking again will
+# not change it. Anything else -- a 5xx, a reset connection, a timed-out
+# request -- says nothing about the release and is worth another try. Reporting
+# the second as the first is what makes a transient failure read as a broken
+# release, and sends whoever hits it looking in the wrong place.
+#
+# curl's own --retry draws the same line: it repeats a transient failure and
+# leaves a 404 alone.
+fetch() {
+	# $1 url, $2 destination, $3 what it is, for the message.
+	code=$(curl -sL --retry 3 --retry-delay 2 -o "$2" -w '%{http_code}' "$1" 2>/dev/null) || code=""
+	case "$code" in
+	200)
+		return 0
+		;;
+	404)
+		fail "$3 is not there ($1); check that the release exists and carries this file"
+		;;
+	"")
+		fail "$3 could not be downloaded, and the server gave no answer; the release itself may be fine, so this is worth retrying"
+		;;
+	*)
+		fail "$3 could not be downloaded (HTTP $code); the release itself may be fine, so this is worth retrying"
+		;;
+	esac
+}
+
 need() {
 	command -v "$1" >/dev/null 2>&1 || fail "this needs $1 and cannot find it"
 }
@@ -121,10 +150,8 @@ tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT INT TERM
 
 echo "install.sh: fetching sbomb $tag for $os-$arch"
-curl -fsL -o "$tmp/$asset" "$base/$asset" ||
-	fail "could not download $asset for $tag; check that the release exists at https://github.com/$REPO/releases"
-curl -fsL -o "$tmp/SHA256SUMS" "$base/SHA256SUMS" ||
-	fail "the release has no SHA256SUMS, so the download cannot be verified; refusing to install"
+fetch "$base/$asset" "$tmp/$asset" "$asset"
+fetch "$base/SHA256SUMS" "$tmp/SHA256SUMS" SHA256SUMS
 
 # sha256sum on Linux, shasum on macOS. Comparing the digest we compute against
 # the line for this asset checks the file and not just that some line matched.
@@ -156,8 +183,7 @@ install -m 0755 "$tmp/$asset" "$bin_dir/sbomb" 2>/dev/null ||
 	fail "cannot write $bin_dir/sbomb; pass --bin-dir, or re-run with the rights to write there"
 
 if [ "$with_sbom" -eq 1 ]; then
-	curl -fsL -o "$bin_dir/sbomb.cdx.json" "$base/$asset.cdx.json" ||
-		fail "could not download the SBOM for $asset"
+	fetch "$base/$asset.cdx.json" "$bin_dir/sbomb.cdx.json" "the SBOM for $asset"
 	echo "install.sh: SBOM written to $bin_dir/sbomb.cdx.json"
 fi
 
