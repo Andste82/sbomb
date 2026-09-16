@@ -36,6 +36,39 @@ function Fail([string]$message) {
     exit 1
 }
 
+# Fetch one file, telling the two kinds of failure apart.
+#
+# A 404 is an answer: the file is not in that release, and asking again will
+# not change it. Anything else -- a 5xx, a reset connection, a timed-out
+# request -- says nothing about the release and is worth another try. Reporting
+# the second as the first is what makes a transient failure read as a broken
+# release, and sends whoever hits it looking in the wrong place.
+#
+# -MaximumRetryCount would do the waiting, but it arrived in PowerShell 6 and
+# this script has to run under Windows PowerShell 5.1 as well.
+function Get-ReleaseFile([string]$Url, [string]$OutFile, [string]$What) {
+    $attempts = 3
+    for ($i = 1; $i -le $attempts; $i++) {
+        try {
+            Invoke-WebRequest -Uri $Url -OutFile $OutFile -UseBasicParsing
+            return
+        } catch {
+            $status = 0
+            if ($_.Exception.PSObject.Properties['Response'] -and $_.Exception.Response) {
+                try { $status = [int]$_.Exception.Response.StatusCode } catch { $status = 0 }
+            }
+            if ($status -eq 404) {
+                Fail "$What is not there ($Url); check that the release exists and carries this file"
+            }
+            if ($i -eq $attempts) {
+                $why = if ($status) { "HTTP $status" } else { $_.Exception.Message }
+                Fail "$What could not be downloaded after $attempts attempts ($why); the release itself may be fine, so this is worth retrying"
+            }
+            Start-Sleep -Seconds (2 * $i)
+        }
+    }
+}
+
 # Only amd64 is published for Windows. Saying so beats a 404 on a URL that
 # could never have existed.
 $arch = $env:PROCESSOR_ARCHITECTURE
@@ -79,16 +112,8 @@ New-Item -ItemType Directory -Path $tmp -Force | Out-Null
 
 try {
     Write-Host "install.ps1: fetching sbomb $tag for windows-amd64"
-    try {
-        Invoke-WebRequest -Uri "$base/$asset" -OutFile (Join-Path $tmp $asset) -UseBasicParsing
-    } catch {
-        Fail "could not download $asset for ${tag}; check that the release exists at https://github.com/$repo/releases"
-    }
-    try {
-        Invoke-WebRequest -Uri "$base/SHA256SUMS" -OutFile (Join-Path $tmp 'SHA256SUMS') -UseBasicParsing
-    } catch {
-        Fail 'the release has no SHA256SUMS, so the download cannot be verified; refusing to install'
-    }
+    Get-ReleaseFile "$base/$asset" (Join-Path $tmp $asset) $asset
+    Get-ReleaseFile "$base/SHA256SUMS" (Join-Path $tmp 'SHA256SUMS') 'SHA256SUMS'
 
     $actual = (Get-FileHash -Path (Join-Path $tmp $asset) -Algorithm SHA256).Hash.ToLower()
     $expected = $null
@@ -108,7 +133,7 @@ try {
     Copy-Item -Path (Join-Path $tmp $asset) -Destination $target -Force
 
     if ($WithSbom) {
-        Invoke-WebRequest -Uri "$base/$asset.cdx.json" -OutFile (Join-Path $BinDir 'sbomb.cdx.json') -UseBasicParsing
+        Get-ReleaseFile "$base/$asset.cdx.json" (Join-Path $BinDir 'sbomb.cdx.json') "$asset.cdx.json"
         Write-Host "install.ps1: SBOM written to $(Join-Path $BinDir 'sbomb.cdx.json')"
     }
 
