@@ -405,6 +405,48 @@ jobs:
           grep -q -- '--policy lenient' "$rules"
           grep -q -- '--foss-out /WANTED/call' "$rules"
           grep -q -- '--foss-format markdown' "$rules"
+      - name: An invalid argument is refused whatever the target kind
+        run: |
+          set -euo pipefail
+          work="$RUNNER_TEMP/argkinds"
+          mkdir -p "$work/src"
+          echo 'int lib(void){return 0;}' > "$work/src/lib.c"
+          # An ALIAS and an INTERFACE library are skipped by sbomb_enable, and
+          # skipping a target must not swallow an argument that is wrong
+          # whatever the target turns out to be.
+          for kind in alias interface; do
+            case "$kind" in
+              alias)     targets='add_library(real STATIC src/lib.c)
+          add_library(ali ALIAS real)'; name=ali ;;
+              interface) targets='add_library(iface INTERFACE)'; name=iface ;;
+            esac
+            cat > "$work/CMakeLists.txt" <<EOF
+          cmake_minimum_required(VERSION 3.20)
+          project(argkinds C)
+          list(APPEND CMAKE_MODULE_PATH "$PWD/cmake")
+          include(Sbomb)
+          $targets
+          sbomb_enable(TARGET $name FOSS_OUT /o FOSS_FORMAT xml)
+          EOF
+            rm -rf "$work/build"
+            if cmake -S "$work" -B "$work/build" > "$work/out.txt" 2>&1; then
+              echo "an invalid FOSS_FORMAT was accepted for an $kind target" >&2
+              exit 1
+            fi
+            grep -q "invalid FOSS_FORMAT" "$work/out.txt"
+          done
+          # The same targets with a valid rendering still configure, so the
+          # check refuses the argument and not the target kind.
+          cat > "$work/CMakeLists.txt" <<EOF
+          cmake_minimum_required(VERSION 3.20)
+          project(argkinds C)
+          list(APPEND CMAKE_MODULE_PATH "$PWD/cmake")
+          include(Sbomb)
+          add_library(iface INTERFACE)
+          sbomb_enable(TARGET iface FOSS_OUT /o FOSS_FORMAT markdown)
+          EOF
+          rm -rf "$work/build"
+          cmake -S "$work" -B "$work/build" > /dev/null
       - name: Including the module after a target is warned about
         run: |
           set -euo pipefail
