@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.27)
+
 include_guard(GLOBAL)
 
 include(CheckLinkerFlag)
@@ -121,30 +123,17 @@ function(sbomb_enable)
     return()
   endif()
 
-  # From CMake 3.27 the File API query is filed for the run in progress, so one
-  # configure leaves a reply and the SBOM target has nothing to prepare.
-  #
-  # Below that the query is read only at the *start* of a run and takes effect
-  # on the next one, so there the target re-configures first. A reply that
-  # never arrives is not a degraded answer but no answer: sbomb knows no
-  # targets, no anchors and no toolchain.
-  set(_sbomb_reconfigure "")
-  if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.27")
-    cmake_file_api(
-      QUERY
-      API_VERSION 1
-      CODEMODEL 2
-      CACHE 2
-      CMAKEFILES 1
-      TOOLCHAINS 1
-    )
-  else()
-    file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/.cmake/api/v1/query/client-sbomb")
-    file(WRITE "${CMAKE_BINARY_DIR}/.cmake/api/v1/query/client-sbomb/query.json"
-      "{\"requests\":[{\"kind\":\"codemodel\",\"version\":2},{\"kind\":\"cache\",\"version\":2},{\"kind\":\"cmakeFiles\",\"version\":1},{\"kind\":\"toolchains\",\"version\":1}]}\n")
-    set(_sbomb_reconfigure
-      COMMAND "${CMAKE_COMMAND}" -S "${CMAKE_SOURCE_DIR}" -B "${CMAKE_BINARY_DIR}")
-  endif()
+  # cmake_minimum_required(VERSION 3.27) above guarantees the File API query
+  # is filed for the run in progress, so this same configure leaves a reply
+  # and the SBOM target never needs to reconfigure for one.
+  cmake_file_api(
+    QUERY
+    API_VERSION 1
+    CODEMODEL 2
+    CACHE 2
+    CMAKEFILES 1
+    TOOLCHAINS 1
+  )
 
   # Only a target that is actually linked can carry linker flags. A static or
   # object library is archived rather than linked, and an imported target is
@@ -175,7 +164,7 @@ function(sbomb_enable)
       endif()
     else()
       if(NOT SBOMB_MAP)
-        check_linker_flag(${_sbomb_language} "-Wl,-Map=<TARGET_FILE>.map" _sbomb_has_map)
+        check_linker_flag(${_sbomb_language} "-Wl,-Map=sbomb_check.map" _sbomb_has_map)
         if(_sbomb_has_map)
           target_link_options("${SBOMB_TARGET}" PRIVATE "-Wl,-Map=$<TARGET_FILE:${SBOMB_TARGET}>.map")
         else()
@@ -183,7 +172,7 @@ function(sbomb_enable)
         endif()
       endif()
       if(NOT SBOMB_DEPFILE)
-        check_linker_flag(${_sbomb_language} "-Wl,--dependency-file=<TARGET_FILE>.d" _sbomb_has_depfile)
+        check_linker_flag(${_sbomb_language} "-Wl,--dependency-file=sbomb_check.d" _sbomb_has_depfile)
         if(_sbomb_has_depfile)
           target_link_options("${SBOMB_TARGET}" PRIVATE "-Wl,--dependency-file=$<TARGET_FILE:${SBOMB_TARGET}>.d")
         else()
@@ -240,7 +229,6 @@ function(sbomb_enable)
   endif()
   add_custom_target("sbomb-${SBOMB_TARGET}"
     COMMAND "${CMAKE_COMMAND}" -E make_directory "${_sbomb_output_dir}"
-    ${_sbomb_reconfigure}
     COMMAND ${_sbomb_command}
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
     DEPENDS "${SBOMB_TARGET}"

@@ -155,7 +155,7 @@ cmake -S . -B build \
 Or in the project itself, so nobody has to remember the flags:
 
 ```cmake
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.27)
 project(device C)
 
 # Both downloads: the bundle, which CMake fetches, and the binary, which sbomb
@@ -325,12 +325,6 @@ skipped rather than silently carrying a flag that does nothing.
 applies — `${CMAKE_SOURCE_DIR}/sbomb.json` — but **only if that file exists**,
 because passing a configuration nobody wrote turns a run that would have worked
 on defaults into a failure.
-
-On CMake 3.27 and later the File API query is filed for the run that is
-happening, so one configure leaves a reply and the SBOM target does nothing but
-run sbomb. Below 3.27 the query is only read at the start of a run, so it takes
-effect on the next one; there the target re-configures once, because a reply
-that never arrives is not a worse answer but no answer at all.
 
 ## Reading the result
 
