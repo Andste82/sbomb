@@ -13,7 +13,7 @@
 #
 # CMake functions are global once defined, so sbomb_enable is available in the
 # consumer's own lists after MakeAvailable adds this directory.
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.27)
 
 include("${CMAKE_CURRENT_LIST_DIR}/SbombFetch.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/Sbomb.cmake")

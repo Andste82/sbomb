@@ -358,7 +358,7 @@ jobs:
           echo 'int main(void){return 0;}' > "$work/src/main.c"
           echo '{"project":{"name":"fc-demo"},"build":{"dir":"build"}}' > "$work/sbomb.json"
           cat > "$work/CMakeLists.txt" <<EOF
-          cmake_minimum_required(VERSION 3.24)
+          cmake_minimum_required(VERSION 3.27)
           project(fc_demo C)
           include(FetchContent)
           FetchContent_Declare(sbomb URL file://$PWD/dist/0.11.0/sbomb-cmake.tar.gz)
@@ -379,7 +379,7 @@ jobs:
           mkdir -p "$work/src"
           echo 'int main(void){return 0;}' > "$work/src/main.c"
           cat > "$work/CMakeLists.txt" <<EOF
-          cmake_minimum_required(VERSION 3.20)
+          cmake_minimum_required(VERSION 3.27)
           project(noconfig C)
           list(APPEND CMAKE_MODULE_PATH "$PWD/cmake")
           include(Sbomb)
@@ -413,7 +413,7 @@ jobs:
           echo 'int main(void){return 0;}' > "$work/src/main.c"
           echo '{}' > "$work/LEAKED.json"
           cat > "$work/CMakeLists.txt" <<EOF
-          cmake_minimum_required(VERSION 3.20)
+          cmake_minimum_required(VERSION 3.27)
           project(shadow C)
           list(APPEND CMAKE_MODULE_PATH "$PWD/cmake")
           include(Sbomb)
@@ -441,7 +441,7 @@ jobs:
           # The guard must not cost the call its own arguments, nor the
           # SBOMB_DEFAULT_ variables their purpose.
           cat > "$work/CMakeLists.txt" <<EOF
-          cmake_minimum_required(VERSION 3.20)
+          cmake_minimum_required(VERSION 3.27)
           project(shadow C)
           list(APPEND CMAKE_MODULE_PATH "$PWD/cmake")
           include(Sbomb)
@@ -472,7 +472,7 @@ jobs:
               interface) targets='add_library(iface INTERFACE)'; name=iface ;;
             esac
             cat > "$work/CMakeLists.txt" <<EOF
-          cmake_minimum_required(VERSION 3.20)
+          cmake_minimum_required(VERSION 3.27)
           project(argkinds C)
           list(APPEND CMAKE_MODULE_PATH "$PWD/cmake")
           include(Sbomb)
@@ -489,7 +489,7 @@ jobs:
           # The same targets with a valid rendering still configure, so the
           # check refuses the argument and not the target kind.
           cat > "$work/CMakeLists.txt" <<EOF
-          cmake_minimum_required(VERSION 3.20)
+          cmake_minimum_required(VERSION 3.27)
           project(argkinds C)
           list(APPEND CMAKE_MODULE_PATH "$PWD/cmake")
           include(Sbomb)
@@ -505,7 +505,7 @@ jobs:
           mkdir -p "$work/src"
           echo 'int main(void){return 0;}' > "$work/src/main.c"
           cat > "$work/CMakeLists.txt" <<EOF
-          cmake_minimum_required(VERSION 3.20)
+          cmake_minimum_required(VERSION 3.27)
           project(late LANGUAGES C)
           add_executable(app src/main.c)
           list(APPEND CMAKE_MODULE_PATH "$PWD/cmake")

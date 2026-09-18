@@ -1,6 +1,16 @@
-cmake_minimum_required(VERSION 3.27)
-
 include_guard(GLOBAL)
+
+# 3.27 is where cmake_file_api() files the query for the run in progress. Below
+# that the query is only read at the start of a run, so a first configure
+# leaves no reply and sbomb knows no targets, no anchors and no toolchain.
+#
+# This is a check and not cmake_minimum_required(): this file is include()d, so
+# that call would apply to whoever included it and silently raise the policy
+# version of a project that asked for an older one.
+if(CMAKE_VERSION VERSION_LESS "3.27")
+  message(FATAL_ERROR
+    "sbomb requires CMake 3.27 or newer for the File API query; this is ${CMAKE_VERSION}")
+endif()
 
 include(CheckLinkerFlag)
 
@@ -123,9 +133,9 @@ function(sbomb_enable)
     return()
   endif()
 
-  # cmake_minimum_required(VERSION 3.27) above guarantees the File API query
-  # is filed for the run in progress, so this same configure leaves a reply
-  # and the SBOM target never needs to reconfigure for one.
+  # The version check at the top of this file guarantees the File API query is
+  # filed for the run in progress, so this same configure leaves a reply and
+  # the SBOM target never needs to reconfigure for one.
   cmake_file_api(
     QUERY
     API_VERSION 1
