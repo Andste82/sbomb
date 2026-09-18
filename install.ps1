@@ -82,15 +82,23 @@ if ($arch -ne 'AMD64') {
 # its own -- and an installer that fails because somebody else installed too
 # often is not an installer. The redirect has no such limit and needs no token.
 if ($Version -eq 'latest') {
+    # Invoke-WebRequest's handling of -MaximumRedirection 0 is inconsistent
+    # across PowerShell versions/hosts: sometimes it returns the 3xx response,
+    # sometimes it throws a WebException carrying it, and sometimes it throws
+    # an InvalidOperationException with no Response at all. HttpWebRequest
+    # with AllowAutoRedirect off behaves the same way everywhere.
     $location = $null
     try {
-        # Windows PowerShell returns the 3xx response here...
-        $response = Invoke-WebRequest -Uri "https://github.com/$repo/releases/latest" `
-            -UseBasicParsing -MaximumRedirection 0 -ErrorAction Stop
-        $location = $response.Headers.Location
-    } catch {
-        # ...and PowerShell 7 throws it instead. Both carry the same header.
-        $location = $_.Exception.Response.Headers.Location
+        $req = [System.Net.HttpWebRequest]::Create("https://github.com/$repo/releases/latest")
+        $req.AllowAutoRedirect = $false
+        $req.Method = 'GET'
+        $resp = $req.GetResponse()
+        $location = $resp.Headers['Location']
+        $resp.Close()
+    } catch [System.Net.WebException] {
+        if ($_.Exception.Response) {
+            $location = $_.Exception.Response.Headers['Location']
+        }
     }
     $location = [string]$location
     if ($location -match '/releases/tag/(.+)$') {
