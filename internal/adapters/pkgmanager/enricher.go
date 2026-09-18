@@ -109,6 +109,31 @@ func applyEnrichment(pkg *Package, root ComponentRoot) []domain.Finding {
 		contributions, enricherFindings := enricher.Enrich(root)
 		findings = append(findings, enricherFindings...)
 		for _, contribution := range contributions {
+			if contribution.RedirectRoot != "" {
+				if len(pkg.Roots) > 0 {
+					pkg.Roots[0] = contribution.RedirectRoot
+				} else {
+					pkg.Roots = []string{contribution.RedirectRoot}
+				}
+				if contribution.RedirectRoot != root.Path {
+					redirectedRoot := ComponentRoot{Path: contribution.RedirectRoot, Name: root.Name}
+					for _, otherEnricher := range enrichers {
+						if otherEnricher.Source() == enricher.Source() {
+							continue
+						}
+						otherContribs, otherFindings := otherEnricher.Enrich(redirectedRoot)
+						findings = append(findings, otherFindings...)
+						for _, otherContrib := range otherContribs {
+							claim := otherContrib.Claim
+							if claim.Source == "" {
+								claim.Source = otherEnricher.Source()
+							}
+							pkg.Take(otherContrib.Field, claim)
+							pkg.CVEExclusions = append(pkg.CVEExclusions, otherContrib.CVEExclusions...)
+						}
+					}
+				}
+			}
 			claim := contribution.Claim
 			if claim.Source == "" {
 				claim.Source = enricher.Source()

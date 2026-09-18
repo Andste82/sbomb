@@ -85,6 +85,7 @@ type Contribution struct {
 	Field         Field
 	Claim         Claim
 	CVEExclusions []CVEExclusion
+	RedirectRoot  string
 }
 
 // Take records one origin's claim about one field and keeps the strongest.
@@ -124,6 +125,12 @@ func (p *Package) Take(field Field, claim Claim) {
 		return
 	}
 	p.Superseded = append(p.Superseded, Contribution{Field: field, Claim: claim})
+}
+
+// ClaimFor points at the field a Field names, or nil for a name that is none
+// of them.
+func (p *Package) ClaimFor(field Field) *Claim {
+	return p.claimFor(field)
 }
 
 // claimFor points at the field a Field names, or nil for a name that is none

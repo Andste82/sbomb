@@ -90,3 +90,76 @@ func TestESPIDSbomEnricherVersionsGenericSubmodulePURL(t *testing.T) {
 		t.Errorf("purl = %q, want %q", pkg.PURL.Value, want)
 	}
 }
+
+func TestBundledYAMLComponentRootRedirection(t *testing.T) {
+	root := t.TempDir()
+	subDir := filepath.Join(root, "cJSON")
+	if err := os.MkdirAll(subDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	// Place a build2 manifest inside the redirected directory
+	if err := os.WriteFile(filepath.Join(subDir, "manifest"), []byte(": 1\nname: cjson\nversion: 1.7.19\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	manifest := `name: cjson
+component-root: ./cJSON
+supplier: 'Organization: DaveGamble'
+`
+	if err := os.WriteFile(filepath.Join(root, bundledYAMLName), []byte(manifest), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	pkg := Package{
+		Name:    "cjson",
+		Manager: "git-submodule",
+		Roots:   []string{root},
+	}
+	findings := applyEnrichment(&pkg, ComponentRoot{Path: root, Name: "cjson"})
+	if len(findings) != 0 {
+		t.Fatalf("unexpected findings: %#v", findings)
+	}
+	if len(pkg.Roots) == 0 || pkg.Roots[0] != subDir {
+		t.Errorf("pkg.Roots[0] = %q, want %q", pkg.Root(), subDir)
+	}
+	if pkg.Supplier.Value != "DaveGamble" {
+		t.Errorf("supplier = %q, want DaveGamble", pkg.Supplier.Value)
+	}
+	if pkg.Version.Value != "1.7.19" {
+		t.Errorf("version = %q, want 1.7.19 from inner manifest", pkg.Version.Value)
+	}
+}
+
+func TestBundledYAMLRejectsInvalidComponentRoots(t *testing.T) {
+	root := t.TempDir()
+
+	// 1. Absolute path
+	absPath := filepath.Join(root, "abs")
+	if err := os.WriteFile(filepath.Join(root, bundledYAMLName),
+		[]byte("name: cjson\ncomponent-root: "+absPath+"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	_, findings := (bundledYAML{}).Enrich(ComponentRoot{Path: root, Name: "cjson"})
+	if len(findings) != 1 || findings[0].ID != "INVALID_COMPONENT_ROOT" {
+		t.Errorf("expected INVALID_COMPONENT_ROOT for absolute path, got %#v", findings)
+	}
+
+	// 2. Escaping path with ..
+	if err := os.WriteFile(filepath.Join(root, bundledYAMLName),
+		[]byte("name: cjson\ncomponent-root: ../outside\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	_, findings = (bundledYAML{}).Enrich(ComponentRoot{Path: root, Name: "cjson"})
+	if len(findings) != 1 || findings[0].ID != "INVALID_COMPONENT_ROOT" {
+		t.Errorf("expected INVALID_COMPONENT_ROOT for escaping path, got %#v", findings)
+	}
+
+	// 3. Non-existent directory
+	if err := os.WriteFile(filepath.Join(root, bundledYAMLName),
+		[]byte("name: cjson\ncomponent-root: ./does_not_exist\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	_, findings = (bundledYAML{}).Enrich(ComponentRoot{Path: root, Name: "cjson"})
+	if len(findings) != 1 || findings[0].ID != "COMPONENT_ROOT_NOT_FOUND" {
+		t.Errorf("expected COMPONENT_ROOT_NOT_FOUND for non-existent path, got %#v", findings)
+	}
+}

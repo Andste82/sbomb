@@ -44,6 +44,11 @@ has long taken the same statement out of `*.cdx.json` and `*.spdx.json`. A
 `cve-exclude-list` is carried through as `sbomb:component:cveExclusion`, which
 records the upstream's claim and suppresses no finding of its own.
 
+`sbom.yml` also supports `component-root` (or `root`) to specify a relative path
+to the actual component sources and licence files within a wrapper repository
+(for example `component-root: ./cJSON`). Absolute paths and paths navigating out
+of the component (`..`) are strictly rejected.
+
 The file also marks the directory as a component, which the JSON forms already
 did. Without that a dependency whose only marker was the YAML was never bounded
 at all: its files fell to the deepest common directory of the used files, and

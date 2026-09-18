@@ -36,7 +36,7 @@ const bundledYAMLName = "sbom.yml"
 // A name and one field about it is the least that distinguishes the two. Asking
 // for all of them would refuse a component that simply has no supplier, and the
 // claims below already treat every field as optional.
-var bundledYAMLFields = []string{"version", "cpe", "supplier", "originator", "description"}
+var bundledYAMLFields = []string{"version", "cpe", "supplier", "originator", "description", "component-root", "root"}
 
 func (bundledYAML) Enrich(root ComponentRoot) ([]Contribution, []domain.Finding) {
 	path := filepath.Join(root.Path, bundledYAMLName)
@@ -95,6 +95,52 @@ func (bundledYAML) Enrich(root ComponentRoot) ([]Contribution, []domain.Finding)
 		claim(FieldOriginator, organizationValue(manifest.scalarAt("originator"))),
 		claim(FieldDescription, manifest.scalarAt("description")),
 	)
+
+	// component-root (or root) redirects the settled component root to a
+	// subfolder relative to sbom.yml, so a repository that acts as a CMake wrapper
+	// around an upstream subdirectory can declare where the actual sources and
+	// license files live.
+	rawRoot := strings.TrimSpace(manifest.scalarAt("component-root"))
+	if rawRoot == "" {
+		rawRoot = strings.TrimSpace(manifest.scalarAt("root"))
+	}
+	if rawRoot != "" {
+		if filepath.IsAbs(rawRoot) || strings.HasPrefix(rawRoot, "/") || strings.HasPrefix(rawRoot, "\\") || (len(rawRoot) > 1 && rawRoot[1] == ':') {
+			findings = append(findings, domain.Finding{
+				ID:          "INVALID_COMPONENT_ROOT",
+				Severity:    domain.SeverityWarning,
+				Subject:     domain.Subject{Kind: "evidence", Ref: path},
+				Message:     fmt.Sprintf("%s specifies an absolute component-root %q; only relative paths are allowed", bundledYAMLName, rawRoot),
+				Remediation: "Use a relative path starting within the component, for example \"./cJSON\".",
+			})
+		} else {
+			cleanRel := filepath.Clean(filepath.ToSlash(rawRoot))
+			if cleanRel == ".." || strings.HasPrefix(cleanRel, "../") || strings.HasPrefix(cleanRel, "..\\") {
+				findings = append(findings, domain.Finding{
+					ID:          "INVALID_COMPONENT_ROOT",
+					Severity:    domain.SeverityWarning,
+					Subject:     domain.Subject{Kind: "evidence", Ref: path},
+					Message:     fmt.Sprintf("%s specifies a component-root %q that leaves the component directory; component-root must stay within the component", bundledYAMLName, rawRoot),
+					Remediation: "Use a relative path inside the component directory, for example \"./cJSON\".",
+				})
+			} else {
+				target := filepath.Join(root.Path, filepath.FromSlash(cleanRel))
+				info, err := os.Stat(target)
+				if err != nil || !info.IsDir() {
+					findings = append(findings, domain.Finding{
+						ID:          "COMPONENT_ROOT_NOT_FOUND",
+						Severity:    domain.SeverityWarning,
+						Subject:     domain.Subject{Kind: "evidence", Ref: path},
+						Message:     fmt.Sprintf("%s specifies component-root %q, but directory was not found: %s", bundledYAMLName, rawRoot, target),
+						Remediation: "Check that the directory exists and the relative path is correct.",
+					})
+				} else {
+					contributions = append(contributions, Contribution{RedirectRoot: target})
+				}
+			}
+		}
+	}
+
 	// cve-exclude-list is esp-idf-sbom's spelling and no standard, so it is
 	// read where it appears and required nowhere.
 	for _, item := range manifest.child("cve-exclude-list").itemsOf() {
@@ -106,6 +152,41 @@ func (bundledYAML) Enrich(root ComponentRoot) ([]Contribution, []domain.Finding)
 		}
 	}
 	return contributions, findings
+}
+
+// ReadSBOMYAMLComponentRoot reads sbom.yml in dir and returns the redirected component root
+// if specified via component-root or root, provided it is a valid relative path to an existing directory.
+func ReadSBOMYAMLComponentRoot(dir string) (string, bool) {
+	path := filepath.Join(dir, bundledYAMLName)
+	info, err := os.Stat(path)
+	if err != nil || info.IsDir() {
+		return "", false
+	}
+	quiet := make([]domain.Finding, 0)
+	manifest, ok := (&espidf{}).readYAMLFile(path, maxIDFManifestBytes, bundledYAMLName, &quiet)
+	if !ok {
+		return "", false
+	}
+	rawRoot := strings.TrimSpace(manifest.scalarAt("component-root"))
+	if rawRoot == "" {
+		rawRoot = strings.TrimSpace(manifest.scalarAt("root"))
+	}
+	if rawRoot == "" {
+		return "", false
+	}
+	if filepath.IsAbs(rawRoot) || strings.HasPrefix(rawRoot, "/") || strings.HasPrefix(rawRoot, "\\") || (len(rawRoot) > 1 && rawRoot[1] == ':') {
+		return "", false
+	}
+	cleanRel := filepath.Clean(filepath.ToSlash(rawRoot))
+	if cleanRel == ".." || strings.HasPrefix(cleanRel, "../") || strings.HasPrefix(cleanRel, "..\\") {
+		return "", false
+	}
+	target := filepath.Join(dir, filepath.FromSlash(cleanRel))
+	stat, err := os.Stat(target)
+	if err != nil || !stat.IsDir() {
+		return "", false
+	}
+	return target, true
 }
 
 // organizationValue strips the SPDX role prefix an upstream writes in front of
