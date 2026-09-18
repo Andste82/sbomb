@@ -4,9 +4,9 @@
 // specification section 22.3 technique 2. Only the digests are stored; the
 // texts are not embedded.
 //
-// SPDX license list version: 1dd5767
-// Licenses in the list: 739
-// Distinct normalized texts: 698
+// SPDX license list version: 3.29.0
+// Licenses in the list: 740
+// Distinct normalized texts: 699
 //
 // The templates that go with them are in spdxtemplates.gz, written by the same
 // command.
@@ -158,6 +158,7 @@ var knownLicenseHashes = map[string]string{
 	"3290479d1104cffb9e1759cddf9a94d672250420897573bef3b2e114a520ee2d": "Latex2e-translated-notice",
 	"32910c57dec23eb368e2452cd3177b6c2286f3710e92ea1468fbc0556a2e9970": "LGPL-2.0-only",
 	"32b1908d5c74391e05f3346f39a270aabe051bf4d8f2c5fd08e1639bc8725b58": "InnoSetup",
+	"33382c34f004b1968188c93719e842c447cf6febc4f920b014e7899f383db2fa": "BSD-Source-alt-GPL",
 	"3383dab5b4e3430bb3fdf01da2f15aac5dc2c06abc5b1d8d1494613e52f66206": "NTP",
 	"34061a76a2ab2786aca92b4c9416c4f4d2ff2505097fbc1040d41cba3ca3c225": "GPL-2.0-with-GCC-exception",
 	"342fe9f160e77d67f14419239b7b8f6022e9041105c51943c060f44e6bc503cd": "AFL-2.1",
