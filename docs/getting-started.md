@@ -115,6 +115,41 @@ build from two years from now runs the same one again. `-DSBOMB_EXECUTABLE=…`
 overrides the whole thing when somebody already has sbomb, and nothing is
 downloaded then.
 
+### Taking whatever the newest release is
+
+GitHub serves the assets of the newest release under `latest/download`, so the
+version comes out of the URL and nothing else changes:
+
+```cmake
+FetchContent_Declare(sbomb
+  URL https://github.com/Andste82/sbomb/releases/latest/download/sbomb-cmake.tar.gz)
+```
+
+The binary follows by itself. The release writes its own tag into the bundle,
+so the modules you fetched know which release they belong to and ask for the
+matching binary — the two cannot drift apart, and the checksum is verified as
+always.
+
+Two things this costs, both of which are the reason the pinned form is what the
+rest of this page shows.
+
+**The bundle is downloaded once, not once per release.** `FetchContent` decides
+whether to fetch from the URL it was given, and that string no longer changes
+when a release does. A build tree created today keeps the release that was
+newest today, however long it lives, while the `CMakeLists.txt` says
+`latest` — which reads like currency and is not. `rm -rf build/_deps/sbomb-*`,
+or a fresh build directory, is what actually moves it.
+
+**`URL_HASH` is no longer possible.** A digest names one file, and `latest` is
+not one file. `TLS_VERIFY ON` still applies and is worth passing, but that
+secures the connection rather than the contents; the next section is about the
+difference.
+
+So: `latest` to find out what is current and to try something out, a pinned URL
+for anything whose result is meant to be the same twice. sbomb writes its own
+version into every document it produces, which is where the difference shows up
+later.
+
 ### Two downloads, not one
 
 It matters where the knobs are, because the two halves are fetched by different
