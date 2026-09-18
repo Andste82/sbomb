@@ -164,6 +164,13 @@ function(sbomb_enable)
     # response files and overridden link rules put too much out of reach of a
     # scan of the flags. sbomb checks the file itself and refuses to run
     # without it (CONFIGURED_EVIDENCE_MISSING).
+    # check_linker_flag caches its answer under the name it is given and skips
+    # the test when that name is set. The flag it tests changed -- it used to
+    # read <TARGET_FILE>.map, which is not a generator expression and reached
+    # the linker as those literal characters -- so the names change with it.
+    # Otherwise a tree configured before that fix keeps the answer the broken
+    # flag produced: on Windows < and > cannot occur in a filename, the test
+    # failed there, and the cached failure would outlive its cause.
     if(MSVC)
       if(NOT SBOMB_MAP)
         target_link_options("${SBOMB_TARGET}" PRIVATE "/MAP:$<TARGET_FILE:${SBOMB_TARGET}>.map")
@@ -174,16 +181,16 @@ function(sbomb_enable)
       endif()
     else()
       if(NOT SBOMB_MAP)
-        check_linker_flag(${_sbomb_language} "-Wl,-Map=sbomb_check.map" _sbomb_has_map)
-        if(_sbomb_has_map)
+        check_linker_flag(${_sbomb_language} "-Wl,-Map=sbomb_check.map" _sbomb_map_flag_supported)
+        if(_sbomb_map_flag_supported)
           target_link_options("${SBOMB_TARGET}" PRIVATE "-Wl,-Map=$<TARGET_FILE:${SBOMB_TARGET}>.map")
         else()
           message(STATUS "sbomb: linker map flag unsupported; skipping map evidence for ${SBOMB_TARGET}")
         endif()
       endif()
       if(NOT SBOMB_DEPFILE)
-        check_linker_flag(${_sbomb_language} "-Wl,--dependency-file=sbomb_check.d" _sbomb_has_depfile)
-        if(_sbomb_has_depfile)
+        check_linker_flag(${_sbomb_language} "-Wl,--dependency-file=sbomb_check.d" _sbomb_depfile_flag_supported)
+        if(_sbomb_depfile_flag_supported)
           target_link_options("${SBOMB_TARGET}" PRIVATE "-Wl,--dependency-file=$<TARGET_FILE:${SBOMB_TARGET}>.d")
         else()
           message(STATUS "sbomb: linker dependency-file flag unsupported; skipping link dependency evidence for ${SBOMB_TARGET}")
