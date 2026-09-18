@@ -264,6 +264,29 @@ so any directory found from it would be a coincidence.
 To name one directory rather than bound a tree, use a `components[]` entry with
 a `path`. It decides the component outright and no search runs.
 
+### Bundled `sbom.yml` and Wrapper Repositories
+
+When a dependency or submodule checkout contains an `sbom.yml` at its root,
+`sbomb` reads component metadata (`version`, `supplier`, `originator`, `description`,
+`cpe`, and `cve-exclude-list`) at rank `bundled-sbom`.
+
+If the repository is a CMake wrapper that places the actual upstream sources in
+a subdirectory, `sbom.yml` can redirect the component root using `component-root`
+(or `root`):
+
+```yaml
+name: cjson
+component-root: ./cJSON
+description: Ultralightweight JSON parser in ANSI C
+cpe: cpe:2.3:a:cjson_project:cjson:{}:*:*:*:*:*:*:*
+originator: 'Person: Dave Gamble'
+supplier: 'Organization: DaveGamble/cJSON'
+```
+
+* The path **must be relative** to the directory containing `sbom.yml` (e.g. `./cJSON`).
+* Absolute paths and paths navigating above the component root (`..`) are disallowed and reported as warnings.
+* When redirected, `sbomb` reads license files (e.g. `cJSON/LICENSE`), manifests, and source files directly from the target directory without duplicating metadata.
+
 ## `components`
 
 Groups files into the components the SBOM reports, and supplies the metadata

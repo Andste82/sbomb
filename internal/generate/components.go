@@ -894,6 +894,23 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 			found, enrichmentFindings := r.enrich(pkgmanager.ComponentRoot{Path: rootInfo.Physical, Name: component.Name})
 			described = found
 			findings = append(findings, enrichmentFindings...)
+			if rootInfo.Source == rootSourceMarkerPrefix+"sbom.yml" {
+				parent := filepath.Dir(rootInfo.Physical)
+				if parent != rootInfo.Physical {
+					if parentRedirect, ok := pkgmanager.ReadSBOMYAMLComponentRoot(parent); ok && parentRedirect == rootInfo.Physical {
+						parentFound, parentFindings := r.enrich(pkgmanager.ComponentRoot{Path: parent, Name: component.Name})
+						findings = append(findings, parentFindings...)
+						for _, field := range []pkgmanager.Field{
+							pkgmanager.FieldVersion, pkgmanager.FieldCPE, pkgmanager.FieldSupplier,
+							pkgmanager.FieldOriginator, pkgmanager.FieldDescription,
+						} {
+							if val := parentFound.ClaimFor(field); val != nil && val.Value != "" {
+								described.Take(field, *val)
+							}
+						}
+					}
+				}
+			}
 		}
 		// What the .pc file that named this component stated about it. It is
 		// folded before the image manifest because the two rank alike (section
@@ -2002,8 +2019,14 @@ func (r *componentResolver) resolveRoot(component *domain.Component, files []dom
 		if !found {
 			continue
 		}
-		if id, ok := identityForRoot(file.ID, r.physical[file.ID.Canonical()], root); ok {
-			return componentRootResult{ID: id, Physical: root, Source: rootSourceMarkerPrefix + marker}
+		targetRoot := root
+		if marker == "sbom.yml" {
+			if redirected, ok := pkgmanager.ReadSBOMYAMLComponentRoot(root); ok {
+				targetRoot = redirected
+			}
+		}
+		if id, ok := identityForRoot(file.ID, r.physical[file.ID.Canonical()], targetRoot); ok {
+			return componentRootResult{ID: id, Physical: targetRoot, Source: rootSourceMarkerPrefix + marker}
 		}
 	}
 
