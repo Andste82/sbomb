@@ -1,5 +1,38 @@
 # Changelog
 
+## Unreleased
+
+### The CMake module requires 3.27, and says so without changing your project
+
+`sbomb_enable` files its File API query with `cmake_file_api()`, which lands in
+the run that is happening only from CMake 3.27. Below that a first configure
+left no reply at all, so the module used to write the query file by hand and
+have the SBOM target re-configure once to collect it. That path is gone and
+3.27 is the requirement.
+
+How the requirement is stated matters, because `Sbomb.cmake` is `include()`d.
+`cmake_minimum_required()` there applies to whoever included it: a project
+declaring 3.20 had its own `CMAKE_MINIMUM_REQUIRED_VERSION` -- and with it the
+policy defaults for the rest of its directory -- raised to 3.27 by the include
+alone. The module checks the version and fails with a message instead, so a
+consumer's policies are its own.
+
+### The linker map and dependency-file checks test a flag the linker can accept
+
+`check_linker_flag` was asked about `-Wl,-Map=<TARGET_FILE>.map`. That is not a
+generator expression -- the real one, two lines further down, reads
+`$<TARGET_FILE:...>` -- so the linker received those angle brackets literally.
+On Unix it wrote a file with a strange name and the check passed anyway; on
+Windows `<` and `>` cannot occur in a filename, the link failed, and the module
+concluded the linker had no map flag. MinGW targets lost their map and
+dependency-file evidence that way, with a status line blaming the linker.
+
+The checks now name a plain file. The variables holding their results are
+renamed with them, because `check_linker_flag` caches an answer under the name
+it is given and skips the test when that name is already set: without the
+rename, a build tree configured before this release would keep the failure the
+broken flag produced.
+
 ## 0.19.0
 
 ### A component's own sbom.yml is read
