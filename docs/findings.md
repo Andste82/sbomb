@@ -16,7 +16,7 @@ same build produce identical output.
 
 <!-- BEGIN GENERATED CATALOGUE -->
 
-This build emits 58 of the 67 identifiers below. The rest are specified and
+This build emits 60 of the 69 identifiers below. The rest are specified and
 reserved: they describe evidence this version does not yet read, and a run will
 never report them. They are listed and marked so that the table is the whole
 catalogue rather than a snapshot of one version.
@@ -30,6 +30,7 @@ catalogue rather than a snapshot of one version.
 | `CMAKE_FILE_API_UNAVAILABLE` | warning | — | No reply directory and regeneration not permitted | emitted |
 | `COMPONENT_MAPPING_CONFLICT` | info | — | Two sources claim the same file, root or name; the mapping or the metadata was decided by rank or given to neither, and the disagreement is reported | emitted |
 | `COMPONENT_METADATA_MISMATCH` | warning | — | A metadata manifest in a component root names a different component than the root it lies in, so nothing was read from it | emitted |
+| `COMPONENT_ROOT_NOT_FOUND` | warning | — | `component-root` in an `sbom.yml` names a directory that does not exist, so the redirection was refused | emitted |
 | `COMPONENT_ROOT_UNRESOLVED` | info | — | Component root fell back to the common directory of the used files | emitted |
 | `CONFIGURED_EVIDENCE_MISSING` | error | always (exit 2) | A configured linker map or link dependency file does not exist | emitted |
 | `CONFIG_DEPRECATED_OPTION` | warning | — | Deprecated configuration key used | reserved |
@@ -48,6 +49,7 @@ catalogue rather than a snapshot of one version.
 | `HEADER_EVIDENCE_FALLBACK` | info | — | A CU had no DWARF coverage; depfile used instead | emitted |
 | `INPUT_LIMIT_EXCEEDED` | warning | — | A parser limit of §30 was reached | emitted |
 | `INTERNAL_INVARIANT_VIOLATION` | error | always (exit 70) | A graph invariant of §8.8 or a `bom-ref` uniqueness assertion of §28.4 failed | emitted |
+| `INVALID_COMPONENT_ROOT` | warning | — | `component-root` in an `sbom.yml` is absolute or leaves the component directory, so the redirection was refused | emitted |
 | `LICENSE_CONFLICT` | warning | `failOnReviewRequired` | Conflicting license evidence | emitted |
 | `LINKED_OBJECT_SOURCE_UNRESOLVED` | warning | `failOnMissingSourceForLinkedObject` | Object could not be mapped to a source | emitted |
 | `LINK_EVIDENCE_ARTIFACT_MISMATCH` | error | `failOnStaleBuildArtifacts` | Evidence does not correspond to the artifact | reserved |

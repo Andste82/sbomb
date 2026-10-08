@@ -46,8 +46,19 @@ records the upstream's claim and suppresses no finding of its own.
 
 `sbom.yml` also supports `component-root` (or `root`) to specify a relative path
 to the actual component sources and licence files within a wrapper repository
-(for example `component-root: ./cJSON`). Absolute paths and paths navigating out
-of the component (`..`) are strictly rejected.
+(for example `component-root: ./cJSON`, or `./vendor/cJSON` for a path of more
+than one level). Absolute paths and paths navigating out of the component (`..`)
+are strictly rejected.
+
+The redirection is also what finds the file. A wrapper's upstream subdirectory
+almost always brings the licence file the redirection exists to reach, and that
+marker bounds the component before the walk ever reaches the wrapper root -- so
+the `sbom.yml` that describes the component is left above it. It is therefore
+looked for the other way round as well: upwards from the settled root, as far
+as the anchor, and taken only when its `component-root` names that very root.
+A bundled SBOM lying above a component it says nothing about stays out of it,
+and `name` is not compared, because the path the file itself states is the
+stronger statement of which component it describes.
 
 The file also marks the directory as a component, which the JSON forms already
 did. Without that a dependency whose only marker was the YAML was never bounded
