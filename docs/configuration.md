@@ -283,9 +283,19 @@ originator: 'Person: Dave Gamble'
 supplier: 'Organization: DaveGamble/cJSON'
 ```
 
-* The path **must be relative** to the directory containing `sbom.yml` (e.g. `./cJSON`).
+* The path **must be relative** to the directory containing `sbom.yml`, and may
+  name more than one level (`./cJSON`, `./vendor/cJSON`).
 * Absolute paths and paths navigating above the component root (`..`) are disallowed and reported as warnings.
 * When redirected, `sbomb` reads license files (e.g. `cJSON/LICENSE`), manifests, and source files directly from the target directory without duplicating metadata.
+* The redirection is what ties the file to the component, so the `sbom.yml` is
+  read even when the upstream subdirectory brings a boundary marker of its own
+  — which it usually does, in the shape of the licence file the redirection
+  exists to reach. `name` is then not compared: a wrapper directory is
+  routinely spelt differently from the name the upstream gives itself.
+* The component is still **named after the directory that bounded it**, not
+  after `name` in the `sbom.yml`. In the example above the component is
+  reported as `cJSON`, after the redirected root. Use a `components[]` entry
+  with a `name` to publish a different one.
 
 ## `components`
 

@@ -2536,6 +2536,8 @@ Severity shown is the default and may be changed via `policy.severityOverrides`.
 | `UNKNOWN_COMPONENT` | warning | `failOnUnknownComponent` | File could not be mapped to a component |
 | `COMPONENT_ROOT_UNRESOLVED` | info | — | Component root fell back to the common directory of the used files |
 | `COMPONENT_METADATA_MISMATCH` | warning | — | A metadata manifest in a component root names a different component than the root it lies in, so nothing was read from it |
+| `INVALID_COMPONENT_ROOT` | warning | — | `component-root` in an `sbom.yml` is absolute or leaves the component directory, so the redirection was refused |
+| `COMPONENT_ROOT_NOT_FOUND` | warning | — | `component-root` in an `sbom.yml` names a directory that does not exist, so the redirection was refused |
 | `COMPONENT_MAPPING_CONFLICT` | info | — | Two sources claim the same file, root or name; the mapping or the metadata was decided by rank or given to neither, and the disagreement is reported |
 | `UNKNOWN_VERSION` | warning | `failOnUnknownVersion` | Component version could not be resolved |
 | `UNKNOWN_PURL` | info | — | No package type assertable |

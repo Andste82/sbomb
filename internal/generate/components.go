@@ -802,6 +802,58 @@ func (r *componentResolver) nearestPackageRoot(file domain.UsedFile) (root, mani
 	return "", "", false
 }
 
+// claimingSBOMYAMLAbove walks up from a settled component root looking for an
+// sbom.yml whose component-root resolves to exactly that root.
+//
+// This is the wrapper case of section 19.2: a repository that is CMake glue
+// around an upstream checkout keeps the glue and the metadata at its own root
+// and the sources and the licence file in a subdirectory. The marker walk of
+// nearestPackageRoot settles the root at the subdirectory -- the upstream
+// brings its own licence file, and that is the boundary it finds first -- so
+// the sbom.yml that describes the component is left above the root, in a
+// directory the walk never reached.
+//
+// The walk goes the other way round and is answered by the file rather than by
+// this walk: only an sbom.yml that names this very root by path is taken, so a
+// bundled SBOM lying above a component it says nothing about stays out of it.
+// A name is deliberately not compared -- the wrapper directory is routinely
+// spelt differently from the name the upstream gives itself, and the redirect
+// already settles which component the file describes.
+//
+// Walking rather than looking one directory up is what the reader already
+// permits: component-root takes any relative path inside the component, so
+// vendor/upstream is as valid as upstream, and the directory holding the
+// sbom.yml is then two levels above the root rather than one.
+//
+// An sbom.yml that resolves elsewhere does not end the walk. It is a statement
+// about another component, not about this one, and a wrapper around a wrapper
+// is still a wrapper.
+func (r *componentResolver) claimingSBOMYAMLAbove(root string, anchor domain.AnchorKey) (string, bool) {
+	if root == "" {
+		return "", false
+	}
+	settled := filepath.Clean(root)
+	boundary := r.anchorRoots[string(anchor)]
+	dir := filepath.Dir(settled)
+	for depth := 0; depth < 64 && dir != "" && dir != "/" && dir != "."; depth++ {
+		if target, ok := pkgmanager.ReadSBOMYAMLComponentRoot(dir); ok && filepath.Clean(target) == settled {
+			return dir, true
+		}
+		// The anchor root is asked and then ends the walk, as in
+		// nearestPackageRoot: above it lies another anchor's tree, and a
+		// statement made there is not about a component of this one.
+		if boundary != "" && dir == filepath.Clean(boundary) {
+			return "", false
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return "", false
+		}
+		dir = parent
+	}
+	return "", false
+}
+
 // packageManifestIn names the package manifest that makes dir the root of a
 // distinct component, if it carries one, and bundledSBOMIn does the same for a
 // bundled SBOM. Both answer from a memo, because the walk of nearestPackageRoot
@@ -894,21 +946,28 @@ func (r *componentResolver) enrichComponent(component *domain.Component, files [
 			found, enrichmentFindings := r.enrich(pkgmanager.ComponentRoot{Path: rootInfo.Physical, Name: component.Name})
 			described = found
 			findings = append(findings, enrichmentFindings...)
-			if rootInfo.Source == rootSourceMarkerPrefix+"sbom.yml" {
-				parent := filepath.Dir(rootInfo.Physical)
-				if parent != rootInfo.Physical {
-					if parentRedirect, ok := pkgmanager.ReadSBOMYAMLComponentRoot(parent); ok && parentRedirect == rootInfo.Physical {
-						parentFound, parentFindings := r.enrich(pkgmanager.ComponentRoot{Path: parent, Name: component.Name})
-						findings = append(findings, parentFindings...)
-						for _, field := range []pkgmanager.Field{
-							pkgmanager.FieldVersion, pkgmanager.FieldCPE, pkgmanager.FieldSupplier,
-							pkgmanager.FieldOriginator, pkgmanager.FieldDescription,
-						} {
-							if val := parentFound.ClaimFor(field); val != nil && val.Value != "" {
-								described.Take(field, *val)
-							}
-						}
+			// The root is settled, but a wrapper repository keeps what
+			// describes the component above it: an sbom.yml whose
+			// component-root names this very root. Which marker settled the
+			// root does not decide whether to look -- an upstream brings its
+			// own licence file, and that marker is the one found first --
+			// so the question is asked of every marker root.
+			//
+			// Only that file answers. The directory it lies in holds the
+			// wrapper's own build glue, and a manifest describing the wrapper
+			// is not a statement about the component inside it.
+			if wrapper, found := r.claimingSBOMYAMLAbove(rootInfo.Physical, rootInfo.ID.Anchor); found {
+				claimed, claimedFindings := pkgmanager.ReadSBOMYAMLMetadata(wrapper)
+				findings = append(findings, claimedFindings...)
+				r.logger.Debug("Component '%s': metadata from the sbom.yml in %s that claims this root",
+					component.Name, wrapper)
+				for _, contribution := range claimed {
+					switch contribution.Field {
+					case pkgmanager.FieldVersion, pkgmanager.FieldCPE, pkgmanager.FieldSupplier,
+						pkgmanager.FieldOriginator, pkgmanager.FieldDescription:
+						described.Take(contribution.Field, contribution.Claim)
 					}
+					described.CVEExclusions = append(described.CVEExclusions, contribution.CVEExclusions...)
 				}
 			}
 		}

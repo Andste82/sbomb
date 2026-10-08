@@ -154,6 +154,40 @@ func (bundledYAML) Enrich(root ComponentRoot) ([]Contribution, []domain.Finding)
 	return contributions, findings
 }
 
+// ReadSBOMYAMLMetadata reads what the sbom.yml in dir states about the
+// component it describes: the version, cpe, supplier, originator and
+// description, each already carrying this reader's source, and the
+// cve-exclude-list beside them.
+//
+// It answers for a caller that has already established the file belongs to the
+// component being described -- a component-root this very file resolved to --
+// and so passes no name: the redirect is a stronger statement of identity than
+// a name comparison, and the mismatch check that guards the ordinary path
+// would refuse a wrapper whose directory is spelt differently from the name
+// the upstream gives itself.
+//
+// The redirect contribution is not returned. The caller holds the root it
+// settled; this call is only about the metadata beside it.
+func ReadSBOMYAMLMetadata(dir string) ([]Contribution, []domain.Finding) {
+	contributions, findings := bundledYAML{}.Enrich(ComponentRoot{Path: dir})
+	described := make([]Contribution, 0, len(contributions))
+	for _, contribution := range contributions {
+		if contribution.RedirectRoot != "" {
+			continue
+		}
+		// A cve-exclude-list entry carries no claim at all, so an empty value
+		// is only a field the file left out when nothing else came with it.
+		if contribution.Claim.Value == "" && len(contribution.CVEExclusions) == 0 {
+			continue
+		}
+		if contribution.Claim.Value != "" && contribution.Claim.Source == "" {
+			contribution.Claim.Source = bundledYAML{}.Source()
+		}
+		described = append(described, contribution)
+	}
+	return described, findings
+}
+
 // ReadSBOMYAMLComponentRoot reads sbom.yml in dir and returns the redirected component root
 // if specified via component-root or root, provided it is a valid relative path to an existing directory.
 func ReadSBOMYAMLComponentRoot(dir string) (string, bool) {
