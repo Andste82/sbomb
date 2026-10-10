@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -30,6 +29,7 @@ import (
 	"github.com/example/sbomb/internal/report"
 	"github.com/example/sbomb/internal/sbomwriter"
 	_ "github.com/example/sbomb/internal/spdx"
+	"github.com/example/sbomb/internal/spdx/spdx3"
 )
 
 func main() {
@@ -168,6 +168,12 @@ func handleSchema(args []string) (int, string, string) {
 			i++
 		case strings.HasPrefix(args[i], "--format="):
 			value := strings.TrimPrefix(args[i], "--format=")
+			// An empty value is a missing one. Read as "no format", it
+			// silently selected the default -- an unset shell variable in
+			// --format=$FORMAT would write CycloneDX and exit 0.
+			if value == "" {
+				return 1, "", "missing value for --format\n"
+			}
 			if conflict := choose(value, "--format "+value); conflict != "" {
 				return 1, "", conflict
 			}
@@ -241,7 +247,7 @@ func handleValidate(args []string) (int, string, string) {
 	if err := writer.Validate(bytes.NewReader(data)); err != nil {
 		return 4, "", err.Error() + "\n"
 	}
-	return 0, fmt.Sprintf("valid %s %s document: %s\n", formatLabel(writer), specVersion, input), ""
+	return 0, fmt.Sprintf("valid %s %s document: %s\n", sbomwriter.Label(writer), specVersion, input), ""
 }
 
 // handleEvidence dumps the evidence graph without producing an SBOM, which is
@@ -535,6 +541,12 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 			i++
 		case strings.HasPrefix(args[i], "--format="):
 			outputFormat = strings.TrimPrefix(args[i], "--format=")
+			// An empty value is a missing one. Read as "no format", it
+			// silently selected the default -- an unset shell variable in
+			// --format=$FORMAT would write CycloneDX and exit 0.
+			if outputFormat == "" {
+				return 1, "", "missing value for --format\n"
+			}
 		case args[i] == "--config-name":
 			if i+1 >= len(args) {
 				return 1, "", "missing value for --config-name\n"
@@ -848,7 +860,7 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 	if err != nil {
 		return exitCodeFor(err, 2), logBuf.String(), err.Error() + "\n"
 	}
-	cliLogger.Info("Writing %s %s document to '%s'...", formatLabel(generated.Writer), generated.SpecVersion, output)
+	cliLogger.Info("Writing %s %s document to '%s'...", sbomwriter.Label(generated.Writer), generated.SpecVersion, output)
 	if err := sbomwriter.WriteFile(output, generated.Writer, generated.Rendered); err != nil {
 		// Either validation layer failing is exit code 4 (section 32.5).
 		return 4, logBuf.String(), err.Error() + "\n"
@@ -1115,20 +1127,11 @@ func explainSubject(g *evidence.Graph, fileRef, bomRef string) (string, string) 
 
 // localIdentity turns an SPDX element IRI of the form urn:uuid:<U>#<local>
 // back into the local identity it was built from, and returns anything else as
-// it is. The fragment is percent-decoded; one that does not decode is kept as
-// it was typed, because a bom-ref may contain "%" and is then not an IRI.
+// it is -- a bom-ref may contain "%" and is then not an IRI. The decoding is
+// the SPDX reader's own, so that a reference typed here and the same IRI read
+// out of a document name the same identity.
 func localIdentity(reference string) string {
-	if !strings.HasPrefix(reference, "urn:uuid:") {
-		return reference
-	}
-	_, fragment, found := strings.Cut(reference, "#")
-	if !found {
-		return reference
-	}
-	if decoded, err := url.PathUnescape(fragment); err == nil {
-		return decoded
-	}
-	return fragment
+	return spdx3.LocalIdentity(reference)
 }
 
 func loadEvidenceGraph(buildDir string) (*evidence.Graph, error) {
@@ -1240,7 +1243,7 @@ func componentFilesFromSBOM(g *evidence.Graph, path, component string) ([]string
 	}
 	reader, reads := writer.(sbomwriter.ComponentReader)
 	if !reads {
-		return nil, fmt.Sprintf("%s is a %s document, which this build cannot read components from\n", path, formatLabel(writer))
+		return nil, fmt.Sprintf("%s is a %s document, which this build cannot read components from\n", path, sbomwriter.Label(writer))
 	}
 	files, err := reader.ComponentFiles(data, component)
 	if errors.Is(err, sbomwriter.ErrNoSuchComponent) {

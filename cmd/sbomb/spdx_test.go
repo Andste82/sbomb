@@ -215,7 +215,7 @@ func TestTheDefaultOutputNameFollowsTheFormat(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := formatLabel(selected.writer); got != "SPDX" {
+	if got := sbomwriter.Label(selected.writer); got != "SPDX" {
 		t.Errorf("label = %q, want SPDX", got)
 	}
 	if selected.version != "3.0.1" {
@@ -757,6 +757,11 @@ func TestALocalIdentityIsReadBackFromAnSpdxIRI(t *testing.T) {
 		"file:project:main.c":       "file:project:main.c",
 		"urn:uuid:no-fragment-here": "urn:uuid:no-fragment-here",
 		"component:zlib@1.3#frag":   "component:zlib@1.3#frag",
+		// One malformed escape beside a well-formed one: the SPDX reader keeps
+		// the malformed one where it stands and decodes the other. This used to
+		// leave the whole fragment escaped, so the command line and the
+		// document reader named the same IRI two different identities.
+		"urn:uuid:782f81fc-5138-5883-8b0a-38f1756e5e91#file:project:a%20b%zz.c": "file:project:a b%zz.c",
 	} {
 		if got := localIdentity(input); got != want {
 			t.Errorf("localIdentity(%q) = %q, want %q", input, got, want)
@@ -978,5 +983,25 @@ func TestBothReadersExpandEveryComponentAlike(t *testing.T) {
 	// The bare name must find the file, or agreeing on it proves nothing.
 	if got := answer(cdxWriter, cdx, "main.c"); got != "[] <nil>" {
 		t.Errorf("CycloneDX answers %q with %s; want the file, which groups nothing", "main.c", got)
+	}
+}
+
+// TestAnEmptyFormatIsAMissingOne: --format= with nothing after it is a missing
+// value, not a request for the default. Read as "no format", it selected the
+// default silently -- an unset shell variable in --format=$FORMAT wrote
+// CycloneDX and exited 0, and `schema` printed the configuration schema and
+// then, beside --spec-version, complained that --format was missing although
+// it had been passed.
+func TestAnEmptyFormatIsAMissingOne(t *testing.T) {
+	for _, args := range [][]string{
+		{"schema", "--format="},
+		{"schema", "--format=", "--spec-version", "3.0.1"},
+		{"generate", "--format=", "--build-dir", t.TempDir()},
+		{"self", "--format="},
+	} {
+		code, _, stderr := execute(args)
+		if code != 1 || !strings.Contains(stderr, "missing value for --format") {
+			t.Errorf("%v = code %d, stderr %q; want exit 1 naming the missing value", args, code, stderr)
+		}
 	}
 }

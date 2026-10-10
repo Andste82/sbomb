@@ -73,7 +73,7 @@ func handleSelf(args []string, verbosity int) (int, string, string) {
 	if err != nil {
 		return exitCodeFor(err, 70), logBuf.String(), err.Error() + "\n"
 	}
-	logger.Info("Writing %s %s document to '%s'...", formatLabel(selected.writer), selected.version, options.output)
+	logger.Info("Writing %s %s document to '%s'...", sbomwriter.Label(selected.writer), selected.version, options.output)
 	if err := sbomwriter.WriteFile(options.output, selected.writer, rendered); err != nil {
 		// Either validation layer failing is exit code 4 (section 32.5).
 		return 4, logBuf.String(), err.Error() + "\n"
@@ -218,6 +218,9 @@ func (o *selfOptions) parse(args []string) (int, string) {
 			// The same choice generate offers: a release that publishes SPDX
 			// for its product publishes SPDX for the tool that wrote it.
 			value, ok = take()
+			// An empty value is a missing one, as in generate: read as "no
+			// format", --format=$FORMAT with the variable unset wrote CycloneDX.
+			ok = ok && value != ""
 			o.format = value
 		case "--findings-json":
 			value, ok = take()

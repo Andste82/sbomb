@@ -66,35 +66,50 @@ done
 # compilation database's own -- and only one of them can be read on a POSIX
 # host. Which one was kept depended on the order the evidence was consulted in,
 # which is not fixed, so the file was hashed on some runs and missing on others,
-# and the SPDX document identity changed with it. Two runs agree by chance often
+# and the document identity changed with it. Two runs agree by chance often
 # enough to miss that; six do not. A fresh copy each time, because generate
 # writes its evidence dump into the build directory.
 #
+# In both formats. Each states things the other does not -- SPDX names the
+# adapters that contributed, CycloneDX keeps its own serial derivation -- so an
+# order dependence can surface in one and not in the other.
+#
 # Built once rather than through go run, which would compile and link the tool
-# again for every one of the six runs. GOEXE, because Windows will not run it
-# without the extension.
+# again for every one of the twelve runs. GOEXE, because Windows will not run
+# it without the extension.
 unity_sbomb="$tmp/sbomb$(go env GOEXE)"
 go build -o "$unity_sbomb" ./cmd/sbomb
+# unity_run FORMAT VERSION OUTPUT, with SOURCE_DATE_EPOCH pinned for SPDX only,
+# as in run above.
 unity_run() {
   rm -rf "$tmp/unity"
   mkdir -p "$tmp/unity"
   cp -r "$repo/testdata/fixtures/msvc-ninja/p06-unity/build" "$tmp/unity/build"
-  SOURCE_DATE_EPOCH=1700000000 "$unity_sbomb" generate \
+  if [ "$1" = spdx-json ]; then
+    epoch=1700000000
+  else
+    epoch=
+  fi
+  SOURCE_DATE_EPOCH=$epoch "$unity_sbomb" generate \
     --build-dir "$tmp/unity/build" \
-    --output "$1" \
-    --format spdx-json \
+    --output "$3" \
+    --format "$1" \
+    --spec-version "$2" \
     --reproducible \
     --path-flavor windows \
     --policy lenient
 }
-unity_run "$tmp/unity-first.spdx.json"
-for attempt in 2 3 4 5 6; do
-  unity_run "$tmp/unity-again.spdx.json"
-  cmp "$tmp/unity-first.spdx.json" "$tmp/unity-again.spdx.json"
+for pair in "cyclonedx-json 1.6 cdx.json" "spdx-json 3.0.1 spdx.json"; do
+  set -- $pair
+  unity_run "$1" "$2" "$tmp/unity-first.$3"
+  for attempt in 2 3 4 5 6; do
+    unity_run "$1" "$2" "$tmp/unity-again.$3"
+    cmp "$tmp/unity-first.$3" "$tmp/unity-again.$3"
+  done
+  printf 'windows-flavor unity SBOM %s SHA-256: ' "$2"
+  sha256sum "$tmp/unity-first.$3" | cut -d ' ' -f 1
+  keep "$tmp/unity-first.$3" "windows-flavor-unity-$2.$3"
 done
-printf 'windows-flavor unity SBOM 3.0.1 SHA-256: '
-sha256sum "$tmp/unity-first.spdx.json" | cut -d ' ' -f 1
-keep "$tmp/unity-first.spdx.json" "windows-flavor-unity-3.0.1.spdx.json"
 
 # The FOSS documents of section 32.6, which are a further rendering of the same
 # discovery and have to be as reproducible as the SBOM: a notices document that
