@@ -3,10 +3,12 @@ package generate
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/example/sbomb/internal/adapters/linkers/mapparser"
 	"github.com/example/sbomb/internal/anchors"
+	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/evidence"
 	"github.com/example/sbomb/internal/pathmodel"
 )
@@ -115,6 +117,57 @@ func TestABareLibraryNameIsTheArchiveTheBuildProduced(t *testing.T) {
 		path, searched := b.libraryLocation(mapparser.FormatMSVC, tc.name)
 		if path != tc.path || searched != tc.searched {
 			t.Errorf("%s: path %q searched %v, want %q %v", tc.name, path, searched, tc.path, tc.searched)
+		}
+	}
+}
+
+// TestAWindowsBuildDirectoryIsMatchedWithoutRegardToCase: on the machine that
+// built, MSBuild's tracking logs name the build directory in capitals while
+// filepath.Abs spells it as it is on disk. Under the Windows flavor the two are
+// one directory, and a file below it is build output, not an unanchored path.
+// Under the POSIX flavor case still tells two directories apart.
+func TestAWindowsBuildDirectoryIsMatchedWithoutRegardToCase(t *testing.T) {
+	dir := t.TempDir()
+	for _, tc := range []struct {
+		name   string
+		flavor pathmodel.Flavor
+		want   string
+	}{
+		{"windows", pathmodel.WindowsFlavor{}, "/logical/DEBUG/CRYPTO.LIB"},
+		{"posix", pathmodel.PosixFlavor{}, strings.ToUpper(pathmodel.NormalizeSeparators(dir)) + "/DEBUG/CRYPTO.LIB"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			registry, err := anchors.Assemble(anchors.Options{Flavor: tc.flavor, ProjectRoot: "/src", BuildRoot: "/logical"})
+			if err != nil {
+				t.Fatal(err)
+			}
+			b := newBuilder(evidence.New(), registry, "/logical", dir, NewLogger(0, nil))
+			shouted := strings.ToUpper(pathmodel.NormalizeSeparators(dir)) + "/DEBUG/CRYPTO.LIB"
+			if got := pathmodel.NormalizeSeparators(b.logicalFor(shouted)); got != tc.want {
+				t.Errorf("logicalFor(%q) = %q, want %q", shouted, got, tc.want)
+			}
+		})
+	}
+}
+
+// TestAnArchiveOrObjectIsKnownByItsExtensionInAnyCase: MSBuild and NMake spell
+// file names in capitals, and FOO.LIB is an archive as much as foo.lib is. A
+// case-sensitive check took it for a plain link input, so its members were
+// never traced back to the objects they came from.
+func TestAnArchiveOrObjectIsKnownByItsExtensionInAnyCase(t *testing.T) {
+	for _, path := range []string{"foo.lib", "FOO.LIB", "libfoo.a", "LIBFOO.A"} {
+		if !isArchivePath(path) || kindForPath(path) != domain.NodeArchive {
+			t.Errorf("%s is not taken for an archive", path)
+		}
+	}
+	for _, path := range []string{"main.obj", "MAIN.OBJ", "main.o", "MAIN.O"} {
+		if !isObjectPath(path) {
+			t.Errorf("%s is not taken for an object", path)
+		}
+	}
+	for _, path := range []string{"main.c", "a.library", "o"} {
+		if isArchivePath(path) || isObjectPath(path) {
+			t.Errorf("%s is taken for an archive or an object", path)
 		}
 	}
 }

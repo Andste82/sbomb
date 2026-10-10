@@ -60,7 +60,7 @@ func RenderReview(in ReviewInput) string {
 		// evidence report differently there than on Linux.
 		line(&b, "configuration", filepath.ToSlash(in.ConfigPath))
 	}
-	line(&b, "build directory", in.BuildDir)
+	line(&b, "build directory", filepath.ToSlash(in.BuildDir))
 	if in.Document.Run.Generator != "" {
 		line(&b, "generator", in.Document.Run.Generator)
 	}

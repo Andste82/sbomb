@@ -124,6 +124,12 @@ func TestAnEvidencePathMeansTheSameFileOnEveryHost(t *testing.T) {
 	same(`JoinEvidence(C:\b, ..\src\a.c)`, JoinEvidence(`C:\b`, `..\src\a.c`), "C:/src/a.c")
 	same(`JoinEvidence(\\server\share, a.c)`, JoinEvidence(`\\server\share`, "a.c"), "//server/share/a.c")
 	same("DirEvidence(/usr/bin/cc)", DirEvidence("/usr/bin/cc"), "/usr/bin")
+	// Found in the review of #65: a UNC directory lost its second slash, a
+	// backslash in a name joined to a host directory stayed one, and two
+	// leading forward slashes were taken for UNC rather than read as POSIX.
+	same(`DirEvidence(\\server\share\bin\cc)`, DirEvidence(`\\server\share\bin\cc`), "//server/share/bin")
+	same(`JoinEvidence(/b, sub\a.c)`, JoinEvidence("/b", `sub\a.c`), "/b/sub/a.c")
+	same("CleanEvidence(//usr/include/a.h)", CleanEvidence("//usr/include/a.h"), "/usr/include/a.h")
 	same("DirEvidence(C:/bin)", DirEvidence("C:/bin"), "C:/")
 	same("BaseEvidence(/opt/gcc/bin/)", BaseEvidence("/opt/gcc/bin/"), "bin")
 	same("ResolveEvidence(host, /usr/include/a.h)", ResolveEvidence(t.TempDir(), "/usr/include/a.h"), "/usr/include/a.h")

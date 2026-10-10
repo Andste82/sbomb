@@ -377,7 +377,7 @@ func buildEvidenceGraph(
 		for _, target := range makeBuild.Targets {
 			var archived bool
 			for _, input := range target.LinkInputs {
-				if strings.HasSuffix(input, ".a") || strings.HasSuffix(input, ".lib") {
+				if isArchivePath(input) {
 					b.recordArchiveInputs(input, collectObjects(target.LinkInputs))
 					archived = true
 				}
@@ -955,7 +955,25 @@ func hashUsedFiles(files []domain.UsedFile, physical map[string]string, bounds l
 }
 
 func isObjectPath(path string) bool {
-	return strings.HasSuffix(path, ".o") || strings.HasSuffix(path, ".obj")
+	return hasExtension(path, ".o", ".obj")
+}
+
+// isArchivePath reports whether path names a static archive.
+func isArchivePath(path string) bool {
+	return hasExtension(path, ".a", ".lib")
+}
+
+// hasExtension reports whether path ends in one of the lower-case extensions,
+// without regard to case. MSBuild and NMake spell file names in capitals, and
+// FOO.LIB is an archive as much as foo.lib is: a case-sensitive check took the
+// one for a plain link input, so its members were never traced to objects.
+func hasExtension(path string, extensions ...string) bool {
+	for _, extension := range extensions {
+		if len(path) >= len(extension) && strings.EqualFold(path[len(path)-len(extension):], extension) {
+			return true
+		}
+	}
+	return false
 }
 
 func isHeaderPath(path string) bool {
