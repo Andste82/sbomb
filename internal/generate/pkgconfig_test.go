@@ -50,7 +50,10 @@ func makeSysrootBuildTree(t *testing.T, root string, pkgConfigFiles map[string]s
 	cfg, buildDir := makeBuildTree(t, root, headers...)
 	source := filepath.Join(root, "src", "main.c")
 	writeTreeFile(t, filepath.Join(buildDir, "CMakeFiles", "app.dir", "link.txt"),
-		"cc -o app CMakeFiles/app.dir/main.c.o "+filepath.Join(sysroot, "usr", "lib", "libfoo.so")+"\n")
+		// In slash form, as CMake writes a link command: link.txt is read by
+		// GNU quoting rules, under which every backslash of a Windows host's
+		// temporary directory would be an escape and the path would fall apart.
+		"cc -o app CMakeFiles/app.dir/main.c.o "+filepath.ToSlash(filepath.Join(sysroot, "usr", "lib", "libfoo.so"))+"\n")
 
 	commands := []map[string]any{{
 		"directory": buildDir,
@@ -343,7 +346,7 @@ func TestTwoFilesOfOneModuleThatAgreeAreOneAnswer(t *testing.T) {
 	writeTreeFile(t, other, "ELF shared object\n")
 	writeTreeFile(t, filepath.Join(buildDir, "CMakeFiles", "app.dir", "link.txt"),
 		"cc -o app CMakeFiles/app.dir/main.c.o "+
-			filepath.Join(sysroot, "usr", "lib", "libfoo.so")+" "+other+"\n")
+			filepath.ToSlash(filepath.Join(sysroot, "usr", "lib", "libfoo.so"))+" "+filepath.ToSlash(other)+"\n")
 	document := runSysrootBuild(t, cfg, buildDir)
 
 	component, ok := componentByID(document, "component:libfoo")
@@ -385,7 +388,7 @@ func TestTwoPackagesOfOneModuleNameLeaveTheComponentWithoutAVersion(t *testing.T
 	writeTreeFile(t, other, "ELF shared object\n")
 	writeTreeFile(t, filepath.Join(buildDir, "CMakeFiles", "app.dir", "link.txt"),
 		"cc -o app CMakeFiles/app.dir/main.c.o "+
-			filepath.Join(sysroot, "usr", "lib", "libfoo.so")+" "+other+"\n")
+			filepath.ToSlash(filepath.Join(sysroot, "usr", "lib", "libfoo.so"))+" "+filepath.ToSlash(other)+"\n")
 	document := runSysrootBuild(t, cfg, buildDir)
 
 	component, ok := componentByID(document, "component:libfoo")

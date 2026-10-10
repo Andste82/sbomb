@@ -335,6 +335,8 @@ func TestTheDefaultProfileKeepsSbombsOwnGroupingOutOfTheNotices(t *testing.T) {
 // and no notice anywhere in it. A marker that stood in both places would say
 // nothing about which of the two things was missing.
 func TestTheIncompletenessMarkersReachTheNoticesDocumentOnTheFixture(t *testing.T) {
+	// The toolchain entry's copyright comes from the headers the host has.
+	testutil.RequireFixtureToolchain(t)
 	files := runFOSSUnderTheDefaultProfile(t)
 	notices := files[foss.NoticesFile]
 	entryOf := func(name string) string {

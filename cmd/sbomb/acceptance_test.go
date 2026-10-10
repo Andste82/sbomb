@@ -13,6 +13,7 @@ import (
 )
 
 func TestMilestone13Acceptance(t *testing.T) {
+	testutil.RequireFixtureToolchain(t)
 	// The whole build directory, so the run sees the CMake File API reply and
 	// can register the toolchain anchor, not just the compile database.
 	buildDir := testutil.CorpusBuildDir(t, "gcc-ninja", "p02-static")

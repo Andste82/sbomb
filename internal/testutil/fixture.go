@@ -120,3 +120,17 @@ func copyTree(source, destination string) error {
 		return os.WriteFile(target, data, 0o644)
 	})
 }
+
+// RequireFixtureToolchain skips a test whose expectation was captured on a host
+// that has the fixture corpus's GCC 13 at the path its evidence names. The run
+// reads the toolchain's startup objects and headers from the host at that path
+// -- /usr/lib/gcc/x86_64-linux-gnu/13 -- rather than from the corpus, so what it
+// hashes and reports depends on whether the host has them (issue #61). Where it
+// does not, Windows among them, the expectation does not apply and the test
+// says why instead of failing.
+func RequireFixtureToolchain(t testing.TB) {
+	t.Helper()
+	if _, err := os.Stat("/usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o"); err != nil {
+		t.Skip("the expectation reads the fixture's GCC 13 toolchain from this host, which has none at /usr/lib/gcc/x86_64-linux-gnu/13 (issue #61)")
+	}
+}
