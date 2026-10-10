@@ -80,7 +80,7 @@ flowchart LR
     DISC --> GRAPH["Evidence graph"]
     GRAPH --> INV["Inventory<br/><i>classify · hash · staleness</i>"]
     INV --> COMP["Components<br/><i>versions · licences · purls</i>"]
-    COMP --> DOC["CycloneDX 1.6 or 1.7<br/><i>written and validated</i>"]
+    COMP --> DOC["CycloneDX or SPDX<br/><i>written and validated</i>"]
     GRAPH --> POL["Policy<br/><i>findings · waivers · exit code</i>"]
     COMP --> POL
 ```
@@ -390,11 +390,92 @@ flowchart LR
     class X bad
 ```
 
+## One description, several formats
+
+Nothing above the last stage knows which format will be written. Discovery,
+inventory, components and licences end in one description of the run: the
+product, its deliverables, components, files, the edges between them, and the
+facts about each. A format is a rendering of that description, and adding one
+— or a version of one — touches nothing upstream.
+
+```mermaid
+flowchart LR
+    D["Description of the run<br/><i>format-neutral</i>"] --> S["Shared derivations<br/><i>identities · properties ·<br/>curated or observed</i>"]
+    S --> C["CycloneDX<br/><i>1.6 · 1.7</i>"]
+    S --> M["SPDX description<br/><i>packages · files · typed edges ·<br/>licences · VEX · patches</i>"]
+    M --> R3["SPDX 3.0.1"]
+    M -.-> R2["SPDX 2.3<br/><i>planned</i>"]
+    C --> VC["Schema and<br/>semantic check"]
+    R3 --> V["Conformance check<br/><i>schema + specification rules</i>"]
+    R2 -.-> V
+    V --> O["Own-output check<br/><i>what sbomb promises<br/>beyond conformance</i>"]
+    VC --> F["file<br/><i>written atomically</i>"]
+    O --> F
+```
+
+**Shared derivations.** What every format must agree on is decided once, below
+all of them: the identity of every product, deliverable, component and file;
+the `sbomb:` properties of each; and whether a licence was curated or observed.
+A CycloneDX reference and an SPDX identifier therefore name the same thing, and
+a shared property reaches every format. A format may add properties of its own
+for facts it has no field for — an SPDX document keeps the exact component
+type, the file class and the run's adapters as properties, which CycloneDX
+states in fields of its own or not at all — and the catalogue marks those as
+belonging to that format. How a format words a licence found in a file is its
+own: CycloneDX calls it declared only when the authors wrote the identifier
+themselves, SPDX calls every licence a tool found in a file declared and keeps
+"concluded" for a curated one.
+
+**One format, several versions.** CycloneDX 1.6 and 1.7 differ by a handful of
+fields on the same structure, so one rendering serves both. The SPDX versions
+share nothing at the serialization level, so the SPDX side has a description of
+its own — packages, files, edges by kind, licences, vulnerability statements,
+patches, in no version's vocabulary — and one renderer per version on top of it.
+SPDX 2.3 is the second renderer, not a second mapping. Where the versions can
+say different things, the description decides once from what the version can
+say: an exception the licence list does not carry gets a custom name of its own
+in SPDX 3, which has one, and makes the whole licence one custom licence in
+SPDX 2.3, which has none.
+
+**Two checks, two questions.** Every document is checked against the
+specification it declares, on the exact bytes about to be written: the official
+schema, and the rules a schema cannot express. For SPDX these are two separate
+questions. The specification permits things sbomb never does — a reference to
+an element defined in another document, for one — so the conformance check
+accepts them, and `validate` asks only that question: a correct document
+another tool wrote passes. A document sbomb writes is then also held to what
+sbomb promises beyond conformance — every reference resolves inside the
+document, every element is reachable from the product, every licence name is
+defined, and the profiles the document claims are exactly the ones it uses,
+except the extension profile, which SPDX's 3.0.1 context makes unclaimable in a
+form both official validators accept. That last one the specification does not ask of anyone: a claimed profile is an
+intention, not an inventory, so `validate` does not hold another tool's
+document to it. A document failing a check is not written, and a previous one at the
+same path is left as it was. SPDX's own model-level validator has no
+implementation the single executable could carry, so it runs in CI, on every
+SPDX reference document the tests compare against.
+
+**What SPDX states that a missing relationship cannot.** In CycloneDX every
+element is listed with what it depends on, and an empty list says "nothing". In
+SPDX an absent relationship means "no assertion", so sbomb states the empty
+case explicitly, as a relationship to the "none" element marked complete. How a
+component reached the deliverable becomes the relationship type — a static
+link, a dynamic link at run time, a build tool, an embedded asset, a header
+dependency. A generated source is not an edge of its own: the object built
+from it was linked, and the link is the edge.
+
+**What a request cannot change.** The format is settled before discovery, and
+the writer is asked then whether it can honour the request: a version it does
+not have, a distribution marking it has no field for, a reproducible creation
+time it cannot state. Each is refused before anything is read, rather than
+after a full run.
+
 ## What comes out
 
 | Output | Contents |
 |---|---|
 | `<name>.cdx.json` | The CycloneDX document, 1.6 by default and 1.7 on request. Validated against the official schema of the version it declares *and* semantically before it is written |
+| `<name>.spdx.json` | The SPDX 3.0.1 document, on request instead of CycloneDX. The same run, the same identities and properties, with typed relationships. Validated the same way, and against the invariants sbomb holds its own output to |
 | `evidence.json` | The full evidence graph — every node, every edge, its strength, confidence and source |
 | Findings JSON | Machine-readable diagnostics, with severity, subject and remediation |
 | Review report | The same for a human, with the evidence chains behind the answers, and the commands the run executed if it was allowed any |
@@ -402,8 +483,11 @@ flowchart LR
 `sbomb explain` answers the reverse question for one file or component: *why is
 this in my SBOM?* It prints the chains back to the deliverable.
 
-Three smaller commands round it out. `validate` checks an existing document
-against the CycloneDX schema and the semantic rules. `evidence` prints the graph
+Three smaller commands round it out. `validate` checks an existing document —
+CycloneDX or SPDX, recognised from the document itself — against the schema and
+the rules of the specification it declares. For SPDX that is all it checks. For
+CycloneDX it still applies some rules sbomb only promises for its own output,
+so a conformant document from another tool can fail. `evidence` prints the graph
 on its own. `self` describes sbomb itself — the tool that makes the claim is
 part of the claim.
 

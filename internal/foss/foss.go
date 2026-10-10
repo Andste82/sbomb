@@ -170,10 +170,12 @@ func Write(directory string, in Input) error {
 // It is deliberately not a schema of sbomb's own: section 36.1 requires the
 // writer layer to be format-agnostic so that SPDX can be added without
 // touching anything below it, and a hand-rolled JSON review format beside it
-// would violate exactly that rule. When the SPDX writer arrives, this file is
-// produced by it and this intermediate form is retired rather than kept.
+// would violate exactly that rule. It stays a CycloneDX rendering when the
+// SBOM itself is written as SPDX: reviewers and the tools that read this file
+// rely on one shape, and the SBOM's format is a choice about the deliverable,
+// not about the review record.
 func writeReviewJSON(directory string, in Input) error {
-	writer, specVersion, err := sbomwriter.Resolve("cyclonedx-json", in.SpecVersion)
+	writer, specVersion, err := sbomwriter.Resolve(sbomwriter.DefaultFormat, in.SpecVersion)
 	if err != nil {
 		return err
 	}
@@ -186,6 +188,9 @@ func writeReviewJSON(directory string, in Input) error {
 		TLP:          in.TLP,
 		LicenseText:  sbomwriter.LicenseTextEvidence,
 		Reproducible: in.Reproducible,
+		// A view of the SBOM for a reviewer, not a second SBOM: it carries no
+		// identity of its own that somebody could track it by.
+		OmitIdentity: true,
 	})
 	if err != nil {
 		return err

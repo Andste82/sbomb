@@ -2,20 +2,22 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/example/sbomb/internal/buildinfo"
 	"github.com/example/sbomb/internal/config"
-	"github.com/example/sbomb/internal/cyclonedx"
+	// The writers this command can select are registered by importing them,
+	// here and nowhere else, so that what the binary can write is decided in
+	// one visible place rather than by whichever package happens to import one.
+	_ "github.com/example/sbomb/internal/cyclonedx"
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/evidence"
 	"github.com/example/sbomb/internal/exec"
@@ -27,6 +29,7 @@ import (
 	"github.com/example/sbomb/internal/policy"
 	"github.com/example/sbomb/internal/report"
 	"github.com/example/sbomb/internal/sbomwriter"
+	_ "github.com/example/sbomb/internal/spdx"
 )
 
 func main() {
@@ -130,13 +133,44 @@ func isAllV(s string) bool {
 	return true
 }
 
+// handleSchema prints a schema: the configuration's by default, or the one a
+// document of a format and version is checked against. --cyclonedx is the
+// older spelling of --format cyclonedx-json and stays an alias of it.
 func handleSchema(args []string) (int, string, string) {
-	cyclone := false
+	format := ""
 	specVersion := ""
+	// spelling is how the user asked for the format so far, so that a
+	// conflict repeats what was typed: "--cyclonedx", not the format it
+	// stands for.
+	spelling := ""
+	choose := func(value, typed string) string {
+		if format != "" && format != value {
+			return fmt.Sprintf("%s and %s name two different formats\n", spelling, typed)
+		}
+		if format == "" {
+			format, spelling = value, typed
+		}
+		return ""
+	}
 	for i := 0; i < len(args); i++ {
 		switch {
 		case args[i] == "--cyclonedx":
-			cyclone = true
+			if conflict := choose(sbomwriter.DefaultFormat, "--cyclonedx"); conflict != "" {
+				return 1, "", conflict
+			}
+		case args[i] == "--format":
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --format\n"
+			}
+			if conflict := choose(args[i+1], "--format "+args[i+1]); conflict != "" {
+				return 1, "", conflict
+			}
+			i++
+		case strings.HasPrefix(args[i], "--format="):
+			value := strings.TrimPrefix(args[i], "--format=")
+			if conflict := choose(value, "--format "+value); conflict != "" {
+				return 1, "", conflict
+			}
 		case args[i] == "--spec-version":
 			if i+1 >= len(args) {
 				return 1, "", "missing value for --spec-version\n"
@@ -147,19 +181,29 @@ func handleSchema(args []string) (int, string, string) {
 			specVersion = strings.TrimPrefix(args[i], "--spec-version=")
 		}
 	}
-	if !cyclone {
+	if format == "" {
 		if specVersion != "" {
-			return 1, "", "--spec-version selects a CycloneDX schema and needs --cyclonedx\n"
+			return 1, "", "--spec-version selects the schema of a document format and needs --format (or --cyclonedx)\n"
 		}
 		return 0, config.Schema() + "\n", ""
 	}
 	// Which schema a document is checked against is the question this answers,
-	// so it has to be answerable for either version.
-	schema, err := cyclonedx.EmbeddedSchema(specVersion)
+	// so it has to be answerable for every format and version. The writer is
+	// found without the version, so that a version it has no schema for is
+	// refused by the writer, in the writer's words.
+	writer, _, err := sbomwriter.Resolve(format, "")
 	if err != nil {
 		return 1, "", err.Error() + "\n"
 	}
-	return 0, schema, ""
+	provider, provides := writer.(sbomwriter.SchemaProvider)
+	if !provides {
+		return 1, "", fmt.Sprintf("format %q serves no schema\n", writer.ID())
+	}
+	schema, err := provider.EmbeddedSchema(specVersion)
+	if err != nil {
+		return 1, "", err.Error() + "\n"
+	}
+	return 0, string(schema), ""
 }
 
 // handleValidate runs both validation layers over an existing document
@@ -197,16 +241,7 @@ func handleValidate(args []string) (int, string, string) {
 	if err := writer.Validate(bytes.NewReader(data)); err != nil {
 		return 4, "", err.Error() + "\n"
 	}
-	return 0, fmt.Sprintf("valid %s %s document: %s\n", formatLabel(writer.ID()), specVersion, input), ""
-}
-
-// formatLabel names a format the way a person writes it, rather than by the
-// identifier the registry keys on.
-func formatLabel(id string) string {
-	if id == "cyclonedx-json" {
-		return "CycloneDX"
-	}
-	return id
+	return 0, fmt.Sprintf("valid %s %s document: %s\n", formatLabel(writer), specVersion, input), ""
 }
 
 // handleEvidence dumps the evidence graph without producing an SBOM, which is
@@ -386,6 +421,10 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 	sourceDir := ""
 	mode := ""
 	specVersion := ""
+	// The serialization (section 32.2). Like --spec-version it overrides the
+	// configuration rather than adding to it, and an empty value leaves the
+	// configured format -- or the default -- in place.
+	outputFormat := ""
 	configName := ""
 	mapPath := ""
 	linkDepfile := ""
@@ -488,6 +527,14 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 			i++
 		case strings.HasPrefix(args[i], "--spec-version="):
 			specVersion = strings.TrimPrefix(args[i], "--spec-version=")
+		case args[i] == "--format":
+			if i+1 >= len(args) {
+				return 1, "", "missing value for --format\n"
+			}
+			outputFormat = args[i+1]
+			i++
+		case strings.HasPrefix(args[i], "--format="):
+			outputFormat = strings.TrimPrefix(args[i], "--format=")
 		case args[i] == "--config-name":
 			if i+1 >= len(args) {
 				return 1, "", "missing value for --config-name\n"
@@ -671,14 +718,6 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 				fossFormat, foss.FormatText, foss.FormatMarkdown)
 		}
 	}
-	// A version no writer emits is a usage error, refused here rather than at
-	// the write: nothing should be read, created or discovered on the strength
-	// of an argument that cannot be honoured.
-	if specVersion != "" {
-		if _, _, err := sbomwriter.Resolve("cyclonedx-json", specVersion); err != nil {
-			return 1, "", err.Error() + "\n"
-		}
-	}
 	var logBuf bytes.Buffer
 	var logWriter io.Writer
 	if verbosity > 0 {
@@ -695,11 +734,41 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 			return 1, logBuf.String(), err.Error() + "\n"
 		}
 	}
+	// output.specVersion is read from the configuration, and the flag overrides
+	// it, so a project that always wants 1.7 says so once. The configuration's
+	// own value was checked by the loader.
+	if specVersion != "" {
+		loadedCfg.Output.SpecVersion = specVersion
+	}
+	// The same for output.format. The pair is not reconciled: a configured
+	// 1.7 with --format spdx-json is refused below by the writer, naming the
+	// versions it has, rather than quietly replaced by a version nobody asked
+	// for.
+	if outputFormat != "" {
+		loadedCfg.Output.Format = outputFormat
+	}
+	// A project that wants comparable SBOMs wants them from every run, not
+	// only from the ones where somebody passed the flag, so the configuration
+	// can ask for it. The flag still forces it on for a single run; neither
+	// can turn the other off.
+	repro = repro || loadedCfg.Output.Reproducible
+	// The format and version to write, and whether the writer can honour the
+	// request -- a version no writer emits, or a configured TLP the chosen
+	// version cannot carry -- are settled here, as soon as the configuration
+	// that names them is read: nothing should be created or discovered on the
+	// strength of an argument that cannot be honoured.
+	selected, err := resolveOutput(loadedCfg.Output.Format, loadedCfg.Output.SpecVersion, sbomwriter.Options{
+		TLP:          loadedCfg.Output.TLP,
+		Reproducible: repro,
+	})
+	if err != nil {
+		return 1, logBuf.String(), err.Error() + "\n"
+	}
 	if err := os.MkdirAll(buildDir, 0o755); err != nil {
 		return 1, logBuf.String(), err.Error() + "\n"
 	}
 	if output == "" {
-		output = "sbomb.cdx.json"
+		output = "sbomb" + outputExtension(selected.writer)
 	}
 	flavor := pathmodel.DefaultFlavor()
 	switch strings.ToLower(pathFlavor) {
@@ -733,19 +802,6 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 	if configName != "" {
 		loadedCfg.Build.Config = configName
 	}
-	// output.specVersion is read from the configuration, and the flag overrides
-	// it, so a project that always wants 1.7 says so once. The configuration's
-	// own value was checked by the loader.
-	if specVersion != "" {
-		loadedCfg.Output.SpecVersion = specVersion
-	}
-	// A configured TLP that the chosen version cannot carry is a usage error,
-	// caught here rather than after a full discovery run.
-	if _, resolved, resolveErr := sbomwriter.Resolve("cyclonedx-json", loadedCfg.Output.SpecVersion); resolveErr == nil {
-		if loadedCfg.Output.TLP != "" && !cyclonedx.SupportsDistributionConstraints(resolved) {
-			return 1, logBuf.String(), fmt.Sprintf("output.tlp needs CycloneDX 1.7; this run writes %s\n", resolved)
-		}
-	}
 	loadedCfg.Manifests = append(loadedCfg.Manifests, imageManifests...)
 	loadedCfg.DistroManifests = append(loadedCfg.DistroManifests, distroManifests...)
 
@@ -763,12 +819,6 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 		return 1, logBuf.String(), err.Error() + "\n"
 	}
 	cliLogger.Info("Policy profile '%s' resolved", policyConfig.Profile)
-
-	// A project that wants comparable SBOMs wants them from every run, not
-	// only from the ones where somebody passed the flag, so the configuration
-	// can ask for it. The flag still forces it on for a single run; neither
-	// can turn the other off.
-	repro = repro || loadedCfg.Output.Reproducible
 
 	introspection, err := resolveIntrospection(loadedCfg, allowIntrospection, introspectionGroups)
 	if err != nil {
@@ -798,8 +848,8 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 	if err != nil {
 		return exitCodeFor(err, 2), logBuf.String(), err.Error() + "\n"
 	}
-	cliLogger.Info("Writing CycloneDX BOM to '%s'...", output)
-	if err := cyclonedx.WriteBOM(output, generated.BOM); err != nil {
+	cliLogger.Info("Writing %s %s document to '%s'...", formatLabel(generated.Writer), generated.SpecVersion, output)
+	if err := sbomwriter.WriteFile(output, generated.Writer, generated.Rendered); err != nil {
 		// Either validation layer failing is exit code 4 (section 32.5).
 		return 4, logBuf.String(), err.Error() + "\n"
 	}
@@ -839,13 +889,7 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 		return 1, logBuf.String(), err.Error() + "\n"
 	}
 	findings := generated.Findings
-	now := time.Now().UTC()
-	if epoch := os.Getenv("SOURCE_DATE_EPOCH"); epoch != "" {
-		if seconds, parseErr := strconv.ParseInt(epoch, 10, 64); parseErr == nil {
-			now = time.Unix(seconds, 0).UTC()
-		}
-	}
-	res := policy.Evaluate(findings, policyConfig, waivers, now)
+	res := policy.Evaluate(findings, policyConfig, waivers, runTimestamp())
 	cliLogger.Info("Policy evaluation complete: %d finding(s) (fail: %v, exit code: %d)", len(res.Findings), res.Fail, res.ExitCode)
 
 	if findingsJSONPath != "" {
@@ -1036,14 +1080,17 @@ func handleExplain(args []string) (int, string, string) {
 // neither example reached a node before.
 //
 // A bom-ref of a file is its identity behind "file:" (§28.4), so the prefix
-// comes off. A path is looked up as an identity first, because that is what
-// `explain` has always accepted and what the review report prints; failing
-// that, every anchor of the dump is offered it. Two anchors carrying one
-// relative path is an ambiguity rather than a choice: both are named and
-// nothing is picked, because picking would make the answer depend on map order.
+// comes off. An SPDX document names the same file by an IRI whose fragment is
+// that bom-ref, percent-encoded (§28.11.2), so a reader who copied the IRI out
+// of an SPDX document is answered as one who copied the bom-ref. A path is
+// looked up as an identity first, because that is what `explain` has always
+// accepted and what the review report prints; failing that, every anchor of
+// the dump is offered it. Two anchors carrying one relative path is an
+// ambiguity rather than a choice: both are named and nothing is picked,
+// because picking would make the answer depend on map order.
 func explainSubject(g *evidence.Graph, fileRef, bomRef string) (string, string) {
 	if bomRef != "" {
-		return strings.TrimPrefix(bomRef, "file:"), ""
+		return strings.TrimPrefix(localIdentity(bomRef), "file:"), ""
 	}
 	if _, found := g.Node(domain.NodeID(fileRef)); found {
 		return fileRef, ""
@@ -1064,6 +1111,24 @@ func explainSubject(g *evidence.Graph, fileRef, bomRef string) (string, string) 
 	default:
 		return "", fmt.Sprintf("%s is ambiguous: %s. Name one of them.\n", fileRef, strings.Join(matches, ", "))
 	}
+}
+
+// localIdentity turns an SPDX element IRI of the form urn:uuid:<U>#<local>
+// back into the local identity it was built from, and returns anything else as
+// it is. The fragment is percent-decoded; one that does not decode is kept as
+// it was typed, because a bom-ref may contain "%" and is then not an IRI.
+func localIdentity(reference string) string {
+	if !strings.HasPrefix(reference, "urn:uuid:") {
+		return reference
+	}
+	_, fragment, found := strings.Cut(reference, "#")
+	if !found {
+		return reference
+	}
+	if decoded, err := url.PathUnescape(fragment); err == nil {
+		return decoded
+	}
+	return fragment
 }
 
 func loadEvidenceGraph(buildDir string) (*evidence.Graph, error) {
@@ -1153,10 +1218,11 @@ func parseSize(value string) (int64, error) {
 // componentFilesFromSBOM expands a component name to the file identities the
 // document says it groups.
 //
-// The mapping is there and nowhere else: section 28's dependency cascade gives
-// every grouping component a dependsOn list of its `file:` refs, and a file
-// bom-ref is its identity behind that prefix (section 28.4) -- which is the
-// key the evidence graph uses. So the expansion is a lookup, not a search.
+// The document's format is detected, as validate does, and the writer of that
+// format reads it: which component a name means and which files it groups is
+// spelled differently in every format, and what a file identity is is not. So
+// the format-specific half is the writer's, and everything a user is told is
+// said here, in the same words for every format.
 //
 // Three refusals, each saying which of three different things went wrong: the
 // document cannot be read, the name is not in it, or the name is in it and
@@ -1168,61 +1234,23 @@ func componentFilesFromSBOM(g *evidence.Graph, path, component string) ([]string
 	if err != nil {
 		return nil, err.Error() + "\n"
 	}
-	var document struct {
-		Components []struct {
-			BomRef string `json:"bom-ref"`
-			Name   string `json:"name"`
-		} `json:"components"`
-		Dependencies []struct {
-			Ref       string   `json:"ref"`
-			DependsOn []string `json:"dependsOn"`
-		} `json:"dependencies"`
-	}
-	if err := json.Unmarshal(data, &document); err != nil {
+	writer, _, err := sbomwriter.DetectFormat(data)
+	if err != nil {
 		return nil, fmt.Sprintf("%s is not a document this can read: %v\n", path, err)
 	}
-
-	// By bom-ref first, because that is what the document is keyed by and what
-	// the review report prints; by name second, because that is what a person
-	// types. A toolchain component is a grouping component too and its ref
-	// carries its own prefix.
-	ref := ""
-	for _, candidate := range []string{component, "component:" + component, "toolchain:" + component} {
-		for _, entry := range document.Components {
-			if entry.BomRef == candidate {
-				ref = entry.BomRef
-				break
-			}
-		}
-		if ref != "" {
-			break
-		}
+	reader, reads := writer.(sbomwriter.ComponentReader)
+	if !reads {
+		return nil, fmt.Sprintf("%s is a %s document, which this build cannot read components from\n", path, formatLabel(writer))
 	}
-	if ref == "" {
-		for _, entry := range document.Components {
-			if entry.Name == component {
-				ref = entry.BomRef
-				break
-			}
-		}
-	}
-	if ref == "" {
+	files, err := reader.ComponentFiles(data, component)
+	if errors.Is(err, sbomwriter.ErrNoSuchComponent) {
 		return nil, fmt.Sprintf("%s names no component %s\n", path, component)
 	}
-
-	files := make([]string, 0)
-	for _, dependency := range document.Dependencies {
-		if dependency.Ref != ref {
-			continue
-		}
-		for _, on := range dependency.DependsOn {
-			if identity, found := strings.CutPrefix(on, "file:"); found {
-				files = append(files, identity)
-			}
-		}
+	if err != nil {
+		return nil, fmt.Sprintf("%s is not a document this can read: %v\n", path, err)
 	}
 	if len(files) == 0 {
-		return nil, fmt.Sprintf("%s groups no file under %s, so there is nothing to explain\n", path, ref)
+		return nil, fmt.Sprintf("%s groups no file under %s, so there is nothing to explain\n", path, component)
 	}
 	known := 0
 	for _, identity := range files {
@@ -1231,7 +1259,7 @@ func componentFilesFromSBOM(g *evidence.Graph, path, component string) ([]string
 		}
 	}
 	if known == 0 {
-		return nil, fmt.Sprintf("no file of %s is in this build directory's evidence: %s describes a different build\n", ref, path)
+		return nil, fmt.Sprintf("no file of %s is in this build directory's evidence: %s describes a different build\n", component, path)
 	}
 	sort.Strings(files)
 	return files, ""

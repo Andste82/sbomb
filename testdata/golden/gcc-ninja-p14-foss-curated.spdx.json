@@ -1,0 +1,4251 @@
+{
+  "@context": "https://spdx.org/rdf/3.0.1/spdx-context.jsonld",
+  "@graph": [
+    {
+      "type": "CreationInfo",
+      "@id": "_:creationInfo1",
+      "specVersion": "3.0.1",
+      "created": "2023-11-14T22:13:20Z",
+      "createdBy": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#agent:sbomb"
+      ],
+      "createdUsing": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#tool:sbomb"
+      ]
+    },
+    {
+      "type": "SpdxDocument",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#document",
+      "creationInfo": "_:creationInfo1",
+      "name": "p14-foss-curated",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:build:config",
+              "extension_cdxPropValue": "Debug"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:build:generator",
+              "extension_cdxPropValue": "Ninja"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:adapters",
+              "extension_cdxPropValue": "binfmt"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:adapters",
+              "extension_cdxPropValue": "depfiles"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:adapters",
+              "extension_cdxPropValue": "linker-depfile"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:adapters",
+              "extension_cdxPropValue": "linker-map"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:adapters",
+              "extension_cdxPropValue": "ninja"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:adapters",
+              "extension_cdxPropValue": "resolver"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:reproducible",
+              "extension_cdxPropValue": "true"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:specVersion",
+              "extension_cdxPropValue": "3.0.1"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:toolVersion",
+              "extension_cdxPropValue": "0.0.0-test"
+            }
+          ]
+        }
+      ],
+      "element": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#sbom",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#agent:Apache%20Lib%20Maintainers",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#agent:Example%20Supplier%20Ltd",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#agent:Example%20Upstream%20Project",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#agent:sbomb",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#tool:sbomb",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:apache-lib",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:bsd-hdr",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:gpl-gen",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:lgpl-lib",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:mit-lib",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:multi-license",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:nocopyright",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:nolicense",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:p14-foss-curated",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:vendored-mix",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#product:p14-foss-curated",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:build:generated/table.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/apache-lib/LICENSE",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/apache-lib/NOTICE",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/apache-lib/include/apache_lib.h",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/apache-lib/src/apache_one.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/apache-lib/src/apache_two.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/bsd-hdr/LICENSE",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/bsd-hdr/include/bsd_hdr.h",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/gpl-gen/LICENSE",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/gpl-gen/table_gen.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/lgpl-lib/LICENSE",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/lgpl-lib/include/lgpl_lib.h",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/lgpl-lib/src/lgpl_core.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/lgpl-lib/src/lgpl_extra.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/mit-lib/LICENSE",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/mit-lib/include/mit_lib.h",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/mit-lib/src/mit_a.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/multi-license/LICENSE-APACHE",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/multi-license/LICENSE-MIT",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/multi-license/include/multi.h",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/multi-license/src/multi.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/nocopyright/LICENSE",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/nocopyright/include/nocopyright.h",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/nocopyright/src/nocopyright.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/nolicense/include/nolicense.h",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/nolicense/src/nolicense.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/vendored-mix/LICENSE",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/vendored-mix/include/vendored_mix.h",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/vendored-mix/src/mix_core.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/vendored-mix/src/mix_vendored_crc.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:src/main.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#vulnerability:CVE-2024-0001",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#vulnerability:CVE-2024-0002",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license-text:LicenseRef-sbomb-Example-Proprietary-Licence-2526dfe7",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:0BSD",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:Apache-2.0",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:BSD-3-Clause",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:GPL-2.0-only",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:LicenseRef-sbomb-Example-Proprietary-Licence-2526dfe7",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:MIT",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:MIT%20OR%20Apache-2.0",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:1",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:2",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:3",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:4",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:5",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:6",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:7",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:8",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:9",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:10",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:11",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:12",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:13",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:14",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:15",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:16",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:17",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:18",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:19",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:20",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:21",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:22",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:23",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:24",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:25",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:26",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:27",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:28",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:29",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:30",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:31",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:32",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:33",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:34",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:35",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:36",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:37",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:38",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:39",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:40",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:41",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:42",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:43",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:44",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:45",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:46",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:47",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:48",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:49",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:50",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:51",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:52",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:53",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:54",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:55",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:56",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:57",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:58",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:59",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:60",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:61",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:62",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:63",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:64"
+      ],
+      "profileConformance": [
+        "core",
+        "security",
+        "simpleLicensing",
+        "software"
+      ],
+      "rootElement": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#sbom"
+      ]
+    },
+    {
+      "type": "software_Sbom",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#sbom",
+      "creationInfo": "_:creationInfo1",
+      "element": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#agent:Apache%20Lib%20Maintainers",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#agent:Example%20Supplier%20Ltd",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#agent:Example%20Upstream%20Project",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#agent:sbomb",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#tool:sbomb",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:apache-lib",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:bsd-hdr",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:gpl-gen",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:lgpl-lib",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:mit-lib",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:multi-license",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:nocopyright",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:nolicense",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:p14-foss-curated",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:vendored-mix",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#product:p14-foss-curated",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:build:generated/table.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/apache-lib/LICENSE",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/apache-lib/NOTICE",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/apache-lib/include/apache_lib.h",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/apache-lib/src/apache_one.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/apache-lib/src/apache_two.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/bsd-hdr/LICENSE",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/bsd-hdr/include/bsd_hdr.h",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/gpl-gen/LICENSE",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/gpl-gen/table_gen.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/lgpl-lib/LICENSE",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/lgpl-lib/include/lgpl_lib.h",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/lgpl-lib/src/lgpl_core.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/lgpl-lib/src/lgpl_extra.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/mit-lib/LICENSE",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/mit-lib/include/mit_lib.h",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/mit-lib/src/mit_a.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/multi-license/LICENSE-APACHE",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/multi-license/LICENSE-MIT",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/multi-license/include/multi.h",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/multi-license/src/multi.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/nocopyright/LICENSE",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/nocopyright/include/nocopyright.h",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/nocopyright/src/nocopyright.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/nolicense/include/nolicense.h",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/nolicense/src/nolicense.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/vendored-mix/LICENSE",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/vendored-mix/include/vendored_mix.h",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/vendored-mix/src/mix_core.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/vendored-mix/src/mix_vendored_crc.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:src/main.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#vulnerability:CVE-2024-0001",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#vulnerability:CVE-2024-0002",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license-text:LicenseRef-sbomb-Example-Proprietary-Licence-2526dfe7",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:0BSD",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:Apache-2.0",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:BSD-3-Clause",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:GPL-2.0-only",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:LicenseRef-sbomb-Example-Proprietary-Licence-2526dfe7",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:MIT",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:MIT%20OR%20Apache-2.0",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:1",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:2",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:3",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:4",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:5",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:6",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:7",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:8",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:9",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:10",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:11",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:12",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:13",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:14",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:15",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:16",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:17",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:18",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:19",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:20",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:21",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:22",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:23",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:24",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:25",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:26",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:27",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:28",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:29",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:30",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:31",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:32",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:33",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:34",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:35",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:36",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:37",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:38",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:39",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:40",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:41",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:42",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:43",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:44",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:45",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:46",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:47",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:48",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:49",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:50",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:51",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:52",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:53",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:54",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:55",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:56",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:57",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:58",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:59",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:60",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:61",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:62",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:63",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:64"
+      ],
+      "rootElement": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#product:p14-foss-curated"
+      ],
+      "software_sbomType": [
+        "build"
+      ]
+    },
+    {
+      "type": "Organization",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#agent:Apache%20Lib%20Maintainers",
+      "creationInfo": "_:creationInfo1",
+      "name": "Apache Lib Maintainers"
+    },
+    {
+      "type": "Organization",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#agent:Example%20Supplier%20Ltd",
+      "creationInfo": "_:creationInfo1",
+      "name": "Example Supplier Ltd"
+    },
+    {
+      "type": "Organization",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#agent:Example%20Upstream%20Project",
+      "creationInfo": "_:creationInfo1",
+      "name": "Example Upstream Project"
+    },
+    {
+      "type": "Organization",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#agent:sbomb",
+      "creationInfo": "_:creationInfo1",
+      "name": "sbomb"
+    },
+    {
+      "type": "Tool",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#tool:sbomb",
+      "creationInfo": "_:creationInfo1",
+      "name": "sbomb",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:toolVersion",
+              "extension_cdxPropValue": "0.0.0-test"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:apache-lib",
+      "creationInfo": "_:creationInfo1",
+      "name": "apache-lib",
+      "externalIdentifier": [
+        {
+          "type": "ExternalIdentifier",
+          "externalIdentifierType": "packageUrl",
+          "identifier": "pkg:generic/apache-lib@2.4.0"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:archiveMembersUsed",
+              "extension_cdxPropValue": "2/2"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:detectedBy",
+              "extension_cdxPropValue": "curated"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:licenseFile",
+              "extension_cdxPropValue": "project:dep/apache-lib/LICENSE@sha256:0b8f6fef304298b6a8a8ad91e7a5b0b2255231f39c8fc4ab84774f8e22d07f98"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "static-archive-member"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:modified",
+              "extension_cdxPropValue": "unknown"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:noticeFile",
+              "extension_cdxPropValue": "project:dep/apache-lib/NOTICE@sha256:c499743d9175cc82bc99be3600c9303257d66a55ada9c7b3f78323a3c2d7610c"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:root",
+              "extension_cdxPropValue": "project:dep/apache-lib"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "third-party"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "library"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "component-level"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:source",
+              "extension_cdxPropValue": "curated"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:version:confidence",
+              "extension_cdxPropValue": "high"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:version:source",
+              "extension_cdxPropValue": "curated"
+            }
+          ]
+        }
+      ],
+      "suppliedBy": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#agent:Apache%20Lib%20Maintainers",
+      "software_copyrightText": "Copyright 2024 The Apache Lib Authors",
+      "software_primaryPurpose": "library",
+      "software_packageUrl": "pkg:generic/apache-lib@2.4.0",
+      "software_packageVersion": "2.4.0"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:bsd-hdr",
+      "creationInfo": "_:creationInfo1",
+      "name": "bsd-hdr",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:detectedBy",
+              "extension_cdxPropValue": "package-metadata:LICENSE"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:headerOnly",
+              "extension_cdxPropValue": "true"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:licenseFile",
+              "extension_cdxPropValue": "project:dep/bsd-hdr/LICENSE@sha256:4bd971475aab8e30017fb65c7f5a6c4da171ee8ee25b3580fad812227f8cb2a2"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "header-only"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:modified",
+              "extension_cdxPropValue": "unknown"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:root",
+              "extension_cdxPropValue": "project:dep/bsd-hdr"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "third-party"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "library"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "file-level"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:source",
+              "extension_cdxPropValue": "project:dep/bsd-hdr/include/bsd_hdr.h"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-identifier"
+            }
+          ]
+        }
+      ],
+      "software_additionalPurpose": [
+        "source"
+      ],
+      "software_primaryPurpose": "library"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:gpl-gen",
+      "creationInfo": "_:creationInfo1",
+      "name": "gpl-gen",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:detectedBy",
+              "extension_cdxPropValue": "package-metadata:LICENSE"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:distributionRole",
+              "extension_cdxPropValue": "build-time-only"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:licenseFile",
+              "extension_cdxPropValue": "project:dep/gpl-gen/LICENSE@sha256:fe84827856780d1c70e8a0248fc622b0516c8787fd560262356289f465907855"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "build-tool"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:modified",
+              "extension_cdxPropValue": "unknown"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:root",
+              "extension_cdxPropValue": "project:dep/gpl-gen"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "third-party"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "library"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "file-level"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:source",
+              "extension_cdxPropValue": "project:dep/gpl-gen/table_gen.c"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-identifier"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "library"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:lgpl-lib",
+      "creationInfo": "_:creationInfo1",
+      "name": "lgpl-lib",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:archiveMembersUsed",
+              "extension_cdxPropValue": "2/2"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:detectedBy",
+              "extension_cdxPropValue": "curated"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:licenseFile",
+              "extension_cdxPropValue": "project:dep/lgpl-lib/LICENSE@sha256:504f56052b78bda68423747cc50aa469ec5412654c000c87e181de257d2cfc86"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "static-archive-member"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:modified",
+              "extension_cdxPropValue": "unknown"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:root",
+              "extension_cdxPropValue": "project:dep/lgpl-lib"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "third-party"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "library"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:conflictingValue",
+              "extension_cdxPropValue": "LGPL-2.1-only"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:review:required",
+              "extension_cdxPropValue": "true"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:version:confidence",
+              "extension_cdxPropValue": "high"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:version:source",
+              "extension_cdxPropValue": "curated"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "library",
+      "software_packageVersion": "3.1.0"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:mit-lib",
+      "creationInfo": "_:creationInfo1",
+      "name": "mit-lib",
+      "description": "A small MIT-licensed helper library the fixture links statically.",
+      "externalIdentifier": [
+        {
+          "type": "ExternalIdentifier",
+          "externalIdentifierType": "cpe23",
+          "identifier": "cpe:2.3:a:example:mit-lib:1.4.0:*:*:*:*:*:*:*"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:archiveMembersUsed",
+              "extension_cdxPropValue": "1/3"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:cveExclusion",
+              "extension_cdxPropValue": "CVE-2024-0001: the parser this affects is not built"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:cveExclusion",
+              "extension_cdxPropValue": "CVE-2024-0002"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:detectedBy",
+              "extension_cdxPropValue": "package-metadata:LICENSE"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:licenseFile",
+              "extension_cdxPropValue": "project:dep/mit-lib/LICENSE@sha256:931fcdc2d230c2d176c937a73a35d00af205d8414ec6526c83654fadb5d2f52d"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "static-archive-member"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:modified",
+              "extension_cdxPropValue": "unknown"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:originator",
+              "extension_cdxPropValue": "Example Upstream Project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:root",
+              "extension_cdxPropValue": "project:dep/mit-lib"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "third-party"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "library"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "file-level"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:source",
+              "extension_cdxPropValue": "project:dep/mit-lib/include/mit_lib.h"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-identifier"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:version:confidence",
+              "extension_cdxPropValue": "high"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:version:source",
+              "extension_cdxPropValue": "bundled-sbom"
+            }
+          ]
+        }
+      ],
+      "originatedBy": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#agent:Example%20Upstream%20Project"
+      ],
+      "suppliedBy": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#agent:Example%20Supplier%20Ltd",
+      "software_primaryPurpose": "library",
+      "software_packageVersion": "1.4.0"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:multi-license",
+      "creationInfo": "_:creationInfo1",
+      "name": "multi-license",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:archiveMembersUsed",
+              "extension_cdxPropValue": "1/1"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:detectedBy",
+              "extension_cdxPropValue": "curated"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:licenseFile",
+              "extension_cdxPropValue": "project:dep/multi-license/LICENSE-APACHE@sha256:0b8f6fef304298b6a8a8ad91e7a5b0b2255231f39c8fc4ab84774f8e22d07f98"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:licenseFile",
+              "extension_cdxPropValue": "project:dep/multi-license/LICENSE-MIT@sha256:59d026162035ee799ad4a49867be3ef92276bfe13250cf10796ec0d3b856596e"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "static-archive-member"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:modified",
+              "extension_cdxPropValue": "unknown"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:root",
+              "extension_cdxPropValue": "project:dep/multi-license"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "third-party"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "library"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "component-level"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:source",
+              "extension_cdxPropValue": "curated"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:version:confidence",
+              "extension_cdxPropValue": "high"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:version:source",
+              "extension_cdxPropValue": "curated"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "library",
+      "software_packageVersion": "1.0.0"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:nocopyright",
+      "creationInfo": "_:creationInfo1",
+      "name": "nocopyright",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:archiveMembersUsed",
+              "extension_cdxPropValue": "1/1"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:detectedBy",
+              "extension_cdxPropValue": "package-metadata:LICENSE"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:licenseFile",
+              "extension_cdxPropValue": "project:dep/nocopyright/LICENSE@sha256:6fd46bc279753ff2f06019924d5e4877729545e72c93165d2fb3bab0bdeebec2"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "static-archive-member"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:modified",
+              "extension_cdxPropValue": "unknown"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:root",
+              "extension_cdxPropValue": "project:dep/nocopyright"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "third-party"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "library"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "file-level"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:source",
+              "extension_cdxPropValue": "project:dep/nocopyright/include/nocopyright.h"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-identifier"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "library"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:nolicense",
+      "creationInfo": "_:creationInfo1",
+      "name": "nolicense",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:archiveMembersUsed",
+              "extension_cdxPropValue": "1/1"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:detectedBy",
+              "extension_cdxPropValue": "curated"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "static-archive-member"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:modified",
+              "extension_cdxPropValue": "unknown"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:root",
+              "extension_cdxPropValue": "project:dep/nolicense"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "third-party"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "library"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "component-level"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:source",
+              "extension_cdxPropValue": "curated"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:version:confidence",
+              "extension_cdxPropValue": "high"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:version:source",
+              "extension_cdxPropValue": "curated"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "library",
+      "software_packageVersion": "0.3.0"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:p14-foss-curated",
+      "creationInfo": "_:creationInfo1",
+      "name": "p14-foss-curated",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "unstructured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:detectedBy",
+              "extension_cdxPropValue": "anchor:project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "static-object"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:modified",
+              "extension_cdxPropValue": "unknown"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:root",
+              "extension_cdxPropValue": "project:"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "application"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "file-level"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:source",
+              "extension_cdxPropValue": "project:src/main.c"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-identifier"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "application"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:vendored-mix",
+      "creationInfo": "_:creationInfo1",
+      "name": "vendored-mix",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:archiveMembersUsed",
+              "extension_cdxPropValue": "2/2"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:detectedBy",
+              "extension_cdxPropValue": "package-metadata:LICENSE"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:licenseFile",
+              "extension_cdxPropValue": "project:dep/vendored-mix/LICENSE@sha256:6c266bb793425c487074cc6d2106024537fd728f6caa2ff59f882d5ca6570182"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "static-archive-member"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:modified",
+              "extension_cdxPropValue": "unknown"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:root",
+              "extension_cdxPropValue": "project:dep/vendored-mix"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "third-party"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "library"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "file-level"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:source",
+              "extension_cdxPropValue": "project:dep/vendored-mix/include/vendored_mix.h"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-identifier"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "library"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#product:p14-foss-curated",
+      "creationInfo": "_:creationInfo1",
+      "name": "p14-foss-curated",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:artifact:role",
+              "extension_cdxPropValue": "application"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "unstructured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "application"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "application"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:build:generated/table.c",
+      "creationInfo": "_:creationInfo1",
+      "name": "build:generated/table.c",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "e1f86d9804ada8505f7a07c96b8bc3dc0c5e736b4227402ecf1d88087d7fae0b"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "build"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "source"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "static-object"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:size",
+              "extension_cdxPropValue": "113"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "build:generated/table.c"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/apache-lib/LICENSE",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/apache-lib/LICENSE",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "0b8f6fef304298b6a8a8ad91e7a5b0b2255231f39c8fc4ab84774f8e22d07f98"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/apache-lib/LICENSE"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "documentation",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/apache-lib/NOTICE",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/apache-lib/NOTICE",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "c499743d9175cc82bc99be3600c9303257d66a55ada9c7b3f78323a3c2d7610c"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/apache-lib/NOTICE"
+            }
+          ]
+        }
+      ],
+      "software_copyrightText": "Copyright 2026 Fixture Apache Library Authors",
+      "software_primaryPurpose": "documentation",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/apache-lib/include/apache_lib.h",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/apache-lib/include/apache_lib.h",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "276eb9575be113a794f3789409437404a2b60045bbbd09aef2523db15a4b720d"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:header:class",
+              "extension_cdxPropValue": "third-party-header"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "header"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "header-only"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:size",
+              "extension_cdxPropValue": "197"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/apache-lib/include/apache_lib.h"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/apache-lib/src/apache_one.c",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/apache-lib/src/apache_one.c",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "82ff9ab94c732e37bf89695cc17c57d3c3f539521cdcfa30248044d4c68f4c47"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "source"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "static-archive-member"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:size",
+              "extension_cdxPropValue": "169"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/apache-lib/src/apache_one.c"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/apache-lib/src/apache_two.c",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/apache-lib/src/apache_two.c",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "17f3f78e4db04aaed9609f69d84327f051ef05832c332fe2fbbdb40066a56f6d"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "source"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "static-archive-member"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:size",
+              "extension_cdxPropValue": "169"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/apache-lib/src/apache_two.c"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/bsd-hdr/LICENSE",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/bsd-hdr/LICENSE",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "4bd971475aab8e30017fb65c7f5a6c4da171ee8ee25b3580fad812227f8cb2a2"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/bsd-hdr/LICENSE"
+            }
+          ]
+        }
+      ],
+      "software_copyrightText": "Copyright (c) 2026, Fixture BSD Header Authors",
+      "software_primaryPurpose": "documentation",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/bsd-hdr/include/bsd_hdr.h",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/bsd-hdr/include/bsd_hdr.h",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "b440f5903223b3a73894bc91ccec2c661302205f409b74fd174b7f0de20fa93d"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:header:class",
+              "extension_cdxPropValue": "project-header"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "header"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "header-only"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:size",
+              "extension_cdxPropValue": "377"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/bsd-hdr/include/bsd_hdr.h"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/gpl-gen/LICENSE",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/gpl-gen/LICENSE",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "fe84827856780d1c70e8a0248fc622b0516c8787fd560262356289f465907855"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/gpl-gen/LICENSE"
+            }
+          ]
+        }
+      ],
+      "software_copyrightText": "Copyright (C) 1989, 1991 Free Software Foundation, Inc.",
+      "software_primaryPurpose": "documentation",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/gpl-gen/table_gen.c",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/gpl-gen/table_gen.c",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "0fc1a9accdc2f926915e2055cc8606fe5cc656de79706ba5d965d6168a647c8b"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "source"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "build-time-only"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "build-tool"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:size",
+              "extension_cdxPropValue": "808"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/gpl-gen/table_gen.c"
+            }
+          ]
+        }
+      ],
+      "software_copyrightText": "Copyright (C) 2026 Fixture GPL Generator Authors",
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/lgpl-lib/LICENSE",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/lgpl-lib/LICENSE",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "504f56052b78bda68423747cc50aa469ec5412654c000c87e181de257d2cfc86"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/lgpl-lib/LICENSE"
+            }
+          ]
+        }
+      ],
+      "software_copyrightText": "Copyright (C) 1991, 1999 Free Software Foundation, Inc.",
+      "software_primaryPurpose": "documentation",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/lgpl-lib/include/lgpl_lib.h",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/lgpl-lib/include/lgpl_lib.h",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "f7fd638c0e4823c696c610a8b1019065e335b8dd59cd33ccc6dd17ef22ea1c0e"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:header:class",
+              "extension_cdxPropValue": "third-party-header"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "header"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "header-only"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:size",
+              "extension_cdxPropValue": "197"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/lgpl-lib/include/lgpl_lib.h"
+            }
+          ]
+        }
+      ],
+      "software_copyrightText": "Copyright (C) 2026 Fixture LGPL Library Authors",
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/lgpl-lib/src/lgpl_core.c",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/lgpl-lib/src/lgpl_core.c",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "6b2ef29c847374d7937429440ad2d2d85dec26c77f0da5a216fcd6292548a33e"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "source"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "static-archive-member"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:size",
+              "extension_cdxPropValue": "171"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/lgpl-lib/src/lgpl_core.c"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/lgpl-lib/src/lgpl_extra.c",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/lgpl-lib/src/lgpl_extra.c",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "4446475e8917e5484af96db6353aa6d0a6ee7e729feebd2c39d3da02e2858d73"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "source"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "static-archive-member"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:size",
+              "extension_cdxPropValue": "234"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/lgpl-lib/src/lgpl_extra.c"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/mit-lib/LICENSE",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/mit-lib/LICENSE",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "931fcdc2d230c2d176c937a73a35d00af205d8414ec6526c83654fadb5d2f52d"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/mit-lib/LICENSE"
+            }
+          ]
+        }
+      ],
+      "software_copyrightText": "Copyright (c) 2026 Fixture MIT Library Authors",
+      "software_primaryPurpose": "documentation",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/mit-lib/include/mit_lib.h",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/mit-lib/include/mit_lib.h",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "5de679e7144d715e468c751004cdfa3c70072fac6876568dd139e87e2853a90c"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:header:class",
+              "extension_cdxPropValue": "project-header"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "header"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "header-only"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:size",
+              "extension_cdxPropValue": "218"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/mit-lib/include/mit_lib.h"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/mit-lib/src/mit_a.c",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/mit-lib/src/mit_a.c",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "6d8a045c61248f33f7acd4ceebc41d709361632f2727fa229f95fd45efc2d14d"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "source"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "static-archive-member"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:size",
+              "extension_cdxPropValue": "160"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/mit-lib/src/mit_a.c"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/multi-license/LICENSE-APACHE",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/multi-license/LICENSE-APACHE",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "0b8f6fef304298b6a8a8ad91e7a5b0b2255231f39c8fc4ab84774f8e22d07f98"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/multi-license/LICENSE-APACHE"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "documentation",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/multi-license/LICENSE-MIT",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/multi-license/LICENSE-MIT",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "59d026162035ee799ad4a49867be3ef92276bfe13250cf10796ec0d3b856596e"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/multi-license/LICENSE-MIT"
+            }
+          ]
+        }
+      ],
+      "software_copyrightText": "Copyright (c) 2026 Fixture Dual Licensed Authors",
+      "software_primaryPurpose": "documentation",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/multi-license/include/multi.h",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/multi-license/include/multi.h",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "b2ca841a99e63effd2eff4f3ff951baadca75ea3fa00ff537a7b6181532825e4"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:header:class",
+              "extension_cdxPropValue": "third-party-header"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "header"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "header-only"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:size",
+              "extension_cdxPropValue": "170"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/multi-license/include/multi.h"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/multi-license/src/multi.c",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/multi-license/src/multi.c",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "b5ad33121d4d1761c87f00529f300cb49f8e7525f24fb3e517f9b7d5ce64b4d4"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "source"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "static-archive-member"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:size",
+              "extension_cdxPropValue": "174"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/multi-license/src/multi.c"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/nocopyright/LICENSE",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/nocopyright/LICENSE",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "6fd46bc279753ff2f06019924d5e4877729545e72c93165d2fb3bab0bdeebec2"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/nocopyright/LICENSE"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "documentation",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/nocopyright/include/nocopyright.h",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/nocopyright/include/nocopyright.h",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "6edd8b836dc7737777c270b88dba18a0d527e4c06033cd4b672b3fa3ca57e461"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:header:class",
+              "extension_cdxPropValue": "project-header"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "header"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "header-only"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:size",
+              "extension_cdxPropValue": "121"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/nocopyright/include/nocopyright.h"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/nocopyright/src/nocopyright.c",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/nocopyright/src/nocopyright.c",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "34758173c7c791ae856efdb33c7f860c69e8c50e4dbda96261a746175e718ee7"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "source"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "static-archive-member"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:size",
+              "extension_cdxPropValue": "267"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/nocopyright/src/nocopyright.c"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/nolicense/include/nolicense.h",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/nolicense/include/nolicense.h",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "48297112fd9548f6232a8c68db803cbf69b4ea3f6794f32e070f772369eee672"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:header:class",
+              "extension_cdxPropValue": "third-party-header"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "header"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "header-only"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:size",
+              "extension_cdxPropValue": "131"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/nolicense/include/nolicense.h"
+            }
+          ]
+        }
+      ],
+      "software_copyrightText": "Copyright (c) 2026 Fixture Unlicensed Authors",
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/nolicense/src/nolicense.c",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/nolicense/src/nolicense.c",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "13ffe47de986df0b8435a1046f4954a3563151aba635e64a3c5b44480c98b5be"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "source"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "static-archive-member"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:size",
+              "extension_cdxPropValue": "292"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/nolicense/src/nolicense.c"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/vendored-mix/LICENSE",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/vendored-mix/LICENSE",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "6c266bb793425c487074cc6d2106024537fd728f6caa2ff59f882d5ca6570182"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/vendored-mix/LICENSE"
+            }
+          ]
+        }
+      ],
+      "software_copyrightText": "Copyright (c) 2026 Fixture Vendored Mix Authors",
+      "software_primaryPurpose": "documentation",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/vendored-mix/include/vendored_mix.h",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/vendored-mix/include/vendored_mix.h",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "11da68ae40c921e72d4e7b3d3a4dd6102fddbdad6a30fdf77d0db392677004b1"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:header:class",
+              "extension_cdxPropValue": "project-header"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "header"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "header-only"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:size",
+              "extension_cdxPropValue": "200"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/vendored-mix/include/vendored_mix.h"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/vendored-mix/src/mix_core.c",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/vendored-mix/src/mix_core.c",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "cfb6a7837c29b6993332ff454e2fa9ddd30b10667e622049cc2149b582d0b4b0"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "source"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "static-archive-member"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:size",
+              "extension_cdxPropValue": "182"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/vendored-mix/src/mix_core.c"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/vendored-mix/src/mix_vendored_crc.c",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:dep/vendored-mix/src/mix_vendored_crc.c",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "e51327f6fe7fbc1731b2960cc0d1eade551e071eec8192873ba7982a03fece3f"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "source"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "static-archive-member"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:size",
+              "extension_cdxPropValue": "348"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:dep/vendored-mix/src/mix_vendored_crc.c"
+            }
+          ]
+        }
+      ],
+      "software_copyrightText": "Copyright (c) 2026 Fixture Upstream CRC Authors",
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:src/main.c",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:src/main.c",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "534570a1b61643417e1f753e4893e309347559678dd815fe314fdd64475aed6f"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "source"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "static-object"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:size",
+              "extension_cdxPropValue": "884"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:src/main.c"
+            }
+          ]
+        }
+      ],
+      "software_copyrightText": "Copyright (c) 2026 sbomb fixture authors",
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "security_Vulnerability",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#vulnerability:CVE-2024-0001",
+      "creationInfo": "_:creationInfo1",
+      "name": "CVE-2024-0001",
+      "externalIdentifier": [
+        {
+          "type": "ExternalIdentifier",
+          "externalIdentifierType": "cve",
+          "identifier": "CVE-2024-0001"
+        }
+      ]
+    },
+    {
+      "type": "security_Vulnerability",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#vulnerability:CVE-2024-0002",
+      "creationInfo": "_:creationInfo1",
+      "name": "CVE-2024-0002",
+      "externalIdentifier": [
+        {
+          "type": "ExternalIdentifier",
+          "externalIdentifierType": "cve",
+          "identifier": "CVE-2024-0002"
+        }
+      ]
+    },
+    {
+      "type": "simplelicensing_SimpleLicensingText",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license-text:LicenseRef-sbomb-Example-Proprietary-Licence-2526dfe7",
+      "creationInfo": "_:creationInfo1",
+      "name": "Example Proprietary Licence",
+      "comment": "sbomb observed only this licence name; no licence text was retained (licenseTextInSBOM is off, or no licence file was read)",
+      "simplelicensing_licenseText": "Example Proprietary Licence"
+    },
+    {
+      "type": "simplelicensing_LicenseExpression",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:0BSD",
+      "creationInfo": "_:creationInfo1",
+      "simplelicensing_licenseExpression": "0BSD",
+      "simplelicensing_licenseListVersion": "3.28.0"
+    },
+    {
+      "type": "simplelicensing_LicenseExpression",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:Apache-2.0",
+      "creationInfo": "_:creationInfo1",
+      "simplelicensing_licenseExpression": "Apache-2.0",
+      "simplelicensing_licenseListVersion": "3.28.0"
+    },
+    {
+      "type": "simplelicensing_LicenseExpression",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:BSD-3-Clause",
+      "creationInfo": "_:creationInfo1",
+      "simplelicensing_licenseExpression": "BSD-3-Clause",
+      "simplelicensing_licenseListVersion": "3.28.0"
+    },
+    {
+      "type": "simplelicensing_LicenseExpression",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:GPL-2.0-only",
+      "creationInfo": "_:creationInfo1",
+      "simplelicensing_licenseExpression": "GPL-2.0-only",
+      "simplelicensing_licenseListVersion": "3.28.0"
+    },
+    {
+      "type": "simplelicensing_LicenseExpression",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:LicenseRef-sbomb-Example-Proprietary-Licence-2526dfe7",
+      "creationInfo": "_:creationInfo1",
+      "simplelicensing_customIdToUri": [
+        {
+          "type": "DictionaryEntry",
+          "key": "LicenseRef-sbomb-Example-Proprietary-Licence-2526dfe7",
+          "value": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license-text:LicenseRef-sbomb-Example-Proprietary-Licence-2526dfe7"
+        }
+      ],
+      "simplelicensing_licenseExpression": "LicenseRef-sbomb-Example-Proprietary-Licence-2526dfe7"
+    },
+    {
+      "type": "simplelicensing_LicenseExpression",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:MIT",
+      "creationInfo": "_:creationInfo1",
+      "simplelicensing_licenseExpression": "MIT",
+      "simplelicensing_licenseListVersion": "3.28.0"
+    },
+    {
+      "type": "simplelicensing_LicenseExpression",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:MIT%20OR%20Apache-2.0",
+      "creationInfo": "_:creationInfo1",
+      "simplelicensing_licenseExpression": "MIT OR Apache-2.0",
+      "simplelicensing_licenseListVersion": "3.28.0"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:1",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:apache-lib",
+      "relationshipType": "contains",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/apache-lib/include/apache_lib.h",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/apache-lib/src/apache_one.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/apache-lib/src/apache_two.c"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:2",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:confidence",
+              "extension_cdxPropValue": "high"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "component-level"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:source",
+              "extension_cdxPropValue": "curated"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:apache-lib",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:Apache-2.0"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:3",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:apache-lib",
+      "relationshipType": "hasEvidence",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/apache-lib/LICENSE",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/apache-lib/NOTICE"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:4",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:bsd-hdr",
+      "relationshipType": "contains",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/bsd-hdr/include/bsd_hdr.h"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:5",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:confidence",
+              "extension_cdxPropValue": "high"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "file-level"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:source",
+              "extension_cdxPropValue": "project:dep/bsd-hdr/include/bsd_hdr.h"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-identifier"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:bsd-hdr",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:BSD-3-Clause"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:6",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:bsd-hdr",
+      "relationshipType": "hasEvidence",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/bsd-hdr/LICENSE"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:7",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:gpl-gen",
+      "relationshipType": "contains",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/gpl-gen/table_gen.c"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:8",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:confidence",
+              "extension_cdxPropValue": "high"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "file-level"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:source",
+              "extension_cdxPropValue": "project:dep/gpl-gen/table_gen.c"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-identifier"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:gpl-gen",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:GPL-2.0-only"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:9",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:gpl-gen",
+      "relationshipType": "hasEvidence",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/gpl-gen/LICENSE",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/gpl-gen/table_gen.c"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:10",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:lgpl-lib",
+      "relationshipType": "contains",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/lgpl-lib/include/lgpl_lib.h",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/lgpl-lib/src/lgpl_core.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/lgpl-lib/src/lgpl_extra.c"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:11",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:confidence",
+              "extension_cdxPropValue": "high"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:conflictingValue",
+              "extension_cdxPropValue": "LGPL-2.1-only"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "component-level"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:reason",
+              "extension_cdxPropValue": "conflicting-evidence"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:source",
+              "extension_cdxPropValue": "project:dep/lgpl-lib/include/lgpl_lib.h"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:lgpl-lib",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:MIT"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:12",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:lgpl-lib",
+      "relationshipType": "hasEvidence",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/lgpl-lib/LICENSE",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/lgpl-lib/include/lgpl_lib.h"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:13",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:mit-lib",
+      "relationshipType": "contains",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/mit-lib/include/mit_lib.h",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/mit-lib/src/mit_a.c"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:14",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:confidence",
+              "extension_cdxPropValue": "high"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "file-level"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:source",
+              "extension_cdxPropValue": "project:dep/mit-lib/include/mit_lib.h"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-identifier"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:mit-lib",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:MIT"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:15",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:mit-lib",
+      "relationshipType": "hasEvidence",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/mit-lib/LICENSE"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:16",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:multi-license",
+      "relationshipType": "contains",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/multi-license/include/multi.h",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/multi-license/src/multi.c"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:17",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:confidence",
+              "extension_cdxPropValue": "high"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "component-level"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:source",
+              "extension_cdxPropValue": "curated"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:multi-license",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:MIT%20OR%20Apache-2.0"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:18",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:multi-license",
+      "relationshipType": "hasEvidence",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/multi-license/LICENSE-APACHE",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/multi-license/LICENSE-MIT"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:19",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:nocopyright",
+      "relationshipType": "contains",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/nocopyright/include/nocopyright.h",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/nocopyright/src/nocopyright.c"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:20",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:confidence",
+              "extension_cdxPropValue": "high"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "file-level"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:source",
+              "extension_cdxPropValue": "project:dep/nocopyright/include/nocopyright.h"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-identifier"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:nocopyright",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:0BSD"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:21",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:nocopyright",
+      "relationshipType": "hasEvidence",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/nocopyright/LICENSE"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:22",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:nolicense",
+      "relationshipType": "contains",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/nolicense/include/nolicense.h",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/nolicense/src/nolicense.c"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:23",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:confidence",
+              "extension_cdxPropValue": "high"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "component-level"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:source",
+              "extension_cdxPropValue": "curated"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:nolicense",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:LicenseRef-sbomb-Example-Proprietary-Licence-2526dfe7"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:24",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:nolicense",
+      "relationshipType": "hasEvidence",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/nolicense/include/nolicense.h"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:25",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:p14-foss-curated",
+      "relationshipType": "contains",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:build:generated/table.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:src/main.c"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:26",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:confidence",
+              "extension_cdxPropValue": "high"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "file-level"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:source",
+              "extension_cdxPropValue": "project:src/main.c"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-identifier"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:p14-foss-curated",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:MIT"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:27",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:p14-foss-curated",
+      "relationshipType": "hasEvidence",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:src/main.c"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:28",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:vendored-mix",
+      "relationshipType": "contains",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/vendored-mix/include/vendored_mix.h",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/vendored-mix/src/mix_core.c",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/vendored-mix/src/mix_vendored_crc.c"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:29",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:confidence",
+              "extension_cdxPropValue": "high"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "file-level"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:source",
+              "extension_cdxPropValue": "project:dep/vendored-mix/include/vendored_mix.h"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-identifier"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:vendored-mix",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:MIT"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:30",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:vendored-mix",
+      "relationshipType": "hasEvidence",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/vendored-mix/LICENSE",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/vendored-mix/src/mix_vendored_crc.c"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:31",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:build:generated/table.c",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:32",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-digest"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/apache-lib/LICENSE",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:Apache-2.0"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:33",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/apache-lib/include/apache_lib.h",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:34",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/apache-lib/src/apache_one.c",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:35",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/apache-lib/src/apache_two.c",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:36",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-template"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/bsd-hdr/LICENSE",
+      "relationshipType": "hasDeclaredLicense",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:BSD-3-Clause"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:37",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/bsd-hdr/include/bsd_hdr.h",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:38",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-template"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/gpl-gen/LICENSE",
+      "relationshipType": "hasDeclaredLicense",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:GPL-2.0-only"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:39",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/gpl-gen/table_gen.c",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:40",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/lgpl-lib/include/lgpl_lib.h",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:41",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/lgpl-lib/src/lgpl_core.c",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:42",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/lgpl-lib/src/lgpl_extra.c",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:43",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-digest"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/mit-lib/LICENSE",
+      "relationshipType": "hasDeclaredLicense",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:MIT"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:44",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/mit-lib/include/mit_lib.h",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:45",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/mit-lib/src/mit_a.c",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:46",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-digest"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/multi-license/LICENSE-APACHE",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:Apache-2.0"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:47",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-digest"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/multi-license/LICENSE-MIT",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:MIT"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:48",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/multi-license/include/multi.h",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:49",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/multi-license/src/multi.c",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:50",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-template"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/nocopyright/LICENSE",
+      "relationshipType": "hasDeclaredLicense",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:0BSD"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:51",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/nocopyright/include/nocopyright.h",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:52",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/nocopyright/src/nocopyright.c",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:53",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/nolicense/include/nolicense.h",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:54",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/nolicense/src/nolicense.c",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:55",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-digest"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/vendored-mix/LICENSE",
+      "relationshipType": "hasDeclaredLicense",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#license:MIT"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:56",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/vendored-mix/include/vendored_mix.h",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:57",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/vendored-mix/src/mix_core.c",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:58",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:dep/vendored-mix/src/mix_vendored_crc.c",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:59",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#file:project:src/main.c",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:60",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#product:p14-foss-curated",
+      "relationshipType": "dependsOn",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:bsd-hdr"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:61",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#product:p14-foss-curated",
+      "relationshipType": "hasStaticLink",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:apache-lib",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:lgpl-lib",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:mit-lib",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:multi-license",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:nocopyright",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:nolicense",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:p14-foss-curated",
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:vendored-mix"
+      ]
+    },
+    {
+      "type": "LifecycleScopedRelationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:62",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#product:p14-foss-curated",
+      "relationshipType": "usesTool",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:gpl-gen"
+      ],
+      "scope": "build"
+    },
+    {
+      "type": "security_VexNotAffectedVulnAssessmentRelationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:63",
+      "creationInfo": "_:creationInfo1",
+      "suppliedBy": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#agent:Example%20Supplier%20Ltd",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#vulnerability:CVE-2024-0001",
+      "relationshipType": "doesNotAffect",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:mit-lib"
+      ],
+      "security_impactStatement": "the parser this affects is not built"
+    },
+    {
+      "type": "security_VexNotAffectedVulnAssessmentRelationship",
+      "spdxId": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#relationship:64",
+      "creationInfo": "_:creationInfo1",
+      "suppliedBy": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#agent:Example%20Supplier%20Ltd",
+      "from": "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#vulnerability:CVE-2024-0002",
+      "relationshipType": "doesNotAffect",
+      "to": [
+        "urn:uuid:6d44a6a4-da5e-58d9-83d6-5af2922394f9#component:mit-lib"
+      ],
+      "security_impactStatement": "the upstream lists this vulnerability as not applying to the version it shipped"
+    }
+  ]
+}

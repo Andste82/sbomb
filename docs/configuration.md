@@ -670,13 +670,15 @@ Select it with `--waivers <file>` or `policy.waiversFile`.
 
 | Field | Values | Default |
 |---|---|---|
-| `format` | `cyclonedx-json` | `cyclonedx-json` |
-| `specVersion` | `1.6`, `1.7` | `1.6` |
+| `format` | `cyclonedx-json`, `spdx-json` | `cyclonedx-json` |
+| `specVersion` | `1.6`, `1.7` for CycloneDX; `3.0.1` for SPDX | the format's default: `1.6`, `3.0.1` |
 | `tlp` | `CLEAR`, `GREEN`, `AMBER`, `AMBER_AND_STRICT`, `RED` | none |
 | `reproducible` | boolean | `false` |
 
-`reproducible` omits the timestamp and derives the serial number from the
-document's content, so two runs over the same evidence produce the same bytes.
+`reproducible` makes two runs over the same evidence produce the same bytes.
+CycloneDX omits the timestamp and derives the serial number from the document's
+content; SPDX has to state a creation time, so it states `SOURCE_DATE_EPOCH` and
+refuses to run without it (see [SPDX 3.0.1](#spdx-301) below).
 It belongs here as well as on the command line because it is a property of the
 project: a project whose SBOMs have to be comparable wants that of every run,
 not only of the ones where somebody remembered `--reproducible`. The flag still
@@ -685,17 +687,46 @@ forces it on for a single run, and neither can turn the other off.
 `format` and `specVersion` are checked against the values the writer registry
 actually offers, so a file asking for something that does not exist says so
 rather than being ignored. The values in the table above are the ones
-`sbomb schema` publishes.
+`sbomb schema` publishes. The pair is checked when a run starts: a `specVersion`
+the chosen format does not have — `1.7` with `spdx-json` — is refused before
+anything is read, and never replaced by a version nobody asked for.
+
+### Choosing a format
+
+`format` selects the serialization; `--format` on `generate` and `self`
+overrides it for a single run. Both formats are renderings of one description
+of the run: the same files, components and identities, the same evidence, the
+same properties. Switching format changes how the document says it, not what
+it says.
+
+**CycloneDX 1.6 is the default.** BSI TR-03183-2 maps its required fields onto
+two formats, CycloneDX 1.6 and SPDX 3.0.1; either satisfies it. Choose SPDX when
+the recipient asks for SPDX.
+
+```json
+{
+  "output": {
+    "format": "spdx-json",
+    "specVersion": "3.0.1",
+    "reproducible": true
+  }
+}
+```
+
+Without `--output` the document is named after its format: `sbomb.cdx.json` or
+`sbomb.spdx.json`. `sbomb schema --format spdx-json` prints the schema an SPDX
+document is checked against.
 
 ### Choosing a specification version
 
-`specVersion` selects the CycloneDX revision. **1.6 is the default and stays
+For CycloneDX, `specVersion` selects the revision. **1.6 is the default and stays
 the default**: BSI TR-03183-2 names it as the minimum, and nothing in 1.7
 changes that. Write 1.7 when a consumer asks for it.
 
 `--spec-version` on `generate` and `self` overrides this for a single run;
-`sbomb schema --cyclonedx --spec-version 1.7` prints the schema a 1.7 document
-is checked against.
+`sbomb schema --format cyclonedx-json --spec-version 1.7` prints the schema a
+1.7 document is checked against (`--cyclonedx` is the older spelling of
+`--format cyclonedx-json`).
 
 The two documents describe the same evidence and differ only in saying so: the
 `specVersion` field, the `sbomb:run:specVersion` property that records it, and
@@ -716,6 +747,67 @@ for it:
 
 Everything else is written identically at both versions.
 
+### SPDX 3.0.1
+
+SPDX has one version here, 3.0.1, the one BSI TR-03183-2 names. SPDX 2.3 is
+planned; until then a 2.3 document is recognised by `validate` and refused by
+name.
+
+**What is native.** Where SPDX 3.0.1 has a field or relationship for something
+sbomb records, it is used: packages and files with their purpose, version,
+purl, CPE, supplier, originator, description, hashes and copyright text; typed
+relationships for how each component reached the deliverable — `hasStaticLink`,
+`hasDynamicLink` (scope `runtime`), `usesTool` (scope `build`), `contains`,
+`dependsOn` — and for licences, evidence files and patches; CVE exclusions of a
+bundled SBOM as VEX "not affected" statements. A file is named by its canonical
+path, so the many `LICENSE` files of a product stay apart.
+
+**What is an extension.** Every `sbomb:` property the CycloneDX document
+carries is also in the SPDX document, on the same element, in SPDX's
+`CdxPropertiesExtension` — beside the native field, not instead of it. Nothing
+sbomb knows is left out; [properties.md](properties.md) lists them, including
+the few only an SPDX document carries.
+
+**Licences.** An identifier or expression on the SPDX licence list is written
+with the list version, each identifier spelled as the list spells it
+(`apache-2.0` becomes `Apache-2.0`) and a `+` joined to its identifier
+(`GPL-2.0 +` becomes `GPL-2.0+`). A licence name the list does not know becomes
+a `LicenseRef-sbomb-…` reference whose definition is in the document: the
+retained licence text when `licenseTextInSBOM` is `evidence`, otherwise the
+name, with a note that no text was retained. Two licences of one name with
+different retained texts are two references. An expression keeps its structure:
+only the identifiers the list does not know become references, so
+`MIT AND Acme-Proprietary-1.0` stays an AND of two licences, and lower-case
+operators (`MIT or Apache-2.0`) are written upper case. An exception the list
+does not know becomes an `AdditionRef-sbomb-…` reference, so
+`GPL-2.0-or-later WITH Acme-linking-exception` keeps its listed licence. With
+`licenseTextInSBOM` set to `evidence` each text is attached to the licence file
+it was read from, byte for byte, as a `license` external reference with a
+`data:` URI — never as attribution text, which SPDX 3.0.1 reserves for
+acknowledgements and says must not hold a complete licence text. A copyright
+statement that names no file is part of the package's copyright text. A
+licence detected in a file is declared by that file
+whatever technique found it; it is concluded only where the component's licence
+is curated.
+
+**Things that differ from CycloneDX.**
+
+| | CycloneDX | SPDX 3.0.1 |
+|---|---|---|
+| Creation time under `reproducible` | omitted, with `REPRODUCIBLE_MODE_OMITS_TIMESTAMP` | `SOURCE_DATE_EPOCH`; without it the run is refused with `REPRODUCIBLE_CREATION_TIME_MISSING` |
+| `tlp` | carried at 1.7, refused at 1.6 | refused: SPDX has no field for a distribution constraint on the document |
+| "depends on nothing" | an empty `dependsOn` | a `dependsOn` to `NoneElement`, marked complete, because a missing relationship in SPDX means "unknown" |
+| Document identity | `serialNumber` | the UUID in every element IRI, `urn:uuid:<uuid>#…` |
+
+**Profiles.** The document claims the profiles it uses — `core`, `software`,
+and the licensing and security profiles when their elements appear. It does not
+claim `extension`, although it uses one: the 3.0.1 context makes that claim
+fail one of SPDX's two official validators whichever way it is written
+([D49b](dev/deviations.md)).
+
+The FOSS review record `foss-review.json` stays CycloneDX whatever `format`
+says, so its consumers see one shape.
+
 ### The repository URL, and where things live
 
 Where CycloneDX specifies a field for something sbomb records, the specified
@@ -732,10 +824,10 @@ which is not something a tool concludes from how the document was produced —
 no default either. An absent constraint means sbomb was not told, not that the
 document may be shared freely.
 
-`sbomb validate` needs no version: it reads what the document declares and
-checks it against the matching embedded schema, including a 1.7 document
-written by another tool. A version this build has no schema for is refused
-rather than checked against the wrong one.
+`sbomb validate` needs no format and no version: it reads what the document
+declares and checks it against the matching embedded schema, including a 1.7 or
+SPDX 3.0.1 document written by another tool. A version this build has no schema
+for is refused rather than checked against the wrong one.
 
 ## A worked example
 

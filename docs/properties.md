@@ -13,7 +13,7 @@ not understand them can ignore them; one that does can audit the answer.
 ## Catalogue
 
 <!-- BEGIN GENERATED CATALOGUE -->
-This build writes 48 of the 84 properties below. The rest are specified and
+This build writes 59 of the 89 properties below. The rest are specified and
 reserved: they describe evidence this version does not yet record, and no
 document sbomb writes will contain them. They are listed and marked so that the
 table is the whole catalogue rather than a snapshot of one version.
@@ -49,6 +49,7 @@ table is the whole catalogue rather than a snapshot of one version.
 | `sbomb:component:root` | Grouping components | — | emitted |
 | `sbomb:component:scope` | Grouping components | project | third-party | sdk | toolchain | system | emitted |
 | `sbomb:component:sourceObligation` | Grouping components | repeated, sorted | emitted |
+| `sbomb:component:type` | Component type (SPDX only, on every package with a type) | the component type of §19.1, verbatim | emitted |
 | `sbomb:component:vcsCommit` | Grouping components | — | emitted |
 | `sbomb:component:vcsDirty` | Grouping components | — | emitted |
 | `sbomb:component:vcsTag` | Grouping components | — | reserved |
@@ -71,15 +72,15 @@ table is the whole catalogue rather than a snapshot of one version.
 | `sbomb:evidence:type` | File components | repeated, sorted | reserved |
 | `sbomb:evidence:unity:parent` | File components | — | reserved |
 | `sbomb:file:anchor` | File components | — | reserved |
-| `sbomb:file:class` | File components | — | reserved |
+| `sbomb:file:class` | File elements (SPDX only) | the file class of discovery, verbatim | emitted |
 | `sbomb:file:distributionRole` | File components | distributed | build-time-only | emitted |
 | `sbomb:file:headerClass` | File components | — | reserved |
 | `sbomb:file:linkageForm` | File components | — | emitted |
-| `sbomb:file:missing` | File components | — | reserved |
+| `sbomb:file:missing` | File elements (SPDX only) | true, for a file that was not | emitted |
 | `sbomb:file:path` | File components | — | reserved |
 | `sbomb:file:resolvedTarget` | File components | — | reserved |
 | `sbomb:file:role` | File components | — | reserved |
-| `sbomb:file:size` | File components | — | reserved |
+| `sbomb:file:size` | File elements (SPDX only) | bytes, for a file that was read | emitted |
 | `sbomb:go:goarch` | Go binary components (`sbomb self`) | — | emitted |
 | `sbomb:go:goos` | Go binary components (`sbomb self`) | — | emitted |
 | `sbomb:go:mainPackage` | Go binary components (`sbomb self`) | — | emitted |
@@ -87,23 +88,27 @@ table is the whole catalogue rather than a snapshot of one version.
 | `sbomb:go:moduleSum` | Go binary components (`sbomb self`) | — | emitted |
 | `sbomb:go:replaces` | Go binary components (`sbomb self`) | module@version the linker substituted | emitted |
 | `sbomb:go:toolchain` | Go binary components (`sbomb self`) | — | emitted |
-| `sbomb:license:confidence` | Grouping components | — | reserved |
+| `sbomb:license:confidence` | Licence relationships (SPDX only) | high | medium | low | unknown | emitted |
 | `sbomb:license:conflictingValue` | Grouping components | — | emitted |
 | `sbomb:license:evidenceClass` | Grouping components | — | emitted |
 | `sbomb:license:reason` | Grouping components | — | emitted |
 | `sbomb:license:review` | Grouping components | — | emitted |
 | `sbomb:license:source` | Grouping components | — | emitted |
 | `sbomb:license:technique` | Grouping components | — | emitted |
+| `sbomb:patch:source` | Patch files (SPDX only) | the metadata file the patch was recorded in | emitted |
+| `sbomb:patch:type` | Patch files (SPDX only) | unofficial | monkey | backport | cherry-pick | emitted |
 | `sbomb:path:canonical` | File components | — | emitted |
 | `sbomb:review:required` | Grouping components | — | emitted |
-| `sbomb:run:adapters` | Run-level (on `metadata.properties`) | — | reserved |
+| `sbomb:run:adapters` | Run-level (SPDX only, on the SpdxDocument) | repeated, sorted | emitted |
 | `sbomb:run:mode` | Run-level (on `metadata.properties`) | — | reserved |
 | `sbomb:run:policyProfile` | Run-level (on `metadata.properties`) | — | emitted |
-| `sbomb:run:reproducible` | Run-level (on `metadata.properties`) | — | reserved |
+| `sbomb:run:reproducible` | Run-level (SPDX only, on the SpdxDocument) | — | emitted |
 | `sbomb:run:sourceDateEpoch` | Run-level (on `metadata.properties`) | — | emitted |
 | `sbomb:run:specVersion` | Run-level (on `metadata.properties`) | — | emitted |
 | `sbomb:run:timestamp` | Run-level (on `metadata.properties`) | — | emitted |
 | `sbomb:run:toolVersion` | Run-level (on `metadata.properties`) | — | emitted |
+| `sbomb:version:confidence` | Version provenance (any component, SPDX only) | high | medium | low | unknown | emitted |
+| `sbomb:version:source` | Version provenance (any component, SPDX only) | curated | cmake | conan | git-describe | ... | emitted |
 <!-- END GENERATED CATALOGUE -->
 
 The table is generated from appendix B of the specification by
@@ -133,13 +138,13 @@ repository URL, and 1.7 gives external references a property bag, so at that
 version they sit on the `vcs` reference rather than on the component. At 1.6,
 where references have no such bag, they stay on the component.
 
-Where a version came from is not a property either. It is
+Where a version came from is not a property in CycloneDX either. It is
 `component.evidence.identity` with `field: "version"` — the value in
 `concludedValue`, the confidence as a number, and the source as one method
-whose `value` names it exactly. `sbomb:version:source` and
-`sbomb:version:confidence` are gone from the catalogue: they were listed and
-never written, and the answer now has a specified field to live in, at both
-specification versions.
+whose `value` names it exactly — at both specification versions. SPDX has no
+such field, so an SPDX document carries the same answer as
+`sbomb:version:source` and `sbomb:version:confidence`, and only there: a
+CycloneDX document never has these two properties.
 
 The URL itself is not a property at all. CycloneDX specifies
 `externalReferences` of type `vcs` for it, and a specified field takes

@@ -6,10 +6,10 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"testing"
 
 	"github.com/example/sbomb/internal/config"
-	"github.com/example/sbomb/internal/cyclonedx"
 	"github.com/example/sbomb/internal/sbomwriter"
 	"github.com/example/sbomb/internal/testutil"
 )
@@ -162,17 +162,31 @@ func TestValidateReadsADocumentItDidNotWrite(t *testing.T) {
 		t.Errorf("CycloneDX 1.4 = code %d, want 4", code)
 	}
 
-	// A document in no format this build knows names what it can read rather
-	// than failing as though it were a broken CycloneDX file.
+	// An SPDX 2.3 document is recognised for what it is and refused by name,
+	// rather than failing as though it were a broken CycloneDX file or an
+	// unknown one: the reader learns which version this build does read.
 	otherPath := filepath.Join(directory, "other.json")
 	if err := os.WriteFile(otherPath, []byte(`{"spdxVersion":"SPDX-2.3"}`), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	code, _, stderr = execute([]string{"validate", "--input", otherPath})
 	if code != 4 {
-		t.Errorf("an SPDX document = code %d, want 4", code)
+		t.Errorf("an SPDX 2.3 document = code %d, want 4", code)
 	}
-	if !bytes.Contains([]byte(stderr), []byte("cyclonedx-json")) {
+	if !bytes.Contains([]byte(stderr), []byte("SPDX 2.3")) || !bytes.Contains([]byte(stderr), []byte("3.0.1")) {
+		t.Errorf("the error does not name the version it found and the one it reads: %q", stderr)
+	}
+
+	// A document in no format this build knows names what it can read.
+	unknownPath := filepath.Join(directory, "unknown.json")
+	if err := os.WriteFile(unknownPath, []byte(`{"bomFormat":"SomethingElse"}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	code, _, stderr = execute([]string{"validate", "--input", unknownPath})
+	if code != 4 {
+		t.Errorf("an unknown document = code %d, want 4", code)
+	}
+	if !bytes.Contains([]byte(stderr), []byte("cyclonedx-json, spdx-json")) {
 		t.Errorf("the error does not say what can be read: %q", stderr)
 	}
 }
@@ -253,6 +267,12 @@ func TestSchemaCommandServesEitherVersion(t *testing.T) {
 // the writer registry together. The loader cannot ask the registry without
 // depending on a serializer, so the two are written apart; this is what stops
 // them drifting.
+//
+// output.format is every registered writer. output.specVersion is the sorted
+// union of what they emit, because the configuration names format and version
+// in two fields and the pair is the registry's to judge at run time. Every
+// published version must have a schema under some format that emits it, or
+// the configuration would offer a document nothing can check.
 func TestConfigEnumsMatchTheWriter(t *testing.T) {
 	var published map[string]any
 	if err := json.Unmarshal([]byte(config.Schema()), &published); err != nil {
@@ -264,21 +284,39 @@ func TestConfigEnumsMatchTheWriter(t *testing.T) {
 	}
 	properties := output["properties"].(map[string]any)
 
-	writer, _, err := sbomwriter.Resolve("cyclonedx-json", "")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if got := enumOf(t, properties, "specVersion"); !reflect.DeepEqual(got, writer.Versions()) {
-		t.Errorf("output.specVersion publishes %v but the writer emits %v", got, writer.Versions())
-	}
 	if got := enumOf(t, properties, "format"); !reflect.DeepEqual(got, sbomwriter.IDs()) {
 		t.Errorf("output.format publishes %v but the registry holds %v", got, sbomwriter.IDs())
 	}
-	// Every published version must actually have a schema to check against.
-	for _, version := range enumOf(t, properties, "specVersion") {
-		if _, err := cyclonedx.EmbeddedSchema(version); err != nil {
-			t.Errorf("output.specVersion offers %s with no embedded schema: %v", version, err)
+	union := map[string]bool{}
+	for _, id := range sbomwriter.IDs() {
+		writer, _, err := sbomwriter.Resolve(id, "")
+		if err != nil {
+			t.Fatal(err)
 		}
+		provider, provides := writer.(sbomwriter.SchemaProvider)
+		if !provides {
+			t.Errorf("%s serves no schema", id)
+		}
+		for _, version := range writer.Versions() {
+			union[version] = true
+			if !provides {
+				continue
+			}
+			if _, err := provider.EmbeddedSchema(version); err != nil {
+				t.Errorf("%s %s has no embedded schema: %v", id, version, err)
+			}
+		}
+	}
+	emitted := make([]string, 0, len(union))
+	for version := range union {
+		emitted = append(emitted, version)
+	}
+	sort.Strings(emitted)
+	if got := enumOf(t, properties, "specVersion"); !reflect.DeepEqual(got, emitted) {
+		t.Errorf("output.specVersion publishes %v but the writers emit %v", got, emitted)
+	}
+	if !union["3.0.1"] {
+		t.Error("no registered writer emits SPDX 3.0.1; the SPDX writer is not linked into the command")
 	}
 }
 

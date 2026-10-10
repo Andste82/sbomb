@@ -66,7 +66,8 @@ type Options struct {
 	// one, and section 20.5 forbids deriving it from a repository URL, so it
 	// is curated or absent.
 	Supplier string
-	// Reproducible omits the timestamp, per section 29.
+	// Reproducible states no wall-clock time, per section 29: the run time
+	// is SOURCE_DATE_EPOCH when that is set, and absent otherwise.
 	Reproducible bool
 	// Timestamp is the run time; the zero value means now.
 	Timestamp time.Time
@@ -627,9 +628,17 @@ func goToolchainSuffix(binary *gobin.Binary) string {
 	return " " + binary.GoVersion
 }
 
+// timestamp follows the RunMetadata contract: under reproducible it is
+// SOURCE_DATE_EPOCH when that is set and readable, otherwise empty, and never
+// the clock -- a format that states a creation time must be able to state the
+// same one on the next run.
 func timestamp(options Options) string {
 	if options.Reproducible {
-		return ""
+		pinned, err := sbomwriter.SourceDateEpoch()
+		if err != nil {
+			return ""
+		}
+		return pinned
 	}
 	at := options.Timestamp
 	if at.IsZero() {

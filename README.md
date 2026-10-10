@@ -5,7 +5,8 @@
 **An evidence-based SBOM generator that reconstructs the software composition
 of CMake build artifacts.** It follows the build's own evidence backwards from
 the final artifact instead of inferring it from the source tree, and writes
-what it finds as CycloneDX 1.6, or 1.7 when a consumer asks for it.
+what it finds as CycloneDX 1.6, or as CycloneDX 1.7 or SPDX 3.0.1 when a
+consumer asks for it.
 
 The chain runs from a firmware image, an executable or a library through link
 inputs, archive members, object files, translation units, sources, headers and
@@ -33,6 +34,10 @@ Concretely:
 - Nothing is inferred from a filename, a directory name or a repository URL.
   What cannot be established is reported as a finding and stays visible in the
   document.
+- **CycloneDX 1.6/1.7 and SPDX 3.0.1 from one discovery.** Both formats are
+  renderings of the same description of the run, with the same identities, so
+  switching format changes the spelling and loses nothing. Both are the formats
+  BSI TR-03183-2 maps its required fields onto.
 
 [docs/architecture.md](docs/architecture.md) explains the machinery: the
 evidence chain, the strategies behind each step, and where sbomb refuses to
@@ -144,10 +149,10 @@ module adds the right flags for you — see
 |---|---|
 | `sbomb generate` | Produce the SBOM and evaluate policy |
 | `sbomb explain` | Show why a file or component is in the SBOM |
-| `sbomb validate` | Check an existing CycloneDX document |
+| `sbomb validate` | Check an existing CycloneDX or SPDX document |
 | `sbomb evidence` | Dump the evidence graph without writing an SBOM |
 | `sbomb self` | Describe a Go binary from the record its linker embedded |
-| `sbomb schema` | Print the embedded configuration or CycloneDX schema |
+| `sbomb schema` | Print the embedded configuration schema, or the CycloneDX or SPDX schema |
 | `sbomb version` | Print the tool version |
 
 ### generate
@@ -163,6 +168,11 @@ sbomb generate \
 
 `--build-dir` is the only required flag; `sbomb.json` is picked up
 automatically when it is present.
+
+`--format spdx-json` writes SPDX 3.0.1 instead of CycloneDX, from the same
+discovery; without `--output` the file is then `sbomb.spdx.json`. Combined with
+`--reproducible` it needs `SOURCE_DATE_EPOCH`, because SPDX requires a creation
+time and the only one a second run would state again is a pinned one.
 
 Alongside the SBOM the run writes `evidence.json` into the build directory: the
 complete graph, every edge with its strength, its confidence and where it came
@@ -191,11 +201,18 @@ sbomb pick one — a build directory can hold several.
 
 ```bash
 sbomb validate --input build/debug/app.cdx.json
+sbomb validate --input build/debug/app.spdx.json
 ```
 
-Runs both layers: the official CycloneDX JSON Schema, and the semantic checks a
-schema cannot express — a closed dependency graph, unique references, well-formed
-purls.
+The format is read from the document. Runs both layers: the official JSON
+Schema of the version the document declares, and the semantic checks a schema
+cannot express — for CycloneDX a closed dependency graph, unique references,
+well-formed purls; for SPDX the rules of the 3.0.1 specification. An SPDX
+document another tool wrote is held to its specification, not to how sbomb
+writes. A CycloneDX document is still held to some of sbomb's own writing rules
+— `metadata` with an array of tools, a dependencies entry for every component,
+only `sbomb:` properties — so a conformant document from another tool can be
+refused.
 
 ### self
 
@@ -238,9 +255,9 @@ binary, produced this way.
 | `--report-chains all` | Include the full evidence chains in the report |
 | `--evidence-dump <path>` | Where the evidence graph goes; `off` writes none |
 | `--inventory-dump <file>` | The used-file set and components in sbomb's own format |
-| `--format cyclonedx-json` | Output format; the only one so far |
-| `--spec-version 1.6\|1.7` | CycloneDX revision; default `1.6` |
-| `--reproducible` | Omit the timestamp and derive a stable serial number |
+| `--format cyclonedx-json\|spdx-json` | Output format; default `cyclonedx-json` |
+| `--spec-version <v>` | Version within the format: `1.6` (default) or `1.7` for CycloneDX, `3.0.1` for SPDX |
+| `--reproducible` | Same evidence, same bytes: a stable serial number or namespace. CycloneDX omits the timestamp; SPDX states `SOURCE_DATE_EPOCH` and needs it set |
 
 **Policy**
 
@@ -273,7 +290,7 @@ binary, produced this way.
 | 1 | Usage or configuration error |
 | 2 | Evidence could not be collected |
 | 3 | Policy failed |
-| 4 | CycloneDX validation failed |
+| 4 | The document failed validation |
 
 Exit code 3 still writes the SBOM. It means the document was produced and
 something in it needs a person.

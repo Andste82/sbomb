@@ -30,11 +30,19 @@ var enums = map[string][]string{
 	// The output enums are the writer registry's answer, written here because
 	// the loader must not depend on a serializer. TestConfigEnumsMatchTheWriter
 	// in cmd/sbomb imports both and fails if they part company.
-	"output.format":      {"cyclonedx-json"},
-	"output.specVersion": {"1.6", "1.7"},
+	//
+	// output.specVersion is the sorted union of every format's versions. Which
+	// version goes with which format is the registry's question and is
+	// answered at run time, before discovery: a configuration naming
+	// spdx-json and 1.7 loads, and the run refuses it as a usage error that
+	// lists the versions spdx-json has.
+	"output.format":      {"cyclonedx-json", "spdx-json"},
+	"output.specVersion": {"1.6", "1.7", "3.0.1"},
 	// The TLP classifications of FIRST, as CycloneDX 1.7 spells them. There is
 	// deliberately no default: the schema annotates CLEAR as one, so an absent
-	// constraint has to mean silence rather than permission to share.
+	// constraint has to mean silence rather than permission to share. Only
+	// CycloneDX 1.7 can carry one; every other format and version refuses a
+	// configured value rather than writing a document that silently lost it.
 	"output.tlp":                       {"CLEAR", "GREEN", "AMBER", "AMBER_AND_STRICT", "RED"},
 	"policy.headerEvidence":            {"dwarf-preferred", "union", "depfiles"},
 	"policy.includeToolchainRuntime":   {"separate-component", "report-only", "exclude"},

@@ -32,7 +32,12 @@ type RunMetadata struct {
 	ToolVendor  string
 	ToolVersion string
 
-	// Timestamp is RFC 3339 UTC, or empty in reproducible mode.
+	// Timestamp is RFC 3339 UTC. Under reproducible it is SOURCE_DATE_EPOCH
+	// when that is set and readable, and otherwise empty -- never the wall
+	// clock. A writer cannot tell a pinned time from a clock reading by looking
+	// at the string, so the producer makes the distinction here, once: a
+	// format that must state a creation time can then trust that a non-empty
+	// value under reproducible is one a second run will state again.
 	Timestamp     string
 	Reproducible  bool
 	PolicyProfile string
@@ -69,7 +74,20 @@ type Options struct {
 	// an SBOM would depend on which extra files somebody asked for.
 	LicenseText  string
 	Reproducible bool
+	// OmitIdentity leaves out the document's own identity -- the serial number
+	// or namespace a consumer tells two documents apart by. Only the FOSS
+	// review rendering sets it: that file is a view of the SBOM for a reviewer
+	// rather than a second SBOM, and an identity on it would invite somebody to
+	// track it as one. A format whose identity is structural, so that a
+	// document without one is not a document, ignores it.
+	OmitIdentity bool
 }
+
+// DefaultFormat is the serialization written when neither the configuration
+// nor the command line names one. It is named once, here, so that the
+// pre-flight checks of the command line and the run itself cannot disagree
+// about which format "nothing" means.
+const DefaultFormat = "cyclonedx-json"
 
 // LicenseText values, per the licenseTextInSBOM setting of section 33.1. The
 // empty string is LicenseTextOff, so a caller with no opinion gets the

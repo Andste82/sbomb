@@ -2112,3 +2112,251 @@ another commit locally resolves to that commit, and no check inside the
 repository can see it. And a distance is measured only when `git describe`
 answers with the declared tag itself; against any other tag the count says
 nothing about the declared revision, so it is not reported.
+
+## D48 — SPDX element IRIs are absolute, not compact IRIs under an `@context` prefix
+
+The decision record of issue #2 settled the SPDX 3.0.1 IRI scheme as a prefix
+declared in `@context` — `{ "sbomb": "urn:uuid:<uuid>#" }` — and compact IRIs
+such as `sbomb:component:apache-lib` after it.
+
+The official 3.0.1 JSON schema does not allow that. It declares `@context` as a
+`const`: the context URL as a plain string, and nothing else. A context array
+carrying a prefix is how some 3.0 examples were written, and every such
+document fails the 3.0.1 schema. The prefix also collides with the property
+namespace: `sbomb:component:linkageForm` is a property name in the same
+documents, and a reader of a compact IRI could not tell the two apart.
+
+**What is implemented.** Every element IRI is absolute,
+`urn:uuid:<uuid>#<fragment>` (§28.11.2). The idea of the decision is kept
+whole: one UUID per document, the same local identities as the CycloneDX
+bom-refs, and the reproducible UUID derived the §28.9 way. Only the spelling
+changes, and the fragment is percent-encoded injectively so that every local
+identity — paths with spaces, `#`, non-ASCII names — is a legal IRI fragment.
+`validate` refuses a context array with that reason rather than with the
+schema's bare `const` message.
+
+The document UUID is a digest of the format-neutral SPDX description of the run
+rather than of the CycloneDX document, and it includes the creation time, the
+spec version and the tool version (§28.11.2). So a CycloneDX and an SPDX
+document of the same run have different identities, and two reproducible runs
+pinned to different `SOURCE_DATE_EPOCH` values do too: merged, the same element
+would otherwise carry two creation records, which the SPDX model forbids.
+
+## D49 — `profileConformance` is computed from what the document uses
+
+The decision record fixed `profileConformance` as
+`["core", "software", "extension"]`.
+
+That under-declares. Every document sbomb writes states licences, and the
+Software profile's conformance clause says it does not include Licensing: a
+document using `simplelicensing_*` classes or the `expandedlicensing_*`
+NOASSERTION and NONE individuals without claiming those profiles claims less
+than it uses. The CVE exclusions of a bundled SBOM are written as VEX
+statements, which are the Security profile.
+
+**What is implemented.** The claim is computed from what the rendered document
+contains (§28.11.1): `core` and `software` always, `simpleLicensing`,
+`expandedLicensing` and `security` when their classes or individuals are used,
+sorted. The tool's own output check demands that the claim equals that set
+exactly, and that every profile the bytes use is claimed, so a claim cannot
+drift from the content. `validate` does not hold other documents to either
+rule: the specification defines `profileConformance` as the profiles the creator
+intends to conform to and makes only Core mandatory, and the SHACL model has no
+constraint tying the claim to the content, so a document another tool wrote
+that uses a profile it does not claim is conformant.
+
+## D49b — The `extension` profile is not claimed, although every document uses it
+
+Every SPDX document sbomb writes carries its `sbomb:` properties in
+`extension_CdxPropertiesExtension`, so by the rule of D49 it should claim the
+`extension` profile. It does not, because no spelling of that claim passes both
+of the SPDX project's own validators.
+
+The 3.0.1 context declares `profileConformance` as vocabulary-typed, with a
+scoped vocabulary of `Core/ProfileIdentifierType/`, so `"core"` expands to the
+profile IRI. But the context also defines a top-level term `extension` — the
+Element property `Core/extension` — and in JSON-LD a term wins over the
+vocabulary. `"extension"` therefore expands to the property IRI, and the SHACL
+model rejects it (verified with pyshacl 0.26.0: two violations on a document
+that claims it, none on the same document without the claim). The full profile
+IRI written out passes SHACL and fails the JSON schema's enum. It is the only
+vocabulary-typed enum value in the context that collides with a term: an
+upstream context defect.
+
+**What is implemented.** `extension` is never claimed. The own-output check
+exempts the `extension_` prefix from "used means claimed" and excludes it from
+the computed set. When the context is fixed
+upstream, the claim is added and this entry is closed.
+
+## D50 — A reproducible SPDX document states `SOURCE_DATE_EPOCH` as its creation time, and refuses without it
+
+§1.5(2) and §29 make `--reproducible` omit the creation timestamp, and emit
+`REPRODUCIBLE_MODE_OMITS_TIMESTAMP` so nobody mistakes the result for the
+deliverable. That is a CycloneDX allowance: `metadata.timestamp` is optional
+there.
+
+SPDX has no such allowance. `CreationInfo.created` is mandatory (cardinality 1),
+so a reproducible SPDX document has to state a time, and the only time a second
+run would state again is a pinned one.
+
+**What is implemented.** In reproducible mode (`--reproducible` or
+`output.reproducible`) an SPDX document states `SOURCE_DATE_EPOCH` as `created`.
+Without a readable `SOURCE_DATE_EPOCH` the run is refused before discovery with
+`REPRODUCIBLE_CREATION_TIME_MISSING` (exit 1), which names the variable and the
+alternative of turning reproducible mode off — by either of its two switches,
+since the refusal cannot tell which one the user set.
+Substituting the Unix epoch was rejected: `1970-01-01T00:00:00Z` would state a
+creation date that is never true, in a document produced for compliance.
+`REPRODUCIBLE_MODE_OMITS_TIMESTAMP` is emitted only for formats that do omit the
+timestamp, which today is CycloneDX alone.
+
+To make that refusal possible before discovery, the format-neutral run metadata
+carries a reproducible timestamp only when it came from `SOURCE_DATE_EPOCH` —
+never the wall clock — so a writer can trust that a time it is given under
+reproducible is one a second run would give again.
+
+## D51 — SPDX semantic validation is written in Go, in two tiers, and the SHACL model runs only in CI
+
+§32.5 requires every document to be validated in-process, against its schema
+and semantically. For SPDX 3.0.1 the semantic half is published by the SPDX
+project as a SHACL model, and the validators that execute it are Python or
+Node. There is no usable SHACL implementation in Go, and §37's single static
+executable rules out shipping one of those.
+
+The 3.0.1 schema constrains very little on its own — a `software_File` needs
+only an `spdxId` — so the hand-written rules carry real weight. Writing them
+raised a second question the CycloneDX side never did: `validate` reads
+documents other tools wrote, and the specification permits things sbomb never
+does, such as references to elements defined in another document (every
+official example has them) or an inline `creationInfo`. One rule set cannot both
+accept those and hold sbomb's own output to its stricter shape.
+
+**What is implemented.** Two tiers (§28.11.9). Tier a is conformance: the
+schema plus the rules the specification states; `validate` applies it. The
+seven official example documents are 3.0.0 documents and `validate` refuses
+them as published; rewritten to the plain 3.0.1 context and spec version, all
+seven pass the stated rules and five pass the schema, while two carry upstream
+defects the schema finds (a scalar `software_sbomType`; a scalar
+`software_attributionText` and a snippet without `software_snippetFromFile`).
+Tier b is the invariants of sbomb's
+own output — closure from the root, every reference resolving, the computed
+profile set, licence-list membership — and runs on every document sbomb writes,
+after tier a, and never under `validate`. The JSON schema is the upstream file,
+embedded byte for byte and pinned by a hash test; its one lookahead pattern,
+which Go's regular expressions cannot compile, is matched by hand.
+
+CI runs the SPDX project's own validators on every SPDX golden: an independent
+JSON schema validator and pyshacl against the committed 3.0.1 model, without
+RDFS inference (with it, abstract superclasses are materialised and every
+document fails). Probes with known defects must fail the same job, so a
+validator that accepts everything cannot pass it: a schema probe, a golden with
+a scalar `software_sbomType`, must be refused by the JSON schema validator with
+that defect named, and the SHACL probes, which pass the schema, must be refused
+by pyshacl.
+
+## D52 — `generate --format` was specified and did not exist
+
+§32.2 has listed `--format` with default `cyclonedx-json` since v3.1. It was
+never implemented: the configuration key `output.format` existed, but the flag
+did not, and with one registered writer nobody noticed. Worse, the generate
+path cast whatever writer the registry returned to the CycloneDX writer, so a
+second format selected through the configuration would have failed at the very
+end of a run — what prevented it was the configuration's enum, not the code.
+
+**What is implemented.** `--format` on `generate` and `self`, overriding
+`output.format` for one run, and `schema --format` beside the older
+`--cyclonedx` (§32.2, §32.5). Format and version are resolved once, before
+discovery, and the writer is asked then whether it can honour the request at
+all — the version, a TLP, a reproducible creation time — so a request that
+cannot be honoured is a usage error, not a failure after discovery. Every
+document is rendered through the writer interface; no command names a format
+in code. A configured `specVersion` is not dropped when `--format` switches to
+a format that does not have it: `output.specVersion: "1.7"` with
+`--format spdx-json` is refused, naming the versions SPDX has, rather than
+quietly replaced by one nobody asked for.
+
+## D53 — A generated source adds no SPDX relationship
+
+The decision record of issue #2 mapped the linkage form `generated-source` to
+the SPDX relationship `generates`.
+
+§24.5 defines `generated-source` as an aggregate added **beside** the linker
+form — "the object was linked, and the source it came from was generated" (D44)
+— not as a form of its own. `C generates D` from a component to the deliverable
+would state that the component generated the deliverable: for the FetchContent
+fixture, that the `tinylog` library generated the application `fcapp`, which is
+false. What generated the source is a generator, which is a `build-tool` form
+with its own `usesTool` edge where the evidence shows it.
+
+**What is implemented.** `generated-source` is ignored when edges are derived;
+the linker form of the same component already gives the edge
+(`hasStaticLink`, usually). The fact is not lost: it stays on the component as
+`sbomb:component:linkageForm=generated-source`. On a file it is where
+discovery put it, which is not always the file class: a generated header that
+discovery saw included carries `sbomb:evidence:header:class=generated-header`,
+while its `sbomb:file:class` stays `header` unless the inventory itself
+classified the file as generated, the only case that writes
+`sbomb:file:class=generated-source` / `generated-header`. In the FetchContent
+fixture the `tinylog` header is of the first kind. Making the file class follow
+the evidence would change the CycloneDX classification as well, and is not
+part of the SPDX writer. A test asserts that no document contains
+`generates`.
+
+## D54 — SPDX output does not meet the §31 performance budgets yet
+
+§31 sets the budgets for every run: 10 000 used files within 15 s and 512 MiB,
+50 000 within 90 s and 1.5 GiB. The CycloneDX writer meets them. The SPDX writer
+does not. Measured on a six-core machine with the performance fixture:
+
+| Units | CycloneDX | SPDX 3.0.1 |
+|---|---|---|
+| 10 000 | 7.2 s, 314 MiB | 15.8 s, 725 MiB |
+| 50 000 | 82.7 s, 1288 MiB | 148 s, 3666 MiB |
+
+Most of the difference is validation, not rendering. An SPDX document states as
+separate elements what CycloneDX states as fields — every relationship, every
+known leaf, every property in an extension object — so the document is several
+times larger, and the JSON schema validator walks every extension entry of it;
+at 10 000 units that is about 3.6 s of the 5.1 s the file elements cost, with
+1.85 GB allocated per validation.
+
+**What is done meanwhile.** The documents are correct, and validation is not
+skipped to make the number: a document that was not checked is not written
+(§32.5). CI measures the 10 000-unit row as SPDX on every push, beside the
+blocking CycloneDX row, as a step that reports its overrun without failing the
+job. Bringing it within budget — validating the repetitive extension entries
+without the general schema walk, and streaming the render — is open work,
+recorded in `docs/dev/open-questions.md` (Q22).
+
+## D55 — A listed licence identifier in another case is written as the list spells it
+
+§28.11.5 carries an observed licence expression with its structure, and mints a
+`LicenseRef-sbomb-` reference for every identifier the SPDX licence list does
+not carry. Until now "does not carry" meant an exact match, so a header saying
+`mit` produced a custom licence `LicenseRef-sbomb-mit` whose text is `mit`, and
+the expression lost its licence-list version: a reader was told the component
+is under an unknown licence, not MIT.
+
+SPDX 3.0.1 annex B (and SPDX 2.3 annex D) says licence and exception
+identifiers "should be matched in a case-insensitive manner". `mit` is the
+listed MIT licence.
+
+**What is implemented.** An identifier is looked up on the list without case,
+as a licence before `WITH` and as an exception after it, in an expression and in
+a stated identifier alike. A match is listed: nothing is minted and the
+expression states the licence-list version. It is written as the list spells it
+(`apache-2.0 OR mit` becomes `Apache-2.0 OR MIT`), not as observed. Both are
+conformant, since a reader matches without case; the list's spelling is the one
+a reader that compares exactly also resolves, and one licence is then one
+expression element whichever way a header spelled it. An identifier the list
+does not carry keeps the case it was observed in. sbomb's own-output check
+holds a document to the list's spelling.
+
+In the same pass, a `+` set apart from its identifier by white space
+(`GPL-2.0 +`) is joined to it. Annex B: "There MUST NOT be white space between a
+license-id and any following +", so the text as observed is no expression, and
+the validator now refuses it in any document.
+
+The CycloneDX writer is unchanged: it writes an observed expression into
+`expression` as it was observed, and only an exact list spelling into the
+enumerated `license.id`.

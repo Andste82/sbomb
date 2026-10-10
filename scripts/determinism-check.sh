@@ -11,26 +11,42 @@ fixture="$tmp/fixture"
 mkdir -p "$fixture"
 cp -r "$repo/testdata/fixtures/gcc-ninja/p02-static/build" "$fixture/build"
 
+# run FORMAT VERSION OUTPUT. SOURCE_DATE_EPOCH is pinned for SPDX only: an
+# SPDX document has to state when it was created, and under --reproducible
+# that time is the pin or nothing (section 29) -- and since the creation time
+# is part of the document's identity, the pin is what makes two platforms
+# agree. A reproducible CycloneDX document states no time, so its runs are
+# left exactly as they were before SPDX existed.
 run() {
-  go run ./cmd/sbomb generate \
+  if [ "$1" = spdx-json ]; then
+    epoch=1700000000
+  else
+    epoch=
+  fi
+  SOURCE_DATE_EPOCH=$epoch go run ./cmd/sbomb generate \
     --build-dir "$fixture/build" \
     --config "$repo/testdata/config/portable.json" \
-    --output "$2" \
-    --spec-version "$1" \
+    --output "$3" \
+    --format "$1" \
+    --spec-version "$2" \
     --reproducible \
     --path-flavor posix \
     --policy lenient
 }
 
-# Every version the tool writes, because the claim is about the tool and not
-# about one of its outputs: the same evidence must produce the same bytes on
-# every platform, whichever revision was asked for.
-for version in 1.6 1.7; do
-  run "$version" "$tmp/first.cdx.json"
-  run "$version" "$tmp/second.cdx.json"
-  cmp "$tmp/first.cdx.json" "$tmp/second.cdx.json"
+# Every version the tool writes, in every format, because the claim is about
+# the tool and not about one of its outputs: the same evidence must produce the
+# same bytes on every platform, whichever format and revision was asked for.
+for version in 1.6 1.7 3.0.1; do
+  case "$version" in
+    3.0.1) format=spdx-json extension=spdx.json ;;
+    *) format=cyclonedx-json extension=cdx.json ;;
+  esac
+  run "$format" "$version" "$tmp/first.$extension"
+  run "$format" "$version" "$tmp/second.$extension"
+  cmp "$tmp/first.$extension" "$tmp/second.$extension"
   printf 'portable SBOM %s SHA-256: ' "$version"
-  sha256sum "$tmp/first.cdx.json" | cut -d ' ' -f 1
+  sha256sum "$tmp/first.$extension" | cut -d ' ' -f 1
 done
 
 # A Windows build read under --path-flavor windows, and more than twice.
@@ -39,9 +55,9 @@ done
 # compilation database's own -- and only one of them can be read on a POSIX
 # host. Which one was kept depended on the order the evidence was consulted in,
 # which is not fixed, so the file was hashed on some runs and missing on others,
-# and the reproducible serial number changed with it. Two runs agree by chance
-# often enough to miss that; six do not. A fresh copy each time, because
-# generate writes its evidence dump into the build directory.
+# and the SPDX document identity changed with it. Two runs agree by chance often
+# enough to miss that; six do not. A fresh copy each time, because generate
+# writes its evidence dump into the build directory.
 #
 # Built once rather than through go run, which would compile and link the tool
 # again for every one of the six runs. GOEXE, because Windows will not run it
@@ -52,20 +68,21 @@ unity_run() {
   rm -rf "$tmp/unity"
   mkdir -p "$tmp/unity"
   cp -r "$repo/testdata/fixtures/msvc-ninja/p06-unity/build" "$tmp/unity/build"
-  "$unity_sbomb" generate \
+  SOURCE_DATE_EPOCH=1700000000 "$unity_sbomb" generate \
     --build-dir "$tmp/unity/build" \
     --output "$1" \
+    --format spdx-json \
     --reproducible \
     --path-flavor windows \
     --policy lenient
 }
-unity_run "$tmp/unity-first.cdx.json"
+unity_run "$tmp/unity-first.spdx.json"
 for attempt in 2 3 4 5 6; do
-  unity_run "$tmp/unity-again.cdx.json"
-  cmp "$tmp/unity-first.cdx.json" "$tmp/unity-again.cdx.json"
+  unity_run "$tmp/unity-again.spdx.json"
+  cmp "$tmp/unity-first.spdx.json" "$tmp/unity-again.spdx.json"
 done
-printf 'windows-flavor unity SBOM 1.6 SHA-256: '
-sha256sum "$tmp/unity-first.cdx.json" | cut -d ' ' -f 1
+printf 'windows-flavor unity SBOM 3.0.1 SHA-256: '
+sha256sum "$tmp/unity-first.spdx.json" | cut -d ' ' -f 1
 
 # The FOSS documents of section 32.6, which are a further rendering of the same
 # discovery and have to be as reproducible as the SBOM: a notices document that

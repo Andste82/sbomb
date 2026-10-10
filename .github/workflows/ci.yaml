@@ -182,6 +182,15 @@ jobs:
           go-version-file: go.mod
       - name: 10 000 translation units within budget
         run: go test -tags perf ./test/perf/ -timeout 10m -units 10000 -map-bytes 41943040
+      - name: 10 000 translation units within budget, as SPDX
+        # Measured on every push like the row above, but not yet blocking: the
+        # SPDX run checks its 32 MB document against the schema and two tiers
+        # of rules, and that does not fit section 31 yet -- on a 6-core machine
+        # 16 s and 725 MiB at this row, 148 s and 3.6 GiB at 50 000 units.
+        # Until it is brought within budget the step reports the overrun
+        # instead of hiding it.
+        continue-on-error: true
+        run: go test -tags perf ./test/perf/ -timeout 10m -units 10000 -map-bytes 41943040 -format spdx-json
 
   # The findings catalogue in the user documentation is generated from appendix
   # A and annotated with what the code emits. Unlike the SPDX list this depends
@@ -222,6 +231,85 @@ jobs:
             exit 1
           fi
           echo "no release version is written into the documentation"
+
+  # sbomb checks every SPDX document it writes itself, against the embedded
+  # JSON schema and two tiers of Go rules (deviation D51). Those rules are a
+  # paraphrase of the SPDX model, and a paraphrase can be wrong in the same way
+  # as the writer it checks. This job holds the goldens to the SPDX project's
+  # own validators instead: the JSON schema through an independent validator,
+  # and the SHACL model, which sbomb does not run. Every Python package is
+  # pinned -- the validators and the engines they depend on -- so that a new
+  # release of any of them cannot turn a green build red; bump them on
+  # purpose. PyPI is the job's one network dependency: the model and the
+  # context are committed. Blocking, because a golden that fails here is a document sbomb
+  # ships to users.
+  spdx-conformance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install the pinned validators
+        # Every package is pinned, the engines among the transitive
+        # dependencies included, so that no release upstream can change a
+        # verdict on the goldens (scripts/spdx-conformance-requirements.txt).
+        run: python3 -m pip install --no-deps -r scripts/spdx-conformance-requirements.txt
+      - name: The goldens are what the tool writes
+        run: go test ./cmd/sbomb -run 'TestSpdx|TestTheSyntheticDocumentGolden|TestTheSpdxDocumentLosesNothing' -count 1
+      - name: The goldens pass the SPDX JSON schema
+        run: check-jsonschema --schemafile internal/spdx/spdx3/schema/spdx-json-schema-3.0.1.json testdata/golden/*.spdx.json
+      - name: The schema check can fail
+        # A schema validator that accepts everything -- a wrong schema path
+        # it reads as empty, a broken pin, a no-op -- passes the goldens too.
+        # The probe is a golden with one schema defect, a scalar
+        # software_sbomType, which must be refused for that reason: the exit
+        # status alone does not tell a refusal from a schema or a probe that
+        # failed to load, so the defect must be named in the output.
+        run: |
+          set +e -u
+          output=$(check-jsonschema --schemafile internal/spdx/spdx3/schema/spdx-json-schema-3.0.1.json \
+            testdata/spdx/known-bad-schema/scalar-sbom-type.json 2>&1)
+          result=$?
+          if [ "$result" -ne 1 ] || ! printf '%s\n' "$output" | grep -q "Schema validation errors were encountered" \
+            || ! printf '%s\n' "$output" | grep -q "software_sbomType: 'build' is not of type 'array'"; then
+            printf '%s\n' "$output" >&2
+            echo "::error::the schema check did not refuse the scalar software_sbomType of the known-bad probe" >&2
+            exit 1
+          fi
+          echo "refused, as it must be: testdata/spdx/known-bad-schema/scalar-sbom-type.json"
+      - name: The goldens pass the SPDX SHACL model
+        # The model and the context are committed copies, so that the job
+        # does not depend on spdx.org answering.
+        run: >-
+          python3 -I scripts/spdx-shacl.py testdata/spdx/spdx-model-3.0.1.ttl
+          testdata/spdx/spdx-context-3.0.1.jsonld testdata/golden/*.spdx.json
+      - name: The SHACL check can fail
+        # A validator that passes everything passes the goldens too. Each probe
+        # is a golden with one defect -- the extension profile claimed, a
+        # relationship from an element the document does not define -- and
+        # each must be refused, or the step above proved nothing.
+        run: |
+          # Not -e: a refusal is the expected outcome of each probe.
+          set +e -u
+          status=0
+          for probe in testdata/spdx/known-bad/*.json; do
+            # Exit 1 is "does not conform"; 0 accepted the defect, and 2 never
+            # got as far as judging it.
+            python3 -I scripts/spdx-shacl.py testdata/spdx/spdx-model-3.0.1.ttl \
+              testdata/spdx/spdx-context-3.0.1.jsonld "$probe" > /dev/null
+            result=$?
+            if [ "$result" -ne 1 ]; then
+              echo "::error::the SHACL check gave $result, not 1, for the known-bad probe $probe" >&2
+              status=1
+            else
+              echo "refused, as it must be: $probe"
+            fi
+          done
+          exit "$status"
 
   # The SPDX license list changes upstream, so drift here is information, not
   # a reason to block a pull request. It is checked separately for that reason.

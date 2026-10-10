@@ -1,0 +1,458 @@
+{
+  "@context": "https://spdx.org/rdf/3.0.1/spdx-context.jsonld",
+  "@graph": [
+    {
+      "type": "CreationInfo",
+      "@id": "_:creationInfo1",
+      "specVersion": "3.0.1",
+      "created": "2023-11-14T22:13:20Z",
+      "createdBy": [
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#agent:sbomb"
+      ],
+      "createdUsing": [
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#tool:sbomb"
+      ]
+    },
+    {
+      "type": "SpdxDocument",
+      "spdxId": "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#document",
+      "creationInfo": "_:creationInfo1",
+      "name": "hdr",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:build:config",
+              "extension_cdxPropValue": "Debug"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:build:generator",
+              "extension_cdxPropValue": "Ninja"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:adapters",
+              "extension_cdxPropValue": "binfmt"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:adapters",
+              "extension_cdxPropValue": "linker-depfile"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:adapters",
+              "extension_cdxPropValue": "linker-map"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:adapters",
+              "extension_cdxPropValue": "resolver"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:reproducible",
+              "extension_cdxPropValue": "true"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:specVersion",
+              "extension_cdxPropValue": "3.0.1"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:toolVersion",
+              "extension_cdxPropValue": "0.0.0-test"
+            }
+          ]
+        }
+      ],
+      "element": [
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#sbom",
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#agent:sbomb",
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#tool:sbomb",
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#component:project",
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#product:hdr",
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#file:project:main.c",
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#file:project:vendor_hdronly/inline_math.h",
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#relationship:1",
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#relationship:2",
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#relationship:3",
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#relationship:4",
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#relationship:5"
+      ],
+      "profileConformance": [
+        "core",
+        "expandedLicensing",
+        "software"
+      ],
+      "rootElement": [
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#sbom"
+      ]
+    },
+    {
+      "type": "software_Sbom",
+      "spdxId": "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#sbom",
+      "creationInfo": "_:creationInfo1",
+      "element": [
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#agent:sbomb",
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#tool:sbomb",
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#component:project",
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#product:hdr",
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#file:project:main.c",
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#file:project:vendor_hdronly/inline_math.h",
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#relationship:1",
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#relationship:2",
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#relationship:3",
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#relationship:4",
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#relationship:5"
+      ],
+      "rootElement": [
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#product:hdr"
+      ],
+      "software_sbomType": [
+        "build"
+      ]
+    },
+    {
+      "type": "Organization",
+      "spdxId": "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#agent:sbomb",
+      "creationInfo": "_:creationInfo1",
+      "name": "sbomb"
+    },
+    {
+      "type": "Tool",
+      "spdxId": "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#tool:sbomb",
+      "creationInfo": "_:creationInfo1",
+      "name": "sbomb",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:toolVersion",
+              "extension_cdxPropValue": "0.0.0-test"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#component:project",
+      "creationInfo": "_:creationInfo1",
+      "name": "project",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "unstructured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:detectedBy",
+              "extension_cdxPropValue": "anchor:project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "static-object"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:modified",
+              "extension_cdxPropValue": "unknown"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:root",
+              "extension_cdxPropValue": "project:"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "application"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "unknown"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:reason",
+              "extension_cdxPropValue": "no-evidence"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:review",
+              "extension_cdxPropValue": "true"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "application"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#product:hdr",
+      "creationInfo": "_:creationInfo1",
+      "name": "hdr",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:artifact:role",
+              "extension_cdxPropValue": "application"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "unstructured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "application"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "application"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#file:project:main.c",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:main.c",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "source"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "static-object"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:missing",
+              "extension_cdxPropValue": "true"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:main.c"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#file:project:vendor_hdronly/inline_math.h",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:vendor_hdronly/inline_math.h",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:header:class",
+              "extension_cdxPropValue": "project-header"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "header"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "header-only"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:missing",
+              "extension_cdxPropValue": "true"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:vendor_hdronly/inline_math.h"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#relationship:1",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#component:project",
+      "relationshipType": "contains",
+      "to": [
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#file:project:main.c",
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#file:project:vendor_hdronly/inline_math.h"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#relationship:2",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "unknown"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:reason",
+              "extension_cdxPropValue": "no-evidence"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#component:project",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "expandedlicensing_NoAssertionLicense"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#relationship:3",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#file:project:main.c",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#relationship:4",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#file:project:vendor_hdronly/inline_math.h",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#relationship:5",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#product:hdr",
+      "relationshipType": "hasStaticLink",
+      "to": [
+        "urn:uuid:6d2e9f60-8800-573f-ac48-9506ffe2e0b3#component:project"
+      ]
+    }
+  ]
+}

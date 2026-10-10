@@ -7,7 +7,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/example/sbomb/internal/cyclonedx"
 	"github.com/example/sbomb/internal/domain"
 )
 
@@ -125,17 +124,17 @@ func (b bundledSBOM) read(path string) ([]Contribution, []domain.Finding) {
 // this package exists to keep -- so BOM.Components is never looked at, however
 // complete it may be.
 func (b bundledSBOM) readCycloneDX(path string, data []byte) ([]Contribution, []domain.Finding) {
-	var bom cyclonedx.BOM
+	var bom bundledCycloneDXDocument
 	if err := json.Unmarshal(data, &bom); err != nil {
 		return nil, []domain.Finding{bundledSBOMFinding("EVIDENCE_UNREADABLE", path,
 			"the bundled SBOM is not a CycloneDX JSON document, so nothing was taken from it")}
 	}
-	// What makes a document CycloneDX is the writer's question, and it already
-	// answers it for `validate`. The specification version it reports is not
-	// checked: the four fields read below are spelled the same way in every
-	// version of the format, so refusing a 1.4 document over a schema this
-	// reader never consults would throw away evidence for nothing.
-	if _, ok := (cyclonedx.Writer{}).Detect(data); !ok {
+	// bomFormat is what makes a document CycloneDX, in every version of the
+	// format. The specification version is not checked: the fields read below
+	// are spelled the same way in every version, so refusing a 1.4 document
+	// over a schema this reader never consults would throw away evidence for
+	// nothing.
+	if bom.BomFormat != "CycloneDX" {
 		return nil, []domain.Finding{bundledSBOMFinding("EVIDENCE_UNREADABLE", path,
 			"the document does not declare bomFormat CycloneDX, so it was not read as one")}
 	}
@@ -155,6 +154,37 @@ func (b bundledSBOM) readCycloneDX(path string, data []byte) ([]Contribution, []
 	return b.contributions(component.Version, cycloneDXLicense(component.Licenses), supplier, component.PURL), nil
 }
 
+// bundledCycloneDXDocument is the part of a CycloneDX document this reader
+// needs, as bundledSPDXDocument is for SPDX. It is a type of its own rather than
+// the CycloneDX writer's: importing the writer's package to read four fields
+// would register a writer as a side effect of reading input, and which formats
+// the binary can write is decided where the command registers them, and
+// nowhere else.
+type bundledCycloneDXDocument struct {
+	BomFormat string `json:"bomFormat"`
+	Metadata  *struct {
+		Component *struct {
+			Name     string `json:"name"`
+			Version  string `json:"version"`
+			PURL     string `json:"purl"`
+			Supplier *struct {
+				Name string `json:"name"`
+			} `json:"supplier"`
+			Licenses []cycloneDXLicenseChoice `json:"licenses"`
+		} `json:"component"`
+	} `json:"metadata"`
+}
+
+// cycloneDXLicenseChoice is one entry of a CycloneDX licence array: an
+// expression, or a licence object with an SPDX id or a name.
+type cycloneDXLicenseChoice struct {
+	Expression string `json:"expression"`
+	License    *struct {
+		ID   string `json:"id"`
+		Name string `json:"name"`
+	} `json:"license"`
+}
+
 // cycloneDXLicense is the SPDX expression a CycloneDX licence array states, or
 // the empty string where it states something this tool will not interpret.
 //
@@ -169,7 +199,7 @@ func (b bundledSBOM) readCycloneDX(path string, data []byte) ([]Contribution, []
 // together or the recipient chooses one, and section 22.3 forbids deciding that
 // by inspection. Such a document then contributes no licence, which is the same
 // silence as a document that stated none.
-func cycloneDXLicense(licenses []cyclonedx.License) string {
+func cycloneDXLicense(licenses []cycloneDXLicenseChoice) string {
 	for _, entry := range licenses {
 		if entry.Expression != "" {
 			return entry.Expression

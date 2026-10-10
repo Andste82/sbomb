@@ -1,0 +1,3574 @@
+{
+  "@context": "https://spdx.org/rdf/3.0.1/spdx-context.jsonld",
+  "@graph": [
+    {
+      "type": "CreationInfo",
+      "@id": "_:creationInfo1",
+      "specVersion": "3.0.1",
+      "created": "2023-11-14T22:13:20Z",
+      "createdBy": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#agent:Sentinel%20Vendor%20Org"
+      ],
+      "createdUsing": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#tool:sbomb"
+      ]
+    },
+    {
+      "type": "SpdxDocument",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#document",
+      "creationInfo": "_:creationInfo1",
+      "name": "sentinel-product",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:build:config",
+              "extension_cdxPropValue": "SentinelConfig"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:build:generator",
+              "extension_cdxPropValue": "Sentinel Generator"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:adapters",
+              "extension_cdxPropValue": "sentinel-adapter-a"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:adapters",
+              "extension_cdxPropValue": "sentinel-adapter-b"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:policyProfile",
+              "extension_cdxPropValue": "sentinel-policy-profile"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:reproducible",
+              "extension_cdxPropValue": "true"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:specVersion",
+              "extension_cdxPropValue": "3.0.1"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:toolVersion",
+              "extension_cdxPropValue": "0.0.0-sentinel"
+            }
+          ]
+        }
+      ],
+      "element": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#sbom",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#agent:Sentinel%20Originator%20Org",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#agent:Sentinel%20Supplier%20Org",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#agent:Sentinel%20Vendor%20Org",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#tool:sbomb",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#artifact:build:bin/app",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#artifact:build:fs.img",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:assets",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:build-environment",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:gen",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:hdr",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:kitchen",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:kitchen@1.2.3-sentinel",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:libc",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:toolchain-headers",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-container",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-crypto",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-device",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-driver",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-file",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-firmware",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-framework",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-model",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-untyped",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#product:sentinel-product",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/COPYING.custom",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/LICENSE",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/LICENSE.retained",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/NOTICE",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/kitchen.c",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/kitchen.h",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:gen/kitchen_config.h",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:gen/table.c",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:lib/libkitchen.a",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:obj/kitchen.o",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:project:assets/logo%20png.png",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:project:hdr/hdr.h",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:project:tools/gen.py",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:sysroot:usr/include/stdio.h",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:sysroot:usr/lib/libc.so.6",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#patch:component:kitchen/1",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#patch:component:kitchen/2",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#patch:component:kitchen/3",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#patch:component:kitchen/4",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#vulnerability:CVE-2024-0001",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#vulnerability:CVE-2024-0002",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#vulnerability:GHSA-sent-inel-0001",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license-text:LicenseRef-sbomb-Sentinel-Custom-Licence-2ce69ab6-d9c0bbf6",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license-text:LicenseRef-sbomb-Sentinel-Header-Licence-2.0",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license-text:LicenseRef-sbomb-Sentinel-Retained-Licence-d581e9c0-083d786f",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license-text:LicenseRef-sbomb-Sentinel-Unlisted-1.0",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:Apache-2.0",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:LGPL-2.1-or-later%20WITH%20GCC-exception-3.1",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:LicenseRef-sbomb-Sentinel-Custom-Licence-2ce69ab6-d9c0bbf6",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:LicenseRef-sbomb-Sentinel-Retained-Licence-d581e9c0-083d786f",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:MIT",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:MIT%20AND%20LicenseRef-sbomb-Sentinel-Unlisted-1.0",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:MIT%20OR%20Apache-2.0",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:MIT%20OR%20LicenseRef-sbomb-Sentinel-Header-Licence-2.0",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:Zlib",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:1",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:2",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:3",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:4",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:5",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:6",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:7",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:8",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:9",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:10",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:11",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:12",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:13",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:14",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:15",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:16",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:17",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:18",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:19",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:20",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:21",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:22",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:23",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:24",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:25",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:26",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:27",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:28",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:29",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:30",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:31",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:32",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:33",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:34",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:35",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:36",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:37",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:38",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:39",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:40",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:41",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:42",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:43",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:44",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:45",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:46",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:47",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:48",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:49",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:50",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:51",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:52",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:53",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:54",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:55",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:56",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:57",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:58",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:59",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:60",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:61",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:62",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:63",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:64",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:65",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:66",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:67"
+      ],
+      "profileConformance": [
+        "core",
+        "expandedLicensing",
+        "security",
+        "simpleLicensing",
+        "software"
+      ],
+      "rootElement": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#sbom"
+      ]
+    },
+    {
+      "type": "software_Sbom",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#sbom",
+      "creationInfo": "_:creationInfo1",
+      "element": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#agent:Sentinel%20Originator%20Org",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#agent:Sentinel%20Supplier%20Org",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#agent:Sentinel%20Vendor%20Org",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#tool:sbomb",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#artifact:build:bin/app",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#artifact:build:fs.img",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:assets",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:build-environment",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:gen",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:hdr",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:kitchen",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:kitchen@1.2.3-sentinel",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:libc",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:toolchain-headers",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-container",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-crypto",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-device",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-driver",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-file",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-firmware",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-framework",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-model",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-untyped",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#product:sentinel-product",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/COPYING.custom",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/LICENSE",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/LICENSE.retained",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/NOTICE",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/kitchen.c",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/kitchen.h",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:gen/kitchen_config.h",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:gen/table.c",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:lib/libkitchen.a",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:obj/kitchen.o",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:project:assets/logo%20png.png",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:project:hdr/hdr.h",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:project:tools/gen.py",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:sysroot:usr/include/stdio.h",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:sysroot:usr/lib/libc.so.6",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#patch:component:kitchen/1",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#patch:component:kitchen/2",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#patch:component:kitchen/3",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#patch:component:kitchen/4",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#vulnerability:CVE-2024-0001",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#vulnerability:CVE-2024-0002",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#vulnerability:GHSA-sent-inel-0001",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license-text:LicenseRef-sbomb-Sentinel-Custom-Licence-2ce69ab6-d9c0bbf6",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license-text:LicenseRef-sbomb-Sentinel-Header-Licence-2.0",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license-text:LicenseRef-sbomb-Sentinel-Retained-Licence-d581e9c0-083d786f",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license-text:LicenseRef-sbomb-Sentinel-Unlisted-1.0",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:Apache-2.0",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:LGPL-2.1-or-later%20WITH%20GCC-exception-3.1",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:LicenseRef-sbomb-Sentinel-Custom-Licence-2ce69ab6-d9c0bbf6",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:LicenseRef-sbomb-Sentinel-Retained-Licence-d581e9c0-083d786f",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:MIT",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:MIT%20AND%20LicenseRef-sbomb-Sentinel-Unlisted-1.0",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:MIT%20OR%20Apache-2.0",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:MIT%20OR%20LicenseRef-sbomb-Sentinel-Header-Licence-2.0",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:Zlib",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:1",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:2",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:3",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:4",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:5",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:6",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:7",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:8",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:9",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:10",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:11",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:12",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:13",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:14",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:15",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:16",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:17",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:18",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:19",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:20",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:21",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:22",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:23",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:24",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:25",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:26",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:27",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:28",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:29",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:30",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:31",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:32",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:33",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:34",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:35",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:36",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:37",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:38",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:39",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:40",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:41",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:42",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:43",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:44",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:45",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:46",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:47",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:48",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:49",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:50",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:51",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:52",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:53",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:54",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:55",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:56",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:57",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:58",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:59",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:60",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:61",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:62",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:63",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:64",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:65",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:66",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:67"
+      ],
+      "rootElement": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#product:sentinel-product"
+      ],
+      "software_sbomType": [
+        "build"
+      ]
+    },
+    {
+      "type": "Organization",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#agent:Sentinel%20Originator%20Org",
+      "creationInfo": "_:creationInfo1",
+      "name": "Sentinel Originator Org"
+    },
+    {
+      "type": "Organization",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#agent:Sentinel%20Supplier%20Org",
+      "creationInfo": "_:creationInfo1",
+      "name": "Sentinel Supplier Org"
+    },
+    {
+      "type": "Organization",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#agent:Sentinel%20Vendor%20Org",
+      "creationInfo": "_:creationInfo1",
+      "name": "Sentinel Vendor Org"
+    },
+    {
+      "type": "Tool",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#tool:sbomb",
+      "creationInfo": "_:creationInfo1",
+      "name": "sbomb",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:toolVersion",
+              "extension_cdxPropValue": "0.0.0-sentinel"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#artifact:build:bin/app",
+      "creationInfo": "_:creationInfo1",
+      "name": "app",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "unstructured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "application"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "application"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#artifact:build:fs.img",
+      "creationInfo": "_:creationInfo1",
+      "name": "fs.img",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "unstructured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "firmware"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "firmware"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:assets",
+      "creationInfo": "_:creationInfo1",
+      "name": "assets",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "embedded-asset"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "data"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "data"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:build-environment",
+      "creationInfo": "_:creationInfo1",
+      "name": "build-environment",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:detectedBy",
+              "extension_cdxPropValue": "synthetic"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "toolchain"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "framework"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "framework"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:gen",
+      "creationInfo": "_:creationInfo1",
+      "name": "gen",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "unstructured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:distributionRole",
+              "extension_cdxPropValue": "build-time-only"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "build-tool"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "third-party"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "application"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "application"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:hdr",
+      "creationInfo": "_:creationInfo1",
+      "name": "hdr",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:headerOnly",
+              "extension_cdxPropValue": "true"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "header-only"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "third-party"
+            }
+          ]
+        }
+      ],
+      "software_additionalPurpose": [
+        "source"
+      ],
+      "software_primaryPurpose": "library"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:kitchen",
+      "creationInfo": "_:creationInfo1",
+      "name": "kitchen",
+      "description": "sentinel description of kitchen",
+      "externalRef": [
+        {
+          "type": "ExternalRef",
+          "externalRefType": "vcs",
+          "locator": [
+            "https://sentinel.example/kitchen.git"
+          ]
+        }
+      ],
+      "externalIdentifier": [
+        {
+          "type": "ExternalIdentifier",
+          "externalIdentifierType": "cpe23",
+          "identifier": "cpe:2.3:a:sentinel:kitchen:1.2.3:*:*:*:*:*:*:*"
+        },
+        {
+          "type": "ExternalIdentifier",
+          "externalIdentifierType": "packageUrl",
+          "identifier": "pkg:generic/kitchen@1.2.3-sentinel"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:archiveMembersUsed",
+              "extension_cdxPropValue": "3/7"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:cveExclusion",
+              "extension_cdxPropValue": "CVE-2024-0001: sentinel reason one"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:cveExclusion",
+              "extension_cdxPropValue": "CVE-2024-0001: sentinel reason two"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:cveExclusion",
+              "extension_cdxPropValue": "CVE-2024-0002"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:cveExclusion",
+              "extension_cdxPropValue": "GHSA-sent-inel-0001: sentinel reason of an advisory"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:declaredRevision",
+              "extension_cdxPropValue": "sentinel-declared-revision"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:detectedBy",
+              "extension_cdxPropValue": "sentinel-detector"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "embedded-asset"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "generated-source"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "static-archive-member"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:modified",
+              "extension_cdxPropValue": "true"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:originator",
+              "extension_cdxPropValue": "Sentinel Originator Org"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:root",
+              "extension_cdxPropValue": "build:_deps/kitchen-src"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "third-party"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:sourceObligation",
+              "extension_cdxPropValue": "sentinel-obligation"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "library"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:vcsCommit",
+              "extension_cdxPropValue": "sentinelcommit111"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:vcsCommit",
+              "extension_cdxPropValue": "sentinelcommit222"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:vcsDirty",
+              "extension_cdxPropValue": "true"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:version:confidence",
+              "extension_cdxPropValue": "medium"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:version:source",
+              "extension_cdxPropValue": "conan"
+            }
+          ]
+        }
+      ],
+      "originatedBy": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#agent:Sentinel%20Originator%20Org"
+      ],
+      "suppliedBy": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#agent:Sentinel%20Supplier%20Org",
+      "software_copyrightText": "Copyright sentinel curated notice\nCopyright sentinel holder C, of no file",
+      "software_primaryPurpose": "library",
+      "software_packageUrl": "pkg:generic/kitchen@1.2.3-sentinel",
+      "software_packageVersion": "1.2.3-sentinel",
+      "software_sourceInfo": "sentinel signal prose"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:kitchen@1.2.3-sentinel",
+      "creationInfo": "_:creationInfo1",
+      "name": "kitchen",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "third-party"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "library"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "library",
+      "software_packageVersion": "1.2.3-sentinel"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:libc",
+      "creationInfo": "_:creationInfo1",
+      "name": "libc",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "dynamic"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "system"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "operating-system"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "operatingSystem"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:toolchain-headers",
+      "creationInfo": "_:creationInfo1",
+      "name": "toolchain headers",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "toolchain"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "platform"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "platform"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-container",
+      "creationInfo": "_:creationInfo1",
+      "name": "type-container",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "static-object"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "container"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "container"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-crypto",
+      "creationInfo": "_:creationInfo1",
+      "name": "type-crypto",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "static-object"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "cryptographic-asset"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "other"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-device",
+      "creationInfo": "_:creationInfo1",
+      "name": "type-device",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "unstructured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "static-object"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "device"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "device"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-driver",
+      "creationInfo": "_:creationInfo1",
+      "name": "type-driver",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "static-object"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "device-driver"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "deviceDriver"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-file",
+      "creationInfo": "_:creationInfo1",
+      "name": "type-file",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "static-object"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "file"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "file"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-firmware",
+      "creationInfo": "_:creationInfo1",
+      "name": "type-firmware",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "unstructured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "static-object"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "firmware"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "firmware"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-framework",
+      "creationInfo": "_:creationInfo1",
+      "name": "type-framework",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "static-object"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "framework"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "framework"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-model",
+      "creationInfo": "_:creationInfo1",
+      "name": "type-model",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "static-object"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "machine-learning-model"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "model"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-untyped",
+      "creationInfo": "_:creationInfo1",
+      "name": "type-untyped",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "static-object"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "library"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#product:sentinel-product",
+      "creationInfo": "_:creationInfo1",
+      "name": "sentinel-product",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:artifact:role",
+              "extension_cdxPropValue": "application"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "unstructured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "application"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:version:confidence",
+              "extension_cdxPropValue": "high"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:version:source",
+              "extension_cdxPropValue": "curated"
+            }
+          ]
+        }
+      ],
+      "suppliedBy": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#agent:Sentinel%20Vendor%20Org",
+      "software_primaryPurpose": "application",
+      "software_packageVersion": "9.9.9-sentinel"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/COPYING.custom",
+      "creationInfo": "_:creationInfo1",
+      "name": "build:_deps/kitchen-src/COPYING.custom",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "5555555555555555555555555555555555555555555555555555555555555555"
+        }
+      ],
+      "externalRef": [
+        {
+          "type": "ExternalRef",
+          "externalRefType": "license",
+          "locator": [
+            "data:text/plain;base64,//5zZW50aW5lbA=="
+          ],
+          "contentType": "text/plain",
+          "comment": "the licence text sbomb retained from this file (licenseTextInSBOM: evidence), byte for byte"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "build:_deps/kitchen-src/COPYING.custom"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "documentation",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/LICENSE",
+      "creationInfo": "_:creationInfo1",
+      "name": "build:_deps/kitchen-src/LICENSE",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "3333333333333333333333333333333333333333333333333333333333333333"
+        }
+      ],
+      "externalRef": [
+        {
+          "type": "ExternalRef",
+          "externalRefType": "license",
+          "locator": [
+            "data:text/plain;charset=utf-8;base64,c2VudGluZWwgbGljZW5jZSB0ZXh0IG9mIE1JVAo="
+          ],
+          "contentType": "text/plain",
+          "comment": "the licence text sbomb retained from this file (licenseTextInSBOM: evidence), byte for byte"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "third-party"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:artifacts",
+              "extension_cdxPropValue": "artifact:build:fs.img"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "asset"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "embedded-asset"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "build:_deps/kitchen-src/LICENSE"
+            }
+          ]
+        }
+      ],
+      "software_additionalPurpose": [
+        "documentation"
+      ],
+      "software_primaryPurpose": "data",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/LICENSE.retained",
+      "creationInfo": "_:creationInfo1",
+      "name": "build:_deps/kitchen-src/LICENSE.retained",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "6666666666666666666666666666666666666666666666666666666666666666"
+        }
+      ],
+      "externalRef": [
+        {
+          "type": "ExternalRef",
+          "externalRefType": "license",
+          "locator": [
+            "data:text/plain;charset=utf-8;base64,c2VudGluZWwgcmV0YWluZWQgY3VzdG9tIGxpY2VuY2UgdGV4dAo="
+          ],
+          "contentType": "text/plain",
+          "comment": "the licence text sbomb retained from this file (licenseTextInSBOM: evidence), byte for byte"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "build:_deps/kitchen-src/LICENSE.retained"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "documentation",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/NOTICE",
+      "creationInfo": "_:creationInfo1",
+      "name": "build:_deps/kitchen-src/NOTICE",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "4444444444444444444444444444444444444444444444444444444444444444"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "build:_deps/kitchen-src/NOTICE"
+            }
+          ]
+        }
+      ],
+      "software_copyrightText": "Copyright sentinel holder B\nCopyright sentinel holder D",
+      "software_primaryPurpose": "documentation",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/kitchen.c",
+      "creationInfo": "_:creationInfo1",
+      "name": "build:_deps/kitchen-src/kitchen.c",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha1",
+          "hashValue": "2222222222222222222222222222222222222222"
+        },
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "1111111111111111111111111111111111111111111111111111111111111111"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "third-party"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:artifacts",
+              "extension_cdxPropValue": "artifact:build:bin/app"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "source"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "static-archive-member"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:size",
+              "extension_cdxPropValue": "4242"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "build:_deps/kitchen-src/kitchen.c"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/kitchen.h",
+      "creationInfo": "_:creationInfo1",
+      "name": "build:_deps/kitchen-src/kitchen.h",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "third-party"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:artifacts",
+              "extension_cdxPropValue": "artifact:build:bin/app"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:header:class",
+              "extension_cdxPropValue": "third-party"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "header"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "static-archive-member"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "build:_deps/kitchen-src/kitchen.h"
+            }
+          ]
+        }
+      ],
+      "software_copyrightText": "Copyright sentinel holder A",
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:gen/kitchen_config.h",
+      "creationInfo": "_:creationInfo1",
+      "name": "build:gen/kitchen_config.h",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "third-party"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:artifacts",
+              "extension_cdxPropValue": "artifact:build:bin/app"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "generated-header"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "generated-source"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "build:gen/kitchen_config.h"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:gen/table.c",
+      "creationInfo": "_:creationInfo1",
+      "name": "build:gen/table.c",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "third-party"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:artifacts",
+              "extension_cdxPropValue": "artifact:build:bin/app"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "generated-source"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "generated-source"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "build:gen/table.c"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:lib/libkitchen.a",
+      "creationInfo": "_:creationInfo1",
+      "name": "build:lib/libkitchen.a",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "other",
+          "hashValue": "abcdef0123",
+          "comment": "SENTINEL-UNKNOWN-KEY"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "unstructured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "third-party"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:artifacts",
+              "extension_cdxPropValue": "artifact:build:bin/app"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "static-archive-member"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "build:lib/libkitchen.a"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "archive",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:obj/kitchen.o",
+      "creationInfo": "_:creationInfo1",
+      "name": "build:obj/kitchen.o",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "unstructured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "third-party"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:artifacts",
+              "extension_cdxPropValue": "artifact:build:bin/app"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "object"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "static-archive-member"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "build:obj/kitchen.o"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "other",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:project:assets/logo%20png.png",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:assets/logo png.png",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:artifacts",
+              "extension_cdxPropValue": "artifact:build:fs.img"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "asset"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "embedded-asset"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:assets/logo png.png"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "data",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:project:hdr/hdr.h",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:hdr/hdr.h",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "third-party"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:artifacts",
+              "extension_cdxPropValue": "artifact:build:bin/app"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "header"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "header-only"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:missing",
+              "extension_cdxPropValue": "true"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:hdr/hdr.h"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:project:tools/gen.py",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:tools/gen.py",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "third-party"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:artifacts",
+              "extension_cdxPropValue": "artifact:build:bin/app"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:artifacts",
+              "extension_cdxPropValue": "artifact:build:fs.img"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "unknown"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "build-tool"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:tools/gen.py"
+            }
+          ]
+        }
+      ],
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:sysroot:usr/include/stdio.h",
+      "creationInfo": "_:creationInfo1",
+      "name": "sysroot:usr/include/stdio.h",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "toolchain"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "header"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "sysroot:usr/include/stdio.h"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:sysroot:usr/lib/libc.so.6",
+      "creationInfo": "_:creationInfo1",
+      "name": "sysroot:usr/lib/libc.so.6",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "unstructured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "system"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:artifacts",
+              "extension_cdxPropValue": "artifact:build:bin/app"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "shared-library"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "dynamic"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "sysroot:usr/lib/libc.so.6"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "library",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#patch:component:kitchen/1",
+      "creationInfo": "_:creationInfo1",
+      "name": "0002-sentinel.patch",
+      "description": "sentinel patch description B",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:patch:source",
+              "extension_cdxPropValue": "conandata.yml"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:patch:type",
+              "extension_cdxPropValue": "backport"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "patch",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#patch:component:kitchen/2",
+      "creationInfo": "_:creationInfo1",
+      "name": "patch 2 of kitchen (the metadata names no patch file)",
+      "description": "sentinel patch description C, of no file",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:patch:source",
+              "extension_cdxPropValue": "conandata.yml"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:patch:type",
+              "extension_cdxPropValue": "monkey"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "patch",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#patch:component:kitchen/3",
+      "creationInfo": "_:creationInfo1",
+      "name": "0001-sentinel.patch",
+      "description": "sentinel patch description A",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:patch:source",
+              "extension_cdxPropValue": "conandata.yml"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:patch:type",
+              "extension_cdxPropValue": "unofficial"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "patch",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#patch:component:kitchen/4",
+      "creationInfo": "_:creationInfo1",
+      "name": "0001-sentinel.patch",
+      "description": "sentinel patch description A2",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:patch:source",
+              "extension_cdxPropValue": "conandata.yml"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:patch:type",
+              "extension_cdxPropValue": "unofficial"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "patch",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "security_Vulnerability",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#vulnerability:CVE-2024-0001",
+      "creationInfo": "_:creationInfo1",
+      "name": "CVE-2024-0001",
+      "externalIdentifier": [
+        {
+          "type": "ExternalIdentifier",
+          "externalIdentifierType": "cve",
+          "identifier": "CVE-2024-0001"
+        }
+      ]
+    },
+    {
+      "type": "security_Vulnerability",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#vulnerability:CVE-2024-0002",
+      "creationInfo": "_:creationInfo1",
+      "name": "CVE-2024-0002",
+      "externalIdentifier": [
+        {
+          "type": "ExternalIdentifier",
+          "externalIdentifierType": "cve",
+          "identifier": "CVE-2024-0002"
+        }
+      ]
+    },
+    {
+      "type": "security_Vulnerability",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#vulnerability:GHSA-sent-inel-0001",
+      "creationInfo": "_:creationInfo1",
+      "name": "GHSA-sent-inel-0001",
+      "externalIdentifier": [
+        {
+          "type": "ExternalIdentifier",
+          "externalIdentifierType": "securityOther",
+          "identifier": "GHSA-sent-inel-0001"
+        }
+      ]
+    },
+    {
+      "type": "simplelicensing_SimpleLicensingText",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license-text:LicenseRef-sbomb-Sentinel-Custom-Licence-2ce69ab6-d9c0bbf6",
+      "creationInfo": "_:creationInfo1",
+      "name": "Sentinel Custom Licence",
+      "comment": "sbomb observed this licence name; the licence text was retained but is not UTF-8 text, so it is attached byte for byte, as a base64 data: URI external reference, to the file build:_deps/kitchen-src/COPYING.custom",
+      "simplelicensing_licenseText": "Sentinel Custom Licence"
+    },
+    {
+      "type": "simplelicensing_SimpleLicensingText",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license-text:LicenseRef-sbomb-Sentinel-Header-Licence-2.0",
+      "creationInfo": "_:creationInfo1",
+      "name": "Sentinel-Header-Licence-2.0",
+      "comment": "sbomb observed only this licence name; no licence text was retained (licenseTextInSBOM is off, or no licence file was read)",
+      "simplelicensing_licenseText": "Sentinel-Header-Licence-2.0"
+    },
+    {
+      "type": "simplelicensing_SimpleLicensingText",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license-text:LicenseRef-sbomb-Sentinel-Retained-Licence-d581e9c0-083d786f",
+      "creationInfo": "_:creationInfo1",
+      "name": "Sentinel Retained Licence",
+      "simplelicensing_licenseText": "sentinel retained custom licence text\n"
+    },
+    {
+      "type": "simplelicensing_SimpleLicensingText",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license-text:LicenseRef-sbomb-Sentinel-Unlisted-1.0",
+      "creationInfo": "_:creationInfo1",
+      "name": "Sentinel-Unlisted-1.0",
+      "comment": "sbomb observed only this licence name; no licence text was retained (licenseTextInSBOM is off, or no licence file was read)",
+      "simplelicensing_licenseText": "Sentinel-Unlisted-1.0"
+    },
+    {
+      "type": "simplelicensing_LicenseExpression",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:Apache-2.0",
+      "creationInfo": "_:creationInfo1",
+      "simplelicensing_licenseExpression": "Apache-2.0",
+      "simplelicensing_licenseListVersion": "3.28.0"
+    },
+    {
+      "type": "simplelicensing_LicenseExpression",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:LGPL-2.1-or-later%20WITH%20GCC-exception-3.1",
+      "creationInfo": "_:creationInfo1",
+      "simplelicensing_licenseExpression": "LGPL-2.1-or-later WITH GCC-exception-3.1",
+      "simplelicensing_licenseListVersion": "3.28.0"
+    },
+    {
+      "type": "simplelicensing_LicenseExpression",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:LicenseRef-sbomb-Sentinel-Custom-Licence-2ce69ab6-d9c0bbf6",
+      "creationInfo": "_:creationInfo1",
+      "simplelicensing_customIdToUri": [
+        {
+          "type": "DictionaryEntry",
+          "key": "LicenseRef-sbomb-Sentinel-Custom-Licence-2ce69ab6-d9c0bbf6",
+          "value": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license-text:LicenseRef-sbomb-Sentinel-Custom-Licence-2ce69ab6-d9c0bbf6"
+        }
+      ],
+      "simplelicensing_licenseExpression": "LicenseRef-sbomb-Sentinel-Custom-Licence-2ce69ab6-d9c0bbf6"
+    },
+    {
+      "type": "simplelicensing_LicenseExpression",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:LicenseRef-sbomb-Sentinel-Retained-Licence-d581e9c0-083d786f",
+      "creationInfo": "_:creationInfo1",
+      "simplelicensing_customIdToUri": [
+        {
+          "type": "DictionaryEntry",
+          "key": "LicenseRef-sbomb-Sentinel-Retained-Licence-d581e9c0-083d786f",
+          "value": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license-text:LicenseRef-sbomb-Sentinel-Retained-Licence-d581e9c0-083d786f"
+        }
+      ],
+      "simplelicensing_licenseExpression": "LicenseRef-sbomb-Sentinel-Retained-Licence-d581e9c0-083d786f"
+    },
+    {
+      "type": "simplelicensing_LicenseExpression",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:MIT",
+      "creationInfo": "_:creationInfo1",
+      "simplelicensing_licenseExpression": "MIT",
+      "simplelicensing_licenseListVersion": "3.28.0"
+    },
+    {
+      "type": "simplelicensing_LicenseExpression",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:MIT%20AND%20LicenseRef-sbomb-Sentinel-Unlisted-1.0",
+      "creationInfo": "_:creationInfo1",
+      "simplelicensing_customIdToUri": [
+        {
+          "type": "DictionaryEntry",
+          "key": "LicenseRef-sbomb-Sentinel-Unlisted-1.0",
+          "value": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license-text:LicenseRef-sbomb-Sentinel-Unlisted-1.0"
+        }
+      ],
+      "simplelicensing_licenseExpression": "MIT AND LicenseRef-sbomb-Sentinel-Unlisted-1.0",
+      "simplelicensing_licenseListVersion": "3.28.0"
+    },
+    {
+      "type": "simplelicensing_LicenseExpression",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:MIT%20OR%20Apache-2.0",
+      "creationInfo": "_:creationInfo1",
+      "simplelicensing_licenseExpression": "MIT OR Apache-2.0",
+      "simplelicensing_licenseListVersion": "3.28.0"
+    },
+    {
+      "type": "simplelicensing_LicenseExpression",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:MIT%20OR%20LicenseRef-sbomb-Sentinel-Header-Licence-2.0",
+      "creationInfo": "_:creationInfo1",
+      "simplelicensing_customIdToUri": [
+        {
+          "type": "DictionaryEntry",
+          "key": "LicenseRef-sbomb-Sentinel-Header-Licence-2.0",
+          "value": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license-text:LicenseRef-sbomb-Sentinel-Header-Licence-2.0"
+        }
+      ],
+      "simplelicensing_licenseExpression": "MIT OR LicenseRef-sbomb-Sentinel-Header-Licence-2.0",
+      "simplelicensing_licenseListVersion": "3.28.0"
+    },
+    {
+      "type": "simplelicensing_LicenseExpression",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:Zlib",
+      "creationInfo": "_:creationInfo1",
+      "simplelicensing_licenseExpression": "Zlib",
+      "simplelicensing_licenseListVersion": "3.28.0"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:1",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#artifact:build:bin/app",
+      "relationshipType": "dependsOn",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:hdr"
+      ]
+    },
+    {
+      "type": "LifecycleScopedRelationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:2",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#artifact:build:bin/app",
+      "relationshipType": "hasDynamicLink",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:libc"
+      ],
+      "scope": "runtime"
+    },
+    {
+      "type": "LifecycleScopedRelationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:3",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#artifact:build:bin/app",
+      "relationshipType": "hasProvidedDependency",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:libc"
+      ],
+      "scope": "runtime"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:4",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#artifact:build:bin/app",
+      "relationshipType": "hasStaticLink",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:kitchen"
+      ]
+    },
+    {
+      "type": "LifecycleScopedRelationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:5",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#artifact:build:bin/app",
+      "relationshipType": "usesTool",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:gen"
+      ],
+      "scope": "build"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:6",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#artifact:build:fs.img",
+      "relationshipType": "contains",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:assets",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:kitchen"
+      ]
+    },
+    {
+      "type": "LifecycleScopedRelationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:7",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#artifact:build:fs.img",
+      "relationshipType": "usesTool",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:gen"
+      ],
+      "scope": "build"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:8",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:assets",
+      "relationshipType": "contains",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:project:assets/logo%20png.png"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:9",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "file-level"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:assets",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:MIT%20AND%20LicenseRef-sbomb-Sentinel-Unlisted-1.0"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:10",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:build-environment",
+      "relationshipType": "contains",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:libc",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:toolchain-headers"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:11",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:gen",
+      "relationshipType": "contains",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:project:tools/gen.py"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:12",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "curated"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:source",
+              "extension_cdxPropValue": "curated"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:gen",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "expandedlicensing_NoneLicense"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:13",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:hdr",
+      "relationshipType": "contains",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:project:hdr/hdr.h"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:14",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "unknown"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:reason",
+              "extension_cdxPropValue": "no-evidence"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:hdr",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "expandedlicensing_NoAssertionLicense"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:15",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:kitchen",
+      "relationshipType": "contains",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/LICENSE",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/kitchen.c",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/kitchen.h",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:gen/kitchen_config.h",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:gen/table.c",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:lib/libkitchen.a",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:obj/kitchen.o"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:16",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:confidence",
+              "extension_cdxPropValue": "high"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:conflictingValue",
+              "extension_cdxPropValue": "sentinel-conflicting-value"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "file-level"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:reason",
+              "extension_cdxPropValue": "sentinel-reason-code"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:source",
+              "extension_cdxPropValue": "build:_deps/kitchen-src/kitchen.h"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-identifier"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:kitchen",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:MIT%20OR%20Apache-2.0"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:17",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:confidence",
+              "extension_cdxPropValue": "low"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:source",
+              "extension_cdxPropValue": "build:_deps/kitchen-src/COPYING.custom"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-template"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:kitchen",
+      "relationshipType": "hasDeclaredLicense",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:LicenseRef-sbomb-Sentinel-Custom-Licence-2ce69ab6-d9c0bbf6"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:18",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:confidence",
+              "extension_cdxPropValue": "high"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:source",
+              "extension_cdxPropValue": "build:_deps/kitchen-src/LICENSE"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-digest"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:kitchen",
+      "relationshipType": "hasDeclaredLicense",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:MIT"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:19",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:kitchen",
+      "relationshipType": "hasEvidence",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/COPYING.custom",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/LICENSE",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/LICENSE.retained",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/NOTICE",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/kitchen.h"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:20",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:kitchen",
+      "relationshipType": "patchedBy",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#patch:component:kitchen/1",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#patch:component:kitchen/2",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#patch:component:kitchen/3",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#patch:component:kitchen/4"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:21",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:kitchen@1.2.3-sentinel",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:22",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:confidence",
+              "extension_cdxPropValue": "high"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "file-level"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:source",
+              "extension_cdxPropValue": "build:_deps/kitchen-src/kitchen.h"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-identifier"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:kitchen@1.2.3-sentinel",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:MIT%20OR%20LicenseRef-sbomb-Sentinel-Header-Licence-2.0"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:23",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:kitchen@1.2.3-sentinel",
+      "relationshipType": "hasEvidence",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/NOTICE"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:24",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:libc",
+      "relationshipType": "contains",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:sysroot:usr/lib/libc.so.6"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:25",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "component-level"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:libc",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:LGPL-2.1-or-later%20WITH%20GCC-exception-3.1"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:26",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:toolchain-headers",
+      "relationshipType": "contains",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:sysroot:usr/include/stdio.h"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:27",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-container",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:28",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "component-level"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-container",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:Zlib"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:29",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-crypto",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:30",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "component-level"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-crypto",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:Zlib"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:31",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-device",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:32",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "component-level"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-device",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:Zlib"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:33",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-driver",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:34",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "component-level"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-driver",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:Zlib"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:35",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-file",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:36",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "component-level"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-file",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:Zlib"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:37",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-firmware",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:38",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "component-level"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-firmware",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:Zlib"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:39",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-framework",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:40",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "component-level"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-framework",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:Zlib"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:41",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-model",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:42",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "component-level"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-model",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:Zlib"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:43",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-untyped",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:44",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "component-level"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-untyped",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:Zlib"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:45",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-template"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/COPYING.custom",
+      "relationshipType": "hasDeclaredLicense",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:LicenseRef-sbomb-Sentinel-Custom-Licence-2ce69ab6-d9c0bbf6"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:46",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/LICENSE",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:47",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-identifier"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/LICENSE",
+      "relationshipType": "hasDeclaredLicense",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:MIT"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:48",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-template"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/LICENSE.retained",
+      "relationshipType": "hasDeclaredLicense",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:LicenseRef-sbomb-Sentinel-Retained-Licence-d581e9c0-083d786f"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:49",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/kitchen.c",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:50",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:_deps/kitchen-src/kitchen.h",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:51",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:gen/kitchen_config.h",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:52",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:gen/table.c",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:53",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:lib/libkitchen.a",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:54",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:build:obj/kitchen.o",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:55",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:project:assets/logo%20png.png",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:56",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:project:hdr/hdr.h",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:57",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:project:tools/gen.py",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:58",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:sysroot:usr/include/stdio.h",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:59",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#file:sysroot:usr/lib/libc.so.6",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:60",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#product:sentinel-product",
+      "relationshipType": "contains",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#artifact:build:bin/app",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#artifact:build:fs.img"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:61",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#product:sentinel-product",
+      "relationshipType": "dependsOn",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:build-environment",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:kitchen@1.2.3-sentinel"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:62",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "curated"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#product:sentinel-product",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#license:Apache-2.0"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:63",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#product:sentinel-product",
+      "relationshipType": "hasStaticLink",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-container",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-crypto",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-device",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-driver",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-file",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-firmware",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-framework",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-model",
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:type-untyped"
+      ]
+    },
+    {
+      "type": "security_VexNotAffectedVulnAssessmentRelationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:64",
+      "creationInfo": "_:creationInfo1",
+      "suppliedBy": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#agent:Sentinel%20Supplier%20Org",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#vulnerability:CVE-2024-0001",
+      "relationshipType": "doesNotAffect",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:kitchen"
+      ],
+      "security_impactStatement": "sentinel reason one"
+    },
+    {
+      "type": "security_VexNotAffectedVulnAssessmentRelationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:65",
+      "creationInfo": "_:creationInfo1",
+      "suppliedBy": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#agent:Sentinel%20Supplier%20Org",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#vulnerability:CVE-2024-0001",
+      "relationshipType": "doesNotAffect",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:kitchen"
+      ],
+      "security_impactStatement": "sentinel reason two"
+    },
+    {
+      "type": "security_VexNotAffectedVulnAssessmentRelationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:66",
+      "creationInfo": "_:creationInfo1",
+      "suppliedBy": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#agent:Sentinel%20Supplier%20Org",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#vulnerability:CVE-2024-0002",
+      "relationshipType": "doesNotAffect",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:kitchen"
+      ],
+      "security_impactStatement": "the upstream lists this vulnerability as not applying to the version it shipped"
+    },
+    {
+      "type": "security_VexNotAffectedVulnAssessmentRelationship",
+      "spdxId": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#relationship:67",
+      "creationInfo": "_:creationInfo1",
+      "suppliedBy": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#agent:Sentinel%20Supplier%20Org",
+      "from": "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#vulnerability:GHSA-sent-inel-0001",
+      "relationshipType": "doesNotAffect",
+      "to": [
+        "urn:uuid:68f66e3c-b28c-5b28-ba77-ff0d26d9b862#component:kitchen"
+      ],
+      "security_impactStatement": "sentinel reason of an advisory"
+    }
+  ]
+}

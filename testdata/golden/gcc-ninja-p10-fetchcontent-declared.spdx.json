@@ -1,0 +1,801 @@
+{
+  "@context": "https://spdx.org/rdf/3.0.1/spdx-context.jsonld",
+  "@graph": [
+    {
+      "type": "CreationInfo",
+      "@id": "_:creationInfo1",
+      "specVersion": "3.0.1",
+      "created": "2023-11-14T22:13:20Z",
+      "createdBy": [
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#agent:sbomb"
+      ],
+      "createdUsing": [
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#tool:sbomb"
+      ]
+    },
+    {
+      "type": "SpdxDocument",
+      "spdxId": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#document",
+      "creationInfo": "_:creationInfo1",
+      "name": "fcapp",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:build:config",
+              "extension_cdxPropValue": "Debug"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:build:generator",
+              "extension_cdxPropValue": "Ninja"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:adapters",
+              "extension_cdxPropValue": "binfmt"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:adapters",
+              "extension_cdxPropValue": "depfiles"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:adapters",
+              "extension_cdxPropValue": "linker-depfile"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:adapters",
+              "extension_cdxPropValue": "linker-map"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:adapters",
+              "extension_cdxPropValue": "resolver"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:reproducible",
+              "extension_cdxPropValue": "true"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:specVersion",
+              "extension_cdxPropValue": "3.0.1"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:toolVersion",
+              "extension_cdxPropValue": "0.0.0-test"
+            }
+          ]
+        }
+      ],
+      "element": [
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#sbom",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#agent:sbomb",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#tool:sbomb",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#component:project",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#component:tinylog",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#product:fcapp",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#file:build:_deps/tinylog-src/LICENSE",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#file:build:_deps/tinylog-src/tinylog.c",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#file:build:_deps/tinylog-src/tinylog.h",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#file:project:main.c",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#license:MIT",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:1",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:2",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:3",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:4",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:5",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:6",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:7",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:8",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:9",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:10"
+      ],
+      "profileConformance": [
+        "core",
+        "expandedLicensing",
+        "simpleLicensing",
+        "software"
+      ],
+      "rootElement": [
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#sbom"
+      ]
+    },
+    {
+      "type": "software_Sbom",
+      "spdxId": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#sbom",
+      "creationInfo": "_:creationInfo1",
+      "element": [
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#agent:sbomb",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#tool:sbomb",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#component:project",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#component:tinylog",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#product:fcapp",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#file:build:_deps/tinylog-src/LICENSE",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#file:build:_deps/tinylog-src/tinylog.c",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#file:build:_deps/tinylog-src/tinylog.h",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#file:project:main.c",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#license:MIT",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:1",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:2",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:3",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:4",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:5",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:6",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:7",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:8",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:9",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:10"
+      ],
+      "rootElement": [
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#product:fcapp"
+      ],
+      "software_sbomType": [
+        "build"
+      ]
+    },
+    {
+      "type": "Organization",
+      "spdxId": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#agent:sbomb",
+      "creationInfo": "_:creationInfo1",
+      "name": "sbomb"
+    },
+    {
+      "type": "Tool",
+      "spdxId": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#tool:sbomb",
+      "creationInfo": "_:creationInfo1",
+      "name": "sbomb",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:toolVersion",
+              "extension_cdxPropValue": "0.0.0-test"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#component:project",
+      "creationInfo": "_:creationInfo1",
+      "name": "project",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "unstructured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:detectedBy",
+              "extension_cdxPropValue": "anchor:project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "static-object"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:modified",
+              "extension_cdxPropValue": "unknown"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:root",
+              "extension_cdxPropValue": "project:"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "application"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "unknown"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:reason",
+              "extension_cdxPropValue": "no-evidence"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:review",
+              "extension_cdxPropValue": "true"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "application"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#component:tinylog",
+      "creationInfo": "_:creationInfo1",
+      "name": "tinylog",
+      "externalRef": [
+        {
+          "type": "ExternalRef",
+          "externalRefType": "vcs",
+          "locator": [
+            "/__fixture_src__/dep/tinylog"
+          ]
+        }
+      ],
+      "externalIdentifier": [
+        {
+          "type": "ExternalIdentifier",
+          "externalIdentifierType": "packageUrl",
+          "identifier": "pkg:generic/tinylog@1.2.0?vcs_url=git%2B%2F__fixture_src__%2Fdep%2Ftinylog%40bef99de91c8a51ad80682833e1a7b15dbbff2b90"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:archiveMembersUsed",
+              "extension_cdxPropValue": "1/1"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:declaredRevision",
+              "extension_cdxPropValue": "v1.2.0"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:detectedBy",
+              "extension_cdxPropValue": "fetchcontent"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:licenseFile",
+              "extension_cdxPropValue": "build:_deps/tinylog-src/LICENSE@sha256:a7637c2b70876aca181d298d012813a9bd2879b13fff83c2d3a4f6e380a3ab0c"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "generated-source"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "static-archive-member"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:modified",
+              "extension_cdxPropValue": "false"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:root",
+              "extension_cdxPropValue": "build:_deps/tinylog-src"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "third-party"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "library"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:vcsCommit",
+              "extension_cdxPropValue": "bef99de91c8a51ad80682833e1a7b15dbbff2b90"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "component-level"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:source",
+              "extension_cdxPropValue": "LICENSE"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-digest"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:version:confidence",
+              "extension_cdxPropValue": "high"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:version:source",
+              "extension_cdxPropValue": "git-describe"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "library",
+      "software_packageUrl": "pkg:generic/tinylog@1.2.0?vcs_url=git%2B%2F__fixture_src__%2Fdep%2Ftinylog%40bef99de91c8a51ad80682833e1a7b15dbbff2b90",
+      "software_packageVersion": "1.2.0",
+      "software_sourceInfo": "the component root's checkout is clean and stands on the declared revision v1.2.0"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#product:fcapp",
+      "creationInfo": "_:creationInfo1",
+      "name": "fcapp",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:artifact:role",
+              "extension_cdxPropValue": "application"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "unstructured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "application"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "application"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#file:build:_deps/tinylog-src/LICENSE",
+      "creationInfo": "_:creationInfo1",
+      "name": "build:_deps/tinylog-src/LICENSE",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "a7637c2b70876aca181d298d012813a9bd2879b13fff83c2d3a4f6e380a3ab0c"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "build:_deps/tinylog-src/LICENSE"
+            }
+          ]
+        }
+      ],
+      "software_copyrightText": "Copyright (c) 2026 Tinylog Authors",
+      "software_primaryPurpose": "documentation",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#file:build:_deps/tinylog-src/tinylog.c",
+      "creationInfo": "_:creationInfo1",
+      "name": "build:_deps/tinylog-src/tinylog.c",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "build"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "source"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "static-archive-member"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:missing",
+              "extension_cdxPropValue": "true"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "build:_deps/tinylog-src/tinylog.c"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#file:build:_deps/tinylog-src/tinylog.h",
+      "creationInfo": "_:creationInfo1",
+      "name": "build:_deps/tinylog-src/tinylog.h",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "build"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:header:class",
+              "extension_cdxPropValue": "generated-header"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "header"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "header-only"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:missing",
+              "extension_cdxPropValue": "true"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "build:_deps/tinylog-src/tinylog.h"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#file:project:main.c",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:main.c",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "source"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "static-object"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:missing",
+              "extension_cdxPropValue": "true"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:main.c"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "simplelicensing_LicenseExpression",
+      "spdxId": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#license:MIT",
+      "creationInfo": "_:creationInfo1",
+      "simplelicensing_licenseExpression": "MIT",
+      "simplelicensing_licenseListVersion": "3.28.0"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:1",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#component:project",
+      "relationshipType": "contains",
+      "to": [
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#file:project:main.c"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:2",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "unknown"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:reason",
+              "extension_cdxPropValue": "no-evidence"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#component:project",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "expandedlicensing_NoAssertionLicense"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:3",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#component:tinylog",
+      "relationshipType": "contains",
+      "to": [
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#file:build:_deps/tinylog-src/tinylog.c",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#file:build:_deps/tinylog-src/tinylog.h"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:4",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:confidence",
+              "extension_cdxPropValue": "high"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "component-level"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:source",
+              "extension_cdxPropValue": "LICENSE"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-digest"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#component:tinylog",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#license:MIT"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:5",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#component:tinylog",
+      "relationshipType": "hasEvidence",
+      "to": [
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#file:build:_deps/tinylog-src/LICENSE"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:6",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:technique",
+              "extension_cdxPropValue": "spdx-digest"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#file:build:_deps/tinylog-src/LICENSE",
+      "relationshipType": "hasDeclaredLicense",
+      "to": [
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#license:MIT"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:7",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#file:build:_deps/tinylog-src/tinylog.c",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:8",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#file:build:_deps/tinylog-src/tinylog.h",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:9",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#file:project:main.c",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#relationship:10",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#product:fcapp",
+      "relationshipType": "hasStaticLink",
+      "to": [
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#component:project",
+        "urn:uuid:86470bd9-d6d4-5838-ac3c-07946ab33c3c#component:tinylog"
+      ]
+    }
+  ]
+}

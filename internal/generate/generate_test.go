@@ -11,7 +11,6 @@ import (
 	"testing"
 
 	"github.com/example/sbomb/internal/config"
-	"github.com/example/sbomb/internal/cyclonedx"
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/pathmodel"
 )
@@ -28,11 +27,7 @@ func marshalPortable(t *testing.T, cfg config.Config, buildDir string, flavor pa
 	if err != nil {
 		t.Fatal(err)
 	}
-	output, err := cyclonedx.MarshalBOM(result.BOM)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return []byte(output)
+	return result.Rendered
 }
 
 func TestByteIdenticalAcrossRuns(t *testing.T) {
@@ -122,7 +117,7 @@ func TestRunBuildsGraphAndReportsMissingEvidence(t *testing.T) {
 	if result.Graph == nil || len(result.Graph.Nodes()) == 0 {
 		t.Fatal("Run did not create an evidence graph")
 	}
-	if result.BOM.Metadata == nil || result.BOM.Metadata.Timestamp != "" {
+	if bom := renderedBOM(t, result); bom.Metadata == nil || bom.Metadata.Timestamp != "" {
 		t.Fatal("reproducible BOM should omit metadata timestamp")
 	}
 	// The fixture carries a map and a dependency file, so link evidence must

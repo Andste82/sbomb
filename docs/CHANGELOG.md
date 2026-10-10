@@ -33,6 +33,111 @@ in the build directory came from a `LIB` directory, and it stays unanchored
 instead of being reported as the project's own build output. The MSVC goldens
 lose their duplicate entries and nothing else.
 
+### SPDX 3.0.1 can be written
+
+`--format spdx-json`, or `"output": {"format": "spdx-json"}`, writes the SBOM as
+SPDX 3.0.1 JSON-LD instead of CycloneDX. BSI TR-03183-2 v2.1.0 maps its
+required fields onto exactly two formats, CycloneDX 1.6 and SPDX 3.0.1, so a
+recipient who asks for SPDX can now be given the version the TR names.
+CycloneDX 1.6 stays the default.
+
+The SPDX document is the same run described in the other format, and it says
+everything the CycloneDX document says: packages and files under the same
+identities as the bom-refs, typed relationships for each linkage form
+(`hasStaticLink`, `hasDynamicLink`, `usesTool`, `contains`, `dependsOn`),
+concluded and declared licences, the licence and copyright files as evidence,
+patches, CVE exclusions as VEX statements, and every `sbomb:` property in an
+SPDX extension. A test renders every golden fixture both ways and checks the
+two against each other element by element. Licence names the SPDX list does not
+know become `LicenseRef-sbomb-*` references that are defined in the document,
+and exceptions it does not know `AdditionRef-sbomb-*` ones, so the listed
+licence before `WITH` stays machine-readable. A listed identifier is matched
+without case, as the SPDX grammar says it should be, and written as the list
+spells it: `apache-2.0 OR mit` is `Apache-2.0 OR MIT`, not two custom licences
+(D55). An element CycloneDX says depends
+on nothing says so in SPDX too, because there an absent relationship means
+"unknown", not "none". A retained licence text is attached to the file it was
+read from, byte for byte, as a `license` reference -- SPDX rules complete
+licence texts out of attribution text -- and the exact component type is kept
+as `sbomb:component:type` where SPDX's purposes have no word for it.
+
+Every SPDX document is checked against the official 3.0.1 schema and the rules
+of the specification before it is written. The SPDX project's own SHACL
+validator has no Go implementation, so CI runs it on every SPDX golden instead.
+Deviations D48 to D55 record where the implementation departs from the plan or
+the specification, among them that SPDX output does not meet the performance
+budgets yet.
+
+### generate and self take --format
+
+`--format` was specified for `generate` and never existed; it does now, on
+`self` too, and overrides `output.format` for one run. Without `--output` the
+document is named after its format, `sbomb.cdx.json` or `sbomb.spdx.json`.
+`schema --format spdx-json` prints the SPDX schema, and `--cyclonedx` remains as
+the older spelling of `--format cyclonedx-json`.
+
+Format and version are settled before discovery, and the writer is asked then
+whether it can honour the request. A configured `specVersion` is not silently
+dropped when `--format` switches formats: `1.7` with `--format spdx-json` is
+refused and the versions SPDX has are named. A TLP marking is refused for SPDX,
+which has no field that constrains distribution of the document: a document
+marked AMBER that every tool reads as unmarked would be worse than no document.
+
+### validate reads SPDX 3.0.1 documents
+
+`sbomb validate` recognises an SPDX 3 document by its context URL and checks it
+against the specification it declares, including one another tool wrote, and
+says `valid SPDX 3.0.1 document`. It holds a foreign document only to what SPDX
+requires, not to how sbomb writes: a reference to an element defined in another
+document is conformant, and so is an expression with lower-case operators
+(`MIT or Apache-2.0`), which the SPDX grammar allows. A package or file without
+a name is refused: SPDX 3.0.1 requires one, although neither its schema nor its
+SHACL model checks it. A name of white space is a name, which the specification
+allows; sbomb only never writes one. The other rules the specification states
+and its schema cannot express are held as well: `NoneElement` stands alone in
+a relationship's targets, a document defines at most one `SpdxDocument`, a VEX
+statement uses the relationship type its class is restricted to and comes from
+a vulnerability, and a not-affected statement gives a justification or an
+impact statement. A schema failure names the value that is wrong, not every
+correct property of the same element besides it. An SPDX 2.3 document is
+recognised and refused by name until 2.3 support follows, instead of being
+reported as unrecognised. Exit code 4 means a failed validation in either
+format.
+
+`explain --component --sbom` reads an SPDX document as well, and `--bom-ref`
+accepts an SPDX element IRI.
+
+### A reproducible SPDX document needs SOURCE_DATE_EPOCH
+
+CycloneDX lets a reproducible document leave out its timestamp. SPDX makes the
+creation time mandatory, so reproducible SPDX (`--reproducible` or
+`output.reproducible`) states `SOURCE_DATE_EPOCH` as the creation time, and
+without it the run stops before discovery with
+`REPRODUCIBLE_CREATION_TIME_MISSING`. Writing the Unix epoch instead would put a
+creation date that is never true into a compliance document. Set the variable to
+the commit time, which is what reproducible builds use it for anyway. A value
+outside the years 0000 to 9999, which no RFC 3339 time can state, is refused the
+same way rather than found after discovery. Outside reproducible mode such a
+value is ignored and the clock is used, by `generate` and `self` alike.
+`sbomb foss --reproducible` does not need the variable under an SPDX
+configuration: it writes no SBOM, and nothing it writes states a creation time.
+
+The CMake module takes `FORMAT` (and `SBOMB_DEFAULT_FORMAT`), and the GitHub
+action `format` and `spec-version`. Both name the document after its format by
+default, the configuration's included, so an SPDX document is never written as
+`*.cdx.json`. A relative `CONFIG` is read, for that name as well, from the
+top-level source directory sbomb runs in, wherever cmake was started.
+
+### Two components of the same name and version no longer share an identity
+
+Two components with the same name and the same version used to get the same
+bom-ref, which CycloneDX forbids and which made the second one unreachable by
+reference. The second one now escalates to the root-digest form, as a component
+of the same name and another version already did, and a counter makes it unique
+if even that collides. The rule is shared by both formats, so a CycloneDX
+bom-ref and an SPDX IRI still name the same thing. No document of a fixture
+changes; the case did not occur there.
+
 ### The CMake module requires 3.27, and says so without changing your project
 
 `sbomb_enable` files its File API query with `cmake_file_api()`, which lands in

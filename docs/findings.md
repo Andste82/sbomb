@@ -16,7 +16,7 @@ same build produce identical output.
 
 <!-- BEGIN GENERATED CATALOGUE -->
 
-This build emits 60 of the 69 identifiers below. The rest are specified and
+This build emits 61 of the 70 identifiers below. The rest are specified and
 reserved: they describe evidence this version does not yet read, and a run will
 never report them. They are listed and marked so that the table is the whole
 catalogue rather than a snapshot of one version.
@@ -48,7 +48,7 @@ catalogue rather than a snapshot of one version.
 | `FOSS_SOURCE_OBLIGATION` | info | — | A distributed component's license triggers a source obligation, which §32.6 names and does not produce | emitted |
 | `HEADER_EVIDENCE_FALLBACK` | info | — | A CU had no DWARF coverage; depfile used instead | emitted |
 | `INPUT_LIMIT_EXCEEDED` | warning | — | A parser limit of §30 was reached | emitted |
-| `INTERNAL_INVARIANT_VIOLATION` | error | always (exit 70) | A graph invariant of §8.8 or a `bom-ref` uniqueness assertion of §28.4 failed | emitted |
+| `INTERNAL_INVARIANT_VIOLATION` | error | always (exit 70) | A graph invariant of §8.8 or a `bom-ref` uniqueness assertion of §28.4 failed, or a writer could not render the document sbomb built (§32.5) | emitted |
 | `INVALID_COMPONENT_ROOT` | warning | — | `component-root` in an `sbom.yml` is absolute or leaves the component directory, so the redirection was refused | emitted |
 | `LICENSE_CONFLICT` | warning | `failOnReviewRequired` | Conflicting license evidence | emitted |
 | `LINKED_OBJECT_SOURCE_UNRESOLVED` | warning | `failOnMissingSourceForLinkedObject` | Object could not be mapped to a source | emitted |
@@ -72,7 +72,8 @@ catalogue rather than a snapshot of one version.
 | `PACKAGE_NOT_LINKED` | info | — | A package manager installed this dependency, but no used file belongs to it | emitted |
 | `PCH_HEADERS_EXCLUDED` | info | — | Headers removed by `pchHeaders=exclude` | emitted |
 | `PREBUILT_LIBRARY_UNMAPPED` | warning | `prebuiltLibrariesRequireMapping` | Prebuilt library has no component mapping | emitted |
-| `REPRODUCIBLE_MODE_OMITS_TIMESTAMP` | info | — | `--reproducible` output lacks `metadata.timestamp`; not a CRA deliverable | emitted |
+| `REPRODUCIBLE_CREATION_TIME_MISSING` | error | always (exit 1) | SPDX requires a creation time, and reproducible mode (`--reproducible` or `output.reproducible`) without a readable `SOURCE_DATE_EPOCH` has none to state; refused before discovery | emitted |
+| `REPRODUCIBLE_MODE_OMITS_TIMESTAMP` | info | — | `--reproducible` output lacks `metadata.timestamp`; not a CRA deliverable. Emitted only for formats that omit the timestamp to be reproducible (CycloneDX) | emitted |
 | `RSP_DEPTH_EXCEEDED` | warning | — | Response file recursion limit hit | reserved |
 | `SECTION_GC_EXCLUDED` | info | — | Objects removed by `sectionGarbageCollection=exclude` | emitted |
 | `SECTION_GC_INFO_UNAVAILABLE` | info | — | `sectionGarbageCollection` requested but the evidence source does not report discarded sections | emitted |

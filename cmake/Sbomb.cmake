@@ -25,6 +25,8 @@ set(SBOMB_EXECUTABLE "sbomb" CACHE FILEPATH "Path to the sbomb executable")
 set(SBOMB_OUTPUT_DIR "${CMAKE_BINARY_DIR}/sbom" CACHE PATH "Directory for sbomb output")
 set(SBOMB_DEFAULT_CONFIG "${CMAKE_SOURCE_DIR}/sbomb.json"
     CACHE FILEPATH "Configuration used when sbomb_enable is called without CONFIG")
+set(SBOMB_DEFAULT_FORMAT ""
+    CACHE STRING "SBOM format used when sbomb_enable is called without FORMAT: cyclonedx-json or spdx-json")
 set(SBOMB_DEFAULT_FOSS_OUT ""
     CACHE PATH "FOSS attribution output directory used when sbomb_enable is called without FOSS_OUT")
 set(SBOMB_DEFAULT_FOSS_FORMAT ""
@@ -56,7 +58,7 @@ endif()
 unset(_sbomb_existing_targets)
 
 function(sbomb_enable)
-  set(_sbomb_keywords TARGET CONFIG POLICY MAP DEPFILE OUTPUT FOSS_OUT FOSS_FORMAT)
+  set(_sbomb_keywords TARGET CONFIG POLICY MAP DEPFILE OUTPUT FORMAT FOSS_OUT FOSS_FORMAT)
   cmake_parse_arguments(SBOMB "" "${_sbomb_keywords}" "" ${ARGN})
 
   # cmake_parse_arguments clears SBOMB_<KEYWORD> for every keyword this call
@@ -119,6 +121,16 @@ function(sbomb_enable)
   endif()
   if(_sbomb_foss_format AND NOT _sbomb_foss_format STREQUAL "text" AND NOT _sbomb_foss_format STREQUAL "markdown")
     message(FATAL_ERROR "sbomb_enable: invalid FOSS_FORMAT '${_sbomb_foss_format}'; use text or markdown")
+  endif()
+
+  # The SBOM's serialization: the call's FORMAT, else the default. Empty leaves
+  # the choice to the configuration, as on the command line.
+  set(_sbomb_format "${SBOMB_FORMAT}")
+  if(NOT _sbomb_format)
+    set(_sbomb_format "${SBOMB_DEFAULT_FORMAT}")
+  endif()
+  if(_sbomb_format AND NOT _sbomb_format STREQUAL "cyclonedx-json" AND NOT _sbomb_format STREQUAL "spdx-json")
+    message(FATAL_ERROR "sbomb_enable: invalid FORMAT '${_sbomb_format}'; use cyclonedx-json or spdx-json")
   endif()
 
   get_target_property(_sbomb_alias "${SBOMB_TARGET}" ALIASED_TARGET)
@@ -204,8 +216,17 @@ function(sbomb_enable)
   # The parsed argument first; the default only when the call named none, and
   # only when the file is really there. --config for a file that does not exist
   # fails a run that defaults alone would have carried.
+  #
+  # A relative CONFIG is relative to the directory sbomb runs in, the top-level
+  # source directory (WORKING_DIRECTORY below). It is made absolute against
+  # that directory before anything here looks at it: if(EXISTS) would resolve
+  # it against the directory cmake was started from, and file(READ) against
+  # the current source directory, so the warning and the format read for the
+  # file name would depend on where the user ran cmake -- and an SPDX document
+  # configured from the build directory would be written as *.cdx.json.
   set(_sbomb_config "${SBOMB_CONFIG}")
   if(_sbomb_config)
+    get_filename_component(_sbomb_config "${_sbomb_config}" ABSOLUTE BASE_DIR "${CMAKE_SOURCE_DIR}")
     if(NOT EXISTS "${_sbomb_config}")
       message(WARNING "sbomb_enable: CONFIG ${_sbomb_config} does not exist; the SBOM target will fail until it does")
     endif()
@@ -213,10 +234,31 @@ function(sbomb_enable)
     set(_sbomb_config "${SBOMB_DEFAULT_CONFIG}")
   endif()
 
+  # The default file name follows the format the document will be in, so that
+  # an SPDX document is never written under a .cdx.json name. Without FORMAT
+  # that is the configuration's output.format, read here from the file the run
+  # will be given; CMake reconfigures when that file changes, so the name
+  # follows an edit of it. A format named only in a configuration that file
+  # refers to is not seen here -- name FORMAT, or OUTPUT, for that case.
+  set(_sbomb_effective_format "${_sbomb_format}")
+  if(NOT _sbomb_effective_format AND _sbomb_config AND EXISTS "${_sbomb_config}")
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_sbomb_config}")
+    file(READ "${_sbomb_config}" _sbomb_config_text)
+    string(JSON _sbomb_effective_format ERROR_VARIABLE _sbomb_json_error
+      GET "${_sbomb_config_text}" output format)
+    if(_sbomb_json_error)
+      set(_sbomb_effective_format "")
+    endif()
+  endif()
+  if(_sbomb_effective_format STREQUAL "spdx-json")
+    set(_sbomb_extension ".spdx.json")
+  else()
+    set(_sbomb_extension ".cdx.json")
+  endif()
   if(SBOMB_OUTPUT)
     set(_sbomb_output "${SBOMB_OUTPUT}")
   else()
-    set(_sbomb_output "${SBOMB_OUTPUT_DIR}/${SBOMB_TARGET}.cdx.json")
+    set(_sbomb_output "${SBOMB_OUTPUT_DIR}/${SBOMB_TARGET}${_sbomb_extension}")
   endif()
   get_filename_component(_sbomb_output_dir "${_sbomb_output}" DIRECTORY)
   if(NOT _sbomb_output_dir)
@@ -229,6 +271,9 @@ function(sbomb_enable)
   endif()
   if(SBOMB_POLICY)
     list(APPEND _sbomb_command --policy "${SBOMB_POLICY}")
+  endif()
+  if(_sbomb_format)
+    list(APPEND _sbomb_command --format "${_sbomb_format}")
   endif()
   # sbomb looks beside the artifact and nowhere else unless it is told, so a
   # path the call named has to be passed on.

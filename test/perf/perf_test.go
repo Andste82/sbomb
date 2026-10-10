@@ -21,6 +21,11 @@ var (
 	fixtureDir = flag.String("fixture", "", "reuse a generated large fixture instead of building one")
 	units      = flag.Int("units", 50000, "translation units in the generated fixture")
 	mapBytes   = flag.Int64("map-bytes", 200<<20, "linker map size")
+	// format is the writer the budget is measured with. The budget of section
+	// 31 is a property of the run, not of one format, and the formats do not
+	// cost the same: SPDX states one relationship per known leaf -- about one
+	// per file -- and checks its output in two tiers on top of the schema.
+	format = flag.String("format", "cyclonedx-json", "output format to measure: cyclonedx-json or spdx-json")
 )
 
 // budget is one row of the table in section 31.
@@ -54,11 +59,19 @@ func TestPerformanceBudget(t *testing.T) {
 		t.Fatalf("go build: %v\n%s", err, output)
 	}
 
-	output := filepath.Join(t.TempDir(), "large.cdx.json")
+	extension := ".cdx.json"
+	if *format == "spdx-json" {
+		extension = ".spdx.json"
+	}
+	output := filepath.Join(t.TempDir(), "large"+extension)
 	command := exec.Command(binary, "generate",
 		"--build-dir", filepath.Join(root, "build"),
 		"--config", configPath, "--policy", "lenient",
+		"--format", *format,
 		"--output", output, "--reproducible")
+	// A reproducible SPDX document is created at SOURCE_DATE_EPOCH and is
+	// refused without it; CycloneDX ignores it under --reproducible.
+	command.Env = append(os.Environ(), "SOURCE_DATE_EPOCH=1700000000")
 	started := time.Now()
 	combined, err := command.CombinedOutput()
 	elapsed := time.Since(started)
@@ -73,8 +86,8 @@ func TestPerformanceBudget(t *testing.T) {
 	}
 	peak := usage.Maxrss * 1024 // Linux reports kilobytes
 
-	t.Logf("section 31: %d units, %d MB map -> %s wall, %d MiB peak RSS (budget %s, %d MiB)",
-		*units, *mapBytes>>20, elapsed.Round(time.Millisecond), peak>>20,
+	t.Logf("section 31, %s: %d units, %d MB map -> %s wall, %d MiB peak RSS (budget %s, %d MiB)",
+		*format, *units, *mapBytes>>20, elapsed.Round(time.Millisecond), peak>>20,
 		want.wall, want.rss>>20)
 
 	if elapsed > want.wall {

@@ -26,10 +26,12 @@ here is a version that goes stale the next time one is cut.
 | `source-dir` | — | The source tree, where it is now. Needed when the build directory was restored somewhere else than it was built — building in one job and describing the result in another (§7.9) |
 | `config` | — | Configuration file |
 | `policy` | `default` | Policy profile |
-| `output` | `sbomb.cdx.json` | Where the document goes |
+| `format` | the configuration's, else `cyclonedx-json` | `cyclonedx-json` or `spdx-json` |
+| `spec-version` | the format's default | `1.6` or `1.7` for CycloneDX, `3.0.1` for SPDX |
+| `output` | `sbomb.cdx.json`, or `sbomb.spdx.json` for SPDX | Where the document goes. Empty names it after the format the run resolved, the configuration's included |
 | `foss` | `false` | Also write the four attribution outputs of [foss.md](foss.md) and upload the directory |
 | `foss-out` | `sbomb-foss` | Where those four files go |
-| `reproducible` | `false` | Omit the timestamp |
+| `reproducible` | `false` | Write the same bytes on every run. CycloneDX omits the timestamp; SPDX states `SOURCE_DATE_EPOCH`, which the workflow must then set, for example to the commit time from `git log -1 --format=%ct`, or the run is refused |
 | `path-flavor` | the host's | Pin to `posix` when comparing across platforms |
 | `artifact-suffix` | — | Appended to the uploaded artifact's name. A matrix that varies anything but the platform needs it: two legs uploading under one name make the second a 409 that is swallowed, and one leg's attribution disappears |
 | `token` | `${{ github.token }}` | Needed while the repository is private; pass `""` to download anonymously |
@@ -83,11 +85,12 @@ than which command it runs.
 | | | `corpus` | Checks complete, portable fixtures and verifies tests leave them unchanged; protects committed golden inputs. |
 | | | `foss-outputs` | Compares the fixture's four attribution outputs against their goldens and runs the action's attribution command; the notices format has no schema, so nothing else would notice a drift. |
 | | | `msvc-corpus` | Regenerates MSVC/Ninja fixtures on Windows and parses them; proves native evidence coverage still works. |
-| | | `performance-budget` | Measures the 10,000-translation-unit case against its time and memory limits; catches scalability regressions. |
+| | | `performance-budget` | Measures the 10,000-translation-unit case against its time and memory limits; catches scalability regressions. The same case as SPDX is measured too and reports its overrun without failing (deviation D54). |
 | | | `documentation` | Checks generated catalogues and loads documented configs; prevents docs from describing unsupported behavior. |
+| | | `spdx-conformance` | Holds every SPDX golden document to the SPDX project's own validators: an independent JSON schema validator and the SHACL model, with every Python package pinned, the validation engines they depend on included (`scripts/spdx-conformance-requirements.txt`); known-bad probes must fail, one with a schema defect the JSON schema validator must refuse and others the SHACL check must refuse, so that neither validator could pass by accepting everything. sbomb checks its documents itself, but those rules are a paraphrase of the model, and this catches a paraphrase wrong in the same way as the writer. |
 | | | `spdx-drift` | Runs `spdxgen --check` against current SPDX data; verifies generated hashes and templates stay current so known licenses do not become `NOASSERTION` (informational). |
 | | | `end-to-end` | Runs the real CMake integration with a toolchain; catches wiring errors package tests cannot exercise. |
-| `determinism` | push, pull request | `hash` | Repeats the same build on Linux and Windows targets; detects timestamps or ordering that change output. |
+| `determinism` | push, pull request | `hash` | Repeats the same build on Linux and Windows targets, as CycloneDX 1.6 and 1.7 and as SPDX 3.0.1 with a pinned `SOURCE_DATE_EPOCH`; detects timestamps or ordering that change output. |
 | | | `compare` | Compares hashes across platforms; proves equivalent evidence produces equivalent SBOM bytes. |
 | `release` | `v*` tag | `publish` | Rebuilds five targets, validates versions, checksums and self-SBOMs, then publishes; protects the release artifact set. |
 | `smoke-test` | called by `release` | `run` | Downloads and runs the published binaries on Linux and Windows; catches packaging or upload errors source CI cannot see. |
@@ -103,7 +106,8 @@ Cutting a release is written down in `.claude/skills/release`.
 
 `release` is the only workflow with write access; the others are read-only.
 `spdx-drift` is the only job that may fail without blocking, because the SPDX
-list changes upstream.
+list changes upstream; the SPDX step of `performance-budget` is the only such
+step, until SPDX output is within budget.
 
 A release carries five executables -- linux/amd64, linux/arm64, windows/amd64,
 darwin/amd64 and darwin/arm64 -- a CycloneDX SBOM beside each one, and the

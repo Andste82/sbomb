@@ -5,18 +5,16 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/example/sbomb/internal/config"
-	"github.com/example/sbomb/internal/cyclonedx"
+	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/generate"
 	"github.com/example/sbomb/internal/limits"
 	"github.com/example/sbomb/internal/policy"
 	"github.com/example/sbomb/internal/sbomwriter"
 	"github.com/example/sbomb/internal/selfsbom"
-	"github.com/google/uuid"
 )
 
 // handleSelf writes an SBOM for a Go binary from the module evidence its
@@ -41,6 +39,16 @@ func handleSelf(args []string, verbosity int) (int, string, string) {
 	if err != nil {
 		return 1, logBuf.String(), err.Error() + "\n"
 	}
+	// The writer and version are settled before the binary is read, as for
+	// generate: a version no writer emits is a usage error, not something to
+	// find out after the work is done.
+	selected, err := resolveOutput(options.format, options.specVersion, sbomwriter.Options{Reproducible: options.reproducible})
+	if err != nil {
+		return 1, logBuf.String(), err.Error() + "\n"
+	}
+	if options.output == "" {
+		options.output = options.binaryPath + outputExtension(selected.writer)
+	}
 
 	logger.Info("Reading Go build information from '%s'", options.binaryPath)
 	result, err := selfsbom.Build(options.binaryPath, selfsbom.Options{
@@ -59,21 +67,14 @@ func handleSelf(args []string, verbosity int) (int, string, string) {
 	logger.Info("Recorded %d module(s) plus the standard library, toolchain %s",
 		len(result.Binary.Deps), result.Binary.GoVersion)
 
-	writer, specVersion, err := sbomwriter.Resolve("cyclonedx-json", options.specVersion)
+	rendered, err := renderSelfDocument(selected.writer, result.Document, sbomwriter.Options{
+		SpecVersion: selected.version, Reproducible: options.reproducible,
+	}, options.binaryPath)
 	if err != nil {
-		return 1, logBuf.String(), err.Error() + "\n"
+		return exitCodeFor(err, 70), logBuf.String(), err.Error() + "\n"
 	}
-	bom, err := writer.(cyclonedx.Writer).Build(result.Document, sbomwriter.Options{SpecVersion: specVersion, Reproducible: options.reproducible})
-	if err != nil {
-		return 4, logBuf.String(), err.Error() + "\n"
-	}
-	if options.reproducible {
-		bom.SerialNumber = cyclonedx.ReproducibleSerialNumber(bom)
-	} else {
-		bom.SerialNumber = "urn:uuid:" + uuid.NewString()
-	}
-	logger.Info("Writing CycloneDX %s BOM to '%s'...", specVersion, options.output)
-	if err := cyclonedx.WriteBOM(options.output, bom); err != nil {
+	logger.Info("Writing %s %s document to '%s'...", formatLabel(selected.writer), selected.version, options.output)
+	if err := sbomwriter.WriteFile(options.output, selected.writer, rendered); err != nil {
 		// Either validation layer failing is exit code 4 (section 32.5).
 		return 4, logBuf.String(), err.Error() + "\n"
 	}
@@ -103,6 +104,25 @@ func handleSelf(args []string, verbosity int) (int, string, string) {
 	return 0, logBuf.String(), ""
 }
 
+// renderSelfDocument renders the document of a binary, and treats a failure
+// the way generate does: the writer refusing a document sbomb built is an
+// internal invariant violation (exit 70), not a validation failure. Exit 4 is
+// left to the validation of the exact bytes (WriteFile, section 32.5), so that
+// one failure gives one exit code whichever command met it.
+func renderSelfDocument(writer sbomwriter.Writer, document *sbomwriter.Document, options sbomwriter.Options, subject string) ([]byte, error) {
+	var rendered bytes.Buffer
+	if err := writer.Write(&rendered, document, options); err != nil {
+		return nil, &generate.ExitError{
+			Code: 70,
+			Finding: domain.Finding{
+				ID: "INTERNAL_INVARIANT_VIOLATION", Severity: domain.SeverityError,
+				Subject: domain.Subject{Kind: "run", Ref: subject}, Message: err.Error(),
+			},
+		}
+	}
+	return rendered.Bytes(), nil
+}
+
 type selfOptions struct {
 	binaryPath       string
 	output           string
@@ -112,6 +132,7 @@ type selfOptions struct {
 	supplier         string
 	policyName       string
 	specVersion      string
+	format           string
 	findingsJSONPath string
 	evidencePath     string
 	licenses         map[string]string
@@ -122,7 +143,7 @@ type selfOptions struct {
 
 const selfUsage = "usage: sbomb self <binary> [--output <path>] [--version <v>] " +
 	"[--module-dir <dir>] [--goroot <dir>] [--supplier <name>] [--policy <profile>] " +
-	"[--spec-version <v>] [--license <module>=<SPDX>]... [--findings-json <path>] " +
+	"[--format <id>] [--spec-version <v>] [--license <module>=<SPDX>]... [--findings-json <path>] " +
 	"[--evidence <path>] [--reproducible]\n"
 
 // parse reads the arguments. It returns an exit code and a message, both zero
@@ -193,6 +214,11 @@ func (o *selfOptions) parse(args []string) (int, string) {
 		case "--spec-version":
 			value, ok = take()
 			o.specVersion = value
+		case "--format":
+			// The same choice generate offers: a release that publishes SPDX
+			// for its product publishes SPDX for the tool that wrote it.
+			value, ok = take()
+			o.format = value
 		case "--findings-json":
 			value, ok = take()
 			o.findingsJSONPath = value
@@ -225,9 +251,6 @@ func (o *selfOptions) parse(args []string) (int, string) {
 	if o.binaryPath == "" {
 		return 1, selfUsage
 	}
-	if o.output == "" {
-		o.output = o.binaryPath + ".cdx.json"
-	}
 	// The module root is where the vendored licences are. Finding it from the
 	// working directory is a convenience; it is never inferred from the binary,
 	// which may sit anywhere.
@@ -252,11 +275,18 @@ func dumpGraph(dump func(io.Writer) error, path string) error {
 }
 
 // runTimestamp honours SOURCE_DATE_EPOCH, so that a build which pins it gets
-// the same document twice (section 29).
+// the same document twice (section 29). It reads the pin the way every writer
+// does (sbomwriter.SourceDateEpoch), bounds included: a value that is not a
+// whole number of seconds, or that falls outside the years 0000 to 9999, is no
+// pin, and the run falls back to the clock -- as generate does outside
+// reproducible mode -- rather than state a time no document can carry and
+// fail after discovery. Reproducible mode refuses an unreadable pin before
+// that, in the writer's Preflight. Every clock of a run reads it here: the
+// document's time and the policy's.
 func runTimestamp() time.Time {
-	if epoch := os.Getenv("SOURCE_DATE_EPOCH"); epoch != "" {
-		if seconds, err := strconv.ParseInt(epoch, 10, 64); err == nil {
-			return time.Unix(seconds, 0).UTC()
+	if pinned, err := sbomwriter.SourceDateEpoch(); err == nil && pinned != "" {
+		if parsed, parseErr := time.Parse(time.RFC3339, pinned); parseErr == nil {
+			return parsed.UTC()
 		}
 	}
 	return time.Now().UTC()
