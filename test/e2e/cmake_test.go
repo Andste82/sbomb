@@ -279,3 +279,116 @@ func run(dir, name string, args ...string) ([]byte, error) {
 	command.Dir = dir
 	return command.CombinedOutput()
 }
+
+// TestTheCMakeTargetNamesTheDocumentAfterItsFormat: the default file name
+// follows the format the document is in -- the configuration's output.format
+// when the call names no FORMAT, and FORMAT (here through its cache default)
+// when it does -- so that an SPDX document is never written under a .cdx.json
+// name.
+func TestTheCMakeTargetNamesTheDocumentAfterItsFormat(t *testing.T) {
+	if _, err := exec.LookPath("cmake"); err != nil {
+		t.Skip("cmake is not installed")
+	}
+	root := filepath.Clean(filepath.Join(filepath.Dir(mustThisFile(t)), "..", ".."))
+	work := t.TempDir()
+	src := filepath.Join(work, "src")
+	build := filepath.Join(work, "build")
+	if err := os.MkdirAll(src, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	files := map[string]string{
+		"CMakeLists.txt": "cmake_minimum_required(VERSION 3.20)\nproject(formats C)\ninclude(\"" + filepath.ToSlash(filepath.Join(root, "cmake", "Sbomb.cmake")) + "\")\n" +
+			"add_executable(app main.c)\nsbomb_enable(TARGET app POLICY lenient)\n",
+		"main.c":     "int main(void) { return 0; }\n",
+		"sbomb.json": `{"schemaVersion": 1, "output": {"format": "spdx-json"}}`,
+	}
+	for name, contents := range files {
+		if err := os.WriteFile(filepath.Join(src, name), []byte(contents), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	sbomb := filepath.Join(work, "sbomb")
+	command := exec.Command("go", "build", "-o", sbomb, "./cmd/sbomb")
+	command.Dir = root
+	if output, err := command.CombinedOutput(); err != nil {
+		t.Fatalf("go build: %v\n%s", err, output)
+	}
+	for _, step := range []struct{ define, name, marker string }{
+		{"-DSBOMB_DEFAULT_FORMAT=", "app.spdx.json", `"@context": "https://spdx.org/rdf/3.0.1/spdx-context.jsonld"`},
+		{"-DSBOMB_DEFAULT_FORMAT=cyclonedx-json", "app.cdx.json", `"bomFormat": "CycloneDX"`},
+	} {
+		if output, err := run(root, "cmake", "-S", src, "-B", build, "-DSBOMB_EXECUTABLE="+sbomb, step.define); err != nil {
+			t.Fatalf("cmake configure %s: %v\n%s", step.define, err, output)
+		}
+		if output, err := run(root, "cmake", "--build", build, "--target", "sbomb"); err != nil {
+			t.Fatalf("sbomb target %s: %v\n%s", step.define, err, output)
+		}
+		data, err := os.ReadFile(filepath.Join(build, "sbom", step.name))
+		if err != nil {
+			t.Errorf("%s: %s was not written: %v", step.define, step.name, err)
+			continue
+		}
+		if !strings.Contains(string(data), step.marker) {
+			t.Errorf("%s is not the format its name says", step.name)
+		}
+	}
+}
+
+// TestARelativeCMakeConfigIsTheOneSbombReads: a relative CONFIG is relative to
+// the directory sbomb runs in, the top-level source directory. The module must
+// read the same file for the default name, wherever cmake was started: an SPDX
+// configuration configured from the build directory must still give
+// app.spdx.json, not an SPDX document named app.cdx.json, and no warning that
+// the file is missing.
+func TestARelativeCMakeConfigIsTheOneSbombReads(t *testing.T) {
+	if _, err := exec.LookPath("cmake"); err != nil {
+		t.Skip("cmake is not installed")
+	}
+	root := filepath.Clean(filepath.Join(filepath.Dir(mustThisFile(t)), "..", ".."))
+	work := t.TempDir()
+	src := filepath.Join(work, "src")
+	build := filepath.Join(work, "build")
+	for _, dir := range []string{src, build} {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	files := map[string]string{
+		"CMakeLists.txt": "cmake_minimum_required(VERSION 3.20)\nproject(relative C)\ninclude(\"" + filepath.ToSlash(filepath.Join(root, "cmake", "Sbomb.cmake")) + "\")\n" +
+			"add_executable(app main.c)\nsbomb_enable(TARGET app CONFIG spdx.json POLICY lenient)\n",
+		"main.c":    "int main(void) { return 0; }\n",
+		"spdx.json": `{"schemaVersion": 1, "output": {"format": "spdx-json"}}`,
+	}
+	for name, contents := range files {
+		if err := os.WriteFile(filepath.Join(src, name), []byte(contents), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	sbomb := filepath.Join(work, "sbomb")
+	command := exec.Command("go", "build", "-o", sbomb, "./cmd/sbomb")
+	command.Dir = root
+	if output, err := command.CombinedOutput(); err != nil {
+		t.Fatalf("go build: %v\n%s", err, output)
+	}
+	// Configured the classic way, from inside the build directory.
+	output, err := run(build, "cmake", "../src", "-DSBOMB_EXECUTABLE="+sbomb)
+	if err != nil {
+		t.Fatalf("cmake configure: %v\n%s", err, output)
+	}
+	if strings.Contains(string(output), "does not exist") {
+		t.Errorf("the configuration is there, and cmake warns that it is not:\n%s", output)
+	}
+	if output, err := run(build, "cmake", "--build", ".", "--target", "sbomb"); err != nil {
+		t.Fatalf("sbomb target: %v\n%s", err, output)
+	}
+	if _, err := os.Stat(filepath.Join(build, "sbom", "app.cdx.json")); err == nil {
+		t.Error("the SPDX document was named app.cdx.json")
+	}
+	data, err := os.ReadFile(filepath.Join(build, "sbom", "app.spdx.json"))
+	if err != nil {
+		t.Fatalf("app.spdx.json was not written: %v", err)
+	}
+	if !strings.Contains(string(data), `"@context": "https://spdx.org/rdf/3.0.1/spdx-context.jsonld"`) {
+		t.Error("app.spdx.json is not an SPDX document")
+	}
+}

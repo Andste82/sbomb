@@ -113,7 +113,9 @@ type Output struct {
 	// TLP is the Traffic Light Protocol classification the document carries,
 	// and it is written only when it is set. Nothing infers it: a TLP marking
 	// states what the recipient may do with the document, which is not
-	// something a tool may conclude from how the document was produced.
+	// something a tool may conclude from how the document was produced. A
+	// format with no field for it (CycloneDX 1.6, SPDX) refuses it before
+	// discovery rather than dropping it.
 	TLP          string `json:"tlp,omitempty"`
 	Reproducible bool   `json:"reproducible,omitempty"`
 }

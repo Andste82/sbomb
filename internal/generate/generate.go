@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 
@@ -21,7 +20,6 @@ import (
 	"github.com/example/sbomb/internal/anchors"
 	"github.com/example/sbomb/internal/buildinfo"
 	"github.com/example/sbomb/internal/config"
-	"github.com/example/sbomb/internal/cyclonedx"
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/evidence"
 	"github.com/example/sbomb/internal/exec"
@@ -31,7 +29,6 @@ import (
 	"github.com/example/sbomb/internal/pathmodel"
 	"github.com/example/sbomb/internal/policy"
 	"github.com/example/sbomb/internal/sbomwriter"
-	"github.com/google/uuid"
 )
 
 type Result struct {
@@ -39,9 +36,16 @@ type Result struct {
 	Findings []domain.Finding
 	// Document is the format-neutral hand-off to a writer (section 36.1).
 	Document *sbomwriter.Document
-	// BOM is the CycloneDX rendering of Document, kept for callers that need
-	// the serialized form directly.
-	BOM cyclonedx.BOM
+	// Writer is the writer the configuration selected, and SpecVersion the
+	// version it rendered. The caller validates and writes Rendered through
+	// them, so that it never names a format itself.
+	Writer      sbomwriter.Writer
+	SpecVersion string
+	// Rendered is the document as the writer serialized it. It is rendered
+	// here rather than by the caller so that a render failure stays what it
+	// is -- an internal invariant violation, exit 70 -- and only validation of
+	// the exact bytes is left to the caller, which is exit 4 (section 32.5).
+	Rendered []byte
 	// Adapters names the evidence sources that contributed, for the review
 	// report (section 34 point 1).
 	Adapters []string
@@ -597,18 +601,57 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	}
 
 	// 11. Hand the resolved facts to a writer.
+	adapters := map[string]bool{}
+	for _, edge := range graph.Edges() {
+		if edge.Adapter != "" {
+			adapters[edge.Adapter] = true
+		}
+	}
+	adapterNames := make([]string, 0, len(adapters))
+	for name := range adapters {
+		adapterNames = append(adapterNames, name)
+	}
+	sort.Strings(adapterNames)
 	run := sbomwriter.RunMetadata{
 		ToolName:     buildinfo.Name,
 		ToolVendor:   buildinfo.Vendor,
 		ToolVersion:  buildinfo.Version,
 		Reproducible: reproducible,
-		Timestamp:    buildTimestamp(),
+		Timestamp:    buildTimestamp(reproducible),
+		// The evidence sources that contributed, the same list the review
+		// report prints. A format with a place for it states which adapters a
+		// document rests on; one without ignores it.
+		Adapters: adapterNames,
 	}
 	if replyModel != nil {
 		run.Generator = replyModel.Cache["CMAKE_GENERATOR"]
 		run.BuildConfig = replyModel.Cache["CMAKE_BUILD_TYPE"]
 	}
-	if reproducible {
+	// The configuration names the serialization; an empty value is the
+	// writer's default rather than a guess made here (section 32.2).
+	format := cfg.Output.Format
+	if format == "" {
+		format = sbomwriter.DefaultFormat
+	}
+	writer, specVersion, err := sbomwriter.Resolve(format, cfg.Output.SpecVersion)
+	if err != nil {
+		return Result{Graph: graph, Findings: findings}, err
+	}
+	writeOptions := sbomwriter.Options{
+		SpecVersion: specVersion,
+		TLP:         cfg.Output.TLP,
+		// Section 22.9 retains the licence texts either way; this decides
+		// whether the document carries them (section 28.7). It is read from
+		// the policy and from nowhere else, so no side output can change a
+		// byte of the SBOM (section 32.1).
+		LicenseText:  options.Policy.LicenseTextInSBOM,
+		Reproducible: reproducible,
+	}
+	// Whether a reproducible document is still a CRA deliverable depends on
+	// the format: one that drops the creation time to be reproducible is not,
+	// one that states SOURCE_DATE_EPOCH instead is. So the writer is asked,
+	// and a writer that cannot say is not assumed to omit anything.
+	if describer, describes := writer.(sbomwriter.Describer); describes && describer.OmitsTimestamp(specVersion, writeOptions) {
 		findings = append(findings, domain.Finding{
 			ID: "REPRODUCIBLE_MODE_OMITS_TIMESTAMP", Severity: domain.SeverityInfo,
 			Subject: domain.Subject{Kind: "run", Ref: buildRootForIdentity},
@@ -685,27 +728,8 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		logger.Info("Project version %q read from CMAKE_PROJECT_VERSION", cfg.Project.Version)
 	}
 	document, findings := buildDocument(cfg, projectVersionSource, resolver, deliverables, artifactIDs, used, findings, run, attributes)
-	// The configuration names the serialization; an empty value is the
-	// writer's default rather than a guess made here (section 32.2).
-	format := cfg.Output.Format
-	if format == "" {
-		format = "cyclonedx-json"
-	}
-	writer, specVersion, err := sbomwriter.Resolve(format, cfg.Output.SpecVersion)
-	if err != nil {
-		return Result{Graph: graph, Findings: findings}, err
-	}
-	bom, err := writer.(cyclonedx.Writer).Build(document, sbomwriter.Options{
-		SpecVersion: specVersion,
-		TLP:         cfg.Output.TLP,
-		// Section 22.9 retains the licence texts either way; this decides
-		// whether the document carries them (section 28.7). It is read from
-		// the policy and from nowhere else, so no side output can change a
-		// byte of the SBOM (section 32.1).
-		LicenseText:  options.Policy.LicenseTextInSBOM,
-		Reproducible: reproducible,
-	})
-	if err != nil {
+	var rendered bytes.Buffer
+	if err := writer.Write(&rendered, document, writeOptions); err != nil {
 		return Result{Graph: graph, Findings: findings}, &ExitError{
 			Code: 70,
 			Finding: domain.Finding{
@@ -714,27 +738,12 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 			},
 		}
 	}
-	if reproducible {
-		bom.SerialNumber = cyclonedx.ReproducibleSerialNumber(bom)
-	} else {
-		bom.SerialNumber = "urn:uuid:" + uuid.NewString()
-	}
-
-	logger.Info("CycloneDX %s BOM constructed: %d component(s) in %d group(s)", specVersion, len(bom.Components), len(document.Components))
-	adapters := map[string]bool{}
-	for _, edge := range graph.Edges() {
-		if edge.Adapter != "" {
-			adapters[edge.Adapter] = true
-		}
-	}
-	adapterNames := make([]string, 0, len(adapters))
-	for name := range adapters {
-		adapterNames = append(adapterNames, name)
-	}
-	sort.Strings(adapterNames)
+	logger.Info("%s %s document rendered: %d component(s) and %d file(s) in %d group(s)",
+		label(writer), specVersion, 1+len(document.Artifacts)+len(document.Components), len(document.Files), len(document.Components))
 
 	result := Result{
-		Graph: graph, Findings: findings, Document: document, BOM: bom,
+		Graph: graph, Findings: findings, Document: document,
+		Writer: writer, SpecVersion: specVersion, Rendered: rendered.Bytes(),
 		Adapters: adapterNames, HeaderNarrowing: narrowing,
 		Introspection: introspectionCommands(runner),
 		Counters:      *b.counters,
@@ -943,13 +952,27 @@ func logicalPackageRoot(root, logicalSource, physicalSource string, flavor pathm
 	return root
 }
 
-func buildTimestamp() string {
-	if value := os.Getenv("SOURCE_DATE_EPOCH"); value != "" {
-		if seconds, err := strconv.ParseInt(value, 10, 64); err == nil {
-			return time.Unix(seconds, 0).UTC().Format(time.RFC3339)
-		}
+// buildTimestamp is the run's creation time per the RunMetadata contract:
+// SOURCE_DATE_EPOCH when it is set and readable; otherwise the clock, except
+// under reproducible, where it is empty. A reproducible run must never state a
+// wall-clock time, because a writer that has to state a creation time would
+// then write a different document on every run and call it reproducible.
+func buildTimestamp(reproducible bool) string {
+	if pinned, err := sbomwriter.SourceDateEpoch(); err == nil && pinned != "" {
+		return pinned
+	}
+	if reproducible {
+		return ""
 	}
 	return time.Now().UTC().Format(time.RFC3339)
+}
+
+// label names the writer's format the way a person does, for the log.
+func label(writer sbomwriter.Writer) string {
+	if describer, describes := writer.(sbomwriter.Describer); describes {
+		return describer.Label()
+	}
+	return writer.ID()
 }
 
 // requireConfiguredEvidence refuses a linker map or link dependency file that

@@ -4,6 +4,9 @@
 # tree was green.
 /sbomb
 /dist/
+# generate's default output names, when it runs in the repository root.
+/sbomb.cdx.json
+/sbomb.spdx.json
 .env
 *.test
 *.pdb

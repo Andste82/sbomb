@@ -294,8 +294,9 @@ meant to.
 |---|---|
 | `TARGET` | The target to describe. Required. |
 | `POLICY` | Policy profile for the run |
-| `CONFIG` | Configuration file; without it `sbomb.json` beside the project is used when it exists |
-| `OUTPUT` | Where to write the document, instead of `<build>/sbom/<target>.cdx.json` |
+| `CONFIG` | Configuration file, a relative path being relative to the top-level source directory; without it `sbomb.json` beside the project is used when it exists |
+| `OUTPUT` | Where to write the document, instead of `<build>/sbom/<target>.cdx.json` (`.spdx.json` when the format is SPDX) |
+| `FORMAT` | `cyclonedx-json` or `spdx-json`; without it the configuration's `output.format` applies, and CycloneDX without one |
 | `MAP` | Where the linker map **already is** |
 | `DEPFILE` | Where the link dependency file **already is** |
 | `FOSS_OUT` | Where to write the FOSS attribution documents; without it none are written |
@@ -347,6 +348,7 @@ when you ask for it.
 | `SBOMB_EXECUTABLE` | `sbomb` | Path to the binary |
 | `SBOMB_OUTPUT_DIR` | `${CMAKE_BINARY_DIR}/sbom` | Where the documents go |
 | `SBOMB_LINK_EVIDENCE` | `ON` | Add the linker map and dependency-file flags |
+| `SBOMB_DEFAULT_FORMAT` | none | `FORMAT` for calls that name none |
 | `SBOMB_DEFAULT_FOSS_OUT` | none | `FOSS_OUT` for calls that name none |
 | `SBOMB_DEFAULT_FOSS_FORMAT` | none | `FOSS_FORMAT` for calls that name none |
 

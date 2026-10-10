@@ -1,4 +1,4 @@
-# sbomb — CMake Used-Files CycloneDX SBOM Specification v3.1
+# sbomb — CMake Used-Files SBOM Specification v3.1
 
 **Status:** Implementation-ready normative specification.
 **Tool name:** `sbomb`. Go module path: `github.com/<org>/sbomb`.
@@ -38,7 +38,7 @@ Throughout, `SUT` means the tool under construction (`sbomb`). "Agent" means the
 
 ### 1.1 Goal
 
-The tool generates a CycloneDX JSON SBOM containing only files and software components that can be connected to one or more configured **final deliverables** through concrete build, link, dependency, generation, packaging, or image evidence.
+The tool generates a CycloneDX JSON or SPDX JSON SBOM containing only files and software components that can be connected to one or more configured **final deliverables** through concrete build, link, dependency, generation, packaging, or image evidence.
 
 It answers exactly one question:
 
@@ -58,7 +58,7 @@ The following MUST NOT be included solely because they exist on disk: unused sou
 | CMake generators | Ninja, Ninja Multi-Config, Unix Makefiles, NMake Makefiles and Visual Studio 17 2022. |
 | Compilers | GCC, Clang and MSVC. IAR and other vendor compilers are **parked** (M21). |
 | Linkers | GNU ld, GNU gold, LLVM lld and MSVC `link.exe`. IAR ILINK is parked. |
-| Output | CycloneDX JSON 1.6. The writer layer is format-agnostic (§36.1) so SPDX or CycloneDX 1.7 can be added without touching discovery. |
+| Output | CycloneDX JSON 1.6 (default) and 1.7 (§28.1), and SPDX 3.0.1 JSON-LD (§28.11). The writer layer is format-agnostic (§36.1): every format is rendered from the same format-neutral description of the run, so a format or a version is added without touching discovery. SPDX 2.3 is the next format (§28.11.11). |
 | Binary formats for inspection | ELF and PE/COFF. Mach-O is out of scope. |
 | Distribution | A single statically linked executable per platform (`CGO_ENABLED=0`). |
 
@@ -70,13 +70,13 @@ The tool does not: discover every dependency in a source tree; perform vulnerabi
 
 The intended compliance target is the EU Cyber Resilience Act (Regulation (EU) 2024/2847). The relevant obligation is Annex I Part II point 1 together with Article 13: manufacturers must draw up a software bill of materials in a commonly used, machine-readable format covering at the very least the top-level dependencies. Reporting obligations apply from 11 September 2026, the main obligations from 11 December 2027. The SBOM need not be published, but must be part of the technical documentation and available to market surveillance authorities on request.
 
-The CRA text itself does not enumerate data fields. The concrete field-level target for this tool is therefore **BSI TR-03183 Part 2 (SBOM)**, currently version 2.1.0 of 2025-08-20, which requires CycloneDX 1.6 as its minimum version — this is why §28.1 fixes 1.6.
+The CRA text itself does not enumerate data fields. The concrete field-level target for this tool is therefore **BSI TR-03183 Part 2 (SBOM)**, currently version 2.1.0 of 2025-08-20. Its normative appendix tables map every required data field onto two formats, headed "SPDX v3.0.1 JSON" and "CycloneDX v1.6 JSON": CycloneDX 1.6 is its minimum CycloneDX version — this is why §28.1 fixes 1.6 as the default — and SPDX 3.0.1 (not 2.3) is the SPDX version it names, which is why §28.11 binds 3.0.1 first. Either format satisfies the TR; the choice is the recipient's.
 
 Consequences that are normative here:
 
 1. Every component in the SBOM MUST carry, or explicitly account for the absence of: component name, version, creator/supplier, at least one cryptographic hash, license information, file name, and dependency relationships.
-2. `metadata.timestamp` and `metadata.tools` (the SBOM creator) MUST be present in normal mode. In `--reproducible` mode the timestamp is omitted, and the run MUST emit `REPRODUCIBLE_MODE_OMITS_TIMESTAMP` (info) so nobody ships a reproducible-mode artifact as the deliverable SBOM by accident.
-3. TR-03183-2 requires the *executable*, *archive*, and *structured* properties per component. The tool MUST emit `sbomb:cdx:executableProperty`, `sbomb:cdx:archiveProperty`, and `sbomb:cdx:structuredProperty`, derived from the file class: an ELF/PE artifact or shared library is `executable`; an `ar` or zip container is `archive`; a source, header, or other text file is `structured`.
+2. `metadata.timestamp` and `metadata.tools` (the SBOM creator) MUST be present in normal mode. In `--reproducible` mode the timestamp is omitted, and the run MUST emit `REPRODUCIBLE_MODE_OMITS_TIMESTAMP` (info) so nobody ships a reproducible-mode artifact as the deliverable SBOM by accident. SPDX makes the creation time mandatory and has no such allowance: an SPDX document always states `CreationInfo.created` and `createdBy`, and under `--reproducible` the time is `SOURCE_DATE_EPOCH` or the run is refused (§28.11.6).
+3. TR-03183-2 requires the *executable*, *archive*, and *structured* properties per component. The tool MUST emit `sbomb:cdx:executableProperty`, `sbomb:cdx:archiveProperty`, and `sbomb:cdx:structuredProperty`, derived from the file class: an ELF/PE artifact or shared library is `executable`; an `ar` or zip container is `archive`; a source, header, or other text file is `structured`. An SPDX document carries the same properties in its extension (§28.11.7); the TR's own SPDX mapping of them is the authority when they move to native fields.
 4. A `cra` policy profile (§33.2) fails the run when any field in (1) is missing and unwaived.
 5. The tool asserts nothing about legal compliance. It produces data; the manufacturer's assessment stays out of scope (§1.4). The exact BSI field list MUST be re-verified against the then-current TR revision before any release claims the `cra` profile is complete. This is a release-checklist item in `docs/compliance.md`.
 
@@ -97,18 +97,20 @@ These terms are used with exactly the meanings below. Previously ambiguous terms
 | **Project root** **[was ambiguous]** | The directory resolved, in this priority order: (1) the value of `project.root` in the configuration; (2) the directory containing the configuration file; (3) the value of `--source-dir`. It MUST be an existing directory. It is NOT automatically the Git root. |
 | **Build root** | The directory given by `--build-dir`, or `build.dir` in configuration. |
 | **Final deliverable** | An artifact explicitly configured (or deterministically discovered per §5.3) that is intended to be flashed, installed, delivered, packaged, executed, deployed, or consumed as a product output. |
-| **Product** | The unit the root CycloneDX component represents. Either one final deliverable (single mode) or an assembly of several (assembly mode). |
+| **Product** | The unit the root component represents — `metadata.component` in CycloneDX, the `rootElement` of the `software_Sbom` in SPDX. Either one final deliverable (single mode) or an assembly of several (assembly mode). |
 | **Anchor** | A named, portable path root (§7). Every file identity is `(anchor, relative path)`. |
 | **Used file** | A file for which at least one valid evidence chain to a final deliverable exists (§4). |
 | **Evidence node** | A node in the evidence graph representing an artifact, unit, or file. |
 | **Evidence edge** | A directed relationship between two evidence nodes, carrying type, strength, confidence, source, and adapter. |
 | **Evidence strength** **[was conflated]** | The *kind* of relationship (§8.4). Fixed enum. |
-| **Confidence** **[was conflated]** | The *trust in a specific evidence instance* (§8.5). Fixed enum, mapped to a CycloneDX float. |
-| **Grouping component** | A CycloneDX component of type `library`, `framework`, or `application` that groups file components into a meaningful software unit. |
-| **File component** | A CycloneDX component of type `file` representing one used file. |
+| **Confidence** **[was conflated]** | The *trust in a specific evidence instance* (§8.5). Fixed enum, mapped to a CycloneDX float; SPDX carries the enum value as a property. |
+| **Grouping component** | A component of type `library`, `framework`, or `application` that groups file components into a meaningful software unit: a CycloneDX component, or an SPDX `software_Package`. |
+| **File component** | The element representing one used file: a CycloneDX component of type `file`, or an SPDX `software_File`. |
 | **Transient build artifact** | An object file, response file, dependency file, unity aggregation source, PCH object, or project-generated static archive that exists only inside the build tree and whose inputs are fully represented. |
 | **Intermediate generated file** **[was ambiguous]** | A transient build artifact. A generated *source* or *header* that appears in compile or dependency evidence is NOT an intermediate generated file. |
 | **Finding** | A structured, machine-readable diagnostic (§26). |
+| **Output format** | A serialization family with one writer: `cyclonedx-json` (CycloneDX 1.6, 1.7) or `spdx-json` (SPDX 3.0.1). Selected by `--format` or `output.format`; the version within it by `--spec-version` or `output.specVersion` (§36.1). |
+| **Local identity** | The format-independent identifier of a product, artifact, component or file: the §28.4 scheme. It is the CycloneDX `bom-ref` and the fragment of the SPDX element IRI (§28.11.2). |
 | **Discovery** | Everything that produces the evidence graph, inventory, components, versions, and licenses. |
 | **Policy** | The pass/fail evaluation applied after discovery. |
 
@@ -370,7 +372,7 @@ This changes the meaning `--source-dir` had in §32.2, which is recorded in `dev
 
 ### 8.1 Evidence Graph
 
-The internal discovery model MUST be a directed evidence graph. CycloneDX output is generated from this graph and never the other way round.
+The internal discovery model MUST be a directed evidence graph. The output, in every format, is generated from this graph and never the other way round.
 
 Nodes have a `kind`:
 
@@ -1258,7 +1260,7 @@ The finding is emitted for a **distributed** component (§24.5) and for no other
 
 **Limits, consistent with §30.** At most **8** retained artifacts per component, at most **1 MiB** each. Exceeding either bound bounds the **list**: a file over the size limit is not retained at all, and the candidates past the count limit are not retained. A retained file is **never truncated** — a truncated license is not a license, and a truncated NOTICE is not a notice. Either exclusion emits `FOSS_LICENSE_ARTIFACT_LIMIT` (info) naming what was dropped and why. The count is consulted in the order of §22.3, so the grants survive a bound that the attribution material does not.
 
-**Where it goes.** The inventory dump (§40) records kind, canonical path, SHA-256, size, identifier and technique for every retained artifact — the hash pins the bytes exactly, which is what a regression document needs, while a golden of embedded base64 would not review. The bytes themselves reach the CycloneDX document only when `licenseTextInSBOM` says so (§28.7, §33.1), so a `generate` run keeps the output size it has today.
+**Where it goes.** The inventory dump (§40) records kind, canonical path, SHA-256, size, identifier and technique for every retained artifact — the hash pins the bytes exactly, which is what a regression document needs, while a golden of embedded base64 would not review. The bytes themselves reach the document only when `licenseTextInSBOM` says so (§28.7, §28.11.3, §33.1), so a `generate` run keeps the output size it has today.
 
 **Ordering.** Retained artifacts are ordered by `(kind, canonical path)`, per §29.
 
@@ -1506,15 +1508,17 @@ Also compare the CMake input files reported by `cmakeFiles-v1` against the File 
 
 ---
 
-## 28. CycloneDX Output Binding
+## 28. Output Bindings
 
 **[This section fixes every previously open output decision. An implementation MUST follow it literally.]**
 
+§28.1–§28.10 bind CycloneDX, §28.11 binds SPDX 3.0.1. Both are renderings of one format-neutral description of the run (§36.1), and both use the local identities of §28.4, so a CycloneDX `bom-ref` and the fragment of an SPDX element IRI name the same thing.
+
 ### 28.1 Specification Version
 
-The default output is CycloneDX **1.6**, and it stays the default. This is fixed by §1.5: BSI TR-03183-2 v2.1.0 requires CycloneDX 1.6 as its minimum, and nothing in a later revision changes that. The default MUST NOT move until the compliance target does.
+The default output is CycloneDX **1.6**, and it stays the default. This is fixed by §1.5: BSI TR-03183-2 v2.1.0 maps its required fields to two formats, SPDX v3.0.1 JSON and CycloneDX v1.6 JSON, so CycloneDX 1.6 is its minimum CycloneDX version, and nothing in a later revision changes that. The default MUST NOT move until the compliance target does. SPDX 3.0.1, the TR's other format, is written on request (`--format spdx-json`, §28.11); it is not the default because a default format change would change every existing user's document.
 
-CycloneDX **1.7** MAY be written on request, via `--spec-version 1.7` or `output.specVersion`. `--spec-version` accepts `1.6` and `1.7`; any other value is a usage error (exit 1), raised before discovery runs rather than at the write. The `bomFormat` and `specVersion` fields MUST match the version written, and `sbomb:run:specVersion` MUST record it.
+CycloneDX **1.7** MAY be written on request, via `--spec-version 1.7` or `output.specVersion`. For CycloneDX `--spec-version` accepts `1.6` and `1.7`; any other value is a usage error (exit 1), raised before discovery runs rather than at the write. The `bomFormat` and `specVersion` fields MUST match the version written, and `sbomb:run:specVersion` MUST record it.
 
 1.7 is additive over 1.6: 108 definitions against 91, nothing removed, the same required top-level fields, and JSON Schema draft-07 in both, so D6 is unaffected. A document written at 1.6 is therefore structurally valid at 1.7 with only `specVersion` changed.
 
@@ -1594,7 +1598,7 @@ Rationale: consumer tooling handles the flat + dependency-graph form far more re
 
 `canonicalPath` is §7.7 verbatim, including the anchor prefix.
 
-`bom-ref` values MUST be stable across runs and MUST NOT change when a file's content changes. Collisions are impossible by construction; the implementation MUST nevertheless assert uniqueness and fail with exit 70 on collision.
+`bom-ref` values MUST be stable across runs and MUST NOT change when a file's content changes. Grouping components are numbered in document order, so the first component of a name keeps the undecorated ref. When a decorated ref is still taken (two components of the same name and the same version), it escalates to the root-digest form, then to `component:<slug(name)>#<sha256(componentID)[:12]>`, then appends `~<n>` (n = 2, 3, … in document order); every format sbomb writes uses these same local identities. Collisions are then impossible by construction; the implementation MUST nevertheless assert uniqueness and fail with exit 70 on collision.
 
 ### 28.5 Dependencies
 
@@ -1664,11 +1668,183 @@ This makes the whole document a fixed point: identical inputs yield an identical
 * Object keys emitted in the order defined by the CycloneDX schema's property order, which the implementation encodes explicitly via ordered struct fields — **not** Go map iteration.
 * HTML escaping in `encoding/json` MUST be disabled (`Encoder.SetEscapeHTML(false)`).
 
+### 28.11 SPDX 3.0.1 Binding
+
+`--format spdx-json` (or `output.format: "spdx-json"`) writes SPDX **3.0.1** in its JSON-LD serialization. 3.0.1 is the only SPDX version written, and the default of the format. It is the SPDX version BSI TR-03183-2 v2.1.0 names (§1.5).
+
+**The SPDX document says everything the CycloneDX document of the same run says, and MAY say more, never less.** Every fact §28.1–§28.10 puts into a CycloneDX document reaches the SPDX document: in a native SPDX field where one exists, and always also as the same `sbomb:` property the CycloneDX document carries (§28.11.7). A test renders the same run in both formats and checks this per element over every golden fixture; a second test fills every field of the format-neutral description with a distinct value and checks that each reaches the SPDX document or is listed as deliberately not rendered (§28.11.8).
+
+#### 28.11.1 Document Shape
+
+```json
+{
+  "@context": "https://spdx.org/rdf/3.0.1/spdx-context.jsonld",
+  "@graph": [
+    { "type": "CreationInfo", "@id": "_:creationInfo1", "specVersion": "3.0.1", "created": "...", "createdBy": ["<agent>"], "createdUsing": ["<tool>"] },
+    { "type": "SpdxDocument", "spdxId": "<document>", "profileConformance": [...], "rootElement": ["<sbom>"], "element": [...] },
+    { "type": "software_Sbom", "spdxId": "<sbom>", "software_sbomType": ["build"], "rootElement": ["<product>"], "element": [...] },
+    "... Organization, Tool, software_Package, software_File, security_Vulnerability,",
+    "    simplelicensing_SimpleLicensingText, simplelicensing_LicenseExpression ...",
+    "... every relationship, by number ..."
+  ]
+}
+```
+
+* `@context` is the context URL as a plain string. The 3.0.1 schema makes it a constant, so no prefix may be declared there (D48).
+* There is exactly **one** `CreationInfo`, the blank node `_:creationInfo1`, and every element refers to it by that string.
+* The `SpdxDocument` is named after the product. Its `element` lists every element of the graph except itself, once each, in `@graph` order; its `rootElement` is the `software_Sbom`.
+* The `software_Sbom` has `software_sbomType: ["build"]` — sbomb reads a build directory — and its `rootElement` is the product package. Its `element` is the document's list without the Sbom.
+* `@graph` order: the CreationInfo, the SpdxDocument, the Sbom, then the groups in the order of the example — organizations, the tool, packages (product, artifacts and components together), files, vulnerabilities, licence texts, licence expressions — each group sorted by local identity, then the relationships by number.
+* `profileConformance` is **computed from what the document uses**, sorted: `core` and `software` always; `simpleLicensing` when a licence expression or licence text is present; `expandedLicensing` when the NOASSERTION or NONE licence individual is referenced; `security` when a vulnerability is present. `extension` is never claimed, although every document uses the extension (D49b).
+* Pretty-printed with two-space indentation, `\n` line endings, one trailing newline, HTML escaping off (§28.10), and timestamps as `YYYY-MM-DDThh:mm:ssZ`. **Not** the canonical serialization of the SPDX specification: that is a form for signing — minified, integer timestamps — and would make every golden one unreadable line. Determinism comes from §29 instead. Key order inside a node is fixed by the implementation, never by map iteration.
+
+#### 28.11.2 Identifiers and Namespace
+
+Every element IRI is `urn:uuid:<U>#<fragment>`, absolute, with one UUID `<U>` per document — the document namespace, the SPDX counterpart of `serialNumber` (§28.9).
+
+The fragment is a **local identity**, percent-encoded: every byte of its UTF-8 form outside `A-Z a-z 0-9 - . _ ~ ! $ & ' ( ) * + , ; = : @ / ?` becomes `%XX` with upper-case hex, `%` and `#` included. The encoding is injective and ASCII-only. Local identities:
+
+| Element | Local identity |
+|---|---|
+| SpdxDocument, Sbom | `document`, `sbom` |
+| Product, artifact, component, used file | the §28.4 bom-ref, unchanged |
+| A licence or copyright file that is not a used file | `file:<canonicalPath>`, the same scheme, so it merges with a used file of the same path |
+| Patch file of a component | `patch:<component local identity>/<n>`, n counted from 1 in the order of §29 |
+| Organization | `agent:<name>` |
+| Tool | `tool:<tool name>` |
+| Licence expression | `license:<expression>` |
+| Licence text defining a `LicenseRef-sbomb-*` | `license-text:<LicenseRef>` |
+| Vulnerability | `vulnerability:<CVE id>` |
+| Relationship | `relationship:<n>`, n = 1, 2, … in the order of §29 |
+
+`explain --bom-ref` accepts an element IRI as well as a bom-ref, and reads the local identity out of it.
+
+`<U>`:
+
+* Normal mode: a random UUIDv4, as `serialNumber`.
+* `--reproducible`: the UUIDv5 algorithm of §28.9 over a canonical encoding of the version-neutral SPDX description of the run (§36.1) — every element, edge and attribute, plus the spec version, the creation time and the tool version. The document is rendered once. Because the creation time is in the digest, the same evidence pinned to two different `SOURCE_DATE_EPOCH` values yields two document identities; otherwise merging the two would give one element two creation records, which the model forbids. The same evidence, the same `SOURCE_DATE_EPOCH` and the same tool version yield the same bytes.
+
+A CycloneDX and an SPDX document of the same run have different identities: they are different documents.
+
+#### 28.11.3 Element Mapping
+
+| sbomb | SPDX 3.0.1 |
+|---|---|
+| Product, artifact, grouping component, build environment | `software_Package` |
+| Used file | `software_File`, `software_fileKind: "file"` |
+| `name` | `name`; for a file the **canonical path** (§7.7), not the base name, so a consumer can tell the many `LICENSE` and `CMakeLists.txt` files apart |
+| version | `software_packageVersion` |
+| purl | `software_packageUrl`, and an `externalIdentifier` of type `packageUrl` |
+| CPE | `externalIdentifier` of type `cpe23` (`cpe:2.3:`) or `cpe22` (`cpe:/`) |
+| supplier, originator | `suppliedBy`, `originatedBy`, each an `Organization` per distinct name, shared with the tool vendor when the names agree |
+| description | `description` |
+| curated copyright (§22.10) | `software_copyrightText` of the package |
+| copyright statement that names no file (§22.10) | `software_copyrightText` of the package, one per line after the curated notice: it is a copyright notice, and `software_attributionText` is for acknowledgements a distributor adds |
+| observed copyright statements (§22.10) | `software_copyrightText` of the file they were read from: the statements of every component naming that file, deduplicated, sorted, one per line |
+| component type (§19.1) | `software_primaryPurpose`: the same word where 3.0.1 has it; `operating-system` → `operatingSystem`, `device-driver` → `deviceDriver`, `machine-learning-model` → `model`, any other → `other`; unset → `application` for the product, `library` otherwise. The exact type is always in `sbomb:component:type` as well, so that `other` loses nothing |
+| header-only component (§15) | additionally `software_additionalPurpose: ["source"]` |
+| file class | `software_primaryPurpose`: source, header and their generated forms → `source`, archive → `archive`, shared library → `library`, asset → `data`, object → `other`, unknown → none; the exact class stays in `sbomb:file:class` |
+| retained licence, notice or copyright file (§22.9) | `software_File` with `software_primaryPurpose: "documentation"`, or, when it is also a used file, the used file's purpose with `documentation` in `software_additionalPurpose`; reached by `hasEvidence` from its component |
+| file a copyright statement was read from (§22.10) | reached by `hasEvidence` from its component; its purpose is not changed — a source file a notice was read from is no documentation — and one that is not a used file states no purpose |
+| hashes | `verifiedUsing`, one `Hash` per algorithm (`sha256`, `sha1`, …); an algorithm 3.0.1 does not name is `other` with the original name as `comment`. A missing file has none and carries `sbomb:file:missing` |
+| repository URL | `externalRef` of type `vcs` |
+| modification signal (§19.4) | `software_sourceInfo` |
+| recorded patches (§19.4) | one `software_File` per patch, named after the patch file, `software_primaryPurpose: "patch"`, the patch description as `description`, and a `patchedBy` relationship from the component. A patch the metadata records without a file (a Conan base64 payload) is named `patch <n> of <component> (the metadata names no patch file)`: 3.0.1 requires a name of every File |
+| CVE exclusion of a bundled SBOM | one `security_Vulnerability` per CVE (with a `cve` external identifier, or `securityOther` for an identifier that does not start with `CVE-`, such as a GHSA advisory) and one `security_VexNotAffectedVulnAssessmentRelationship` (`doesNotAffect`) per component, CVE and reason, carrying the reason as `security_impactStatement` (a fixed sentence when none was given) and the component's supplier as `suppliedBy` |
+| retained licence text, `licenseTextInSBOM: evidence` | an `externalRef` of type `license` on the licence file's `software_File`, whose locator is the file's bytes as a base64 `data:` URI (`data:text/plain;charset=utf-8;base64,` for UTF-8 text, `data:text/plain;base64,` otherwise). Never `software_attributionText`: 3.0.1 says an attribution text "is not meant to include the software Package, File or Snippet's actual complete license text". Where the text also defines a `LicenseRef-sbomb-*`, it is that definition's `simplelicensing_licenseText` as well (§28.11.5) |
+| run metadata (§28.3) | properties of the SpdxDocument; tool name, vendor and creation time in the CreationInfo (§28.11.6) |
+
+#### 28.11.4 Relationships
+
+The structure of §28.5 is stated as typed relationships. Each relationship is an element with its own IRI (§28.11.2); relationships equal in everything but `to` are merged into one with the union of `to`, sorted and deduplicated.
+
+| From → to | `relationshipType` |
+|---|---|
+| component → its used files; product → its artifacts (assembly mode); build environment → the toolchain and system components it groups (§24.2) | `contains` |
+| product → build environment | `dependsOn` |
+| deliverable → component, per linkage form (§24.5) of the pair: | |
+| `static-archive-member`, `static-object` | `hasStaticLink` |
+| `dynamic` | `hasDynamicLink`, `LifecycleScopedRelationship` with `scope: "runtime"` |
+| `dynamic`, environment-provided component | additionally `hasProvidedDependency`, scope `runtime` |
+| `build-tool` | `usesTool`, `LifecycleScopedRelationship` with `scope: "build"` |
+| `embedded-asset` | `contains` |
+| `header-only`, or no form at all | `dependsOn` |
+| package → its licence; file → the licence read from it | `hasConcludedLicense` / `hasDeclaredLicense` (§28.11.5) |
+| component → its retained licence, notice and copyright files | `hasEvidence` |
+| component → its patch files | `patchedBy` |
+| vulnerability → component | `doesNotAffect` (§28.11.3) |
+| an element with no outgoing structure | `dependsOn` → `NoneElement`, `completeness: "complete"` |
+
+* The deliverable is the product in single mode. In assembly mode it is each artifact, and a component's forms are recovered per artifact from the files that reached it (`sbomb:evidence:artifacts`, §6.3); a component no file attributes to an artifact stays under the product.
+* A component with two forms gets two relationships; two forms of the same type give one.
+* **`generated-source` adds no relationship.** §24.5 adds it *beside* the linker form — the object was linked, and the source it came from was generated — so the linker form already gives the edge. A `generates` relationship would say that the component generated the deliverable, which is false (D53). The fact stays in the component's `sbomb:component:linkageForm`; on a file it is `sbomb:evidence:header:class=generated-header` where discovery recorded a generated header, and `sbomb:file:class=generated-source` / `generated-header` only where the inventory classified the file itself as generated.
+* **Known leaves are stated.** CycloneDX lists every element in `dependencies` and an empty `dependsOn` there says "depends on nothing". In SPDX an absent relationship means *no assertion*, so leaving it out would lose that statement. Every element CycloneDX lists with an empty `dependsOn` — in practice every file — gets one `dependsOn` relationship to the individual `NoneElement` with `completeness: "complete"`. `completeness` is set nowhere else: `contains` from a component to its files is deliberately not complete, because sbomb lists used files only (§2), not every file a component has.
+* Statically linked edges and header-only edges carry no lifecycle scope: nothing beyond the relationship type is known about when they apply.
+* Every element is reachable from the SpdxDocument's `rootElement` by a directed walk along `rootElement`, relationships (`from` → `to`), agents and the licence-text definitions; a vulnerability and its VEX statement are reached from the component they are about.
+
+#### 28.11.5 Licences
+
+| Finding (§22) | SPDX 3.0.1 target |
+|---|---|
+| NOASSERTION | the individual `expandedlicensing_NoAssertionLicense` |
+| NONE | the individual `expandedlicensing_NoneLicense` |
+| an expression whose every licence identifier is on the SPDX licence list (exceptions after `WITH` on the exception list), or a `LicenseRef-` | a `simplelicensing_LicenseExpression` with that expression |
+| an expression that names a licence identifier the list does not carry | the same expression, each such operand replaced by `LicenseRef-sbomb-<s>` of that operand (a following `+` included), defined below |
+| no expression, and an identifier on the list | that identifier |
+| an expression whose exception after `WITH` is not on the exception list | the same expression, the exception replaced by `AdditionRef-sbomb-<s>` of that exception, defined below |
+| a name; an identifier the list does not carry; a text that is no expression; an expression with a licence identifier from the list where an exception belongs (`MIT WITH Apache-2.0`) | one `LicenseRef-sbomb-<s>` for the whole text, defined below |
+
+* **An expression keeps its structure.** Operators written in lower case (`MIT or Apache-2.0`, which SPDX 2.x readers accept and real headers contain) are written upper case: annex B allows an operator all upper or all lower case, and sbomb writes one spelling so that one licence is one expression element. A mixed-case `Or`, which the grammar does not allow, is read as the operator it was meant to be. A listed identifier is matched without case — annex B: identifiers "should be matched in a case-insensitive manner" — and written as the list spells it, so `apache-2.0 OR mit` becomes `Apache-2.0 OR MIT`, a listed expression with nothing minted (D55); an identifier off the list keeps its case. A `+` set apart by white space (`GPL-2.0 +`) is joined to its identifier: annex B says there "MUST NOT be white space between a license-id and any following +". When an expression is present the identifier of the first licence in it is never stated instead: `MIT AND Acme-Proprietary-1.0` becomes `MIT AND LicenseRef-sbomb-Acme-Proprietary-1.0`, never `MIT`, which would be a different licence and one obligation fewer. An exception the list does not carry is an `AdditionRef-sbomb-<s>`: 3.0.1 defines `simplelicensing_SimpleLicensingText` as "a license or addition that is not listed" and `simplelicensing_customIdToUri` as mapping "a LicenseRef or AdditionRef", so `GPL-2.0-or-later WITH Acme-linking-exception` becomes `GPL-2.0-or-later WITH AdditionRef-sbomb-Acme-linking-exception` and the listed licence stays machine-readable. An `AdditionRef-` the build stated is kept. `AdditionRef` is a 3.x form; SPDX 2.3 (§28.11.11) has none, and there both an unlisted exception and a stated `AdditionRef-` make the expression one `LicenseRef-sbomb-<s>` for the whole text. The version-neutral description makes that choice once, from whether the version being written has the form.
+* One `simplelicensing_LicenseExpression` per distinct expression. Every expression with at least one listed identifier carries `simplelicensing_licenseListVersion`, the version of the licence list the build embeds, so a newer list cannot make an older document ambiguous.
+* `<s>` is the name with every character outside `[A-Za-z0-9.-]` replaced by `-`, followed by `-<sha256(name)[:8]>` whenever the replacement changed anything, so two names never share a reference.
+* **Every `LicenseRef-sbomb-*` and `AdditionRef-sbomb-*` is defined in the document.** The expression that uses one carries `simplelicensing_customIdToUri`, mapping it to its definition. An `AdditionRef-sbomb-*` is defined by a `simplelicensing_SimpleLicensingText` whose `name` and text are the observed exception name, with a `comment` saying that no text of it was retained. A `LicenseRef-sbomb-*` is defined by a `simplelicensing_SimpleLicensingText` whose `name` is the original name and whose `simplelicensing_licenseText` is the retained licence text where §22.9 retained one for the file the finding came from, and otherwise the observed name with a `comment` saying no text was retained. A retained text that is not UTF-8 cannot be that field: the definition is then the name, and its `comment` says the text was retained and names the file that carries it as a base64 `data:` URI. sbomb never invents a licence text.
+* **A reference defined by a retained text has that text in its identity**: `LicenseRef-sbomb-<s>-<sha256(text)[:8]>`. Two components that each observed a licence called `Proprietary` in files with different texts are under two licences, and one shared definition would state that the second is under the first one's text. A reference defined by the observed name alone stays `LicenseRef-sbomb-<s>` and is shared — the name is all either observation says. A reference minted for one operand of a compound expression is defined by that operand: the file's text is the text of the whole expression, not of the operand. A `LicenseRef-` the build itself stated gets no definition: sbomb has none to give.
+* **Which relationship states a licence** follows §22.4's separation of observation and conclusion: the concluded licence of a component is `hasConcludedLicense`; each observed licence of a component is `hasDeclaredLicense`; a retained licence file states the licence detected in it with `hasDeclaredLicense`, whatever technique detected it — the 3.0.1 vocabulary defines that relationship as the artifact having been found to contain the licence, "for example as detected by use of automated tooling", and the component states the same finding from the same file with the same verb — and with `hasConcludedLicense` only where the component's licence is curated (§22.5), the one case in which sbomb states a conclusion about the file. The technique travels in `sbomb:license:technique`. This deliberately differs from CycloneDX's `acknowledgement` (§28.7), where `declared` means the authors wrote the identifier themselves. Every component has a concluded licence (NOASSERTION at worst), the product only when it is configured, used files none — as in CycloneDX.
+* The provenance of a licence — `sbomb:license:source`, `technique`, `confidence`, `evidenceClass`, `reason`, `conflictingValue` — is carried on the relationship that states it, as properties (§28.11.7). Two statements of the same licence with different provenance stay two relationships.
+
+#### 28.11.6 Agents and Creation
+
+* `createdBy` is the `Organization` of the tool vendor; `createdUsing` is a `Tool` named after the tool, whose version is the property `sbomb:run:toolVersion`.
+* `created` is the run's time (`SOURCE_DATE_EPOCH` when set, the current UTC time otherwise). Unlike CycloneDX's `metadata.timestamp` it is **mandatory** in SPDX, so `--reproducible` does not omit it: the time stated is `SOURCE_DATE_EPOCH`, and a reproducible run without a readable `SOURCE_DATE_EPOCH` — a whole number of seconds that falls within the years 0000 to 9999, the only years an RFC 3339 time can state — is refused before discovery with `REPRODUCIBLE_CREATION_TIME_MISSING` (exit 1, D50). Substituting the Unix epoch was rejected: it would state a creation date that is never true, in a document produced for compliance. For the same reason `REPRODUCIBLE_MODE_OMITS_TIMESTAMP` is not emitted for SPDX.
+
+#### 28.11.7 Extension and Properties
+
+Every element carries, in one `extension_CdxPropertiesExtension`, **exactly the `sbomb:` property set the CycloneDX 1.6 document carries for the same local identity**, one `extension_CdxPropertyEntry` per value, sorted by `(name, value)`, plus the SPDX-only properties of Appendix B: `sbomb:run:reproducible` and `sbomb:run:adapters` on the document, `sbomb:version:source` and `sbomb:version:confidence` where CycloneDX uses `evidence.identity`, `sbomb:component:type` on every package with a type, because the purpose vocabulary has no word for some types and spells others differently, `sbomb:file:class`, `sbomb:file:size` and `sbomb:file:missing` on a file, `sbomb:patch:type` and `sbomb:patch:source` on a patch file, and the licence provenance, `sbomb:license:confidence` included, on licence relationships. An element with no property has no extension. The native fields of §28.11.3 are written **in addition**: the properties stay, so a consumer that knows sbomb loses nothing by switching format, and moving a property family to its native field alone is a later, per-family decision.
+
+`extension_CdxPropertiesExtension` is the one concrete extension class 3.0.1 defines, and it is name/value structured — the reason the properties are not annotations.
+
+#### 28.11.8 What Is Not Rendered
+
+* **Findings** (§26) are not part of the SBOM, as in CycloneDX; they go to the findings JSON and the review report.
+* **The remediation text of a modification check** (§19.4) is finding text and is not rendered, as in CycloneDX.
+* **The run's evidence graph** is not rendered; it is `evidence.json`.
+* Nothing else of the format-neutral description is dropped, and a test fails when a field is added to it without either a rendering or an entry in this list.
+
+#### 28.11.9 Validation
+
+Every SPDX document is validated before it is written, on the exact bytes that will be written, in two tiers (D51):
+
+**Tier a — SPDX 3.0.1 conformance.** The official 3.0.1 JSON schema (embedded byte for byte), and the rules of the specification the schema cannot express: the root is one node or `@context` + `@graph` with the plain context URL; every element has a type and an `spdxId` that is an IRI and not a blank node; no identifier is defined twice; `creationInfo` is inline or resolves to a CreationInfo of spec version 3.0.1; a reference that resolves inside the document resolves to the right kind of element (an Element for `from`, `to`, `element` and `rootElement`; an Agent for `createdBy`, `suppliedBy` and `originatedBy`; a Tool for `createdUsing`), including references inside nested objects; no element is inlined where an IRI is expected; `to` is never empty, and `NoneElement` in `to` stands alone (the Relationship class: a relationship "that contains NoneElement and additional elements in the `to` property is not valid"); a document defines at most one `SpdxDocument` ("Any instance of serialization of SPDX data MUST NOT contain more than one SpdxDocument element definition"); every VEX assessment uses the one relationship type its class is restricted to (`affects`, `doesNotAffect`, `fixedIn`, `underInvestigationFor`), no other class uses those four, and its `from`, when the document defines it, is a `security_Vulnerability`; every VEX not-affected statement has a `security_justificationType` or a `security_impactStatement`, of which the class page says one MUST be defined; every `software_Package` and `software_File` (and every subclass) has a non-empty `name` — the 3.0.1 class pages raise `name` to `minCount 1` for both, which the SHACL model does not encode; licence expressions are syntactically valid, whatever identifiers they name, with operators all upper case or all lower case (annex B: `MIT or Apache-2.0` is an expression, `MIT Or Apache-2.0` is not); a `Hash` or `PackageVerificationCode` of an algorithm with a fixed digest length has that length in hex. A reference to an element the document does not define is **conformant**: SPDX 3.0.1 lets a document refer to elements defined elsewhere, and every official example does. `sbomb validate` applies tier a, and only tier a, to any SPDX document, so a correct document another tool wrote passes. That every profile a document uses is listed in `profileConformance` is **not** a tier-a rule: neither the specification nor the SHACL model states it — `profileConformance` names the profiles the creator intends to conform to, and only Core is mandatory — so a document that uses a licensing or security term without claiming that profile is conformant.
+
+**Tier b — invariants of sbomb's own output**, applied after tier a to every document sbomb writes and never by `validate`: the shape of §28.11.1 exactly (one CreationInfo, one SpdxDocument listing every element once, one Sbom); every reference resolves inside the document or is a predefined individual; `NoneElement` and `NoAssertionElement` only ever the one target of a relationship (tier a refuses `NoneElement` beside others; the specification states no such rule for `NoAssertionElement`); the closure of §28.11.4; every package and file named by more than white space (tier a accepts a name of white space, which `name`, an `xsd:string` without a pattern, allows); licence relationships only from packages and files to licences; every licence identifier on the embedded licence list or a `LicenseRef-`, every exception on the list or an `AdditionRef-`, every `LicenseRef-sbomb-*` and `AdditionRef-sbomb-*` defined, operators written upper case, every listed expression carrying the list version; `profileConformance` equal to the computed set, and every profile whose classes, properties or individuals the bytes use claimed (`extension` excepted, D49b); every property name in the `sbomb:` namespace and none of the internal keys; a `software_packageUrl` that starts with `pkg:`; relationship numbers 1..n without gaps, in `@graph` order. A tier-b failure is a defect of sbomb, and the document is not written.
+
+Issues are collected, sorted and capped at 20 per document, as for CycloneDX. Either tier failing → exit 4.
+
+The SHACL model of 3.0.1 is the other half of SPDX's own validation and has no Go implementation, so it is **not** run by the tool. CI runs it, with an independent JSON schema validator, on every SPDX golden document, together with probes that must fail: a schema probe the JSON schema validator must refuse, naming its defect, and SHACL probes that pass the schema and the SHACL check must refuse (docs/ci.md).
+
+#### 28.11.10 TLP
+
+`output.tlp` is refused for SPDX 3.0.1 (exit 1, before discovery): `output.tlp cannot be carried by SPDX 3.0.1, which has no field for a distribution constraint on the document; write CycloneDX 1.7 to carry it`. The one TLP-like field, `dataset_confidentialityLevel`, classifies a dataset package, not the document, and a marking carried in an extension or an annotation would be one no consumer recognises as a constraint — a document marked AMBER that every tool treats as unmarked is worse than a refusal. This is the rule §28.1 applies to CycloneDX 1.6.
+
+#### 28.11.11 SPDX 2.3
+
+SPDX 2.3 is the next version of this format (`--format spdx-json --spec-version 2.3`). It shares nothing with 3.0.1 at the serialization level and everything above it: the version-neutral SPDX description of the run (§28.11.2, §36.1) — packages, files, neutral edge kinds, known leaves, licence attributes and `LicenseRef-sbomb-*` definitions, VEX, evidence and patch attributes — is built once and rendered by either version, so 2.3 adds a renderer, its checks and its goldens. Three things 2.3 makes mandatory are not yet available and are recorded in `docs/dev/open-questions.md`: a SHA-1 of every file, a decision for files that cannot be hashed, and the `extractedText` of a licence nobody retained the text of (Q21).
+
 ---
 
 ## 29. Determinism and Reproducibility
 
-Given identical final artifacts, build evidence, source files, configuration, policy, waivers, and tool version, the tool MUST produce **byte-identical** output, except for `metadata.timestamp` and `serialNumber` outside `--reproducible` mode.
+Given identical final artifacts, build evidence, source files, configuration, policy, waivers, and tool version, the tool MUST produce **byte-identical** output, except for `metadata.timestamp` and `serialNumber` outside `--reproducible` mode — and, for SPDX, `CreationInfo.created` and the document namespace, which outside `--reproducible` are the only two things that differ between two runs.
 
 Mandatory ordering rules:
 
@@ -1697,6 +1873,25 @@ Mandatory ordering rules:
 All sorting uses byte-wise comparison of UTF-8, not locale collation.
 
 `--reproducible` additionally: omits `metadata.timestamp`, derives `serialNumber` per §28.9, omits `sbomb:run:*` volatile properties, and honours `SOURCE_DATE_EPOCH`.
+
+**SPDX (§28.11).** Every sort key is over percent-encoded local identities, which is IRI byte order because every IRI of a document shares its prefix, and every sort has a total key, so the order of the input never decides the output:
+
+| Collection | Sort key |
+|---|---|
+| `@graph` | CreationInfo, SpdxDocument, Sbom, then the groups of §28.11.1, each by local identity; relationships by number |
+| `element[]` | `@graph` order |
+| relationships, before numbering | `(from, relationshipType, class, scope, completeness, to, properties, impact statement, supplier)` |
+| `to[]`, `originatedBy[]` | local identity |
+| `verifiedUsing[]` | `(algorithm, hashValue)` |
+| `externalIdentifier[]` | `(type, identifier)` |
+| `externalRef[]` | `(type, locator)` |
+| `extension_cdxProperty[]` | `(name, value)` |
+| `software_additionalPurpose[]`, `profileConformance[]` | value |
+| patches of a component | `(type, file, source, description)`; exact duplicates dropped |
+| CVE exclusions | `(CVE, reason)`; exact duplicates dropped |
+| `software_copyrightText` of a file | the statements, sorted, then joined by `\n` |
+
+`--reproducible` with SPDX states `SOURCE_DATE_EPOCH` as `created` rather than omitting it, refuses the run when it is unset or unreadable (§28.11.6), and derives the document namespace per §28.11.2.
 
 A cross-platform determinism test is mandatory (Milestone 14): the same fixture processed on Linux and Windows MUST yield identical bytes.
 
@@ -1735,6 +1930,8 @@ Measured on a 4-core x86_64 runner with warm page cache, using the `large` fixtu
 
 The tool MUST NOT read files that are not evidence-selected or required for configured metadata resolution.
 
+The budgets apply to every output format. SPDX 3.0.1 output does **not** meet them yet (D54): CI measures the 10 000-unit row as SPDX on every push, without blocking, so the overrun is reported rather than hidden.
+
 A benchmark suite (`go test -bench`) MUST exist for: map parsing, depfile parsing, graph construction, and serialization.
 
 ---
@@ -1746,10 +1943,10 @@ A benchmark suite (`go test -bench`) MUST exist for: map parsing, depfile parsin
 ```
 sbomb generate   [flags]     Generate SBOM(s) and evaluate policy
 sbomb explain    [flags]     Explain why a file or component is in the SBOM
-sbomb validate   [flags]     Validate an existing CycloneDX document produced by this tool
+sbomb validate   [flags]     Validate an existing CycloneDX or SPDX document (§36.1 says how far for CycloneDX)
 sbomb evidence   [flags]     Dump the evidence graph without producing an SBOM
 sbomb foss       [flags]     Write the FOSS attribution documents without an SBOM on disk
-sbomb schema     [flags]     Print the embedded configuration / findings / evidence JSON Schemas
+sbomb schema     [flags]     Print the embedded configuration / findings / evidence / output-format JSON Schemas
 sbomb version                Print version, commit, build date, spec support
 ```
 
@@ -1769,13 +1966,13 @@ sbomb generate \
 | `--source-dir` | logical source root | Physical source directory: where the source tree is now (§7.9). It never changes identity. |
 | `--build-dir` | required | Build directory |
 | `--config` | `sbomb.json` if present | Configuration file |
-| `--output` | — | Output file (single artifact) |
+| `--output` | `sbomb.cdx.json` or `sbomb.spdx.json` | Output file (single artifact); the default name follows the format |
 | `--output-dir` | — | Output directory (multiple artifacts) |
 | `--mode` | from config, else `single` | `single` \| `assembly` |
 | `--config-name` | — | Build configuration (multi-config generators) |
 | `--policy` | `default` | `default` \| `strict` \| `lenient` \| path to a policy JSON |
-| `--format` | `cyclonedx-json` | Output format |
-| `--spec-version` | `1.6` | `1.6` \| `1.7` (§28.1) |
+| `--format` | `cyclonedx-json` | `cyclonedx-json` \| `spdx-json`; overrides `output.format`. An unknown value is a usage error listing the registered formats (§36.1) |
+| `--spec-version` | the format's default | `1.6` \| `1.7` for `cyclonedx-json` (default `1.6`, §28.1); `3.0.1` for `spdx-json` (§28.11). A version the selected format does not have is a usage error — a configured `1.7` is refused under `--format spdx-json`, not replaced |
 | `--map` | auto | Linker map path (repeatable) |
 | `--link-depfile` | auto | Linker dependency file (repeatable) |
 | `--image-manifest` | — | Package/image manifest (repeatable) |
@@ -1787,7 +1984,7 @@ sbomb generate \
 | `--evidence-dump` | `<build-dir>/evidence.json` | Evidence graph dump path, or `off` |
 | `--allow-introspection` | off | Permit §9.2 allowlisted commands |
 | `--allow-cmake-regenerate` | off | Permit `cmake -S -B` for File API queries |
-| `--reproducible` | off | Deterministic serialNumber, no timestamp |
+| `--reproducible` | off | Deterministic serialNumber (CycloneDX: no timestamp) or document namespace (SPDX: `SOURCE_DATE_EPOCH` as the creation time, required, §28.11.6) |
 | `--redact-unanchored-paths` | off | Hash unanchored paths |
 | `--include-system-headers` | policy | Override |
 | `--include-toolchain-runtime` | policy | Override |
@@ -1844,6 +2041,8 @@ Prints all evidence chains from the file/component to every reaching final deliv
 
 `--component` names a grouping component, and the evidence dump carries none: component mapping happens above the graph (§35) and its result is not written back into it. The mapping is in the **document** instead — §28's dependency cascade gives every grouping component a `dependsOn` list of its `file:` refs — so `--component` takes `--sbom <file>` beside `--build-dir`, expands the name to those files and explains each of them from the dump. The document is named rather than guessed: a directory holds any number of them, and picking one would make the answer depend on which.
 
+The document may be CycloneDX or SPDX; its format is detected as `validate` detects it (§32.5). In an SPDX document the component's files are the `software_File` targets of its `contains` relationships, and their local identities (§28.11.2) are the same `file:` refs. `--bom-ref` likewise accepts an SPDX element IRI and reads the local identity out of its fragment.
+
 A component is looked up by its bom-ref (`component:<name>`, `toolchain:<name>`) and then by its `name`, in that order. Where none of its files is a node of the dump, the document describes a different build than the build directory does, and that MUST be reported as such rather than as an absent chain: a subject that cannot be found and a subject that was never in this product are different answers to the question `explain` is asked.
 
 ### 32.4 Exit Codes
@@ -1853,7 +2052,7 @@ A component is looked up by its bom-ref (`component:<name>`, `toolchain:<name>`)
 1  = usage or configuration error
 2  = discovery error (evidence could not be collected)
 3  = policy failed
-4  = CycloneDX validation failed
+4  = document validation failed (CycloneDX or SPDX, §32.5)
 70 = internal error / invariant violation
 ```
 
@@ -1863,14 +2062,14 @@ A component is looked up by its bom-ref (`component:<name>`, `toolchain:<name>`)
 
 Third-party Go modules are permitted (§37), so validation is performed **in-process** and is mandatory:
 
-* The official CycloneDX JSON Schema files of **every version §28.1 permits** (`bom-1.6.schema.json`, `bom-1.7.schema.json`, `spdx.schema.json`, `jsf-0.82.schema.json`, `cryptography-defs.schema.json`) MUST be embedded with `go:embed` and validated against with a pure-Go JSON Schema validator. Every generated document is validated before it is written to its final path; validation runs on the exact bytes that will be written.
-* The schema is selected by the **document's own `specVersion`**, not by the caller's: a file is checked against what it claims to be. A document declaring a version the build has no schema for MUST be refused, never checked against another version's schema.
-* In addition, the tool MUST perform **semantic validation** that a JSON Schema cannot express: `bom-ref` uniqueness, dependency-ref closure (every `ref` and `dependsOn` resolves), hash length matching the declared algorithm, purl syntax, RFC 3339 timestamps, property-name membership in Appendix B, and the §1.5 CRA field completeness check when the `cra` profile is active.
-* `sbomb schema --cyclonedx [--spec-version <v>]` prints the embedded schema of one version; `sbomb validate --input <file>` runs both layers against an existing document.
-* `validate` MUST **detect** the serialization format from the document rather than assuming or requiring one: `bomFormat` identifies CycloneDX, and a second format identifies itself by its own marker. Somebody checking a file another tool sent them knows they have an SBOM, not which serialization it is in. A document in no format the build can read is a failure that names what it can read.
+* The official CycloneDX JSON Schema files of **every version §28.1 permits** (`bom-1.6.schema.json`, `bom-1.7.schema.json`, `spdx.schema.json`, `jsf-0.82.schema.json`, `cryptography-defs.schema.json`) and the official SPDX 3.0.1 JSON schema MUST be embedded with `go:embed`, byte for byte, and validated against with a pure-Go JSON Schema validator. Every generated document is validated before it is written to its final path; validation runs on the exact bytes that will be written.
+* The schema is selected by the **version the document itself declares** (CycloneDX `specVersion`, the SPDX 3 context URL), not by the caller's: a file is checked against what it claims to be. A document declaring a version the build has no schema for MUST be refused, never checked against another version's schema.
+* In addition, the tool MUST perform **semantic validation** that a JSON Schema cannot express: `bom-ref` uniqueness, dependency-ref closure (every `ref` and `dependsOn` resolves), hash length matching the declared algorithm, purl syntax, RFC 3339 timestamps, property-name membership in Appendix B, and the §1.5 CRA field completeness check when the `cra` profile is active. For SPDX the semantic layer is the two tiers of §28.11.9: conformance to the specification, which `validate` applies to any document, and the invariants of sbomb's own output, which apply only to documents sbomb writes. Appendix B membership of every emitted property name is enforced by the build (the property catalogue is generated from the code and checked in CI), not at run time.
+* `sbomb schema --format <id> [--spec-version <v>]` prints the embedded schema of one format and version (`--cyclonedx` remains an alias of `--format cyclonedx-json`); `sbomb validate --input <file>` runs both layers against an existing document. A successful `validate` names what it checked: `valid SPDX 3.0.1 document: <file>`.
+* `validate` MUST **detect** the serialization format from the document rather than assuming or requiring one: `bomFormat` identifies CycloneDX; an SPDX 3 document is identified by its `@context` URL, which names its version, and an SPDX 2 document by `spdxVersion`. A recognised version the build cannot read — SPDX 3.0.0, SPDX 2.3 until §28.11.11 is built — is refused by name rather than reported as unrecognised. Somebody checking a file another tool sent them knows they have an SBOM, not which serialization it is in. A document in no format the build can read is a failure that names what it can read.
 * Output is written atomically: to a temporary file in the destination directory, validated, then renamed. A failed validation MUST NOT leave a partial or invalid file at the target path.
 
-Either validation layer failing → exit 4.
+Either validation layer failing → exit 4. A writer that cannot render the document sbomb built is not a validation failure but an internal invariant violation (`INTERNAL_INVARIANT_VIOLATION`, exit 70), in `generate` and `self` alike: exit 4 is the verdict on the exact bytes, and there are none.
 
 ---
 
@@ -1904,8 +2103,8 @@ is internally correct. The two entry points MUST produce byte-identical files
 for the same build.
 
 **The FOSS outputs never change the document.** The retained license text of
-§22.9 always reaches the notices document, and reaches the CycloneDX document
-only when `licenseTextInSBOM` says so (§33.1). `--foss-out` is an output
+§22.9 always reaches the notices document, and reaches the SBOM — CycloneDX or
+SPDX — only when `licenseTextInSBOM` says so (§33.1). `--foss-out` is an output
 selector, never a content switch: `generate` with and without it MUST write the
 same bytes to `--output`.
 
@@ -1920,9 +2119,18 @@ same bytes to `--output`.
 
 `foss-review.json` is not a fourth format of sbomb's own invention: it is the
 §36.1 rendering of `sbomwriter.Document` through the writer registry, with the
-retained license texts included. When the SPDX writer of §36.1 arrives, that
-writer produces this file and the intermediate form is retired rather than
-placed beside it.
+retained license texts included. It is always rendered by the default writer,
+CycloneDX, at that writer's default version, **whatever format the SBOM of the
+same run is written in**: the file is a view of the run for a reviewer with a
+stable shape, and its goldens do not change with `--format`. Whether an SPDX
+run should render it as SPDX too is recorded in `docs/dev/open-questions.md` (Q22).
+Because `foss` writes no SBOM, it renders its run as CycloneDX whatever format
+the configuration names, and demands nothing the configured format would
+demand only of a document that is never written: an SPDX configuration does not
+make `foss --reproducible` need `SOURCE_DATE_EPOCH`. The configured format and
+version must still be ones a writer emits, and a configured TLP one that format
+can carry (exit 1 otherwise), so that a configuration `foss` accepts is one
+`generate` accepts too.
 
 `--out` and `--foss-out` write these four names and overwrite them, exactly as
 `--output` overwrites an SBOM. Nothing else in the directory is read, moved or
@@ -2035,7 +2243,7 @@ failOnMissingSupplier             failOnMissingComponentHash
 licenseTextInSBOM
 ```
 
-`licenseTextInSBOM` ∈ `off` (default) | `evidence` decides whether the license texts retained per §22.9 are written into the document, as `evidence.licenses[].license.text`. It is a *content* setting like the ones above it: two runs that differ here are not comparable, and base64 inflates a license text by a third, which is why `generate` does not carry the texts unless it is asked to.
+`licenseTextInSBOM` ∈ `off` (default) | `evidence` decides whether the license texts retained per §22.9 are written into the document, as `evidence.licenses[].license.text` in CycloneDX and a `license` external reference of the licence file, with the bytes as a `data:` URI, in SPDX (§28.11.3). It is a *content* setting like the ones above it: two runs that differ here are not comparable, and base64 inflates a license text by a third, which is why `generate` does not carry the texts unless it is asked to.
 
 ### 33.2 Built-in Profiles
 
@@ -2125,13 +2333,13 @@ CLI
  |-> ComponentMap    (mapping, versions, purls)
  |-> LicenseEngine   (resolution, conflicts, confidence)
  |-> Policy          (findings evaluation, waivers, exit code)
- |-> Writers         (CycloneDX, findings JSON, evidence dump, review report)
+ |-> Writers         (CycloneDX, SPDX, findings JSON, evidence dump, review report)
 ```
 
 Rules:
 
 * The domain model MUST NOT import any adapter package.
-* Adapters MUST NOT import the CycloneDX writer.
+* Adapters MUST NOT import the CycloneDX writer, nor the SPDX writer.
 * Adapters produce normalized `evidence.Edge`/`evidence.Node` values only; they never mutate output structures.
 * Only `internal/cli` may call `os.Exit`.
 * Only `internal/exec` may spawn processes, and only from the §9.2 allowlist.
@@ -2169,8 +2377,16 @@ internal/version/        component version + purl resolution
 internal/license/
 internal/policy/
 internal/findings/
-internal/sbomwriter/     format-agnostic writer interface + registry (§36.1)
-internal/cyclonedx/      CycloneDX 1.6 writer + schema and semantic validation
+internal/sbomwriter/     format-agnostic writer interface, optional capabilities, registry,
+                         validated atomic write (§36.1)
+internal/sbommap/        what every writer derives alike: local identities (§28.4), the
+                         sbomb: property set of an element, licence acknowledgement,
+                         the reproducible document UUID
+internal/licenselist/    SPDX licence-list membership and version, generated
+internal/cyclonedx/      CycloneDX 1.6/1.7 writer + schema and semantic validation
+internal/spdx/           the "spdx-json" writer: version dispatch, detection, preflight
+internal/spdx/mapping/   version-neutral SPDX description of a run, shared by 3.0.1 and 2.3
+internal/spdx/spdx3/     SPDX 3.0.1 rendering, embedded schema, tier a and tier b checks
 internal/report/
 internal/testutil/       golden helpers, fixture loading
 testdata/fixtures/       golden fixtures (see Appendix F)
@@ -2182,9 +2398,11 @@ Module path: `github.com/<org>/sbomb`. Minimum Go version: **1.22**.
 
 ### 36.1 Output Format Abstraction
 
-Although only CycloneDX is implemented, the writer layer MUST be format-agnostic, so that SPDX 3.x can be added without touching discovery, inventory, mapping, licensing, or policy.
+The writer layer MUST be format-agnostic, so that a format can be added without touching discovery, inventory, mapping, licensing, or policy. Two formats are registered: `cyclonedx-json` (CycloneDX 1.6, 1.7) and `spdx-json` (SPDX 3.0.1; 2.3 follows, §28.11.11). `generate`, `self` and `foss` reach a writer only through this interface: they resolve the selected format and version once, before discovery, and render with `Write`.
 
-**One writer per serialization format; versions live inside it.** A consumer asks for a format, not for a shape, so CycloneDX 1.6 and 1.7 are one writer and SPDX 2.3 and 3.0.1 will be another. Where two versions of a format are a handful of fields on the same structure, one writer with version-conditional fields is honest. Where they share nothing at the document level, "one writer" MUST NOT become one function with a switch at the top: it dispatches to a renderer per version in separate files, over a shared mapping layer that decides which evidence edge means which relationship. That mapping is the reuse; the serialization is not.
+**One writer per serialization format; versions live inside it.** A consumer asks for a format, not for a shape, so CycloneDX 1.6 and 1.7 are one writer and SPDX 3.0.1 and 2.3 are another. Where two versions of a format are a handful of fields on the same structure, one writer with version-conditional fields is honest. Where they share nothing at the document level, "one writer" MUST NOT become one function with a switch at the top: it dispatches to a renderer per version in separate files, over a shared mapping layer that decides which evidence edge means which relationship. That mapping is the reuse; the serialization is not. The SPDX writer is built this way: one version-neutral SPDX description of the run (packages, files, neutral edge kinds, known leaves, licence, VEX, evidence and patch attributes; no relationship-type names, purpose words, hash spellings or other 3.0.1 vocabulary), and a renderer plus its two tiers of checks per version, selected by a table keyed by version.
+
+**What every format derives alike is derived once, below the writers.** The local identities of §28.4, the `sbomb:` property set of an element, whether a retained licence file is declared or concluded, and the UUIDv5 derivation of a reproducible document identity are shared by all writers, so a CycloneDX bom-ref and an SPDX IRI fragment cannot name different things, and a property cannot be present in one format and missing in the other. Neither writer imports the other.
 
 ```go
 package sbomwriter
@@ -2197,9 +2415,16 @@ type Document struct {
     Components  []domain.Component
     Files       []domain.UsedFile
     Relations   []Relation          // product/artifact/component/file edges, already sorted
-    Evidence    *evidence.Graph     // for writers that can express provenance
     Findings    []domain.Finding
-    Run         RunMetadata         // tool version, timestamps, policy profile, adapters
+    Run         RunMetadata         // tool, timestamp, reproducible, policy profile, build, adapters
+}
+
+type Options struct {
+    SpecVersion  string             // "" = the writer's DefaultVersion
+    TLP          string             // a distribution constraint; refused by formats that cannot carry it
+    LicenseText  string             // licenseTextInSBOM (§33.1)
+    Reproducible bool
+    OmitIdentity bool               // the FOSS review view; ignored where identity is structural
 }
 
 type Writer interface {
@@ -2220,6 +2445,23 @@ func Register(w Writer)
 func Get(id, version string) (Writer, error)
 func Resolve(id, version string) (Writer, string, error)  // fills in the default
 func DetectFormat(data []byte) (Writer, string, error)
+func IDs() []string
+func WriteFile(path string, w Writer, data []byte) error  // Validate, CheckOutput, atomic rename
+
+const DefaultFormat = "cyclonedx-json"
+
+// Optional capabilities, type-asserted like Detector. Each is a question the
+// command line asks about a format without naming it.
+type Describer interface {
+    Label() string                  // "CycloneDX", "SPDX"
+    Extension() string              // ".cdx.json", ".spdx.json"; default output names
+    OmitsTimestamp(version string, o Options) bool  // decides REPRODUCIBLE_MODE_OMITS_TIMESTAMP
+}
+type SchemaProvider interface { EmbeddedSchema(version string) ([]byte, error) }  // `schema --format`
+type Preflighter interface { Preflight(version string, o Options) error }       // refuse before discovery
+type ComponentReader interface { ComponentFiles(data []byte, name string) ([]string, error) } // explain --component
+type OutputChecker interface { CheckOutput(data []byte) error }                  // invariants of own output
+type RefusalError struct { ID, Message string }  // a preflight refusal that is an appendix A finding
 ```
 
 Rules:
@@ -2228,9 +2470,11 @@ Rules:
 * A version a writer does not list is a usage error, raised before work begins. Silently downgrading a document a consumer asked for is worse than refusing.
 
 * `internal/domain` and every layer above it MUST NOT import `internal/cyclonedx`.
-* `Document` MUST NOT contain CycloneDX-specific field names, `bom-ref` strings, or property keys. `bom-ref` generation (§28.4) belongs to the CycloneDX writer; other formats derive their own identifiers from the same canonical paths.
-* Adding a format means adding one package that implements `Writer` plus its golden tests. If adding a format requires changing anything below `sbomwriter`, the abstraction has been violated and that is a bug.
-* `--format` lists registered writers; an unknown value is a usage error (exit 1) listing what is available.
+* `Document` MUST NOT contain CycloneDX-specific or SPDX-specific field names, `bom-ref` strings, or property keys. Local identities (§28.4) are derived below the writers, once, for every format; each format spells them its own way (a bom-ref, an IRI fragment).
+* `Validate` judges a document against the specification it declares, whoever wrote it. A writer whose own output promises more than conformance states those promises as `CheckOutput`, which runs on everything sbomb writes and never under `validate`. The SPDX writer follows this rule. The CycloneDX writer does not yet: its `Validate` still requires `metadata` with an array-form `metadata.tools` and a dependencies entry for every component (§28.5), which the CycloneDX schema does not, so `validate` can refuse a conformant CycloneDX document another tool wrote (open question Q23).
+* A request a writer cannot honour — a version it does not have, a TLP it cannot carry, a reproducible creation time it cannot state — is refused by `Preflight` before discovery, never at the write.
+* Adding a format means adding one package that implements `Writer` plus its golden tests, registered by an explicit import in the command, never transitively. Adding a version to a format means adding a renderer. If adding a format requires changing anything below `sbomwriter`, the abstraction has been violated and that is a bug. (SPDX 2.3's mandatory SHA-1 per file is the one known exception in waiting, §28.11.11.)
+* `--format` lists registered writers; an unknown value is a usage error (exit 1) listing what is available. The configuration schema's `output.format` enum MUST equal the registered writers, and its `output.specVersion` enum the union of their versions; a test holds them together.
 
 ## 37. Dependency Policy
 
@@ -2247,7 +2491,7 @@ Recommended direct dependencies:
 | Purpose | Module | Note |
 |---|---|---|
 | CycloneDX model and JSON serialization | `github.com/CycloneDX/cyclonedx-go` | Removes hand-written schema drift risk. Ordering is still imposed by `internal/cyclonedx` (§29). |
-| JSON Schema validation | a pure-Go JSON Schema draft 2020-12 validator | Required by §32.5. Must be cgo-free. |
+| JSON Schema validation | a pure-Go JSON Schema draft 2020-12 validator | Required by §32.5, for the CycloneDX schemas and the SPDX 3.0.1 schema alike. Must be cgo-free. The SPDX writer adds no dependency: it serializes with `encoding/json` and imposes §29 itself. |
 | purl parsing/formatting | `github.com/package-url/packageurl-go` | Avoids hand-rolled percent-encoding bugs (§20.4). |
 
 Everything else — depfile parsing, map parsing, Ninja parsing, DWARF, archive reading, path model — MUST remain standard library (`debug/elf`, `debug/pe`, `debug/dwarf`, `archive/tar`, `regexp`, and so on). Adding a dependency for any of those requires a recorded deviation (§0.2).
@@ -2568,7 +2812,8 @@ Severity shown is the default and may be changed via `policy.severityOverrides`.
 | `CONFIG_DEPRECATED_OPTION` | warning | — | Deprecated configuration key used |
 | `HEADER_EVIDENCE_FALLBACK` | info | — | A CU had no DWARF coverage; depfile used instead |
 | `DYNAMIC_DEPENDENCIES_IGNORED` | info | — | Artifact has `DT_NEEDED`/imports while `systemLibraries=exclude` |
-| `REPRODUCIBLE_MODE_OMITS_TIMESTAMP` | info | — | `--reproducible` output lacks `metadata.timestamp`; not a CRA deliverable |
+| `REPRODUCIBLE_MODE_OMITS_TIMESTAMP` | info | — | `--reproducible` output lacks `metadata.timestamp`; not a CRA deliverable. Emitted only for formats that omit the timestamp to be reproducible (CycloneDX) |
+| `REPRODUCIBLE_CREATION_TIME_MISSING` | error | always (exit 1) | SPDX requires a creation time, and reproducible mode (`--reproducible` or `output.reproducible`) without a readable `SOURCE_DATE_EPOCH` has none to state; refused before discovery |
 | `MISSING_SUPPLIER` | warning | `failOnMissingSupplier` | Component has no supplier/creator (CRA/BSI field) |
 | `MISSING_COMPONENT_HASH` | warning | `failOnMissingComponentHash` | Component has no hash for its deployable form (CRA/BSI field) |
 | `CRA_FIELD_INCOMPLETE` | error | `cra` profile | Aggregate: one or more §1.5(1) fields missing on some component |
@@ -2576,7 +2821,7 @@ Severity shown is the default and may be changed via `policy.severityOverrides`.
 | `WEAK_EVIDENCE` | warning | `failOnWeakEvidence` | The only evidence for a file is a textual fallback source (§8.4) |
 | `MISSING_COMPILE_EVIDENCE` | warning | — | No compile database was found, so object-to-source mapping loses a strategy (§14.1) |
 | `MALFORMED_BINARY` | info | — | An artifact could not be parsed as ELF or PE, so no debug-info evidence was read (§11.4) |
-| `INTERNAL_INVARIANT_VIOLATION` | error | always (exit 70) | A graph invariant of §8.8 or a `bom-ref` uniqueness assertion of §28.4 failed |
+| `INTERNAL_INVARIANT_VIOLATION` | error | always (exit 70) | A graph invariant of §8.8 or a `bom-ref` uniqueness assertion of §28.4 failed, or a writer could not render the document sbomb built (§32.5) |
 
 An implementation MUST NOT emit a finding ID that is not in this table without also adding it to the table and to `docs/findings.md`.
 
@@ -2592,7 +2837,6 @@ All properties are namespaced `sbomb:`. Booleans are the strings `"true"`/`"fals
 sbomb:run:toolVersion            sbomb:run:specVersion
 sbomb:run:timestamp              sbomb:run:sourceDateEpoch
 sbomb:run:policyProfile          sbomb:run:mode
-sbomb:run:reproducible           sbomb:run:adapters        (repeated, sorted)
 sbomb:build:generator            sbomb:build:config
 sbomb:build:compilerId           sbomb:build:compilerVersion
 sbomb:build:linkerId             sbomb:build:linkerVersion
@@ -2625,7 +2869,7 @@ sbomb:component:sourceObligation (repeated, sorted)
 sbomb:component:originator
 sbomb:component:cveExclusion     (repeated, <cve> or <cve>: <reason>)
 sbomb:license:source             sbomb:license:evidenceClass
-sbomb:license:confidence         sbomb:license:review
+sbomb:license:review
 sbomb:license:reason             sbomb:license:conflictingValue
 sbomb:license:technique
 sbomb:review:required
@@ -2645,15 +2889,31 @@ sbomb:go:goos                    sbomb:go:goarch
 sbomb:go:replaces                (module@version the linker substituted)
 ```
 
+**Version provenance (any component, SPDX only)**
+
+```
+sbomb:version:source             (curated | cmake | conan | git-describe | ...)
+sbomb:version:confidence         (high | medium | low | unknown)
+```
+
+CycloneDX states where a version came from in `evidence.identity`; SPDX has no field for it, so an SPDX document carries the same two facts as properties.
+
+**Patch files (SPDX only)**
+
+```
+sbomb:patch:type                 (unofficial | monkey | backport | cherry-pick)
+sbomb:patch:source               (the metadata file the patch was recorded in)
+```
+
 **File components**
 
 ```
 sbomb:path:canonical             sbomb:file:anchor
-sbomb:file:role                  sbomb:file:class
+sbomb:file:role
 sbomb:file:distributionRole      (distributed | build-time-only)
 sbomb:file:linkageForm
-sbomb:evidence:header:class      sbomb:file:size
-sbomb:file:missing               sbomb:file:resolvedTarget
+sbomb:evidence:header:class
+sbomb:file:resolvedTarget
 sbomb:evidence:type              (repeated, sorted)
 sbomb:evidence:source            (repeated, sorted)
 sbomb:evidence:strength          (strongest present)
@@ -2678,6 +2938,35 @@ sbomb:cdx:structuredProperty
 `sbomb:path:canonical` and `sbomb:evidence:header:class`. The names the writer
 uses are the ones documents carry, so they are the ones recorded here
 (deviation D26).
+
+**Run-level (SPDX only, on the SpdxDocument)**
+
+```
+sbomb:run:reproducible
+sbomb:run:adapters               (repeated, sorted)
+```
+
+**File elements (SPDX only)**
+
+```
+sbomb:file:class                 (the file class of discovery, verbatim)
+sbomb:file:size                  (bytes, for a file that was read)
+sbomb:file:missing               (true, for a file that was not)
+```
+
+**Licence relationships (SPDX only)**
+
+```
+sbomb:license:confidence         (high | medium | low | unknown)
+```
+
+**Component type (SPDX only, on every package with a type)**
+
+```
+sbomb:component:type             (the component type of §19.1, verbatim)
+```
+
+The groups marked *SPDX only* are carried by an SPDX document and by no CycloneDX document of the same run, because CycloneDX states the fact in a field of its own (the component type, version provenance) or not at all. They are derived in the version-neutral SPDX description (§36.1), so every SPDX version carries them alike. The rest of an SPDX element's `sbomb:license:*` provenance is the set the groups above define, carried on the relationship that states the licence.
 
 Property values MUST NOT contain absolute paths. Every path-valued property uses canonical form (§7.7).
 
@@ -2927,7 +3216,7 @@ Unknown keys are a configuration error (exit 1) **at every level of the document
                            |
                     POLICY ENGINE
                     /      |       \
-        CycloneDX JSON  Findings   Review Report / explain
+   CycloneDX / SPDX JSON  Findings  Review Report / explain
 ```
 
 The fundamental rules:
@@ -2989,6 +3278,8 @@ These were open questions in v3.0 and are now settled. An implementing agent MUS
 | 14 | **CI runs on Linux and Windows.** The determinism matrix includes `windows-latest`, so the released Windows binary is exercised rather than only cross-compiled; Windows path semantics are additionally covered by an injectable path flavor plus synthetic and mingw fixtures. | §41 M14, M16 |
 | 15 | **Fixture licensing policy:** only build-metadata *text* and self-built artifacts from original fixture projects may be committed. No third-party source, headers, toolchain files, or SDK trees. Every fixture carries a `PROVENANCE.md`. | §41 M0 |
 | 16 | Tool name is **`sbomb`**; module path `github.com/<org>/sbomb`; property namespace `sbomb:`. | throughout |
+
+Rows 4 and 7 are superseded by later decisions and kept as the record of what v3.1 decided: CycloneDX 1.7 is written on request (§28.1), and SPDX 3.0.1 is written on request (§28.11), as the second format the format-agnostic writer layer of row 4 was built for. SPDX 2.3 follows (§28.11.11).
 
 ### Still Open
 

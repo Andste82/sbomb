@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "project": {
+    "name": "p14-foss-curated"
+  },
+  "components": [
+    {
+      "path": "dep/apache-lib",
+      "name": "apache-lib",
+      "version": "2.4.0",
+      "supplier": "Apache Lib Maintainers",
+      "license": "Apache-2.0",
+      "copyright": "Copyright 2024 The Apache Lib Authors",
+      "purl": "pkg:generic/apache-lib@2.4.0"
+    },
+    {
+      "path": "dep/multi-license",
+      "name": "multi-license",
+      "version": "1.0.0",
+      "license": "MIT OR Apache-2.0"
+    },
+    {
+      "path": "dep/nolicense",
+      "name": "nolicense",
+      "version": "0.3.0",
+      "license": "Example Proprietary Licence"
+    },
+    {
+      "path": "dep/lgpl-lib",
+      "name": "lgpl-lib",
+      "version": "3.1.0",
+      "license": "MIT"
+    }
+  ],
+  "policy": {
+    "profile": "lenient"
+  }
+}

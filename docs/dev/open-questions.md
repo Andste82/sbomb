@@ -455,3 +455,85 @@ answer as an absent chain.
 What is left is that one subcommand reads two files where the other subjects
 read one. That follows from where the two facts are, and deviation D46 records
 it.
+
+## Q21 — What SPDX 2.3 still needs that the shared SPDX layer does not provide
+
+SPDX 3.0.1 is written (§28.11), and SPDX 2.3 (issue #3) renders the same
+version-neutral SPDX description of the run (§28.11.11). Three things 2.3 makes
+mandatory are not in that description, and each is a decision for #3 rather
+than a gap to fill silently:
+
+1. **A SHA-1 of every file.** 2.3 requires a `checksums` entry for SHA1 on every
+   file. sbomb hashes with SHA-256 only, and only the files it read. A SHA-1 pass
+   belongs in hashing, below the writer layer, so it is the one change below
+   §36.1 a format will have needed — the section's rule has to be amended for it
+   or the requirement met another way.
+2. **Files that cannot be hashed.** A missing file and a patch file sbomb did not
+   read cannot carry a SHA-1. The description marks both; whether 2.3 omits
+   them and counts the omission, or refuses the document, is open.
+3. **`extractedText` of an undefined licence.** A `LicenseRef-sbomb-*` carries
+   the retained licence text where §22.9 kept one, and otherwise only the
+   observed name. Whether 2.3 accepts the name as `extractedText` or refuses
+   under `licenseTextInSBOM: off` is open. A text that was retained but is not
+   UTF-8 is a third case: the description names the file whose bytes it is,
+   and 2.3's `extractedText`, a string, cannot carry them unaltered either.
+
+A fourth is a mapping choice rather than a gap: 2.3 has one `licenseDeclared`
+field per package where 3.0.1 has one relationship per observed licence. Join
+the distinct expressions with `AND`, or state only the evidence of the
+conclusion — #3 decides. CVE exclusions have no VEX in 2.3 and remain
+properties there.
+
+## Q22 — Open choices of the SPDX 3.0.1 writer
+
+Decided provisionally for the first release of SPDX output; each is cheap to
+change and each changes the goldens.
+
+* **Package copyright.** `software_copyrightText` of a package carries the
+  curated notice (§22.10's conclusion) and, one per line after it, the
+  statements that name no file; a statement read from a file sits on that file
+  and not on the package. The open alternative is to join the file statements
+  onto the package as well: that would duplicate them, but a consumer reading
+  only packages would see them.
+* **`dataLicense`.** Not emitted. `CC0-1.0` there is a licence grant on the
+  user's SBOM, and sbomb is not the party who can make it.
+* **`foss-review.json` under `--format spdx-json`** stays CycloneDX (§32.6), so
+  its consumers see one shape. Rendering it in the SBOM's format is the
+  alternative.
+* **The CMake module and the GitHub Action** take the format as an input:
+  `FORMAT` (and its cache default `SBOMB_DEFAULT_FORMAT`) in the module, and
+  `format` and `spec-version` in the action. Each names the default output
+  after the format it resolves, so an SPDX document is never written under a
+  `.cdx.json` name. The alternative was `output.format` in the configuration
+  file alone.
+* **VEX.** CVE exclusions of a bundled SBOM are written as SPDX VEX
+  not-affected statements attributed to the supplier, beside the property. The
+  alternative is the property alone until a security-profile issue decides how
+  sbomb speaks about vulnerabilities at all.
+* **Known leaves** cost one relationship per element, which in practice is one
+  per file. Stating them only for packages would halve the relationships of a
+  large document and lose CycloneDX parity for files.
+* **Performance.** D54: the SPDX path exceeds the §31 budgets, mostly in schema
+  validation of the extension entries.
+
+## Q23 — `validate` still holds a CycloneDX document to how sbomb writes
+
+§36.1 says `Validate` judges a document against the specification it declares,
+and that what sbomb promises beyond conformance belongs in `CheckOutput`, which
+`validate` never runs. The SPDX writer is split that way. The CycloneDX writer
+is not: its one check still applies three of sbomb's own writing rules to every
+document.
+
+* `metadata` is required, and `metadata.tools` must be a non-empty array. The
+  1.6 schema requires neither, and prefers the object form
+  `{components, services}` for tools, which sbomb cannot decode at all.
+* Every component needs its own dependencies entry (§28.5). The schema does not
+  ask for one.
+* The `sbomb:` property namespace rules.
+
+So `validate` refuses conformant CycloneDX documents other tools commonly
+write. The fix is the SPDX split: keep the schema and the specification's own
+rules in `Validate`, move these three into a CycloneDX `CheckOutput`, and read
+the object form of `metadata.tools`. It is open because it changes what
+`validate` accepts for the default format, which deserves its own change and
+its own changelog entry rather than a line in the SPDX one.

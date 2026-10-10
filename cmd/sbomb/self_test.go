@@ -4,7 +4,11 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+
+	"github.com/example/sbomb/internal/domain"
+	"github.com/example/sbomb/internal/sbomwriter"
 )
 
 // The test binary is a Go executable this module produced, so "sbomb self"
@@ -100,5 +104,31 @@ func TestSelfWithoutABinaryPrintsUsage(t *testing.T) {
 	code, _, stderr := execute([]string{"self"})
 	if code != 1 || stderr == "" {
 		t.Fatalf("exit code = %d, stderr = %q", code, stderr)
+	}
+}
+
+// TestARenderFailureInSelfIsAnInternalInvariantViolation: a writer refusing a
+// document sbomb built is exit 70 in generate, and the same failure in self
+// must not become exit 4, which section 32.5 keeps for the validation of the
+// exact bytes. The SPDX writer refuses a document whose run states no time,
+// which generate and self can only reach through a defect.
+func TestARenderFailureInSelfIsAnInternalInvariantViolation(t *testing.T) {
+	writer, err := sbomwriter.Get("spdx-json", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	document := &sbomwriter.Document{
+		Product: domain.Component{ID: "product", Name: "self", Type: "application"},
+		Run:     sbomwriter.RunMetadata{ToolName: "sbomb", ToolVendor: "sbomb"},
+	}
+	_, err = renderSelfDocument(writer, document, sbomwriter.Options{SpecVersion: writer.DefaultVersion()}, "bin/app")
+	if err == nil {
+		t.Fatal("a document without a creation time was rendered as SPDX")
+	}
+	if code := exitCodeFor(err, 4); code != 70 {
+		t.Errorf("exit code = %d, want 70", code)
+	}
+	if !strings.HasPrefix(err.Error(), "INTERNAL_INVARIANT_VIOLATION: ") {
+		t.Errorf("message = %q, want the finding first", err.Error())
 	}
 }

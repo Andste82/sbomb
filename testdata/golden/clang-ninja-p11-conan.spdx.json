@@ -1,0 +1,751 @@
+{
+  "@context": "https://spdx.org/rdf/3.0.1/spdx-context.jsonld",
+  "@graph": [
+    {
+      "type": "CreationInfo",
+      "@id": "_:creationInfo1",
+      "specVersion": "3.0.1",
+      "created": "2023-11-14T22:13:20Z",
+      "createdBy": [
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#agent:sbomb"
+      ],
+      "createdUsing": [
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#tool:sbomb"
+      ]
+    },
+    {
+      "type": "SpdxDocument",
+      "spdxId": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#document",
+      "creationInfo": "_:creationInfo1",
+      "name": "conanapp",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:build:config",
+              "extension_cdxPropValue": "Debug"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:build:generator",
+              "extension_cdxPropValue": "Ninja"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:adapters",
+              "extension_cdxPropValue": "depfiles"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:adapters",
+              "extension_cdxPropValue": "linker-depfile"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:adapters",
+              "extension_cdxPropValue": "linker-map"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:adapters",
+              "extension_cdxPropValue": "resolver"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:reproducible",
+              "extension_cdxPropValue": "true"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:specVersion",
+              "extension_cdxPropValue": "3.0.1"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:toolVersion",
+              "extension_cdxPropValue": "0.0.0-test"
+            }
+          ]
+        }
+      ],
+      "element": [
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#sbom",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#agent:sbomb",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#tool:sbomb",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#component:project",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#component:tinycbor",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#product:conanapp",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#file:pkg:conan/tinycbor:include/tinycbor.h",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#file:pkg:conan/tinycbor:lib/libtinycbor.a",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#file:pkg:conan/tinycbor:lib/libtinycbor.a(tinycbor.c.o)",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#file:project:main.c",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#relationship:1",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#relationship:2",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#relationship:3",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#relationship:4",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#relationship:5",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#relationship:6",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#relationship:7",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#relationship:8",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#relationship:9"
+      ],
+      "profileConformance": [
+        "core",
+        "expandedLicensing",
+        "software"
+      ],
+      "rootElement": [
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#sbom"
+      ]
+    },
+    {
+      "type": "software_Sbom",
+      "spdxId": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#sbom",
+      "creationInfo": "_:creationInfo1",
+      "element": [
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#agent:sbomb",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#tool:sbomb",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#component:project",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#component:tinycbor",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#product:conanapp",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#file:pkg:conan/tinycbor:include/tinycbor.h",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#file:pkg:conan/tinycbor:lib/libtinycbor.a",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#file:pkg:conan/tinycbor:lib/libtinycbor.a(tinycbor.c.o)",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#file:project:main.c",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#relationship:1",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#relationship:2",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#relationship:3",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#relationship:4",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#relationship:5",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#relationship:6",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#relationship:7",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#relationship:8",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#relationship:9"
+      ],
+      "rootElement": [
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#product:conanapp"
+      ],
+      "software_sbomType": [
+        "build"
+      ]
+    },
+    {
+      "type": "Organization",
+      "spdxId": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#agent:sbomb",
+      "creationInfo": "_:creationInfo1",
+      "name": "sbomb"
+    },
+    {
+      "type": "Tool",
+      "spdxId": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#tool:sbomb",
+      "creationInfo": "_:creationInfo1",
+      "name": "sbomb",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:toolVersion",
+              "extension_cdxPropValue": "0.0.0-test"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#component:project",
+      "creationInfo": "_:creationInfo1",
+      "name": "project",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "unstructured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:detectedBy",
+              "extension_cdxPropValue": "anchor:project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "static-object"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:modified",
+              "extension_cdxPropValue": "unknown"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:root",
+              "extension_cdxPropValue": "project:"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "application"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "unknown"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:reason",
+              "extension_cdxPropValue": "no-evidence"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:review",
+              "extension_cdxPropValue": "true"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "application"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#component:tinycbor",
+      "creationInfo": "_:creationInfo1",
+      "name": "tinycbor",
+      "externalIdentifier": [
+        {
+          "type": "ExternalIdentifier",
+          "externalIdentifierType": "packageUrl",
+          "identifier": "pkg:conan/tinycbor@0.6.1"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:detectedBy",
+              "extension_cdxPropValue": "conan"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "static-archive-member"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:modified",
+              "extension_cdxPropValue": "unknown"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:root",
+              "extension_cdxPropValue": "pkg:conan/tinycbor:"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "third-party"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "library"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "unknown"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:reason",
+              "extension_cdxPropValue": "no-evidence"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:review",
+              "extension_cdxPropValue": "true"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:version:confidence",
+              "extension_cdxPropValue": "high"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:version:source",
+              "extension_cdxPropValue": "conan"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "library",
+      "software_packageUrl": "pkg:conan/tinycbor@0.6.1",
+      "software_packageVersion": "0.6.1"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#product:conanapp",
+      "creationInfo": "_:creationInfo1",
+      "name": "conanapp",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:artifact:role",
+              "extension_cdxPropValue": "application"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "unstructured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "application"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "application"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#file:pkg:conan/tinycbor:include/tinycbor.h",
+      "creationInfo": "_:creationInfo1",
+      "name": "pkg:conan/tinycbor:include/tinycbor.h",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "third-party"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:header:class",
+              "extension_cdxPropValue": "third-party-header"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "header"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "header-only"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:missing",
+              "extension_cdxPropValue": "true"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "pkg:conan/tinycbor:include/tinycbor.h"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#file:pkg:conan/tinycbor:lib/libtinycbor.a",
+      "creationInfo": "_:creationInfo1",
+      "name": "pkg:conan/tinycbor:lib/libtinycbor.a",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "unstructured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "third-party"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "static-archive-member"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:missing",
+              "extension_cdxPropValue": "true"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "pkg:conan/tinycbor:lib/libtinycbor.a"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "archive",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#file:pkg:conan/tinycbor:lib/libtinycbor.a(tinycbor.c.o)",
+      "creationInfo": "_:creationInfo1",
+      "name": "pkg:conan/tinycbor:lib/libtinycbor.a(tinycbor.c.o)",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "unstructured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "third-party"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "object"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "static-archive-member"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:missing",
+              "extension_cdxPropValue": "true"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "pkg:conan/tinycbor:lib/libtinycbor.a(tinycbor.c.o)"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "other",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#file:project:main.c",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:main.c",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "source"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "static-object"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:missing",
+              "extension_cdxPropValue": "true"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:main.c"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#relationship:1",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#component:project",
+      "relationshipType": "contains",
+      "to": [
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#file:project:main.c"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#relationship:2",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "unknown"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:reason",
+              "extension_cdxPropValue": "no-evidence"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#component:project",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "expandedlicensing_NoAssertionLicense"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#relationship:3",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#component:tinycbor",
+      "relationshipType": "contains",
+      "to": [
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#file:pkg:conan/tinycbor:include/tinycbor.h",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#file:pkg:conan/tinycbor:lib/libtinycbor.a",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#file:pkg:conan/tinycbor:lib/libtinycbor.a(tinycbor.c.o)"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#relationship:4",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "unknown"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:reason",
+              "extension_cdxPropValue": "no-evidence"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#component:tinycbor",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "expandedlicensing_NoAssertionLicense"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#relationship:5",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#file:pkg:conan/tinycbor:include/tinycbor.h",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#relationship:6",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#file:pkg:conan/tinycbor:lib/libtinycbor.a",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#relationship:7",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#file:pkg:conan/tinycbor:lib/libtinycbor.a(tinycbor.c.o)",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#relationship:8",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#file:project:main.c",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#relationship:9",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#product:conanapp",
+      "relationshipType": "hasStaticLink",
+      "to": [
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#component:project",
+        "urn:uuid:efe696e0-1b74-5099-821e-9c75cbb8b1d3#component:tinycbor"
+      ]
+    }
+  ]
+}

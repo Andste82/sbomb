@@ -1,0 +1,791 @@
+{
+  "@context": "https://spdx.org/rdf/3.0.1/spdx-context.jsonld",
+  "@graph": [
+    {
+      "type": "CreationInfo",
+      "@id": "_:creationInfo1",
+      "specVersion": "3.0.1",
+      "created": "2023-11-14T22:13:20Z",
+      "createdBy": [
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#agent:sbomb"
+      ],
+      "createdUsing": [
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#tool:sbomb"
+      ]
+    },
+    {
+      "type": "SpdxDocument",
+      "spdxId": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#document",
+      "creationInfo": "_:creationInfo1",
+      "name": "p12-assets",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:build:config",
+              "extension_cdxPropValue": "Debug"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:build:generator",
+              "extension_cdxPropValue": "Ninja"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:adapters",
+              "extension_cdxPropValue": "depfiles"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:adapters",
+              "extension_cdxPropValue": "linker-depfile"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:adapters",
+              "extension_cdxPropValue": "linker-map"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:adapters",
+              "extension_cdxPropValue": "manifest"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:adapters",
+              "extension_cdxPropValue": "resolver"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:reproducible",
+              "extension_cdxPropValue": "true"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:specVersion",
+              "extension_cdxPropValue": "3.0.1"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:toolVersion",
+              "extension_cdxPropValue": "0.0.0-test"
+            }
+          ]
+        }
+      ],
+      "element": [
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#sbom",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#agent:sbomb",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#tool:sbomb",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#artifact:build:filesystem.img",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#artifact:build:imgapp",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#component:p12-assets",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#product:p12-assets",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#file:build:generated/config.bin",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#file:project:assets/config.yaml",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#file:project:assets/index.html",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#file:project:main.c",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:1",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:2",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:3",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:4",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:5",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:6",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:7",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:8",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:9",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:10",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:11"
+      ],
+      "profileConformance": [
+        "core",
+        "expandedLicensing",
+        "software"
+      ],
+      "rootElement": [
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#sbom"
+      ]
+    },
+    {
+      "type": "software_Sbom",
+      "spdxId": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#sbom",
+      "creationInfo": "_:creationInfo1",
+      "element": [
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#agent:sbomb",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#tool:sbomb",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#artifact:build:filesystem.img",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#artifact:build:imgapp",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#component:p12-assets",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#product:p12-assets",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#file:build:generated/config.bin",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#file:project:assets/config.yaml",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#file:project:assets/index.html",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#file:project:main.c",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:1",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:2",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:3",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:4",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:5",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:6",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:7",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:8",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:9",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:10",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:11"
+      ],
+      "rootElement": [
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#product:p12-assets"
+      ],
+      "software_sbomType": [
+        "build"
+      ]
+    },
+    {
+      "type": "Organization",
+      "spdxId": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#agent:sbomb",
+      "creationInfo": "_:creationInfo1",
+      "name": "sbomb"
+    },
+    {
+      "type": "Tool",
+      "spdxId": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#tool:sbomb",
+      "creationInfo": "_:creationInfo1",
+      "name": "sbomb",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:run:toolVersion",
+              "extension_cdxPropValue": "0.0.0-test"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#artifact:build:filesystem.img",
+      "creationInfo": "_:creationInfo1",
+      "name": "filesystem.img",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "unstructured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "firmware"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "firmware"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#artifact:build:imgapp",
+      "creationInfo": "_:creationInfo1",
+      "name": "imgapp",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "unstructured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "application"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "application"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#component:p12-assets",
+      "creationInfo": "_:creationInfo1",
+      "name": "p12-assets",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "unstructured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:detectedBy",
+              "extension_cdxPropValue": "anchor:project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "build-tool"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "embedded-asset"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:linkageForm",
+              "extension_cdxPropValue": "static-object"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:modified",
+              "extension_cdxPropValue": "unknown"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:root",
+              "extension_cdxPropValue": "project:"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "application"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "unknown"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:reason",
+              "extension_cdxPropValue": "no-evidence"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:review",
+              "extension_cdxPropValue": "true"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "application"
+    },
+    {
+      "type": "software_Package",
+      "spdxId": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#product:p12-assets",
+      "creationInfo": "_:creationInfo1",
+      "name": "p12-assets",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:artifact:role",
+              "extension_cdxPropValue": "application"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "unstructured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:type",
+              "extension_cdxPropValue": "application"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "application"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#file:build:generated/config.bin",
+      "creationInfo": "_:creationInfo1",
+      "name": "build:generated/config.bin",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "e62fae3a7d249e6d1147cc9370b8d483d4b059fab253cd9ad0ddd0bb1c177f35"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "build"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:artifacts",
+              "extension_cdxPropValue": "artifact:build:filesystem.img"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "asset"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "embedded-asset"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:size",
+              "extension_cdxPropValue": "25"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "build:generated/config.bin"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "data",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#file:project:assets/config.yaml",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:assets/config.yaml",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "e62fae3a7d249e6d1147cc9370b8d483d4b059fab253cd9ad0ddd0bb1c177f35"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:artifacts",
+              "extension_cdxPropValue": "artifact:build:filesystem.img"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "asset"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "build-time-only"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "build-tool"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:size",
+              "extension_cdxPropValue": "25"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:assets/config.yaml"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "data",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#file:project:assets/index.html",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:assets/index.html",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "4e0ff301df5a6a8cf0df8c46037b23df843e6677e2acc691ed9e9f6456b5addf"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:artifacts",
+              "extension_cdxPropValue": "artifact:build:filesystem.img"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "asset"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "embedded-asset"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:size",
+              "extension_cdxPropValue": "39"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:assets/index.html"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "data",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "software_File",
+      "spdxId": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#file:project:main.c",
+      "creationInfo": "_:creationInfo1",
+      "name": "project:main.c",
+      "verifiedUsing": [
+        {
+          "type": "Hash",
+          "algorithm": "sha256",
+          "hashValue": "2ad75d95660563887d8d3f1d0ae1dcf18c2379cbd83a5c72f5ab276351ee6949"
+        }
+      ],
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
+              "extension_cdxPropValue": "no-archive"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:executableProperty",
+              "extension_cdxPropValue": "non-executable"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
+              "extension_cdxPropValue": "structured"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:component:scope",
+              "extension_cdxPropValue": "project"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:evidence:artifacts",
+              "extension_cdxPropValue": "artifact:build:imgapp"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:class",
+              "extension_cdxPropValue": "source"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:distributionRole",
+              "extension_cdxPropValue": "distributed"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:linkageForm",
+              "extension_cdxPropValue": "static-object"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:file:size",
+              "extension_cdxPropValue": "29"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:path:canonical",
+              "extension_cdxPropValue": "project:main.c"
+            }
+          ]
+        }
+      ],
+      "software_primaryPurpose": "source",
+      "software_fileKind": "file"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:1",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#artifact:build:filesystem.img",
+      "relationshipType": "contains",
+      "to": [
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#component:p12-assets"
+      ]
+    },
+    {
+      "type": "LifecycleScopedRelationship",
+      "spdxId": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:2",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#artifact:build:filesystem.img",
+      "relationshipType": "usesTool",
+      "to": [
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#component:p12-assets"
+      ],
+      "scope": "build"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:3",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#artifact:build:imgapp",
+      "relationshipType": "hasStaticLink",
+      "to": [
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#component:p12-assets"
+      ]
+    },
+    {
+      "type": "LifecycleScopedRelationship",
+      "spdxId": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:4",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#artifact:build:imgapp",
+      "relationshipType": "usesTool",
+      "to": [
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#component:p12-assets"
+      ],
+      "scope": "build"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:5",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#component:p12-assets",
+      "relationshipType": "contains",
+      "to": [
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#file:build:generated/config.bin",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#file:project:assets/config.yaml",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#file:project:assets/index.html",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#file:project:main.c"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:6",
+      "creationInfo": "_:creationInfo1",
+      "extension": [
+        {
+          "type": "extension_CdxPropertiesExtension",
+          "extension_cdxProperty": [
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:evidenceClass",
+              "extension_cdxPropValue": "unknown"
+            },
+            {
+              "type": "extension_CdxPropertyEntry",
+              "extension_cdxPropName": "sbomb:license:reason",
+              "extension_cdxPropValue": "no-evidence"
+            }
+          ]
+        }
+      ],
+      "from": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#component:p12-assets",
+      "relationshipType": "hasConcludedLicense",
+      "to": [
+        "expandedlicensing_NoAssertionLicense"
+      ]
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:7",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#file:build:generated/config.bin",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:8",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#file:project:assets/config.yaml",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:9",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#file:project:assets/index.html",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:10",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#file:project:main.c",
+      "relationshipType": "dependsOn",
+      "to": [
+        "NoneElement"
+      ],
+      "completeness": "complete"
+    },
+    {
+      "type": "Relationship",
+      "spdxId": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#relationship:11",
+      "creationInfo": "_:creationInfo1",
+      "from": "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#product:p12-assets",
+      "relationshipType": "contains",
+      "to": [
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#artifact:build:filesystem.img",
+        "urn:uuid:dc51359c-1dd9-57c7-8e8f-ba72c2b192a0#artifact:build:imgapp"
+      ]
+    }
+  ]
+}

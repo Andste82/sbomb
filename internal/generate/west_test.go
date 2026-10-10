@@ -67,7 +67,7 @@ func TestAWestProjectReachesTheDocument(t *testing.T) {
 
 	// The version evidence must render as a manifest read out of a file, not as
 	// the "other" every unmapped source falls to.
-	for _, entry := range result.BOM.Components {
+	for _, entry := range renderedBOM(t, result).Components {
 		if entry.PURL != want {
 			continue
 		}
@@ -209,7 +209,7 @@ func TestACommitPinnedWestProjectPublishesNoVersion(t *testing.T) {
 	// the spec version puts it -- on the component at 1.6, on the reference it
 	// qualifies at 1.7.
 	var stated bool
-	for _, entry := range result.BOM.Components {
+	for _, entry := range renderedBOM(t, result).Components {
 		if entry.PURL != want {
 			continue
 		}

@@ -103,7 +103,7 @@ func TestTheSchemaRefusesWhatTheLoaderRefuses(t *testing.T) {
 		{"a removed key", `{"project":{"name":"a"},"generators":[{"output":"x"}]}`},
 		{"an unknown mode", `{"project":{"name":"a"},"mode":"cluster"}`},
 		{"an unknown artifact role", `{"project":{"name":"a"},"artifacts":[{"path":"p","role":"widget"}]}`},
-		{"an unknown output format", `{"project":{"name":"a"},"output":{"format":"spdx-json"}}`},
+		{"an unknown output format", `{"project":{"name":"a"},"output":{"format":"spdx-tag-value"}}`},
 		{"no project at all", `{"build":{"dir":"b"}}`},
 	} {
 		if err := checkAgainstSchema(t, schema, bad.body); err == nil {

@@ -1,0 +1,10 @@
+name: mit-lib
+version: '1.4.0'
+description: A small MIT-licensed helper library the fixture links statically.
+cpe: cpe:2.3:a:example:mit-lib:{}:*:*:*:*:*:*:*
+supplier: 'Organization: Example Supplier Ltd'
+originator: 'Organization: Example Upstream Project'
+cve-exclude-list:
+  - cve: CVE-2024-0001
+    reason: the parser this affects is not built
+  - cve: CVE-2024-0002

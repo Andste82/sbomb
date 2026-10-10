@@ -2,18 +2,17 @@ package cyclonedx
 
 import (
 	"bytes"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/example/sbomb/internal/buildinfo"
+	"github.com/example/sbomb/internal/sbommap"
+	"github.com/example/sbomb/internal/sbomwriter"
 	"github.com/google/uuid"
 )
 
@@ -377,8 +376,10 @@ func reproducibleSerialNumber(specVersion string) string {
 // the same evidence written at 1.6 and at 1.7 yields two serial numbers --
 // which is right: they are two documents, and a consumer that has both must be
 // able to tell them apart.
+//
+// The UUID itself is the derivation every format shares
+// (sbommap.DocumentUUID); what is CycloneDX here is only which bytes go in.
 func ReproducibleSerialNumber(bom BOM) string {
-	const namespace = "6ba7b811-9dad-11d1-80b4-00c04fd430c8"
 	bom.SerialNumber = ""
 	if bom.Metadata != nil {
 		metadata := *bom.Metadata
@@ -387,62 +388,20 @@ func ReproducibleSerialNumber(bom BOM) string {
 	}
 	canonicalizeBOM(&bom)
 	body, _ := json.Marshal(bom)
-	hash := sha256.Sum256(body)
-	name := "sbomb:" + hex.EncodeToString(hash[:])
-	ns, err := uuid.Parse(namespace)
-	if err != nil {
-		return ""
-	}
-	return "urn:uuid:" + uuid.NewSHA1(ns, []byte(name)).String()
+	return "urn:uuid:" + sbommap.DocumentUUID(body)
 }
 
+// timestamp is SOURCE_DATE_EPOCH when it is set and readable, and the clock
+// otherwise: the empty document has no run to take a time from.
 func timestamp() string {
-	if value := os.Getenv("SOURCE_DATE_EPOCH"); value != "" {
-		if seconds, err := strconv.ParseInt(value, 10, 64); err == nil {
-			return time.Unix(seconds, 0).UTC().Format(time.RFC3339)
-		}
+	if pinned, err := sbomwriter.SourceDateEpoch(); err == nil && pinned != "" {
+		return pinned
 	}
 	return time.Now().UTC().Format(time.RFC3339)
 }
 
 func WriteEmpty(path, specVersion string, reproducible bool) error {
 	out, err := MarshalEmpty(specVersion, reproducible)
-	if err != nil {
-		return err
-	}
-	// Validation runs on the exact bytes that will be written, before the
-	// temporary file is renamed into place (section 32.5).
-	if err := Validate([]byte(out)); err != nil {
-		return err
-	}
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
-		return err
-	}
-	tmp, err := os.CreateTemp(filepath.Dir(path), ".sbomb-*.tmp")
-	if err != nil {
-		return err
-	}
-	name := tmp.Name()
-	if _, err := tmp.WriteString(out); err != nil {
-		tmp.Close()
-		os.Remove(name)
-		return err
-	}
-	if err := tmp.Close(); err != nil {
-		os.Remove(name)
-		return err
-	}
-	if err := os.Rename(name, path); err != nil {
-		os.Remove(name)
-		return err
-	}
-	return nil
-}
-
-// WriteBOM serializes and validates a populated document using the same atomic
-// write path as the empty-document compatibility helper.
-func WriteBOM(path string, bom BOM) error {
-	out, err := MarshalBOM(bom)
 	if err != nil {
 		return err
 	}
@@ -710,31 +669,9 @@ func validateProperties(bom BOM) error {
 	return nil
 }
 
-func validatePropertyName(name string) error {
-	if name == "" {
-		return fmt.Errorf("empty property name")
-	}
-	if !strings.HasPrefix(name, "sbomb:") {
-		return fmt.Errorf("property name %q must start with sbomb:", name)
-	}
-	allowed := map[string]struct{}{
-		"sbomb:cdx:archiveProperty":    {},
-		"sbomb:cdx:executableProperty": {},
-		"sbomb:cdx:structuredProperty": {},
-		"sbomb:evidence:artifacts":     {},
-		"sbomb:license:reason":         {},
-		"sbomb:license:review":         {},
-		"sbomb:run:timestamp":          {},
-		"sbomb:run:sourceDateEpoch":    {},
-	}
-	if _, ok := allowed[name]; ok {
-		return nil
-	}
-	if strings.Contains(name, ":") {
-		return nil
-	}
-	return fmt.Errorf("property name %q is not in the sbomb namespace", name)
-}
+// validatePropertyName is the namespace rule every writer holds its
+// properties to (sbommap.ValidatePropertyName).
+func validatePropertyName(name string) error { return sbommap.ValidatePropertyName(name) }
 
 func isRFC3339Timestamp(v string) bool {
 	if v == "" {

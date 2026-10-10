@@ -52,8 +52,23 @@
   registered writer. Nothing below that package knows about `bom-ref` strings
   or CycloneDX property names. The writer states its `DefaultVersion()` and
   recognises its own documents, which is what `validate` detects a format with.
-- `sbomb validate` and `sbomb evidence` exist, and `sbomb schema --cyclonedx`
-  prints the embedded schema.
+  `generate`, `self` and `foss` render only through the `Writer` interface; the
+  format is resolved and preflighted once, before discovery. Local identities,
+  the property set and the licence acknowledgement are derived once in
+  `internal/sbommap` for every writer.
+- Section 28.11: SPDX 3.0.1 is the second registered writer, `spdx-json`
+  (`--format`, `output.format`). A version-neutral SPDX mapping
+  (`internal/spdx/mapping`) feeds a 3.0.1 renderer (`internal/spdx/spdx3`), so
+  SPDX 2.3 (issue #3) is a second renderer. Every document passes the embedded
+  upstream schema and the tier a and tier b checks of section 28.11.9 before it
+  is written. Fourteen fixture goldens plus a synthetic all-fields golden, a
+  per-element cross-check against the CycloneDX document of the same run, and
+  a value-level coverage test of every `Document` field. CI holds the goldens
+  to check-jsonschema and pyshacl (job `spdx-conformance`). Deviations D48-D55;
+  the performance budget is not met yet (D54).
+- `sbomb validate` and `sbomb evidence` exist, and `sbomb schema --format <id>`
+  (alias `--cyclonedx`) prints the embedded schema. `validate` reads CycloneDX
+  and SPDX 3.0.1 and refuses SPDX 2.3 by name.
 - Sections 19, 20 and 22: files are mapped to components by the priority chain
   of section 19.2 (curated configuration, package-manager metadata, a
   configured CMake target, the nearest ancestor carrying a package manifest or
@@ -321,6 +336,10 @@
   in question. Fixing it costs what that decision refused to spend -- a change
   to the dump format, a second discovery, or one subcommand reading two files
   -- so it is recorded as open question Q19 rather than guessed at.
+- **SPDX output is over the performance budget** of section 31 (D54), mostly
+  in schema validation of the extension entries. CI measures it without
+  blocking.
+- **SPDX 2.3 is not written yet** (issue #3, open question Q21).
 - **Five specified flags are absent**, each waiting on the feature it belongs
   to rather than on effort: `--license-scan`, `--output-dir`,
   `--adapter`, `--allow-cmake-regenerate`, `--include-runtime-libraries`.

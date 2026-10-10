@@ -15,11 +15,6 @@ import (
 	"github.com/example/sbomb/internal/sbomwriter"
 )
 
-// The writer registry has to have the CycloneDX writer in it for
-// foss-review.json, and importing the package is what registers it. The blank
-// use keeps the import honest.
-var _ = cyclonedx.Writer{}
-
 func digestOf(text string) string {
 	sum := sha256.Sum256([]byte(text))
 	return hex.EncodeToString(sum[:])

@@ -68,7 +68,7 @@ func TestAManagedESPIDFComponentReachesTheDocument(t *testing.T) {
 
 	// The version evidence must render as a manifest read out of a file, not as
 	// the "other" every unmapped source falls to.
-	for _, entry := range result.BOM.Components {
+	for _, entry := range renderedBOM(t, result).Components {
 		if entry.PURL != "pkg:idf/espressif/led_strip@2.5.3" {
 			continue
 		}

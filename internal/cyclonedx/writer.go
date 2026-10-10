@@ -2,9 +2,7 @@ package cyclonedx
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"encoding/base64"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -13,8 +11,9 @@ import (
 
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/license"
-	"github.com/example/sbomb/internal/pathmodel"
+	"github.com/example/sbomb/internal/sbommap"
 	"github.com/example/sbomb/internal/sbomwriter"
+	"github.com/google/uuid"
 )
 
 // Writer serializes a document as CycloneDX JSON, in either of the
@@ -86,10 +85,22 @@ func SupportsVersion(version string) bool {
 	return err == nil && version != ""
 }
 
+// Write renders the document, identity included. The serial number is part of
+// the rendering rather than something a caller adds afterwards: under
+// reproducible it is derived from the canonical BOM (section 29), otherwise it
+// is random, and either way every caller that writes CycloneDX gets the same
+// rule. Only OmitIdentity, which the FOSS review rendering sets, leaves it out.
 func (w Writer) Write(out io.Writer, document *sbomwriter.Document, options sbomwriter.Options) error {
 	bom, err := w.Build(document, options)
 	if err != nil {
 		return err
+	}
+	if !options.OmitIdentity {
+		if options.Reproducible {
+			bom.SerialNumber = ReproducibleSerialNumber(bom)
+		} else {
+			bom.SerialNumber = "urn:uuid:" + uuid.NewString()
+		}
 	}
 	serialized, err := MarshalBOM(bom)
 	if err != nil {
@@ -105,13 +116,6 @@ func (Writer) Validate(r io.Reader) error {
 		return err
 	}
 	return Validate(data)
-}
-
-// shortDigest is the twelve-character content digest section 28.4 uses to
-// disambiguate two components that share a name and have no version.
-func shortDigest(value string) string {
-	sum := sha256.Sum256([]byte(value))
-	return hex.EncodeToString(sum[:])[:12]
 }
 
 // Validate runs both layers section 32.5 requires: the official JSON Schema,
@@ -130,28 +134,27 @@ func (Writer) Build(document *sbomwriter.Document, options sbomwriter.Options) (
 	if err != nil {
 		return BOM{}, err
 	}
-	refs := newRefTable()
-
-	product := componentToCyclone(document.Product, refs.forProduct(document.Product), specVersion, options)
-	if product.Type == "" {
-		product.Type = "application"
+	// Every identity comes from the shared table, built once in the order
+	// section 28.4 prescribes, so that the SPDX document of the same run names
+	// each component exactly as this one does.
+	refs, err := sbommap.Identifiers(document)
+	if err != nil {
+		// Section 28.4 makes collisions impossible by construction, but an
+		// implementation must still assert it rather than emit a broken graph.
+		return BOM{}, err
 	}
+
+	product := componentToCyclone(document.Product, refs.Product(), specVersion, options)
 
 	components := make([]Component, 0, len(document.Artifacts)+len(document.Components)+len(document.Files))
 	for _, artifact := range document.Artifacts {
-		components = append(components, componentToCyclone(artifact, refs.forArtifact(artifact), specVersion, options))
+		components = append(components, componentToCyclone(artifact, refs.Component(artifact.ID), specVersion, options))
 	}
 	for _, grouping := range document.Components {
-		components = append(components, componentToCyclone(grouping, refs.forComponent(grouping), specVersion, options))
+		components = append(components, componentToCyclone(grouping, refs.Component(grouping.ID), specVersion, options))
 	}
 	for _, file := range document.Files {
-		components = append(components, fileToCyclone(file, refs.forFile(file)))
-	}
-
-	if duplicate := firstDuplicateRef(components, product.BomRef); duplicate != "" {
-		// Section 28.4 makes collisions impossible by construction, but an
-		// implementation must still assert it rather than emit a broken graph.
-		return BOM{}, fmt.Errorf("bom-ref collision on %q", duplicate)
+		components = append(components, fileToCyclone(file, refs.File(file.ID.Canonical())))
 	}
 
 	dependencies := buildDependencies(document, refs, product.BomRef, components)
@@ -163,7 +166,7 @@ func (Writer) Build(document *sbomwriter.Document, options sbomwriter.Options) (
 			Version: document.Run.ToolVersion,
 		}},
 		Component:  &product,
-		Properties: runProperties(document.Run, specVersion),
+		Properties: toCycloneProperties(sbommap.RunProperties(document.Run, specVersion)),
 	}
 	if !options.Reproducible {
 		metadata.Timestamp = document.Run.Timestamp
@@ -189,83 +192,21 @@ func (Writer) Build(document *sbomwriter.Document, options sbomwriter.Options) (
 	return bom, nil
 }
 
-// refTable derives and remembers the bom-ref of every identity, per the scheme
-// of section 28.4.
-type refTable struct {
-	byComponentID map[string]string
-	byFileID      map[string]string
-	nameCounts    map[string]int
-}
-
-func newRefTable() *refTable {
-	return &refTable{
-		byComponentID: map[string]string{},
-		byFileID:      map[string]string{},
-		nameCounts:    map[string]int{},
-	}
-}
-
-func (t *refTable) forProduct(product domain.Component) string {
-	ref := "product:" + pathmodel.Slug(product.Name, 64)
-	t.byComponentID[product.ID] = ref
-	return ref
-}
-
-func (t *refTable) forArtifact(artifact domain.Component) string {
-	ref := "artifact:" + artifact.ID
-	t.byComponentID[artifact.ID] = ref
-	return ref
-}
-
-func (t *refTable) forComponent(component domain.Component) string {
-	ref := "component:" + pathmodel.Slug(component.Name, 64)
-	// Disambiguate by version, then by a digest of the component root, exactly
-	// as section 28.4 prescribes.
-	if t.nameCounts[ref] > 0 {
-		if component.Version != "" {
-			ref += "@" + pathmodel.Slug(component.Version, 32)
-		} else if component.Root != nil {
-			ref += "#" + shortDigest(component.Root.Canonical())
-		} else {
-			ref += "#" + shortDigest(component.ID)
-		}
-	}
-	t.nameCounts["component:"+pathmodel.Slug(component.Name, 64)]++
-	t.byComponentID[component.ID] = ref
-	return ref
-}
-
-func (t *refTable) forFile(file domain.UsedFile) string {
-	canonical := file.ID.Canonical()
-	ref := "file:" + canonical
-	t.byFileID[canonical] = ref
-	return ref
-}
-
-// resolve maps a component or file identity onto its bom-ref.
-func (t *refTable) resolve(id string) (string, bool) {
-	if ref, ok := t.byComponentID[id]; ok {
-		return ref, true
-	}
-	ref, ok := t.byFileID[id]
-	return ref, ok
-}
-
 // buildDependencies renders the cascade of section 28.5. Every bom-ref in the
 // document appears exactly once as a dependency entry, even when it depends on
 // nothing, so that a consumer can close the graph.
-func buildDependencies(document *sbomwriter.Document, refs *refTable, productRef string, components []Component) []Dependency {
+func buildDependencies(document *sbomwriter.Document, refs *sbommap.Table, productRef string, components []Component) []Dependency {
 	dependsOn := map[string][]string{productRef: nil}
 	for _, component := range components {
 		dependsOn[component.BomRef] = nil
 	}
 	for _, relation := range document.Relations {
-		from, known := refs.resolve(relation.From)
+		from, known := refs.Resolve(relation.From)
 		if !known {
 			continue
 		}
 		for _, target := range relation.To {
-			to, resolved := refs.resolve(target)
+			to, resolved := refs.Resolve(target)
 			if !resolved {
 				continue
 			}
@@ -284,16 +225,15 @@ func buildDependencies(document *sbomwriter.Document, refs *refTable, productRef
 
 func componentToCyclone(component domain.Component, ref, specVersion string, options sbomwriter.Options) Component {
 	out := Component{
-		Type:        component.Type,
+		// The type every writer states, an unset one included
+		// (sbommap.EffectiveType), so that both documents of a run agree.
+		Type:        sbommap.EffectiveType(component),
 		Name:        component.Name,
 		Version:     component.Version,
 		BomRef:      ref,
 		PURL:        component.PURL,
 		CPE:         component.CPE,
 		Description: component.Description,
-	}
-	if out.Type == "" {
-		out.Type = "library"
 	}
 	if component.Supplier != "" {
 		out.Supplier = &OrganizationalEntity{Name: component.Supplier}
@@ -329,23 +269,9 @@ func componentToCyclone(component domain.Component, ref, specVersion string, opt
 	out.Scope = scopeForRole(component.DistributionRole)
 	out.Pedigree = pedigreeToCyclone(component.Modification)
 	out.ExternalReferences, out.Properties = vcsToCyclone(component.VCS, specVersion)
-	if component.Originator != "" {
-		out.Properties = append(out.Properties, Property{Name: "sbomb:component:originator", Value: component.Originator})
-	}
-	for _, exclusion := range component.CVEExclusions {
-		// A reason is optional in the manifest, and "CVE-0000-0: " with
-		// nothing after the separator states a reason that was never given.
-		value := exclusion.CVE
-		if exclusion.Reason != "" {
-			value += ": " + exclusion.Reason
-		}
-		out.Properties = append(out.Properties, Property{Name: "sbomb:component:cveExclusion", Value: value})
-	}
-	out.Properties = append(out.Properties, propertiesFromMap(component.Properties)...)
-	if component.Scope != "" {
-		out.Properties = append(out.Properties, Property{Name: "sbomb:component:scope", Value: component.Scope})
-	}
-	out.Properties = append(out.Properties, bsiProperties(domain.FileClassUnknown, out.Type)...)
+	// The rest of the property set is the one every format carries for this
+	// component (appendix B), derived once in sbommap.
+	out.Properties = append(out.Properties, toCycloneProperties(sbommap.ComponentProperties(component))...)
 	return out
 }
 
@@ -438,73 +364,29 @@ func patchLabel(patch domain.Patch) string {
 func fileToCyclone(file domain.UsedFile, ref string) Component {
 	canonical := file.ID.Canonical()
 	out := Component{
-		Type:   "file",
-		Name:   baseName(canonical),
-		BomRef: ref,
-		Properties: []Property{
-			{Name: "sbomb:path:canonical", Value: canonical},
-		},
+		Type:       "file",
+		Name:       baseName(canonical),
+		BomRef:     ref,
+		Properties: toCycloneProperties(sbommap.FileProperties(file)),
 	}
 	for _, algorithm := range sortedMapKeys(file.Hashes) {
 		out.Hashes = append(out.Hashes, Hash{Alg: algorithm, Value: file.Hashes[algorithm]})
 	}
-	out.Properties = append(out.Properties, propertiesFromMap(file.Properties)...)
-	out.Properties = append(out.Properties, bsiProperties(file.Class, "file")...)
 	return out
 }
 
-// bsiProperties emits the three properties BSI TR-03183-2 requires per
-// component, derived from the file class (section 1.5(3)).
-func bsiProperties(class domain.FileClass, componentType string) []Property {
-	executable := "non-executable"
-	archive := "no-archive"
-	structured := "unstructured"
-
-	switch class {
-	case domain.FileClassSource, domain.FileClassHeader,
-		domain.FileClassGeneratedSource, domain.FileClassGeneratedHeader:
-		structured = "structured"
-	case domain.FileClassArchive:
-		archive = "archive"
-	case domain.FileClassSharedLibrary:
-		executable = "executable"
-	case domain.FileClassObject:
-		// An object is a linkable container, neither executable nor an archive.
-	default:
-		switch componentType {
-		case "application", "firmware", "device":
-			executable = "executable"
-		default:
-			structured = "structured"
-		}
+// toCycloneProperties spells the shared property set as CycloneDX
+// properties. The order does not matter here: MarshalBOM sorts every property
+// bag (section 29).
+func toCycloneProperties(properties []sbommap.Property) []Property {
+	if len(properties) == 0 {
+		return nil
 	}
-
-	return []Property{
-		{Name: "sbomb:cdx:archiveProperty", Value: archive},
-		{Name: "sbomb:cdx:executableProperty", Value: executable},
-		{Name: "sbomb:cdx:structuredProperty", Value: structured},
+	out := make([]Property, 0, len(properties))
+	for _, property := range properties {
+		out = append(out, Property{Name: property.Name, Value: property.Value})
 	}
-}
-
-func runProperties(run sbomwriter.RunMetadata, specVersion string) []Property {
-	properties := []Property{
-		{Name: "sbomb:run:specVersion", Value: specVersion},
-		{Name: "sbomb:run:toolVersion", Value: run.ToolVersion},
-	}
-	if run.PolicyProfile != "" {
-		properties = append(properties, Property{Name: "sbomb:run:policyProfile", Value: run.PolicyProfile})
-	}
-	if run.BuildConfig != "" {
-		properties = append(properties, Property{Name: "sbomb:build:config", Value: run.BuildConfig})
-	}
-	if run.Generator != "" {
-		properties = append(properties, Property{Name: "sbomb:build:generator", Value: run.Generator})
-	}
-	if !run.Reproducible {
-		return properties
-	}
-	// Volatile run properties are omitted in reproducible mode (section 29).
-	return properties
+	return out
 }
 
 // observedLicensesToCyclone renders licence evidence.
@@ -572,18 +454,29 @@ func observedCopyrightToCyclone(statements []domain.CopyrightStatement) []Copyri
 // it.
 //
 // acknowledgementFor says whether the identifier beside these bytes is the
-// component's own statement or somebody's conclusion, which is the distinction
-// CycloneDX draws and the one a consumer filters on.
+// component's own statement ("declared") or somebody's conclusion
+// ("concluded"), which is the distinction CycloneDX draws and the one a
+// consumer filters on.
 //
 // Only technique 1 of section 22.3 is a declaration: the component wrote
 // `SPDX-License-Identifier` into its own file. A digest, a template or a
 // normalized-text match is analysis -- sbomb compared the bytes against a
 // catalogue and concluded -- and publishing that as `declared` tells a reader
-// the authors said something they did not.
+// the authors said something they did not. A curated licence makes every
+// licence file beside it a conclusion too (sbommap.CuratedLicense).
 //
-// Where nothing was recognized the field is left off altogether. The entry
+// Where nothing was recognized the answer is the empty string. The entry
 // carries NOASSERTION, and calling a non-statement "declared" states something
 // about it.
+//
+// This is CycloneDX's vocabulary, not a rule the SPDX writer shares. SPDX 3.0.1
+// draws its line elsewhere: hasDeclaredLicense is that an artifact was found
+// to contain a licence, "for example as detected by use of automated
+// tooling", so there every detection is declared and only a curated licence
+// concluded (the SPDX mapping's fileAcknowledgement). The two documents share
+// the inputs -- the technique and whether the licence is curated -- and word
+// the result differently: a licence found by digest is concluded here and
+// declared in SPDX. A change to this rule does not reach the SPDX document.
 func acknowledgementFor(artifact domain.LicenseArtifact, curated bool) string {
 	if artifact.DetectedID == "" {
 		return ""
@@ -603,17 +496,9 @@ func withRetainedText(observed []License, component domain.Component, options sb
 	}
 	// CycloneDX draws one line here: `declared` is what the authors of the
 	// component state, `concluded` is what somebody worked out. Both halves of
-	// that were wrong before.
-	//
-	// A curated value is a conclusion whatever else happened. Testing the
-	// source for "curated" missed the case that matters most -- section 22.5's
-	// conflict, where a reviewer overrode what the file said, and
-	// ResolveConflict carries the *file's* name as the source -- so the
-	// override was published as the component's own declaration. The reason
-	// code is what survives both paths.
-	curated := len(component.Licenses) > 0 &&
-		(component.Licenses[0].Source == "curated" ||
-			component.Licenses[0].Reason == license.ReasonConflictingEvidence)
+	// that were wrong before; sbommap.CuratedLicense says why a curated value
+	// and a resolved conflict are both conclusions.
+	curated := sbommap.CuratedLicense(component)
 	for _, artifact := range component.LicenseArtifacts {
 		if artifact.Kind != domain.LicenseArtifactLicense {
 			continue
@@ -778,13 +663,9 @@ func vcsToCyclone(record *domain.VCSRecord, specVersion string) ([]ExternalRefer
 	if record == nil {
 		return nil, nil
 	}
-	qualifiers := make([]Property, 0, 2)
-	if record.Commit != "" {
-		qualifiers = append(qualifiers, Property{Name: "sbomb:component:vcsCommit", Value: record.Commit})
-	}
-	if record.Dirty {
-		qualifiers = append(qualifiers, Property{Name: "sbomb:component:vcsDirty", Value: "true"})
-	}
+	// What the qualifiers are is shared with the SPDX writer
+	// (sbommap.VCSProperties); only where they sit is decided here.
+	qualifiers := toCycloneProperties(sbommap.VCSProperties(record))
 	if record.URL == "" {
 		// Nothing to hang a reference on; the qualifiers are all there is.
 		return nil, qualifiers
@@ -817,12 +698,6 @@ func mixedLicenseChoiceAllowed(specVersion string) bool { return specVersion != 
 // supportsDistributionConstraints reports whether metadata may carry a TLP
 // classification. 1.7 introduced it.
 func supportsDistributionConstraints(specVersion string) bool { return specVersion != Version16 }
-
-// SupportsDistributionConstraints is the exported form, for the command line
-// to refuse a configured TLP before any work is done rather than at the write.
-func SupportsDistributionConstraints(specVersion string) bool {
-	return supportsDistributionConstraints(specVersion)
-}
 
 // isCompoundExpression reports whether an SPDX expression states a relation
 // between licences rather than naming one. "MIT" is not compound and is better
@@ -865,34 +740,6 @@ func licensesToCyclone(findings []domain.LicenseFinding) []License {
 	return licenses
 }
 
-// propertiesFromMap emits only catalogued properties. Discovery annotates
-// files with internal markers in the same map; the property catalogue of
-// appendix B governs what reaches a consumer, so anything outside the sbomb
-// namespace stays inside the tool.
-func propertiesFromMap(values map[string][]string) []Property {
-	properties := make([]Property, 0, len(values))
-	for _, name := range sortedSliceMapKeys(values) {
-		if !strings.HasPrefix(name, "sbomb:") {
-			continue
-		}
-		for _, value := range values[name] {
-			properties = append(properties, Property{Name: name, Value: value})
-		}
-	}
-	return properties
-}
-
-func firstDuplicateRef(components []Component, extra string) string {
-	seen := map[string]bool{extra: true}
-	for _, component := range components {
-		if seen[component.BomRef] {
-			return component.BomRef
-		}
-		seen[component.BomRef] = true
-	}
-	return ""
-}
-
 func baseName(canonical string) string {
 	if index := strings.LastIndexByte(canonical, '/'); index >= 0 {
 		return canonical[index+1:]
@@ -920,15 +767,6 @@ func dedupeStrings(values []string) []string {
 }
 
 func sortedMapKeys(m map[string]string) []string {
-	keys := make([]string, 0, len(m))
-	for key := range m {
-		keys = append(keys, key)
-	}
-	sort.Strings(keys)
-	return keys
-}
-
-func sortedSliceMapKeys(m map[string][]string) []string {
 	keys := make([]string, 0, len(m))
 	for key := range m {
 		keys = append(keys, key)

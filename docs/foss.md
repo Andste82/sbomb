@@ -124,7 +124,10 @@ into `evidence.json`, which is a format change to a file other tools read.
 ## The licence text in the document itself
 
 `policy.licenseTextInSBOM` decides whether the retained texts are written into
-the CycloneDX document, as `evidence.licenses[].license.text`:
+the SBOM — in a CycloneDX document as `evidence.licenses[].license.text`, in an
+SPDX document as a `license` external reference of the licence file, carrying
+its bytes as a `data:` URI (SPDX reserves attribution text for
+acknowledgements, not complete licence texts):
 
 ```json
 {

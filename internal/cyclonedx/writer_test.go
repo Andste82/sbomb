@@ -245,7 +245,7 @@ func TestWriterIsRegisteredUnderItsFormatIdentifier(t *testing.T) {
 	if _, err := sbomwriter.Get("cyclonedx-json", "1.5"); err == nil {
 		t.Error("an unsupported specification version should be rejected")
 	}
-	if _, err := sbomwriter.Get("spdx-json", ""); err == nil {
+	if _, err := sbomwriter.Get("never-registered-json", ""); err == nil {
 		t.Error("an unregistered format should be rejected")
 	}
 }

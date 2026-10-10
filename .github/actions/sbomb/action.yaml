@@ -23,9 +23,27 @@ inputs:
     required: false
     default: ''
   reproducible:
-    description: Omit the timestamp and derive a stable serial number
+    description: >-
+      Write a document that is byte-identical across runs. CycloneDX omits the
+      timestamp and derives a stable serial number. SPDX must state when it was
+      created, so it states SOURCE_DATE_EPOCH, which the workflow then has to
+      set (for example to the commit time); without it the run is refused with
+      REPRODUCIBLE_CREATION_TIME_MISSING.
     required: false
     default: "false"
+  format:
+    description: >-
+      Serialization of the SBOM, cyclonedx-json or spdx-json. Empty means the
+      configuration's output.format, and CycloneDX without one.
+    required: false
+    default: ''
+  spec-version:
+    description: >-
+      Specification version of the chosen format (1.6 or 1.7 for CycloneDX,
+      3.0.1 for SPDX). Empty means the configuration's, or the format's
+      default.
+    required: false
+    default: ''
   config:
     description: Optional sbomb JSON configuration file
     required: false
@@ -34,9 +52,12 @@ inputs:
     required: false
     default: default
   output:
-    description: CycloneDX output path
+    description: >-
+      Where the SBOM goes. Empty means sbomb.cdx.json, or sbomb.spdx.json when
+      the format -- the input, or the configuration's -- is SPDX, so that the
+      file name never claims a format the document is not in.
     required: false
-    default: sbomb.cdx.json
+    default: ''
   foss:
     description: >
       Also write the four FOSS attribution outputs of docs/foss.md and upload
@@ -115,11 +136,18 @@ runs:
         SBOMB_CONFIG: ${{ inputs.config }}
         SBOMB_POLICY: ${{ inputs.policy }}
         SBOMB_OUTPUT: ${{ inputs.output }}
+        SBOMB_FORMAT: ${{ inputs.format }}
+        SBOMB_SPEC_VERSION: ${{ inputs.spec-version }}
         SBOMB_SOURCE_DIR: ${{ inputs.source-dir }}
         SBOMB_PATH_FLAVOR: ${{ inputs.path-flavor }}
       run: |
         set -euo pipefail
-        args=(generate --build-dir "$SBOMB_BUILD_DIR" --output "$SBOMB_OUTPUT" --policy "$SBOMB_POLICY")
+        args=(generate --build-dir "$SBOMB_BUILD_DIR" --policy "$SBOMB_POLICY")
+        # Without --output sbomb names the document after the format it
+        # resolved, the configuration's included, which this step cannot know.
+        if [[ -n "$SBOMB_OUTPUT" ]]; then args+=(--output "$SBOMB_OUTPUT"); fi
+        if [[ -n "$SBOMB_FORMAT" ]]; then args+=(--format "$SBOMB_FORMAT"); fi
+        if [[ -n "$SBOMB_SPEC_VERSION" ]]; then args+=(--spec-version "$SBOMB_SPEC_VERSION"); fi
         if [[ -n "$SBOMB_SOURCE_DIR" ]]; then args+=(--source-dir "$SBOMB_SOURCE_DIR"); fi
         if [[ -n "$SBOMB_CONFIG" ]]; then args+=(--config "$SBOMB_CONFIG"); fi
         if [[ -n "$SBOMB_PATH_FLAVOR" ]]; then args+=(--path-flavor "$SBOMB_PATH_FLAVOR"); fi

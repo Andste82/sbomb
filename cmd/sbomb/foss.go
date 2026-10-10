@@ -5,12 +5,9 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/example/sbomb/internal/config"
-	"github.com/example/sbomb/internal/cyclonedx"
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/exec"
 	"github.com/example/sbomb/internal/foss"
@@ -47,6 +44,15 @@ func writeFOSSOutputs(directory string, in fossRendering) error {
 	if view == "" {
 		view = "dwarf-preferred"
 	}
+	// foss-review.json is a CycloneDX rendering whatever the SBOM is written
+	// in (section 32.6). The configured version belongs to the SBOM's format,
+	// so it is passed on only when that format is CycloneDX: "3.0.1" means
+	// nothing to the CycloneDX writer, and the review rendering of an SPDX run
+	// takes the CycloneDX default instead of failing after a full discovery.
+	specVersion := in.SpecVersion
+	if in.Generated.Writer != nil && in.Generated.Writer.ID() != sbomwriter.DefaultFormat {
+		specVersion = ""
+	}
 	return foss.Write(directory, foss.Input{
 		Document:       in.Generated.Document,
 		Findings:       in.Findings,
@@ -55,7 +61,7 @@ func writeFOSSOutputs(directory string, in fossRendering) error {
 		Mode:           mode,
 		HeaderEvidence: view,
 		Format:         in.Format,
-		SpecVersion:    in.SpecVersion,
+		SpecVersion:    specVersion,
 		TLP:            in.TLP,
 		Reproducible:   in.Reproducible,
 	})
@@ -229,20 +235,8 @@ func handleFOSS(args []string, verbosity int) (int, string, string) {
 		return 1, "", fmt.Sprintf("invalid value for --format: %s; use %s or %s\n",
 			format, foss.FormatText, foss.FormatMarkdown)
 	}
-	if specVersion != "" {
-		if _, _, err := sbomwriter.Resolve("cyclonedx-json", specVersion); err != nil {
-			return 1, "", err.Error() + "\n"
-		}
-	}
 	if mode != "" && mode != "single" && mode != "assembly" {
 		return 1, "", "invalid value for --mode: " + mode + "\n"
-	}
-	// A build directory that is not there is a discovery error and not a
-	// usage error (section 32.4 code 2): no evidence can be collected from
-	// it. `foss` reads a build tree and never creates one, which is the
-	// difference from `generate`.
-	if info, err := os.Stat(buildDir); err != nil || !info.IsDir() {
-		return 2, "", fmt.Sprintf("the build directory %s cannot be read: no evidence can be collected\n", buildDir)
 	}
 
 	var logBuf bytes.Buffer
@@ -272,12 +266,38 @@ func handleFOSS(args []string, verbosity int) (int, string, string) {
 	if specVersion != "" {
 		loadedCfg.Output.SpecVersion = specVersion
 	}
-	if _, resolved, resolveErr := sbomwriter.Resolve("cyclonedx-json", loadedCfg.Output.SpecVersion); resolveErr == nil {
-		if loadedCfg.Output.TLP != "" && !cyclonedx.SupportsDistributionConstraints(resolved) {
-			return 1, logBuf.String(), fmt.Sprintf("output.tlp needs CycloneDX 1.7; this run writes %s\n", resolved)
-		}
-	}
 	repro = repro || loadedCfg.Output.Reproducible
+	// The SBOM format and version the run is configured for, and whether the
+	// writer can honour them, are usage questions and are answered before the
+	// build directory is looked at (section 32.4): a version no writer emits,
+	// or a configured TLP the chosen version cannot carry, is refused here
+	// rather than after a full discovery run. Reproducibility is not part of
+	// the question. This command writes no SBOM, and nothing it writes states
+	// a creation time, so what the configured format would demand of a
+	// reproducible document -- SPDX's SOURCE_DATE_EPOCH -- is not demanded of
+	// a run that never writes one.
+	if _, err := resolveOutput(loadedCfg.Output.Format, loadedCfg.Output.SpecVersion, sbomwriter.Options{
+		TLP: loadedCfg.Output.TLP,
+	}); err != nil {
+		return 1, logBuf.String(), err.Error() + "\n"
+	}
+	// For the same reason the run is rendered as CycloneDX whatever the
+	// configuration names: foss-review.json, the one machine-readable record
+	// this command writes, is CycloneDX in every case (section 32.6), and the
+	// SPDX version belongs to the SPDX document. Rendering the configured
+	// format would only render a document nobody receives -- and, under
+	// --reproducible without SOURCE_DATE_EPOCH, fail on it.
+	if fossConfiguredFormat(loadedCfg.Output.Format) != sbomwriter.DefaultFormat {
+		loadedCfg.Output.Format = sbomwriter.DefaultFormat
+		loadedCfg.Output.SpecVersion = ""
+	}
+	// A build directory that is not there is a discovery error and not a
+	// usage error (section 32.4 code 2): no evidence can be collected from
+	// it. `foss` reads a build tree and never creates one, which is the
+	// difference from `generate`.
+	if info, err := os.Stat(buildDir); err != nil || !info.IsDir() {
+		return 2, logBuf.String(), fmt.Sprintf("the build directory %s cannot be read: no evidence can be collected\n", buildDir)
+	}
 
 	policyConfig, err := policy.Resolve(loadedCfg.Policy, policy.Overrides{
 		Profile:     policyName,
@@ -326,13 +346,7 @@ func handleFOSS(args []string, verbosity int) (int, string, string) {
 	if err != nil {
 		return 1, logBuf.String(), err.Error() + "\n"
 	}
-	now := time.Now().UTC()
-	if epoch := os.Getenv("SOURCE_DATE_EPOCH"); epoch != "" {
-		if seconds, parseErr := strconv.ParseInt(epoch, 10, 64); parseErr == nil {
-			now = time.Unix(seconds, 0).UTC()
-		}
-	}
-	annotated := policy.Evaluate(generated.Findings, policyConfig, waivers, now)
+	annotated := policy.Evaluate(generated.Findings, policyConfig, waivers, runTimestamp())
 
 	cliLogger.Info("Writing the FOSS documents to '%s'...", out)
 	if err := writeFOSSOutputs(out, fossRendering{
@@ -349,4 +363,13 @@ func handleFOSS(args []string, verbosity int) (int, string, string) {
 		return 1, logBuf.String(), err.Error() + "\n"
 	}
 	return 0, logBuf.String(), ""
+}
+
+// fossConfiguredFormat is the SBOM format a configuration names, with the
+// empty value read as the default.
+func fossConfiguredFormat(format string) string {
+	if format == "" {
+		return sbomwriter.DefaultFormat
+	}
+	return format
 }
