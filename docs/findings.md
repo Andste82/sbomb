@@ -70,6 +70,7 @@ catalogue rather than a snapshot of one version.
 | `NINJA_DEPS_UNAVAILABLE` | info | — | `ninja -t deps` not permitted or failed | emitted |
 | `OBJECT_SOURCE_MAPPING_CONFLICT` | info | — | Two strategies disagreed; higher priority used | emitted |
 | `PACKAGE_NOT_LINKED` | info | — | A package manager installed this dependency, but no used file belongs to it | emitted |
+| `PACKAGING_OUTPUT_NOT_DELIVERED` | warning | — | A manifest describes a package or image that no configured deliverable reaches, so its inputs are left out | emitted |
 | `PCH_HEADERS_EXCLUDED` | info | — | Headers removed by `pchHeaders=exclude` | emitted |
 | `PREBUILT_LIBRARY_UNMAPPED` | warning | `prebuiltLibrariesRequireMapping` | Prebuilt library has no component mapping | emitted |
 | `REPRODUCIBLE_CREATION_TIME_MISSING` | error | always (exit 1) | SPDX requires a creation time, and reproducible mode (`--reproducible` or `output.reproducible`) without a readable `SOURCE_DATE_EPOCH` has none to state; refused before discovery | emitted |

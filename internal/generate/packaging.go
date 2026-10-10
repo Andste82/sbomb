@@ -45,8 +45,8 @@ type manifestSource struct {
 
 // addPackagingEvidence records what the package and image manifests say. The
 // edges point from an output to its inputs, so the reachability filter decides
-// what reaches the product: a manifest describing an image nothing delivers
-// contributes nothing, which is the same rule every other adapter follows.
+// what reaches the product. A manifest describing an image nothing delivers
+// contributes nothing but a finding that says so.
 func addPackagingEvidence(
 	graph *evidence.Graph,
 	b *builder,
@@ -67,9 +67,49 @@ func addPackagingEvidence(
 		artifactIDs[canonical] = domain.NodeID("artifact:" + canonical)
 	}
 
+	// An output enters the graph only if a deliverable reaches it, itself or
+	// as the input of an output that is reached. One that nothing reaches
+	// would be a root that is not an artifact, which the invariants of
+	// section 8.8 forbid; it is the configuration that does not describe the
+	// build, and that is reported rather than taken for an internal error.
+	reached := map[string]bool{}
+	for canonical := range artifactIDs {
+		reached[canonical] = true
+	}
+	for grew := true; grew; {
+		grew = false
+		for _, source := range sources {
+			for _, output := range source.manifest.Outputs {
+				outputCanonical, _ := b.identify(resolveManifestPath(cfg, buildDir, output.Path))
+				if !reached[outputCanonical] {
+					continue
+				}
+				for _, input := range output.Inputs {
+					inputCanonical, _ := b.identify(resolveManifestPath(cfg, buildDir, input.Path))
+					if !reached[inputCanonical] {
+						reached[inputCanonical] = true
+						grew = true
+					}
+				}
+			}
+		}
+	}
+
 	for _, source := range sources {
 		for _, output := range source.manifest.Outputs {
 			outputCanonical, _ := b.identify(resolveManifestPath(cfg, buildDir, output.Path))
+			if !reached[outputCanonical] {
+				logger.Info("Manifest '%s': %s is not delivered, its %d declared input(s) are left out",
+					filepath.Base(source.path), outputCanonical, len(output.Inputs))
+				findings = append(findings, domain.Finding{
+					ID: "PACKAGING_OUTPUT_NOT_DELIVERED", Severity: domain.SeverityWarning,
+					Subject: domain.Subject{Kind: "file", Ref: outputCanonical},
+					Message: "the manifest '" + filepath.Base(source.path) + "' describes this " + outputKindName(output.Kind) +
+						", but no configured deliverable reaches it, so its inputs are not in the SBOM",
+					Remediation: "Declare it as a deliverable, for example with mode: assembly and the file under artifacts[].",
+				})
+				continue
+			}
 			outputID, isArtifact := artifactIDs[outputCanonical]
 			if !isArtifact {
 				outputID = domain.NodeID(outputCanonical)
@@ -262,6 +302,14 @@ func resolveManifestPath(cfg config.Config, buildDir, path string) string {
 		return path
 	}
 	return filepath.Join(root, path)
+}
+
+// outputKindName names a manifest output's kind for a message.
+func outputKindName(kind string) string {
+	if kind == "image" || kind == "package" {
+		return kind
+	}
+	return "output"
 }
 
 func nodeKindForOutput(kind string) domain.NodeKind {
