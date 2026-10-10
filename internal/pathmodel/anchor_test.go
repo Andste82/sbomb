@@ -148,6 +148,36 @@ func TestWindowsFlavorMatchesCaseInsensitively(t *testing.T) {
 	}
 }
 
+// A relative path in Windows build evidence ("imgapp.exe", "CMakeFiles\x.obj")
+// is relative to the directory it is resolved in, exactly as under POSIX. The
+// flavor once rooted it while normalizing, so the join onto the build root was
+// skipped and every such file landed under the abs anchor -- and an image the
+// manifest named by its full path no longer met the deliverable that named it
+// by its bare name.
+func TestWindowsFlavorResolvesARelativePathInItsBaseDirectory(t *testing.T) {
+	r := NewRegistry(WindowsFlavor{})
+	mustRegister(t, r, "build", `C:\__fixture_build__`)
+	for path, want := range map[string]string{
+		"imgapp.exe":                       "build:imgapp.exe",
+		`CMakeFiles\imgapp.dir\main.c.obj`: "build:CMakeFiles/imgapp.dir/main.c.obj",
+		`..\__fixture_build__\x.img`:       "build:x.img",
+	} {
+		if got := r.ResolveIn("C:/__fixture_build__", path).Canonical(); got != want {
+			t.Errorf("ResolveIn(%q) = %q, want %q", path, got, want)
+		}
+	}
+	for path, want := range map[string]string{
+		"imgapp.exe":       "imgapp.exe",
+		`\rooted\file.c`:   "/rooted/file.c",
+		`C$:\src\main.c`:   "C:/src/main.c",
+		`\\server\share\x`: "//server/share/x",
+	} {
+		if got := (WindowsFlavor{}).Normalize(path); got != want {
+			t.Errorf("Normalize(%q) = %q, want %q", path, got, want)
+		}
+	}
+}
+
 func TestPosixFlavorMatchesCaseSensitively(t *testing.T) {
 	r := NewRegistry(PosixFlavor{})
 	mustRegister(t, r, "project", "/Work/Project")

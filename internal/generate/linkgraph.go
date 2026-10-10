@@ -30,6 +30,10 @@ type linkInput struct {
 	Member  string
 	Source  string // evidence source identifier, e.g. "ld:app.map"
 	Adapter string
+	// Searched is set when the library this input names (the archive, for an
+	// extracted member) was found by the linker on its search path rather
+	// than at a path the evidence gives; see identifySearched.
+	Searched bool
 }
 
 // builder accumulates the evidence graph for one run.
@@ -224,15 +228,42 @@ func (b *builder) identify(path string) (string, anchors.Scope) {
 	if cached, known := b.identified[path]; known {
 		return cached.canonical, cached.scope
 	}
-	canonical, scope := b.identifyUncached(path)
+	canonical, scope := b.identifyUncached(b.logicalBuild, path)
 	b.identified[path] = identity{canonical: canonical, scope: scope}
 	return canonical, scope
 }
 
-func (b *builder) identifyUncached(path string) (string, anchors.Scope) {
-	id, scope := b.anchors.ScopeOfPath(b.logicalBuild, b.logicalFor(path))
+// identifySearched identifies a library the linker found on its search path
+// rather than at a path the evidence names. A relative path in build evidence
+// is relative to the build directory, and identify reads it that way; a bare
+// library name the linker looked up is not, and joining it onto the build root
+// would claim the toolchain's runtime as build output of the project. Without
+// the search path there is no root to anchor it under, so it is identified
+// against none and stays unanchored (section 7.5), which is what it is.
+func (b *builder) identifySearched(path string) (string, anchors.Scope) {
+	key := "\x00searched:" + path
+	if cached, known := b.identified[key]; known {
+		return cached.canonical, cached.scope
+	}
+	canonical, scope := b.identifyUncached("", path)
+	b.identified[key] = identity{canonical: canonical, scope: scope}
+	return canonical, scope
+}
+
+// identifyLinkInput identifies a link input path the way its evidence means it.
+func (b *builder) identifyLinkInput(path string, searched bool) (string, anchors.Scope) {
+	if searched {
+		return b.identifySearched(path)
+	}
+	return b.identify(path)
+}
+
+func (b *builder) identifyUncached(base, path string) (string, anchors.Scope) {
+	id, scope := b.anchors.ScopeOfPath(base, b.logicalFor(path))
 	canonical := id.Canonical()
-	if _, known := b.physical[canonical]; !known {
+	if recorded, known := b.physical[canonical]; known {
+		b.reconsiderPhysical(canonical, recorded, path)
+	} else {
 		physical, readable := b.physicalFor(b.logicalFor(path))
 		// A refused read is recorded as no location at all, which is what every
 		// reader of this map already checks for. Section 7.9 rule 3 asks for
@@ -243,7 +274,7 @@ func (b *builder) identifyUncached(path string) (string, anchors.Scope) {
 			b.findings = append(b.findings, domain.Finding{
 				ID: "MISSING_FILE_HASH", Severity: domain.SeverityWarning,
 				Subject: domain.Subject{Kind: "file", Ref: canonical},
-				Message: "the path leaves the source tree it would be read from, so the read was refused and no hash could be computed",
+				Message: refusedReadMessage,
 			})
 		}
 		b.logger.Trace("Identity: %-64s <- %s", canonical, path)
@@ -254,6 +285,62 @@ func (b *builder) identifyUncached(path string) (string, anchors.Scope) {
 		}
 	}
 	return canonical, scope
+}
+
+const refusedReadMessage = "the path leaves the source tree it would be read from, so the read was refused and no hash could be computed"
+
+// reconsiderPhysical decides where the bytes of an identity are read when a
+// second spelling of it arrives, so that the answer does not depend on which
+// spelling the evidence handed over first.
+//
+// Two spellings of one file are common: a Ninja graph names a source by the
+// absolute path the generator wrote and by one relative to the build
+// directory, and the compilation database names it a third way. They resolve
+// to one identity, but not always to one readable location -- a spelling the
+// host cannot interpret, a Windows path read on another system, joins onto
+// the build root as a file that is not there. Keeping whichever spelling came
+// first made the document depend on the order the adapters were consulted in,
+// which is not fixed: the same build was hashed on one run and reported
+// missing on the next, and the reproducible document identity changed with
+// it. So the location is chosen by what it is, not by when it arrived: one
+// that can be read over a refused one, an existing file over one that is not
+// there, and between two of a kind the first in byte order.
+func (b *builder) reconsiderPhysical(canonical, recorded, path string) {
+	candidate, readable := b.physicalFor(b.logicalFor(path))
+	if !readable || candidate == recorded || !preferPhysical(candidate, recorded) {
+		return
+	}
+	b.physical[canonical] = candidate
+	if recorded != "" {
+		return
+	}
+	// The refusal recorded for the first spelling no longer holds: the file
+	// is read through this one.
+	kept := b.findings[:0]
+	for _, finding := range b.findings {
+		if finding.ID == "MISSING_FILE_HASH" && finding.Subject.Ref == canonical && finding.Message == refusedReadMessage {
+			continue
+		}
+		kept = append(kept, finding)
+	}
+	b.findings = kept
+}
+
+// preferPhysical is the total order reconsiderPhysical chooses by.
+func preferPhysical(candidate, recorded string) bool {
+	if recorded == "" {
+		return true
+	}
+	candidateExists, recordedExists := isRegularFile(candidate), isRegularFile(recorded)
+	if candidateExists != recordedExists {
+		return candidateExists
+	}
+	return candidate < recorded
+}
+
+func isRegularFile(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && info.Mode().IsRegular()
 }
 
 // identityOf resolves a path to its identity without recording it. Registering
@@ -467,14 +554,23 @@ func (b *builder) collectLinkEvidence(deliverable Deliverable, buildDir, mapPath
 			case mapparser.ArchiveMember:
 				members++
 				inputs = append(inputs, linkInput{
-					Path:    record.Path,
-					Kind:    domain.NodeArchiveMember,
-					Archive: record.Archive,
-					Member:  record.Member,
-					Source:  result.Format + ":" + filepath.Base(path),
-					Adapter: "linker-map",
+					Path:     record.Path,
+					Kind:     domain.NodeArchiveMember,
+					Archive:  record.Archive,
+					Member:   record.Member,
+					Source:   result.Format + ":" + filepath.Base(path),
+					Adapter:  "linker-map",
+					Searched: b.searchedLibrary(result.Format, record.Archive),
 				})
-			case mapparser.LinkedObject, mapparser.StaticArchive, mapparser.SharedLibrary:
+			case mapparser.StaticArchive, mapparser.SharedLibrary:
+				inputs = append(inputs, linkInput{
+					Path:     record.Path,
+					Kind:     kindForPath(record.Path),
+					Source:   result.Format + ":" + filepath.Base(path),
+					Adapter:  "linker-map",
+					Searched: b.searchedLibrary(result.Format, record.Path),
+				})
+			case mapparser.LinkedObject:
 				inputs = append(inputs, linkInput{
 					Path:    record.Path,
 					Kind:    kindForPath(record.Path),
@@ -498,7 +594,7 @@ func (b *builder) collectLinkEvidence(deliverable Deliverable, buildDir, mapPath
 	// here; a missing log is a normal degradation, not a failed build.
 	if data, err := os.ReadFile(filepath.Join(buildDir, "build.log")); err == nil {
 		for _, record := range mapparser.ParseMSVCVerbose(string(data)) {
-			canonical, _ := b.identify(record.Path)
+			canonical, _ := b.identifyLinkInput(record.Path, b.searchedLibrary(mapparser.FormatMSVC, record.Archive))
 			b.discardedObjects[canonical]++
 		}
 	}
@@ -592,6 +688,21 @@ func readMap(path string) (mapparser.Result, error) {
 	return result, result.Err
 }
 
+// searchedLibrary reports whether a library named in a linker map was found on
+// the linker's search path. link.exe's map names a library by its bare name
+// ("MSVCRTD:init.obj", "kernel32:KERNEL32.dll") whether it came from the
+// build directory or from a LIB directory, so the name alone cannot say which.
+// The build directory can: a bare name that is not a file there was not taken
+// from there. A name with a directory in it is a path the evidence gives, and
+// the other map formats name every library by such a path.
+func (b *builder) searchedLibrary(format, path string) bool {
+	if format != mapparser.FormatMSVC || path == "" || strings.ContainsAny(path, "/\\") {
+		return false
+	}
+	_, err := os.Stat(filepath.Join(b.physicalBuild, path))
+	return err != nil
+}
+
 // addLinkEdges turns link inputs into graph edges rooted at the artifact.
 // Extracted archive members are attached to the build-tree object they came
 // from, so that an unextracted member has no path to the artifact at all --
@@ -602,7 +713,7 @@ func (b *builder) addLinkEdges(artifactID domain.NodeID, inputs []linkInput) {
 			b.addArchiveMember(artifactID, input)
 			continue
 		}
-		canonical, scope := b.identify(input.Path)
+		canonical, scope := b.identifyLinkInput(input.Path, input.Searched)
 		b.graph.AddNode(domain.Node{
 			ID:         domain.NodeID(canonical),
 			Kind:       input.Kind,
@@ -621,7 +732,7 @@ func (b *builder) addLinkEdges(artifactID domain.NodeID, inputs []linkInput) {
 // from. The mapping is by basename within one archive, which is unambiguous
 // because ar stores members under their basename.
 func (b *builder) addArchiveMember(artifactID domain.NodeID, input linkInput) {
-	archiveCanonical, archiveScope := b.identify(input.Archive)
+	archiveCanonical, archiveScope := b.identifyLinkInput(input.Archive, input.Searched)
 	b.graph.AddNode(domain.Node{
 		ID:         domain.NodeID(archiveCanonical),
 		Kind:       domain.NodeArchive,

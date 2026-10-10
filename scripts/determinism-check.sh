@@ -33,6 +33,34 @@ for version in 1.6 1.7; do
   sha256sum "$tmp/first.cdx.json" | cut -d ' ' -f 1
 done
 
+# A Windows build read under --path-flavor windows, and more than twice.
+# msvc-ninja/p06-unity names its unity source three ways -- the Ninja graph's
+# escaped absolute path, a path relative to the build directory and the
+# compilation database's own -- and only one of them can be read on a POSIX
+# host. Which one was kept depended on the order the evidence was consulted in,
+# which is not fixed, so the file was hashed on some runs and missing on others,
+# and the reproducible serial number changed with it. Two runs agree by chance
+# often enough to miss that; six do not. A fresh copy each time, because
+# generate writes its evidence dump into the build directory.
+unity_run() {
+  rm -rf "$tmp/unity"
+  mkdir -p "$tmp/unity"
+  cp -r "$repo/testdata/fixtures/msvc-ninja/p06-unity/build" "$tmp/unity/build"
+  go run ./cmd/sbomb generate \
+    --build-dir "$tmp/unity/build" \
+    --output "$1" \
+    --reproducible \
+    --path-flavor windows \
+    --policy lenient
+}
+unity_run "$tmp/unity-first.cdx.json"
+for attempt in 2 3 4 5 6; do
+  unity_run "$tmp/unity-again.cdx.json"
+  cmp "$tmp/unity-first.cdx.json" "$tmp/unity-again.cdx.json"
+done
+printf 'windows-flavor unity SBOM 1.6 SHA-256: '
+sha256sum "$tmp/unity-first.cdx.json" | cut -d ' ' -f 1
+
 # The FOSS documents of section 32.6, which are a further rendering of the same
 # discovery and have to be as reproducible as the SBOM: a notices document that
 # churns cannot be reviewed, and a release-to-release diff is how a new copyleft

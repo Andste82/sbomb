@@ -2,6 +2,37 @@
 
 ## Unreleased
 
+### Every Windows build reads its files from the same place on every run
+
+A file the evidence names in several spellings -- a Ninja graph's escaped
+absolute path, a path relative to the build directory, the compilation
+database's own -- was read from whichever spelling arrived first, and that order
+was not fixed. Under `--path-flavor windows` on Linux one spelling cannot be
+read, so the same build was hashed on one run and reported missing on the next
+(`msvc-ninja/p06-unity`), and the reproducible serial number changed with it.
+The location is now chosen by what it is: readable over refused, existing over
+missing, then byte order. No golden changes.
+
+### A relative Windows path is relative to the build directory
+
+Under `--path-flavor windows` a relative path such as `imgapp.exe` or
+`CMakeFiles\app.dir\main.c.obj` was turned into a rooted one while it was
+normalized, so it was never resolved in the build directory and every such
+file landed under the `abs` anchor. An MSVC build therefore listed each object
+and archive twice, once under `build:` and once as an unknown component, a
+header reached by `..\` came out as `abs:../...`, and an MSVC assembly whose
+image the packaging manifest names by its full path stopped with
+INTERNAL_INVARIANT_VIOLATION, because the configured deliverable and the
+manifest's output were two different files. A relative path now resolves in
+the build directory, as it always did under POSIX.
+
+The one name that must not is a library `link.exe` found on its search path.
+Its map names the C runtime archive and the imported DLLs by bare name exactly
+as it names a library from the build directory; a bare name that is not a file
+in the build directory came from a `LIB` directory, and it stays unanchored
+instead of being reported as the project's own build output. The MSVC goldens
+lose their duplicate entries and nothing else.
+
 ### The CMake module requires 3.27, and says so without changing your project
 
 `sbomb_enable` files its File API query with `cmake_file_api()`, which lands in
