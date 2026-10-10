@@ -224,8 +224,13 @@ func hashOne(file domain.UsedFile, options HashOptions) domain.UsedFile {
 	if err != nil || !info.Mode().IsRegular() {
 		return unreadable()
 	}
+	// A link is a path whose resolved location differs from where it says it
+	// is. On Windows EvalSymlinks also expands short names and takes the
+	// disk's case, so the path is put in that form before the two are
+	// compared; otherwise every file below a short-named directory counted as
+	// a link out of its anchor.
 	resolved, err := filepath.EvalSymlinks(path)
-	isSymlink := err == nil && filepath.Clean(resolved) != filepath.Clean(path)
+	isSymlink := err == nil && !samePath(resolved, longPath(path))
 	if err != nil || (isSymlink && !options.AllowUnanchoredReads && !withinAnchor(resolved, options.Anchors)) {
 		return unreadable()
 	}
