@@ -407,7 +407,7 @@ func (b *builder) logicalFor(path string) string {
 		return path
 	}
 	if b.absoluteBuildPrefix != "" {
-		if rel, found := strings.CutPrefix(pathmodel.NormalizeSeparators(path), b.absoluteBuildPrefix); found {
+		if rel, found := b.underBuildPrefix(pathmodel.NormalizeSeparators(path)); found {
 			return b.logicalBuild + "/" + rel
 		}
 	}
@@ -419,6 +419,23 @@ func (b *builder) logicalFor(path string) string {
 		return inLogicalSource(path, b.logicalSource, b.physicalSource, b.flavor)
 	}
 	return path
+}
+
+// underBuildPrefix cuts the physical build directory off a slash-form path. A
+// path read under the Windows flavor is compared without regard to case, as the
+// file system it names compares it: MSBuild writes its tracking logs in
+// capitals, so on the machine that built a tlog names C:\GM\DEBUG\CRYPTO.LIB
+// for the directory filepath.Abs spells C:\gm, and a case-sensitive cut left
+// every such file unanchored.
+func (b *builder) underBuildPrefix(path string) (string, bool) {
+	prefix := b.absoluteBuildPrefix
+	if len(path) < len(prefix) {
+		return "", false
+	}
+	if path[:len(prefix)] == prefix || (b.windowsFlavor() && strings.EqualFold(path[:len(prefix)], prefix)) {
+		return path[len(prefix):], true
+	}
+	return "", false
 }
 
 // inLogicalSource expresses a path found in the relocated tree in the logical
@@ -1066,7 +1083,7 @@ func (b *builder) ninjaArchiveInputs(archiveCanonical string) []string {
 	objects := make([]string, 0)
 	for _, line := range strings.Split(string(out), "\n") {
 		input := strings.TrimSpace(strings.TrimSuffix(line, "\r"))
-		if strings.HasSuffix(input, ".o") || strings.HasSuffix(input, ".obj") {
+		if isObjectPath(input) {
 			objects = append(objects, input)
 		}
 	}
@@ -1116,12 +1133,12 @@ func (b *builder) recordArchiveInputs(archivePath string, objects []string) {
 func (b *builder) loadNinjaArchiveInputs(rules []ninja.Rule) {
 	for _, rule := range rules {
 		for _, output := range rule.Outputs {
-			if !strings.HasSuffix(output, ".a") && !strings.HasSuffix(output, ".lib") {
+			if !isArchivePath(output) {
 				continue
 			}
 			objects := make([]string, 0, len(rule.Inputs))
 			for _, input := range rule.Inputs {
-				if strings.HasSuffix(input, ".o") || strings.HasSuffix(input, ".obj") {
+				if isObjectPath(input) {
 					objects = append(objects, input)
 				}
 			}
@@ -1146,7 +1163,7 @@ func (b *builder) Findings() []domain.Finding {
 
 func kindForPath(path string) domain.NodeKind {
 	switch {
-	case strings.HasSuffix(path, ".a"), strings.HasSuffix(path, ".lib"):
+	case isArchivePath(path):
 		return domain.NodeArchive
 	case strings.HasSuffix(path, ".so"), strings.HasSuffix(path, ".dll"), strings.Contains(path, ".so."):
 		return domain.NodeArchive

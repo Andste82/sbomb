@@ -264,6 +264,11 @@ func withinAnchor(path string, anchors []string) bool {
 		if err != nil {
 			continue
 		}
+		// The path was resolved by EvalSymlinks, which on Windows also
+		// expands short names; an anchor registered as C:\Users\RUNNER~1
+		// is put in the same long form, or nothing below it ever matched.
+		// filepath.Rel already ignores case there.
+		cleanAnchor = longPath(cleanAnchor)
 		rel, err := filepath.Rel(cleanAnchor, cleanPath)
 		if err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)) && !pathmodel.IsAbsolute(rel) {
 			return true

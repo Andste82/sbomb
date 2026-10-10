@@ -47,6 +47,13 @@ func NormalizeSeparators(path string) string {
 	return strings.ReplaceAll(path, "\\", "/")
 }
 
+// isUNC reports whether p is a UNC path as Windows evidence spells it, from
+// two backslashes. Two leading slashes are not: POSIX reads "//usr" as "/usr",
+// and a Makefile that joins $(PREFIX)/ with PREFIX=/ writes exactly that.
+func isUNC(p string) bool {
+	return strings.HasPrefix(p, `\\`)
+}
+
 // CleanEvidence cleans a path as build evidence records it. A path that is
 // absolute in the host's own spelling is cleaned by the host's rules, exactly
 // like the paths sbomb joins onto a directory it reads, so that one file has
@@ -56,21 +63,24 @@ func NormalizeSeparators(path string) string {
 // reading it, and on a Windows host /usr/bin/cc became \usr\bin\cc, so the
 // same evidence produced other identities than on Linux. A drive root keeps
 // its slash and a UNC path its second leading one, which path.Clean alone
-// would drop.
+// would drop; two leading forward slashes are one, as POSIX reads them.
 func CleanEvidence(p string) string {
 	if p == "" {
 		return ""
 	}
-	// A UNC path is foreign anywhere but on Windows, and filepath on another
-	// host would fold its two leading slashes into one.
-	if slashed := NormalizeSeparators(p); strings.HasPrefix(slashed, "//") && runtime.GOOS != "windows" {
-		return "/" + path.Clean(slashed)
+	if isUNC(p) {
+		if runtime.GOOS == "windows" {
+			return filepath.Clean(p)
+		}
+		return "/" + path.Clean(NormalizeSeparators(p))
+	}
+	if strings.HasPrefix(p, "//") {
+		return path.Clean(NormalizeSeparators(p))
 	}
 	if filepath.IsAbs(p) {
 		return filepath.Clean(p)
 	}
-	p = NormalizeSeparators(p)
-	clean := path.Clean(p)
+	clean := path.Clean(NormalizeSeparators(p))
 	if len(clean) == 2 && clean[1] == ':' && isASCIIAlpha(clean[0]) {
 		return clean + "/"
 	}
@@ -82,13 +92,17 @@ func CleanEvidence(p string) string {
 // unit's compilation directory. Both are paths of the build machine; when the
 // directory is absolute in the host's spelling the two are joined by the
 // host's rules, otherwise in slash form, as CleanEvidence would clean the
-// result. An absolute path stands on its own.
+// result. Either way a backslash in the name is a separator, as it always was
+// here. An absolute path stands on its own.
 func JoinEvidence(dir, p string) string {
 	if IsAbsolute(p) || dir == "" {
 		return CleanEvidence(p)
 	}
-	if filepath.IsAbs(dir) && !strings.HasPrefix(NormalizeSeparators(dir), "//") {
-		return filepath.Clean(filepath.Join(dir, p))
+	if isUNC(dir) {
+		return CleanEvidence(dir + `\` + p)
+	}
+	if filepath.IsAbs(dir) {
+		return filepath.Clean(filepath.Join(dir, NormalizeSeparators(p)))
 	}
 	return CleanEvidence(NormalizeSeparators(dir) + "/" + NormalizeSeparators(p))
 }
@@ -109,10 +123,12 @@ func ResolveEvidence(hostDir, p string) string {
 func DirEvidence(p string) string {
 	clean := CleanEvidence(p)
 	switch {
+	case isUNC(p) && runtime.GOOS != "windows":
+		// Before the host's rules: filepath takes //server for an absolute
+		// POSIX path here and would fold its two slashes into one.
+		return "/" + path.Dir(clean[1:])
 	case filepath.IsAbs(clean):
 		return filepath.Dir(clean)
-	case strings.HasPrefix(clean, "//"):
-		return "/" + path.Dir(clean[1:])
 	case len(clean) >= 3 && clean[1] == ':' && isASCIIAlpha(clean[0]) && !strings.Contains(clean[3:], "/"):
 		return clean[:3]
 	}

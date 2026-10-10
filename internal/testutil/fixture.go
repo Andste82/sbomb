@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/example/sbomb/tools/fixtures"
@@ -121,16 +122,23 @@ func copyTree(source, destination string) error {
 	})
 }
 
-// RequireFixtureToolchain skips a test whose expectation was captured on a host
+// RequireFixtureToolchain guards a test whose expectation was captured on a host
 // that has the fixture corpus's GCC 13 at the path its evidence names. The run
 // reads the toolchain's startup objects and headers from the host at that path
 // -- /usr/lib/gcc/x86_64-linux-gnu/13 -- rather than from the corpus, so what it
-// hashes and reports depends on whether the host has them (issue #61). Where it
-// does not, Windows among them, the expectation does not apply and the test
-// says why instead of failing.
+// hashes and reports depends on whether the host has them (issue #61).
+//
+// Off Linux the expectation cannot apply, and the test skips and says why. On
+// Linux a missing toolchain fails the test instead: there it is the host the
+// expectation was made for, and a skip would let a runner image that moved on
+// to another GCC turn the main acceptance tests off without anyone noticing.
 func RequireFixtureToolchain(t testing.TB) {
 	t.Helper()
-	if _, err := os.Stat("/usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o"); err != nil {
+	if _, err := os.Stat("/usr/lib/gcc/x86_64-linux-gnu/13/crtbeginS.o"); err == nil {
+		return
+	}
+	if runtime.GOOS != "linux" {
 		t.Skip("the expectation reads the fixture's GCC 13 toolchain from this host, which has none at /usr/lib/gcc/x86_64-linux-gnu/13 (issue #61)")
 	}
+	t.Fatal("this Linux host has no GCC 13 at /usr/lib/gcc/x86_64-linux-gnu/13, which the expectation reads the fixture's toolchain from (issue #61); install gcc-13 rather than skip the test")
 }
