@@ -2,6 +2,7 @@ package report
 
 import (
 	"fmt"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -54,7 +55,10 @@ func RenderReview(in ReviewInput) string {
 	line(&b, "tool", in.Document.Run.ToolName+" "+in.Document.Run.ToolVersion)
 	line(&b, "policy profile", in.Profile)
 	if in.ConfigPath != "" {
-		line(&b, "configuration", in.ConfigPath)
+		// In slash form: the report is an output of the run like the
+		// document, and a path typed on Windows would otherwise make the same
+		// evidence report differently there than on Linux.
+		line(&b, "configuration", filepath.ToSlash(in.ConfigPath))
 	}
 	line(&b, "build directory", in.BuildDir)
 	if in.Document.Run.Generator != "" {
