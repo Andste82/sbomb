@@ -296,6 +296,43 @@ func TestAnMSVCAssemblyReachesItsImageThroughTheManifest(t *testing.T) {
 	}
 }
 
+// TestAnImageNothingDeliversIsAFindingNotAnInternalError: run without the
+// assembly configuration that names it, the image its manifest describes is
+// reached by no deliverable. That is the configuration not describing the
+// build, so the run reports it and finishes, and the image's inputs stay out.
+func TestAnImageNothingDeliversIsAFindingNotAnInternalError(t *testing.T) {
+	for _, build := range []struct{ toolchain, project, image string }{
+		{"gcc-ninja", "p12-assets", "build:filesystem.img"},
+		{"gcc-ninja", "p15-shared", "build:image.img"},
+	} {
+		t.Run(build.project, func(t *testing.T) {
+			directory := t.TempDir()
+			output := filepath.Join(directory, "out.cdx.json")
+			findingsPath := filepath.Join(directory, "findings.json")
+			code, _, stderr := execute([]string{"generate",
+				"--build-dir", testutil.CorpusBuildDir(t, build.toolchain, build.project),
+				"--config", filepath.Join("..", "..", "testdata", "config", "portable.json"),
+				"--policy", "lenient", "--output", output, "--findings-json", findingsPath})
+			if code != 0 {
+				t.Fatalf("generate = code %d, stderr %q", code, stderr)
+			}
+			findings, err := os.ReadFile(findingsPath)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !strings.Contains(string(findings), `"PACKAGING_OUTPUT_NOT_DELIVERED"`) ||
+				!strings.Contains(string(findings), `"`+build.image+`"`) {
+				t.Errorf("findings name no undelivered %s: %s", build.image, findings)
+			}
+			for ref := range fileAttributes(t, output) {
+				if strings.Contains(ref, "assets/index.html") {
+					t.Errorf("%s is in the SBOM, but only the image nothing delivers contains it", ref)
+				}
+			}
+		})
+	}
+}
+
 // TestEvidenceChainYieldsTheSameFilesAcrossToolchains is the phase 2
 // acceptance criterion. The same project built with five different toolchain
 // and generator combinations must yield the same used-file set, because the
