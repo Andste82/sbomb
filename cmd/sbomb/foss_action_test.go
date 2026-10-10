@@ -82,7 +82,9 @@ func TestTheActionCannotGateTheBuildOnAttribution(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	action := string(data)
+	// A Windows checkout gives the file CRLF line ends, and what is looked for
+	// is the shape of the action, not how git wrote its lines.
+	action := strings.ReplaceAll(string(data), "\r\n", "\n")
 	for _, want := range []string{
 		// The input, and the directory it writes into.
 		"\n  foss:\n",

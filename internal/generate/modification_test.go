@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -408,6 +409,11 @@ func TestTheDistanceSuffixIsTheOneGitWrites(t *testing.T) {
 func TestAnAnswerThatCannotBeToldFromACommitIsUnknown(t *testing.T) {
 	if _, err := exec.LookPath("sh"); err != nil {
 		t.Skip("the stand-in is a shell script")
+	}
+	if runtime.GOOS == "windows" {
+		// Windows runs git.exe off the PATH and never a script named git,
+		// so the stand-in would not answer and the real git would.
+		t.Skip("a shell script cannot stand in for git.exe")
 	}
 	root := modificationTree(t)
 	if !gitRepository(t, root) {
