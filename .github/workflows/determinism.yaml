@@ -1,11 +1,22 @@
-name: Determinism Check
+name: Determinism
 
+# Every pull request, and main once it has moved. A push to a pull request's
+# branch used to start the same jobs twice, once for the push and once for the
+# pull request.
 on:
   push:
+    branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
+
+# A newer push to the same pull request supersedes the run in progress. A run
+# on main always finishes, so every commit there keeps its verdict.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   hash:
@@ -23,9 +34,10 @@ jobs:
           - runner: windows-latest
             target: windows-amd64
     runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
       - name: Two runs, one hash
@@ -36,7 +48,7 @@ jobs:
           SBOMB_DETERMINISM_KEEP: determinism-documents
         run: scripts/determinism-check.sh > "determinism-${{ matrix.target }}.txt"
       - name: Keep the hash
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: determinism-${{ matrix.target }}
           path: determinism-${{ matrix.target }}.txt
@@ -45,7 +57,7 @@ jobs:
       # the pattern compare merges.
       - name: Keep the documents
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: documents-${{ matrix.target }}
           path: determinism-documents/
@@ -53,8 +65,9 @@ jobs:
   compare:
     needs: hash
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: determinism-*
           merge-multiple: true

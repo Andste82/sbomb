@@ -1,4 +1,4 @@
-name: Pages Deployment
+name: Pages
 
 # The install scripts live in the repository and are served from GitHub Pages.
 # Publishing them from here rather than linking at raw.githubusercontent.com
@@ -19,6 +19,8 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  # deploy-pages reads the run's artifacts since its version 4.
+  actions: read
 
 # One publish at a time, and a newer commit wins. A queued older run would
 # otherwise be able to serve a script the tree has already moved past.
@@ -29,12 +31,13 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
 
@@ -67,9 +70,12 @@ jobs:
             (Resolve-Path ./install.ps1), [ref]$null, [ref]$errors) | Out-Null
           if ($errors) { $errors | ForEach-Object { Write-Error $_ }; exit 1 }
 
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: site
+          # .nojekyll is a dotfile, which this action leaves out by default
+          # since its version 4.
+          include-hidden-files: true
       - id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

@@ -1,4 +1,4 @@
-name: Smoke-Test
+name: Smoke Test
 
 # What a user does: take the published release, point it at a build directory,
 # and expect the right answer. Nothing here builds sbomb -- if it did, it would
@@ -37,8 +37,9 @@ jobs:
           - runner: windows-latest
             target: windows
     runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Real evidence, committed in this repository, needing no toolchain.
       # generate writes an evidence dump into the build directory, so it runs
@@ -105,7 +106,7 @@ jobs:
         shell: bash
         run: sha256sum smoke.cdx.json | cut -d ' ' -f 1 > "smoke-${{ matrix.target }}.txt"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: smoke-${{ matrix.target }}
           path: smoke-${{ matrix.target }}.txt
@@ -113,8 +114,9 @@ jobs:
   compare:
     needs: run
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: smoke-*
           merge-multiple: true

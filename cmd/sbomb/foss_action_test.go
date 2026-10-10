@@ -92,7 +92,7 @@ func TestTheActionCannotGateTheBuildOnAttribution(t *testing.T) {
 		// Opt-in: a workflow that does not ask for attribution runs neither step.
 		"if: inputs.foss == 'true'",
 		// The upload, which is what makes the four files reachable afterwards.
-		"uses: actions/upload-artifact@v4",
+		"uses: actions/upload-artifact@v7",
 		"path: ${{ inputs.foss-out }}/",
 	} {
 		if !strings.Contains(action, want) {
