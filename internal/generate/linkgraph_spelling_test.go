@@ -47,6 +47,7 @@ func TestWhereAFileIsReadDoesNotDependOnWhichSpellingCameFirst(t *testing.T) {
 	// one can be read: the file is hashed after all.
 	b := newBuilder(evidence.New(), assembledAnchors(t), dir, dir, NewLogger(0, nil))
 	b.physical[canonical] = ""
+	b.refusedReads[canonical] = true
 	b.findings = append(b.findings, domain.Finding{ID: "MISSING_FILE_HASH", Subject: domain.Subject{Kind: "file", Ref: canonical}, Message: refusedReadMessage})
 	b.reconsiderPhysical(canonical, "", "sub/a.c")
 	if b.physical[canonical] != want || len(b.findings) != 0 {

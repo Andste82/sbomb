@@ -42,11 +42,17 @@ done
 # and the reproducible serial number changed with it. Two runs agree by chance
 # often enough to miss that; six do not. A fresh copy each time, because
 # generate writes its evidence dump into the build directory.
+#
+# Built once rather than through go run, which would compile and link the tool
+# again for every one of the six runs. GOEXE, because Windows will not run it
+# without the extension.
+unity_sbomb="$tmp/sbomb$(go env GOEXE)"
+go build -o "$unity_sbomb" ./cmd/sbomb
 unity_run() {
   rm -rf "$tmp/unity"
   mkdir -p "$tmp/unity"
   cp -r "$repo/testdata/fixtures/msvc-ninja/p06-unity/build" "$tmp/unity/build"
-  go run ./cmd/sbomb generate \
+  "$unity_sbomb" generate \
     --build-dir "$tmp/unity/build" \
     --output "$1" \
     --reproducible \
