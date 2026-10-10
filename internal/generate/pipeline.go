@@ -388,6 +388,8 @@ func buildEvidenceGraph(
 		}
 	}
 
+	settleLocations(b, compile)
+
 	artifactIDs := make([]domain.NodeID, 0, len(deliverables))
 	for _, deliverable := range deliverables {
 		canonical, _ := b.identify(deliverable.EvidencePath)
@@ -703,6 +705,56 @@ func adapterForHeaderSource(source string) string {
 		return "pch"
 	default:
 		return "depfiles"
+	}
+}
+
+// settleLocations identifies every path the compile-side evidence names before
+// anything reads a file through one of them. One file is often named several
+// ways -- a Ninja graph's escaped absolute path, a path relative to the build
+// directory, a compilation database's own -- and identify settles where its
+// bytes are read by what each spelling is (reconsiderPhysical), not by which
+// came first. But a reader that opened the file before its readable spelling
+// arrived kept what it found: the debug information of an object, the source
+// of a unity translation unit, the include list of a precompiled header. The
+// stages that read run after the ones that only identify, and their own
+// spellings arrive in the order Go chooses to range over a map, so the answer
+// could differ between two runs over the same evidence.
+//
+// identify is memoized and changes no identity, so naming every path here once
+// costs a map lookup per later call and moves nothing but the moment each
+// location is settled: before the first read rather than during it. The paths
+// are visited in sorted order, though nothing here depends on it, because the
+// findings an identification records are sorted before they are published.
+// Paths that only reading a file brings to light -- what debug information
+// names -- cannot be settled before that read, and are not.
+func settleLocations(b *builder, compile *compileEvidence) {
+	seen := map[string]bool{}
+	var paths []string
+	add := func(path string) {
+		if path != "" && !seen[path] {
+			seen[path] = true
+			paths = append(paths, path)
+		}
+	}
+	for object, source := range compile.objectSources {
+		add(object)
+		add(source)
+	}
+	for object, headers := range compile.objectHeaders {
+		add(object)
+		for _, header := range headers {
+			add(header)
+		}
+	}
+	for object, forced := range compile.objectForcedIncludes {
+		add(object)
+		for _, include := range forced {
+			add(include)
+		}
+	}
+	sort.Strings(paths)
+	for _, path := range paths {
+		b.identify(path)
 	}
 }
 

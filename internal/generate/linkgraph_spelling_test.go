@@ -54,3 +54,32 @@ func TestWhereAFileIsReadDoesNotDependOnWhichSpellingCameFirst(t *testing.T) {
 		t.Errorf("physical %q, findings %v", b.physical[canonical], b.findings)
 	}
 }
+
+// TestEveryCompileSpellingIsSettledBeforeAnythingReads: a reader asks for a
+// file by the spelling its own evidence gives, and the spelling that can be
+// read may come from evidence about another object -- a header list, a forced
+// include. Without settling every compile-side spelling first, the reader
+// opened what it was handed, and whether that was the readable spelling
+// depended on the order the stages ranged over their maps.
+func TestEveryCompileSpellingIsSettledBeforeAnythingReads(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(dir, "sub"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "sub", "a.c"), []byte("int a;\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	b := newBuilder(evidence.New(), assembledAnchors(t), dir, dir, NewLogger(0, nil))
+	compile := newCompileEvidence()
+	// The object's own evidence names its source in a spelling this host may
+	// not be able to read; another object's header list names it readably.
+	compile.objectSources["one.o"] = `sub\a.c`
+	compile.objectHeaders["two.o"] = []string{"sub/a.c"}
+
+	settleLocations(b, compile)
+
+	canonical, _ := b.identify(`sub\a.c`)
+	if got, want := b.physical[canonical], filepath.Join(dir, "sub", "a.c"); got != want {
+		t.Errorf("the reader of one.o's source opens %q, want %q", got, want)
+	}
+}
