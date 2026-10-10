@@ -1,22 +1,25 @@
 name: Determinism
 
-# Every pull request, and main once it has moved. A push to a pull request's
-# branch used to start the same jobs twice, once for the push and once for the
-# pull request.
+# Every pull request, main once it has moved, and every release tag. A push to
+# a pull request's branch used to start the same jobs twice, once for the push
+# and once for the pull request.
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
 
-# A newer push to the same pull request supersedes the run in progress. A run
-# on main always finishes, so every commit there keeps its verdict.
+# A newer push to the same pull request supersedes the run in progress. Any
+# other run has a group of its own: GitHub keeps one pending run per group and
+# cancels the one before it, so a shared group on main would leave a commit
+# without a verdict whenever two merges queue behind a running check.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
   hash:
