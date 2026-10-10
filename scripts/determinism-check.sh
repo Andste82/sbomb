@@ -5,6 +5,16 @@ repo=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 
+# keep FILE NAME copies a document into $SBOMB_DETERMINISM_KEEP when it is set.
+# The hashes say that two platforms disagree; only the documents say where, and
+# a Windows document cannot be reproduced on any other host to find out.
+keep() {
+  if [ -n "${SBOMB_DETERMINISM_KEEP:-}" ]; then
+    mkdir -p "$SBOMB_DETERMINISM_KEEP"
+    cp "$1" "$SBOMB_DETERMINISM_KEEP/$2"
+  fi
+}
+
 # Work on a copy: generate writes an evidence dump into the build directory,
 # and the committed corpus is a golden artifact that must stay unchanged.
 fixture="$tmp/fixture"
@@ -47,6 +57,7 @@ for version in 1.6 1.7 3.0.1; do
   cmp "$tmp/first.$extension" "$tmp/second.$extension"
   printf 'portable SBOM %s SHA-256: ' "$version"
   sha256sum "$tmp/first.$extension" | cut -d ' ' -f 1
+  keep "$tmp/first.$extension" "portable-$version.$extension"
 done
 
 # A Windows build read under --path-flavor windows, and more than twice.
@@ -83,6 +94,7 @@ for attempt in 2 3 4 5 6; do
 done
 printf 'windows-flavor unity SBOM 3.0.1 SHA-256: '
 sha256sum "$tmp/unity-first.spdx.json" | cut -d ' ' -f 1
+keep "$tmp/unity-first.spdx.json" "windows-flavor-unity-3.0.1.spdx.json"
 
 # The FOSS documents of section 32.6, which are a further rendering of the same
 # discovery and have to be as reproducible as the SBOM: a notices document that
