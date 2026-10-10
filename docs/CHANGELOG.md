@@ -24,6 +24,8 @@ sbomb running on Linux, in several places, and published other documents:
   alike.
 - `--source-dir .` lost its source root under the Windows flavor, and the
   review report named its configuration in the host's spelling.
+- A UNC path such as `\\server\share\a.obj` in MSVC evidence was taken for
+  a relative path on a non-Windows host and joined under the build directory.
 
 The test suite now runs on Windows in CI as well (`windows-tests`).
 

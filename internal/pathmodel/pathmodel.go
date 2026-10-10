@@ -38,7 +38,7 @@ func IsAbsolute(path string) bool {
 	if filepath.IsAbs(path) || strings.HasPrefix(path, "/") {
 		return true
 	}
-	return len(path) >= 3 && isASCIIAlpha(path[0]) && path[1] == ':' && (path[2] == '/' || path[2] == '\\') || strings.HasPrefix(path, `\\\\`)
+	return len(path) >= 3 && isASCIIAlpha(path[0]) && path[1] == ':' && (path[2] == '/' || path[2] == '\\') || isUNC(path)
 }
 
 // NormalizeSeparators converts Windows and POSIX separators to slash form for
