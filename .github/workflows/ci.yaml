@@ -50,6 +50,22 @@ jobs:
       - name: No data races
         run: go test -race ./...
 
+  # The test suite on a Windows host (issue #62). sbomb reads evidence written
+  # on one platform while it runs on another, and a path rule that holds on
+  # Linux can fail there: IsAbsolute took a POSIX absolute path for a relative
+  # one on Windows, and a unit test asserting the opposite had always existed
+  # -- it had just never run on Windows. A test that cannot mean anything on
+  # Windows skips with its reason rather than being left out of this job.
+  windows-tests:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Tests pass
+        run: go test ./...
+
   # The fixture corpus is a committed golden artifact. CI verifies that it is
   # complete and free of host paths; regenerating it needs the pinned
   # toolchains of the devcontainer and is therefore a developer task.
