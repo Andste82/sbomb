@@ -2,6 +2,49 @@
 
 ## Unreleased
 
+### The same build directory gives the same document on Windows as on Linux
+
+sbomb running on a Windows host read the same evidence differently from
+sbomb running on Linux, in several places, and published other documents:
+
+- A path the evidence names was cleaned by the host's rules. On Windows
+  `/usr/bin/cc` became `\usr\bin\cc`, a compilation database's
+  `/build/main.c` became `\build\main.c`, and a POSIX compiler's search path
+  did not split at all. A path absolute in the host's own spelling still keeps
+  it; one in a foreign spelling is now read the same way everywhere.
+- The build directory was compared in a spelling no Windows path has, so every
+  object a Makefiles build names relative to it became an unanchored file.
+- A file below a short-named directory such as `C:\Users\RUNNER~1` counted as a
+  link out of its anchor and was refused a hash.
+- Evidence read under the Windows flavor is case-insensitive, and MSBuild
+  writes its tracking logs in capitals. Windows opened `DEBUG\CRYPTO.LIB` and
+  read the archive's index; Linux did not find it. On a host that tells case
+  apart the file is now found in its spelling on disk, so `msvc-vs17-p02`
+  gains `archiveMembersUsed: 1/2`, and both hosts now write it byte for byte
+  alike.
+- `--source-dir .` lost its source root under the Windows flavor, and the
+  review report named its configuration in the host's spelling.
+
+The test suite now runs on Windows in CI as well (`windows-tests`).
+
+### A project library linked by bare name is the project's
+
+link.exe's map names a library by bare name whether it came from the build or
+from the LIB search path. A library the build produced in a subdirectory and
+handed over with `/LIBPATH` -- or spelled in another case -- was taken for a
+system library, became an unanchored component, and its members lost the
+objects they came from. The build graph now says which archives the build
+produced, and such a name is that archive. `msvc-vs17-p02` loses its
+`abs:crypto.lib` file and the unknown component built for it.
+
+### Two runs read the same files
+
+One file is often named several ways, and where its bytes are read is chosen
+by what each spelling is. A reader that opened it before the readable spelling
+arrived kept what it found, and the order spellings arrive in depended on how
+Go ranged over a map. Every path the compile-side evidence names is now settled
+before anything reads. No document changes.
+
 ### Every Windows build reads its files from the same place on every run
 
 A file the evidence names in several spellings -- a Ninja graph's escaped
