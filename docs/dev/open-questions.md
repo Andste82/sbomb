@@ -484,37 +484,27 @@ the distinct expressions with `AND`, or state only the evidence of the
 conclusion — #3 decides. CVE exclusions have no VEX in 2.3 and remain
 properties there.
 
-## Q22 — Open choices of the SPDX 3.0.1 writer
+## Q22 — reserved
 
-Decided provisionally for the first release of SPDX output; each is cheap to
-change and each changes the goldens.
+**Settled: the provisional choices of the SPDX 3.0.1 writer stand.** Each was
+confirmed as it shipped (#57):
 
-* **Package copyright.** `software_copyrightText` of a package carries the
-  curated notice (§22.10's conclusion) and, one per line after it, the
-  statements that name no file; a statement read from a file sits on that file
-  and not on the package. The open alternative is to join the file statements
-  onto the package as well: that would duplicate them, but a consumer reading
-  only packages would see them.
+* **Package copyright.** A package's `software_copyrightText` carries the
+  curated notice and the statements that name no file. A statement read from a
+  file sits on that file only, so nothing is stated twice.
 * **`dataLicense`.** Not emitted. `CC0-1.0` there is a licence grant on the
   user's SBOM, and sbomb is not the party who can make it.
 * **`foss-review.json` under `--format spdx-json`** stays CycloneDX (§32.6), so
-  its consumers see one shape. Rendering it in the SBOM's format is the
-  alternative.
-* **The CMake module and the GitHub Action** take the format as an input:
-  `FORMAT` (and its cache default `SBOMB_DEFAULT_FORMAT`) in the module, and
-  `format` and `spec-version` in the action. Each names the default output
-  after the format it resolves, so an SPDX document is never written under a
-  `.cdx.json` name. The alternative was `output.format` in the configuration
-  file alone.
+  its consumers see one shape.
+* **The CMake module and the GitHub Action** take the format as an input
+  (`FORMAT`, `SBOMB_DEFAULT_FORMAT`; `format`, `spec-version`).
 * **VEX.** CVE exclusions of a bundled SBOM are written as SPDX VEX
-  not-affected statements attributed to the supplier, beside the property. The
-  alternative is the property alone until a security-profile issue decides how
-  sbomb speaks about vulnerabilities at all.
-* **Known leaves** cost one relationship per element, which in practice is one
-  per file. Stating them only for packages would halve the relationships of a
-  large document and lose CycloneDX parity for files.
-* **Performance.** D54: the SPDX path exceeds the §31 budgets, mostly in schema
-  validation of the extension entries.
+  not-affected statements attributed to the supplier, beside the property.
+* **Known leaves** are stated for every element, files included, for parity
+  with CycloneDX.
+
+What remains of the SPDX path's performance is D54. The number stays reserved
+so that references to it keep their meaning.
 
 ## Q23 — `validate` still holds a CycloneDX document to how sbomb writes
 

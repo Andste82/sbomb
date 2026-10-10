@@ -2122,8 +2122,7 @@ same bytes to `--output`.
 retained license texts included. It is always rendered by the default writer,
 CycloneDX, at that writer's default version, **whatever format the SBOM of the
 same run is written in**: the file is a view of the run for a reviewer with a
-stable shape, and its goldens do not change with `--format`. Whether an SPDX
-run should render it as SPDX too is recorded in `docs/dev/open-questions.md` (Q22).
+stable shape, and its goldens do not change with `--format`.
 Because `foss` writes no SBOM, it renders its run as CycloneDX whatever format
 the configuration names, and demands nothing the configured format would
 demand only of a document that is never written: an SPDX configuration does not
