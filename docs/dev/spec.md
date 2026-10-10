@@ -2774,6 +2774,7 @@ Severity shown is the default and may be changed via `policy.severityOverrides`.
 | `PCH_HEADERS_EXCLUDED` | info | — | Headers removed by `pchHeaders=exclude` |
 | `MISSING_GENERATOR_INPUT_EVIDENCE` | warning | — | Generated file used, generator inputs unknown |
 | `MISSING_PACKAGE_EVIDENCE` | warning | — | Package/image artifact without a manifest |
+| `PACKAGING_OUTPUT_NOT_DELIVERED` | warning | — | A manifest describes a package or image that no configured deliverable reaches, so its inputs are left out |
 | `PACKAGE_NOT_LINKED` | info | — | A package manager installed this dependency, but no used file belongs to it |
 | `STALE_BUILD_EVIDENCE` | error | `failOnStaleBuildArtifacts` | Timestamps or hashes indicate a stale build |
 | `STALE_CMAKE_CONFIGURATION` | warning | `failOnStaleBuildArtifacts` | CMake inputs newer than the File API reply |

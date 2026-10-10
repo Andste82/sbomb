@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### An image nothing delivers is a finding, not an internal error
+
+A build whose manifest describes an image stopped with exit 70 and
+`INTERNAL_INVARIANT_VIOLATION` when the configuration did not name that image
+as a deliverable. The run now finishes, leaves the image's inputs out, and
+reports `PACKAGING_OUTPUT_NOT_DELIVERED` with the image and how to declare it.
+
 ### The same build directory gives the same document on Windows as on Linux
 
 sbomb running on a Windows host read the same evidence differently from
