@@ -119,3 +119,30 @@ func writeTemp(t *testing.T, data []byte) string {
 	}
 	return path
 }
+
+// TestADebugInfoPathIsReadTheSameOnEveryHost: the names in the debug
+// information are paths of the machine the binary was built for. They used to
+// be joined and cleaned with the host's path rules, so on a Windows host a
+// POSIX header came out with backslashes and no longer met the identity the
+// other evidence gave it -- which adapter attached the header then depended on
+// the platform sbomb ran on, and a reproducible SPDX document, which names the
+// contributing adapters, differed between Linux and Windows. Every case here
+// must give the same answer on every host.
+func TestADebugInfoPathIsReadTheSameOnEveryHost(t *testing.T) {
+	for _, tc := range []struct {
+		compDir, name, want string
+	}{
+		{"/__fixture_build__", "/__fixture_src__/crypto.h", "/__fixture_src__/crypto.h"},
+		{"/__fixture_build__", "../__fixture_src__/./inc/../crypto.h", "/__fixture_src__/crypto.h"},
+		{"/__fixture_build__", "main.c", "/__fixture_build__/main.c"},
+		{"", "src/main.c", "src/main.c"},
+		{`C:\__fixture_build__`, `..\src\main.c`, "C:/src/main.c"},
+		{"C:/__fixture_build__", `C:\src\inc\..\crypto.h`, "C:/src/crypto.h"},
+		{`\\server\share\build`, "main.c", "//server/share/build/main.c"},
+		{"/b", "", ""},
+	} {
+		if got := resolvePath(tc.compDir, tc.name); got != tc.want {
+			t.Errorf("resolvePath(%q, %q) = %q, want %q", tc.compDir, tc.name, got, tc.want)
+		}
+	}
+}
