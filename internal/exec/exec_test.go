@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -129,6 +130,9 @@ func TestEveryInvocationIsRecorded(t *testing.T) {
 }
 
 func TestOutputIsBounded(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("the probe runs /bin/echo, which Windows does not have")
+	}
 	runner := &Runner{
 		Features: allFeatures(), Anchors: []string{"/"},
 		Exists:      func(string) bool { return true },
