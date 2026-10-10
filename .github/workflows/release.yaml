@@ -17,9 +17,10 @@ permissions:
   contents: write
 
 # One release per tag at a time, and never cancelled halfway: a publish that
-# stops after the upload and before the checksums leaves a broken release.
+# stops after the upload and before the checksums leaves a broken release. The
+# group uses the bare tag name, which a push and a dispatch both yield.
 concurrency:
-  group: ${{ github.workflow }}-${{ inputs.tag || github.ref }}
+  group: ${{ github.workflow }}-${{ inputs.tag || github.ref_name }}
   cancel-in-progress: false
 
 jobs:
@@ -45,7 +46,7 @@ jobs:
           VERSION: ${{ inputs.tag || github.ref_name }}
         run: echo "tag=$VERSION" >> "$GITHUB_OUTPUT"
 
-      # The gate runs on every push already; these are the two properties that
+      # CI runs on the tag push already; these are the two properties that
       # are specific to a release and would otherwise be claimed rather than
       # checked.
       - name: Reproducible

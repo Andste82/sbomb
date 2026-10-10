@@ -1,22 +1,25 @@
 name: CI
 
-# Every pull request, and main once it has moved. A push to a pull request's
-# branch used to start the same jobs twice, once for the push and once for the
-# pull request.
+# Every pull request, main once it has moved, and every release tag. A push to
+# a pull request's branch used to start the same jobs twice, once for the push
+# and once for the pull request.
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
 
-# A newer push to the same pull request supersedes the run in progress. A run
-# on main always finishes, so every commit there keeps its verdict.
+# A newer push to the same pull request supersedes the run in progress. Any
+# other run has a group of its own: GitHub keeps one pending run per group and
+# cancels the one before it, so a shared group on main would leave a commit
+# without a verdict whenever two merges queue behind a running check.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
   # The universal gate from docs/dev/README.md. Every milestone must
@@ -223,8 +226,10 @@ jobs:
         # 16 s and 725 MiB at this row, 148 s and 3.6 GiB at 50 000 units.
         # Until it is brought within budget the step reports the overrun
         # instead of hiding it.
+        # Its own limit, so that a slow run fails this step rather than the job.
         continue-on-error: true
-        run: go test -tags perf ./test/perf/ -timeout 10m -units 10000 -map-bytes 41943040 -format spdx-json
+        timeout-minutes: 5
+        run: go test -tags perf ./test/perf/ -timeout 4m -units 10000 -map-bytes 41943040 -format spdx-json
 
   # The findings catalogue in the user documentation is generated from appendix
   # A and annotated with what the code emits. Unlike the SPDX list this depends

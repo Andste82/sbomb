@@ -79,12 +79,14 @@ A job never repeats the name of its workflow, and says what it checks rather
 than which command it runs.
 
 Every workflow follows the same rules. `ci` and `determinism` run for every
-pull request and for `main` once it has moved, not for every push to every
-branch, which used to start the same jobs twice for a pull request. A newer
-push to a pull request cancels the run it supersedes; a run on `main` always
-finishes, and so does a release. Every job states a time limit, a few times
-what it takes, so that a hang fails the job instead of holding a runner for
-hours. The actions they use are pinned to the same major version everywhere.
+pull request, for `main` once it has moved and for every release tag, not for
+every push to every branch, which used to start the same jobs twice for a pull
+request. A newer push to a pull request cancels the run it supersedes; every
+other run of theirs has a group of its own, so each commit on `main` gets its
+verdict. A release that has started is never cancelled. Every job states a time
+limit, a few times what it takes, so that a hang fails the job instead of
+holding a runner for hours. Each action is pinned to one major version, the
+same in every workflow.
 
 | Workflow | Runs on | Job | Checks and purpose |
 |---|---|---|---|
