@@ -2325,8 +2325,8 @@ skipped to make the number: a document that was not checked is not written
 (§32.5). CI measures the 10 000-unit row as SPDX on every push, beside the
 blocking CycloneDX row, as a step that reports its overrun without failing the
 job. Bringing it within budget — validating the repetitive extension entries
-without the general schema walk, and streaming the render — is open work,
-recorded in `docs/dev/open-questions.md` (Q22).
+without the general schema walk, and streaming the render — is open work
+(#56).
 
 ## D55 — A listed licence identifier in another case is written as the list spells it
 
