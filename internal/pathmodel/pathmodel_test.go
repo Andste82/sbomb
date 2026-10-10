@@ -130,3 +130,18 @@ func TestAnEvidencePathMeansTheSameFileOnEveryHost(t *testing.T) {
 	host := t.TempDir()
 	same("ResolveEvidence(host, sub/a.c)", ResolveEvidence(host, "sub/a.c"), NormalizeSeparators(filepath.Join(host, "sub", "a.c")))
 }
+
+// TestBothFlavorsReadADotPathAlike: a relative path that cleans to nothing is
+// the directory it is relative to, and ".." above it survives, under either
+// flavor. Since a relative Windows path stays relative, the Windows flavor
+// answered "" for "." -- an identity of no file -- where the POSIX flavor
+// answers "/", so a run given --source-dir . under the Windows flavor lost its
+// source root.
+func TestBothFlavorsReadADotPathAlike(t *testing.T) {
+	for _, p := range []string{".", "./", "a/..", `a\..`, "a/../../b", "..", "../x"} {
+		posix, windows := PosixFlavor{}.Normalize(p), WindowsFlavor{}.Normalize(p)
+		if posix != windows || windows == "" {
+			t.Errorf("Normalize(%q): posix %q, windows %q", p, posix, windows)
+		}
+	}
+}

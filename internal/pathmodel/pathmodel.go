@@ -225,8 +225,15 @@ func normalizeWindows(p string) string {
 		root = strings.ToUpper(p[:1]) + ":/"
 		p = p[2:]
 	}
-	clean := cleanPath(p, "\\")
-	return strings.ReplaceAll(root+strings.TrimPrefix(clean, "\\"), "\\", "/")
+	clean := strings.TrimPrefix(cleanPath(p, "\\"), "\\")
+	// A relative path that cleans to nothing -- ".", "a\.." -- is the
+	// directory it is relative to, and the POSIX flavor spells that "/".
+	// Trimming the separator cleanPath answers with left it empty here, an
+	// identity of no file at all, so the two flavors disagreed about ".".
+	if root == "" && clean == "" {
+		return "/"
+	}
+	return strings.ReplaceAll(root+clean, "\\", "/")
 }
 
 func cleanPath(p, separator string) string {
