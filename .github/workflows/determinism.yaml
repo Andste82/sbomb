@@ -32,12 +32,23 @@ jobs:
         # bash on the Windows runner too: the script is the same one developers
         # run, and rewriting it per platform would test something else.
         shell: bash
+        env:
+          SBOMB_DETERMINISM_KEEP: determinism-documents
         run: scripts/determinism-check.sh > "determinism-${{ matrix.target }}.txt"
       - name: Keep the hash
         uses: actions/upload-artifact@v4
         with:
           name: determinism-${{ matrix.target }}
           path: determinism-${{ matrix.target }}.txt
+      # The documents behind the hashes, so a disagreement in compare can be
+      # diffed instead of guessed at. Named apart from determinism-*, which is
+      # the pattern compare merges.
+      - name: Keep the documents
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: documents-${{ matrix.target }}
+          path: determinism-documents/
 
   compare:
     needs: hash
