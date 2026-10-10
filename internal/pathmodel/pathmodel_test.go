@@ -56,7 +56,7 @@ func TestWindowsFlavorUnescapesNinjaDriveColon(t *testing.T) {
 // absolute path from Linux evidence is absolute when a Windows host reads it,
 // as a Windows drive path is when a Linux host does.
 func TestIsAbsolutePortable(t *testing.T) {
-	for _, path := range []string{"/tmp/build", `C:\\build\\app.obj`, "C:/build/app.obj", `\\\\server\\share\\app.obj`} {
+	for _, path := range []string{"/tmp/build", `C:\build\app.obj`, "C:/build/app.obj", `\\server\share\app.obj`} {
 		if !IsAbsolute(path) {
 			t.Errorf("IsAbsolute(%q) = false, want true", path)
 		}
