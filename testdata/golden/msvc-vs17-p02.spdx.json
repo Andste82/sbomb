@@ -7,15 +7,15 @@
       "specVersion": "3.0.1",
       "created": "2023-11-14T22:13:20Z",
       "createdBy": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#agent:sbomb"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#agent:sbomb"
       ],
       "createdUsing": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#tool:sbomb"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#tool:sbomb"
       ]
     },
     {
       "type": "SpdxDocument",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#document",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#document",
       "creationInfo": "_:creationInfo1",
       "name": "app.exe",
       "extension": [
@@ -61,204 +61,199 @@
         }
       ],
       "element": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#sbom",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#agent:sbomb",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#tool:sbomb",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:project",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-crypto.lib",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-kernel32.dll",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-amdsecgs.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-argv_mode.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-commit_mode.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-cpu_disp.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-default_local_stdio_options.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-denormal_control.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-dyn_tls_dtor.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-dyn_tls_init.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-env_mode.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-error.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-exe_main.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-file_mode.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-gs_report.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-gs_support.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-gshandler.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-guard_dispatch.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-guard_support.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-guard_xfg_dispatch.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-init.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-initsect.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-invalid_parameter_handler.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-matherr.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-matherr_detection.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-new_mode.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-pdblkup.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-thread_locale.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-tncleanup.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-ucrt_detection.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-ucrt_stubs.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-userapi.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-utility.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-utility_desktop.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-ucrtbased.dll",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-vcruntime140d.dll",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#product:app.exe",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:KERNEL32.dll",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(amdsecgs.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(argv_mode.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(commit_mode.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(cpu_disp.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(default_local_stdio_options.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(denormal_control.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(dyn_tls_dtor.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(dyn_tls_init.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(env_mode.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(error.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(exe_main.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(file_mode.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(gs_report.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(gs_support.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(gshandler.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(guard_dispatch.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(guard_support.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(guard_xfg_dispatch.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(init.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(initsect.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(invalid_parameter_handler.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(matherr.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(matherr_detection.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(new_mode.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(pdblkup.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(thread_locale.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(tncleanup.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(ucrt_detection.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(ucrt_stubs.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(userapi.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(utility.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(utility_desktop.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:VCRUNTIME140D.dll",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:crypto.lib",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:ucrtbased.dll",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:project:CRYPTO.C",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:project:MAIN.C",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:1",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:2",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:3",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:4",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:5",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:6",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:7",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:8",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:9",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:10",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:11",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:12",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:13",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:14",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:15",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:16",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:17",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:18",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:19",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:20",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:21",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:22",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:23",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:24",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:25",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:26",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:27",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:28",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:29",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:30",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:31",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:32",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:33",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:34",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:35",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:36",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:37",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:38",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:39",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:40",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:41",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:42",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:43",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:44",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:45",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:46",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:47",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:48",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:49",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:50",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:51",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:52",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:53",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:54",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:55",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:56",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:57",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:58",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:59",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:60",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:61",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:62",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:63",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:64",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:65",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:66",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:67",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:68",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:69",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:70",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:71",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:72",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:73",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:74",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:75",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:76",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:77",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:78",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:79",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:80",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:81",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:82",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:83",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:84",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:85",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:86",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:87",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:88",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:89",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:90",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:91",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:92",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:93",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:94",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:95",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:96",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:97",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:98",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:99",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:100",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:101",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:102",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:103",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:104",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:105",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:106",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:107",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:108",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:109",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:110",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:111",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:112",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:113",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:114",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:115",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:116",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:117"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#sbom",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#agent:sbomb",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#tool:sbomb",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:project",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-kernel32.dll",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-amdsecgs.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-argv_mode.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-commit_mode.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-cpu_disp.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-default_local_stdio_options.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-denormal_control.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-dyn_tls_dtor.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-dyn_tls_init.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-env_mode.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-error.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-exe_main.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-file_mode.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-gs_report.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-gs_support.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-gshandler.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-guard_dispatch.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-guard_support.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-guard_xfg_dispatch.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-init.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-initsect.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-invalid_parameter_handler.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-matherr.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-matherr_detection.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-new_mode.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-pdblkup.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-thread_locale.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-tncleanup.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-ucrt_detection.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-ucrt_stubs.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-userapi.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-utility.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-utility_desktop.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-ucrtbased.dll",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-vcruntime140d.dll",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#product:app.exe",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:KERNEL32.dll",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(amdsecgs.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(argv_mode.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(commit_mode.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(cpu_disp.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(default_local_stdio_options.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(denormal_control.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(dyn_tls_dtor.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(dyn_tls_init.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(env_mode.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(error.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(exe_main.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(file_mode.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(gs_report.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(gs_support.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(gshandler.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(guard_dispatch.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(guard_support.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(guard_xfg_dispatch.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(init.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(initsect.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(invalid_parameter_handler.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(matherr.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(matherr_detection.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(new_mode.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(pdblkup.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(thread_locale.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(tncleanup.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(ucrt_detection.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(ucrt_stubs.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(userapi.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(utility.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(utility_desktop.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:VCRUNTIME140D.dll",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:ucrtbased.dll",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:project:CRYPTO.C",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:project:MAIN.C",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:1",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:2",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:3",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:4",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:5",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:6",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:7",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:8",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:9",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:10",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:11",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:12",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:13",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:14",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:15",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:16",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:17",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:18",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:19",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:20",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:21",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:22",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:23",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:24",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:25",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:26",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:27",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:28",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:29",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:30",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:31",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:32",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:33",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:34",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:35",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:36",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:37",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:38",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:39",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:40",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:41",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:42",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:43",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:44",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:45",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:46",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:47",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:48",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:49",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:50",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:51",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:52",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:53",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:54",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:55",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:56",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:57",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:58",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:59",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:60",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:61",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:62",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:63",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:64",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:65",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:66",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:67",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:68",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:69",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:70",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:71",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:72",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:73",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:74",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:75",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:76",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:77",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:78",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:79",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:80",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:81",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:82",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:83",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:84",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:85",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:86",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:87",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:88",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:89",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:90",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:91",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:92",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:93",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:94",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:95",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:96",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:97",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:98",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:99",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:100",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:101",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:102",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:103",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:104",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:105",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:106",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:107",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:108",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:109",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:110",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:111",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:112",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:113",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:114"
       ],
       "profileConformance": [
         "core",
@@ -266,214 +261,209 @@
         "software"
       ],
       "rootElement": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#sbom"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#sbom"
       ]
     },
     {
       "type": "software_Sbom",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#sbom",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#sbom",
       "creationInfo": "_:creationInfo1",
       "element": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#agent:sbomb",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#tool:sbomb",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:project",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-crypto.lib",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-kernel32.dll",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-amdsecgs.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-argv_mode.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-commit_mode.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-cpu_disp.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-default_local_stdio_options.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-denormal_control.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-dyn_tls_dtor.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-dyn_tls_init.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-env_mode.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-error.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-exe_main.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-file_mode.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-gs_report.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-gs_support.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-gshandler.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-guard_dispatch.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-guard_support.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-guard_xfg_dispatch.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-init.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-initsect.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-invalid_parameter_handler.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-matherr.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-matherr_detection.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-new_mode.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-pdblkup.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-thread_locale.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-tncleanup.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-ucrt_detection.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-ucrt_stubs.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-userapi.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-utility.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-utility_desktop.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-ucrtbased.dll",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-vcruntime140d.dll",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#product:app.exe",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:KERNEL32.dll",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(amdsecgs.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(argv_mode.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(commit_mode.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(cpu_disp.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(default_local_stdio_options.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(denormal_control.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(dyn_tls_dtor.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(dyn_tls_init.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(env_mode.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(error.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(exe_main.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(file_mode.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(gs_report.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(gs_support.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(gshandler.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(guard_dispatch.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(guard_support.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(guard_xfg_dispatch.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(init.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(initsect.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(invalid_parameter_handler.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(matherr.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(matherr_detection.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(new_mode.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(pdblkup.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(thread_locale.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(tncleanup.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(ucrt_detection.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(ucrt_stubs.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(userapi.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(utility.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(utility_desktop.obj)",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:VCRUNTIME140D.dll",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:crypto.lib",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:ucrtbased.dll",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:project:CRYPTO.C",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:project:MAIN.C",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:1",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:2",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:3",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:4",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:5",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:6",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:7",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:8",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:9",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:10",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:11",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:12",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:13",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:14",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:15",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:16",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:17",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:18",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:19",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:20",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:21",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:22",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:23",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:24",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:25",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:26",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:27",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:28",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:29",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:30",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:31",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:32",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:33",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:34",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:35",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:36",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:37",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:38",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:39",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:40",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:41",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:42",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:43",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:44",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:45",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:46",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:47",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:48",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:49",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:50",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:51",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:52",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:53",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:54",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:55",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:56",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:57",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:58",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:59",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:60",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:61",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:62",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:63",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:64",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:65",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:66",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:67",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:68",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:69",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:70",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:71",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:72",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:73",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:74",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:75",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:76",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:77",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:78",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:79",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:80",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:81",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:82",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:83",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:84",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:85",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:86",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:87",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:88",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:89",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:90",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:91",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:92",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:93",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:94",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:95",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:96",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:97",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:98",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:99",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:100",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:101",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:102",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:103",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:104",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:105",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:106",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:107",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:108",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:109",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:110",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:111",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:112",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:113",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:114",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:115",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:116",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:117"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#agent:sbomb",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#tool:sbomb",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:project",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-kernel32.dll",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-amdsecgs.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-argv_mode.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-commit_mode.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-cpu_disp.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-default_local_stdio_options.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-denormal_control.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-dyn_tls_dtor.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-dyn_tls_init.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-env_mode.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-error.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-exe_main.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-file_mode.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-gs_report.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-gs_support.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-gshandler.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-guard_dispatch.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-guard_support.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-guard_xfg_dispatch.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-init.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-initsect.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-invalid_parameter_handler.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-matherr.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-matherr_detection.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-new_mode.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-pdblkup.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-thread_locale.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-tncleanup.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-ucrt_detection.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-ucrt_stubs.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-userapi.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-utility.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-utility_desktop.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-ucrtbased.dll",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-vcruntime140d.dll",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#product:app.exe",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:KERNEL32.dll",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(amdsecgs.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(argv_mode.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(commit_mode.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(cpu_disp.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(default_local_stdio_options.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(denormal_control.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(dyn_tls_dtor.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(dyn_tls_init.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(env_mode.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(error.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(exe_main.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(file_mode.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(gs_report.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(gs_support.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(gshandler.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(guard_dispatch.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(guard_support.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(guard_xfg_dispatch.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(init.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(initsect.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(invalid_parameter_handler.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(matherr.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(matherr_detection.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(new_mode.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(pdblkup.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(thread_locale.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(tncleanup.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(ucrt_detection.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(ucrt_stubs.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(userapi.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(utility.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(utility_desktop.obj)",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:VCRUNTIME140D.dll",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:ucrtbased.dll",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:project:CRYPTO.C",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:project:MAIN.C",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:1",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:2",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:3",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:4",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:5",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:6",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:7",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:8",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:9",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:10",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:11",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:12",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:13",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:14",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:15",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:16",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:17",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:18",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:19",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:20",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:21",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:22",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:23",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:24",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:25",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:26",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:27",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:28",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:29",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:30",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:31",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:32",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:33",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:34",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:35",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:36",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:37",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:38",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:39",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:40",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:41",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:42",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:43",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:44",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:45",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:46",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:47",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:48",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:49",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:50",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:51",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:52",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:53",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:54",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:55",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:56",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:57",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:58",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:59",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:60",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:61",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:62",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:63",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:64",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:65",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:66",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:67",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:68",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:69",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:70",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:71",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:72",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:73",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:74",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:75",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:76",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:77",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:78",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:79",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:80",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:81",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:82",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:83",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:84",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:85",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:86",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:87",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:88",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:89",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:90",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:91",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:92",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:93",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:94",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:95",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:96",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:97",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:98",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:99",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:100",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:101",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:102",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:103",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:104",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:105",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:106",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:107",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:108",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:109",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:110",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:111",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:112",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:113",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:114"
       ],
       "rootElement": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#product:app.exe"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#product:app.exe"
       ],
       "software_sbomType": [
         "build"
@@ -481,13 +471,13 @@
     },
     {
       "type": "Organization",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#agent:sbomb",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#agent:sbomb",
       "creationInfo": "_:creationInfo1",
       "name": "sbomb"
     },
     {
       "type": "Tool",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#tool:sbomb",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#tool:sbomb",
       "creationInfo": "_:creationInfo1",
       "name": "sbomb",
       "extension": [
@@ -505,7 +495,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:project",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:project",
       "creationInfo": "_:creationInfo1",
       "name": "project",
       "extension": [
@@ -589,86 +579,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-crypto.lib",
-      "creationInfo": "_:creationInfo1",
-      "name": "unknown:abs/crypto.lib",
-      "extension": [
-        {
-          "type": "extension_CdxPropertiesExtension",
-          "extension_cdxProperty": [
-            {
-              "type": "extension_CdxPropertyEntry",
-              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
-              "extension_cdxPropValue": "no-archive"
-            },
-            {
-              "type": "extension_CdxPropertyEntry",
-              "extension_cdxPropName": "sbomb:cdx:executableProperty",
-              "extension_cdxPropValue": "non-executable"
-            },
-            {
-              "type": "extension_CdxPropertyEntry",
-              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
-              "extension_cdxPropValue": "structured"
-            },
-            {
-              "type": "extension_CdxPropertyEntry",
-              "extension_cdxPropName": "sbomb:component:detectedBy",
-              "extension_cdxPropValue": "unresolved"
-            },
-            {
-              "type": "extension_CdxPropertyEntry",
-              "extension_cdxPropName": "sbomb:component:distributionRole",
-              "extension_cdxPropValue": "distributed"
-            },
-            {
-              "type": "extension_CdxPropertyEntry",
-              "extension_cdxPropName": "sbomb:component:linkageForm",
-              "extension_cdxPropValue": "static-archive-member"
-            },
-            {
-              "type": "extension_CdxPropertyEntry",
-              "extension_cdxPropName": "sbomb:component:modified",
-              "extension_cdxPropValue": "unknown"
-            },
-            {
-              "type": "extension_CdxPropertyEntry",
-              "extension_cdxPropName": "sbomb:component:scope",
-              "extension_cdxPropValue": "unknown"
-            },
-            {
-              "type": "extension_CdxPropertyEntry",
-              "extension_cdxPropName": "sbomb:component:type",
-              "extension_cdxPropValue": "library"
-            },
-            {
-              "type": "extension_CdxPropertyEntry",
-              "extension_cdxPropName": "sbomb:license:evidenceClass",
-              "extension_cdxPropValue": "unknown"
-            },
-            {
-              "type": "extension_CdxPropertyEntry",
-              "extension_cdxPropName": "sbomb:license:reason",
-              "extension_cdxPropValue": "no-evidence"
-            },
-            {
-              "type": "extension_CdxPropertyEntry",
-              "extension_cdxPropName": "sbomb:license:review",
-              "extension_cdxPropValue": "true"
-            },
-            {
-              "type": "extension_CdxPropertyEntry",
-              "extension_cdxPropName": "sbomb:review:required",
-              "extension_cdxPropValue": "true"
-            }
-          ]
-        }
-      ],
-      "software_primaryPurpose": "library"
-    },
-    {
-      "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-kernel32.dll",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-kernel32.dll",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/KERNEL32.dll",
       "extension": [
@@ -747,7 +658,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib",
       "extension": [
@@ -826,7 +737,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-amdsecgs.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-amdsecgs.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(amdsecgs.obj)",
       "extension": [
@@ -905,7 +816,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-argv_mode.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-argv_mode.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(argv_mode.obj)",
       "extension": [
@@ -984,7 +895,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-commit_mode.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-commit_mode.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(commit_mode.obj)",
       "extension": [
@@ -1063,7 +974,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-cpu_disp.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-cpu_disp.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(cpu_disp.obj)",
       "extension": [
@@ -1142,7 +1053,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-default_local_stdio_options.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-default_local_stdio_options.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(default_local_stdio_options.obj)",
       "extension": [
@@ -1221,7 +1132,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-denormal_control.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-denormal_control.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(denormal_control.obj)",
       "extension": [
@@ -1300,7 +1211,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-dyn_tls_dtor.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-dyn_tls_dtor.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(dyn_tls_dtor.obj)",
       "extension": [
@@ -1379,7 +1290,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-dyn_tls_init.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-dyn_tls_init.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(dyn_tls_init.obj)",
       "extension": [
@@ -1458,7 +1369,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-env_mode.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-env_mode.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(env_mode.obj)",
       "extension": [
@@ -1537,7 +1448,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-error.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-error.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(error.obj)",
       "extension": [
@@ -1616,7 +1527,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-exe_main.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-exe_main.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(exe_main.obj)",
       "extension": [
@@ -1695,7 +1606,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-file_mode.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-file_mode.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(file_mode.obj)",
       "extension": [
@@ -1774,7 +1685,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-gs_report.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-gs_report.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(gs_report.obj)",
       "extension": [
@@ -1853,7 +1764,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-gs_support.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-gs_support.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(gs_support.obj)",
       "extension": [
@@ -1932,7 +1843,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-gshandler.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-gshandler.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(gshandler.obj)",
       "extension": [
@@ -2011,7 +1922,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-guard_dispatch.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-guard_dispatch.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(guard_dispatch.obj)",
       "extension": [
@@ -2090,7 +2001,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-guard_support.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-guard_support.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(guard_support.obj)",
       "extension": [
@@ -2169,7 +2080,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-guard_xfg_dispatch.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-guard_xfg_dispatch.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(guard_xfg_dispatch.obj)",
       "extension": [
@@ -2248,7 +2159,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-init.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-init.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(init.obj)",
       "extension": [
@@ -2327,7 +2238,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-initsect.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-initsect.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(initsect.obj)",
       "extension": [
@@ -2406,7 +2317,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-invalid_parameter_handler.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-invalid_parameter_handler.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(invalid_parameter_handler.obj)",
       "extension": [
@@ -2485,7 +2396,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-matherr.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-matherr.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(matherr.obj)",
       "extension": [
@@ -2564,7 +2475,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-matherr_detection.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-matherr_detection.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(matherr_detection.obj)",
       "extension": [
@@ -2643,7 +2554,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-new_mode.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-new_mode.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(new_mode.obj)",
       "extension": [
@@ -2722,7 +2633,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-pdblkup.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-pdblkup.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(pdblkup.obj)",
       "extension": [
@@ -2801,7 +2712,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-thread_locale.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-thread_locale.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(thread_locale.obj)",
       "extension": [
@@ -2880,7 +2791,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-tncleanup.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-tncleanup.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(tncleanup.obj)",
       "extension": [
@@ -2959,7 +2870,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-ucrt_detection.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-ucrt_detection.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(ucrt_detection.obj)",
       "extension": [
@@ -3038,7 +2949,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-ucrt_stubs.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-ucrt_stubs.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(ucrt_stubs.obj)",
       "extension": [
@@ -3117,7 +3028,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-userapi.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-userapi.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(userapi.obj)",
       "extension": [
@@ -3196,7 +3107,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-utility.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-utility.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(utility.obj)",
       "extension": [
@@ -3275,7 +3186,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-utility_desktop.obj",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-utility_desktop.obj",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/MSVCRTD.lib(utility_desktop.obj)",
       "extension": [
@@ -3354,7 +3265,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-ucrtbased.dll",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-ucrtbased.dll",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/ucrtbased.dll",
       "extension": [
@@ -3433,7 +3344,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-vcruntime140d.dll",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-vcruntime140d.dll",
       "creationInfo": "_:creationInfo1",
       "name": "unknown:abs/VCRUNTIME140D.dll",
       "extension": [
@@ -3512,7 +3423,7 @@
     },
     {
       "type": "software_Package",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#product:app.exe",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#product:app.exe",
       "creationInfo": "_:creationInfo1",
       "name": "app.exe",
       "extension": [
@@ -3551,7 +3462,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:KERNEL32.dll",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:KERNEL32.dll",
       "creationInfo": "_:creationInfo1",
       "name": "abs:KERNEL32.dll",
       "extension": [
@@ -3611,7 +3522,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib",
       "extension": [
@@ -3671,7 +3582,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(amdsecgs.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(amdsecgs.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(amdsecgs.obj)",
       "extension": [
@@ -3731,7 +3642,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(argv_mode.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(argv_mode.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(argv_mode.obj)",
       "extension": [
@@ -3791,7 +3702,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(commit_mode.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(commit_mode.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(commit_mode.obj)",
       "extension": [
@@ -3851,7 +3762,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(cpu_disp.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(cpu_disp.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(cpu_disp.obj)",
       "extension": [
@@ -3911,7 +3822,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(default_local_stdio_options.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(default_local_stdio_options.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(default_local_stdio_options.obj)",
       "extension": [
@@ -3971,7 +3882,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(denormal_control.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(denormal_control.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(denormal_control.obj)",
       "extension": [
@@ -4031,7 +3942,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(dyn_tls_dtor.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(dyn_tls_dtor.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(dyn_tls_dtor.obj)",
       "extension": [
@@ -4091,7 +4002,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(dyn_tls_init.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(dyn_tls_init.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(dyn_tls_init.obj)",
       "extension": [
@@ -4151,7 +4062,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(env_mode.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(env_mode.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(env_mode.obj)",
       "extension": [
@@ -4211,7 +4122,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(error.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(error.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(error.obj)",
       "extension": [
@@ -4271,7 +4182,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(exe_main.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(exe_main.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(exe_main.obj)",
       "extension": [
@@ -4331,7 +4242,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(file_mode.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(file_mode.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(file_mode.obj)",
       "extension": [
@@ -4391,7 +4302,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(gs_report.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(gs_report.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(gs_report.obj)",
       "extension": [
@@ -4451,7 +4362,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(gs_support.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(gs_support.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(gs_support.obj)",
       "extension": [
@@ -4511,7 +4422,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(gshandler.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(gshandler.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(gshandler.obj)",
       "extension": [
@@ -4571,7 +4482,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(guard_dispatch.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(guard_dispatch.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(guard_dispatch.obj)",
       "extension": [
@@ -4631,7 +4542,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(guard_support.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(guard_support.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(guard_support.obj)",
       "extension": [
@@ -4691,7 +4602,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(guard_xfg_dispatch.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(guard_xfg_dispatch.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(guard_xfg_dispatch.obj)",
       "extension": [
@@ -4751,7 +4662,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(init.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(init.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(init.obj)",
       "extension": [
@@ -4811,7 +4722,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(initsect.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(initsect.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(initsect.obj)",
       "extension": [
@@ -4871,7 +4782,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(invalid_parameter_handler.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(invalid_parameter_handler.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(invalid_parameter_handler.obj)",
       "extension": [
@@ -4931,7 +4842,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(matherr.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(matherr.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(matherr.obj)",
       "extension": [
@@ -4991,7 +4902,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(matherr_detection.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(matherr_detection.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(matherr_detection.obj)",
       "extension": [
@@ -5051,7 +4962,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(new_mode.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(new_mode.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(new_mode.obj)",
       "extension": [
@@ -5111,7 +5022,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(pdblkup.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(pdblkup.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(pdblkup.obj)",
       "extension": [
@@ -5171,7 +5082,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(thread_locale.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(thread_locale.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(thread_locale.obj)",
       "extension": [
@@ -5231,7 +5142,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(tncleanup.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(tncleanup.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(tncleanup.obj)",
       "extension": [
@@ -5291,7 +5202,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(ucrt_detection.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(ucrt_detection.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(ucrt_detection.obj)",
       "extension": [
@@ -5351,7 +5262,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(ucrt_stubs.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(ucrt_stubs.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(ucrt_stubs.obj)",
       "extension": [
@@ -5411,7 +5322,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(userapi.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(userapi.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(userapi.obj)",
       "extension": [
@@ -5471,7 +5382,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(utility.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(utility.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(utility.obj)",
       "extension": [
@@ -5531,7 +5442,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(utility_desktop.obj)",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(utility_desktop.obj)",
       "creationInfo": "_:creationInfo1",
       "name": "abs:MSVCRTD.lib(utility_desktop.obj)",
       "extension": [
@@ -5591,7 +5502,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:VCRUNTIME140D.dll",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:VCRUNTIME140D.dll",
       "creationInfo": "_:creationInfo1",
       "name": "abs:VCRUNTIME140D.dll",
       "extension": [
@@ -5651,67 +5562,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:crypto.lib",
-      "creationInfo": "_:creationInfo1",
-      "name": "abs:crypto.lib",
-      "extension": [
-        {
-          "type": "extension_CdxPropertiesExtension",
-          "extension_cdxProperty": [
-            {
-              "type": "extension_CdxPropertyEntry",
-              "extension_cdxPropName": "sbomb:cdx:archiveProperty",
-              "extension_cdxPropValue": "archive"
-            },
-            {
-              "type": "extension_CdxPropertyEntry",
-              "extension_cdxPropName": "sbomb:cdx:executableProperty",
-              "extension_cdxPropValue": "non-executable"
-            },
-            {
-              "type": "extension_CdxPropertyEntry",
-              "extension_cdxPropName": "sbomb:cdx:structuredProperty",
-              "extension_cdxPropValue": "unstructured"
-            },
-            {
-              "type": "extension_CdxPropertyEntry",
-              "extension_cdxPropName": "sbomb:component:scope",
-              "extension_cdxPropValue": "unknown"
-            },
-            {
-              "type": "extension_CdxPropertyEntry",
-              "extension_cdxPropName": "sbomb:file:class",
-              "extension_cdxPropValue": "archive"
-            },
-            {
-              "type": "extension_CdxPropertyEntry",
-              "extension_cdxPropName": "sbomb:file:distributionRole",
-              "extension_cdxPropValue": "distributed"
-            },
-            {
-              "type": "extension_CdxPropertyEntry",
-              "extension_cdxPropName": "sbomb:file:linkageForm",
-              "extension_cdxPropValue": "static-archive-member"
-            },
-            {
-              "type": "extension_CdxPropertyEntry",
-              "extension_cdxPropName": "sbomb:file:missing",
-              "extension_cdxPropValue": "true"
-            },
-            {
-              "type": "extension_CdxPropertyEntry",
-              "extension_cdxPropName": "sbomb:path:canonical",
-              "extension_cdxPropValue": "abs:crypto.lib"
-            }
-          ]
-        }
-      ],
-      "software_primaryPurpose": "archive",
-      "software_fileKind": "file"
-    },
-    {
-      "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:ucrtbased.dll",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:ucrtbased.dll",
       "creationInfo": "_:creationInfo1",
       "name": "abs:ucrtbased.dll",
       "extension": [
@@ -5771,7 +5622,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:project:CRYPTO.C",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:project:CRYPTO.C",
       "creationInfo": "_:creationInfo1",
       "name": "project:CRYPTO.C",
       "extension": [
@@ -5831,7 +5682,7 @@
     },
     {
       "type": "software_File",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:project:MAIN.C",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:project:MAIN.C",
       "creationInfo": "_:creationInfo1",
       "name": "project:MAIN.C",
       "extension": [
@@ -5891,18 +5742,18 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:1",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:1",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:project",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:project",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:project:CRYPTO.C",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:project:MAIN.C"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:project:CRYPTO.C",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:project:MAIN.C"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:2",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:2",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -5921,7 +5772,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:project",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:project",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -5929,17 +5780,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:3",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:3",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-crypto.lib",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-kernel32.dll",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:crypto.lib"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:KERNEL32.dll"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:4",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:4",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -5958,7 +5809,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-crypto.lib",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-kernel32.dll",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -5966,17 +5817,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:5",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:5",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-kernel32.dll",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:KERNEL32.dll"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:6",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:6",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -5995,7 +5846,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-kernel32.dll",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -6003,17 +5854,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:7",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:7",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-amdsecgs.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(amdsecgs.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:8",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:8",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -6032,7 +5883,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-amdsecgs.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -6040,17 +5891,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:9",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:9",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-amdsecgs.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-argv_mode.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(amdsecgs.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(argv_mode.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:10",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:10",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -6069,7 +5920,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-amdsecgs.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-argv_mode.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -6077,17 +5928,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:11",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:11",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-argv_mode.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-commit_mode.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(argv_mode.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(commit_mode.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:12",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:12",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -6106,7 +5957,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-argv_mode.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-commit_mode.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -6114,17 +5965,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:13",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:13",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-commit_mode.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-cpu_disp.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(commit_mode.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(cpu_disp.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:14",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:14",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -6143,7 +5994,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-commit_mode.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-cpu_disp.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -6151,17 +6002,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:15",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:15",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-cpu_disp.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-default_local_stdio_options.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(cpu_disp.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(default_local_stdio_options.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:16",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:16",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -6180,7 +6031,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-cpu_disp.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-default_local_stdio_options.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -6188,17 +6039,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:17",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:17",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-default_local_stdio_options.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-denormal_control.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(default_local_stdio_options.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(denormal_control.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:18",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:18",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -6217,7 +6068,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-default_local_stdio_options.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-denormal_control.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -6225,17 +6076,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:19",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:19",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-denormal_control.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-dyn_tls_dtor.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(denormal_control.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(dyn_tls_dtor.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:20",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:20",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -6254,7 +6105,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-denormal_control.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-dyn_tls_dtor.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -6262,17 +6113,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:21",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:21",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-dyn_tls_dtor.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-dyn_tls_init.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(dyn_tls_dtor.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(dyn_tls_init.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:22",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:22",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -6291,7 +6142,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-dyn_tls_dtor.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-dyn_tls_init.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -6299,17 +6150,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:23",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:23",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-dyn_tls_init.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-env_mode.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(dyn_tls_init.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(env_mode.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:24",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:24",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -6328,7 +6179,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-dyn_tls_init.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-env_mode.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -6336,17 +6187,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:25",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:25",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-env_mode.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-error.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(env_mode.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(error.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:26",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:26",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -6365,7 +6216,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-env_mode.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-error.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -6373,17 +6224,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:27",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:27",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-error.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-exe_main.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(error.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(exe_main.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:28",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:28",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -6402,7 +6253,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-error.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-exe_main.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -6410,17 +6261,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:29",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:29",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-exe_main.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-file_mode.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(exe_main.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(file_mode.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:30",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:30",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -6439,7 +6290,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-exe_main.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-file_mode.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -6447,17 +6298,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:31",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:31",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-file_mode.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-gs_report.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(file_mode.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(gs_report.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:32",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:32",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -6476,7 +6327,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-file_mode.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-gs_report.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -6484,17 +6335,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:33",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:33",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-gs_report.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-gs_support.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(gs_report.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(gs_support.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:34",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:34",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -6513,7 +6364,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-gs_report.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-gs_support.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -6521,17 +6372,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:35",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:35",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-gs_support.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-gshandler.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(gs_support.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(gshandler.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:36",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:36",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -6550,7 +6401,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-gs_support.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-gshandler.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -6558,17 +6409,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:37",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:37",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-gshandler.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-guard_dispatch.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(gshandler.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(guard_dispatch.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:38",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:38",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -6587,7 +6438,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-gshandler.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-guard_dispatch.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -6595,17 +6446,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:39",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:39",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-guard_dispatch.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-guard_support.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(guard_dispatch.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(guard_support.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:40",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:40",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -6624,7 +6475,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-guard_dispatch.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-guard_support.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -6632,17 +6483,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:41",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:41",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-guard_support.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-guard_xfg_dispatch.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(guard_support.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(guard_xfg_dispatch.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:42",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:42",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -6661,7 +6512,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-guard_support.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-guard_xfg_dispatch.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -6669,17 +6520,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:43",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:43",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-guard_xfg_dispatch.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-init.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(guard_xfg_dispatch.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(init.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:44",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:44",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -6698,7 +6549,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-guard_xfg_dispatch.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-init.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -6706,17 +6557,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:45",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:45",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-init.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-initsect.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(init.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(initsect.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:46",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:46",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -6735,7 +6586,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-init.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-initsect.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -6743,17 +6594,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:47",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:47",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-initsect.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-invalid_parameter_handler.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(initsect.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(invalid_parameter_handler.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:48",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:48",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -6772,7 +6623,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-initsect.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-invalid_parameter_handler.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -6780,17 +6631,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:49",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:49",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-invalid_parameter_handler.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-matherr.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(invalid_parameter_handler.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(matherr.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:50",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:50",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -6809,7 +6660,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-invalid_parameter_handler.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-matherr.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -6817,17 +6668,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:51",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:51",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-matherr.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-matherr_detection.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(matherr.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(matherr_detection.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:52",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:52",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -6846,7 +6697,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-matherr.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-matherr_detection.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -6854,17 +6705,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:53",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:53",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-matherr_detection.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-new_mode.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(matherr_detection.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(new_mode.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:54",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:54",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -6883,7 +6734,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-matherr_detection.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-new_mode.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -6891,17 +6742,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:55",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:55",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-new_mode.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-pdblkup.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(new_mode.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(pdblkup.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:56",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:56",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -6920,7 +6771,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-new_mode.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-pdblkup.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -6928,17 +6779,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:57",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:57",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-pdblkup.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-thread_locale.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(pdblkup.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(thread_locale.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:58",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:58",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -6957,7 +6808,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-pdblkup.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-thread_locale.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -6965,17 +6816,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:59",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:59",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-thread_locale.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-tncleanup.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(thread_locale.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(tncleanup.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:60",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:60",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -6994,7 +6845,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-thread_locale.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-tncleanup.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -7002,17 +6853,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:61",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:61",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-tncleanup.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-ucrt_detection.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(tncleanup.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(ucrt_detection.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:62",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:62",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -7031,7 +6882,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-tncleanup.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-ucrt_detection.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -7039,17 +6890,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:63",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:63",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-ucrt_detection.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-ucrt_stubs.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(ucrt_detection.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(ucrt_stubs.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:64",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:64",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -7068,7 +6919,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-ucrt_detection.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-ucrt_stubs.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -7076,17 +6927,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:65",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:65",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-ucrt_stubs.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-userapi.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(ucrt_stubs.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(userapi.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:66",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:66",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -7105,7 +6956,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-ucrt_stubs.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-userapi.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -7113,17 +6964,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:67",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:67",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-userapi.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-utility.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(userapi.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(utility.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:68",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:68",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -7142,7 +6993,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-userapi.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-utility.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -7150,17 +7001,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:69",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:69",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-utility.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-utility_desktop.obj",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(utility.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(utility_desktop.obj)"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:70",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:70",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -7179,7 +7030,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-utility.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-utility_desktop.obj",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -7187,17 +7038,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:71",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:71",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-utility_desktop.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-ucrtbased.dll",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(utility_desktop.obj)"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:ucrtbased.dll"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:72",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:72",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -7216,7 +7067,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-utility_desktop.obj",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-ucrtbased.dll",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -7224,17 +7075,17 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:73",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:73",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-ucrtbased.dll",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-vcruntime140d.dll",
       "relationshipType": "contains",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:ucrtbased.dll"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:VCRUNTIME140D.dll"
       ]
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:74",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:74",
       "creationInfo": "_:creationInfo1",
       "extension": [
         {
@@ -7253,7 +7104,7 @@
           ]
         }
       ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-ucrtbased.dll",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-vcruntime140d.dll",
       "relationshipType": "hasConcludedLicense",
       "to": [
         "expandedlicensing_NoAssertionLicense"
@@ -7261,46 +7112,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:75",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:75",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-vcruntime140d.dll",
-      "relationshipType": "contains",
-      "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:VCRUNTIME140D.dll"
-      ]
-    },
-    {
-      "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:76",
-      "creationInfo": "_:creationInfo1",
-      "extension": [
-        {
-          "type": "extension_CdxPropertiesExtension",
-          "extension_cdxProperty": [
-            {
-              "type": "extension_CdxPropertyEntry",
-              "extension_cdxPropName": "sbomb:license:evidenceClass",
-              "extension_cdxPropValue": "unknown"
-            },
-            {
-              "type": "extension_CdxPropertyEntry",
-              "extension_cdxPropName": "sbomb:license:reason",
-              "extension_cdxPropValue": "no-evidence"
-            }
-          ]
-        }
-      ],
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-vcruntime140d.dll",
-      "relationshipType": "hasConcludedLicense",
-      "to": [
-        "expandedlicensing_NoAssertionLicense"
-      ]
-    },
-    {
-      "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:77",
-      "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:KERNEL32.dll",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:KERNEL32.dll",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7309,9 +7123,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:78",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:76",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7320,9 +7134,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:79",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:77",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(amdsecgs.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(amdsecgs.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7331,9 +7145,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:80",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:78",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(argv_mode.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(argv_mode.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7342,9 +7156,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:81",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:79",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(commit_mode.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(commit_mode.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7353,9 +7167,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:82",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:80",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(cpu_disp.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(cpu_disp.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7364,9 +7178,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:83",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:81",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(default_local_stdio_options.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(default_local_stdio_options.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7375,9 +7189,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:84",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:82",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(denormal_control.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(denormal_control.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7386,9 +7200,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:85",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:83",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(dyn_tls_dtor.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(dyn_tls_dtor.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7397,9 +7211,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:86",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:84",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(dyn_tls_init.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(dyn_tls_init.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7408,9 +7222,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:87",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:85",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(env_mode.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(env_mode.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7419,9 +7233,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:88",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:86",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(error.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(error.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7430,9 +7244,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:89",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:87",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(exe_main.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(exe_main.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7441,9 +7255,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:90",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:88",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(file_mode.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(file_mode.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7452,9 +7266,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:91",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:89",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(gs_report.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(gs_report.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7463,9 +7277,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:92",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:90",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(gs_support.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(gs_support.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7474,9 +7288,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:93",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:91",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(gshandler.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(gshandler.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7485,9 +7299,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:94",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:92",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(guard_dispatch.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(guard_dispatch.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7496,9 +7310,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:95",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:93",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(guard_support.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(guard_support.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7507,9 +7321,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:96",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:94",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(guard_xfg_dispatch.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(guard_xfg_dispatch.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7518,9 +7332,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:97",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:95",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(init.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(init.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7529,9 +7343,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:98",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:96",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(initsect.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(initsect.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7540,9 +7354,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:99",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:97",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(invalid_parameter_handler.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(invalid_parameter_handler.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7551,9 +7365,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:100",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:98",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(matherr.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(matherr.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7562,9 +7376,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:101",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:99",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(matherr_detection.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(matherr_detection.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7573,9 +7387,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:102",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:100",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(new_mode.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(new_mode.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7584,9 +7398,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:103",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:101",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(pdblkup.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(pdblkup.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7595,9 +7409,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:104",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:102",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(thread_locale.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(thread_locale.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7606,9 +7420,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:105",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:103",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(tncleanup.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(tncleanup.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7617,9 +7431,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:106",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:104",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(ucrt_detection.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(ucrt_detection.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7628,9 +7442,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:107",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:105",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(ucrt_stubs.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(ucrt_stubs.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7639,9 +7453,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:108",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:106",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(userapi.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(userapi.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7650,9 +7464,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:109",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:107",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(utility.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(utility.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7661,9 +7475,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:110",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:108",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:MSVCRTD.lib(utility_desktop.obj)",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:MSVCRTD.lib(utility_desktop.obj)",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7672,9 +7486,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:111",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:109",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:VCRUNTIME140D.dll",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:VCRUNTIME140D.dll",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7683,9 +7497,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:112",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:110",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:crypto.lib",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:abs:ucrtbased.dll",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7694,9 +7508,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:113",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:111",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:abs:ucrtbased.dll",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:project:CRYPTO.C",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7705,20 +7519,9 @@
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:114",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:112",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:project:CRYPTO.C",
-      "relationshipType": "dependsOn",
-      "to": [
-        "NoneElement"
-      ],
-      "completeness": "complete"
-    },
-    {
-      "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:115",
-      "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#file:project:MAIN.C",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#file:project:MAIN.C",
       "relationshipType": "dependsOn",
       "to": [
         "NoneElement"
@@ -7727,59 +7530,58 @@
     },
     {
       "type": "LifecycleScopedRelationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:116",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:113",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#product:app.exe",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#product:app.exe",
       "relationshipType": "hasDynamicLink",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-kernel32.dll",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-ucrtbased.dll",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-vcruntime140d.dll"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-kernel32.dll",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-ucrtbased.dll",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-vcruntime140d.dll"
       ],
       "scope": "runtime"
     },
     {
       "type": "Relationship",
-      "spdxId": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#relationship:117",
+      "spdxId": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#relationship:114",
       "creationInfo": "_:creationInfo1",
-      "from": "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#product:app.exe",
+      "from": "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#product:app.exe",
       "relationshipType": "hasStaticLink",
       "to": [
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:project",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-crypto.lib",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-amdsecgs.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-argv_mode.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-commit_mode.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-cpu_disp.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-default_local_stdio_options.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-denormal_control.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-dyn_tls_dtor.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-dyn_tls_init.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-env_mode.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-error.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-exe_main.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-file_mode.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-gs_report.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-gs_support.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-gshandler.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-guard_dispatch.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-guard_support.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-guard_xfg_dispatch.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-init.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-initsect.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-invalid_parameter_handler.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-matherr.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-matherr_detection.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-new_mode.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-pdblkup.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-thread_locale.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-tncleanup.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-ucrt_detection.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-ucrt_stubs.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-userapi.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-utility.obj",
-        "urn:uuid:345a5c28-2238-50b0-a89a-a1a80ad5b4bc#component:unknown-abs-msvcrtd.lib-utility_desktop.obj"
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:project",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-amdsecgs.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-argv_mode.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-commit_mode.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-cpu_disp.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-default_local_stdio_options.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-denormal_control.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-dyn_tls_dtor.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-dyn_tls_init.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-env_mode.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-error.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-exe_main.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-file_mode.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-gs_report.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-gs_support.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-gshandler.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-guard_dispatch.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-guard_support.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-guard_xfg_dispatch.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-init.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-initsect.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-invalid_parameter_handler.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-matherr.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-matherr_detection.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-new_mode.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-pdblkup.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-thread_locale.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-tncleanup.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-ucrt_detection.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-ucrt_stubs.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-userapi.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-utility.obj",
+        "urn:uuid:52281720-5cf6-56d8-b05f-910b7bf2ac1e#component:unknown-abs-msvcrtd.lib-utility_desktop.obj"
       ]
     }
   ]

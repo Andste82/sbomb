@@ -2,7 +2,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "version": 1,
-  "serialNumber": "urn:uuid:c608f762-55c2-5558-b205-13d0a0671eee",
+  "serialNumber": "urn:uuid:4b182601-470c-5357-8681-b320a8f33771",
   "metadata": {
     "tools": [
       {
@@ -1348,41 +1348,6 @@
     },
     {
       "type": "file",
-      "name": "crypto.lib",
-      "bom-ref": "file:abs:crypto.lib",
-      "properties": [
-        {
-          "name": "sbomb:cdx:archiveProperty",
-          "value": "archive"
-        },
-        {
-          "name": "sbomb:cdx:executableProperty",
-          "value": "non-executable"
-        },
-        {
-          "name": "sbomb:cdx:structuredProperty",
-          "value": "unstructured"
-        },
-        {
-          "name": "sbomb:component:scope",
-          "value": "unknown"
-        },
-        {
-          "name": "sbomb:file:distributionRole",
-          "value": "distributed"
-        },
-        {
-          "name": "sbomb:file:linkageForm",
-          "value": "static-archive-member"
-        },
-        {
-          "name": "sbomb:path:canonical",
-          "value": "abs:crypto.lib"
-        }
-      ]
-    },
-    {
-      "type": "file",
       "name": "ucrtbased.dll",
       "bom-ref": "file:abs:ucrtbased.dll",
       "properties": [
@@ -1483,69 +1448,6 @@
         {
           "name": "sbomb:path:canonical",
           "value": "project:MAIN.C"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "unknown:abs/crypto.lib",
-      "bom-ref": "component:unknown-abs-crypto.lib",
-      "scope": "required",
-      "licenses": [
-        {
-          "license": {
-            "name": "NOASSERTION"
-          }
-        }
-      ],
-      "properties": [
-        {
-          "name": "sbomb:cdx:archiveProperty",
-          "value": "no-archive"
-        },
-        {
-          "name": "sbomb:cdx:executableProperty",
-          "value": "non-executable"
-        },
-        {
-          "name": "sbomb:cdx:structuredProperty",
-          "value": "structured"
-        },
-        {
-          "name": "sbomb:component:detectedBy",
-          "value": "unresolved"
-        },
-        {
-          "name": "sbomb:component:distributionRole",
-          "value": "distributed"
-        },
-        {
-          "name": "sbomb:component:linkageForm",
-          "value": "static-archive-member"
-        },
-        {
-          "name": "sbomb:component:modified",
-          "value": "unknown"
-        },
-        {
-          "name": "sbomb:component:scope",
-          "value": "unknown"
-        },
-        {
-          "name": "sbomb:license:evidenceClass",
-          "value": "unknown"
-        },
-        {
-          "name": "sbomb:license:reason",
-          "value": "no-evidence"
-        },
-        {
-          "name": "sbomb:license:review",
-          "value": "true"
-        },
-        {
-          "name": "sbomb:review:required",
-          "value": "true"
         }
       ]
     },
@@ -3827,12 +3729,6 @@
       ]
     },
     {
-      "ref": "component:unknown-abs-crypto.lib",
-      "dependsOn": [
-        "file:abs:crypto.lib"
-      ]
-    },
-    {
       "ref": "component:unknown-abs-kernel32.dll",
       "dependsOn": [
         "file:abs:KERNEL32.dll"
@@ -4154,9 +4050,6 @@
       "ref": "file:abs:VCRUNTIME140D.dll"
     },
     {
-      "ref": "file:abs:crypto.lib"
-    },
-    {
       "ref": "file:abs:ucrtbased.dll"
     },
     {
@@ -4169,7 +4062,6 @@
       "ref": "product:app.exe",
       "dependsOn": [
         "component:project",
-        "component:unknown-abs-crypto.lib",
         "component:unknown-abs-kernel32.dll",
         "component:unknown-abs-msvcrtd.lib",
         "component:unknown-abs-msvcrtd.lib-amdsecgs.obj",
