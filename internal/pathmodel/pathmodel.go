@@ -25,9 +25,16 @@ func (WindowsFlavor) Normalize(path string) string { return normalizeWindows(pat
 func (WindowsFlavor) CaseSensitive() bool          { return false }
 
 // IsAbsolute reports whether a path is absolute under the host OS or in a
-// Windows path spelling carried by cross-platform build evidence.
+// spelling carried by cross-platform build evidence: a Windows drive or UNC
+// path, or a POSIX path from a leading slash. The evidence names paths of the
+// machine that built the project, not of the one reading it, and a POSIX
+// absolute path is absolute there whatever host sbomb runs on. filepath.IsAbs
+// alone said otherwise on a Windows host, so a compilation database's
+// /__fixture_build__ was made absolute against the current drive and its
+// sources were joined under it -- the same evidence read on Windows produced
+// other identities than on Linux.
 func IsAbsolute(path string) bool {
-	if filepath.IsAbs(path) {
+	if filepath.IsAbs(path) || strings.HasPrefix(path, "/") {
 		return true
 	}
 	return len(path) >= 3 && isASCIIAlpha(path[0]) && path[1] == ':' && (path[2] == '/' || path[2] == '\\') || strings.HasPrefix(path, `\\\\`)
