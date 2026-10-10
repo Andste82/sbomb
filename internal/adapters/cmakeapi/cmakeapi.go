@@ -15,6 +15,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/example/sbomb/internal/pathmodel"
 )
 
 // maxReplyFileBytes bounds a single reply file, per specification section 30.
@@ -348,9 +350,11 @@ func ToolchainRoot(compilerPath string) string {
 	if compilerPath == "" {
 		return ""
 	}
-	dir := filepath.Dir(filepath.Clean(compilerPath))
-	if strings.EqualFold(filepath.Base(dir), "bin") {
-		return filepath.Dir(dir)
+	// The compiler path is the File API's, a path of the build machine: it is
+	// taken apart as evidence, not by the rules of the host reading the reply.
+	dir := pathmodel.DirEvidence(compilerPath)
+	if strings.EqualFold(pathmodel.BaseEvidence(dir), "bin") {
+		return pathmodel.DirEvidence(dir)
 	}
 	return dir
 }

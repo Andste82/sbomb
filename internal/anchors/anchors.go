@@ -9,7 +9,6 @@ package anchors
 
 import (
 	"context"
-	"path/filepath"
 	"sort"
 	"strings"
 
@@ -284,7 +283,7 @@ func SysrootFromFlags(flags []string) string {
 }
 
 func sysrootID(path string) string {
-	base := filepath.Base(strings.TrimSuffix(filepath.Clean(path), "/"))
+	base := pathmodel.BaseEvidence(path)
 	if base == "" || base == "." || base == "/" {
 		return "root"
 	}

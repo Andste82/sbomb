@@ -126,11 +126,9 @@ func resolvePath(directory, path string) string {
 	if path == "" {
 		return ""
 	}
-	path = pathmodel.NormalizeSeparators(path)
-	if pathmodel.IsAbsolute(path) || directory == "" {
-		return filepath.Clean(path)
-	}
-	return filepath.Clean(filepath.Join(directory, path))
+	// The entry's directory is the build machine's, recorded in the database
+	// beside the file, so the two are joined as evidence.
+	return pathmodel.JoinEvidence(directory, path)
 }
 
 func expandResponseFiles(args []string, directory string) ([]string, []string, error) {

@@ -1,6 +1,7 @@
 package pathmodel
 
 import (
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -97,4 +98,35 @@ func TestSlugTruncatesWithADigest(t *testing.T) {
 	if got == other {
 		t.Error("two different long names produced the same slug")
 	}
+}
+
+// TestAnEvidencePathMeansTheSameFileOnEveryHost: build evidence names paths of
+// the machine that built the project. A path in a foreign spelling -- POSIX on
+// Windows, Windows on Linux -- is cleaned in slash form by the same rule on
+// every host; one that is the host's own keeps the host's spelling, so that it
+// matches the paths sbomb joins onto a directory it reads. Either way the file
+// is the same, which is what is compared: filepath alone turned /usr/bin/cc
+// into \usr\bin\cc on Windows, and the same evidence gave other identities
+// there than on Linux.
+func TestAnEvidencePathMeansTheSameFileOnEveryHost(t *testing.T) {
+	same := func(name, got, want string) {
+		t.Helper()
+		if NormalizeSeparators(got) != want {
+			t.Errorf("%s = %q, want %q", name, got, want)
+		}
+	}
+	same("CleanEvidence(/usr/lib/../bin/cc)", CleanEvidence("/usr/lib/../bin/cc"), "/usr/bin/cc")
+	same(`CleanEvidence(C:\src\inc\..\a.h)`, CleanEvidence(`C:\src\inc\..\a.h`), "C:/src/a.h")
+	same("CleanEvidence(C:/)", CleanEvidence("C:/"), "C:/")
+	same(`CleanEvidence(\\server\share\x)`, CleanEvidence(`\\server\share\x`), "//server/share/x")
+	same("JoinEvidence(/b, ../src/a.c)", JoinEvidence("/b", "../src/a.c"), "/src/a.c")
+	same("JoinEvidence(/b, /abs/a.c)", JoinEvidence("/b", "/abs/a.c"), "/abs/a.c")
+	same(`JoinEvidence(C:\b, ..\src\a.c)`, JoinEvidence(`C:\b`, `..\src\a.c`), "C:/src/a.c")
+	same(`JoinEvidence(\\server\share, a.c)`, JoinEvidence(`\\server\share`, "a.c"), "//server/share/a.c")
+	same("DirEvidence(/usr/bin/cc)", DirEvidence("/usr/bin/cc"), "/usr/bin")
+	same("DirEvidence(C:/bin)", DirEvidence("C:/bin"), "C:/")
+	same("BaseEvidence(/opt/gcc/bin/)", BaseEvidence("/opt/gcc/bin/"), "bin")
+	same("ResolveEvidence(host, /usr/include/a.h)", ResolveEvidence(t.TempDir(), "/usr/include/a.h"), "/usr/include/a.h")
+	host := t.TempDir()
+	same("ResolveEvidence(host, sub/a.c)", ResolveEvidence(host, "sub/a.c"), NormalizeSeparators(filepath.Join(host, "sub", "a.c")))
 }

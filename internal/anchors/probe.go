@@ -2,7 +2,6 @@ package anchors
 
 import (
 	"context"
-	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
@@ -68,7 +67,7 @@ func parseSearchDirs(output string) toolchainProbe {
 		line = strings.TrimSpace(strings.TrimSuffix(line, "\r"))
 		switch {
 		case strings.HasPrefix(line, "install:"):
-			probe.Root = filepath.Clean(strings.TrimSpace(strings.TrimPrefix(line, "install:")))
+			probe.Root = pathmodel.CleanEvidence(strings.TrimSpace(strings.TrimPrefix(line, "install:")))
 		case strings.HasPrefix(line, "libraries:"):
 			probe.LinkDirs = searchPathEntries(strings.TrimPrefix(line, "libraries:"))
 		}
@@ -83,25 +82,35 @@ func parseSearchDirs(output string) toolchainProbe {
 func (p toolchainProbe) anchorKey() string {
 	name := strings.TrimSpace(strings.Trim(p.Triple+"-"+p.Version, "-"))
 	if name == "" {
-		name = filepath.Base(p.Root)
+		name = pathmodel.BaseEvidence(p.Root)
 	}
 	return "toolchain:" + pathmodel.Slug(name, 64)
 }
 
 // searchPathEntries splits one -print-search-dirs value. GCC writes a leading
-// "=" for the sysroot prefix and separates the directories with the platform's
-// path separator; the entries carry ".." segments that Clean removes, so that
-// two spellings of one directory do not become two anchors.
+// "=" for the sysroot prefix and separates the directories with the path list
+// separator of the platform the compiler runs on; the entries carry ".."
+// segments that cleaning removes, so that two spellings of one directory do
+// not become two anchors.
+//
+// The separator is read off the answer, not off the host: a MinGW GCC writes
+// C:/... entries joined by ";", a POSIX GCC /... entries joined by ":". The
+// host's own list separator split a POSIX answer into nothing on Windows, and
+// a single Windows entry would fall apart at its drive colon on Linux.
 func searchPathEntries(value string) []string {
 	value = strings.TrimSpace(value)
 	value = strings.TrimPrefix(value, "=")
+	separator := ":"
+	if strings.Contains(value, ";") || (len(value) >= 3 && value[1] == ':' && (value[2] == '/' || value[2] == '\\')) {
+		separator = ";"
+	}
 	out := make([]string, 0, 8)
-	for _, entry := range strings.Split(value, string(filepath.ListSeparator)) {
+	for _, entry := range strings.Split(value, separator) {
 		entry = strings.TrimSpace(entry)
 		if entry == "" {
 			continue
 		}
-		out = append(out, filepath.Clean(entry))
+		out = append(out, pathmodel.CleanEvidence(entry))
 	}
 	return out
 }

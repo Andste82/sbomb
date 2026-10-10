@@ -3,6 +3,7 @@ package pathmodel
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -44,6 +45,88 @@ func IsAbsolute(path string) bool {
 // host-side path joining and comparison.
 func NormalizeSeparators(path string) string {
 	return strings.ReplaceAll(path, "\\", "/")
+}
+
+// CleanEvidence cleans a path as build evidence records it. A path that is
+// absolute in the host's own spelling is cleaned by the host's rules, exactly
+// like the paths sbomb joins onto a directory it reads, so that one file has
+// one spelling on that host. A path in a foreign spelling -- a POSIX path read
+// on Windows, a Windows path read on Linux -- is cleaned in slash form, by the
+// same rule on every host: filepath would clean it by the rules of the machine
+// reading it, and on a Windows host /usr/bin/cc became \usr\bin\cc, so the
+// same evidence produced other identities than on Linux. A drive root keeps
+// its slash and a UNC path its second leading one, which path.Clean alone
+// would drop.
+func CleanEvidence(p string) string {
+	if p == "" {
+		return ""
+	}
+	// A UNC path is foreign anywhere but on Windows, and filepath on another
+	// host would fold its two leading slashes into one.
+	if slashed := NormalizeSeparators(p); strings.HasPrefix(slashed, "//") && runtime.GOOS != "windows" {
+		return "/" + path.Clean(slashed)
+	}
+	if filepath.IsAbs(p) {
+		return filepath.Clean(p)
+	}
+	p = NormalizeSeparators(p)
+	clean := path.Clean(p)
+	if len(clean) == 2 && clean[1] == ':' && isASCIIAlpha(clean[0]) {
+		return clean + "/"
+	}
+	return clean
+}
+
+// JoinEvidence joins a path recorded in build evidence to the evidence
+// directory it is relative to -- a compilation database's directory, a debug
+// unit's compilation directory. Both are paths of the build machine; when the
+// directory is absolute in the host's spelling the two are joined by the
+// host's rules, otherwise in slash form, as CleanEvidence would clean the
+// result. An absolute path stands on its own.
+func JoinEvidence(dir, p string) string {
+	if IsAbsolute(p) || dir == "" {
+		return CleanEvidence(p)
+	}
+	if filepath.IsAbs(dir) && !strings.HasPrefix(NormalizeSeparators(dir), "//") {
+		return filepath.Clean(filepath.Join(dir, p))
+	}
+	return CleanEvidence(NormalizeSeparators(dir) + "/" + NormalizeSeparators(p))
+}
+
+// ResolveEvidence resolves a path recorded in build evidence against the
+// directory on this host it is relative to. An absolute path is a path of the
+// build machine and is cleaned as evidence; a relative one names a file below
+// hostDir that is about to be read here, and is joined by the host's rules.
+func ResolveEvidence(hostDir, p string) string {
+	if IsAbsolute(p) || hostDir == "" {
+		return CleanEvidence(p)
+	}
+	return filepath.Clean(filepath.Join(hostDir, NormalizeSeparators(p)))
+}
+
+// DirEvidence is the directory of a path as build evidence records it, taken
+// apart by the rules CleanEvidence cleaned it by.
+func DirEvidence(p string) string {
+	clean := CleanEvidence(p)
+	switch {
+	case filepath.IsAbs(clean):
+		return filepath.Dir(clean)
+	case strings.HasPrefix(clean, "//"):
+		return "/" + path.Dir(clean[1:])
+	case len(clean) >= 3 && clean[1] == ':' && isASCIIAlpha(clean[0]) && !strings.Contains(clean[3:], "/"):
+		return clean[:3]
+	}
+	return path.Dir(clean)
+}
+
+// BaseEvidence is the last element of a path as build evidence records it,
+// taken apart by the rules CleanEvidence cleaned it by.
+func BaseEvidence(p string) string {
+	clean := CleanEvidence(p)
+	if filepath.IsAbs(clean) {
+		return filepath.Base(clean)
+	}
+	return path.Base(clean)
 }
 
 func isASCIIAlpha(value byte) bool {
