@@ -119,13 +119,18 @@ func (Writer) Validate(r io.Reader) error {
 }
 
 // Validate runs both layers section 32.5 requires: the official JSON Schema,
-// then the semantic checks a schema cannot express.
+// then the semantic checks a schema cannot express. It judges a document
+// against the specification it declares and nothing else (section 36.1).
 func Validate(data []byte) error {
 	if err := ValidateAgainstSchema(data); err != nil {
 		return err
 	}
 	return ValidateDocument(data)
 }
+
+// CheckOutput holds a document sbomb wrote to the invariants of its own
+// output, on top of Validate (section 36.1).
+func (Writer) CheckOutput(data []byte) error { return CheckDocument(data) }
 
 // Build turns a format-neutral document into a CycloneDX BOM. All bom-ref
 // derivation lives here, per section 36.1: the document itself carries none.

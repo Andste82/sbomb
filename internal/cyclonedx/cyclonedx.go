@@ -26,13 +26,14 @@ type BOM struct {
 	SerialNumber string       `json:"serialNumber,omitempty"`
 	Metadata     *Metadata    `json:"metadata,omitempty"`
 	Components   []Component  `json:"components,omitempty"`
+	Services     []Service    `json:"services,omitempty"`
 	Dependencies []Dependency `json:"dependencies,omitempty"`
 	Properties   []Property   `json:"properties,omitempty"`
 }
 
 type Metadata struct {
 	Timestamp string     `json:"timestamp,omitempty"`
-	Tools     []Tool     `json:"tools,omitempty"`
+	Tools     Tools      `json:"tools,omitempty"`
 	Component *Component `json:"component,omitempty"`
 	// DistributionConstraints is CycloneDX 1.7 and later. It is written only
 	// when the configuration sets it; an absent constraint is silence, not
@@ -50,6 +51,54 @@ type Tool struct {
 	Vendor  string `json:"vendor,omitempty"`
 	Name    string `json:"name"`
 	Version string `json:"version,omitempty"`
+}
+
+// Tools is metadata.tools. sbomb writes the array of tools, which 1.6 and 1.7
+// still accept; the schema prefers the object form {components, services},
+// which other tools write, so both are read. An object reads as the tools it
+// lists, each by its name and version and the organisation behind it.
+type Tools []Tool
+
+func (t *Tools) UnmarshalJSON(data []byte) error {
+	if trimmed := bytes.TrimSpace(data); len(trimmed) > 0 && trimmed[0] == '{' {
+		type entity struct {
+			Name string `json:"name"`
+		}
+		type tool struct {
+			Name         string  `json:"name"`
+			Version      string  `json:"version"`
+			Group        string  `json:"group"`
+			Supplier     *entity `json:"supplier"`
+			Manufacturer *entity `json:"manufacturer"`
+			Provider     *entity `json:"provider"`
+		}
+		var object struct {
+			Components []tool `json:"components"`
+			Services   []tool `json:"services"`
+		}
+		if err := json.Unmarshal(data, &object); err != nil {
+			return err
+		}
+		tools := make(Tools, 0, len(object.Components)+len(object.Services))
+		for _, entry := range append(object.Components, object.Services...) {
+			vendor := entry.Group
+			for _, organisation := range []*entity{entry.Supplier, entry.Manufacturer, entry.Provider} {
+				if organisation != nil && organisation.Name != "" {
+					vendor = organisation.Name
+					break
+				}
+			}
+			tools = append(tools, Tool{Vendor: vendor, Name: entry.Name, Version: entry.Version})
+		}
+		*t = tools
+		return nil
+	}
+	var tools []Tool
+	if err := json.Unmarshal(data, &tools); err != nil {
+		return err
+	}
+	*t = tools
+	return nil
 }
 
 type Component struct {
@@ -88,6 +137,17 @@ type Component struct {
 	Pedigree   *Pedigree  `json:"pedigree,omitempty"`
 	Properties []Property `json:"properties,omitempty"`
 	Evidence   *Evidence  `json:"evidence,omitempty"`
+	// Components nests the components this one contains. sbomb writes a flat
+	// array (section 28.3); other tools nest, and a bom-ref in there is one a
+	// dependency may name.
+	Components []Component `json:"components,omitempty"`
+}
+
+// Service is read so that its bom-ref counts as one; sbomb writes none.
+type Service struct {
+	BomRef   string    `json:"bom-ref,omitempty"`
+	Name     string    `json:"name,omitempty"`
+	Services []Service `json:"services,omitempty"`
 }
 
 // Pedigree carries the component's ancestry. sbomb fills the three parts it
@@ -443,6 +503,9 @@ func ValidateFile(path string) error {
 	return Validate(data)
 }
 
+// ValidateDocument holds a document to the rules of the specification it
+// declares that its schema cannot express. It does not hold it to how sbomb
+// writes (CheckDocument): a conformant document somebody else wrote passes.
 func ValidateDocument(data []byte) error {
 	var bom BOM
 	if err := json.Unmarshal(data, &bom); err != nil {
@@ -460,17 +523,8 @@ func ValidateDocument(data []byte) error {
 	if bom.Version < 1 {
 		return fmt.Errorf("invalid version")
 	}
-	if bom.Metadata == nil {
-		return fmt.Errorf("metadata is required")
-	}
-	if len(bom.Metadata.Tools) == 0 {
-		return fmt.Errorf("metadata.tools is required")
-	}
-	if bom.Metadata.Timestamp != "" && !isRFC3339Timestamp(bom.Metadata.Timestamp) {
+	if bom.Metadata != nil && bom.Metadata.Timestamp != "" && !isRFC3339Timestamp(bom.Metadata.Timestamp) {
 		return fmt.Errorf("metadata.timestamp must be RFC3339")
-	}
-	if err := validateRootComponent(bom); err != nil {
-		return err
 	}
 	if err := validateUniqueRefs(bom); err != nil {
 		return err
@@ -484,28 +538,88 @@ func ValidateDocument(data []byte) error {
 	if err := validatePURLs(bom); err != nil {
 		return err
 	}
-	if err := validateProperties(bom); err != nil {
+	return validateExternalReferences(bom)
+}
+
+// CheckDocument holds a document sbomb wrote to the invariants of how it
+// writes, beyond what CycloneDX requires of any document: it names the tool
+// that wrote it and the product it describes (sections 28.2, 28.3), every
+// bom-ref has its own dependencies entry (section 28.5), and every property
+// keeps to the namespace of appendix B. Writer.CheckOutput runs it when sbomb
+// writes a document; validate never does.
+func CheckDocument(data []byte) error {
+	var bom BOM
+	if err := json.Unmarshal(data, &bom); err != nil {
 		return err
 	}
-	return nil
+	if bom.Metadata == nil {
+		return fmt.Errorf("metadata is required")
+	}
+	if len(bom.Metadata.Tools) == 0 {
+		return fmt.Errorf("metadata.tools is required")
+	}
+	if err := validateRootComponent(bom); err != nil {
+		return err
+	}
+	if err := checkDependencyEntries(bom); err != nil {
+		return err
+	}
+	return validateProperties(bom)
+}
+
+// eachComponent visits every component of the document, the root and nested
+// ones included.
+func eachComponent(bom BOM, visit func(Component) error) error {
+	var walk func([]Component) error
+	walk = func(components []Component) error {
+		for _, comp := range components {
+			if err := visit(comp); err != nil {
+				return err
+			}
+			if err := walk(comp.Components); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+	if bom.Metadata != nil && bom.Metadata.Component != nil {
+		if err := walk([]Component{*bom.Metadata.Component}); err != nil {
+			return err
+		}
+	}
+	return walk(bom.Components)
+}
+
+// bomRefs lists every bom-ref the document declares, on a component or a
+// service at any depth, in document order.
+func bomRefs(bom BOM) []string {
+	refs := make([]string, 0, len(bom.Components)+1)
+	eachComponent(bom, func(comp Component) error {
+		if comp.BomRef != "" {
+			refs = append(refs, comp.BomRef)
+		}
+		return nil
+	})
+	var walk func([]Service)
+	walk = func(services []Service) {
+		for _, service := range services {
+			if service.BomRef != "" {
+				refs = append(refs, service.BomRef)
+			}
+			walk(service.Services)
+		}
+	}
+	walk(bom.Services)
+	return refs
 }
 
 func validateUniqueRefs(bom BOM) error {
 	seen := make(map[string]struct{}, len(bom.Components)+1)
-	for _, comp := range bom.Components {
-		if comp.BomRef == "" {
-			continue
+	for _, ref := range bomRefs(bom) {
+		if _, ok := seen[ref]; ok {
+			return fmt.Errorf("duplicate bom-ref: %s", ref)
 		}
-		if _, ok := seen[comp.BomRef]; ok {
-			return fmt.Errorf("duplicate bom-ref: %s", comp.BomRef)
-		}
-		seen[comp.BomRef] = struct{}{}
-	}
-	if bom.Metadata != nil && bom.Metadata.Component != nil && bom.Metadata.Component.BomRef != "" {
-		if _, ok := seen[bom.Metadata.Component.BomRef]; ok {
-			return fmt.Errorf("duplicate bom-ref: %s", bom.Metadata.Component.BomRef)
-		}
-		seen[bom.Metadata.Component.BomRef] = struct{}{}
+		seen[ref] = struct{}{}
 	}
 	dependencyRefs := make(map[string]struct{}, len(bom.Dependencies))
 	for _, dep := range bom.Dependencies {
@@ -521,15 +635,9 @@ func validateUniqueRefs(bom BOM) error {
 }
 
 func validateDependencies(bom BOM) error {
-	refs := make(map[string]struct{}, len(bom.Components)+len(bom.Dependencies))
-	for _, comp := range bom.Components {
-		if comp.BomRef == "" {
-			continue
-		}
-		refs[comp.BomRef] = struct{}{}
-	}
-	if bom.Metadata != nil && bom.Metadata.Component != nil && bom.Metadata.Component.BomRef != "" {
-		refs[bom.Metadata.Component.BomRef] = struct{}{}
+	refs := make(map[string]struct{}, len(bom.Components)+1)
+	for _, ref := range bomRefs(bom) {
+		refs[ref] = struct{}{}
 	}
 	for _, dep := range bom.Dependencies {
 		if _, ok := refs[dep.Ref]; !ok {
@@ -541,15 +649,19 @@ func validateDependencies(bom BOM) error {
 			}
 		}
 	}
-	// Section 28.5: every bom-ref must appear exactly once as a dependency
-	// entry, even when it depends on nothing, so that a consumer can close the
-	// graph. Checking the component refs against themselves, as this did
-	// before, proves nothing.
+	return nil
+}
+
+// checkDependencyEntries is section 28.5: every bom-ref must appear exactly
+// once as a dependency entry, even when it depends on nothing, so that a
+// consumer can close the graph. Checking the component refs against
+// themselves, as this did before, proves nothing.
+func checkDependencyEntries(bom BOM) error {
 	declared := make(map[string]struct{}, len(bom.Dependencies))
 	for _, dep := range bom.Dependencies {
 		declared[dep.Ref] = struct{}{}
 	}
-	for ref := range refs {
+	for _, ref := range bomRefs(bom) {
 		if _, ok := declared[ref]; !ok {
 			return fmt.Errorf("bom-ref %q has no dependencies entry; section 28.5 requires one for every component", ref)
 		}
@@ -575,14 +687,14 @@ func validateRootComponent(bom BOM) error {
 }
 
 func validateHashes(bom BOM) error {
-	for _, comp := range bom.Components {
+	return eachComponent(bom, func(comp Component) error {
 		for _, h := range comp.Hashes {
 			if err := validateHashValue(h.Alg, h.Value); err != nil {
 				return fmt.Errorf("component %q hash invalid: %w", comp.BomRef, err)
 			}
 		}
-	}
-	return nil
+		return nil
+	})
 }
 
 func validateHashValue(alg, value string) error {
@@ -622,18 +734,15 @@ func hashLengthFor(alg string) int {
 }
 
 func validatePURLs(bom BOM) error {
-	for _, comp := range bom.Components {
+	return eachComponent(bom, func(comp Component) error {
 		if comp.PURL == "" {
-			continue
+			return nil
 		}
-		if !strings.HasPrefix(comp.PURL, "pkg:") {
+		if !strings.HasPrefix(comp.PURL, "pkg:") || strings.Contains(comp.PURL, " ") {
 			return fmt.Errorf("bad purl: %s", comp.PURL)
 		}
-		if strings.Contains(comp.PURL, " ") {
-			return fmt.Errorf("bad purl: %s", comp.PURL)
-		}
-	}
-	return nil
+		return nil
+	})
 }
 
 func validateProperties(bom BOM) error {
@@ -656,9 +765,6 @@ func validateProperties(bom BOM) error {
 		// A property bag on an external reference is still a property bag; the
 		// catalogue of appendix B governs it exactly as it governs the others.
 		for _, reference := range comp.ExternalReferences {
-			if reference.URL == "" || reference.Type == "" {
-				return fmt.Errorf("component %q has an external reference without a url or type", comp.BomRef)
-			}
 			for _, p := range reference.Properties {
 				if err := validatePropertyName(p.Name); err != nil {
 					return fmt.Errorf("component %q external reference %q: %w", comp.BomRef, reference.Type, err)
@@ -667,6 +773,19 @@ func validateProperties(bom BOM) error {
 		}
 	}
 	return nil
+}
+
+// validateExternalReferences: the specification requires a url and a type of
+// every external reference.
+func validateExternalReferences(bom BOM) error {
+	return eachComponent(bom, func(comp Component) error {
+		for _, reference := range comp.ExternalReferences {
+			if reference.URL == "" || reference.Type == "" {
+				return fmt.Errorf("component %q has an external reference without a url or type", comp.BomRef)
+			}
+		}
+		return nil
+	})
 }
 
 // validatePropertyName is the namespace rule every writer holds its

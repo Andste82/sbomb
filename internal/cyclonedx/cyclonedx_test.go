@@ -2,6 +2,8 @@ package cyclonedx
 
 import (
 	"encoding/json"
+	"fmt"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -122,5 +124,69 @@ func TestValidateDocumentRejectsDanglingDependencyRef(t *testing.T) {
 	}`)
 	if err := ValidateDocument(data); err == nil {
 		t.Fatal("ValidateDocument() accepted a dangling dependency reference")
+	}
+}
+
+// thirdPartyDocument is conformant CycloneDX the way other tools write it:
+// tools in the object form, nested components, a service, no dependencies
+// entry for every component, and properties in a namespace of their own.
+const thirdPartyDocument = `{
+	"bomFormat": "CycloneDX",
+	"specVersion": "%s",
+	"version": 1,
+	"serialNumber": "urn:uuid:123e4567-e89b-12d3-a456-426614174000",
+	"metadata": {
+		"timestamp": "2026-09-04T00:00:00Z",
+		"tools": {
+			"components": [{"type": "application", "name": "other-tool", "version": "2.1", "supplier": {"name": "Other Inc."}}],
+			"services": [{"name": "scanner", "version": "1"}]
+		},
+		"component": {"type": "application", "name": "app", "bom-ref": "app"}
+	},
+	"components": [{
+		"type": "library", "name": "outer", "bom-ref": "outer",
+		"properties": [{"name": "acme:origin", "value": "vendored"}],
+		"components": [{"type": "library", "name": "inner", "bom-ref": "inner", "purl": "pkg:generic/inner@1"}]
+	}],
+	"services": [{"bom-ref": "api", "name": "api"}],
+	"dependencies": [{"ref": "app", "dependsOn": ["outer", "inner", "api"]}]
+}`
+
+// Q23: validate judges a document against the specification it declares,
+// not against how sbomb writes, so a conformant third-party document passes.
+func TestValidateAcceptsAConformantThirdPartyDocument(t *testing.T) {
+	for _, version := range supportedVersions {
+		data := []byte(fmt.Sprintf(thirdPartyDocument, version))
+		if err := Validate(data); err != nil {
+			t.Errorf("CycloneDX %s: Validate() = %v, want a conformant document to pass", version, err)
+		}
+		if err := CheckDocument(data); err == nil {
+			t.Errorf("CycloneDX %s: CheckDocument() accepted a document sbomb would not write", version)
+		}
+	}
+}
+
+func TestToolsReadInBothForms(t *testing.T) {
+	var object Metadata
+	if err := json.Unmarshal([]byte(`{"tools": {"components": [{"name": "a", "version": "1", "group": "g"}], "services": [{"name": "b", "provider": {"name": "P"}}]}}`), &object); err != nil {
+		t.Fatal(err)
+	}
+	want := Tools{{Vendor: "g", Name: "a", Version: "1"}, {Vendor: "P", Name: "b"}}
+	if !reflect.DeepEqual(object.Tools, want) {
+		t.Errorf("object form = %#v, want %#v", object.Tools, want)
+	}
+	var array Metadata
+	if err := json.Unmarshal([]byte(`{"tools": [{"vendor": "v", "name": "a", "version": "1"}]}`), &array); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(array.Tools, Tools{{Vendor: "v", Name: "a", Version: "1"}}) {
+		t.Errorf("array form = %#v", array.Tools)
+	}
+}
+
+func TestValidateRejectsADuplicateNestedBomRef(t *testing.T) {
+	data := []byte(strings.Replace(fmt.Sprintf(thirdPartyDocument, Version16), `"bom-ref": "inner"`, `"bom-ref": "outer"`, 1))
+	if err := ValidateDocument(data); err == nil {
+		t.Fatal("ValidateDocument() accepted a bom-ref declared twice")
 	}
 }

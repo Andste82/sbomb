@@ -439,12 +439,15 @@ SPDX 2.3, which has none.
 
 **Two checks, two questions.** Every document is checked against the
 specification it declares, on the exact bytes about to be written: the official
-schema, and the rules a schema cannot express. For SPDX these are two separate
+schema, and the rules a schema cannot express. These are two separate
 questions. The specification permits things sbomb never does — a reference to
-an element defined in another document, for one — so the conformance check
-accepts them, and `validate` asks only that question: a correct document
-another tool wrote passes. A document sbomb writes is then also held to what
-sbomb promises beyond conformance — every reference resolves inside the
+an element defined in another SPDX document, nested CycloneDX components, a
+component without a dependencies entry — so the conformance check accepts them,
+and `validate` asks only that question: a correct document another tool wrote
+passes. A document sbomb writes is then also held to what sbomb promises beyond
+conformance. In CycloneDX it names the tool and the product, lists every
+component with what it depends on, and keeps its properties to sbomb's
+namespace. In SPDX every reference resolves inside the
 document, every element is reachable from the product, every licence name is
 defined, and the profiles the document claims are exactly the ones it uses,
 except the extension profile, which SPDX's 3.0.1 context makes unclaimable in a

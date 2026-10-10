@@ -506,24 +506,17 @@ confirmed as it shipped (#57):
 What remains of the SPDX path's performance is D54. The number stays reserved
 so that references to it keep their meaning.
 
-## Q23 — `validate` still holds a CycloneDX document to how sbomb writes
+## Q23 — reserved
 
-§36.1 says `Validate` judges a document against the specification it declares,
-and that what sbomb promises beyond conformance belongs in `CheckOutput`, which
-`validate` never runs. The SPDX writer is split that way. The CycloneDX writer
-is not: its one check still applies three of sbomb's own writing rules to every
-document.
-
-* `metadata` is required, and `metadata.tools` must be a non-empty array. The
-  1.6 schema requires neither, and prefers the object form
-  `{components, services}` for tools, which sbomb cannot decode at all.
-* Every component needs its own dependencies entry (§28.5). The schema does not
-  ask for one.
-* The `sbomb:` property namespace rules.
-
-So `validate` refuses conformant CycloneDX documents other tools commonly
-write. The fix is the SPDX split: keep the schema and the specification's own
-rules in `Validate`, move these three into a CycloneDX `CheckOutput`, and read
-the object form of `metadata.tools`. It is open because it changes what
-`validate` accepts for the default format, which deserves its own change and
-its own changelog entry rather than a line in the SPDX one.
+**Settled: `validate` asks the specification's question for CycloneDX too.**
+The CycloneDX writer is split the way the SPDX writer is (§36.1). `Validate`
+keeps the schema and the rules of the specification a schema cannot express:
+unique bom-refs at every depth, dependencies that name a declared component or
+service, well-formed hashes and purls. `CheckOutput` holds what sbomb promises
+beyond that -- `metadata` with the tool that wrote it and the product it
+describes (§28.2, §28.3), a dependencies entry for every bom-ref (§28.5), and
+the property namespace of appendix B -- and runs on everything sbomb writes,
+never under `validate`. `metadata.tools` is read in the object form
+`{components, services}` as well as the array sbomb writes, and nested
+components and services count as the bom-refs they declare. The number stays
+reserved so that references to it keep their meaning.
