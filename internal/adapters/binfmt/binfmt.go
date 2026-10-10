@@ -9,7 +9,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
-	"path"
 	"sort"
 	"strings"
 
@@ -306,31 +305,12 @@ func peSectionData(f *pe.File, rva uint32) ([]byte, int, bool) {
 
 // resolvePath joins a DWARF file name to its compilation directory. Both are
 // paths of the machine the binary was built for, not of the one reading it, so
-// they are joined and cleaned in slash form rather than with the host's path
-// rules: on a Windows host filepath turned /__fixture_src__/crypto.h into
-// \__fixture_src__\crypto.h, the header no longer met the identity the other
-// evidence gave it, and which adapter attached a header depended on the
-// platform sbomb ran on. A Windows spelling in the debug information (MinGW
-// writes either separator) comes out in the same slash form, which every path
-// flavor reads.
+// they are joined as evidence, by the same rule on every host.
 func resolvePath(compDir, name string) string {
 	if name == "" {
 		return ""
 	}
-	name = pathmodel.NormalizeSeparators(name)
-	if pathmodel.IsAbsolute(name) || compDir == "" {
-		return cleanSlashed(name)
-	}
-	return cleanSlashed(pathmodel.NormalizeSeparators(compDir) + "/" + name)
-}
-
-// cleanSlashed is path.Clean that keeps the second leading slash of a UNC
-// path, which path.Clean would fold into the first.
-func cleanSlashed(name string) string {
-	if strings.HasPrefix(name, "//") {
-		return "/" + path.Clean(name)
-	}
-	return path.Clean(name)
+	return pathmodel.JoinEvidence(compDir, name)
 }
 
 func finding(id, message string) domain.Finding {

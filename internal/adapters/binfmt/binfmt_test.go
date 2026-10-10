@@ -1,8 +1,10 @@
 package binfmt
 
 import (
+	"github.com/example/sbomb/internal/pathmodel"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -18,8 +20,18 @@ func TestInspectCurrentTestBinary(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if result.Format != FormatELF {
-		t.Fatalf("format = %q, want ELF", result.Format)
+	// The test binary is whatever the host builds: PE on Windows, ELF on
+	// Linux. A host whose executables are neither has nothing to inspect here.
+	want := FormatELF
+	switch runtime.GOOS {
+	case "windows":
+		want = FormatPE
+	case "linux", "freebsd", "netbsd", "openbsd":
+	default:
+		t.Skipf("%s executables are neither ELF nor PE", runtime.GOOS)
+	}
+	if result.Format != want {
+		t.Fatalf("format = %q, want %q", result.Format, want)
 	}
 	if len(result.CompilationUnits) == 0 {
 		t.Skip("test binary was built without DWARF")
@@ -141,7 +153,10 @@ func TestADebugInfoPathIsReadTheSameOnEveryHost(t *testing.T) {
 		{`\\server\share\build`, "main.c", "//server/share/build/main.c"},
 		{"/b", "", ""},
 	} {
-		if got := resolvePath(tc.compDir, tc.name); got != tc.want {
+		// A path that is absolute in the host's own spelling keeps that
+		// spelling -- C:\src\main.c on Windows -- so the file is compared,
+		// not its separators.
+		if got := pathmodel.NormalizeSeparators(resolvePath(tc.compDir, tc.name)); got != tc.want {
 			t.Errorf("resolvePath(%q, %q) = %q, want %q", tc.compDir, tc.name, got, tc.want)
 		}
 	}

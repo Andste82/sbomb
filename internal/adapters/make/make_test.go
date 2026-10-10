@@ -1,6 +1,7 @@
 package make
 
 import (
+	"github.com/example/sbomb/internal/pathmodel"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -55,7 +56,9 @@ func TestParseTargetEvidence(t *testing.T) {
 }
 
 func TestResolvePathAcceptsWindowsAbsolutePathsOnLinux(t *testing.T) {
-	if got := resolvePath("/build", "C:/__fixture_src__/main.c"); got != "C:/__fixture_src__/main.c" {
+	// On a Windows host the path is the host's own and keeps its spelling;
+	// what is asserted is that it is not joined onto the build directory.
+	if got := pathmodel.NormalizeSeparators(resolvePath("/build", "C:/__fixture_src__/main.c")); got != "C:/__fixture_src__/main.c" {
 		t.Fatalf("resolvePath() = %q, want C:/__fixture_src__/main.c", got)
 	}
 }
@@ -125,7 +128,13 @@ func TestParseMSVCObjectDependencyList(t *testing.T) {
 		t.Fatal(err)
 	}
 	object := filepath.Join(root, "CMakeFiles", "app.dir", "main.c.obj")
-	if got := target.ObjectDeps[object]; !reflect.DeepEqual(got, []string{"C:/__fixture_src__/main.h"}) {
+	// The header is a Windows path, the host's own on a Windows host, where it
+	// keeps its spelling; the file is compared, not its separators.
+	got := target.ObjectDeps[object]
+	for index := range got {
+		got[index] = pathmodel.NormalizeSeparators(got[index])
+	}
+	if !reflect.DeepEqual(got, []string{"C:/__fixture_src__/main.h"}) {
 		t.Fatalf("ObjectDeps[%q] = %#v, want the MSVC header list", object, got)
 	}
 }

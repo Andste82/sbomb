@@ -383,12 +383,12 @@ func looksLikeSource(path string) bool {
 	// only on Windows, but CMake emits them as written, so compare lowercased.
 	return sourceExtensions[strings.ToLower(filepath.Ext(path))]
 }
+
+// resolvePath resolves a path a Makefile names against the build directory on
+// this host: an absolute one is a path of the build machine, a relative one a
+// file below the build directory that is read here.
 func resolvePath(base, path string) string {
-	path = pathmodel.NormalizeSeparators(path)
-	if pathmodel.IsAbsolute(path) {
-		return filepath.Clean(path)
-	}
-	return filepath.Clean(filepath.Join(base, path))
+	return pathmodel.ResolveEvidence(base, path)
 }
 func resolvePaths(base string, paths []string) []string {
 	result := make([]string, 0, len(paths))
