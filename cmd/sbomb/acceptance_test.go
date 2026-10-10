@@ -233,6 +233,68 @@ func TestMilestone18BMSBuildAcceptance(t *testing.T) {
 	assertGolden(t, "msvc-vs17-p02.cdx.json", actual)
 }
 
+// The MSVC assembly from the corpus: an executable and a firmware image packed
+// by a custom command, both named by their bare names in the configuration and
+// the image named by its full path in the packaging manifest (section 18).
+// Under the Windows path flavor a bare name used to be rooted while it was
+// normalized, so it never met the build root: the deliverable became
+// abs:filesystem.img, the manifest's output build:filesystem.img, and the run
+// stopped on an image node nothing delivered. Both now meet under the build
+// anchor, and the chain reaches the assets through the image.
+//
+// The same run holds the other half of the rule. link.exe's map names its
+// runtime library and the DLLs it imports by bare name too, and those were
+// found on the library search path, not in the build directory: they stay
+// unanchored instead of being claimed as the project's build output.
+func TestAnMSVCAssemblyReachesItsImageThroughTheManifest(t *testing.T) {
+	directory := t.TempDir()
+	configPath := filepath.Join(directory, "sbomb.json")
+	config := `{
+  "schemaVersion": 1,
+  "project": {"name": "p12-assets", "root": "C:/__fixture_src__"},
+  "build": {"dir": "C:/__fixture_build__"},
+  "mode": "assembly",
+  "artifacts": [
+    {"path": "imgapp.exe", "role": "application"},
+    {"path": "filesystem.img", "role": "image"}
+  ]
+}`
+	if err := os.WriteFile(configPath, []byte(config), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	output := filepath.Join(directory, "out.cdx.json")
+	code, _, stderr := execute([]string{"generate",
+		"--build-dir", testutil.CorpusBuildDir(t, "msvc-ninja", "p12-assets"),
+		"--config", configPath, "--path-flavor", "windows", "--policy", "lenient",
+		"--source-dir", filepath.Join("..", "..", "tools", "fixtures", "projects", "p12-assets"),
+		"--output", output, "--reproducible"})
+	if code != 0 || stderr != "" {
+		t.Fatalf("generate = code %d, stderr %q", code, stderr)
+	}
+
+	got := fileAttributes(t, output)
+	for ref, expected := range map[string][2]string{
+		"file:project:assets/index.html":  {"distributed", "embedded-asset"},
+		"file:build:generated/config.bin": {"distributed", "embedded-asset"},
+		"file:project:assets/config.yaml": {"build-time-only", "build-tool"},
+		"file:project:main.c":             {"distributed", "static-object"},
+	} {
+		if got[ref] != expected {
+			t.Errorf("%s = %v, want %v", ref, got[ref], expected)
+		}
+	}
+	for ref := range got {
+		if strings.Contains(strings.ToLower(ref), "msvcrtd.lib") || strings.Contains(strings.ToLower(ref), "kernel32.dll") {
+			if !strings.HasPrefix(ref, "file:abs:") {
+				t.Errorf("%s is anchored, want the searched library left unanchored", ref)
+			}
+		}
+	}
+	if _, found := got["file:abs:MSVCRTD.lib(init.obj)"]; !found {
+		t.Errorf("the runtime library's extracted members are missing: %v", got)
+	}
+}
+
 // TestEvidenceChainYieldsTheSameFilesAcrossToolchains is the phase 2
 // acceptance criterion. The same project built with five different toolchain
 // and generator combinations must yield the same used-file set, because the

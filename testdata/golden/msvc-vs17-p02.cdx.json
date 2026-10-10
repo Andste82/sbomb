@@ -2,7 +2,7 @@
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
   "version": 1,
-  "serialNumber": "urn:uuid:78634475-c060-5909-b099-d317edf23f60",
+  "serialNumber": "urn:uuid:c608f762-55c2-5558-b205-13d0a0671eee",
   "metadata": {
     "tools": [
       {
@@ -1383,41 +1383,6 @@
     },
     {
       "type": "file",
-      "name": "main.obj",
-      "bom-ref": "file:abs:main.obj",
-      "properties": [
-        {
-          "name": "sbomb:cdx:archiveProperty",
-          "value": "no-archive"
-        },
-        {
-          "name": "sbomb:cdx:executableProperty",
-          "value": "non-executable"
-        },
-        {
-          "name": "sbomb:cdx:structuredProperty",
-          "value": "unstructured"
-        },
-        {
-          "name": "sbomb:component:scope",
-          "value": "unknown"
-        },
-        {
-          "name": "sbomb:file:distributionRole",
-          "value": "distributed"
-        },
-        {
-          "name": "sbomb:file:linkageForm",
-          "value": "static-object"
-        },
-        {
-          "name": "sbomb:path:canonical",
-          "value": "abs:main.obj"
-        }
-      ]
-    },
-    {
-      "type": "file",
       "name": "ucrtbased.dll",
       "bom-ref": "file:abs:ucrtbased.dll",
       "properties": [
@@ -1620,69 +1585,6 @@
         {
           "name": "sbomb:component:linkageForm",
           "value": "dynamic"
-        },
-        {
-          "name": "sbomb:component:modified",
-          "value": "unknown"
-        },
-        {
-          "name": "sbomb:component:scope",
-          "value": "unknown"
-        },
-        {
-          "name": "sbomb:license:evidenceClass",
-          "value": "unknown"
-        },
-        {
-          "name": "sbomb:license:reason",
-          "value": "no-evidence"
-        },
-        {
-          "name": "sbomb:license:review",
-          "value": "true"
-        },
-        {
-          "name": "sbomb:review:required",
-          "value": "true"
-        }
-      ]
-    },
-    {
-      "type": "library",
-      "name": "unknown:abs/main.obj",
-      "bom-ref": "component:unknown-abs-main.obj",
-      "scope": "required",
-      "licenses": [
-        {
-          "license": {
-            "name": "NOASSERTION"
-          }
-        }
-      ],
-      "properties": [
-        {
-          "name": "sbomb:cdx:archiveProperty",
-          "value": "no-archive"
-        },
-        {
-          "name": "sbomb:cdx:executableProperty",
-          "value": "non-executable"
-        },
-        {
-          "name": "sbomb:cdx:structuredProperty",
-          "value": "structured"
-        },
-        {
-          "name": "sbomb:component:detectedBy",
-          "value": "unresolved"
-        },
-        {
-          "name": "sbomb:component:distributionRole",
-          "value": "distributed"
-        },
-        {
-          "name": "sbomb:component:linkageForm",
-          "value": "static-object"
         },
         {
           "name": "sbomb:component:modified",
@@ -3937,12 +3839,6 @@
       ]
     },
     {
-      "ref": "component:unknown-abs-main.obj",
-      "dependsOn": [
-        "file:abs:main.obj"
-      ]
-    },
-    {
       "ref": "component:unknown-abs-msvcrtd.lib",
       "dependsOn": [
         "file:abs:MSVCRTD.lib"
@@ -4261,9 +4157,6 @@
       "ref": "file:abs:crypto.lib"
     },
     {
-      "ref": "file:abs:main.obj"
-    },
-    {
       "ref": "file:abs:ucrtbased.dll"
     },
     {
@@ -4278,7 +4171,6 @@
         "component:project",
         "component:unknown-abs-crypto.lib",
         "component:unknown-abs-kernel32.dll",
-        "component:unknown-abs-main.obj",
         "component:unknown-abs-msvcrtd.lib",
         "component:unknown-abs-msvcrtd.lib-amdsecgs.obj",
         "component:unknown-abs-msvcrtd.lib-argv_mode.obj",

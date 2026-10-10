@@ -117,12 +117,20 @@ func normalizeWindows(p string) string {
 		return "/"
 	}
 	p = strings.ReplaceAll(p, "/", "\\")
-	root := "/"
+	// A relative path stays relative, exactly as it does under the POSIX
+	// flavor. Rooting it here would make "imgapp.exe" read as "/imgapp.exe",
+	// and every caller that joins a relative path onto its base directory
+	// asks first whether the path is absolute: the answer would be yes, the
+	// join would be skipped, and the file would be identified against no root
+	// at all (section 7.3). Only a path that names a root keeps one.
+	root := ""
 	if len(p) >= 3 && p[1] == '$' && p[2] == ':' {
 		p = p[:1] + p[2:]
 	}
 	if strings.HasPrefix(p, "\\\\") {
 		root = "//"
+	} else if strings.HasPrefix(p, "\\") {
+		root = "/"
 	} else if len(p) >= 2 && p[1] == ':' {
 		root = strings.ToUpper(p[:1]) + ":/"
 		p = p[2:]
