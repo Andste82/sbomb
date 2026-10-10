@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+### `validate` accepts conformant CycloneDX from other tools
+
+`sbomb validate` held every CycloneDX document to how sbomb writes, not only
+to the specification, and so refused documents other tools commonly write. It
+now asks only whether the document is correct CycloneDX 1.6 or 1.7:
+
+- `metadata` and `metadata.tools` are optional, and `metadata.tools` is read in
+  the object form `{components, services}` the schema prefers.
+- A component needs no dependencies entry of its own.
+- Properties outside sbomb's namespace are not judged.
+- Nested components and services count as the bom-refs they declare, so a
+  dependency may name them.
+
+A document sbomb writes is still held to all of this before it is written.
+
 ### An image nothing delivers is a finding, not an internal error
 
 A build whose manifest describes an image stopped with exit 70 and

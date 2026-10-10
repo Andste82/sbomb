@@ -164,8 +164,8 @@ func TestTheWriterDescribesItself(t *testing.T) {
 		describer.OmitsTimestamp(Version16, sbomwriter.Options{}) {
 		t.Error("OmitsTimestamp does not follow reproducible")
 	}
-	if _, ok := writer.(sbomwriter.OutputChecker); ok {
-		t.Error("the CycloneDX writer checks its output in Validate already; a second checker would run it twice")
+	if _, ok := writer.(sbomwriter.OutputChecker); !ok {
+		t.Error("the CycloneDX writer does not hold its own output to how it writes")
 	}
 	provider := writer.(sbomwriter.SchemaProvider)
 	for _, version := range []string{"", Version16, Version17} {

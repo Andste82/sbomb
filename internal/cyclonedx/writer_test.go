@@ -195,28 +195,28 @@ func TestSchemaValidationRejectsAnInvalidComponentType(t *testing.T) {
 	}
 }
 
-func TestSemanticValidationRejectsAMissingRootComponent(t *testing.T) {
+func TestOutputCheckRejectsAMissingRootComponent(t *testing.T) {
 	bom := buildSample(t, true)
 	bom.Metadata.Component = nil
 	serialized, err := MarshalBOM(bom)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := ValidateDocument([]byte(serialized)); err == nil {
-		t.Fatal("a document without a root component passed semantic validation")
+	if err := CheckDocument([]byte(serialized)); err == nil {
+		t.Fatal("a document without a root component passed the output check")
 	}
 }
 
-func TestSemanticValidationRejectsAnIncompleteDependencyGraph(t *testing.T) {
+func TestOutputCheckRejectsAnIncompleteDependencyGraph(t *testing.T) {
 	bom := buildSample(t, true)
 	bom.Dependencies = bom.Dependencies[:1]
 	serialized, err := MarshalBOM(bom)
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = ValidateDocument([]byte(serialized))
+	err = CheckDocument([]byte(serialized))
 	if err == nil {
-		t.Fatal("a document missing dependency entries passed semantic validation")
+		t.Fatal("a document missing dependency entries passed the output check")
 	}
 	if !strings.Contains(err.Error(), "28.5") {
 		t.Errorf("the error does not explain which rule was broken: %v", err)
