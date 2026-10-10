@@ -78,10 +78,19 @@ otherwise yields two different documents by design (section 7.3).
 A job never repeats the name of its workflow, and says what it checks rather
 than which command it runs.
 
+Every workflow follows the same rules. `ci` and `determinism` run for every
+pull request and for `main` once it has moved, not for every push to every
+branch, which used to start the same jobs twice for a pull request. A newer
+push to a pull request cancels the run it supersedes; a run on `main` always
+finishes, and so does a release. Every job states a time limit, a few times
+what it takes, so that a hang fails the job instead of holding a runner for
+hours. The actions they use are pinned to the same major version everywhere.
+
 | Workflow | Runs on | Job | Checks and purpose |
 |---|---|---|---|
-| `ci` | push, pull request | `gate` | Builds with and without network, vets, tests and formats; proves ordinary source changes remain buildable and clean. |
+| `ci` | `main`, pull request | `gate` | Builds with and without network, vets, tests and formats; proves ordinary source changes remain buildable and clean. |
 | | | `race` | Runs with cgo and the race detector; checks concurrent evidence collection for data races. |
+| | | `windows-tests` | Runs the whole test suite on a Windows host; sbomb reads evidence written on one platform while it runs on another, and a path rule that holds on Linux can fail there. A test that cannot mean anything on Windows skips and says why. |
 | | | `corpus` | Checks complete, portable fixtures and verifies tests leave them unchanged; protects committed golden inputs. |
 | | | `foss-outputs` | Compares the fixture's four attribution outputs against their goldens and runs the action's attribution command; the notices format has no schema, so nothing else would notice a drift. |
 | | | `msvc-corpus` | Regenerates MSVC/Ninja fixtures on Windows and parses them; proves native evidence coverage still works. |
@@ -90,7 +99,10 @@ than which command it runs.
 | | | `spdx-conformance` | Holds every SPDX golden document to the SPDX project's own validators: an independent JSON schema validator and the SHACL model, with every Python package pinned, the validation engines they depend on included (`scripts/spdx-conformance-requirements.txt`); known-bad probes must fail, one with a schema defect the JSON schema validator must refuse and others the SHACL check must refuse, so that neither validator could pass by accepting everything. sbomb checks its documents itself, but those rules are a paraphrase of the model, and this catches a paraphrase wrong in the same way as the writer. |
 | | | `spdx-drift` | Runs `spdxgen --check` against current SPDX data; verifies generated hashes and templates stay current so known licenses do not become `NOASSERTION` (informational). |
 | | | `end-to-end` | Runs the real CMake integration with a toolchain; catches wiring errors package tests cannot exercise. |
-| `determinism` | push, pull request | `hash` | Repeats the same build on Linux and Windows targets, as CycloneDX 1.6 and 1.7 and as SPDX 3.0.1 with a pinned `SOURCE_DATE_EPOCH`; detects timestamps or ordering that change output. |
+| | | `install-script` | Runs `install.sh` against the real published release on Linux and macOS, the way a new user does. |
+| | | `install-script-windows` | The same for `install.ps1` on Windows. |
+| | | `cmake-fetchcontent` | Pulls the CMake bundle built from this tree through FetchContent and lets it fetch the published binary; checks that path before a release carries it. |
+| `determinism` | `main`, pull request | `hash` | Repeats the same build on Linux and Windows targets, as CycloneDX 1.6 and 1.7 and as SPDX 3.0.1 with a pinned `SOURCE_DATE_EPOCH`, and a Windows-flavor unity build six times in both formats; detects timestamps or ordering that change output. Keeps the documents it hashed, so a disagreement can be diffed. |
 | | | `compare` | Compares hashes across platforms; proves equivalent evidence produces equivalent SBOM bytes. |
 | `release` | `v*` tag | `publish` | Rebuilds five targets, validates versions, checksums and self-SBOMs, then publishes; protects the release artifact set. |
 | `smoke-test` | called by `release` | `run` | Downloads and runs the published binaries on Linux and Windows; catches packaging or upload errors source CI cannot see. |

@@ -1,20 +1,32 @@
 name: CI
 
+# Every pull request, and main once it has moved. A push to a pull request's
+# branch used to start the same jobs twice, once for the push and once for the
+# pull request.
 on:
   push:
+    branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
+
+# A newer push to the same pull request supersedes the run in progress. A run
+# on main always finishes, so every commit there keeps its verdict.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   # The universal gate from docs/dev/README.md. Every milestone must
   # leave the repository in a state where all four of these succeed.
   gate:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
       - name: Builds without network
@@ -40,11 +52,12 @@ jobs:
   # so this job overrides it rather than dropping the requirement.
   race:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       CGO_ENABLED: 1
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
       - name: No data races
@@ -58,9 +71,10 @@ jobs:
   # Windows skips with its reason rather than being left out of this job.
   windows-tests:
     runs-on: windows-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
       - name: Tests pass
@@ -71,9 +85,10 @@ jobs:
   # toolchains of the devcontainer and is therefore a developer task.
   corpus:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
       - name: Complete
@@ -102,9 +117,10 @@ jobs:
   # and leaves four files" is the property a release pipeline depends on.
   foss-outputs:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
       - name: The four attribution outputs are unchanged
@@ -162,9 +178,10 @@ jobs:
   # are not compared: windows-latest updates CMake and MSVC independently.
   msvc-corpus:
     runs-on: windows-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
       - name: Regenerate MSVC fixtures
@@ -191,9 +208,10 @@ jobs:
   #   go test -tags perf ./test/perf/ -timeout 15m
   performance-budget:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
       - name: 10 000 translation units within budget
@@ -216,9 +234,10 @@ jobs:
   # Both keep a document from describing something other than the tool.
   documentation:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
       - name: Findings match the code and the specification
@@ -261,12 +280,13 @@ jobs:
   # ships to users.
   spdx-conformance:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - name: Install the pinned validators
@@ -331,10 +351,11 @@ jobs:
   # a reason to block a pull request. It is checked separately for that reason.
   spdx-drift:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
       - name: Matches the upstream SPDX list
@@ -344,9 +365,10 @@ jobs:
   # real cmake on PATH.
   end-to-end:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
       - name: Against a real toolchain
@@ -361,8 +383,9 @@ jobs:
       matrix:
         runner: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.runner }}
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Clean, and parses as POSIX sh
         if: runner.os == 'Linux'
         run: |
@@ -447,9 +470,10 @@ jobs:
   # carries it -- the binary it downloads is the real published release.
   cmake-fetchcontent:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
       - name: Build the bundle
@@ -770,8 +794,9 @@ jobs:
 
   install-script-windows:
     runs-on: windows-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Installs the latest release
         shell: pwsh
         run: |
