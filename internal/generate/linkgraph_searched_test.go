@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/example/sbomb/internal/adapters/linkers/mapparser"
 	"github.com/example/sbomb/internal/anchors"
 	"github.com/example/sbomb/internal/evidence"
 	"github.com/example/sbomb/internal/pathmodel"
@@ -68,5 +69,52 @@ func TestALinkCommandNamesASearchedLibraryAsTheMapWould(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+// TestABareLibraryNameIsTheArchiveTheBuildProduced: link.exe's map names a
+// library by bare name whether it came from the build or from the LIB search
+// path, and the map does not record which directory it was found in. The
+// build graph does: an archive the build produced under that name is that
+// archive, in whatever subdirectory, and a project library handed over with
+// /LIBPATH must not be taken for a system library. Only the top of the build
+// directory used to be looked at, and case-sensitively, so a library built in
+// a subdirectory, or spelled FOO.lib by the map while the build wrote foo.lib,
+// became an unanchored system library and its members lost their objects.
+// The answers must not depend on the host: a case-insensitive file system
+// would otherwise keep the map's spelling where Linux keeps the disk's.
+func TestABareLibraryNameIsTheArchiveTheBuildProduced(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "Top.lib"), []byte("x"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	registry, err := anchors.Assemble(anchors.Options{Flavor: pathmodel.WindowsFlavor{}, ProjectRoot: filepath.Join(dir, "src"), BuildRoot: dir})
+	if err != nil {
+		t.Fatal(err)
+	}
+	b := newBuilder(evidence.New(), registry, dir, dir, NewLogger(0, nil))
+	b.archiveInputs["build:sub/foo.lib"] = []string{"sub/foo.obj"}
+	b.archiveInputs["build:one/dup.lib"] = []string{"one/dup.obj"}
+	b.archiveInputs["build:two/dup.lib"] = []string{"two/dup.obj"}
+
+	for _, tc := range []struct {
+		name, path string
+		searched   bool
+	}{
+		{"foo.lib", "sub/foo.lib", false},
+		{"FOO.LIB", "sub/foo.lib", false},
+		{"top.lib", "Top.lib", false},
+		{"kernel32.lib", "kernel32.lib", true},
+		// Two produced archives of one name cannot be told apart from it, so
+		// neither is claimed; with no file of that name at the top of the
+		// build directory, the name is left to the search path.
+		{"dup.lib", "dup.lib", true},
+		// A name with a directory in it is a path the evidence gives.
+		{`sub\foo.lib`, `sub\foo.lib`, false},
+	} {
+		path, searched := b.libraryLocation(mapparser.FormatMSVC, tc.name)
+		if path != tc.path || searched != tc.searched {
+			t.Errorf("%s: path %q searched %v, want %q %v", tc.name, path, searched, tc.path, tc.searched)
+		}
 	}
 }

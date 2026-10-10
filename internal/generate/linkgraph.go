@@ -107,10 +107,14 @@ type builder struct {
 	// same bare name is another file when the linker found it on its search
 	// path, so the two answers must not share a key.
 	searchedIdentified map[string]identity
-	// searchedLibraries memoizes searchedLibrary per name. A map names its
+	// libraryLocations memoizes libraryLocation per name. A map names its
 	// runtime archive once for every member it extracted, and the answer to
-	// whether that archive lies in the build directory is the same each time.
-	searchedLibraries map[string]bool
+	// where that archive lies is the same each time.
+	libraryLocations map[string]libraryLocated
+	// buildEntries maps the lower-cased names at the top of the build
+	// directory to their spelling on disk, read once when a Windows-flavor
+	// name has to be found without regard to case.
+	buildEntries map[string]string
 	// refusedReads holds the identities whose MISSING_FILE_HASH records a
 	// refused read, so that reconsiderPhysical withdraws exactly that finding
 	// when a later spelling of the file can be read -- by identity, not by
@@ -158,7 +162,7 @@ func newBuilder(graph *evidence.Graph, anchorResult *anchors.Result, logicalBuil
 
 		identified:          map[string]identity{},
 		searchedIdentified:  map[string]identity{},
-		searchedLibraries:   map[string]bool{},
+		libraryLocations:    map[string]libraryLocated{},
 		refusedReads:        map[string]bool{},
 		absoluteBuildPrefix: absoluteBuildPrefix,
 	}
@@ -569,22 +573,24 @@ func (b *builder) collectLinkEvidence(deliverable Deliverable, buildDir, mapPath
 			switch record.Kind {
 			case mapparser.ArchiveMember:
 				members++
+				archive, searched := b.libraryLocation(result.Format, record.Archive)
 				inputs = append(inputs, linkInput{
 					Path:     record.Path,
 					Kind:     domain.NodeArchiveMember,
-					Archive:  record.Archive,
+					Archive:  archive,
 					Member:   record.Member,
 					Source:   result.Format + ":" + filepath.Base(path),
 					Adapter:  "linker-map",
-					Searched: b.searchedLibrary(result.Format, record.Archive),
+					Searched: searched,
 				})
 			case mapparser.StaticArchive, mapparser.SharedLibrary:
+				library, searched := b.libraryLocation(result.Format, record.Path)
 				inputs = append(inputs, linkInput{
-					Path:     record.Path,
+					Path:     library,
 					Kind:     kindForPath(record.Path),
 					Source:   result.Format + ":" + filepath.Base(path),
 					Adapter:  "linker-map",
-					Searched: b.searchedLibrary(result.Format, record.Path),
+					Searched: searched,
 				})
 			case mapparser.LinkedObject:
 				inputs = append(inputs, linkInput{
@@ -610,7 +616,8 @@ func (b *builder) collectLinkEvidence(deliverable Deliverable, buildDir, mapPath
 	// here; a missing log is a normal degradation, not a failed build.
 	if data, err := os.ReadFile(filepath.Join(buildDir, "build.log")); err == nil {
 		for _, record := range mapparser.ParseMSVCVerbose(string(data)) {
-			canonical, _ := b.identifyLinkInput(record.Path, b.searchedLibrary(mapparser.FormatMSVC, record.Archive))
+			_, searched := b.libraryLocation(mapparser.FormatMSVC, record.Archive)
+			canonical, _ := b.identifyLinkInput(record.Path, searched)
 			b.discardedObjects[canonical]++
 		}
 	}
@@ -620,12 +627,13 @@ func (b *builder) collectLinkEvidence(deliverable Deliverable, buildDir, mapPath
 		// system recorded it. Weaker than a map, because it names what was
 		// offered to the linker rather than what the linker used.
 		for _, input := range b.reconstructedLinks[filepath.Base(deliverable.Path)] {
+			library, searched := b.linkCommandLocation(input)
 			inputs = append(inputs, linkInput{
-				Path:     input,
+				Path:     library,
 				Kind:     kindForPath(input),
 				Source:   "buildsystem:link-command",
 				Adapter:  "make",
-				Searched: b.searchedLinkCommandInput(input),
+				Searched: searched,
 			})
 		}
 		if len(inputs) > 0 {
@@ -705,38 +713,104 @@ func readMap(path string) (mapparser.Result, error) {
 	return result, result.Err
 }
 
-// searchedLibrary reports whether a library named in a linker map was found on
-// the linker's search path. link.exe's map names a library by its bare name
-// ("MSVCRTD:init.obj", "kernel32:KERNEL32.dll") whether it came from the
-// build directory or from a LIB directory, so the name alone cannot say which.
-// The build directory can: a bare name that is not a file there was not taken
-// from there. A name with a directory in it is a path the evidence gives, and
-// the other map formats name every library by such a path.
-func (b *builder) searchedLibrary(format, path string) bool {
-	if format != mapparser.FormatMSVC || path == "" || strings.ContainsAny(path, "/\\") {
-		return false
-	}
-	if searched, known := b.searchedLibraries[path]; known {
-		return searched
-	}
-	_, err := os.Stat(filepath.Join(b.physicalBuild, path))
-	b.searchedLibraries[path] = err != nil
-	return err != nil
+// libraryLocated is where libraryLocation found a library a link names by bare
+// name: the path to identify it by, and whether the linker found it on its
+// search path rather than in the build.
+type libraryLocated struct {
+	path     string
+	searched bool
 }
 
-// searchedLinkCommandInput is searchedLibrary for an input read off a recorded
-// link command rather than out of a map. link.exe takes its runtime archive and
-// the import libraries of the system DLLs by bare name on that command line,
-// exactly as its map names them, and resolves them on the LIB search path; so
-// under the Windows flavor a bare name that is not a file in the build
-// directory came from there, as it does when a map names it. A POSIX link
-// command names a library it searched for as -l, which is a flag and never an
-// input, so a bare name there is a file the build directory holds.
-func (b *builder) searchedLinkCommandInput(path string) bool {
-	if _, windows := b.anchors.Registry.Flavor().(pathmodel.WindowsFlavor); !windows {
-		return false
+// libraryLocation reads a library name the way link.exe meant it. Its map
+// names the C runtime archive and the import libraries of the system DLLs by
+// bare name, exactly as it names a library the build produced, and resolves
+// both on its search path -- which the map does not record. So the build is
+// asked instead of the path:
+//
+//   - an archive the build graph produced under that name is that archive,
+//     wherever in the build directory it lies; a project library built in a
+//     subdirectory and handed over with /LIBPATH is build output, not a
+//     system library;
+//   - a file of that name at the top of the build directory is that file;
+//   - anything else came from the LIB search path and stays unanchored.
+//
+// Under the Windows flavor both lookups ignore case, as the linker did: a map
+// that spells FOO.lib names the foo.lib the build wrote, also on a host whose
+// file system would tell the two apart. A name with a directory in it is a
+// path the evidence gives, and the other map formats name every library by
+// such a path.
+func (b *builder) libraryLocation(format, name string) (string, bool) {
+	if format != mapparser.FormatMSVC || name == "" || strings.ContainsAny(name, "/\\") {
+		return name, false
 	}
-	return b.searchedLibrary(mapparser.FormatMSVC, path)
+	if known, ok := b.libraryLocations[name]; ok {
+		return known.path, known.searched
+	}
+	located := b.locateBareLibrary(name)
+	b.libraryLocations[name] = located
+	return located.path, located.searched
+}
+
+func (b *builder) locateBareLibrary(name string) libraryLocated {
+	sameName := func(candidate string) bool { return candidate == name }
+	if b.windowsFlavor() {
+		sameName = func(candidate string) bool { return strings.EqualFold(candidate, name) }
+	}
+	// One produced archive of that name is the one; two in different
+	// directories cannot be told apart from a bare name, and neither is
+	// claimed for it.
+	var produced []string
+	for canonical := range b.archiveInputs {
+		if anchorOf(canonical) == "build" && sameName(path.Base(relOf(canonical))) {
+			produced = append(produced, relOf(canonical))
+		}
+	}
+	if len(produced) == 1 {
+		return libraryLocated{path: produced[0]}
+	}
+	// Under the Windows flavor the directory listing answers, not os.Stat:
+	// a case-insensitive host would find FOO.lib for foo.lib and keep the
+	// map's spelling, a Linux host the disk's, and the same evidence would
+	// name the library two ways on two platforms.
+	if !b.windowsFlavor() {
+		if _, err := os.Stat(filepath.Join(b.physicalBuild, name)); err == nil {
+			return libraryLocated{path: name}
+		}
+	} else {
+		if b.buildEntries == nil {
+			b.buildEntries = map[string]string{}
+			if entries, err := os.ReadDir(b.physicalBuild); err == nil {
+				for _, entry := range entries {
+					b.buildEntries[strings.ToLower(entry.Name())] = entry.Name()
+				}
+			}
+		}
+		if spelled, found := b.buildEntries[strings.ToLower(name)]; found {
+			return libraryLocated{path: spelled}
+		}
+	}
+	return libraryLocated{path: name, searched: true}
+}
+
+// windowsFlavor reports whether the evidence is read under the Windows path
+// flavor.
+func (b *builder) windowsFlavor() bool {
+	_, windows := b.anchors.Registry.Flavor().(pathmodel.WindowsFlavor)
+	return windows
+}
+
+// linkCommandLocation is libraryLocation for an input read off a recorded link
+// command rather than out of a map. link.exe takes its runtime archive and the
+// import libraries of the system DLLs by bare name on that command line,
+// exactly as its map names them, so under the Windows flavor the same reading
+// applies. A POSIX link command names a library it searched for as -l, which
+// is a flag and never an input, so a bare name there is a file the build
+// directory holds.
+func (b *builder) linkCommandLocation(name string) (string, bool) {
+	if !b.windowsFlavor() {
+		return name, false
+	}
+	return b.libraryLocation(mapparser.FormatMSVC, name)
 }
 
 // addLinkEdges turns link inputs into graph edges rooted at the artifact.
