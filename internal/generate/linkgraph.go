@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 
@@ -115,14 +116,21 @@ type builder struct {
 	// directory to their spelling on disk, read once when a Windows-flavor
 	// name has to be found without regard to case.
 	buildEntries map[string]string
+	// foldedDirectories caches, per directory, its entries by lower-cased name,
+	// for onDisk.
+	foldedDirectories map[string]map[string]string
 	// refusedReads holds the identities whose MISSING_FILE_HASH records a
 	// refused read, so that reconsiderPhysical withdraws exactly that finding
 	// when a later spelling of the file can be read -- by identity, not by
 	// matching the wording of the message.
 	refusedReads map[string]bool
-	// absoluteBuildPrefix is physicalBuild made absolute, with the separator
-	// already on it, which is the form logicalFor compares every absolute path
-	// against. It is derived once because filepath.Abs asks the process for its
+	// absoluteBuildPrefix is physicalBuild made absolute, in slash form and
+	// with the separator already on it, which is the form logicalFor compares
+	// every absolute path against. Slash form because the paths it meets are
+	// spelled both ways on Windows: filepath.Abs answers C:\gm, an adapter
+	// joining onto the build directory answers C:\gm\CMakeFiles\..., and a
+	// prefix of C:\gm/ matched neither -- every object a Makefiles build
+	// named relative to its build directory became an unanchored file. It is derived once because filepath.Abs asks the process for its
 	// working directory, and logicalFor is reached twenty thousand times over a
 	// build of two thousand translation units. Empty when there is no build
 	// root or the working directory could not be had, which is the same case
@@ -142,7 +150,7 @@ func newBuilder(graph *evidence.Graph, anchorResult *anchors.Result, logicalBuil
 	absoluteBuildPrefix := ""
 	if strings.TrimSuffix(logicalBuild, "/") != "" {
 		if absolute, err := filepath.Abs(physicalBuild); err == nil {
-			absoluteBuildPrefix = absolute + "/"
+			absoluteBuildPrefix = pathmodel.NormalizeSeparators(absolute) + "/"
 		}
 	}
 	return &builder{
@@ -399,7 +407,7 @@ func (b *builder) logicalFor(path string) string {
 		return path
 	}
 	if b.absoluteBuildPrefix != "" {
-		if rel, found := strings.CutPrefix(path, b.absoluteBuildPrefix); found {
+		if rel, found := strings.CutPrefix(pathmodel.NormalizeSeparators(path), b.absoluteBuildPrefix); found {
 			return b.logicalBuild + "/" + rel
 		}
 	}
@@ -479,7 +487,7 @@ func relativeUnder(path, root string, flavor pathmodel.Flavor) (string, bool) {
 func (b *builder) physicalFor(path string) (string, bool) {
 	if b.logicalBuild != "" {
 		if rel, found := strings.CutPrefix(path, b.logicalBuild+"/"); found {
-			return filepath.Join(b.physicalBuild, rel), true
+			return b.onDisk(b.physicalBuild, rel), true
 		}
 		if path == b.logicalBuild {
 			return b.physicalBuild, true
@@ -492,6 +500,9 @@ func (b *builder) physicalFor(path string) (string, bool) {
 	if b.relocatesSource() {
 		if rel, found := relativeUnder(path, b.logicalSource, b.flavor); found {
 			if physical, ok := underSourceRoot(b.physicalSource, rel); ok {
+				if rel != "" {
+					physical = b.onDisk(filepath.Clean(b.physicalSource), rel)
+				}
 				return physical, true
 			}
 			// Refused, per section 7.9 rule 3 and section 30.4. Returning the
@@ -505,9 +516,75 @@ func (b *builder) physicalFor(path string) (string, bool) {
 		}
 	}
 	if !pathmodel.IsAbsolute(path) {
-		return filepath.Join(b.physicalBuild, path), true
+		return b.onDisk(b.physicalBuild, path), true
 	}
 	return path, true
+}
+
+// onDisk joins rel onto root and, where the evidence is read under the Windows
+// flavor on a host that tells case apart, finds the file in the spelling it has
+// on disk. MSBuild writes its tracking logs in capitals --
+// C:\__FIXTURE_BUILD__\DEBUG\CRYPTO.LIB for Debug/crypto.lib -- and Windows,
+// whose file system ignores case, opens them as written. Linux did not, so the
+// same evidence read the archive's index on Windows and could not on Linux,
+// and the two published different documents. The exact spelling is tried
+// first and costs nothing more; only a miss is resolved, a directory listing
+// at a time, each listing read once.
+func (b *builder) onDisk(root, rel string) string {
+	joined := filepath.Join(root, rel)
+	if !b.windowsFlavor() || caseInsensitiveHost() {
+		return joined
+	}
+	if _, err := os.Lstat(joined); err == nil {
+		return joined
+	}
+	current := root
+	for _, part := range strings.Split(filepath.ToSlash(filepath.Clean(rel)), "/") {
+		if part == "" || part == "." {
+			continue
+		}
+		next := filepath.Join(current, part)
+		if part == ".." {
+			current = next
+			continue
+		}
+		if _, err := os.Lstat(next); err == nil {
+			current = next
+			continue
+		}
+		spelled, found := b.foldedEntry(current, part)
+		if !found {
+			return joined
+		}
+		current = filepath.Join(current, spelled)
+	}
+	return current
+}
+
+// foldedEntry finds the entry of dir that is name without regard to case.
+func (b *builder) foldedEntry(dir, name string) (string, bool) {
+	if b.foldedDirectories == nil {
+		b.foldedDirectories = map[string]map[string]string{}
+	}
+	entries, known := b.foldedDirectories[dir]
+	if !known {
+		entries = map[string]string{}
+		if listed, err := os.ReadDir(dir); err == nil {
+			for _, entry := range listed {
+				entries[strings.ToLower(entry.Name())] = entry.Name()
+			}
+		}
+		b.foldedDirectories[dir] = entries
+	}
+	spelled, found := entries[strings.ToLower(name)]
+	return spelled, found
+}
+
+// caseInsensitiveHost reports whether the host's file system already ignores
+// case, as Windows and macOS do by default; there the evidence's spelling is
+// opened as written.
+func caseInsensitiveHost() bool {
+	return runtime.GOOS == "windows" || runtime.GOOS == "darwin"
 }
 
 // underSourceRoot joins a relative path onto the physical source root and
@@ -517,7 +594,11 @@ func (b *builder) physicalFor(path string) (string, bool) {
 // the tree the build actually used.
 func underSourceRoot(root, rel string) (string, bool) {
 	if rel == "" {
-		return root, true
+		// The root itself, in the host's spelling like every path joined
+		// below it: the root is held normalized, in slash form, and handing
+		// it back as it is gave C:/src for the root and C:\src\a.c for a
+		// file in it.
+		return filepath.Clean(root), true
 	}
 	joined := filepath.Join(root, filepath.FromSlash(rel))
 	absoluteRoot, rootErr := filepath.Abs(root)
