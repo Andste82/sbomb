@@ -74,3 +74,13 @@ type RefusalError struct {
 }
 
 func (e *RefusalError) Error() string { return e.ID + ": " + e.Message }
+
+// Label names a format the way a person writes it, falling back to the
+// registry identifier for a writer that does not describe itself. Log lines
+// and validate's verdict both use it, so the two never name a format apart.
+func Label(writer Writer) string {
+	if describer, describes := writer.(Describer); describes {
+		return describer.Label()
+	}
+	return writer.ID()
+}

@@ -22,10 +22,7 @@ type selection struct {
 // error (exit 1), which is what it is. An empty format is the default format,
 // and an empty version the writer's default.
 func resolveOutput(format, specVersion string, options sbomwriter.Options) (selection, error) {
-	if format == "" {
-		format = sbomwriter.DefaultFormat
-	}
-	writer, version, err := sbomwriter.Resolve(format, specVersion)
+	writer, version, err := sbomwriter.Resolve(sbomwriter.FormatOrDefault(format), specVersion)
 	if err != nil {
 		return selection{}, err
 	}
@@ -38,16 +35,6 @@ func resolveOutput(format, specVersion string, options sbomwriter.Options) (sele
 		}
 	}
 	return selection{writer: writer, version: version}, nil
-}
-
-// formatLabel names a format the way a person writes it, rather than by the
-// identifier the registry keys on. A writer that does not say is named by its
-// identifier.
-func formatLabel(writer sbomwriter.Writer) string {
-	if describer, describes := writer.(sbomwriter.Describer); describes {
-		return describer.Label()
-	}
-	return writer.ID()
 }
 
 // outputExtension is the file-name suffix the default output name of a format

@@ -88,6 +88,18 @@ func hexDigit(c byte) (byte, bool) {
 	return 0, false
 }
 
+// LocalIdentity is the local identity behind an element IRI of sbomb's scheme,
+// urn:uuid:<uuid>#<local>, and the reference itself when it is not one. It is
+// what the command line uses to read back an IRI somebody typed, so that it
+// and the document reader decode a fragment by the same rule: a malformed
+// escape is kept where it stands and every well-formed one is decoded.
+func LocalIdentity(reference string) string {
+	if !strings.HasPrefix(reference, "urn:uuid:") || !strings.Contains(reference, "#") {
+		return reference
+	}
+	return localOf(reference)
+}
+
 // localOf is the local identity behind an IRI of sbomb's scheme: the
 // unescaped fragment. Anything without a fragment is returned as it is.
 func localOf(iri string) string {

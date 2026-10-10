@@ -287,7 +287,7 @@ func handleFOSS(args []string, verbosity int) (int, string, string) {
 	// SPDX version belongs to the SPDX document. Rendering the configured
 	// format would only render a document nobody receives -- and, under
 	// --reproducible without SOURCE_DATE_EPOCH, fail on it.
-	if fossConfiguredFormat(loadedCfg.Output.Format) != sbomwriter.DefaultFormat {
+	if sbomwriter.FormatOrDefault(loadedCfg.Output.Format) != sbomwriter.DefaultFormat {
 		loadedCfg.Output.Format = sbomwriter.DefaultFormat
 		loadedCfg.Output.SpecVersion = ""
 	}
@@ -363,13 +363,4 @@ func handleFOSS(args []string, verbosity int) (int, string, string) {
 		return 1, logBuf.String(), err.Error() + "\n"
 	}
 	return 0, logBuf.String(), ""
-}
-
-// fossConfiguredFormat is the SBOM format a configuration names, with the
-// empty value read as the default.
-func fossConfiguredFormat(format string) string {
-	if format == "" {
-		return sbomwriter.DefaultFormat
-	}
-	return format
 }

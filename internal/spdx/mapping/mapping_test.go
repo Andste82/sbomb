@@ -960,3 +960,36 @@ func TestParseExpressionFollowsTheGrammar(t *testing.T) {
 		}
 	}
 }
+
+// TestAUsedFileKeepsItsOwnDigestWhenItsLicenceReadDisagrees: a licence file
+// that is also a used file is hashed twice, once as the used file and once as
+// the retained licence artifact, and one digest per algorithm is kept. It must
+// be the used file's, the one the evidence chain hashed. The digests were
+// ordered by value before the duplicate was dropped, so whichever was smaller
+// won: a file that changed between the two reads stated the licence read's
+// digest, and the used file's own was dropped without a word.
+func TestAUsedFileKeepsItsOwnDigestWhenItsLicenceReadDisagrees(t *testing.T) {
+	document := sbomwritertest.AllFields()
+	used := -1
+	for index, file := range document.Files {
+		if !file.Missing {
+			used = index
+			break
+		}
+	}
+	if used < 0 {
+		t.Fatal("the synthetic document has no file that was read")
+	}
+	usedDigest, licenceDigest := strings.Repeat("f", 64), strings.Repeat("0", 64)
+	document.Files[used].Hashes = map[string]string{"SHA-256": usedDigest}
+	document.Components[0].LicenseArtifacts = append(document.Components[0].LicenseArtifacts, domain.LicenseArtifact{
+		Kind: domain.LicenseArtifactLicense, File: document.Files[used].ID, SHA256: licenceDigest,
+	})
+	file := fileOf(t, build(t, document, Options{}), "file:"+document.Files[used].ID.Canonical())
+	if file.Origin&OriginEvidence == 0 {
+		t.Fatal("the licence artifact did not reach the used file, so two digests were never offered")
+	}
+	if len(file.Hashes) != 1 || file.Hashes[0].Value != usedDigest {
+		t.Errorf("hashes = %+v, want the used file's own SHA-256 alone", file.Hashes)
+	}
+}

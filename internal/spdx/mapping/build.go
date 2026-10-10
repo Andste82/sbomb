@@ -638,14 +638,14 @@ func findingProperties(finding domain.LicenseFinding) []Property {
 
 // finish puts a file's collected statements into canonical order.
 func (f *File) finish() {
-	sort.Slice(f.Hashes, func(i, j int) bool {
-		if f.Hashes[i].Key != f.Hashes[j].Key {
-			return f.Hashes[i].Key < f.Hashes[j].Key
-		}
-		return f.Hashes[i].Value < f.Hashes[j].Value
-	})
 	// One digest per algorithm: a retained licence file that is also a used
-	// file was hashed twice, and the used-file hash came first.
+	// file was hashed twice, and the used-file hash came first -- Build reads
+	// every used file before any component's licence artifacts. The sort is
+	// stable and by algorithm alone, so that hash is the one kept: ordering by
+	// value as well made the smaller digest win, and a used file whose two
+	// reads disagreed would have stated the licence read's digest instead of
+	// the one the evidence chain hashed.
+	sort.SliceStable(f.Hashes, func(i, j int) bool { return f.Hashes[i].Key < f.Hashes[j].Key })
 	hashes := f.Hashes[:0]
 	for _, hash := range f.Hashes {
 		if len(hashes) > 0 && hashes[len(hashes)-1].Key == hash.Key {

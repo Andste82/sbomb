@@ -89,6 +89,16 @@ type Options struct {
 // about which format "nothing" means.
 const DefaultFormat = "cyclonedx-json"
 
+// FormatOrDefault reads an unset format as DefaultFormat. It is the one place
+// that rule is written, so that the pre-flight check of a command and the run
+// it starts cannot disagree about which writer "nothing" means.
+func FormatOrDefault(format string) string {
+	if format == "" {
+		return DefaultFormat
+	}
+	return format
+}
+
 // LicenseText values, per the licenseTextInSBOM setting of section 33.1. The
 // empty string is LicenseTextOff, so a caller with no opinion gets the
 // documented default rather than an accident.

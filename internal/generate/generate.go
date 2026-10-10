@@ -629,11 +629,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	}
 	// The configuration names the serialization; an empty value is the
 	// writer's default rather than a guess made here (section 32.2).
-	format := cfg.Output.Format
-	if format == "" {
-		format = sbomwriter.DefaultFormat
-	}
-	writer, specVersion, err := sbomwriter.Resolve(format, cfg.Output.SpecVersion)
+	writer, specVersion, err := sbomwriter.Resolve(sbomwriter.FormatOrDefault(cfg.Output.Format), cfg.Output.SpecVersion)
 	if err != nil {
 		return Result{Graph: graph, Findings: findings}, err
 	}
@@ -739,7 +735,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		}
 	}
 	logger.Info("%s %s document rendered: %d component(s) and %d file(s) in %d group(s)",
-		label(writer), specVersion, 1+len(document.Artifacts)+len(document.Components), len(document.Files), len(document.Components))
+		sbomwriter.Label(writer), specVersion, 1+len(document.Artifacts)+len(document.Components), len(document.Files), len(document.Components))
 
 	result := Result{
 		Graph: graph, Findings: findings, Document: document,
@@ -965,14 +961,6 @@ func buildTimestamp(reproducible bool) string {
 		return ""
 	}
 	return time.Now().UTC().Format(time.RFC3339)
-}
-
-// label names the writer's format the way a person does, for the log.
-func label(writer sbomwriter.Writer) string {
-	if describer, describes := writer.(sbomwriter.Describer); describes {
-		return describer.Label()
-	}
-	return writer.ID()
 }
 
 // requireConfiguredEvidence refuses a linker map or link dependency file that
