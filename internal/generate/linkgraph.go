@@ -103,6 +103,19 @@ type builder struct {
 	// so a builder whose roots are set after it has already identified
 	// something still answers from the roots in force.
 	identified map[string]identity
+	// searchedIdentified memoizes identifySearched apart from identify: the
+	// same bare name is another file when the linker found it on its search
+	// path, so the two answers must not share a key.
+	searchedIdentified map[string]identity
+	// searchedLibraries memoizes searchedLibrary per name. A map names its
+	// runtime archive once for every member it extracted, and the answer to
+	// whether that archive lies in the build directory is the same each time.
+	searchedLibraries map[string]bool
+	// refusedReads holds the identities whose MISSING_FILE_HASH records a
+	// refused read, so that reconsiderPhysical withdraws exactly that finding
+	// when a later spelling of the file can be read -- by identity, not by
+	// matching the wording of the message.
+	refusedReads map[string]bool
 	// absoluteBuildPrefix is physicalBuild made absolute, with the separator
 	// already on it, which is the form logicalFor compares every absolute path
 	// against. It is derived once because filepath.Abs asks the process for its
@@ -144,6 +157,9 @@ func newBuilder(graph *evidence.Graph, anchorResult *anchors.Result, logicalBuil
 		counters:           &Counters{},
 
 		identified:          map[string]identity{},
+		searchedIdentified:  map[string]identity{},
+		searchedLibraries:   map[string]bool{},
+		refusedReads:        map[string]bool{},
 		absoluteBuildPrefix: absoluteBuildPrefix,
 	}
 }
@@ -160,6 +176,7 @@ func (b *builder) setSourceRoots(logical, physical string, flavor pathmodel.Flav
 	// empty map. It is here so that the memo in identify cannot outlive the
 	// roots it was computed under, whoever calls this and whenever.
 	clear(b.identified)
+	clear(b.searchedIdentified)
 }
 
 // normalizedRoot is a source root in the one spelling everything below compares
@@ -241,12 +258,11 @@ func (b *builder) identify(path string) (string, anchors.Scope) {
 // the search path there is no root to anchor it under, so it is identified
 // against none and stays unanchored (section 7.5), which is what it is.
 func (b *builder) identifySearched(path string) (string, anchors.Scope) {
-	key := "\x00searched:" + path
-	if cached, known := b.identified[key]; known {
+	if cached, known := b.searchedIdentified[path]; known {
 		return cached.canonical, cached.scope
 	}
 	canonical, scope := b.identifyUncached("", path)
-	b.identified[key] = identity{canonical: canonical, scope: scope}
+	b.searchedIdentified[path] = identity{canonical: canonical, scope: scope}
 	return canonical, scope
 }
 
@@ -271,6 +287,7 @@ func (b *builder) identifyUncached(base, path string) (string, anchors.Scope) {
 		// per file rather than once per attempt to open it.
 		b.physical[canonical] = physical
 		if !readable {
+			b.refusedReads[canonical] = true
 			b.findings = append(b.findings, domain.Finding{
 				ID: "MISSING_FILE_HASH", Severity: domain.SeverityWarning,
 				Subject: domain.Subject{Kind: "file", Ref: canonical},
@@ -311,19 +328,18 @@ func (b *builder) reconsiderPhysical(canonical, recorded, path string) {
 		return
 	}
 	b.physical[canonical] = candidate
-	if recorded != "" {
+	if recorded != "" || !b.refusedReads[canonical] {
 		return
 	}
 	// The refusal recorded for the first spelling no longer holds: the file
-	// is read through this one.
-	kept := b.findings[:0]
-	for _, finding := range b.findings {
-		if finding.ID == "MISSING_FILE_HASH" && finding.Subject.Ref == canonical && finding.Message == refusedReadMessage {
-			continue
+	// is read through this one. Exactly one finding was recorded for it.
+	delete(b.refusedReads, canonical)
+	for index, finding := range b.findings {
+		if finding.ID == "MISSING_FILE_HASH" && finding.Subject.Ref == canonical {
+			b.findings = append(b.findings[:index], b.findings[index+1:]...)
+			return
 		}
-		kept = append(kept, finding)
 	}
-	b.findings = kept
 }
 
 // preferPhysical is the total order reconsiderPhysical chooses by.
@@ -605,10 +621,11 @@ func (b *builder) collectLinkEvidence(deliverable Deliverable, buildDir, mapPath
 		// offered to the linker rather than what the linker used.
 		for _, input := range b.reconstructedLinks[filepath.Base(deliverable.Path)] {
 			inputs = append(inputs, linkInput{
-				Path:    input,
-				Kind:    kindForPath(input),
-				Source:  "buildsystem:link-command",
-				Adapter: "make",
+				Path:     input,
+				Kind:     kindForPath(input),
+				Source:   "buildsystem:link-command",
+				Adapter:  "make",
+				Searched: b.searchedLinkCommandInput(input),
 			})
 		}
 		if len(inputs) > 0 {
@@ -699,8 +716,27 @@ func (b *builder) searchedLibrary(format, path string) bool {
 	if format != mapparser.FormatMSVC || path == "" || strings.ContainsAny(path, "/\\") {
 		return false
 	}
+	if searched, known := b.searchedLibraries[path]; known {
+		return searched
+	}
 	_, err := os.Stat(filepath.Join(b.physicalBuild, path))
+	b.searchedLibraries[path] = err != nil
 	return err != nil
+}
+
+// searchedLinkCommandInput is searchedLibrary for an input read off a recorded
+// link command rather than out of a map. link.exe takes its runtime archive and
+// the import libraries of the system DLLs by bare name on that command line,
+// exactly as its map names them, and resolves them on the LIB search path; so
+// under the Windows flavor a bare name that is not a file in the build
+// directory came from there, as it does when a map names it. A POSIX link
+// command names a library it searched for as -l, which is a flag and never an
+// input, so a bare name there is a file the build directory holds.
+func (b *builder) searchedLinkCommandInput(path string) bool {
+	if _, windows := b.anchors.Registry.Flavor().(pathmodel.WindowsFlavor); !windows {
+		return false
+	}
+	return b.searchedLibrary(mapparser.FormatMSVC, path)
 }
 
 // addLinkEdges turns link inputs into graph edges rooted at the artifact.
