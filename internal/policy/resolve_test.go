@@ -1,6 +1,7 @@
 package policy
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/example/sbomb/internal/config"
@@ -53,7 +54,10 @@ func TestPrecedenceIsCLIThenProfileThenConfiguration(t *testing.T) {
 }
 
 func TestHostLinuxOverlayOnlyChangesScope(t *testing.T) {
-	base := ResolveProfile("cra")
+	base, err := ResolveProfile("cra")
+	if err != nil {
+		t.Fatal(err)
+	}
 	resolved, err := Resolve(config.Policy{Profile: "cra"}, Overrides{Overlay: "host-linux"})
 	if err != nil {
 		t.Fatal(err)
@@ -80,6 +84,44 @@ func TestInvalidValuesAreRejectedRatherThanIgnored(t *testing.T) {
 	}
 	if _, err := Resolve(config.Policy{SeverityOverrides: map[string]string{"X": "loud"}}, Overrides{}); err == nil {
 		t.Error("an invalid severity was accepted")
+	}
+}
+
+// An unknown profile name used to fall back to the default gates, so a typo
+// such as "strcit" ran silently under weaker gates than the user asked for.
+// The overlay was already checked; the profile has to be too, from the flag
+// and from the configuration file alike.
+func TestUnknownProfileIsRejectedRatherThanDefaulted(t *testing.T) {
+	for _, source := range []struct {
+		name      string
+		cfgPolicy config.Policy
+		overrides Overrides
+	}{
+		{"flag", config.Policy{}, Overrides{Profile: "strcit"}},
+		{"configuration", config.Policy{Profile: "bogus"}, Overrides{}},
+	} {
+		_, err := Resolve(source.cfgPolicy, source.overrides)
+		if err == nil {
+			t.Errorf("%s: an unknown profile was accepted", source.name)
+			continue
+		}
+		for _, profile := range []string{"default", "lenient", "cra", "strict"} {
+			if !strings.Contains(err.Error(), profile) {
+				t.Errorf("%s: error %q does not name the profile %q", source.name, err, profile)
+			}
+		}
+	}
+
+	// Every spelling accepted so far still resolves.
+	for name, want := range map[string]string{"STRICT": "strict", "Cra": "cra", "Lenient": "lenient", "": "default"} {
+		resolved, err := Resolve(config.Policy{}, Overrides{Profile: name})
+		if err != nil {
+			t.Errorf("profile %q: %v", name, err)
+			continue
+		}
+		if resolved.Profile != want {
+			t.Errorf("profile %q resolved to %q, want %q", name, resolved.Profile, want)
+		}
 	}
 }
 

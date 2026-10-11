@@ -1971,7 +1971,7 @@ sbomb generate \
 | `--output-dir` | — | Output directory (multiple artifacts) |
 | `--mode` | from config, else `single` | `single` \| `assembly` |
 | `--config-name` | — | Build configuration (multi-config generators) |
-| `--policy` | `default` | `default` \| `strict` \| `lenient` \| path to a policy JSON |
+| `--policy` | `default` | `default` \| `lenient` \| `cra` \| `strict` (§33.2), matched case-insensitively; overrides `policy.profile`. An unknown name is a usage error (exit 1) listing the profiles |
 | `--format` | `cyclonedx-json` | `cyclonedx-json` \| `spdx-json`; overrides `output.format`. An unknown value is a usage error listing the registered formats (§36.1) |
 | `--spec-version` | the format's default | `1.6` \| `1.7` for `cyclonedx-json` (default `1.6`, §28.1); `3.0.1` for `spdx-json` (§28.11). A version the selected format does not have is a usage error — a configured `1.7` is refused under `--format spdx-json`, not replaced |
 | `--map` | auto | Linker map path (repeatable) |
@@ -2247,7 +2247,7 @@ licenseTextInSBOM
 
 ### 33.2 Built-in Profiles
 
-Five profiles exist: `lenient`, `default`, `strict`, `cra`, and `host-linux`. `cra` is the CRA/BSI field-completeness profile of §1.5. `host-linux` is a *scope* profile for hosted (non-embedded) Linux targets and is meant to be combined with one of the other three via `--policy cra --profile-overlay host-linux`.
+Five profiles exist: `lenient`, `default`, `strict`, `cra`, and `host-linux`. `cra` is the CRA/BSI field-completeness profile of §1.5. `host-linux` is a *scope* profile for hosted (non-embedded) Linux targets and is meant to be combined with one of the other three via `--policy cra --profile-overlay host-linux`. A profile or overlay name that is not one of these, from the command line or from `policy.profile`, is a usage error (exit 1); it never falls back to `default`.
 
 | Option | `lenient` | `default` | `strict` | `cra` | `host-linux` overlay |
 |---|---|---|---|---|---|

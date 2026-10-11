@@ -84,7 +84,10 @@ func Resolve(cfgPolicy config.Policy, overrides Overrides) (Config, error) {
 	if profile == "" {
 		profile = cfgPolicy.Profile
 	}
-	resolved := ResolveProfile(profile)
+	resolved, err := ResolveProfile(profile)
+	if err != nil {
+		return Config{}, err
+	}
 
 	// 3. Configuration file.
 	applyBool := func(value *bool, name string) {
