@@ -18,6 +18,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/example/sbomb/internal/digest"
 	"github.com/example/sbomb/internal/sbommap"
 	"github.com/example/sbomb/internal/sbomwriter"
 	"github.com/example/sbomb/internal/spdx/mapping"
@@ -101,7 +102,7 @@ var renderers = map[string]renderer{
 		schema:            spdx23.SchemaJSON,
 		read:              spdx23.ComponentFiles,
 		customAdditions:   false,
-		fileDigests:       []string{"SHA-1"},
+		fileDigests:       []string{digest.SHA1},
 		selfContainedRefs: true,
 	},
 }

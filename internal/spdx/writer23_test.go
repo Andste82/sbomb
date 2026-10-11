@@ -13,6 +13,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/example/sbomb/internal/digest"
 	"github.com/example/sbomb/internal/sbommap"
 	"github.com/example/sbomb/internal/sbomwriter"
 	"github.com/example/sbomb/internal/sbomwriter/sbomwritertest"
@@ -68,6 +69,16 @@ func TestFileDigestsPerVersion(t *testing.T) {
 	(Writer{}).FileDigests(Version23)[0] = "MD5"
 	if got := (Writer{}).FileDigests(Version23); got[0] != "SHA-1" {
 		t.Error("FileDigests handed out the table")
+	}
+	// Every digest a version asks for is one the shared table computes, so
+	// the hashing of used files and the mapping of retained licence files
+	// both can (they answer from that table alone).
+	for version := range renderers {
+		for _, name := range (Writer{}).FileDigests(version) {
+			if !digest.Supported(name) || !digest.OnRequest(name) {
+				t.Errorf("SPDX %s asks for a %s digest the shared table does not compute on request", version, name)
+			}
+		}
 	}
 }
 

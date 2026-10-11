@@ -2,7 +2,6 @@ package mapping
 
 import (
 	"bytes"
-	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/binary"
 	"encoding/hex"
@@ -15,6 +14,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/example/sbomb/internal/digest"
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/sbommap"
 	"github.com/example/sbomb/internal/sbomwriter"
@@ -36,9 +36,9 @@ func Build(document *sbomwriter.Document, options Options) (*Model, error) {
 	if options.SpecVersion == "" {
 		return nil, errors.New("no SPDX version to map the document for")
 	}
-	for _, digest := range options.Digests {
-		if _, known := digestFuncs[digest]; !known {
-			return nil, fmt.Errorf("the SPDX %s mapping cannot compute a %s digest of a retained licence file", options.SpecVersion, digest)
+	for _, name := range options.Digests {
+		if !digest.Supported(name) {
+			return nil, fmt.Errorf("the SPDX %s mapping cannot compute a %s digest of a retained licence file", options.SpecVersion, name)
 		}
 	}
 	created, err := creationTime(document.Run.Timestamp)
@@ -376,15 +376,19 @@ func (b *builder) licenseArtifacts(component domain.Component) []string {
 		file := b.file(local, canonical)
 		file.Origin |= OriginEvidence | OriginLicenseFile
 		if artifact.SHA256 != "" && !file.Missing {
-			file.Hashes = append(file.Hashes, Hash{Key: "SHA-256", Value: artifact.SHA256})
+			file.Hashes = append(file.Hashes, Hash{Key: digest.SHA256, Value: artifact.SHA256})
 		}
 		if !file.Missing && len(artifact.Bytes) > 0 {
 			// The digests the version needs beyond the SHA-256, from the
 			// bytes the document already holds: no read. A used file's own
 			// digest of the same algorithm came first and is the one kept
 			// (finish).
-			for _, digest := range b.options.Digests {
-				file.Hashes = append(file.Hashes, Hash{Key: digest, Value: digestFuncs[digest](artifact.Bytes)})
+			for _, name := range b.options.Digests {
+				if name == digest.SHA256 {
+					continue
+				}
+				value, _ := digest.Compute(name, artifact.Bytes)
+				file.Hashes = append(file.Hashes, Hash{Key: name, Value: value})
 			}
 		}
 		if b.options.LicenseText == sbomwriter.LicenseTextEvidence &&
@@ -405,14 +409,6 @@ func (b *builder) licenseArtifacts(component domain.Component) []string {
 		locals = append(locals, local)
 	}
 	return locals
-}
-
-// digestFuncs are the algorithms Options.Digests may name.
-var digestFuncs = map[string]func([]byte) string{
-	"SHA-1": func(data []byte) string {
-		sum := sha1.Sum(data)
-		return hex.EncodeToString(sum[:])
-	},
 }
 
 // fileAcknowledgement says how SPDX states the licence detected in a retained
