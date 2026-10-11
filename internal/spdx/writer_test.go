@@ -331,3 +331,51 @@ func TestATypelessProductIsTheSameThingInBothFormats(t *testing.T) {
 		t.Error("an unset type is stated as sbomb:component:type; the document carried none")
 	}
 }
+
+// ValidateOutput reads the version from the head of a document sbomb wrote
+// and comes to the verdict of Validate and CheckOutput, in their words; a
+// document that does not start with @context is detected the way any document
+// is. A document cut off after its head is refused by both, as JSON that does
+// not parse rather than as a document of no known format.
+func TestValidateOutputIsValidateAndCheckOutput(t *testing.T) {
+	var _ sbomwriter.OutputValidator = Writer{}
+	written := write(t, sbomwritertest.AllFields(), sbomwritertest.AllFieldsOptions())
+	var root map[string]any
+	if err := json.Unmarshal(written, &root); err != nil {
+		t.Fatal(err)
+	}
+	compact := mustMarshal(t, root)
+	graphFirst := []byte(`{"@graph": ` + string(mustMarshal(t, root["@graph"])) + `, "@context": ` + string(mustMarshal(t, root["@context"])) + `}`)
+	for name, data := range map[string][]byte{
+		"as written":      written,
+		"compact":         compact,
+		"@graph first":    graphFirst,
+		"another version": bytes.Replace(written, []byte("3.0.1/spdx-context"), []byte("3.0.0/spdx-context"), 1),
+		"SPDX 2.3":        []byte(`{"spdxVersion": "SPDX-2.3"}`),
+		"broken":          append(append([]byte(nil), written[:len(written)/2]...), '}'),
+	} {
+		want := (Writer{}).Validate(bytes.NewReader(data))
+		if want == nil {
+			want = (Writer{}).CheckOutput(data)
+		}
+		got := (Writer{}).ValidateOutput(data)
+		if name == "broken" {
+			if got == nil || want == nil {
+				t.Errorf("broken: ValidateOutput = %v, Validate = %v; want both to refuse", got, want)
+			}
+			continue
+		}
+		if (got == nil) != (want == nil) || (got != nil && got.Error() != want.Error()) {
+			t.Errorf("%s: ValidateOutput = %v, want %v", name, got, want)
+		}
+	}
+}
+
+func mustMarshal(t *testing.T, value any) []byte {
+	t.Helper()
+	data, err := json.Marshal(value)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return data
+}

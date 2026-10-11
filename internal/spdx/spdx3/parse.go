@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"sort"
 	"strings"
 )
@@ -19,16 +20,22 @@ type parsedDocument struct {
 	nodes []map[string]any
 	// byID is every top-level node by its spdxId or @id.
 	byID map[string]map[string]any
+	// trailing reports that something follows the top-level value. A
+	// document is one JSON value; the schema check refuses it otherwise.
+	trailing bool
 }
 
 func parseDocument(data []byte) (*parsedDocument, error) {
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.UseNumber()
-	var root map[string]any
-	if err := decoder.Decode(&root); err != nil {
+	root, err := decodeRoot(decoder)
+	if err != nil {
 		return nil, fmt.Errorf("the document is not a JSON object: %w", err)
 	}
 	parsed := &parsedDocument{root: root, context: root["@context"], byID: map[string]map[string]any{}}
+	if _, err := decoder.Token(); err != io.EOF {
+		parsed.trailing = true
+	}
 	if graph, isGraph := root["@graph"]; isGraph {
 		items, isArray := graph.([]any)
 		if !isArray {
@@ -58,6 +65,121 @@ func parseDocument(data []byte) (*parsedDocument, error) {
 		}
 	}
 	return parsed, nil
+}
+
+// decodeRoot decodes the top-level object as decoding it into a
+// map[string]any would -- numbers as json.Number, the last of a repeated key
+// winning -- but the members of each top-level value one at a time. A decoder
+// holds the whole value it decodes in a buffer of its own, so decoding the
+// document in one piece copied all of it into a buffer grown by doubling;
+// member by member, the buffer holds one @graph node.
+func decodeRoot(decoder *json.Decoder) (map[string]any, error) {
+	token, err := decoder.Token()
+	if err != nil {
+		return nil, err
+	}
+	if token != json.Delim('{') {
+		return nil, fmt.Errorf("the top-level value is %v, not an object", token)
+	}
+	root := map[string]any{}
+	for decoder.More() {
+		key, err := decoder.Token()
+		if err != nil {
+			return nil, err
+		}
+		next, err := decoder.Token()
+		if err != nil {
+			return nil, err
+		}
+		if root[key.(string)], err = decodeAfter(decoder, next); err != nil {
+			return nil, err
+		}
+	}
+	_, err = decoder.Token()
+	return root, err
+}
+
+// decodeAfter finishes the value whose first token is first: a scalar is the
+// token itself, and an array or object is read member by member, each member
+// decoded whole.
+func decodeAfter(decoder *json.Decoder, first json.Token) (any, error) {
+	switch first {
+	case json.Delim('['):
+		items := []any{}
+		shared := interner{}
+		for decoder.More() {
+			var item any
+			if err := decoder.Decode(&item); err != nil {
+				return nil, err
+			}
+			items = append(items, shared.value(item))
+		}
+		_, err := decoder.Token()
+		return items, err
+	case json.Delim('{'):
+		object := map[string]any{}
+		for decoder.More() {
+			key, err := decoder.Token()
+			if err != nil {
+				return nil, err
+			}
+			var value any
+			if err := decoder.Decode(&value); err != nil {
+				return nil, err
+			}
+			object[key.(string)] = value
+		}
+		_, err := decoder.Token()
+		return object, err
+	}
+	return first, nil
+}
+
+// interner keeps one copy of every key and every short string of the nodes it
+// sees. A decoded node owns a copy of each key and value it spells, and the
+// nodes of a large document spell the same few hundred keys, class names and
+// property names and values hundreds of thousands of times: shared, they take
+// about half the memory. It holds each string as the interface value a decoded
+// node stores, so a shared value costs neither a string nor its box.
+type interner map[string]any
+
+// internLimit is the longest value shared. Identifiers, names and digests
+// are longer and unique, and sharing them would only fill the table.
+const internLimit = 48
+
+func (in interner) value(value any) any {
+	switch typed := value.(type) {
+	case string:
+		if len(typed) > internLimit {
+			return value
+		}
+		if shared, known := in[typed]; known {
+			return shared
+		}
+		in[typed] = value
+		return value
+	case []any:
+		for index, item := range typed {
+			typed[index] = in.value(item)
+		}
+	case map[string]any:
+		rebuilt := make(map[string]any, len(typed))
+		for key, item := range typed {
+			rebuilt[in.key(key)] = in.value(item)
+		}
+		return rebuilt
+	}
+	return value
+}
+
+func (in interner) key(key string) string {
+	if shared, known := in[key]; known {
+		if text, isString := shared.(string); isString {
+			return text
+		}
+	}
+	in[key] = key
+	return key
 }
 
 // nodeID is the identifier of a node: its spdxId, or its @id.
@@ -107,18 +229,14 @@ func stringList(node map[string]any, key string) (values []string, allStrings bo
 }
 
 // walkObjects calls visit for every JSON object inside a value, at any depth,
-// the value itself included.
+// the value itself included, in no particular order: every check collects
+// what it finds into a set that is sorted when it is reported.
 func walkObjects(value any, visit func(map[string]any)) {
 	switch typed := value.(type) {
 	case map[string]any:
 		visit(typed)
-		keys := make([]string, 0, len(typed))
-		for key := range typed {
-			keys = append(keys, key)
-		}
-		sort.Strings(keys)
-		for _, key := range keys {
-			walkObjects(typed[key], visit)
+		for _, item := range typed {
+			walkObjects(item, visit)
 		}
 	case []any:
 		for _, item := range typed {

@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### SPDX output within the performance budget
+
+Writing an SPDX document of a large build took twice the time and two to
+three times the memory section 31 allows. It now fits: 10 000 files take about
+a third less time and 60 % less memory than before, 50 000 files take 1.3 GiB
+instead of 3.6 GiB. Every document is still checked against the schema and
+both tiers of rules before it is written, and the output is unchanged byte for
+byte. CycloneDX runs use less memory as well. The SPDX row of the CI
+performance job now blocks.
+
 ### `validate` accepts conformant CycloneDX from other tools
 
 `sbomb validate` held every CycloneDX document to how sbomb writes, not only

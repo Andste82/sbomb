@@ -2,7 +2,9 @@ package evidence
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 	"testing"
 
@@ -561,5 +563,56 @@ func TestDumpLoadRoundtrip(t *testing.T) {
 		t.Error("Dump → Load → Dump produced different bytes (not idempotent)")
 		t.Logf("First:  %s", string(dumpBytes))
 		t.Logf("Second: %s", string(buf2.Bytes()))
+	}
+}
+
+// Dump writes the graph node by node; the bytes are those of encoding the
+// whole dump in one piece, which is what it did before and what LoadDump and
+// every reader of evidence.json were written against.
+func TestDumpWritesWhatEncodingTheWholeDumpWrites(t *testing.T) {
+	for name, g := range map[string]*Graph{"empty": New(), "full": func() *Graph {
+		g := New()
+		g.AddNode(domain.Node{ID: "artifact:app", Kind: domain.NodeArtifact, Attributes: map[string]string{"role": "<app>"}})
+		g.AddNode(domain.Node{ID: "project:main.c", Kind: domain.NodeSource, File: &domain.FileID{Anchor: "project", RelPath: "main.c"}})
+		g.AddNode(domain.Node{ID: "build:main.o", Kind: domain.NodeObject, File: &domain.FileID{Anchor: "build", RelPath: "main.o"}})
+		g.AddEdge(domain.Edge{From: "artifact:app", To: "build:main.o", Type: "link", Strength: "linked",
+			Confidence: domain.ConfidenceHigh, Source: "map:app.map", Adapter: "gnuld", Downgrades: []string{"weak & old"}})
+		g.AddEdge(domain.Edge{From: "build:main.o", To: "project:main.c", Type: "compile", Strength: "derived",
+			Confidence: domain.ConfidenceMedium, Source: "compdb", Adapter: "compdb", Attributes: map[string]string{"k": "v"}})
+		return g
+	}()} {
+		anchors := []AnchorDump{}
+		seen := map[domain.AnchorKey]bool{}
+		for _, node := range g.Nodes() {
+			if node.File != nil && !seen[node.File.Anchor] {
+				seen[node.File.Anchor] = true
+				anchors = append(anchors, AnchorDump{Key: node.File.Anchor})
+			}
+		}
+		sort.Slice(anchors, func(i, j int) bool { return anchors[i].Key < anchors[j].Key })
+		nodes := []NodeDump{}
+		for _, node := range g.Nodes() {
+			nodes = append(nodes, NodeDump{ID: node.ID, Kind: node.Kind, Attributes: node.Attributes})
+		}
+		edges := []EdgeDump{}
+		for _, edge := range g.Edges() {
+			edges = append(edges, EdgeDump{From: edge.From, To: edge.To, Type: edge.Type, Strength: edge.Strength,
+				Confidence: edge.Confidence, Source: edge.Source, Adapter: edge.Adapter,
+				Attributes: edge.Attributes, Downgrades: edge.Downgrades})
+		}
+		var want bytes.Buffer
+		encoder := json.NewEncoder(&want)
+		encoder.SetEscapeHTML(false)
+		encoder.SetIndent("", "  ")
+		if err := encoder.Encode(DumpFormat{SchemaVersion: 1, ToolVersion: "0.0.0", Anchors: anchors, Nodes: nodes, Edges: edges}); err != nil {
+			t.Fatal(err)
+		}
+		var got bytes.Buffer
+		if err := g.Dump(&got); err != nil {
+			t.Fatal(err)
+		}
+		if got.String() != want.String() {
+			t.Errorf("%s: Dump wrote\n%s\nwant\n%s", name, got.String(), want.String())
+		}
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"testing"
 )
 
@@ -107,5 +108,105 @@ func TestARefusalNamesItsFinding(t *testing.T) {
 	var err error = &RefusalError{ID: "SOME_FINDING", Message: "cannot be honoured"}
 	if err.Error() != "SOME_FINDING: cannot be honoured" {
 		t.Errorf("Error() = %q", err.Error())
+	}
+}
+
+// validatingWriter answers Validate and CheckOutput in one call as well.
+type validatingWriter struct {
+	checkingWriter
+	verdict error
+	calls   *int
+}
+
+func (w validatingWriter) ValidateOutput([]byte) error {
+	*w.calls++
+	return w.verdict
+}
+
+// A writer that validates its output in one pass is asked once, and its
+// verdict decides as the two separate calls would.
+func TestWriteFilePrefersTheOnePassValidation(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "out.json")
+	calls, checks := 0, 0
+	writer := validatingWriter{
+		checkingWriter: checkingWriter{invalid: errors.New("not asked"), checked: &checks},
+		calls:          &calls,
+	}
+	if err := WriteFile(path, writer, []byte("document")); err != nil {
+		t.Fatal(err)
+	}
+	if calls != 1 || checks != 0 {
+		t.Errorf("ValidateOutput ran %d times and CheckOutput %d; want the one pass alone", calls, checks)
+	}
+	writer.verdict = errors.New("refused")
+	if err := WriteFile(path, writer, []byte("second")); err == nil {
+		t.Error("a document the one pass refused was written")
+	}
+	if data, _ := os.ReadFile(path); string(data) != "document" {
+		t.Errorf("the previous document was replaced by %q", data)
+	}
+}
+
+// Validation runs with the collector tightened, and the setting the run had
+// is restored afterwards, whatever the verdict.
+func TestWriteFileRestoresTheCollectorSetting(t *testing.T) {
+	previous := debug.SetGCPercent(80)
+	defer debug.SetGCPercent(previous)
+	seen := 0
+	writer := validatingWriter{calls: new(int)}
+	observe := func() {
+		seen = debug.SetGCPercent(-1)
+		debug.SetGCPercent(seen)
+	}
+	checking := observingWriter{validatingWriter: writer, observe: observe}
+	if err := WriteFile(filepath.Join(t.TempDir(), "out.json"), checking, []byte("x")); err != nil {
+		t.Fatal(err)
+	}
+	if seen != 40 {
+		t.Errorf("validation ran at GOGC %d, want half of 80", seen)
+	}
+	if now := debug.SetGCPercent(80); now != 80 {
+		t.Errorf("GOGC is %d after writing, want the 80 it was", now)
+	}
+}
+
+type observingWriter struct {
+	validatingWriter
+	observe func()
+}
+
+func (w observingWriter) ValidateOutput(data []byte) error {
+	w.observe()
+	return w.validatingWriter.ValidateOutput(data)
+}
+
+func currentGCPercent() int {
+	current := debug.SetGCPercent(-1)
+	debug.SetGCPercent(current)
+	return current
+}
+
+// GOGC=0, which collects all the time, is not halved into "off"; and calls
+// that overlap restore the setting the first of them found, once the last of
+// them is done.
+func TestTheCollectorSettingSurvivesOverlapAndZero(t *testing.T) {
+	previous := debug.SetGCPercent(0)
+	defer debug.SetGCPercent(previous)
+	release := tightenCollector()
+	if got := currentGCPercent(); got != 0 {
+		t.Errorf("GOGC 0 became %d", got)
+	}
+	release()
+
+	debug.SetGCPercent(80)
+	first := tightenCollector()
+	second := tightenCollector()
+	first()
+	if got := currentGCPercent(); got != 40 {
+		t.Errorf("with a call still validating, GOGC is %d, want 40", got)
+	}
+	second()
+	if got := currentGCPercent(); got != 80 {
+		t.Errorf("after both, GOGC is %d, want the 80 it was", got)
 	}
 }
