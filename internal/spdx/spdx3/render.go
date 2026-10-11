@@ -147,7 +147,7 @@ func (r *renderer) document() document {
 		n.SbomType = []string{"build"}
 	})
 	spdxDocument := r.element("SpdxDocument", "document", func(n *node) {
-		n.Name = productName(model)
+		n.Name = model.ProductName()
 		n.Extension = extensionOf(model.Run.Properties)
 		n.Element = members
 		n.ProfileConformance = r.profiles(len(texts)+len(expressions) > 0, len(vulnerabilities) > 0)
@@ -192,15 +192,6 @@ func (r *renderer) profiles(simpleLicensing, security bool) []string {
 	}
 	sort.Strings(profiles)
 	return profiles
-}
-
-func productName(model *mapping.Model) string {
-	for _, pkg := range model.Packages {
-		if pkg.Role == mapping.RoleProduct {
-			return pkg.Name
-		}
-	}
-	return ""
 }
 
 func (r *renderer) packageNode(pkg mapping.Package) node {

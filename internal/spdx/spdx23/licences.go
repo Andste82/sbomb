@@ -1,6 +1,7 @@
 package spdx23
 
 import (
+	"slices"
 	"sort"
 	"strings"
 
@@ -39,7 +40,7 @@ func licenseField(uses []mapping.LicenseUse) string {
 		case mapping.LicenseNone:
 			noneSeen = true
 		default:
-			if !contains(expressions, use.License.Expression) {
+			if !slices.Contains(expressions, use.License.Expression) {
 				expressions = append(expressions, use.License.Expression)
 			}
 		}
@@ -64,12 +65,14 @@ func licenseField(uses []mapping.LicenseUse) string {
 // licenseList is the licences found in a file (licenseInfoInFiles), one entry
 // per distinct statement, sorted. 2.3 allows an expression in each entry, so
 // none is split into its identifiers and nothing about a choice or an
-// exception is lost.
+// exception is lost. Clause 8.6.1 suggests an entry per option of a choice;
+// keeping the choice whole departs from that SHOULD on purpose (deviation
+// D57).
 func licenseList(uses []mapping.LicenseUse) []string {
 	var out []string
 	for _, use := range uses {
 		value := licenseString(use.License)
-		if !contains(out, value) {
+		if !slices.Contains(out, value) {
 			out = append(out, value)
 		}
 	}

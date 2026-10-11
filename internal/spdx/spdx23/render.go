@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/url"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 	"unicode/utf8"
@@ -87,7 +88,7 @@ func build(model *mapping.Model, namespace string) document {
 		SPDXVersion:       specVersion,
 		DataLicense:       dataLicense,
 		SPDXID:            documentID,
-		Name:              productName(model),
+		Name:              model.ProductName(),
 		DocumentNamespace: "urn:uuid:" + namespace,
 		CreationInfo:      creationInfo{Created: model.Created, Creators: creators},
 	}
@@ -142,15 +143,6 @@ func listVersion(version string) string {
 		return version
 	}
 	return parts[0] + "." + parts[1]
-}
-
-func productName(model *mapping.Model) string {
-	for _, p := range model.Packages {
-		if p.Role == mapping.RoleProduct {
-			return p.Name
-		}
-	}
-	return ""
 }
 
 // annotation is one annotation of sbomb's, from its lines.
@@ -280,7 +272,7 @@ func downloadLocation(p mapping.Package) string {
 	}
 	var commits []string
 	for _, property := range p.Properties {
-		if property.Name == "sbomb:component:vcsCommit" && !contains(commits, property.Value) {
+		if property.Name == "sbomb:component:vcsCommit" && !slices.Contains(commits, property.Value) {
 			commits = append(commits, property.Value)
 		}
 	}
@@ -289,15 +281,6 @@ func downloadLocation(p mapping.Package) string {
 		result += "@" + commits[0]
 	}
 	return result
-}
-
-func contains(values []string, value string) bool {
-	for _, v := range values {
-		if v == value {
-			return true
-		}
-	}
-	return false
 }
 
 // hasSHA1 reports whether a file can be a File element: SPDX 2.3 requires a

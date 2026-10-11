@@ -99,8 +99,11 @@ func gatherSchemaIssues(err error, into map[string]bool) {
 	}
 }
 
-// maxReportedIssues is how many problems a failed check lists: enough to fix
-// a document by, few enough to read.
+// maxReportedIssues is how many problems a failed check lists, as the 3.0.1
+// and CycloneDX validators do: enough to fix a document by, few enough to
+// read. capped is the 3.0.1 validator's, kept per version on purpose: it is
+// report formatting, not part of the mapping both versions share, and no
+// package below the two renderers is about reporting.
 const maxReportedIssues = 20
 
 func capped(lines []string) string {
