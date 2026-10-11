@@ -70,6 +70,11 @@ type builder struct {
 	// archiveInputs maps an archive identity to the objects it was built from,
 	// which is how an extracted member is traced back to a build-tree object.
 	archiveInputs map[string][]string
+	// builtArchives are the archives a build graph names as the output of an
+	// archiving step with objects as its inputs. archiveInputs alone does not
+	// say that: a Makefiles target records every archive on its link line
+	// there, including a prebuilt one it only links.
+	builtArchives map[string]bool
 	// discardedObjects counts the input sections the link evidence reported as
 	// discarded, per object path as recorded (section 4.5).
 	discardedObjects map[string]int
@@ -171,6 +176,7 @@ func newBuilder(graph *evidence.Graph, anchorResult *anchors.Result, logicalBuil
 		findings:           []domain.Finding{},
 		physical:           map[string]string{},
 		archiveInputs:      map[string][]string{},
+		builtArchives:      map[string]bool{},
 		discardedObjects:   map[string]int{},
 		retainedObjects:    map[string]bool{},
 		reconstructedLinks: map[string][]string{},
@@ -1233,6 +1239,73 @@ func (b *builder) recordArchiveInputs(archivePath string, objects []string) {
 	b.archiveInputs[canonical] = append(b.archiveInputs[canonical], objects...)
 }
 
+// recordBuiltArchive is recordArchiveInputs for an archiving step the build
+// graph states as such, which also proves this build produced the archive.
+func (b *builder) recordBuiltArchive(archivePath string, objects []string) {
+	b.recordArchiveInputs(archivePath, objects)
+	if len(objects) > 0 {
+		canonical, _ := b.identify(archivePath)
+		b.builtArchives[canonical] = true
+	}
+}
+
+// producedArchives names the archives this build produced itself, wherever
+// they lie. Section 33.1 asks about prebuilt libraries only, and an archive in
+// the build directory is plainly not one; these are the ones the build
+// directory alone does not account for, such as an archive a target writes
+// into the source tree. Each is named by evidence: build.ninja or the MSBuild
+// project states the objects it was archived from, or a member the link
+// extracted was traced to an object this build compiled.
+//
+// An in-source build has no build anchor, because the build root is the
+// project root and the project claimed that directory first. Every archive
+// under it is then in the build directory, as it would be under the build
+// anchor of an out-of-source build, and is counted as produced: the evidence
+// cannot tell one this build archived from one checked in beside its sources.
+func (b *builder) producedArchives(inSource bool) map[string]bool {
+	produced := map[string]bool{}
+	for canonical := range b.builtArchives {
+		produced[canonical] = true
+	}
+	for _, edge := range b.graph.Edges() {
+		if edge.Type != "archive-member" {
+			continue
+		}
+		// An unresolved member is a node without a file: the archive named it,
+		// but no object of this build answers to it.
+		if member, known := b.graph.Node(edge.To); known && member.File != nil {
+			produced[string(edge.From)] = true
+		}
+	}
+	if inSource {
+		for _, node := range b.graph.Nodes() {
+			if node.Kind == domain.NodeArchive && anchorOf(string(node.ID)) == "project" {
+				produced[string(node.ID)] = true
+			}
+		}
+	}
+	return produced
+}
+
+// inSourceBuild reports whether the build ran in the project root itself. The
+// registry then holds a project anchor and no build anchor, because the build
+// root was registered second and its directory was already taken.
+func inSourceBuild(registry *pathmodel.Registry, buildRoot string) bool {
+	if buildRoot == "" {
+		return false
+	}
+	project, build := false, false
+	for _, anchor := range registry.Anchors() {
+		switch anchor.Key {
+		case "project":
+			project = true
+		case "build":
+			build = true
+		}
+	}
+	return project && !build
+}
+
 // loadNinjaArchiveInputs takes the inputs of every archive edge from the build
 // graph the compile side already parsed. Without this an extracted member
 // cannot be traced to a source.
@@ -1252,7 +1325,7 @@ func (b *builder) loadNinjaArchiveInputs(rules []ninja.Rule) {
 					objects = append(objects, input)
 				}
 			}
-			b.recordArchiveInputs(output, objects)
+			b.recordBuiltArchive(output, objects)
 		}
 	}
 }

@@ -453,7 +453,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	}
 	for archive, objects := range msbuildEvidence.LibInputs {
 		logger.Debug("MSBuild LibInput %s -> %v", archive, objects)
-		b.recordArchiveInputs(archive, objects)
+		b.recordBuiltArchive(archive, objects)
 	}
 	findings = append(findings, compile.findings...)
 	mapPath, depfilePath := "", ""
@@ -560,6 +560,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	// files are hashed so that the file records carry them.
 	attributes := deriveGraphAttributes(graph, artifactIDs, outcome.excludedByGC, b.physical, logger)
 	applyFileAttributes(used, attributes)
+	attributes.produced = b.producedArchives(inSourceBuild(anchorResult.Registry, b.logicalBuild))
 	// Section 22.10 rides on the hashing pass: the copyright statements are
 	// taken from the bytes the digest already needed, so the read below is
 	// the only one either of them causes (decision Q9).

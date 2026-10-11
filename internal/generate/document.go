@@ -349,7 +349,7 @@ func groupFilesByComponent(resolver *componentResolver, files []domain.UsedFile,
 			order = append(order, id)
 		}
 		group.files = append(group.files, file)
-		if finding, unmapped := unmappedPrebuiltLibrary(file, detectedBy); unmapped {
+		if finding, unmapped := unmappedPrebuiltLibrary(file, detectedBy, attributes); unmapped {
 			unmappedLibraries = append(unmappedLibraries, finding)
 		}
 	}
@@ -397,11 +397,15 @@ func groupFilesByComponent(resolver *componentResolver, files []domain.UsedFile,
 // if this build had compiled it, and an unresolved file belongs to an unknown
 // component.
 //
-// An archive in the build directory is not prebuilt: this build produced it.
-// A toolchain or system library is the environment's, not the product's, and
-// is not asked about either.
-func unmappedPrebuiltLibrary(file domain.UsedFile, detectedBy string) (domain.Finding, bool) {
+// An archive in the build directory is not prebuilt, and neither is one the
+// evidence shows this build produced elsewhere: this build made both. A
+// toolchain or system library is the environment's, not the product's, and is
+// not asked about either.
+func unmappedPrebuiltLibrary(file domain.UsedFile, detectedBy string, attributes *graphAttributes) (domain.Finding, bool) {
 	if file.Class != domain.FileClassArchive || file.ID.Anchor == "build" {
+		return domain.Finding{}, false
+	}
+	if attributes != nil && attributes.produced[file.ID.Canonical()] {
 		return domain.Finding{}, false
 	}
 	if scopes := file.Properties["sbomb:component:scope"]; len(scopes) > 0 && !anchors.IncludedByDefault(anchors.Scope(scopes[0])) {
