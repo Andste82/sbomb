@@ -94,6 +94,10 @@ func TestParseBuildMakeReadsNMakeArchiveInputs(t *testing.T) {
 	if !reflect.DeepEqual(target.LinkInputs, want) {
 		t.Fatalf("LinkInputs = %#v, want %#v", target.LinkInputs, want)
 	}
+	// The rule makes the archive from objects, so the target writes it.
+	if target.Archive != filepath.Join(root, "crypto.lib") {
+		t.Fatalf("Archive = %q, want the rule's target", target.Archive)
+	}
 }
 
 func TestParseCommittedNMakeFixtureArchiveInputs(t *testing.T) {
@@ -168,5 +172,33 @@ func TestParseFallsBackToDFile(t *testing.T) {
 	}
 	if len(target.DependencyFiles) != 1 {
 		t.Fatalf("got %d dependency files, want 1", len(target.DependencyFiles))
+	}
+}
+
+// TestALinkFileNamesTheArchiveOnlyWhenItArchives: a static library target's
+// link.txt runs an archiver, and the archive it names first is the one it
+// writes -- possibly outside the build directory. A linker names archives
+// too, but as inputs, some of them prebuilt, so its line names no output.
+func TestALinkFileNamesTheArchiveOnlyWhenItArchives(t *testing.T) {
+	buildDir := t.TempDir()
+	for _, test := range []struct {
+		name, line, want string
+	}{
+		{"ar", "/usr/bin/ar qc ../src/lib/libmine.a CMakeFiles/mine.dir/a.c.o\n/usr/bin/ranlib ../src/lib/libmine.a\n", filepath.Join(buildDir, "..", "src", "lib", "libmine.a")},
+		{"cross ar", "/opt/arm/bin/arm-none-eabi-ar qc libfw.a CMakeFiles/fw.dir/a.c.o\n", filepath.Join(buildDir, "libfw.a")},
+		{"lib.exe", `C:/VS/bin/lib.exe /nologo /out:mine.lib CMakeFiles/mine.dir/a.c.obj` + "\n", filepath.Join(buildDir, "mine.lib")},
+		{"linker", "/usr/bin/c++ CMakeFiles/app.dir/main.c.o -o app ../vendor/libfoo.a libmine.a\n", ""},
+	} {
+		path := filepath.Join(buildDir, "link.txt")
+		if err := os.WriteFile(path, []byte(test.line), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		_, archive, err := parseLinkFile(path, buildDir)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if filepath.Clean(archive) != filepath.Clean(test.want) && !(archive == "" && test.want == "") {
+			t.Errorf("%s: archive = %q, want %q", test.name, archive, test.want)
+		}
 	}
 }

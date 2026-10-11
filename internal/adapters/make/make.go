@@ -20,10 +20,13 @@ var ErrInputLimitExceeded = errors.New("make adapter input limit exceeded")
 
 // Target contains the evidence CMake emits for one target directory.
 type Target struct {
-	Name            string
-	Directory       string
-	ObjectSources   map[string]string
-	LinkInputs      []string
+	Name          string
+	Directory     string
+	ObjectSources map[string]string
+	LinkInputs    []string
+	// Archive is the archive link.txt writes when the target is a static
+	// library: its command is an archiver, not a linker.
+	Archive         string
 	ObjectDeps      map[string][]string
 	CompilerDepend  string
 	DependencyFiles []string
@@ -80,8 +83,11 @@ func parseTarget(buildDir, directoryName string) (Target, error) {
 	if err := parseBuildMake(filepath.Join(directory, "build.make"), buildDir, &target); err != nil && !os.IsNotExist(err) {
 		return Target{}, err
 	}
-	if inputs, err := parseLinkFile(filepath.Join(directory, "link.txt"), buildDir); err == nil {
+	if inputs, archive, err := parseLinkFile(filepath.Join(directory, "link.txt"), buildDir); err == nil {
 		target.LinkInputs = inputs
+		if target.Archive == "" {
+			target.Archive = archive
+		}
 	} else if !os.IsNotExist(err) {
 		return Target{}, err
 	}
@@ -112,9 +118,14 @@ func parseBuildMake(path, buildDir string, target *Target) error {
 		prerequisites := splitMakeWords(line[colon+1:])
 		if looksLikeArchive(object) {
 			target.LinkInputs = append(target.LinkInputs, resolvePath(buildDir, object))
+			// A rule that makes the archive from objects is this target
+			// writing it.
 			for _, prerequisite := range prerequisites {
 				if looksLikeObject(prerequisite) {
 					target.LinkInputs = append(target.LinkInputs, resolvePath(buildDir, prerequisite))
+					if target.Archive == "" {
+						target.Archive = resolvePath(buildDir, object)
+					}
 				}
 			}
 			continue
@@ -137,10 +148,10 @@ func parseBuildMake(path, buildDir string, target *Target) error {
 	return nil
 }
 
-func parseLinkFile(path, buildDir string) ([]string, error) {
+func parseLinkFile(path, buildDir string) ([]string, string, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	// Section 9.3: the link line of a large target lives in a response file,
 	// and CMake writes one for every Windows link. The shared expander applies
@@ -157,18 +168,42 @@ func parseLinkFile(path, buildDir string) ([]string, error) {
 		MaxDepth: maxResponseDepth,
 	})
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
+	// An archiver names its output first: `ar qc libx.a a.o b.o`, or
+	// `lib.exe /out:x.lib a.obj`. The archives a linker names are its inputs,
+	// and some of them are prebuilt, so only an archiver's proves the target
+	// built one.
+	archiver := isArchiver(linker)
+	var archive string
 	inputs := make([]string, 0)
 	for _, arg := range args {
+		if archiver && len(arg) > len("/out:") && strings.EqualFold(arg[:len("/out:")], "/out:") {
+			if archive == "" {
+				archive = resolvePath(buildDir, arg[len("/out:"):])
+			}
+			continue
+		}
 		if arg == "-o" || strings.HasPrefix(arg, "-") || arg == "@" {
 			continue
+		}
+		if archiver && archive == "" && looksLikeArchive(arg) {
+			archive = resolvePath(buildDir, arg)
 		}
 		if strings.HasSuffix(arg, ".o") || strings.HasSuffix(arg, ".obj") || strings.HasSuffix(arg, ".a") || strings.HasSuffix(arg, ".so") || strings.HasSuffix(arg, ".lib") {
 			inputs = append(inputs, resolvePath(buildDir, arg))
 		}
 	}
-	return unique(inputs), nil
+	return unique(inputs), archive, nil
+}
+
+// isArchiver reports whether a link.txt command creates a static library:
+// ar and its prefixed and wrapper forms (arm-none-eabi-ar, gcc-ar, llvm-ar),
+// and lib.exe or llvm-lib for MSVC.
+func isArchiver(command string) bool {
+	name := strings.ToLower(filepath.Base(strings.ReplaceAll(command, `\`, "/")))
+	name = strings.TrimSuffix(name, ".exe")
+	return name == "ar" || strings.HasSuffix(name, "-ar") || name == "lib" || name == "llvm-lib"
 }
 
 func parseDependInfo(path, buildDir string, target *Target) error {

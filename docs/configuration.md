@@ -598,7 +598,7 @@ the last two). Each names the findings that make the run fail.
 | `failOnMissingHeaderEvidence` | a translation unit contributed no header evidence |
 | `failOnUnanchoredFile` | a file matched no anchor and would carry an absolute path |
 | `allowMissingLinkEvidence` | inverted: **permits** a run in which no link evidence source succeeded |
-| `prebuiltLibrariesRequireMapping` | a prebuilt library from outside the build directory belongs to no component: no `components[]` entry, package manager, package metadata or package, SDK or external anchor claims it (`PREBUILT_LIBRARY_UNMAPPED`). A library `build.ninja`, an MSBuild project or its traced archive members show this build produced is not prebuilt; in an in-source build no archive under the project root is |
+| `prebuiltLibrariesRequireMapping` | a prebuilt library from outside the build directory belongs to no component: no `components[]` entry, package manager, package metadata or package, SDK or external anchor claims it (`PREBUILT_LIBRARY_UNMAPPED`). A library this build produced is not prebuilt: the CMake File API names it as a static library target's artifact, `build.ninja`, an MSBuild project or a Makefiles archiving rule states its objects, or its archive members trace back to this build. In an in-source build without a File API reply, no archive under the project root is |
 
 `severityOverrides` maps a finding identifier to `error`, `warning` or `info`
 when your process disagrees with the default severity.
