@@ -255,11 +255,12 @@ func handleValidate(args []string) (int, string, string) {
 const defaultConfigFile = "sbomb.json"
 
 // resolveConfigPath applies the --config default of section 32.2: a named file
-// is used as given, so a missing one stays an error, and without the flag
-// sbomb.json in the working directory is read when it is there. implicit
-// reports that the default was picked up.
-func resolveConfigPath(flagValue string) (path string, implicit bool) {
-	if flagValue != "" {
+// is used as given, so a missing one stays an error, an empty --config reads
+// no configuration at all, and without the flag sbomb.json in the working
+// directory is read when it is there. implicit reports that the default was
+// picked up.
+func resolveConfigPath(flagValue string, given bool) (path string, implicit bool) {
+	if given {
 		return flagValue, false
 	}
 	if info, err := os.Stat(defaultConfigFile); err == nil && info.Mode().IsRegular() {
@@ -273,7 +274,7 @@ func resolveConfigPath(flagValue string) (path string, implicit bool) {
 func handleEvidence(args []string) (int, string, string) {
 	buildDir := ""
 	output := ""
-	cfgPath := ""
+	cfgPath, cfgGiven := "", false
 	for i := 0; i < len(args); i++ {
 		switch {
 		case args[i] == "--build-dir":
@@ -296,10 +297,10 @@ func handleEvidence(args []string) (int, string, string) {
 			if i+1 >= len(args) {
 				return 1, "", "missing value for --config\n"
 			}
-			cfgPath = args[i+1]
+			cfgPath, cfgGiven = args[i+1], true
 			i++
 		case strings.HasPrefix(args[i], "--config="):
-			cfgPath = strings.TrimPrefix(args[i], "--config=")
+			cfgPath, cfgGiven = strings.TrimPrefix(args[i], "--config="), true
 		default:
 			return 1, "", fmt.Sprintf("unexpected argument: %s\n", args[i])
 		}
@@ -307,7 +308,7 @@ func handleEvidence(args []string) (int, string, string) {
 	if buildDir == "" {
 		return 1, "", "--build-dir is required\n"
 	}
-	cfgPath, _ = resolveConfigPath(cfgPath)
+	cfgPath, _ = resolveConfigPath(cfgPath, cfgGiven)
 	loadedCfg := config.Config{}
 	if cfgPath != "" {
 		var err error
@@ -429,7 +430,7 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 	buildDir := ""
 	output := ""
 	repro := false
-	cfgPath := ""
+	cfgPath, cfgGiven := "", false
 	policyName := ""
 	profileOverlay := ""
 	gateOverrides := map[string]bool{}
@@ -635,10 +636,10 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 			if i+1 >= len(args) {
 				return 1, "", "missing value for --config\n"
 			}
-			cfgPath = args[i+1]
+			cfgPath, cfgGiven = args[i+1], true
 			i++
 		case strings.HasPrefix(args[i], "--config="):
-			cfgPath = strings.TrimPrefix(args[i], "--config=")
+			cfgPath, cfgGiven = strings.TrimPrefix(args[i], "--config="), true
 		case args[i] == "--policy":
 			if i+1 >= len(args) {
 				return 1, "", "missing value for --policy\n"
@@ -756,7 +757,7 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 	}
 	cliLogger := generate.NewLogger(verbosity, logWriter)
 
-	cfgPath, implicitCfg := resolveConfigPath(cfgPath)
+	cfgPath, implicitCfg := resolveConfigPath(cfgPath, cfgGiven)
 	if implicitCfg {
 		cliLogger.Info("Using configuration '%s' from the working directory (no --config given)", cfgPath)
 	}
