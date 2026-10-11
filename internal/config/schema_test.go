@@ -104,7 +104,6 @@ func TestTheSchemaRefusesWhatTheLoaderRefuses(t *testing.T) {
 		{"an unknown mode", `{"project":{"name":"a"},"mode":"cluster"}`},
 		{"an unknown artifact role", `{"project":{"name":"a"},"artifacts":[{"path":"p","role":"widget"}]}`},
 		{"an unknown output format", `{"project":{"name":"a"},"output":{"format":"spdx-tag-value"}}`},
-		{"no project at all", `{"build":{"dir":"b"}}`},
 	} {
 		if err := checkAgainstSchema(t, schema, bad.body); err == nil {
 			t.Errorf("%s: accepted by the schema", bad.why)
@@ -151,6 +150,50 @@ func TestEverySectionOfTheLoaderIsInTheSchema(t *testing.T) {
 	} {
 		if _, present := properties[section]; !present {
 			t.Errorf("the schema does not mention %q, which the loader accepts", section)
+		}
+	}
+}
+
+// The schema's required lists have to name only what Load refuses when
+// missing. The schema once required "project", which Load never asked for: the
+// project root falls back to the configuration's directory or --source-dir,
+// and the name comes from the build system. A schema stricter than the loader
+// has an editor flag documents the tool runs without complaint. Load requires
+// nothing, so neither may the schema, at any level.
+func TestTheSchemaRequiresNothingTheLoaderDoesNot(t *testing.T) {
+	var published any
+	if err := json.Unmarshal([]byte(Schema()), &published); err != nil {
+		t.Fatal(err)
+	}
+	var walk func(node any, path string)
+	walk = func(node any, path string) {
+		switch value := node.(type) {
+		case map[string]any:
+			if names, present := value["required"]; present {
+				t.Errorf("the schema requires %v at %q, which Load does not", names, path)
+			}
+			for key, child := range value {
+				walk(child, path+"/"+key)
+			}
+		case []any:
+			for _, child := range value {
+				walk(child, path)
+			}
+		}
+	}
+	walk(published, "")
+
+	schema := compiledSchema(t)
+	for _, body := range []string{`{}`, `{"policy":{}}`, `{"build":{"dir":"b"}}`} {
+		if err := checkAgainstSchema(t, schema, body); err != nil {
+			t.Errorf("%s: refused by the schema: %v", body, err)
+		}
+		path := filepath.Join(t.TempDir(), "sbomb.json")
+		if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := Load(path); err != nil {
+			t.Errorf("%s: refused by Load: %v", body, err)
 		}
 	}
 }

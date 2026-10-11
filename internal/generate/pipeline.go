@@ -1045,9 +1045,9 @@ func includedByPolicy(scope anchors.Scope, node domain.Node, cfg policy.Config) 
 	}
 	switch scope {
 	case anchors.ScopeSystem:
-		return cfg.SystemLibraries == "main-sbom" || cfg.SystemLibraries == "separate-component"
+		return cfg.SystemLibraries == "separate-component"
 	case anchors.ScopeToolchain:
-		return cfg.IncludeToolchainRuntime == "main-sbom" || cfg.IncludeToolchainRuntime == "separate-component"
+		return cfg.IncludeToolchainRuntime == "separate-component"
 	default:
 		return anchors.IncludedByDefault(scope)
 	}

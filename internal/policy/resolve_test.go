@@ -1,6 +1,8 @@
 package policy
 
 import (
+	"encoding/json"
+	"sort"
 	"strings"
 	"testing"
 
@@ -79,6 +81,14 @@ func TestInvalidValuesAreRejectedRatherThanIgnored(t *testing.T) {
 	if _, err := Resolve(config.Policy{SystemLibraries: "sometimes"}, Overrides{}); err == nil {
 		t.Error("an invalid systemLibraries value was accepted")
 	}
+	// main-sbom was specified and accepted but never built: it behaved as
+	// separate-component. It is refused rather than left to mislead.
+	if _, err := Resolve(config.Policy{IncludeToolchainRuntime: "main-sbom"}, Overrides{}); err == nil {
+		t.Error("includeToolchainRuntime main-sbom was accepted")
+	}
+	if _, err := Resolve(config.Policy{SystemLibraries: "main-sbom"}, Overrides{}); err == nil {
+		t.Error("systemLibraries main-sbom was accepted")
+	}
 	if _, err := Resolve(config.Policy{}, Overrides{HeaderEvidence: "guess"}); err == nil {
 		t.Error("an invalid headerEvidence value was accepted")
 	}
@@ -146,6 +156,41 @@ func TestEveryGateNameHasASetter(t *testing.T) {
 	for _, name := range GateNames() {
 		if _, err := Resolve(config.Policy{}, Overrides{Gates: map[string]bool{name: true}}); err != nil {
 			t.Errorf("gate %q: %v", name, err)
+		}
+	}
+}
+
+// The schema states each scope option's values and Resolve checks them; they
+// are two tables, and they drifted once: Resolve accepted main-sbom for
+// includeToolchainRuntime and systemLibraries, which the schema left out.
+// Every scope option Resolve checks has to be in the schema with exactly the
+// values Resolve admits.
+func TestSchemaScopeEnumsMatchResolve(t *testing.T) {
+	var published struct {
+		Properties struct {
+			Policy struct {
+				Properties map[string]struct {
+					Enum []string `json:"enum"`
+				} `json:"properties"`
+			} `json:"policy"`
+		} `json:"properties"`
+	}
+	if err := json.Unmarshal([]byte(config.Schema()), &published); err != nil {
+		t.Fatal(err)
+	}
+	properties := published.Properties.Policy.Properties
+	for name, allowed := range allowedScopeValues {
+		property, present := properties[name]
+		if !present {
+			t.Errorf("policy.%s is checked by Resolve but missing from the schema", name)
+			continue
+		}
+		want := append([]string(nil), allowed...)
+		got := append([]string(nil), property.Enum...)
+		sort.Strings(want)
+		sort.Strings(got)
+		if strings.Join(got, ",") != strings.Join(want, ",") {
+			t.Errorf("policy.%s: schema enum %v, Resolve allows %v", name, got, want)
 		}
 	}
 }

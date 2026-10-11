@@ -2384,3 +2384,25 @@ the validator now refuses it in any document.
 The CycloneDX writer is unchanged: it writes an observed expression into
 `expression` as it was observed, and only an exact list spelling into the
 enumerated `license.id`.
+
+## D56 — `main-sbom` is removed rather than implemented
+
+§24.2 listed `main-sbom` as a value of `includeToolchainRuntime` and
+`systemLibraries` but defined only `separate-component`. Policy resolution
+accepted it, from the configuration file and from the flags alike, and the
+pipeline treated it exactly as `separate-component`: the toolchain and system
+files went under the synthetic `build-environment` component, not into the
+main SBOM. The published configuration schema never listed it. A value that is
+accepted and then does something other than its name says is the state D20
+describes for configuration keys, and it is resolved the same way.
+
+Building it is not the alternative. Placing toolchain or system files in the
+main SBOM means making them ordinary dependencies of the product, and §24.2
+says toolchain files MUST NOT silently appear as ordinary project
+dependencies. `separate-component` already includes the files, grouped where a
+reader can tell them apart.
+
+**What is implemented.** The values are `exclude`, `separate-component` and
+`report-only`; `main-sbom` is refused with the same "invalid value" error as
+any other unknown value, which lists the allowed ones. The schema and policy
+resolution are held to the same values for every scope option.
