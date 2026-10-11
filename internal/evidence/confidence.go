@@ -8,6 +8,7 @@ import (
 	"sort"
 
 	"github.com/example/sbomb/internal/domain"
+	"github.com/example/sbomb/internal/jsonstream"
 )
 
 // SourceClass represents the class of an evidence source per §8.6.
@@ -139,53 +140,41 @@ func (g *Graph) Dump(w io.Writer) error {
 		}
 	}
 
-	// Build node dumps (sorted)
+	// Nodes and edges are written one at a time (jsonstream): the dump of a
+	// large build is written when the run holds the most memory, and encoding
+	// it in one piece held it twice more.
 	nodes := g.Nodes()
-	nodeDumps := make([]NodeDump, len(nodes))
-	for i, node := range nodes {
-		nodeDumps[i] = NodeDump{
-			ID:         node.ID,
-			Kind:       node.Kind,
-			Attributes: node.Attributes,
-		}
-	}
-
-	// Build edge dumps (sorted)
 	edges := g.Edges()
-	edgeDumps := make([]EdgeDump, len(edges))
-	for i, edge := range edges {
-		downgrades := edge.Downgrades
-		if downgrades == nil {
-			downgrades = []string{}
-		}
-		edgeDumps[i] = EdgeDump{
-			From:       edge.From,
-			To:         edge.To,
-			Type:       edge.Type,
-			Strength:   edge.Strength,
-			Confidence: edge.Confidence,
-			Source:     edge.Source,
-			Adapter:    edge.Adapter,
-			Attributes: edge.Attributes,
-			Downgrades: downgrades,
-		}
-	}
-
-	dump := DumpFormat{
-		SchemaVersion: 1,
-		ToolVersion:   "0.0.0", // will be replaced by CLI layer
-		Anchors:       anchorDumps,
-		Nodes:         nodeDumps,
-		Edges:         edgeDumps,
-	}
-
-	enc := json.NewEncoder(w)
-	enc.SetEscapeHTML(false)
-	enc.SetIndent("", "  ")
-	if err := enc.Encode(dump); err != nil {
+	err := jsonstream.WriteObject(w, []jsonstream.Member{
+		{Name: "schemaVersion", Value: int64(1)},
+		{Name: "toolVersion", Value: "0.0.0"}, // will be replaced by CLI layer
+		jsonstream.Elements("anchors", anchorDumps),
+		{Name: "nodes", Array: true, Len: len(nodes), Element: func(i int) any {
+			node := nodes[i]
+			return NodeDump{ID: node.ID, Kind: node.Kind, Attributes: node.Attributes}
+		}},
+		{Name: "edges", Array: true, Len: len(edges), Element: func(i int) any {
+			edge := edges[i]
+			downgrades := edge.Downgrades
+			if downgrades == nil {
+				downgrades = []string{}
+			}
+			return EdgeDump{
+				From:       edge.From,
+				To:         edge.To,
+				Type:       edge.Type,
+				Strength:   edge.Strength,
+				Confidence: edge.Confidence,
+				Source:     edge.Source,
+				Adapter:    edge.Adapter,
+				Attributes: edge.Attributes,
+				Downgrades: downgrades,
+			}
+		}},
+	})
+	if err != nil {
 		return fmt.Errorf("dump error: %w", err)
 	}
-
 	return nil
 }
 

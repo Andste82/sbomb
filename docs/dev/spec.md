@@ -1930,7 +1930,7 @@ Measured on a 4-core x86_64 runner with warm page cache, using the `large` fixtu
 
 The tool MUST NOT read files that are not evidence-selected or required for configured metadata resolution.
 
-The budgets apply to every output format. SPDX 3.0.1 output does **not** meet them yet (D54): CI measures the 10 000-unit row as SPDX on every push, without blocking, so the overrun is reported rather than hidden.
+The budgets apply to every output format. CI measures the 10 000-unit row in CycloneDX and in SPDX 3.0.1 on every push, and either overrun fails the build.
 
 A benchmark suite (`go test -bench`) MUST exist for: map parsing, depfile parsing, graph construction, and serialization.
 

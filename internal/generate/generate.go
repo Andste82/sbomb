@@ -724,7 +724,7 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 		logger.Info("Project version %q read from CMAKE_PROJECT_VERSION", cfg.Project.Version)
 	}
 	document, findings := buildDocument(cfg, projectVersionSource, resolver, deliverables, artifactIDs, used, findings, run, attributes)
-	var rendered bytes.Buffer
+	var rendered chunkedBuffer
 	if err := writer.Write(&rendered, document, writeOptions); err != nil {
 		return Result{Graph: graph, Findings: findings}, &ExitError{
 			Code: 70,
@@ -1144,4 +1144,43 @@ func artifactRefs(nodeIDs []string) []string {
 	}
 	sort.Strings(refs)
 	return refs
+}
+
+// chunkedBuffer collects a rendered document in blocks of a fixed size and
+// hands it out once, in an array of exactly its size. A bytes.Buffer grows by
+// doubling: when it grows it holds the old array and the new one at once, and
+// it ends up to twice the document. The document stays alive through
+// validation and writing, and on a large run rendering is the time the most
+// memory is in use; blocks cost the document once while it is written and
+// twice only for the moment it is joined.
+type chunkedBuffer struct {
+	chunks [][]byte
+	size   int
+}
+
+const chunkSize = 1 << 20
+
+func (b *chunkedBuffer) Write(data []byte) (int, error) {
+	written := len(data)
+	for len(data) > 0 {
+		if len(b.chunks) == 0 || len(b.chunks[len(b.chunks)-1]) == chunkSize {
+			b.chunks = append(b.chunks, make([]byte, 0, chunkSize))
+		}
+		last := &b.chunks[len(b.chunks)-1]
+		taken := min(chunkSize-len(*last), len(data))
+		*last = append(*last, data[:taken]...)
+		data = data[taken:]
+	}
+	b.size += written
+	return written, nil
+}
+
+// Bytes joins the blocks and releases them.
+func (b *chunkedBuffer) Bytes() []byte {
+	joined := make([]byte, 0, b.size)
+	for _, chunk := range b.chunks {
+		joined = append(joined, chunk...)
+	}
+	b.chunks = nil
+	return joined
 }

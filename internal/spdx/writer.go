@@ -61,6 +61,7 @@ type renderer struct {
 	render          func(io.Writer, *mapping.Model, string) error
 	validate        func([]byte) error
 	check           func([]byte) error
+	validateOwn     func([]byte) error
 	schema          func() []byte
 	read            func([]byte, string) ([]string, error)
 	customAdditions bool
@@ -70,7 +71,15 @@ type renderer struct {
 // and reads. Versions, the version a document is read as, and the version a
 // document is written in all come from here and from nowhere else.
 var renderers = map[string]renderer{
-	Version301: {spdx3.Render, spdx3.Validate, spdx3.CheckOwnOutput, spdx3.SchemaJSON, spdx3.ComponentFiles, true},
+	Version301: {
+		render:          spdx3.Render,
+		validate:        spdx3.Validate,
+		check:           spdx3.CheckOwnOutput,
+		validateOwn:     spdx3.ValidateOwnOutput,
+		schema:          spdx3.SchemaJSON,
+		read:            spdx3.ComponentFiles,
+		customAdditions: true,
+	},
 }
 
 func rendererFor(version string) (renderer, string, error) {
@@ -146,6 +155,22 @@ func (w Writer) CheckOutput(data []byte) error {
 	return r.check(data)
 }
 
+// ValidateOutput is Validate and CheckOutput over one decoding of a document
+// sbomb wrote.
+func (w Writer) ValidateOutput(data []byte) error {
+	r, err := w.ownReaderFor(data)
+	if err != nil {
+		return err
+	}
+	if r.validateOwn == nil {
+		if err := r.validate(data); err != nil {
+			return err
+		}
+		return r.check(data)
+	}
+	return r.validateOwn(data)
+}
+
 // ComponentFiles reads the files a component contains back out of a document.
 func (w Writer) ComponentFiles(data []byte, name string) ([]string, error) {
 	r, err := w.readerFor(data)
@@ -153,6 +178,27 @@ func (w Writer) ComponentFiles(data []byte, name string) ([]string, error) {
 		return nil, err
 	}
 	return r.read(data, name)
+}
+
+// ownReaderFor is readerFor for a document sbomb wrote. sbomb writes
+// @context first, so the version is read from the head of the document
+// without scanning the rest, which Detect does to read a document of any
+// shape. A document that does not start that way is detected as any other.
+func (w Writer) ownReaderFor(data []byte) (renderer, error) {
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	if open, err := decoder.Token(); err == nil && open == json.Delim('{') {
+		if key, err := decoder.Token(); err == nil && key == "@context" {
+			var context json.RawMessage
+			if decoder.Decode(&context) == nil {
+				if version, ok := contextVersion(context); ok {
+					if r, known := renderers[version]; known {
+						return r, nil
+					}
+				}
+			}
+		}
+	}
+	return w.readerFor(data)
 }
 
 // readerFor is the renderer of the version a document declares, or a refusal

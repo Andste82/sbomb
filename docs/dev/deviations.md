@@ -2302,31 +2302,55 @@ the evidence would change the CycloneDX classification as well, and is not
 part of the SPDX writer. A test asserts that no document contains
 `generates`.
 
-## D54 — SPDX output does not meet the §31 performance budgets yet
+## D54 — SPDX output did not meet the §31 performance budgets
 
 §31 sets the budgets for every run: 10 000 used files within 15 s and 512 MiB,
-50 000 within 90 s and 1.5 GiB. The CycloneDX writer meets them. The SPDX writer
-does not. Measured on a six-core machine with the performance fixture:
+50 000 within 90 s and 1.5 GiB. The CycloneDX writer met them; the first SPDX
+writer did not, at 15.8 s and 725 MiB for 10 000 files and 148 s and 3.6 GiB
+for 50 000 on a six-core machine.
 
-| Units | CycloneDX | SPDX 3.0.1 |
-|---|---|---|
-| 10 000 | 7.2 s, 314 MiB | 15.8 s, 725 MiB |
-| 50 000 | 82.7 s, 1288 MiB | 148 s, 3666 MiB |
+Most of it was validation, not rendering. An SPDX document states as separate
+elements what CycloneDX states as fields, so it is several times larger, and
+every node of it went through the general schema walk -- each file with its
+ten property entries, each relationship, and the SpdxDocument and Sbom with a
+list of every element -- while the document was decoded up to five times.
 
-Most of the difference is validation, not rendering. An SPDX document states as
-separate elements what CycloneDX states as fields — every relationship, every
-known leaf, every property in an extension object — so the document is several
-times larger, and the JSON schema validator walks every extension entry of it;
-at 10 000 units that is about 3.6 s of the 5.1 s the file elements cost, with
-1.85 GB allocated per validation.
+**What is implemented.** Validation is not skipped: a document that was not
+checked is still not written (§32.5).
 
-**What is done meanwhile.** The documents are correct, and validation is not
-skipped to make the number: a document that was not checked is not written
-(§32.5). CI measures the 10 000-unit row as SPDX on every push, beside the
-blocking CycloneDX row, as a step that reports its overrun without failing the
-job. Bringing it within budget — validating the repetitive extension entries
-without the general schema walk, and streaming the render — is open work
-(#56).
+* The nodes sbomb writes in their usual shapes -- files and relationships --
+  are recognised by hand and left out of the schema walk only when the schema
+  is certain to accept them. The enums and patterns this uses are read from
+  the embedded schema; every other node, and every node of an unusual shape,
+  is walked as before and refused in the schema's own words. Items the schema
+  can only accept -- CycloneDX property extensions, element references -- are
+  left out of the nodes that are walked. A test bends every node the renderer
+  writes in a few thousand ways and holds both to the verdict of the schema.
+* A document sbomb writes is decoded once for the schema, the conformance
+  rules and its own invariants, element by element and with its repeated
+  strings shared, and its version is read from its head.
+* The SBOM and the evidence dump are written element by element, and the
+  rendered document is collected in blocks and joined once, so neither is held
+  twice or three times while it is written.
+* Validation runs with the garbage collector at half its usual heap growth,
+  since the run is largest then.
+
+The output is byte for byte what it was. Measured on a shared six-core machine
+whose speed varied between runs (median wall time, peak RSS, CPU time):
+
+| Units | Format | Before | After |
+|---|---|---|---|
+| 10 000 | SPDX 3.0.1 | 17.6 s, 830 MiB, 26.1 s CPU | 11.1 s, 331 MiB, 13.6 s CPU |
+| 10 000 | CycloneDX | 8.9 s, 317 MiB, 11.0 s CPU | 8.4 s, 247 MiB, 11.1 s CPU |
+| 50 000 | SPDX 3.0.1 | 100 s, 3791 MiB, 140 s CPU | 103 s, 1331 MiB, 91 s CPU |
+| 50 000 | CycloneDX | 1234–1365 MiB, 57–86 s CPU | 1084–1147 MiB, 67–81 s CPU |
+
+The CI performance job measures the 10 000-unit row as SPDX on every push and
+fails on an overrun, as it does for CycloneDX; on its runner the row took
+8.9 s and 266 MiB. At 50 000 units SPDX now costs about what CycloneDX costs;
+the wall time of that row is dominated by the steps both formats share. The
+CycloneDX times at 50 000 units spread wider between runs than they differ.
+**Closed.**
 
 ## D55 — A listed licence identifier in another case is written as the list spells it
 

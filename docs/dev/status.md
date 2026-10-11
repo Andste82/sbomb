@@ -65,7 +65,7 @@
   per-element cross-check against the CycloneDX document of the same run, and
   a value-level coverage test of every `Document` field. CI holds the goldens
   to check-jsonschema and pyshacl (job `spdx-conformance`). Deviations D48-D55;
-  the performance budget is not met yet (D54).
+  the SPDX path meets the performance budget of section 31 (D54, closed).
 - `sbomb validate` and `sbomb evidence` exist, and `sbomb schema --format <id>`
   (alias `--cyclonedx`) prints the embedded schema. `validate` reads CycloneDX
   and SPDX 3.0.1 and refuses SPDX 2.3 by name.
@@ -336,9 +336,6 @@
   in question. Fixing it costs what that decision refused to spend -- a change
   to the dump format, a second discovery, or one subcommand reading two files
   -- so it is recorded as open question Q19 rather than guessed at.
-- **SPDX output is over the performance budget** of section 31 (D54), mostly
-  in schema validation of the extension entries. CI measures it without
-  blocking.
 - **SPDX 2.3 is not written yet** (issue #3, open question Q21).
 - **Five specified flags are absent**, each waiting on the feature it belongs
   to rather than on effort: `--license-scan`, `--output-dir`,

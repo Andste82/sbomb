@@ -35,6 +35,11 @@ func CheckOwnOutput(data []byte) error {
 	if err != nil {
 		return err
 	}
+	return checkParsed(parsed)
+}
+
+// checkParsed is CheckOwnOutput over a document already read.
+func checkParsed(parsed *parsedDocument) error {
 	found := &issues{}
 	check := &ownOutput{parsed: parsed, found: found}
 	check.shape()

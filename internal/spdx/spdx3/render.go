@@ -2,13 +2,13 @@ package spdx3
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"io"
 	"sort"
 	"strings"
 	"unicode/utf8"
 
+	"github.com/example/sbomb/internal/jsonstream"
 	"github.com/example/sbomb/internal/licenselist"
 	"github.com/example/sbomb/internal/spdx/mapping"
 )
@@ -32,10 +32,16 @@ func Render(w io.Writer, model *mapping.Model, namespace string) error {
 		return errors.New("an SPDX 3.0.1 document needs a namespace for its element identifiers")
 	}
 	r := &renderer{model: model, namespace: namespace, relationships: newRelationshipSet()}
-	encoder := json.NewEncoder(w)
-	encoder.SetEscapeHTML(false)
-	encoder.SetIndent("", "  ")
-	return encoder.Encode(r.document())
+	return writeDocument(w, r.document())
+}
+
+// writeDocument writes the document node by node, byte for byte as one
+// indented encoding of the whole would (jsonstream).
+func writeDocument(w io.Writer, doc document) error {
+	return jsonstream.WriteObject(w, []jsonstream.Member{
+		{Name: "@context", Value: doc.Context},
+		jsonstream.Elements("@graph", doc.Graph),
+	})
 }
 
 type renderer struct {

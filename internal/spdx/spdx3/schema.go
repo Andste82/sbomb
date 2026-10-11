@@ -89,6 +89,8 @@ type schemaSet struct {
 	document *jsonschema.Schema
 	anyNode  *jsonschema.Schema
 	byClass  map[string]*jsonschema.Schema
+	// shapes vouches for the nodes the schema need not walk.
+	shapes *shapeTable
 }
 
 // compiled returns the schema, compiled once per process. The CycloneDX
@@ -123,6 +125,9 @@ func compile() (*schemaSet, error) {
 		return nil, fmt.Errorf("registering the node schemas: %w", err)
 	}
 	set := &schemaSet{byClass: map[string]*jsonschema.Schema{}}
+	if set.shapes, err = newShapeTable(document); err != nil {
+		return nil, err
+	}
 	if set.document, err = compiler.Compile(schemaURL); err != nil {
 		return nil, err
 	}
@@ -150,6 +155,26 @@ func ValidateAgainstSchema(data []byte) error {
 	if err != nil {
 		return fmt.Errorf("the document is not valid JSON: %w", err)
 	}
+	return set.validate(instance)
+}
+
+// validateParsedAgainstSchema is ValidateAgainstSchema over a document
+// already read, so that a document is decoded once however many checks it
+// passes through. parseDocument decodes as jsonschema.UnmarshalJSON does --
+// numbers kept as json.Number -- so the schema sees the same value.
+func validateParsedAgainstSchema(parsed *parsedDocument) error {
+	set, err := compiled()
+	if err != nil {
+		return err
+	}
+	if parsed.trailing {
+		return fmt.Errorf("the document is not valid JSON: invalid character after top-level value")
+	}
+	return set.validate(parsed.root)
+}
+
+// validate checks one decoded document against the schema.
+func (set *schemaSet) validate(instance any) error {
 	issues := map[string]bool{}
 	root, isObject := instance.(map[string]any)
 	graph, hasGraph := root["@graph"].([]any)
@@ -192,13 +217,16 @@ func (set *schemaSet) validateNodes(graph []any) []map[string]bool {
 		go func() {
 			defer wait.Done()
 			for index := range next {
+				if set.shapes.conforms(graph[index]) {
+					continue
+				}
 				schema := set.anyNode
 				if object, ok := graph[index].(map[string]any); ok {
 					if class, ok := object["type"].(string); ok && set.byClass[class] != nil {
 						schema = set.byClass[class]
 					}
 				}
-				if err := schema.Validate(graph[index]); err != nil {
+				if err := schema.Validate(set.shapes.elide(graph[index])); err != nil {
 					found := map[string]bool{}
 					collectSchemaIssues(err, []string{"@graph", strconv.Itoa(index)}, found)
 					results[index] = found

@@ -65,6 +65,14 @@ type OutputChecker interface {
 	CheckOutput(data []byte) error
 }
 
+// OutputValidator answers Validate and CheckOutput in one call, so that a
+// writer whose documents are large decodes one only once on its way out. Its
+// verdict is the verdict of the two calls; WriteFile prefers it when a writer
+// has it.
+type OutputValidator interface {
+	ValidateOutput(data []byte) error
+}
+
 // RefusalError is a Preflight refusal that carries an appendix A finding, so
 // that the command line can print the identifier a user looks up rather than
 // only the sentence.

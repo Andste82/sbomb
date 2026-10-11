@@ -24,6 +24,26 @@ func Validate(data []byte) error {
 	if err != nil {
 		return err
 	}
+	return validateParsed(parsed)
+}
+
+// ValidateOwnOutput is Validate and then CheckOwnOutput, over one decoding of
+// the document. It is what a document sbomb writes passes through: the same
+// verdict as the two calls, for a third of the decoding and without two copies
+// of a large document in memory at once.
+func ValidateOwnOutput(data []byte) error {
+	parsed, err := parseDocument(data)
+	if err != nil {
+		return err
+	}
+	if err := validateParsed(parsed); err != nil {
+		return err
+	}
+	return checkParsed(parsed)
+}
+
+// validateParsed is Validate over a document already read.
+func validateParsed(parsed *parsedDocument) error {
 	// Before the schema, because the schema only says the value is wrong: an
 	// @context array is how 3.0.1 documents declare prefixes, and the reason
 	// it is refused deserves a sentence.
@@ -39,7 +59,7 @@ func Validate(data []byte) error {
 	default:
 		return fmt.Errorf("@context is not a string; an SPDX 3.0.1 document names %q", contextURL)
 	}
-	if err := ValidateAgainstSchema(data); err != nil {
+	if err := validateParsedAgainstSchema(parsed); err != nil {
 		return err
 	}
 	return conformance(parsed).err("SPDX 3.0.1 conformance check failed")

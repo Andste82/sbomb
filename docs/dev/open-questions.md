@@ -503,7 +503,7 @@ confirmed as it shipped (#57):
 * **Known leaves** are stated for every element, files included, for parity
   with CycloneDX.
 
-What remains of the SPDX path's performance is D54. The number stays reserved
+The SPDX path's performance was D54, which is closed. The number stays reserved
 so that references to it keep their meaning.
 
 ## Q23 — reserved
