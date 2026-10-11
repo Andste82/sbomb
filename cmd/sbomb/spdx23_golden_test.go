@@ -161,19 +161,7 @@ func choiceInAFile() *sbomwriter.Document {
 // itself is not lost; the 3.0.1 document of the same build states the same
 // expression.
 func TestSpdx23ChoiceInAFileGolden(t *testing.T) {
-	render := func(version string) []byte {
-		writer, err := sbomwriter.Get("spdx-json", version)
-		if err != nil {
-			t.Fatal(err)
-		}
-		options := sbomwritertest.AllFieldsOptions()
-		options.SpecVersion = version
-		var buffer bytes.Buffer
-		if err := writer.Write(&buffer, choiceInAFile(), options); err != nil {
-			t.Fatal(err)
-		}
-		return buffer.Bytes()
-	}
+	render := func(version string) []byte { return renderSynthetic(t, choiceInAFile(), version) }
 	data := render("2.3")
 	holdToBothTiers(t, "synthetic-choice-in-file", "2.3", data)
 	doc := parseSpdx23(t, data)
@@ -188,6 +176,41 @@ func TestSpdx23ChoiceInAFileGolden(t *testing.T) {
 	}
 	assertNoProblems(t, "synthetic-choice-in-file", crossCheck23(t, render("3.0.1"), data))
 	assertGolden(t, spdx23Golden("synthetic-choice-in-file"), data)
+}
+
+// renderSynthetic writes a synthetic document in the given SPDX version
+// through the registered writer, with the all-fields options.
+func renderSynthetic(t *testing.T, document *sbomwriter.Document, version string) []byte {
+	t.Helper()
+	writer, err := sbomwriter.Get("spdx-json", version)
+	if err != nil {
+		t.Fatal(err)
+	}
+	options := sbomwritertest.AllFieldsOptions()
+	options.SpecVersion = version
+	var buffer bytes.Buffer
+	if err := writer.Write(&buffer, document, options); err != nil {
+		t.Fatal(err)
+	}
+	return buffer.Bytes()
+}
+
+// TestSpdx23LicenceReferencesGolden: licence references the build stated --
+// a LicenseRef, a LicenseRef of another document, an exception off the SPDX
+// list -- are written so that every reference the 2.3 document uses is
+// defined in it and no AdditionRef appears (section 28.11.11, deviation D57).
+// The golden is in the directory the conformance job hands to pyspdxtools.
+func TestSpdx23LicenceReferencesGolden(t *testing.T) {
+	data := renderSynthetic(t, sbomwritertest.LicenceReferences(), "2.3")
+	holdToBothTiers(t, "synthetic-licence-refs", "2.3", data)
+	if bytes.Contains(data, []byte("AdditionRef")) {
+		t.Error("the 2.3 document names an AdditionRef")
+	}
+	if !bytes.Contains(data, []byte(`"licenseId": "LicenseRef-acme"`)) {
+		t.Error("LicenseRef-acme, which the build stated, is not defined in the document")
+	}
+	assertNoProblems(t, "synthetic-licence-refs", crossCheck23(t, renderSynthetic(t, sbomwritertest.LicenceReferences(), "3.0.1"), data))
+	assertGolden(t, spdx23Golden("synthetic-licence-refs"), data)
 }
 
 // TestSpdx23DocumentStatesWhatThe301DocumentStates is the completeness
@@ -596,7 +619,7 @@ func crossCheck23(t *testing.T, spdx3Data, spdx23Data []byte) []string {
 					if len(graph.targets(from, rel.relationshipType)) == 1 && field != expression {
 						report("%s %s %s: the 2.3 field says %q", from, rel.relationshipType, expression, field)
 					}
-				case !licenceNamed(field, expression, doc):
+				case !licenceNamed(field, expression, doc, graph.mintedName):
 					report("%s %s %q: not in its 2.3 field %q", from, rel.relationshipType, expression, field)
 				}
 			case "doesNotAffect":
@@ -622,8 +645,10 @@ func crossCheck23(t *testing.T, spdx3Data, spdx23Data []byte) []string {
 // joined 2.3 licence fields of an element: every identifier of it, compared
 // as a token. An identifier 2.3 cannot reference -- an AdditionRef, a
 // reference into another document -- is named through the LicenseRef sbomb
-// defined for it, whose name is the original.
-func licenceNamed(fields, expression string, doc *spdx23Doc) bool {
+// defined for it, whose name is the original. A reference sbomb minted in
+// 3.0.1 (an AdditionRef-sbomb-* for an exception off the list) is looked for by
+// the name minted gives it.
+func licenceNamed(fields, expression string, doc *spdx23Doc, minted func(string) string) bool {
 	tokens := map[string]bool{}
 	for _, token := range strings.FieldsFunc(fields, licenceSeparator) {
 		tokens[token] = true
@@ -644,9 +669,13 @@ func licenceNamed(fields, expression string, doc *spdx23Doc) bool {
 		if tokens[token] {
 			continue
 		}
+		needle := token
+		if name := minted(token); name != "" {
+			needle = name
+		}
 		found := false
 		for id, name := range defined {
-			if tokens[id] && (name == token || strings.Contains(name, token)) {
+			if tokens[id] && (name == needle || strings.Contains(name, needle)) {
 				found = true
 				break
 			}
@@ -669,4 +698,14 @@ func annotationHasPrefix(element map[string]any, prefix string) bool {
 		}
 	}
 	return false
+}
+
+// mintedName is the name of a licence or exception reference sbomb minted in a
+// 3.0.1 document -- what was observed -- or "" for any other identifier.
+func (g *spdxGraph) mintedName(ref string) string {
+	if !strings.HasPrefix(ref, "LicenseRef-sbomb-") && !strings.HasPrefix(ref, "AdditionRef-sbomb-") {
+		return ""
+	}
+	name, _ := g.nodes["license-text:"+ref]["name"].(string)
+	return name
 }

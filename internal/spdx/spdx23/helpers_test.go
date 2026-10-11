@@ -18,8 +18,9 @@ func options23(options sbomwriter.Options) mapping.Options {
 		SpecVersion:              "2.3",
 		LicenseText:              options.LicenseText,
 		Reproducible:             options.Reproducible,
-		Digests:                  []string{"SHA-1"},
-		SelfContainedLicenseRefs: true,
+		CustomAdditions:          CustomAdditions,
+		Digests:                  FileDigests(),
+		SelfContainedLicenseRefs: SelfContainedLicenseRefs,
 	}
 }
 

@@ -1,0 +1,158 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "licence-refs",
+  "documentNamespace": "urn:uuid:0d488fcc-5d67-5d18-abce-b5cc4c295a4a",
+  "creationInfo": {
+    "created": "2023-11-14T22:13:20Z",
+    "creators": [
+      "Organization: Sentinel Vendor Org",
+      "Tool: sbomb-0.0.0-sentinel"
+    ],
+    "licenseListVersion": "3.28"
+  },
+  "annotations": [
+    {
+      "annotationDate": "2023-11-14T22:13:20Z",
+      "annotationType": "OTHER",
+      "annotator": "Tool: sbomb-0.0.0-sentinel",
+      "comment": "sbomb:run:reproducible=true\nsbomb:run:specVersion=2.3\nsbomb:run:toolVersion=0.0.0-sentinel"
+    }
+  ],
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-product-3Alicence-2Drefs",
+      "name": "licence-refs",
+      "versionInfo": "1.0.0",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "MIT",
+      "primaryPackagePurpose": "APPLICATION",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:type=application\nsbomb:version:source=curated"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "licenseConcluded: MIT\nsbomb:license:evidenceClass=curated"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-artifact-3Abuild-3Abin-2Fapp",
+      "name": "app",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "APPLICATION",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:type=application"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aacme",
+      "name": "acme",
+      "versionInfo": "1.0.0",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "LicenseRef-acme OR LicenseRef-sbomb-DocumentRef-other-LicenseRef-beta-8fb0e63e",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:scope=third-party\nsbomb:component:type=library"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "licenseConcluded: LicenseRef-acme OR LicenseRef-sbomb-DocumentRef-other-LicenseRef-beta-8fb0e63e\nsbomb:license:evidenceClass=curated\nsbomb:license:source=curated"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aexcepted",
+      "name": "excepted",
+      "versionInfo": "2.0.0",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "LicenseRef-sbomb-GPL-2.0-only-WITH-Acme-exception-38914b81",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:scope=third-party\nsbomb:component:type=library"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "licenseConcluded: LicenseRef-sbomb-GPL-2.0-only-WITH-Acme-exception-38914b81\nsbomb:license:evidenceClass=curated\nsbomb:license:source=curated"
+        }
+      ]
+    }
+  ],
+  "hasExtractedLicensingInfos": [
+    {
+      "licenseId": "LicenseRef-acme",
+      "name": "LicenseRef-acme",
+      "extractedText": "LicenseRef-acme",
+      "comment": "the build stated this licence reference; sbomb has no text for it beyond its identifier"
+    },
+    {
+      "licenseId": "LicenseRef-sbomb-DocumentRef-other-LicenseRef-beta-8fb0e63e",
+      "name": "DocumentRef-other:LicenseRef-beta",
+      "extractedText": "DocumentRef-other:LicenseRef-beta",
+      "comment": "sbomb observed only this licence name; no licence text was retained (licenseTextInSBOM is off, or no licence file was read)"
+    },
+    {
+      "licenseId": "LicenseRef-sbomb-GPL-2.0-only-WITH-Acme-exception-38914b81",
+      "name": "GPL-2.0-only WITH Acme-exception",
+      "extractedText": "GPL-2.0-only WITH Acme-exception",
+      "comment": "sbomb observed only this licence name; no licence text was retained (licenseTextInSBOM is off, or no licence file was read)"
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relationshipType": "DESCRIBES",
+      "relatedSpdxElement": "SPDXRef-product-3Alicence-2Drefs"
+    },
+    {
+      "spdxElementId": "SPDXRef-artifact-3Abuild-3Abin-2Fapp",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-component-3Aacme"
+    },
+    {
+      "spdxElementId": "SPDXRef-artifact-3Abuild-3Abin-2Fapp",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-component-3Aexcepted"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aacme",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aexcepted",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Alicence-2Drefs",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-artifact-3Abuild-3Abin-2Fapp"
+    }
+  ]
+}

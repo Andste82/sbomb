@@ -65,7 +65,7 @@
   before it is written. Fourteen fixture goldens plus a synthetic all-fields golden, a
   per-element cross-check against the CycloneDX document of the same run, and
   a value-level coverage test of every `Document` field. CI holds the goldens
-  to check-jsonschema and pyshacl (job `spdx-conformance`). SPDX 2.3 has seven
+  to check-jsonschema and pyshacl (job `spdx-conformance`). SPDX 2.3 has nine
   goldens of its own, each cross-checked against the 3.0.1 document of the same
   run, and CI holds them to check-jsonschema and pyspdxtools. Deviations D48-D55 and D57;
   the SPDX path meets the performance budget of section 31 (D54, closed).

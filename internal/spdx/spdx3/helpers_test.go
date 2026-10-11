@@ -22,7 +22,7 @@ func iriOf(local string) string { return iriFor(testNamespace, local) }
 // namespace, and holds the result to both tiers.
 func render(t *testing.T, document *sbomwriter.Document, options sbomwriter.Options) []byte {
 	t.Helper()
-	model, err := mapping.Build(document, mapping.Options{SpecVersion: specVersion, LicenseText: options.LicenseText, Reproducible: options.Reproducible, CustomAdditions: true})
+	model, err := mapping.Build(document, mapping.Options{SpecVersion: specVersion, LicenseText: options.LicenseText, Reproducible: options.Reproducible, CustomAdditions: CustomAdditions})
 	if err != nil {
 		t.Fatal(err)
 	}
