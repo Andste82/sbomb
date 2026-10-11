@@ -9,6 +9,7 @@ import (
 
 	"github.com/example/sbomb/internal/adapters/cmakeapi"
 	makeadapter "github.com/example/sbomb/internal/adapters/make"
+	"github.com/example/sbomb/internal/anchors"
 	"github.com/example/sbomb/internal/config"
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/evidence"
@@ -231,6 +232,31 @@ func TestOnlyACodemodelListsTheArchives(t *testing.T) {
 	} {
 		if got := archivesListed(test.model); got != test.want {
 			t.Errorf("%s: listed = %v, want %v", test.name, got, test.want)
+		}
+	}
+}
+
+// TestACodemodelEndsTheInSourceAssumption: in an in-source build, every
+// archive under the project root is counted as produced only without a
+// codemodel; with one, a checked-in prebuilt library is reported again.
+func TestACodemodelEndsTheInSourceAssumption(t *testing.T) {
+	inSource, err := anchors.Assemble(anchors.Options{Flavor: pathmodel.PosixFlavor{}, ProjectRoot: "/src", BuildRoot: "/src"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	codemodel := &cmakeapi.Model{Configurations: []cmakeapi.Configuration{{Name: "Release"}}}
+	for _, test := range []struct {
+		name     string
+		model    *cmakeapi.Model
+		registry *pathmodel.Registry
+		want     bool
+	}{
+		{"in source, no reply", nil, inSource.Registry, true},
+		{"in source, codemodel", codemodel, inSource.Registry, false},
+		{"out of source", nil, hostReadAnchors(t).Registry, false},
+	} {
+		if got := everyProjectArchiveIsBuilt(test.model, test.registry, "/src"); got != test.want {
+			t.Errorf("%s: every project archive built = %v, want %v", test.name, got, test.want)
 		}
 	}
 }
