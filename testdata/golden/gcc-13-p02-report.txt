@@ -57,7 +57,7 @@ evidence edges:        36
 headers excluded by DWARF narrowing: 0
 
 == Unresolved ==
-MISSING_COMPONENT_HASH: 1
+MISSING_COMPONENT_HASH: 2
 MISSING_FILE_HASH:     3
 MISSING_SUPPLIER:      2
 UNANCHORED_FILE:       2
@@ -70,8 +70,13 @@ none
 
 == Findings ==
 warning
+- HOST_FILES_NOT_READ: the build ran on another machine, so toolchain and system files named by absolute path were not read from this one and carry no hash
+    subject: configuration/toolchain
+    remediation: Generate the SBOM on the machine, or in the image, that ran the build to have these files hashed.
 - MISSING_COMPONENT_HASH: no file of this component could be hashed
     subject: component/component:p02-static
+- MISSING_COMPONENT_HASH: no file of this component could be hashed
+    subject: component/toolchain:gnu-13.3.0
 - MISSING_FILE_HASH: the file is not readable, so no hash could be computed
     subject: file/project:crypto.c
 - MISSING_FILE_HASH: the file is not readable, so no hash could be computed

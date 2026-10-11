@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/example/sbomb/internal/anchors"
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/evidence"
 )
@@ -36,7 +37,7 @@ func TestWhereAFileIsReadDoesNotDependOnWhichSpellingCameFirst(t *testing.T) {
 				b.physical[canonical], _ = b.physicalFor(b.logicalFor(spellings[index]))
 				continue
 			}
-			b.reconsiderPhysical(canonical, b.physical[canonical], spellings[index])
+			b.reconsiderPhysical(canonical, b.physical[canonical], spellings[index], anchors.ScopeBuild)
 		}
 		if got := b.physical[canonical]; got != want {
 			t.Errorf("order %v: the file is read at %q, want %q", order, got, want)
@@ -49,7 +50,7 @@ func TestWhereAFileIsReadDoesNotDependOnWhichSpellingCameFirst(t *testing.T) {
 	b.physical[canonical] = ""
 	b.refusedReads[canonical] = true
 	b.findings = append(b.findings, domain.Finding{ID: "MISSING_FILE_HASH", Subject: domain.Subject{Kind: "file", Ref: canonical}, Message: refusedReadMessage})
-	b.reconsiderPhysical(canonical, "", "sub/a.c")
+	b.reconsiderPhysical(canonical, "", "sub/a.c", anchors.ScopeBuild)
 	if b.physical[canonical] != want || len(b.findings) != 0 {
 		t.Errorf("physical %q, findings %v", b.physical[canonical], b.findings)
 	}

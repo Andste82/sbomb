@@ -124,6 +124,15 @@ type builder struct {
 	// when a later spelling of the file can be read -- by identity, not by
 	// matching the wording of the message.
 	refusedReads map[string]bool
+	// hostReads records that a file was looked up where the build recorded
+	// it, outside the build and source trees: once, so that the run says so in
+	// one finding rather than one per toolchain file (section 7.9 rule 8).
+	hostReads bool
+	// unread holds, by identity, the path the build recorded for each file
+	// hostRead did not read. Where a file lies still classifies it -- a header
+	// in the compiler's own include directory is a compiler runtime header --
+	// and that needs the path, not the bytes.
+	unread map[string]string
 	// absoluteBuildPrefix is physicalBuild made absolute, in slash form and
 	// with the separator already on it, which is the form logicalFor compares
 	// every absolute path against. Slash form because the paths it meets are
@@ -172,6 +181,7 @@ func newBuilder(graph *evidence.Graph, anchorResult *anchors.Result, logicalBuil
 		searchedIdentified:  map[string]identity{},
 		libraryLocations:    map[string]libraryLocated{},
 		refusedReads:        map[string]bool{},
+		unread:              map[string]string{},
 		absoluteBuildPrefix: absoluteBuildPrefix,
 	}
 }
@@ -290,9 +300,10 @@ func (b *builder) identifyUncached(base, path string) (string, anchors.Scope) {
 	id, scope := b.anchors.ScopeOfPath(base, b.logicalFor(path))
 	canonical := id.Canonical()
 	if recorded, known := b.physical[canonical]; known {
-		b.reconsiderPhysical(canonical, recorded, path)
+		b.reconsiderPhysical(canonical, recorded, path, scope)
 	} else {
 		physical, readable := b.physicalFor(b.logicalFor(path))
+		physical = b.hostRead(canonical, b.logicalFor(path), scope, physical, readable)
 		// A refused read is recorded as no location at all, which is what every
 		// reader of this map already checks for. Section 7.9 rule 3 asks for
 		// MISSING_FILE_HASH in addition, and here is where it can be said once
@@ -334,9 +345,10 @@ const refusedReadMessage = "the path leaves the source tree it would be read fro
 // it. So the location is chosen by what it is, not by when it arrived: one
 // that can be read over a refused one, an existing file over one that is not
 // there, and between two of a kind the first in byte order.
-func (b *builder) reconsiderPhysical(canonical, recorded, path string) {
+func (b *builder) reconsiderPhysical(canonical, recorded, path string, scope anchors.Scope) {
 	candidate, readable := b.physicalFor(b.logicalFor(path))
-	if !readable || candidate == recorded || !preferPhysical(candidate, recorded) {
+	candidate = b.hostRead(canonical, b.logicalFor(path), scope, candidate, readable)
+	if !readable || candidate == "" || candidate == recorded || !preferPhysical(candidate, recorded) {
 		return
 	}
 	b.physical[canonical] = candidate
@@ -352,6 +364,104 @@ func (b *builder) reconsiderPhysical(canonical, recorded, path string) {
 			return
 		}
 	}
+}
+
+// hostRead decides whether a file that lies outside the build and source trees
+// is read at the absolute path the evidence recorded for it -- a toolchain's
+// startup objects and runtime libraries, a system header, a file no anchor
+// claims. That path names a file of the machine that ran the build. Where sbomb
+// runs on that machine it is the file that was linked, and it is read as
+// before. Where the build or source tree was relocated, the evidence came from
+// elsewhere, and the file of that name here is whatever this host has: another
+// compiler's crtbeginS.o, or nothing at all on Windows. Hashing it would put
+// this host's bytes into the document as the build's, and would make the same
+// evidence publish different documents on different machines. Such a file is
+// therefore not read at all: it is recorded with no location, as a refused
+// read is, and the run says so once (section 7.9 rule 8). The evidence records
+// no digest that could tell the two files apart, or the file could be read and
+// checked against it instead.
+//
+// A package cache is not affected: rule 7 keeps its recorded paths, and its
+// scope is third-party, not one of the three below.
+func (b *builder) hostRead(canonical, logical string, scope anchors.Scope, physical string, readable bool) string {
+	if !readable || physical == "" || !pathmodel.IsAbsolute(logical) || b.inTrees(logical) {
+		return physical
+	}
+	switch scope {
+	case anchors.ScopeToolchain, anchors.ScopeSystem, anchors.ScopeUnknown:
+	default:
+		return physical
+	}
+	relocated := b.relocatesBuild() || b.relocatesSource()
+	if !b.hostReads {
+		b.hostReads = true
+		b.findings = append(b.findings, hostReadFinding(relocated))
+	}
+	if relocated {
+		b.logger.Debug("Not reading '%s' from this host: the build ran elsewhere", logical)
+		// The smaller spelling in byte order, so that where the file lies
+		// does not depend on which spelling the evidence handed over last.
+		if recorded, known := b.unread[canonical]; !known || logical < recorded {
+			b.unread[canonical] = logical
+		}
+		return ""
+	}
+	b.logger.Trace("Reading '%s' where the build recorded it", logical)
+	return physical
+}
+
+// inTrees reports whether a path from the evidence lies in the build tree or
+// the source tree the evidence records. A toolchain checked into the source
+// tree, or fetched into the build tree, is read from that tree, relocated or
+// not, and is no file of the host.
+func (b *builder) inTrees(logical string) bool {
+	if b.logicalBuild != "" && (logical == b.logicalBuild || strings.HasPrefix(logical, b.logicalBuild+"/")) {
+		return true
+	}
+	if _, found := relativeUnder(logical, b.logicalSource, b.flavor); found {
+		return true
+	}
+	return false
+}
+
+// hostReadFinding is the one finding a run carries about files read, or not
+// read, outside its build and source trees.
+func hostReadFinding(relocated bool) domain.Finding {
+	if relocated {
+		return domain.Finding{
+			ID: "HOST_FILES_NOT_READ", Severity: domain.SeverityWarning,
+			Subject:     domain.Subject{Kind: "configuration", Ref: "toolchain"},
+			Message:     "the build ran on another machine, so toolchain and system files named by absolute path were not read from this one and carry no hash",
+			Remediation: "Generate the SBOM on the machine, or in the image, that ran the build to have these files hashed.",
+		}
+	}
+	return domain.Finding{
+		ID: "HOST_FILES_READ", Severity: domain.SeverityInfo,
+		Subject: domain.Subject{Kind: "configuration", Ref: "toolchain"},
+		Message: "toolchain and system files named by absolute path are read where the build recorded them, on the machine this run takes for the one that built",
+	}
+}
+
+// relocatesBuild reports whether the build tree is read somewhere other than
+// where the evidence says it was produced (section 7.6). Both roots are put in
+// one spelling first, as normalizedRoot does for the source roots: a build.dir
+// of /bd/ or /x/../bd names the directory filepath.Abs calls /bd, and a local
+// run must not take itself for a relocated one over a spelling. A relative
+// logical root cannot be compared with anything and is taken as local.
+func (b *builder) relocatesBuild() bool {
+	if b.logicalBuild == "" || b.absoluteBuildPrefix == "" {
+		return false
+	}
+	flavor := b.anchors.Registry.Flavor()
+	logical := normalizedRoot(b.logicalBuild, flavor)
+	if !pathmodel.IsAbsolute(logical) {
+		return false
+	}
+	physical := normalizedRoot(strings.TrimSuffix(b.absoluteBuildPrefix, "/"), flavor)
+	if !flavor.CaseSensitive() {
+		return !strings.EqualFold(logical, physical)
+	}
+	return logical != physical
 }
 
 // preferPhysical is the total order reconsiderPhysical chooses by.
@@ -391,7 +501,7 @@ func (b *builder) scopeOfCanonical(canonical string) anchors.Scope {
 	}
 	// An unanchored file may still be recognizable as a system path from where
 	// its bytes actually live (section 14.4).
-	if physical := b.physical[canonical]; physical != "" {
+	if physical := b.location(canonical); physical != "" {
 		if _, scope := b.anchors.ScopeOfPath(b.logicalBuild, physical); scope != anchors.ScopeUnknown {
 			return scope
 		}
@@ -1211,7 +1321,16 @@ func (b *builder) classify(canonical string, generated bool) headers.Class {
 	}
 	return b.headerClass.Classify(headers.Input{
 		Canonical: canonical,
-		Physical:  b.physical[canonical],
+		Physical:  b.location(canonical),
 		Generated: generated,
 	})
+}
+
+// location is where a file lies: where it is read, or, for a file hostRead
+// left unread, where the build recorded it.
+func (b *builder) location(canonical string) string {
+	if physical := b.physical[canonical]; physical != "" {
+		return physical
+	}
+	return b.unread[canonical]
 }

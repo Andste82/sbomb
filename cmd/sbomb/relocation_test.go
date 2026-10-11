@@ -344,3 +344,57 @@ func TestADotSourceDirRelocatesLikeAnyOtherPath(t *testing.T) {
 			dotted["mit-lib"], absolute["mit-lib"])
 	}
 }
+
+// TestARelocatedRunHashesNoneOfThisHostsToolchain is section 7.9 rule 8 on the
+// corpus, issue #61. The evidence names GCC 13's startup objects and runtime
+// libraries under /usr; this host may have the same files, another GCC's or
+// none at all. Before, the document carried whatever this host had there, so
+// one corpus published different hashes on Linux and on Windows. Now none of
+// them is read: every toolchain file carries no hash, on every host, and one
+// finding says why.
+func TestARelocatedRunHashesNoneOfThisHostsToolchain(t *testing.T) {
+	directory := t.TempDir()
+	output := filepath.Join(directory, "out.cdx.json")
+	findingsPath := filepath.Join(directory, "findings.json")
+	code, _, stderr := execute([]string{"generate", "--build-dir", testutil.CorpusBuildDir(t, "gcc-ninja", "p02-static"),
+		"--output", output, "--findings-json", findingsPath, "--reproducible"})
+	// The default profile, because lenient reports the toolchain runtime
+	// without listing its files. It fails on the corpus's missing hashes,
+	// which is a verdict and not an error.
+	if code != 0 && code != 3 {
+		t.Fatalf("generate = code %d, stderr %q", code, stderr)
+	}
+	type component struct {
+		BomRef     string            `json:"bom-ref"`
+		Type       string            `json:"type"`
+		Hashes     []json.RawMessage `json:"hashes"`
+		Components []component       `json:"components"`
+	}
+	var document struct {
+		Components []component `json:"components"`
+	}
+	if err := json.Unmarshal(mustRead(t, output), &document); err != nil {
+		t.Fatal(err)
+	}
+	toolchainFiles := 0
+	var walk func([]component)
+	walk = func(components []component) {
+		for _, each := range components {
+			walk(each.Components)
+			if each.Type != "file" || !strings.HasPrefix(each.BomRef, "file:toolchain:") {
+				continue
+			}
+			toolchainFiles++
+			if len(each.Hashes) != 0 {
+				t.Errorf("%s carries a hash of this host's file", each.BomRef)
+			}
+		}
+	}
+	walk(document.Components)
+	if toolchainFiles == 0 {
+		t.Fatal("the document has no toolchain file; the test checks nothing")
+	}
+	if count := strings.Count(string(mustRead(t, findingsPath)), `"HOST_FILES_NOT_READ"`); count != 1 {
+		t.Errorf("HOST_FILES_NOT_READ appears %d time(s), want once per run", count)
+	}
+}
