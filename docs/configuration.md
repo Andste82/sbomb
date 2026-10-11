@@ -542,6 +542,7 @@ Only the rows that differ are listed; everything else is the same in all four.
 | missing header evidence | – | – | – | ✓ |
 | unanchored file | – | – | – | ✓ |
 | no link evidence at all | – | ✓ | ✓ | ✓ |
+| unmapped prebuilt library | – | ✓ | ✓ | ✓ |
 | **Content** | | | | |
 | `headerEvidence` | dwarf-preferred | dwarf-preferred | dwarf-preferred | **union** |
 | `includeToolchainRuntime` | report-only | separate-component | separate-component | separate-component |
@@ -579,8 +580,8 @@ remain for these components; only introspection can close that.
 ### Gates
 
 Each is a boolean with a matching `--fail-on-…` flag
-(`--allow-missing-link-evidence` for the last). Each names the findings that
-make the run fail.
+(`--allow-missing-link-evidence` and `--prebuilt-libraries-require-mapping` for
+the last two). Each names the findings that make the run fail.
 
 | Gate | Fails when |
 |---|---|
@@ -597,6 +598,7 @@ make the run fail.
 | `failOnMissingHeaderEvidence` | a translation unit contributed no header evidence |
 | `failOnUnanchoredFile` | a file matched no anchor and would carry an absolute path |
 | `allowMissingLinkEvidence` | inverted: **permits** a run in which no link evidence source succeeded |
+| `prebuiltLibrariesRequireMapping` | a prebuilt library from outside the build directory has no component mapping (`PREBUILT_LIBRARY_UNMAPPED`) |
 
 `severityOverrides` maps a finding identifier to `error`, `warning` or `info`
 when your process disagrees with the default severity.
@@ -618,7 +620,6 @@ runs that differ here are not comparable.
 | `systemLibraries` | `exclude`, `separate-component`, `report-only` | Libraries the distribution provides |
 | `pchHeaders` | `include`, `exclude`, `annotate-only` | Headers that arrived through a precompiled header |
 | `sectionGarbageCollection` | `ignore`, `annotate`, `exclude` | Objects the linker discarded with `--gc-sections`: keep them, mark them, or drop them |
-| `prebuiltLibrariesRequireMapping` | `true`, `false` | Accepted, but has no effect yet: `PREBUILT_LIBRARY_UNMAPPED` is always a warning and fails no run |
 | `licenseTextInSBOM` | `off`, `evidence` | Whether the licence texts sbomb retained from the component roots are written into the document, as `evidence.licenses[].license.text` |
 | `staleToleranceSeconds` | `5` | How much clock skew counts as "not stale" |
 
