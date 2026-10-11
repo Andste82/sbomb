@@ -76,6 +76,9 @@ type graphAttributes struct {
 	// that are both linked is two.
 	archivesOf map[string]map[string]bool
 	usage      map[string]archiveUsage
+	// produced names the archives this build produced itself, per archive
+	// identity. None of them is a prebuilt library (section 33.1).
+	produced map[string]bool
 }
 
 // roleOf answers for one file identity. A file the derivation never saw is

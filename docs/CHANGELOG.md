@@ -15,7 +15,13 @@ already claimed. It is now raised only for a library no component claims --
 one that would otherwise be folded into the project or land in an unknown
 component. A library a `components[]` entry, a package manager, package
 metadata beside it, or a package, SDK or external anchor accounts for is not
-reported.
+reported. Neither is a library the build produced itself: one `build.ninja` or
+an MSBuild project names as archived from objects, or one whose extracted
+members trace back to objects of this build. In an in-source build,
+where the build directory is the project root, every archive under the project
+root counts as built there, as one in a separate build directory always did; a
+prebuilt library checked in beside the sources of such a build is therefore
+not reported.
 
 A run that passed before can now fail; add a `components[]` entry for the
 library, or set `prebuiltLibrariesRequireMapping: false`
