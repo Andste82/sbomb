@@ -227,6 +227,11 @@ jobs:
         # Its own limit, so that a slow run fails this step rather than the job.
         timeout-minutes: 5
         run: go test -tags perf ./test/perf/ -timeout 4m -units 10000 -map-bytes 41943040 -format spdx-json
+      - name: 10 000 translation units within budget, as SPDX 2.3
+        # SPDX 2.3 asks for a SHA-1 of every file, computed in the same read
+        # as the SHA-256; the same budget holds. Blocking like the rows above.
+        timeout-minutes: 5
+        run: go test -tags perf ./test/perf/ -timeout 4m -units 10000 -map-bytes 41943040 -format spdx-json -spec-version 2.3
 
   # The findings catalogue in the user documentation is generated from appendix
   # A and annotated with what the code emits. Unlike the SPDX list this depends
@@ -274,7 +279,8 @@ jobs:
   # paraphrase of the SPDX model, and a paraphrase can be wrong in the same way
   # as the writer it checks. This job holds the goldens to the SPDX project's
   # own validators instead: the JSON schema through an independent validator,
-  # and the SHACL model, which sbomb does not run. Every Python package is
+  # and the SHACL model, which sbomb does not run, for 3.0.1; the 2.3 schema
+  # and the SPDX reference implementation (pyspdxtools) for 2.3. Every Python package is
   # pinned -- the validators and the engines they depend on -- so that a new
   # release of any of them cannot turn a green build red; bump them on
   # purpose. PyPI is the job's one network dependency: the model and the
@@ -342,6 +348,63 @@ jobs:
             result=$?
             if [ "$result" -ne 1 ]; then
               echo "::error::the SHACL check gave $result, not 1, for the known-bad probe $probe" >&2
+              status=1
+            else
+              echo "refused, as it must be: $probe"
+            fi
+          done
+          exit "$status"
+      - name: The SPDX 2.3 goldens pass the SPDX 2.3 JSON schema
+        # The schema released with SPDX 2.3, the one sbomb embeds (section
+        # 28.11.11). The 2.3 goldens live in a directory of their own, so the
+        # 3.0.1 steps above never read them.
+        run: check-jsonschema --schemafile internal/spdx/spdx23/schema/spdx-schema-2.3.json testdata/golden/spdx-2.3/*.spdx.json
+      - name: The SPDX 2.3 schema check can fail
+        # The probe is a document with one schema defect, a File without
+        # checksums, which must be refused for that reason.
+        run: |
+          set +e -u
+          output=$(check-jsonschema --schemafile internal/spdx/spdx23/schema/spdx-schema-2.3.json \
+            testdata/spdx/known-bad-schema-2.3/file-without-checksums.json 2>&1)
+          result=$?
+          if [ "$result" -ne 1 ] || ! printf '%s\n' "$output" | grep -q "Schema validation errors were encountered" \
+            || ! printf '%s\n' "$output" | grep -q "'checksums' is a required property"; then
+            printf '%s\n' "$output" >&2
+            echo "::error::the SPDX 2.3 schema check did not refuse the File without checksums" >&2
+            exit 1
+          fi
+          echo "refused, as it must be: testdata/spdx/known-bad-schema-2.3/file-without-checksums.json"
+      - name: The SPDX 2.3 goldens pass the SPDX reference implementation
+        # pyspdxtools (the spdx-tools package) parses each document into the
+        # SPDX 2.3 model and validates it against the specification text:
+        # the SHA-1 of every file, every LicenseRef defined, every
+        # relationship end an element -- rules the schema does not state.
+        run: |
+          set +e -u
+          status=0
+          for golden in testdata/golden/spdx-2.3/*.spdx.json; do
+            if pyspdxtools -i "$golden"; then
+              echo "valid: $golden"
+            else
+              echo "::error::pyspdxtools refused $golden" >&2
+              status=1
+            fi
+          done
+          exit "$status"
+      - name: The SPDX reference implementation can fail
+        # Each probe breaks one rule of the specification text -- a File
+        # without a SHA-1, an undefined LicenseRef, a relationship to an
+        # element the document does not define -- and each must be refused,
+        # or the step above proved nothing.
+        run: |
+          set +e -u
+          status=0
+          for probe in testdata/spdx/known-bad-2.3/*.json; do
+            output=$(pyspdxtools -i "$probe" 2>&1)
+            result=$?
+            if [ "$result" -ne 1 ] || ! printf '%s\n' "$output" | grep -q "The document is invalid"; then
+              printf '%s\n' "$output" >&2
+              echo "::error::pyspdxtools gave $result, not a refusal, for the known-bad probe $probe" >&2
               status=1
             else
               echo "refused, as it must be: $probe"

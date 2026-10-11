@@ -26,6 +26,10 @@ var (
 	// cost the same: SPDX states one relationship per known leaf -- about one
 	// per file -- and checks its output in two tiers on top of the schema.
 	format = flag.String("format", "cyclonedx-json", "output format to measure: cyclonedx-json or spdx-json")
+	// specVersion is the version of that format; empty is the format's
+	// default. SPDX 2.3 is measured on its own because it asks for a SHA-1 of
+	// every file on top of the SHA-256 every run computes.
+	specVersion = flag.String("spec-version", "", "spec version of the measured format; empty is the format's default")
 )
 
 // budget is one row of the table in section 31.
@@ -64,11 +68,15 @@ func TestPerformanceBudget(t *testing.T) {
 		extension = ".spdx.json"
 	}
 	output := filepath.Join(t.TempDir(), "large"+extension)
-	command := exec.Command(binary, "generate",
+	args := []string{"generate",
 		"--build-dir", filepath.Join(root, "build"),
 		"--config", configPath, "--policy", "lenient",
 		"--format", *format,
-		"--output", output, "--reproducible")
+		"--output", output, "--reproducible"}
+	if *specVersion != "" {
+		args = append(args, "--spec-version", *specVersion)
+	}
+	command := exec.Command(binary, args...)
 	// A reproducible SPDX document is created at SOURCE_DATE_EPOCH and is
 	// refused without it; CycloneDX ignores it under --reproducible.
 	command.Env = append(os.Environ(), "SOURCE_DATE_EPOCH=1700000000")
@@ -86,8 +94,8 @@ func TestPerformanceBudget(t *testing.T) {
 	}
 	peak := usage.Maxrss * 1024 // Linux reports kilobytes
 
-	t.Logf("section 31, %s: %d units, %d MB map -> %s wall, %d MiB peak RSS (budget %s, %d MiB)",
-		*format, *units, *mapBytes>>20, elapsed.Round(time.Millisecond), peak>>20,
+	t.Logf("section 31, %s %s: %d units, %d MB map -> %s wall, %d MiB peak RSS (budget %s, %d MiB)",
+		*format, *specVersion, *units, *mapBytes>>20, elapsed.Round(time.Millisecond), peak>>20,
 		want.wall, want.rss>>20)
 
 	if elapsed > want.wall {

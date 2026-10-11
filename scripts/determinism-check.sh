@@ -47,9 +47,9 @@ run() {
 # Every version the tool writes, in every format, because the claim is about
 # the tool and not about one of its outputs: the same evidence must produce the
 # same bytes on every platform, whichever format and revision was asked for.
-for version in 1.6 1.7 3.0.1; do
+for version in 1.6 1.7 2.3 3.0.1; do
   case "$version" in
-    3.0.1) format=spdx-json extension=spdx.json ;;
+    2.3|3.0.1) format=spdx-json extension=spdx.json ;;
     *) format=cyclonedx-json extension=cdx.json ;;
   esac
   run "$format" "$version" "$tmp/first.$extension"
@@ -70,12 +70,13 @@ done
 # enough to miss that; six do not. A fresh copy each time, because generate
 # writes its evidence dump into the build directory.
 #
-# In both formats. Each states things the other does not -- SPDX names the
-# adapters that contributed, CycloneDX keeps its own serial derivation -- so an
-# order dependence can surface in one and not in the other.
+# In both formats, and in both SPDX versions. Each states things the others do
+# not -- SPDX names the adapters that contributed, CycloneDX keeps its own
+# serial derivation, SPDX 2.3 states a file without a SHA-1 as a package -- so
+# an order dependence can surface in one and not in the others.
 #
 # Built once rather than through go run, which would compile and link the tool
-# again for every one of the twelve runs. GOEXE, because Windows will not run
+# again for every one of the eighteen runs. GOEXE, because Windows will not run
 # it without the extension.
 unity_sbomb="$tmp/sbomb$(go env GOEXE)"
 go build -o "$unity_sbomb" ./cmd/sbomb
@@ -99,7 +100,7 @@ unity_run() {
     --path-flavor windows \
     --policy lenient
 }
-for pair in "cyclonedx-json 1.6 cdx.json" "spdx-json 3.0.1 spdx.json"; do
+for pair in "cyclonedx-json 1.6 cdx.json" "spdx-json 2.3 spdx.json" "spdx-json 3.0.1 spdx.json"; do
   set -- $pair
   unity_run "$1" "$2" "$tmp/unity-first.$3"
   for attempt in 2 3 4 5 6; do

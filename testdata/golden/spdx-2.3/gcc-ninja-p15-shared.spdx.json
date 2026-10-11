@@ -1,0 +1,325 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "p15-shared",
+  "documentNamespace": "urn:uuid:6607289f-500a-5f3a-a4a8-55225be56769",
+  "creationInfo": {
+    "created": "2023-11-14T22:13:20Z",
+    "creators": [
+      "Organization: sbomb",
+      "Tool: sbomb-0.0.0-test"
+    ],
+    "licenseListVersion": "3.28"
+  },
+  "annotations": [
+    {
+      "annotationDate": "2023-11-14T22:13:20Z",
+      "annotationType": "OTHER",
+      "annotator": "Tool: sbomb-0.0.0-test",
+      "comment": "sbomb:build:config=Debug\nsbomb:build:generator=Ninja\nsbomb:run:adapters=binfmt\nsbomb:run:adapters=depfiles\nsbomb:run:adapters=linker-depfile\nsbomb:run:adapters=linker-map\nsbomb:run:adapters=manifest\nsbomb:run:adapters=resolver\nsbomb:run:reproducible=true\nsbomb:run:specVersion=2.3\nsbomb:run:toolVersion=0.0.0-test"
+    }
+  ],
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-product-3Ap15-2Dshared",
+      "name": "p15-shared",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "APPLICATION",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:artifact:role=application\nsbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:type=application"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-artifact-3Abuild-3Aapp",
+      "name": "app",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "APPLICATION",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:type=application"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-artifact-3Abuild-3Aimage.img",
+      "name": "image.img",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "FIRMWARE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:type=firmware"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Ap15-2Dshared",
+      "name": "p15-shared",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "MIT",
+      "primaryPackagePurpose": "APPLICATION",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:detectedBy=anchor:project\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-object\nsbomb:component:modified=unknown\nsbomb:component:root=project:\nsbomb:component:scope=project\nsbomb:component:type=application\nsbomb:license:evidenceClass=file-level\nsbomb:license:source=project:src/main.c\nsbomb:license:technique=spdx-identifier"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: MIT\nsbomb:license:confidence=high\nsbomb:license:evidenceClass=file-level\nsbomb:license:source=project:src/main.c\nsbomb:license:technique=spdx-identifier"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Ashared-2Dlib",
+      "name": "shared-lib",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "LGPL-2.1-only",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:archiveMembersUsed=1/1\nsbomb:component:detectedBy=package-metadata:LICENSE\nsbomb:component:distributionRole=distributed\nsbomb:component:licenseFile=project:dep/shared-lib/LICENSE@sha256:2278b2a116002e54f74ad5bea23c5d30fd58d46df35ba81e5b5b66b32073adb0\nsbomb:component:linkageForm=embedded-asset\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:root=project:dep/shared-lib\nsbomb:component:scope=third-party\nsbomb:component:sourceObligation=library-source\nsbomb:component:sourceObligation=relinking\nsbomb:component:type=library\nsbomb:license:evidenceClass=file-level\nsbomb:license:source=project:dep/shared-lib/include/shared_bits.h\nsbomb:license:technique=spdx-identifier"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: LGPL-2.1-only\nsbomb:license:confidence=high\nsbomb:license:evidenceClass=file-level\nsbomb:license:source=project:dep/shared-lib/include/shared_bits.h\nsbomb:license:technique=spdx-identifier"
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fshared-2Dlib-2FLICENSE",
+      "fileName": "project:dep/shared-lib/LICENSE",
+      "fileTypes": [
+        "DOCUMENTATION",
+        "TEXT"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "9badd7f69abbbe919902a479ae30f15d23ef1c22"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "2278b2a116002e54f74ad5bea23c5d30fd58d46df35ba81e5b5b66b32073adb0"
+        }
+      ],
+      "copyrightText": "Copyright (C) 2026 Fixture Shared Library Authors",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:path:canonical=project:dep/shared-lib/LICENSE"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fshared-2Dlib-2Fdata-2Ftable.bin",
+      "fileName": "project:dep/shared-lib/data/table.bin",
+      "fileTypes": [
+        "OTHER"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "477355a8eef3d1d932e3b849a070360dea2081bd"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "997ff90f8eb9dbf019e4bf0dd71d1902d3a6d83c59a011363e2718a403f7e980"
+        }
+      ],
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:evidence:artifacts=artifact:build:image.img\nsbomb:file:class=asset\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=embedded-asset\nsbomb:file:size=57\nsbomb:path:canonical=project:dep/shared-lib/data/table.bin"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fshared-2Dlib-2Finclude-2Fshared-5Fbits.h",
+      "fileName": "project:dep/shared-lib/include/shared_bits.h",
+      "fileTypes": [
+        "SOURCE"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "55d5d12859c3a28c5fc0b3f92a1704c74f9ff38f"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "969db9708046ca73feb07ae51fd6dc7d2d0a27fe1c8626cf8f5c975a0002a882"
+        }
+      ],
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:evidence:artifacts=artifact:build:app\nsbomb:evidence:header:class=project-header\nsbomb:file:class=header\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=header-only\nsbomb:file:size=137\nsbomb:path:canonical=project:dep/shared-lib/include/shared_bits.h"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fshared-2Dlib-2Fsrc-2Fshared-5Fbits.c",
+      "fileName": "project:dep/shared-lib/src/shared_bits.c",
+      "fileTypes": [
+        "SOURCE"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "b95521c53b8045e4a5e8c830a8bf2ec176098547"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "10f0fcfe2246f421b97dd26fdd9bf2b1886e01cd34731b1a96f9b0373a23f4f8"
+        }
+      ],
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:evidence:artifacts=artifact:build:app\nsbomb:file:class=source\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:size=163\nsbomb:path:canonical=project:dep/shared-lib/src/shared_bits.c"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Asrc-2Fmain.c",
+      "fileName": "project:src/main.c",
+      "fileTypes": [
+        "SOURCE"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "1872269cb3b157374e12dd8718c738c2962adcba"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "93195b278f12f098470605606ae2da170f017c7349f45370dc0e5106e6dbca32"
+        }
+      ],
+      "copyrightText": "Copyright (c) 2026 Fixture Assembly Authors",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:evidence:artifacts=artifact:build:app\nsbomb:file:class=source\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-object\nsbomb:file:size=165\nsbomb:path:canonical=project:src/main.c"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relationshipType": "DESCRIBES",
+      "relatedSpdxElement": "SPDXRef-product-3Ap15-2Dshared"
+    },
+    {
+      "spdxElementId": "SPDXRef-artifact-3Abuild-3Aapp",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Ap15-2Dshared"
+    },
+    {
+      "spdxElementId": "SPDXRef-artifact-3Abuild-3Aapp",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Ashared-2Dlib"
+    },
+    {
+      "spdxElementId": "SPDXRef-artifact-3Abuild-3Aimage.img",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-component-3Ashared-2Dlib"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Ap15-2Dshared",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Asrc-2Fmain.c"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Ap15-2Dshared",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Asrc-2Fmain.c",
+      "comment": "evidence: a copyright statement of this package was read from this file"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Ashared-2Dlib",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Adep-2Fshared-2Dlib-2Fdata-2Ftable.bin"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Ashared-2Dlib",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Adep-2Fshared-2Dlib-2Finclude-2Fshared-5Fbits.h"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Ashared-2Dlib",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Adep-2Fshared-2Dlib-2Fsrc-2Fshared-5Fbits.c"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fshared-2Dlib-2FLICENSE",
+      "relationshipType": "DOCUMENTATION_OF",
+      "relatedSpdxElement": "SPDXRef-component-3Ashared-2Dlib"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fshared-2Dlib-2Fdata-2Ftable.bin",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fshared-2Dlib-2Finclude-2Fshared-5Fbits.h",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fshared-2Dlib-2Fsrc-2Fshared-5Fbits.c",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Asrc-2Fmain.c",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Ap15-2Dshared",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-artifact-3Abuild-3Aapp"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Ap15-2Dshared",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-artifact-3Abuild-3Aimage.img"
+    }
+  ]
+}

@@ -1,0 +1,1506 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "p14-foss-curated",
+  "documentNamespace": "urn:uuid:f90750cd-f396-51e4-bb5b-06b5341df16b",
+  "creationInfo": {
+    "created": "2023-11-14T22:13:20Z",
+    "creators": [
+      "Organization: sbomb",
+      "Tool: sbomb-0.0.0-test"
+    ],
+    "licenseListVersion": "3.28"
+  },
+  "annotations": [
+    {
+      "annotationDate": "2023-11-14T22:13:20Z",
+      "annotationType": "OTHER",
+      "annotator": "Tool: sbomb-0.0.0-test",
+      "comment": "sbomb:build:config=Debug\nsbomb:build:generator=Ninja\nsbomb:run:adapters=binfmt\nsbomb:run:adapters=depfiles\nsbomb:run:adapters=linker-depfile\nsbomb:run:adapters=linker-map\nsbomb:run:adapters=ninja\nsbomb:run:adapters=resolver\nsbomb:run:reproducible=true\nsbomb:run:specVersion=2.3\nsbomb:run:toolVersion=0.0.0-test"
+    }
+  ],
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-product-3Ap14-2Dfoss-2Dcurated",
+      "name": "p14-foss-curated",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "APPLICATION",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:artifact:role=application\nsbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:type=application"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aapache-2Dlib",
+      "name": "apache-lib",
+      "versionInfo": "2.4.0",
+      "supplier": "Organization: Apache Lib Maintainers",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "Apache-2.0",
+      "copyrightText": "Copyright 2024 The Apache Lib Authors",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:generic/apache-lib@2.4.0"
+        }
+      ],
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:archiveMembersUsed=2/2\nsbomb:component:detectedBy=curated\nsbomb:component:distributionRole=distributed\nsbomb:component:licenseFile=project:dep/apache-lib/LICENSE@sha256:0b8f6fef304298b6a8a8ad91e7a5b0b2255231f39c8fc4ab84774f8e22d07f98\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:noticeFile=project:dep/apache-lib/NOTICE@sha256:c499743d9175cc82bc99be3600c9303257d66a55ada9c7b3f78323a3c2d7610c\nsbomb:component:root=project:dep/apache-lib\nsbomb:component:scope=third-party\nsbomb:component:type=library\nsbomb:license:evidenceClass=component-level\nsbomb:license:source=curated\nsbomb:version:confidence=high\nsbomb:version:source=curated"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: Apache-2.0\nsbomb:license:confidence=high\nsbomb:license:evidenceClass=component-level\nsbomb:license:source=curated"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Absd-2Dhdr",
+      "name": "bsd-hdr",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "BSD-3-Clause",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=package-metadata:LICENSE\nsbomb:component:distributionRole=distributed\nsbomb:component:headerOnly=true\nsbomb:component:licenseFile=project:dep/bsd-hdr/LICENSE@sha256:4bd971475aab8e30017fb65c7f5a6c4da171ee8ee25b3580fad812227f8cb2a2\nsbomb:component:linkageForm=header-only\nsbomb:component:modified=unknown\nsbomb:component:root=project:dep/bsd-hdr\nsbomb:component:scope=third-party\nsbomb:component:type=library\nsbomb:license:evidenceClass=file-level\nsbomb:license:source=project:dep/bsd-hdr/include/bsd_hdr.h\nsbomb:license:technique=spdx-identifier"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: BSD-3-Clause\nsbomb:license:confidence=high\nsbomb:license:evidenceClass=file-level\nsbomb:license:source=project:dep/bsd-hdr/include/bsd_hdr.h\nsbomb:license:technique=spdx-identifier"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Agpl-2Dgen",
+      "name": "gpl-gen",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "GPL-2.0-only",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=package-metadata:LICENSE\nsbomb:component:distributionRole=build-time-only\nsbomb:component:licenseFile=project:dep/gpl-gen/LICENSE@sha256:fe84827856780d1c70e8a0248fc622b0516c8787fd560262356289f465907855\nsbomb:component:linkageForm=build-tool\nsbomb:component:modified=unknown\nsbomb:component:root=project:dep/gpl-gen\nsbomb:component:scope=third-party\nsbomb:component:type=library\nsbomb:license:evidenceClass=file-level\nsbomb:license:source=project:dep/gpl-gen/table_gen.c\nsbomb:license:technique=spdx-identifier"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: GPL-2.0-only\nsbomb:license:confidence=high\nsbomb:license:evidenceClass=file-level\nsbomb:license:source=project:dep/gpl-gen/table_gen.c\nsbomb:license:technique=spdx-identifier"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Algpl-2Dlib",
+      "name": "lgpl-lib",
+      "versionInfo": "3.1.0",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "MIT",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:archiveMembersUsed=2/2\nsbomb:component:detectedBy=curated\nsbomb:component:distributionRole=distributed\nsbomb:component:licenseFile=project:dep/lgpl-lib/LICENSE@sha256:504f56052b78bda68423747cc50aa469ec5412654c000c87e181de257d2cfc86\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:root=project:dep/lgpl-lib\nsbomb:component:scope=third-party\nsbomb:component:type=library\nsbomb:license:conflictingValue=LGPL-2.1-only\nsbomb:review:required=true\nsbomb:version:confidence=high\nsbomb:version:source=curated"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: MIT\nsbomb:license:confidence=high\nsbomb:license:conflictingValue=LGPL-2.1-only\nsbomb:license:evidenceClass=component-level\nsbomb:license:reason=conflicting-evidence\nsbomb:license:source=project:dep/lgpl-lib/include/lgpl_lib.h"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Amit-2Dlib",
+      "name": "mit-lib",
+      "versionInfo": "1.4.0",
+      "supplier": "Organization: Example Supplier Ltd",
+      "originator": "Organization: Example Upstream Project",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "MIT",
+      "description": "A small MIT-licensed helper library the fixture links statically.",
+      "externalRefs": [
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:example:mit-lib:1.4.0:*:*:*:*:*:*:*"
+        }
+      ],
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:archiveMembersUsed=1/3\nsbomb:component:cveExclusion=CVE-2024-0001: the parser this affects is not built\nsbomb:component:cveExclusion=CVE-2024-0002\nsbomb:component:detectedBy=package-metadata:LICENSE\nsbomb:component:distributionRole=distributed\nsbomb:component:licenseFile=project:dep/mit-lib/LICENSE@sha256:931fcdc2d230c2d176c937a73a35d00af205d8414ec6526c83654fadb5d2f52d\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:originator=Example Upstream Project\nsbomb:component:root=project:dep/mit-lib\nsbomb:component:scope=third-party\nsbomb:component:type=library\nsbomb:license:evidenceClass=file-level\nsbomb:license:source=project:dep/mit-lib/include/mit_lib.h\nsbomb:license:technique=spdx-identifier\nsbomb:version:confidence=high\nsbomb:version:source=bundled-sbom"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: MIT\nsbomb:license:confidence=high\nsbomb:license:evidenceClass=file-level\nsbomb:license:source=project:dep/mit-lib/include/mit_lib.h\nsbomb:license:technique=spdx-identifier"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "not affected: CVE-2024-0001: the parser this affects is not built"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "not affected: CVE-2024-0002: the upstream lists this vulnerability as not applying to the version it shipped"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Amulti-2Dlicense",
+      "name": "multi-license",
+      "versionInfo": "1.0.0",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:archiveMembersUsed=1/1\nsbomb:component:detectedBy=curated\nsbomb:component:distributionRole=distributed\nsbomb:component:licenseFile=project:dep/multi-license/LICENSE-APACHE@sha256:0b8f6fef304298b6a8a8ad91e7a5b0b2255231f39c8fc4ab84774f8e22d07f98\nsbomb:component:licenseFile=project:dep/multi-license/LICENSE-MIT@sha256:59d026162035ee799ad4a49867be3ef92276bfe13250cf10796ec0d3b856596e\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:root=project:dep/multi-license\nsbomb:component:scope=third-party\nsbomb:component:type=library\nsbomb:license:evidenceClass=component-level\nsbomb:license:source=curated\nsbomb:version:confidence=high\nsbomb:version:source=curated"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: MIT OR Apache-2.0\nsbomb:license:confidence=high\nsbomb:license:evidenceClass=component-level\nsbomb:license:source=curated"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Anocopyright",
+      "name": "nocopyright",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "0BSD",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:archiveMembersUsed=1/1\nsbomb:component:detectedBy=package-metadata:LICENSE\nsbomb:component:distributionRole=distributed\nsbomb:component:licenseFile=project:dep/nocopyright/LICENSE@sha256:6fd46bc279753ff2f06019924d5e4877729545e72c93165d2fb3bab0bdeebec2\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:root=project:dep/nocopyright\nsbomb:component:scope=third-party\nsbomb:component:type=library\nsbomb:license:evidenceClass=file-level\nsbomb:license:source=project:dep/nocopyright/include/nocopyright.h\nsbomb:license:technique=spdx-identifier"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: 0BSD\nsbomb:license:confidence=high\nsbomb:license:evidenceClass=file-level\nsbomb:license:source=project:dep/nocopyright/include/nocopyright.h\nsbomb:license:technique=spdx-identifier"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Anolicense",
+      "name": "nolicense",
+      "versionInfo": "0.3.0",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "LicenseRef-sbomb-Example-Proprietary-Licence-2526dfe7",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:archiveMembersUsed=1/1\nsbomb:component:detectedBy=curated\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:root=project:dep/nolicense\nsbomb:component:scope=third-party\nsbomb:component:type=library\nsbomb:license:evidenceClass=component-level\nsbomb:license:source=curated\nsbomb:version:confidence=high\nsbomb:version:source=curated"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: LicenseRef-sbomb-Example-Proprietary-Licence-2526dfe7\nsbomb:license:confidence=high\nsbomb:license:evidenceClass=component-level\nsbomb:license:source=curated"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Ap14-2Dfoss-2Dcurated",
+      "name": "p14-foss-curated",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "MIT",
+      "primaryPackagePurpose": "APPLICATION",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:detectedBy=anchor:project\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-object\nsbomb:component:modified=unknown\nsbomb:component:root=project:\nsbomb:component:scope=project\nsbomb:component:type=application\nsbomb:license:evidenceClass=file-level\nsbomb:license:source=project:src/main.c\nsbomb:license:technique=spdx-identifier"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: MIT\nsbomb:license:confidence=high\nsbomb:license:evidenceClass=file-level\nsbomb:license:source=project:src/main.c\nsbomb:license:technique=spdx-identifier"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Avendored-2Dmix",
+      "name": "vendored-mix",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "MIT",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:archiveMembersUsed=2/2\nsbomb:component:detectedBy=package-metadata:LICENSE\nsbomb:component:distributionRole=distributed\nsbomb:component:licenseFile=project:dep/vendored-mix/LICENSE@sha256:6c266bb793425c487074cc6d2106024537fd728f6caa2ff59f882d5ca6570182\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:root=project:dep/vendored-mix\nsbomb:component:scope=third-party\nsbomb:component:type=library\nsbomb:license:evidenceClass=file-level\nsbomb:license:source=project:dep/vendored-mix/include/vendored_mix.h\nsbomb:license:technique=spdx-identifier"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: MIT\nsbomb:license:confidence=high\nsbomb:license:evidenceClass=file-level\nsbomb:license:source=project:dep/vendored-mix/include/vendored_mix.h\nsbomb:license:technique=spdx-identifier"
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "SPDXID": "SPDXRef-file-3Abuild-3Agenerated-2Ftable.c",
+      "fileName": "build:generated/table.c",
+      "fileTypes": [
+        "SOURCE"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "302dfce72f62120f40a1e73a12f4b26597149b60"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e1f86d9804ada8505f7a07c96b8bc3dc0c5e736b4227402ecf1d88087d7fae0b"
+        }
+      ],
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=build\nsbomb:file:class=source\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-object\nsbomb:file:size=113\nsbomb:path:canonical=build:generated/table.c"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fapache-2Dlib-2FLICENSE",
+      "fileName": "project:dep/apache-lib/LICENSE",
+      "fileTypes": [
+        "DOCUMENTATION",
+        "TEXT"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "ec303ff94b98e8162737914d92c2cb861048626b"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "0b8f6fef304298b6a8a8ad91e7a5b0b2255231f39c8fc4ab84774f8e22d07f98"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:path:canonical=project:dep/apache-lib/LICENSE"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: Apache-2.0\nsbomb:license:technique=spdx-digest"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fapache-2Dlib-2FNOTICE",
+      "fileName": "project:dep/apache-lib/NOTICE",
+      "fileTypes": [
+        "DOCUMENTATION",
+        "TEXT"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "306a603f4aad85d5e75687af06dc807b7839f035"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c499743d9175cc82bc99be3600c9303257d66a55ada9c7b3f78323a3c2d7610c"
+        }
+      ],
+      "copyrightText": "Copyright 2026 Fixture Apache Library Authors",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:path:canonical=project:dep/apache-lib/NOTICE"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fapache-2Dlib-2Finclude-2Fapache-5Flib.h",
+      "fileName": "project:dep/apache-lib/include/apache_lib.h",
+      "fileTypes": [
+        "SOURCE"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "29530442547f084c9fca14c144aaaa0197cc6149"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "276eb9575be113a794f3789409437404a2b60045bbbd09aef2523db15a4b720d"
+        }
+      ],
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:evidence:header:class=third-party-header\nsbomb:file:class=header\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=header-only\nsbomb:file:size=197\nsbomb:path:canonical=project:dep/apache-lib/include/apache_lib.h"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fapache-2Dlib-2Fsrc-2Fapache-5Fone.c",
+      "fileName": "project:dep/apache-lib/src/apache_one.c",
+      "fileTypes": [
+        "SOURCE"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "90c9d9e1465fe26951eb9a58f9ebedac69cad14b"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "82ff9ab94c732e37bf89695cc17c57d3c3f539521cdcfa30248044d4c68f4c47"
+        }
+      ],
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:file:class=source\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:size=169\nsbomb:path:canonical=project:dep/apache-lib/src/apache_one.c"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fapache-2Dlib-2Fsrc-2Fapache-5Ftwo.c",
+      "fileName": "project:dep/apache-lib/src/apache_two.c",
+      "fileTypes": [
+        "SOURCE"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "c5af02ddddb72d289e50bda7399c21a7407f9b8b"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "17f3f78e4db04aaed9609f69d84327f051ef05832c332fe2fbbdb40066a56f6d"
+        }
+      ],
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:file:class=source\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:size=169\nsbomb:path:canonical=project:dep/apache-lib/src/apache_two.c"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fbsd-2Dhdr-2FLICENSE",
+      "fileName": "project:dep/bsd-hdr/LICENSE",
+      "fileTypes": [
+        "DOCUMENTATION",
+        "TEXT"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "284cda24dca381d29cfbb4f581228fef192890c2"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "4bd971475aab8e30017fb65c7f5a6c4da171ee8ee25b3580fad812227f8cb2a2"
+        }
+      ],
+      "licenseInfoInFiles": [
+        "BSD-3-Clause"
+      ],
+      "copyrightText": "Copyright (c) 2026, Fixture BSD Header Authors",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:path:canonical=project:dep/bsd-hdr/LICENSE"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseInfoInFiles: BSD-3-Clause\nsbomb:license:technique=spdx-template"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fbsd-2Dhdr-2Finclude-2Fbsd-5Fhdr.h",
+      "fileName": "project:dep/bsd-hdr/include/bsd_hdr.h",
+      "fileTypes": [
+        "SOURCE"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "f0f9932db2cf207e753a87977dc0fe8a35373994"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b440f5903223b3a73894bc91ccec2c661302205f409b74fd174b7f0de20fa93d"
+        }
+      ],
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:evidence:header:class=project-header\nsbomb:file:class=header\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=header-only\nsbomb:file:size=377\nsbomb:path:canonical=project:dep/bsd-hdr/include/bsd_hdr.h"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fgpl-2Dgen-2FLICENSE",
+      "fileName": "project:dep/gpl-gen/LICENSE",
+      "fileTypes": [
+        "DOCUMENTATION",
+        "TEXT"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "d9d87ece97866d37086928592cb3307c3a2f6f54"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "fe84827856780d1c70e8a0248fc622b0516c8787fd560262356289f465907855"
+        }
+      ],
+      "licenseInfoInFiles": [
+        "GPL-2.0-only"
+      ],
+      "copyrightText": "Copyright (C) 1989, 1991 Free Software Foundation, Inc.",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:path:canonical=project:dep/gpl-gen/LICENSE"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseInfoInFiles: GPL-2.0-only\nsbomb:license:technique=spdx-template"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fgpl-2Dgen-2Ftable-5Fgen.c",
+      "fileName": "project:dep/gpl-gen/table_gen.c",
+      "fileTypes": [
+        "SOURCE"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "ceaa3b05d2e8b1c9132bc8ea9c6f1c7df919048c"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "0fc1a9accdc2f926915e2055cc8606fe5cc656de79706ba5d965d6168a647c8b"
+        }
+      ],
+      "copyrightText": "Copyright (C) 2026 Fixture GPL Generator Authors",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:file:class=source\nsbomb:file:distributionRole=build-time-only\nsbomb:file:linkageForm=build-tool\nsbomb:file:size=808\nsbomb:path:canonical=project:dep/gpl-gen/table_gen.c"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Flgpl-2Dlib-2FLICENSE",
+      "fileName": "project:dep/lgpl-lib/LICENSE",
+      "fileTypes": [
+        "DOCUMENTATION",
+        "TEXT"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "fb27ba91a0009232f8371348d2ba132e427eebe0"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "504f56052b78bda68423747cc50aa469ec5412654c000c87e181de257d2cfc86"
+        }
+      ],
+      "copyrightText": "Copyright (C) 1991, 1999 Free Software Foundation, Inc.",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:path:canonical=project:dep/lgpl-lib/LICENSE"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Flgpl-2Dlib-2Finclude-2Flgpl-5Flib.h",
+      "fileName": "project:dep/lgpl-lib/include/lgpl_lib.h",
+      "fileTypes": [
+        "SOURCE"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "6c118f53116bf851986729691962e28b783886bc"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f7fd638c0e4823c696c610a8b1019065e335b8dd59cd33ccc6dd17ef22ea1c0e"
+        }
+      ],
+      "copyrightText": "Copyright (C) 2026 Fixture LGPL Library Authors",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:evidence:header:class=third-party-header\nsbomb:file:class=header\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=header-only\nsbomb:file:size=197\nsbomb:path:canonical=project:dep/lgpl-lib/include/lgpl_lib.h"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Flgpl-2Dlib-2Fsrc-2Flgpl-5Fcore.c",
+      "fileName": "project:dep/lgpl-lib/src/lgpl_core.c",
+      "fileTypes": [
+        "SOURCE"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "312cbd6716c188b6ebb3147a1d0c1720526e6c7c"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "6b2ef29c847374d7937429440ad2d2d85dec26c77f0da5a216fcd6292548a33e"
+        }
+      ],
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:file:class=source\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:size=171\nsbomb:path:canonical=project:dep/lgpl-lib/src/lgpl_core.c"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Flgpl-2Dlib-2Fsrc-2Flgpl-5Fextra.c",
+      "fileName": "project:dep/lgpl-lib/src/lgpl_extra.c",
+      "fileTypes": [
+        "SOURCE"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "a5475e7ba2fc877441b8c19a7dd27b0c8f493e3a"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "4446475e8917e5484af96db6353aa6d0a6ee7e729feebd2c39d3da02e2858d73"
+        }
+      ],
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:file:class=source\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:size=234\nsbomb:path:canonical=project:dep/lgpl-lib/src/lgpl_extra.c"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fmit-2Dlib-2FLICENSE",
+      "fileName": "project:dep/mit-lib/LICENSE",
+      "fileTypes": [
+        "DOCUMENTATION",
+        "TEXT"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "c94fba87da80235e290868953f2323423f11a678"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "931fcdc2d230c2d176c937a73a35d00af205d8414ec6526c83654fadb5d2f52d"
+        }
+      ],
+      "licenseInfoInFiles": [
+        "MIT"
+      ],
+      "copyrightText": "Copyright (c) 2026 Fixture MIT Library Authors",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:path:canonical=project:dep/mit-lib/LICENSE"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseInfoInFiles: MIT\nsbomb:license:technique=spdx-digest"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fmit-2Dlib-2Finclude-2Fmit-5Flib.h",
+      "fileName": "project:dep/mit-lib/include/mit_lib.h",
+      "fileTypes": [
+        "SOURCE"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "2acd7f021861d5fd0ce23b0e347d60e988784c25"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5de679e7144d715e468c751004cdfa3c70072fac6876568dd139e87e2853a90c"
+        }
+      ],
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:evidence:header:class=project-header\nsbomb:file:class=header\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=header-only\nsbomb:file:size=218\nsbomb:path:canonical=project:dep/mit-lib/include/mit_lib.h"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fmit-2Dlib-2Fsrc-2Fmit-5Fa.c",
+      "fileName": "project:dep/mit-lib/src/mit_a.c",
+      "fileTypes": [
+        "SOURCE"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "3ce640a28d84b06e2f365674ba7a4a711292f320"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "6d8a045c61248f33f7acd4ceebc41d709361632f2727fa229f95fd45efc2d14d"
+        }
+      ],
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:file:class=source\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:size=160\nsbomb:path:canonical=project:dep/mit-lib/src/mit_a.c"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fmulti-2Dlicense-2FLICENSE-2DAPACHE",
+      "fileName": "project:dep/multi-license/LICENSE-APACHE",
+      "fileTypes": [
+        "DOCUMENTATION",
+        "TEXT"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "ec303ff94b98e8162737914d92c2cb861048626b"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "0b8f6fef304298b6a8a8ad91e7a5b0b2255231f39c8fc4ab84774f8e22d07f98"
+        }
+      ],
+      "licenseConcluded": "Apache-2.0",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:path:canonical=project:dep/multi-license/LICENSE-APACHE"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: Apache-2.0\nsbomb:license:technique=spdx-digest"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fmulti-2Dlicense-2FLICENSE-2DMIT",
+      "fileName": "project:dep/multi-license/LICENSE-MIT",
+      "fileTypes": [
+        "DOCUMENTATION",
+        "TEXT"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "c3a39583e4ceb73240b674be79d4360fb732ec44"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "59d026162035ee799ad4a49867be3ef92276bfe13250cf10796ec0d3b856596e"
+        }
+      ],
+      "licenseConcluded": "MIT",
+      "copyrightText": "Copyright (c) 2026 Fixture Dual Licensed Authors",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:path:canonical=project:dep/multi-license/LICENSE-MIT"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: MIT\nsbomb:license:technique=spdx-digest"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fmulti-2Dlicense-2Finclude-2Fmulti.h",
+      "fileName": "project:dep/multi-license/include/multi.h",
+      "fileTypes": [
+        "SOURCE"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "bfaf05e5884024b804ab5c74a06c948d1f39ba83"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b2ca841a99e63effd2eff4f3ff951baadca75ea3fa00ff537a7b6181532825e4"
+        }
+      ],
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:evidence:header:class=third-party-header\nsbomb:file:class=header\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=header-only\nsbomb:file:size=170\nsbomb:path:canonical=project:dep/multi-license/include/multi.h"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fmulti-2Dlicense-2Fsrc-2Fmulti.c",
+      "fileName": "project:dep/multi-license/src/multi.c",
+      "fileTypes": [
+        "SOURCE"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "5c3574d35c40e3a5f6532b1951f8531419252dbe"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b5ad33121d4d1761c87f00529f300cb49f8e7525f24fb3e517f9b7d5ce64b4d4"
+        }
+      ],
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:file:class=source\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:size=174\nsbomb:path:canonical=project:dep/multi-license/src/multi.c"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fnocopyright-2FLICENSE",
+      "fileName": "project:dep/nocopyright/LICENSE",
+      "fileTypes": [
+        "DOCUMENTATION",
+        "TEXT"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "a8c2066011a76d7a0b23e70a70e1487de21d201e"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "6fd46bc279753ff2f06019924d5e4877729545e72c93165d2fb3bab0bdeebec2"
+        }
+      ],
+      "licenseInfoInFiles": [
+        "0BSD"
+      ],
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:path:canonical=project:dep/nocopyright/LICENSE"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseInfoInFiles: 0BSD\nsbomb:license:technique=spdx-template"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fnocopyright-2Finclude-2Fnocopyright.h",
+      "fileName": "project:dep/nocopyright/include/nocopyright.h",
+      "fileTypes": [
+        "SOURCE"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "30e1cfac4d988ded0b1e3c43801fb23ebeceb819"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "6edd8b836dc7737777c270b88dba18a0d527e4c06033cd4b672b3fa3ca57e461"
+        }
+      ],
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:evidence:header:class=project-header\nsbomb:file:class=header\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=header-only\nsbomb:file:size=121\nsbomb:path:canonical=project:dep/nocopyright/include/nocopyright.h"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fnocopyright-2Fsrc-2Fnocopyright.c",
+      "fileName": "project:dep/nocopyright/src/nocopyright.c",
+      "fileTypes": [
+        "SOURCE"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "27dc25d1cb4cdc73e630d571575d758b2ca645a4"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "34758173c7c791ae856efdb33c7f860c69e8c50e4dbda96261a746175e718ee7"
+        }
+      ],
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:file:class=source\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:size=267\nsbomb:path:canonical=project:dep/nocopyright/src/nocopyright.c"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fnolicense-2Finclude-2Fnolicense.h",
+      "fileName": "project:dep/nolicense/include/nolicense.h",
+      "fileTypes": [
+        "SOURCE"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "56b9fce02ddbeb5aa7a79dd071f1b549a71a52c9"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "48297112fd9548f6232a8c68db803cbf69b4ea3f6794f32e070f772369eee672"
+        }
+      ],
+      "copyrightText": "Copyright (c) 2026 Fixture Unlicensed Authors",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:evidence:header:class=third-party-header\nsbomb:file:class=header\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=header-only\nsbomb:file:size=131\nsbomb:path:canonical=project:dep/nolicense/include/nolicense.h"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fnolicense-2Fsrc-2Fnolicense.c",
+      "fileName": "project:dep/nolicense/src/nolicense.c",
+      "fileTypes": [
+        "SOURCE"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "fc14914bfcae490e480fd4f3368f7b477ad3253c"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "13ffe47de986df0b8435a1046f4954a3563151aba635e64a3c5b44480c98b5be"
+        }
+      ],
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:file:class=source\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:size=292\nsbomb:path:canonical=project:dep/nolicense/src/nolicense.c"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fvendored-2Dmix-2FLICENSE",
+      "fileName": "project:dep/vendored-mix/LICENSE",
+      "fileTypes": [
+        "DOCUMENTATION",
+        "TEXT"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "72734e6a5f67fbf2b7dcfbf25eedbf3025b76ed2"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "6c266bb793425c487074cc6d2106024537fd728f6caa2ff59f882d5ca6570182"
+        }
+      ],
+      "licenseInfoInFiles": [
+        "MIT"
+      ],
+      "copyrightText": "Copyright (c) 2026 Fixture Vendored Mix Authors",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:path:canonical=project:dep/vendored-mix/LICENSE"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseInfoInFiles: MIT\nsbomb:license:technique=spdx-digest"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fvendored-2Dmix-2Finclude-2Fvendored-5Fmix.h",
+      "fileName": "project:dep/vendored-mix/include/vendored_mix.h",
+      "fileTypes": [
+        "SOURCE"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "5cbc1192c5b539229e34dbc27861e2a467158fff"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "11da68ae40c921e72d4e7b3d3a4dd6102fddbdad6a30fdf77d0db392677004b1"
+        }
+      ],
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:evidence:header:class=project-header\nsbomb:file:class=header\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=header-only\nsbomb:file:size=200\nsbomb:path:canonical=project:dep/vendored-mix/include/vendored_mix.h"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fvendored-2Dmix-2Fsrc-2Fmix-5Fcore.c",
+      "fileName": "project:dep/vendored-mix/src/mix_core.c",
+      "fileTypes": [
+        "SOURCE"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "47a0f07df950b7593280906e720824e8d26f08bf"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "cfb6a7837c29b6993332ff454e2fa9ddd30b10667e622049cc2149b582d0b4b0"
+        }
+      ],
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:file:class=source\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:size=182\nsbomb:path:canonical=project:dep/vendored-mix/src/mix_core.c"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Adep-2Fvendored-2Dmix-2Fsrc-2Fmix-5Fvendored-5Fcrc.c",
+      "fileName": "project:dep/vendored-mix/src/mix_vendored_crc.c",
+      "fileTypes": [
+        "SOURCE"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "27a59532275455e0160d7df4dd28a3079e635340"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e51327f6fe7fbc1731b2960cc0d1eade551e071eec8192873ba7982a03fece3f"
+        }
+      ],
+      "copyrightText": "Copyright (c) 2026 Fixture Upstream CRC Authors",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:file:class=source\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:size=348\nsbomb:path:canonical=project:dep/vendored-mix/src/mix_vendored_crc.c"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Asrc-2Fmain.c",
+      "fileName": "project:src/main.c",
+      "fileTypes": [
+        "SOURCE"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "16f8be8cfcbcb84b432350c326e27da7cabed3f9"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "534570a1b61643417e1f753e4893e309347559678dd815fe314fdd64475aed6f"
+        }
+      ],
+      "copyrightText": "Copyright (c) 2026 sbomb fixture authors",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:file:class=source\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-object\nsbomb:file:size=884\nsbomb:path:canonical=project:src/main.c"
+        }
+      ]
+    }
+  ],
+  "hasExtractedLicensingInfos": [
+    {
+      "licenseId": "LicenseRef-sbomb-Example-Proprietary-Licence-2526dfe7",
+      "name": "Example Proprietary Licence",
+      "extractedText": "Example Proprietary Licence",
+      "comment": "sbomb observed only this licence name; no licence text was retained (licenseTextInSBOM is off, or no licence file was read)"
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relationshipType": "DESCRIBES",
+      "relatedSpdxElement": "SPDXRef-product-3Ap14-2Dfoss-2Dcurated"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aapache-2Dlib",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Adep-2Fapache-2Dlib-2Finclude-2Fapache-5Flib.h"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aapache-2Dlib",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Adep-2Fapache-2Dlib-2Fsrc-2Fapache-5Fone.c"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aapache-2Dlib",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Adep-2Fapache-2Dlib-2Fsrc-2Fapache-5Ftwo.c"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Absd-2Dhdr",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Adep-2Fbsd-2Dhdr-2Finclude-2Fbsd-5Fhdr.h"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Agpl-2Dgen",
+      "relationshipType": "BUILD_TOOL_OF",
+      "relatedSpdxElement": "SPDXRef-product-3Ap14-2Dfoss-2Dcurated"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Agpl-2Dgen",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Adep-2Fgpl-2Dgen-2Ftable-5Fgen.c"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Agpl-2Dgen",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Adep-2Fgpl-2Dgen-2Ftable-5Fgen.c",
+      "comment": "evidence: a copyright statement of this package was read from this file"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Algpl-2Dlib",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Adep-2Flgpl-2Dlib-2Finclude-2Flgpl-5Flib.h"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Algpl-2Dlib",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Adep-2Flgpl-2Dlib-2Fsrc-2Flgpl-5Fcore.c"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Algpl-2Dlib",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Adep-2Flgpl-2Dlib-2Fsrc-2Flgpl-5Fextra.c"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Algpl-2Dlib",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Adep-2Flgpl-2Dlib-2Finclude-2Flgpl-5Flib.h",
+      "comment": "evidence: a copyright statement of this package was read from this file"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Amit-2Dlib",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Adep-2Fmit-2Dlib-2Finclude-2Fmit-5Flib.h"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Amit-2Dlib",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Adep-2Fmit-2Dlib-2Fsrc-2Fmit-5Fa.c"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Amulti-2Dlicense",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Adep-2Fmulti-2Dlicense-2Finclude-2Fmulti.h"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Amulti-2Dlicense",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Adep-2Fmulti-2Dlicense-2Fsrc-2Fmulti.c"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Anocopyright",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Adep-2Fnocopyright-2Finclude-2Fnocopyright.h"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Anocopyright",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Adep-2Fnocopyright-2Fsrc-2Fnocopyright.c"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Anolicense",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Adep-2Fnolicense-2Finclude-2Fnolicense.h"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Anolicense",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Adep-2Fnolicense-2Fsrc-2Fnolicense.c"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Anolicense",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Adep-2Fnolicense-2Finclude-2Fnolicense.h",
+      "comment": "evidence: a copyright statement of this package was read from this file"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Ap14-2Dfoss-2Dcurated",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Abuild-3Agenerated-2Ftable.c"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Ap14-2Dfoss-2Dcurated",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Asrc-2Fmain.c"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Ap14-2Dfoss-2Dcurated",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Asrc-2Fmain.c",
+      "comment": "evidence: a copyright statement of this package was read from this file"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Avendored-2Dmix",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Adep-2Fvendored-2Dmix-2Finclude-2Fvendored-5Fmix.h"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Avendored-2Dmix",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Adep-2Fvendored-2Dmix-2Fsrc-2Fmix-5Fcore.c"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Avendored-2Dmix",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Adep-2Fvendored-2Dmix-2Fsrc-2Fmix-5Fvendored-5Fcrc.c"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Avendored-2Dmix",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Adep-2Fvendored-2Dmix-2Fsrc-2Fmix-5Fvendored-5Fcrc.c",
+      "comment": "evidence: a copyright statement of this package was read from this file"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Abuild-3Agenerated-2Ftable.c",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fapache-2Dlib-2FLICENSE",
+      "relationshipType": "DOCUMENTATION_OF",
+      "relatedSpdxElement": "SPDXRef-component-3Aapache-2Dlib"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fapache-2Dlib-2FNOTICE",
+      "relationshipType": "DOCUMENTATION_OF",
+      "relatedSpdxElement": "SPDXRef-component-3Aapache-2Dlib"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fapache-2Dlib-2Finclude-2Fapache-5Flib.h",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fapache-2Dlib-2Fsrc-2Fapache-5Fone.c",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fapache-2Dlib-2Fsrc-2Fapache-5Ftwo.c",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fbsd-2Dhdr-2FLICENSE",
+      "relationshipType": "DOCUMENTATION_OF",
+      "relatedSpdxElement": "SPDXRef-component-3Absd-2Dhdr"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fbsd-2Dhdr-2Finclude-2Fbsd-5Fhdr.h",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fgpl-2Dgen-2FLICENSE",
+      "relationshipType": "DOCUMENTATION_OF",
+      "relatedSpdxElement": "SPDXRef-component-3Agpl-2Dgen"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fgpl-2Dgen-2Ftable-5Fgen.c",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Flgpl-2Dlib-2FLICENSE",
+      "relationshipType": "DOCUMENTATION_OF",
+      "relatedSpdxElement": "SPDXRef-component-3Algpl-2Dlib"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Flgpl-2Dlib-2Finclude-2Flgpl-5Flib.h",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Flgpl-2Dlib-2Fsrc-2Flgpl-5Fcore.c",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Flgpl-2Dlib-2Fsrc-2Flgpl-5Fextra.c",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fmit-2Dlib-2FLICENSE",
+      "relationshipType": "DOCUMENTATION_OF",
+      "relatedSpdxElement": "SPDXRef-component-3Amit-2Dlib"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fmit-2Dlib-2Finclude-2Fmit-5Flib.h",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fmit-2Dlib-2Fsrc-2Fmit-5Fa.c",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fmulti-2Dlicense-2FLICENSE-2DAPACHE",
+      "relationshipType": "DOCUMENTATION_OF",
+      "relatedSpdxElement": "SPDXRef-component-3Amulti-2Dlicense"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fmulti-2Dlicense-2FLICENSE-2DMIT",
+      "relationshipType": "DOCUMENTATION_OF",
+      "relatedSpdxElement": "SPDXRef-component-3Amulti-2Dlicense"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fmulti-2Dlicense-2Finclude-2Fmulti.h",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fmulti-2Dlicense-2Fsrc-2Fmulti.c",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fnocopyright-2FLICENSE",
+      "relationshipType": "DOCUMENTATION_OF",
+      "relatedSpdxElement": "SPDXRef-component-3Anocopyright"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fnocopyright-2Finclude-2Fnocopyright.h",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fnocopyright-2Fsrc-2Fnocopyright.c",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fnolicense-2Finclude-2Fnolicense.h",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fnolicense-2Fsrc-2Fnolicense.c",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fvendored-2Dmix-2FLICENSE",
+      "relationshipType": "DOCUMENTATION_OF",
+      "relatedSpdxElement": "SPDXRef-component-3Avendored-2Dmix"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fvendored-2Dmix-2Finclude-2Fvendored-5Fmix.h",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fvendored-2Dmix-2Fsrc-2Fmix-5Fcore.c",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Adep-2Fvendored-2Dmix-2Fsrc-2Fmix-5Fvendored-5Fcrc.c",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Asrc-2Fmain.c",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Ap14-2Dfoss-2Dcurated",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-component-3Absd-2Dhdr"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Ap14-2Dfoss-2Dcurated",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aapache-2Dlib"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Ap14-2Dfoss-2Dcurated",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Algpl-2Dlib"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Ap14-2Dfoss-2Dcurated",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Amit-2Dlib"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Ap14-2Dfoss-2Dcurated",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Amulti-2Dlicense"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Ap14-2Dfoss-2Dcurated",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Anocopyright"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Ap14-2Dfoss-2Dcurated",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Anolicense"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Ap14-2Dfoss-2Dcurated",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Ap14-2Dfoss-2Dcurated"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Ap14-2Dfoss-2Dcurated",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Avendored-2Dmix"
+    }
+  ]
+}

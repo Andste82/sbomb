@@ -42,8 +42,8 @@ inputs:
   spec-version:
     description: >-
       Specification version of the chosen format (1.6 or 1.7 for CycloneDX,
-      3.0.1 for SPDX). Empty means the configuration's, or the format's
-      default.
+      2.3 or 3.0.1 for SPDX). Empty means the configuration's, or the
+      format's default (1.6 for CycloneDX, 3.0.1 for SPDX).
     required: false
     default: ''
   config:

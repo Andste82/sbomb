@@ -652,7 +652,7 @@ func TestSelfWritesSpdx(t *testing.T) {
 
 // TestExplainGivesTheSameAnswerForEveryNameInEitherFormat: the same question
 // about the same run gets the same answer, refusal included, whichever format
-// the document is in. The names cover every kind of element: the product, which
+// the document is in: CycloneDX, SPDX 3.0.1 or SPDX 2.3. The names cover every kind of element: the product, which
 // CycloneDX states as metadata and not as a component; an artifact; a grouping
 // component, by name and by local identity; a used file, by base name and by
 // identity; a file that is only licence evidence; and a name nothing has.
@@ -680,12 +680,22 @@ func TestExplainGivesTheSameAnswerForEveryNameInEitherFormat(t *testing.T) {
 		code, out, stderr := execute([]string{"explain", "--build-dir", buildDir, "--sbom", document, "--component", name})
 		return fmt.Sprintf("code %d\n%s\n%s", code, out, strings.ReplaceAll(stderr, document, "<document>"))
 	}
+	spdx23Path := filepath.Join(t.TempDir(), "app-2.3.spdx.json")
+	code, _, stderr = execute([]string{"generate", "--build-dir", buildDir,
+		"--source-dir", testutil.CorpusSourceTree(t), "--policy", "lenient",
+		"--output", spdx23Path, "--reproducible", "--format", "spdx-json", "--spec-version", "2.3"})
+	if code != 0 || stderr != "" {
+		t.Fatalf("generate --spec-version 2.3 = code %d, stderr %q", code, stderr)
+	}
 	for _, name := range []string{
 		metadata.Metadata.Component.Name, "fossapp", "artifact:build:fossapp", "mit-lib", "component:mit-lib",
 		"mit_a.c", "file:project:dep/mit-lib/src/mit_a.c", "LICENSE", "no-such-lib",
 	} {
 		if fromCycloneDX, fromSpdx := answer(cyclone, name), answer(spdxPath, name); fromCycloneDX != fromSpdx {
 			t.Errorf("%q is answered differently:\nCycloneDX: %s\nSPDX: %s", name, fromCycloneDX, fromSpdx)
+		}
+		if fromCycloneDX, fromSpdx23 := answer(cyclone, name), answer(spdx23Path, name); fromCycloneDX != fromSpdx23 {
+			t.Errorf("%q is answered differently:\nCycloneDX: %s\nSPDX 2.3: %s", name, fromCycloneDX, fromSpdx23)
 		}
 	}
 }
@@ -948,6 +958,7 @@ func TestBothReadersExpandEveryComponentAlike(t *testing.T) {
 	}
 	cdxWriter, cdx := render("cyclonedx-json", "1.6")
 	spdxWriter, spdx := render("spdx-json", "3.0.1")
+	_, spdx23 := render("spdx-json", "2.3")
 	reader := func(writer sbomwriter.Writer) sbomwriter.ComponentReader {
 		t.Helper()
 		reader, ok := writer.(sbomwriter.ComponentReader)
@@ -978,6 +989,9 @@ func TestBothReadersExpandEveryComponentAlike(t *testing.T) {
 	for _, name := range names {
 		if fromCycloneDX, fromSpdx := answer(cdxWriter, cdx, name), answer(spdxWriter, spdx, name); fromCycloneDX != fromSpdx {
 			t.Errorf("%q is answered differently:\nCycloneDX: %s\nSPDX:      %s", name, fromCycloneDX, fromSpdx)
+		}
+		if fromCycloneDX, fromSpdx23 := answer(cdxWriter, cdx, name), answer(spdxWriter, spdx23, name); fromCycloneDX != fromSpdx23 {
+			t.Errorf("%q is answered differently:\nCycloneDX: %s\nSPDX 2.3:  %s", name, fromCycloneDX, fromSpdx23)
 		}
 	}
 	// The bare name must find the file, or agreeing on it proves nothing.

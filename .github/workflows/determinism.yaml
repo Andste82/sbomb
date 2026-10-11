@@ -80,10 +80,10 @@ jobs:
           set -euo pipefail
           # Each specification version is compared on its own. Two versions
           # produce two different documents by design, so pooling their hashes
-          # would report that design as a portability failure. 3.0.1 is SPDX;
-          # the version numbers of the two formats do not collide.
+          # would report that design as a portability failure. 2.3 and 3.0.1
+          # are SPDX; the version numbers of the two formats do not collide.
           status=0
-          for version in 1.6 1.7 3.0.1; do
+          for version in 1.6 1.7 2.3 3.0.1; do
             # Trailing carriage returns would make two identical hashes compare
             # unequal, which is the one difference this job must not report.
             hashes=$(grep "portable SBOM $version SHA-256:" determinism-*.txt | awk '{print $NF}' | tr -d '\r' | sort -u)
