@@ -620,7 +620,7 @@ runs that differ here are not comparable.
 | `systemLibraries` | `exclude`, `separate-component`, `report-only` | Libraries the distribution provides |
 | `pchHeaders` | `include`, `exclude`, `annotate-only` | Headers that arrived through a precompiled header |
 | `sectionGarbageCollection` | `ignore`, `annotate`, `exclude` | Objects the linker discarded with `--gc-sections`: keep them, mark them, or drop them |
-| `licenseTextInSBOM` | `off`, `evidence` | Whether the licence texts sbomb retained from the component roots are written into the document, as `evidence.licenses[].license.text` |
+| `licenseTextInSBOM` | `off`, `evidence` | Whether the licence texts sbomb retained from the component roots are written into the document, as `evidence.licenses[].license.text` in CycloneDX, a `license` external reference with a `data:` URI in SPDX 3.0.1, and `noticeText` or a `LicenseRef-` definition's `extractedText` in SPDX 2.3 |
 | `staleToleranceSeconds` | `5` | How much clock skew counts as "not stale" |
 
 Each has a flag of the same name: `--include-system-headers`,

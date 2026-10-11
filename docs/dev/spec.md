@@ -97,7 +97,7 @@ These terms are used with exactly the meanings below. Previously ambiguous terms
 | **Project root** **[was ambiguous]** | The directory resolved, in this priority order: (1) the value of `project.root` in the configuration; (2) the directory containing the configuration file; (3) the value of `--source-dir`. It MUST be an existing directory. It is NOT automatically the Git root. |
 | **Build root** | The directory given by `--build-dir`, or `build.dir` in configuration. |
 | **Final deliverable** | An artifact explicitly configured (or deterministically discovered per §5.3) that is intended to be flashed, installed, delivered, packaged, executed, deployed, or consumed as a product output. |
-| **Product** | The unit the root component represents — `metadata.component` in CycloneDX, the `rootElement` of the `software_Sbom` in SPDX. Either one final deliverable (single mode) or an assembly of several (assembly mode). |
+| **Product** | The unit the root component represents — `metadata.component` in CycloneDX, the `rootElement` of the `software_Sbom` in SPDX 3.0.1, or the package the document DESCRIBES in SPDX 2.3. Either one final deliverable (single mode) or an assembly of several (assembly mode). |
 | **Anchor** | A named, portable path root (§7). Every file identity is `(anchor, relative path)`. |
 | **Used file** | A file for which at least one valid evidence chain to a final deliverable exists (§4). |
 | **Evidence node** | A node in the evidence graph representing an artifact, unit, or file. |
@@ -110,7 +110,7 @@ These terms are used with exactly the meanings below. Previously ambiguous terms
 | **Intermediate generated file** **[was ambiguous]** | A transient build artifact. A generated *source* or *header* that appears in compile or dependency evidence is NOT an intermediate generated file. |
 | **Finding** | A structured, machine-readable diagnostic (§26). |
 | **Output format** | A serialization family with one writer: `cyclonedx-json` (CycloneDX 1.6, 1.7) or `spdx-json` (SPDX 3.0.1, 2.3). Selected by `--format` or `output.format`; the version within it by `--spec-version` or `output.specVersion` (§36.1). |
-| **Local identity** | The format-independent identifier of a product, artifact, component or file: the §28.4 scheme. It is the CycloneDX `bom-ref` and the fragment of the SPDX element IRI (§28.11.2). |
+| **Local identity** | The format-independent identifier of a product, artifact, component or file: the §28.4 scheme. It is the CycloneDX `bom-ref`, the fragment of the SPDX 3.0.1 element IRI (§28.11.2) and, encoded, the SPDX 2.3 `SPDXRef-` identifier (§28.11.11). |
 | **Discovery** | Everything that produces the evidence graph, inventory, components, versions, and licenses. |
 | **Policy** | The pass/fail evaluation applied after discovery. |
 
@@ -1514,7 +1514,7 @@ Also compare the CMake input files reported by `cmakeFiles-v1` against the File 
 
 **[This section fixes every previously open output decision. An implementation MUST follow it literally.]**
 
-§28.1–§28.10 bind CycloneDX, §28.11 binds SPDX 3.0.1. Both are renderings of one format-neutral description of the run (§36.1), and both use the local identities of §28.4, so a CycloneDX `bom-ref` and the fragment of an SPDX element IRI name the same thing.
+§28.1–§28.10 bind CycloneDX, §28.11 binds SPDX 3.0.1 and, in §28.11.11, SPDX 2.3. All are renderings of one format-neutral description of the run (§36.1), and all use the local identities of §28.4, so a CycloneDX `bom-ref`, the fragment of an SPDX 3.0.1 element IRI and an SPDX 2.3 `SPDXRef-` identifier (the same identity, encoded as §28.11.11 says) name the same thing.
 
 ### 28.1 Specification Version
 
@@ -1928,7 +1928,7 @@ CI runs, on every 2.3 golden, an independent JSON schema validator against the s
 
 **TLP** is refused for 2.3 as for 3.0.1 (§28.11.10), naming 2.3.
 
-**The SHA-1.** Clause 8.4 requires a SHA-1 of every file. The writer states, per version, which digests beyond SHA-256 its documents need (§36.1); the run asks before it hashes, and hashing computes them over the bytes it already read for the SHA-256, so no file is read a second time (§23). Only a 2.3 run computes a SHA-1. A retained licence file that is not a used file gets its SHA-1 from the retained bytes, which the description already carries. The inventory dump (§40) and the FOSS review record (§32.6) of a 2.3 run state the SHA-1 the run computed.
+**The SHA-1.** Clause 8.4 requires a SHA-1 of every file. The writer states, per version, which digests beyond SHA-256 its documents need (§36.1); the run asks before it hashes, and hashing computes them over the bytes it already read for the SHA-256, so no file is read a second time (§23). Only a 2.3 run computes a SHA-1. A retained licence file that is not a used file gets its SHA-1 from the retained bytes, which the description already carries. The FOSS review record (§32.6) of a 2.3 run states the SHA-1 the run computed. The inventory dump (§40) does not: a digest computed only because the writer asked for it is the document's, and the dump MUST NOT move when the serialization does. The hashing of used files and the mapping of retained licence files compute from one table of digests, so a digest a writer asks for is known to both or to neither.
 
 ---
 
@@ -2020,7 +2020,7 @@ Measured on a 4-core x86_64 runner with warm page cache, using the `large` fixtu
 
 The tool MUST NOT read files that are not evidence-selected or required for configured metadata resolution.
 
-The budgets apply to every output format. CI measures the 10 000-unit row in CycloneDX and in SPDX 3.0.1 on every push, and either overrun fails the build.
+The budgets apply to every output format. CI measures the 10 000-unit row in CycloneDX, in SPDX 3.0.1 and in SPDX 2.3 on every push, and any overrun fails the build.
 
 A benchmark suite (`go test -bench`) MUST exist for: map parsing, depfile parsing, graph construction, and serialization.
 
@@ -2131,7 +2131,7 @@ Prints all evidence chains from the file/component to every reaching final deliv
 
 `--component` names a grouping component, and the evidence dump carries none: component mapping happens above the graph (§35) and its result is not written back into it. The mapping is in the **document** instead — §28's dependency cascade gives every grouping component a `dependsOn` list of its `file:` refs — so `--component` takes `--sbom <file>` beside `--build-dir`, expands the name to those files and explains each of them from the dump. The document is named rather than guessed: a directory holds any number of them, and picking one would make the answer depend on which.
 
-The document may be CycloneDX or SPDX; its format is detected as `validate` detects it (§32.5). In an SPDX document the component's files are the `software_File` targets of its `contains` relationships, and their local identities (§28.11.2) are the same `file:` refs. `--bom-ref` likewise accepts an SPDX element IRI and reads the local identity out of its fragment.
+The document may be CycloneDX or SPDX; its format is detected as `validate` detects it (§32.5). In an SPDX 3.0.1 document the component's files are the `software_File` targets of its `contains` relationships, and their local identities (§28.11.2) are the same `file:` refs. In an SPDX 2.3 document they are the targets of its `CONTAINS` relationships — `files[]` entries and the packages that stand for a file alike (§28.11.11) — whose `SPDXRef-` identifiers decode to the same `file:` refs. `--bom-ref` likewise accepts an SPDX 3.0.1 element IRI and reads the local identity out of its fragment, and an SPDX 2.3 `SPDXRef-` identifier, which it decodes; `--component` matches by name in either version.
 
 A component is looked up by its bom-ref (`component:<name>`, `toolchain:<name>`) and then by its `name`, in that order. Where none of its files is a node of the dump, the document describes a different build than the build directory does, and that MUST be reported as such rather than as an absent chain: a subject that cannot be found and a subject that was never in this product are different answers to the question `explain` is asked.
 
@@ -2152,8 +2152,8 @@ A component is looked up by its bom-ref (`component:<name>`, `toolchain:<name>`)
 
 Third-party Go modules are permitted (§37), so validation is performed **in-process** and is mandatory:
 
-* The official CycloneDX JSON Schema files of **every version §28.1 permits** (`bom-1.6.schema.json`, `bom-1.7.schema.json`, `spdx.schema.json`, `jsf-0.82.schema.json`, `cryptography-defs.schema.json`) and the official SPDX 3.0.1 JSON schema MUST be embedded with `go:embed`, byte for byte, and validated against with a pure-Go JSON Schema validator. Every generated document is validated before it is written to its final path; validation runs on the exact bytes that will be written.
-* The schema is selected by the **version the document itself declares** (CycloneDX `specVersion`, the SPDX 3 context URL), not by the caller's: a file is checked against what it claims to be. A document declaring a version the build has no schema for MUST be refused, never checked against another version's schema.
+* The official CycloneDX JSON Schema files of **every version §28.1 permits** (`bom-1.6.schema.json`, `bom-1.7.schema.json`, `spdx.schema.json`, `jsf-0.82.schema.json`, `cryptography-defs.schema.json`), the official SPDX 3.0.1 JSON schema and the official SPDX 2.3 JSON schema (§28.11.11) MUST be embedded with `go:embed`, byte for byte, and validated against with a pure-Go JSON Schema validator. Every generated document is validated before it is written to its final path; validation runs on the exact bytes that will be written.
+* The schema is selected by the **version the document itself declares** (CycloneDX `specVersion`, the SPDX 3 context URL or the SPDX 2 `spdxVersion`), not by the caller's: a file is checked against what it claims to be. A document declaring a version the build has no schema for MUST be refused, never checked against another version's schema.
 * In addition, the tool MUST perform **semantic validation** that a JSON Schema cannot express: `bom-ref` uniqueness, dependency-ref closure (every `ref` and `dependsOn` resolves), hash length matching the declared algorithm, purl syntax, RFC 3339 timestamps, property-name membership in Appendix B, and the §1.5 CRA field completeness check when the `cra` profile is active. For SPDX the semantic layer is the two tiers of §28.11.9: conformance to the specification, which `validate` applies to any document, and the invariants of sbomb's own output, which apply only to documents sbomb writes. Appendix B membership of every emitted property name is enforced by the build (the property catalogue is generated from the code and checked in CI), not at run time.
 * `sbomb schema --format <id> [--spec-version <v>]` prints the embedded schema of one format and version (`--cyclonedx` remains an alias of `--format cyclonedx-json`); `sbomb validate --input <file>` runs both layers against an existing document. A successful `validate` names what it checked: `valid SPDX 3.0.1 document: <file>`, `valid SPDX 2.3 document: <file>`.
 * `validate` MUST **detect** the serialization format from the document rather than assuming or requiring one: `bomFormat` identifies CycloneDX; an SPDX 3 document is identified by its `@context` URL, which names its version, and an SPDX 2 document by `spdxVersion`. A recognised version the build cannot read — SPDX 3.0.0, SPDX 2.2 — is refused by name rather than reported as unrecognised. Somebody checking a file another tool sent them knows they have an SBOM, not which serialization it is in. A document in no format the build can read is a failure that names what it can read.
@@ -2332,7 +2332,7 @@ failOnMissingSupplier             failOnMissingComponentHash
 licenseTextInSBOM
 ```
 
-`licenseTextInSBOM` ∈ `off` (default) | `evidence` decides whether the license texts retained per §22.9 are written into the document, as `evidence.licenses[].license.text` in CycloneDX and a `license` external reference of the licence file, with the bytes as a `data:` URI, in SPDX (§28.11.3). It is a *content* setting like the ones above it: two runs that differ here are not comparable, and base64 inflates a license text by a third, which is why `generate` does not carry the texts unless it is asked to.
+`licenseTextInSBOM` ∈ `off` (default) | `evidence` decides whether the license texts retained per §22.9 are written into the document, as `evidence.licenses[].license.text` in CycloneDX, as a `license` external reference of the licence file, with the bytes as a `data:` URI, in SPDX 3.0.1 (§28.11.3), and in SPDX 2.3 as the licence file's `noticeText` or, where the text defines a `LicenseRef-`, that definition's `extractedText` (§28.11.11). It is a *content* setting like the ones above it: two runs that differ here are not comparable, and base64 inflates a license text by a third, which is why `generate` does not carry the texts unless it is asked to.
 
 ### 33.2 Built-in Profiles
 
@@ -2461,6 +2461,8 @@ internal/adapters/packaging/
 internal/adapters/pkgmgr/conan|vcpkg|cpm|fetchcontent|idf|west
 internal/adapters/sdk/espidf/
 internal/inventory/
+internal/digest/         the one table of file digests a run can compute (SHA-256 always,
+                         SHA-1 on a writer's request, §36.1)
 internal/componentmap/
 internal/version/        component version + purl resolution
 internal/license/
@@ -2582,7 +2584,7 @@ Recommended direct dependencies:
 | Purpose | Module | Note |
 |---|---|---|
 | CycloneDX model and JSON serialization | `github.com/CycloneDX/cyclonedx-go` | Removes hand-written schema drift risk. Ordering is still imposed by `internal/cyclonedx` (§29). |
-| JSON Schema validation | a pure-Go JSON Schema draft 2020-12 validator | Required by §32.5, for the CycloneDX schemas and the SPDX 3.0.1 schema alike. Must be cgo-free. The SPDX writer adds no dependency: it serializes with `encoding/json` and imposes §29 itself. |
+| JSON Schema validation | a pure-Go JSON Schema draft 2020-12 validator | Required by §32.5, for the CycloneDX schemas, the SPDX 3.0.1 schema and the draft-07 SPDX 2.3 schema alike. Must be cgo-free. The SPDX writer adds no dependency: it serializes with `encoding/json` and imposes §29 itself. |
 | purl parsing/formatting | `github.com/package-url/packageurl-go` | Avoids hand-rolled percent-encoding bugs (§20.4). |
 
 Everything else — depfile parsing, map parsing, Ninja parsing, DWARF, archive reading, path model — MUST remain standard library (`debug/elf`, `debug/pe`, `debug/dwarf`, `archive/tar`, `regexp`, and so on). Adding a dependency for any of those requires a recorded deviation (§0.2).
@@ -2784,7 +2786,7 @@ Logs are for humans debugging the tool. Findings are for users and CI. A conditi
 Two internal formats are normative because tests depend on them:
 
 * **Evidence dump** (`--evidence-dump`, `sbomb evidence`): Appendix C.
-* **Inventory dump** (`--inventory-dump`, used by golden tests): a JSON document with `schemaVersion`, `files[]` (sorted by canonical path) with class, hashes (SHA-256, and SHA-1 as well in a run that writes SPDX 2.3, §28.11.11), size, missing flag, component id, and properties; and `components[]` sorted by bom-ref and then by id. The tiebreak is not cosmetic: deriving a bom-ref is the writer's job, so a component taken straight out of discovery has none, and without a second key the order of the dump would be the order of discovery. A component entry also carries its retained license artifacts (§22.9) as `licenseArtifacts[]`, ordered by `(kind, file)`, each with kind, canonical path, SHA-256, size, and — for a grant — the detected identifier and the technique that detected it. The bytes are not in the dump: the hash pins them exactly and stays reviewable in a diff, which embedded base64 would not.
+* **Inventory dump** (`--inventory-dump`, used by golden tests): a JSON document with `schemaVersion`, `files[]` (sorted by canonical path) with class, hashes (SHA-256; a digest computed only because the selected writer asked for it, such as the SHA-1 of SPDX 2.3 (§28.11.11), is left out, so the dump of one build is the same whatever the format), size, missing flag, component id, and properties; and `components[]` sorted by bom-ref and then by id. The tiebreak is not cosmetic: deriving a bom-ref is the writer's job, so a component taken straight out of discovery has none, and without a second key the order of the dump would be the order of discovery. A component entry also carries its retained license artifacts (§22.9) as `licenseArtifacts[]`, ordered by `(kind, file)`, each with kind, canonical path, SHA-256, size, and — for a grant — the detected identifier and the technique that detected it. The bytes are not in the dump: the hash pins them exactly and stays reviewable in a diff, which embedded base64 would not.
 
 Both MUST be stable, sorted, and independent of the CycloneDX writer, so that inventory correctness can be tested before any CycloneDX code exists.
 
@@ -3033,7 +3035,7 @@ sbomb:cdx:structuredProperty
 uses are the ones documents carry, so they are the ones recorded here
 (deviation D26).
 
-**Run-level (SPDX only, on the SpdxDocument)**
+**Run-level (SPDX only, on the document: the SpdxDocument in 3.0.1, the document annotation in 2.3)**
 
 ```
 sbomb:run:reproducible

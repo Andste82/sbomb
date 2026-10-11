@@ -99,10 +99,10 @@ table is the whole catalogue rather than a snapshot of one version.
 | `sbomb:patch:type` | Patch files (SPDX only) | unofficial | monkey | backport | cherry-pick | emitted |
 | `sbomb:path:canonical` | File components | — | emitted |
 | `sbomb:review:required` | Grouping components | — | emitted |
-| `sbomb:run:adapters` | Run-level (SPDX only, on the SpdxDocument) | repeated, sorted | emitted |
+| `sbomb:run:adapters` | Run-level (SPDX only, on the document: the SpdxDocument in 3.0.1, the document annotation in 2.3) | repeated, sorted | emitted |
 | `sbomb:run:mode` | Run-level (on `metadata.properties`) | — | reserved |
 | `sbomb:run:policyProfile` | Run-level (on `metadata.properties`) | — | emitted |
-| `sbomb:run:reproducible` | Run-level (SPDX only, on the SpdxDocument) | — | emitted |
+| `sbomb:run:reproducible` | Run-level (SPDX only, on the document: the SpdxDocument in 3.0.1, the document annotation in 2.3) | — | emitted |
 | `sbomb:run:sourceDateEpoch` | Run-level (on `metadata.properties`) | — | emitted |
 | `sbomb:run:specVersion` | Run-level (on `metadata.properties`) | — | emitted |
 | `sbomb:run:timestamp` | Run-level (on `metadata.properties`) | — | emitted |
