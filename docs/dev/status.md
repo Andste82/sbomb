@@ -58,17 +58,20 @@
   `internal/sbommap` for every writer.
 - Section 28.11: SPDX 3.0.1 is the second registered writer, `spdx-json`
   (`--format`, `output.format`). A version-neutral SPDX mapping
-  (`internal/spdx/mapping`) feeds a 3.0.1 renderer (`internal/spdx/spdx3`), so
-  SPDX 2.3 (issue #3) is a second renderer. Every document passes the embedded
-  upstream schema and the tier a and tier b checks of section 28.11.9 before it
-  is written. Fourteen fixture goldens plus a synthetic all-fields golden, a
+  (`internal/spdx/mapping`) feeds a 3.0.1 renderer (`internal/spdx/spdx3`) and
+  an SPDX 2.3 renderer (`internal/spdx/spdx23`, `--spec-version 2.3`, section
+  28.11.11, deviation D57); 3.0.1 stays the default. Every document passes the
+  embedded upstream schema and the tier a and tier b checks of its version
+  before it is written. Fourteen fixture goldens plus a synthetic all-fields golden, a
   per-element cross-check against the CycloneDX document of the same run, and
   a value-level coverage test of every `Document` field. CI holds the goldens
-  to check-jsonschema and pyshacl (job `spdx-conformance`). Deviations D48-D55;
+  to check-jsonschema and pyshacl (job `spdx-conformance`). SPDX 2.3 has seven
+  goldens of its own, each cross-checked against the 3.0.1 document of the same
+  run, and CI holds them to check-jsonschema and pyspdxtools. Deviations D48-D55 and D57;
   the SPDX path meets the performance budget of section 31 (D54, closed).
 - `sbomb validate` and `sbomb evidence` exist, and `sbomb schema --format <id>`
   (alias `--cyclonedx`) prints the embedded schema. `validate` reads CycloneDX
-  and SPDX 3.0.1 and refuses SPDX 2.3 by name.
+  and SPDX 3.0.1 and 2.3, and refuses other SPDX versions by name.
 - Sections 19, 20 and 22: files are mapped to components by the priority chain
   of section 19.2 (curated configuration, package-manager metadata, a
   configured CMake target, the nearest ancestor carrying a package manifest or
@@ -347,7 +350,6 @@
   in question. Fixing it costs what that decision refused to spend -- a change
   to the dump format, a second discovery, or one subcommand reading two files
   -- so it is recorded as open question Q19 rather than guessed at.
-- **SPDX 2.3 is not written yet** (issue #3, open question Q21).
 - **Five specified flags are absent**, each waiting on the feature it belongs
   to rather than on effort: `--license-scan`, `--output-dir`,
   `--adapter`, `--allow-cmake-regenerate`, `--include-runtime-libraries`.

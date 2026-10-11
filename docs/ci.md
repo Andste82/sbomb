@@ -27,7 +27,7 @@ here is a version that goes stale the next time one is cut.
 | `config` | `sbomb.json` in the working directory, if present | Configuration file |
 | `policy` | `default` | Policy profile |
 | `format` | the configuration's, else `cyclonedx-json` | `cyclonedx-json` or `spdx-json` |
-| `spec-version` | the format's default | `1.6` or `1.7` for CycloneDX, `3.0.1` for SPDX |
+| `spec-version` | the format's default | `1.6` or `1.7` for CycloneDX, `3.0.1` or `2.3` for SPDX |
 | `output` | `sbomb.cdx.json`, or `sbomb.spdx.json` for SPDX | Where the document goes. Empty names it after the format the run resolved, the configuration's included |
 | `foss` | `false` | Also write the four attribution outputs of [foss.md](foss.md) and upload the directory |
 | `foss-out` | `sbomb-foss` | Where those four files go |
@@ -103,15 +103,15 @@ same in every workflow.
 | | | `corpus` | Checks complete, portable fixtures and verifies tests leave them unchanged; protects committed golden inputs. |
 | | | `foss-outputs` | Compares the fixture's four attribution outputs against their goldens and runs the action's attribution command; the notices format has no schema, so nothing else would notice a drift. |
 | | | `msvc-corpus` | Regenerates MSVC/Ninja fixtures on Windows and parses them; proves native evidence coverage still works. |
-| | | `performance-budget` | Measures the 10,000-translation-unit case against its time and memory limits; catches scalability regressions. The same case is measured as SPDX too, and blocks as well. |
+| | | `performance-budget` | Measures the 10,000-translation-unit case against its time and memory limits; catches scalability regressions. The same case is measured as SPDX 3.0.1 and as SPDX 2.3 too, and blocks as well. |
 | | | `documentation` | Checks generated catalogues and loads documented configs; prevents docs from describing unsupported behavior. |
-| | | `spdx-conformance` | Holds every SPDX golden document to the SPDX project's own validators: an independent JSON schema validator and the SHACL model, with every Python package pinned, the validation engines they depend on included (`scripts/spdx-conformance-requirements.txt`); known-bad probes must fail, one with a schema defect the JSON schema validator must refuse and others the SHACL check must refuse, so that neither validator could pass by accepting everything. sbomb checks its documents itself, but those rules are a paraphrase of the model, and this catches a paraphrase wrong in the same way as the writer. |
+| | | `spdx-conformance` | Holds every SPDX golden document to the SPDX project's own validators: for 3.0.1 an independent JSON schema validator and the SHACL model, for 2.3 the same JSON schema validator against the 2.3 schema and the SPDX reference implementation (`pyspdxtools`), with every Python package pinned, the validation engines they depend on included (`scripts/spdx-conformance-requirements.txt`); known-bad probes must fail, each with one defect a named validator must refuse, so that no validator could pass by accepting everything. sbomb checks its documents itself, but those rules are a paraphrase of the model, and this catches a paraphrase wrong in the same way as the writer. |
 | | | `spdx-drift` | Runs `spdxgen --check` against current SPDX data; verifies generated hashes and templates stay current so known licenses do not become `NOASSERTION` (informational). |
 | | | `end-to-end` | Runs the real CMake integration with a toolchain; catches wiring errors package tests cannot exercise. |
 | | | `install-script` | Runs `install.sh` against the real published release on Linux and macOS, the way a new user does. |
 | | | `install-script-windows` | The same for `install.ps1` on Windows. |
 | | | `cmake-fetchcontent` | Pulls the CMake bundle built from this tree through FetchContent and lets it fetch the published binary; checks that path before a release carries it. |
-| `determinism` | `main`, pull request | `hash` | Repeats the same build on Linux and Windows targets, as CycloneDX 1.6 and 1.7 and as SPDX 3.0.1 with a pinned `SOURCE_DATE_EPOCH`, and a Windows-flavor unity build six times in both formats; detects timestamps or ordering that change output. Keeps the documents it hashed, so a disagreement can be diffed. |
+| `determinism` | `main`, pull request | `hash` | Repeats the same build on Linux and Windows targets, as CycloneDX 1.6 and 1.7 and as SPDX 2.3 and 3.0.1 with a pinned `SOURCE_DATE_EPOCH`, and a Windows-flavor unity build six times in each of CycloneDX 1.6, SPDX 2.3 and SPDX 3.0.1; detects timestamps or ordering that change output. Keeps the documents it hashed, so a disagreement can be diffed. |
 | | | `compare` | Compares hashes across platforms; proves equivalent evidence produces equivalent SBOM bytes. |
 | `pages` | `main`, when the install scripts or `docs/site` change | `publish` | Checks both install scripts parse, then publishes them with the configuration schema to GitHub Pages; keeps the install URL stable and the served copy equal to the tree. |
 | `release` | `v*` tag | `publish` | Rebuilds five targets, validates versions, checksums and self-SBOMs, then publishes; protects the release artifact set. |

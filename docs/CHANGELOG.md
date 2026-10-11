@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+### SPDX 2.3
+
+`--format spdx-json --spec-version 2.3` (or `output.specVersion: "2.3"`)
+writes SPDX 2.3, for tools that read nothing newer. It is a second version of
+the SPDX writer, rendered from the same description of the run as SPDX 3.0.1,
+with the same identities, and checked before it is written against the schema
+released with SPDX 2.3, the rules of its specification and the invariants of
+sbomb's own output. `validate` reads 2.3 documents written by any tool, and
+`schema --format spdx-json --spec-version 2.3` prints the schema. `explain`
+reads a 2.3 document and accepts its `SPDXRef-` identifiers. The defaults do
+not change: CycloneDX 1.6 overall, and 3.0.1 when SPDX is asked for.
+
+2.3 cannot say everything 3.0.1 says, and sbomb says it another way rather
+than drop it (D57). Properties are `name=value` lines of an annotation of
+their element; CVE exclusions of a bundled SBOM are annotations, as 2.3 has no
+VEX; several licences of one package are one expression joined with `AND`;
+every licence reference is defined in the document, with the retained text
+where there is one and the observed name otherwise. SPDX 2.3 requires a SHA-1
+of every file, so a 2.3 run computes one beside the SHA-256 from the same
+read, and its inventory dump and FOSS review record carry it too; a CycloneDX
+or 3.0.1 run is unchanged. A file that has no SHA-1 because it could not be
+read is stated as a package that stands for it, with a comment saying why,
+rather than dropped.
+
 ### An unmapped prebuilt library fails the run
 
 `prebuiltLibrariesRequireMapping` was read and resolved but decided nothing:

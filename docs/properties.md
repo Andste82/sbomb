@@ -146,6 +146,15 @@ such field, so an SPDX document carries the same answer as
 `sbomb:version:source` and `sbomb:version:confidence`, and only there: a
 CycloneDX document never has these two properties.
 
+SPDX 3.0.1 carries every property in the element's extension, as a name and a
+value. SPDX 2.3 has no name/value field on an element, so there every property
+of an element is one `name=value` line of one annotation of that element, a
+backslash, line feed and carriage return in the value written `\\`, `\n` and
+`\r`. The properties that qualify one licence statement are an annotation of
+their own, whose first line names the field and the expression they qualify
+(`licenseConcluded: MIT`). The names and values are the ones in the catalogue;
+SPDX 2.3 adds none.
+
 The URL itself is not a property at all. CycloneDX specifies
 `externalReferences` of type `vcs` for it, and a specified field takes
 precedence over one in the `sbomb:` namespace — at both versions, since that

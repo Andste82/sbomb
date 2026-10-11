@@ -2406,3 +2406,118 @@ reader can tell them apart.
 `report-only`; `main-sbom` is refused with the same "invalid value" error as
 any other unknown value, which lists the allowed ones. The schema and policy
 resolution are held to the same values for every scope option.
+
+## D57 — SPDX 2.3: what the version cannot say, and how sbomb says it
+
+§28.11 promises that an SPDX document says everything the CycloneDX document
+of the same run says. SPDX 2.3 (§28.11.11) is a flat document of packages,
+files and typed relationships with fixed fields and no name/value extension,
+and it makes two things mandatory that a build cannot always give: a SHA-1 of
+every file (clause 8.4) and a download location of every package (clause 7.7).
+Each point below is a place where 2.3 has no field for what sbomb knows, or
+demands a field sbomb cannot fill truthfully. None of them drops a fact
+silently, invents a value, or refuses the document; the 3.0.1 document of the
+same run (§28.11) carries every one of them natively. BSI TR-03183-2 names
+SPDX 3.0.1, not 2.3 (§1.5), so 2.3 is a tooling choice for consumers that read
+nothing newer, and the default SPDX version stays 3.0.1.
+
+**What is implemented.**
+
+1. **A file without a SHA-1 is a one-file package.** A missing file, a patch
+   known only from metadata, and a file a producer gave no SHA-1 for cannot be
+   a 2.3 File. Each is a package with the file's identifier: `filesAnalyzed`
+   false, `primaryPackagePurpose` FILE, `downloadLocation` NOASSERTION, the
+   canonical path as `packageFileName`, whatever digests it has as package
+   `checksums` (0..* there), and a `comment` that says why. It is not dropped,
+   no digest is invented, and every relationship still points at it. Dropping
+   it and counting the omission would lose the file in the document a consumer
+   reads; refusing would make 2.3 unwritable for most of the MSVC corpus (40 of
+   40 files of `msvc-vs17-p02` are system libraries not present on the build
+   machine). `MISSING_FILE_HASH` already reports the cause; no new finding.
+2. **A SHA-1 is computed only for a 2.3 run, in the same read.** The writer
+   says which digests its version needs beyond SHA-256 before files are read
+   (§36.1), and hashing computes them over the bytes the SHA-256 is computed
+   over; no file is read twice (§23). Always computing SHA-1 would cost
+   every CycloneDX and 3.0.1 run hashing time for nothing and change every
+   golden, since both write every digest they are given. A retained licence
+   file that is not a used file gets its SHA-1 from the retained bytes. The
+   inventory dump and the CycloneDX FOSS review record of a 2.3 run state the
+   SHA-1 the run computed, so those two files differ from a 3.0.1 or CycloneDX
+   run of the same evidence by exactly that digest.
+3. **Properties are annotations.** Every `sbomb:` property of an element is one
+   line `name=value` of one annotation (`annotationType` OTHER, the tool as
+   annotator, the creation time as date), with `\`, line feed and carriage
+   return escaped so a line is always a property. Free text by the
+   specification, machine-readable by this convention. The provenance of one
+   licence statement (§28.11.5) cannot be attached to that statement, because
+   2.3 has no relationship or field properties: it is an annotation of the
+   element whose first line names the field and the expression it qualifies.
+4. **VEX statements are annotations.** 2.3 has no vulnerability element: an
+   upstream CVE exclusion is a package annotation `not affected: <id>:
+   <statement>`.
+5. **No `DESCENDANT_OF`.** A modified component is stated by `sourceInfo`, its
+   `sbomb:component:modified` line, its patches (`PATCH_APPLIED`) and, where
+   known, its VCS download location. The upstream baseline is no element of the
+   document, and a relationship to it would describe a package nobody
+   observed, which 3.0.1 does not do either.
+6. **One expression per licence field.** 3.0.1 states each licence as a
+   relationship; 2.3 has one `licenseConcluded` and one `licenseDeclared`. The
+   distinct expressions of a field are sorted and joined with `AND`, each
+   compound one parenthesised — every one was found to apply. NOASSERTION and
+   NONE stand only where nothing else was stated. A product, artifact or
+   component with no concluded licence states NOASSERTION. A file states the
+   licences found in it as `licenseInfoInFiles`, one expression per entry, and
+   a curated conclusion as `licenseConcluded`.
+7. **`extractedText` is never invented.** A `LicenseRef-sbomb-*` carries the
+   retained text where §22.9 kept one (`licenseTextInSBOM: evidence`), and
+   otherwise the observed name, with a `comment` saying no text was retained.
+   A retained text that is not UTF-8 cannot be a JSON string unaltered: the
+   definition is the name, and its `comment` names the file the FOSS outputs
+   carry it from. The retained text of a listed licence is the licence file's
+   `noticeText`. A licence file stated as a package (point 1) has no field for
+   a text; its `comment` says the text is in the FOSS outputs.
+8. **Every licence reference is defined in the document.** 2.3 resolves a
+   `LicenseRef-` only through its own `hasExtractedLicensingInfos`, or through
+   an external document whose checksum it states. A `LicenseRef-` the build
+   stated is defined with its identifier as text and a `comment` saying sbomb
+   has none; a `DocumentRef-…:LicenseRef-…` operand is minted like an unlisted
+   identifier. 2.3 has no `AdditionRef`: an unlisted exception, or a stated
+   `AdditionRef-`, makes the whole expression one `LicenseRef-sbomb-<s>`
+   (§28.11.5).
+9. **The download location is NOASSERTION unless the repository is known.** It
+   is mandatory. The VCS form `git+<url>[@<commit>]` is written when the
+   component's repository is a network URL (http, https, ssh or git, a host
+   name ending in a top-level domain of two to five letters, no query, fragment
+   or `@` in the path — what the SPDX reference implementation accepts), with
+   the commit when the component states exactly one; otherwise NOASSERTION.
+   Never NONE: clause 7.7 has NONE assert that no location exists, which sbomb
+   does not know.
+10. **The embedded schema is the v2.3 schema, not the v2.3.1 errata schema.**
+    It is the one released with the version documents declare, and the one the
+    reference implementation's output conforms to; the errata schema respells
+    `OPERATING_SYSTEM` as `OPERATING-SYSTEM` and would refuse such documents.
+    sbomb writes `OPERATING_SYSTEM`; a document using the spelling of the
+    specification text is refused by the embedded schema, as by the official
+    v2.3 one. The stricter rules the errata schema and the specification text
+    add — `documentNamespace` required, the `SPDXRef-` pattern, the date and
+    checksum formats, exactly one SHA1 per file — are tier-a checks instead.
+11. **`fileName` is the canonical path** (§7.7), anchor included, not a path
+    relative to a package root: sbomb's files span several anchors, and no
+    package is analysed as a whole.
+12. **A digest 2.3 names no algorithm for** (SHA3-224, or one no format names)
+    is not a checksum; it is stated in the element's `comment` as
+    `<key>:<value>`.
+13. **The purpose vocabulary is narrower.** Platform, data, device driver,
+    machine-learning model and cryptographic asset have no 2.3 purpose and are
+    OTHER; a header-only component has no second purpose. The exact type stays
+    in the `sbomb:component:type` and `sbomb:component:headerOnly` lines.
+14. **Evidence has no relationship of its own.** A retained licence, notice or
+    copyright file is `DOCUMENTATION_OF` its component; a file a copyright
+    statement was read from is `OTHER`, with a comment saying so.
+15. **`dataLicense` is stated.** 2.3 makes it mandatory with the one value
+    `CC0-1.0`, so a 2.3 document carries the grant the 3.0.1 document leaves
+    out (Q22): the version gives no choice.
+16. **Identifiers are encoded, the list version shortened.** A local identity
+    holds bytes `SPDXRef-` does not allow, so every byte outside `[A-Za-z0-9.]`,
+    `-` included, is written `-XX`; the encoding is injective and is read back
+    by `explain`. `licenseListVersion` is `M.N`, as clause 6.7 requires.

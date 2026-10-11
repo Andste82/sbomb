@@ -458,31 +458,31 @@ it.
 
 ## Q21 — What SPDX 2.3 still needs that the shared SPDX layer does not provide
 
-SPDX 3.0.1 is written (§28.11), and SPDX 2.3 (issue #3) renders the same
-version-neutral SPDX description of the run (§28.11.11). Three things 2.3 makes
-mandatory are not in that description, and each is a decision for #3 rather
-than a gap to fill silently:
+**Settled: SPDX 2.3 is written (#3), and each point below was decided there.**
+§28.11.11 is the binding and deviation D57 records every loss.
 
-1. **A SHA-1 of every file.** 2.3 requires a `checksums` entry for SHA1 on every
-   file. sbomb hashes with SHA-256 only, and only the files it read. A SHA-1 pass
-   belongs in hashing, below the writer layer, so it is the one change below
-   §36.1 a format will have needed — the section's rule has to be amended for it
-   or the requirement met another way.
-2. **Files that cannot be hashed.** A missing file and a patch file sbomb did not
-   read cannot carry a SHA-1. The description marks both; whether 2.3 omits
-   them and counts the omission, or refuses the document, is open.
-3. **`extractedText` of an undefined licence.** A `LicenseRef-sbomb-*` carries
-   the retained licence text where §22.9 kept one, and otherwise only the
-   observed name. Whether 2.3 accepts the name as `extractedText` or refuses
-   under `licenseTextInSBOM: off` is open. A text that was retained but is not
-   UTF-8 is a third case: the description names the file whose bytes it is,
-   and 2.3's `extractedText`, a string, cannot carry them unaltered either.
+SPDX 2.3 renders the same version-neutral SPDX description of the run as
+3.0.1. Three things 2.3 makes mandatory were not in that description, and a
+fourth was a mapping choice:
 
-A fourth is a mapping choice rather than a gap: 2.3 has one `licenseDeclared`
-field per package where 3.0.1 has one relationship per observed licence. Join
-the distinct expressions with `AND`, or state only the evidence of the
-conclusion — #3 decides. CVE exclusions have no VEX in 2.3 and remain
-properties there.
+1. **A SHA-1 of every file.** The writer states which digests beyond SHA-256
+   its version needs; the run asks before it hashes, and hashing computes the
+   SHA-1 over the bytes it already read, so only a 2.3 run pays for it and no
+   stage below the writer learns which format asked (§36.1 amended, §23). A
+   retained licence file gets its SHA-1 from the retained bytes.
+2. **Files that cannot be hashed.** Neither omitted nor refused: a file without
+   a SHA-1 is a package that stands for the file — `filesAnalyzed: false`,
+   purpose FILE, download location NOASSERTION, a comment saying why — so
+   nothing is dropped, no digest is invented, and every relationship still
+   points at it (D57, point 1).
+3. **`extractedText` of an undefined licence.** The retained text where §22.9
+   kept one, otherwise the observed name with a comment saying that no text was
+   retained; never refused under `licenseTextInSBOM: off`. A retained text that
+   is not UTF-8 is replaced by the name, with a comment naming the file the
+   FOSS outputs carry it from (D57, point 7).
+4. **One `licenseDeclared` per package.** The distinct expressions are joined
+   with `AND` (D57, point 6). CVE exclusions are package annotations, as are the
+   properties (D57, points 3 and 4).
 
 ## Q22 — reserved
 

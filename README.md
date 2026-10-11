@@ -5,8 +5,8 @@
 **An evidence-based SBOM generator that reconstructs the software composition
 of CMake build artifacts.** It follows the build's own evidence backwards from
 the final artifact instead of inferring it from the source tree, and writes
-what it finds as CycloneDX 1.6, or as CycloneDX 1.7 or SPDX 3.0.1 when a
-consumer asks for it.
+what it finds as CycloneDX 1.6, or as CycloneDX 1.7, SPDX 3.0.1 or SPDX 2.3
+when a consumer asks for it.
 
 The chain runs from a firmware image, an executable or a library through link
 inputs, archive members, object files, translation units, sources, headers and
@@ -34,10 +34,11 @@ Concretely:
 - Nothing is inferred from a filename, a directory name or a repository URL.
   What cannot be established is reported as a finding and stays visible in the
   document.
-- **CycloneDX 1.6/1.7 and SPDX 3.0.1 from one discovery.** Both formats are
-  renderings of the same description of the run, with the same identities, so
-  switching format changes the spelling and loses nothing. Both are the formats
-  BSI TR-03183-2 maps its required fields onto.
+- **CycloneDX 1.6/1.7 and SPDX 3.0.1/2.3 from one discovery.** Every format
+  is a rendering of the same description of the run, with the same identities,
+  so switching format changes the spelling and loses nothing. CycloneDX 1.6 and
+  SPDX 3.0.1 are the formats BSI TR-03183-2 maps its required fields onto; SPDX
+  2.3 is there for the tools that read nothing newer.
 
 [docs/architecture.md](docs/architecture.md) explains the machinery: the
 evidence chain, the strategies behind each step, and where sbomb refuses to
@@ -173,9 +174,11 @@ sbomb generate \
 `sbomb.json` explicitly.
 
 `--format spdx-json` writes SPDX 3.0.1 instead of CycloneDX, from the same
-discovery; without `--output` the file is then `sbomb.spdx.json`. Combined with
-`--reproducible` it needs `SOURCE_DATE_EPOCH`, because SPDX requires a creation
-time and the only one a second run would state again is a pinned one.
+discovery; without `--output` the file is then `sbomb.spdx.json`. Add
+`--spec-version 2.3` for SPDX 2.3, which states what 2.3 has no field for as
+annotations ([docs/configuration.md](docs/configuration.md#spdx-23)). Combined
+with `--reproducible` either needs `SOURCE_DATE_EPOCH`, because SPDX requires a
+creation time and the only one a second run would state again is a pinned one.
 
 Alongside the SBOM the run writes `evidence.json` into the build directory: the
 complete graph, every edge with its strength, its confidence and where it came
@@ -209,9 +212,10 @@ sbomb validate --input build/debug/app.spdx.json
 
 The format is read from the document. Runs both layers: the official JSON
 Schema of the version the document declares (CycloneDX 1.6 or 1.7, SPDX
-3.0.1), and the semantic checks a schema cannot express — for CycloneDX a
-closed dependency graph, unique references, well-formed purls; for SPDX the
-rules of the 3.0.1 specification. A document another tool wrote is held to its
+3.0.1 or 2.3), and the semantic checks a schema cannot express — for CycloneDX
+a closed dependency graph, unique references, well-formed purls; for SPDX the
+rules of the specification of its version, such as the SHA-1 SPDX 2.3 requires
+of every file. A document another tool wrote is held to its
 specification, not to how sbomb writes. Either layer failing is exit code 4.
 
 ### self
@@ -258,7 +262,7 @@ binary, produced this way.
 | `--foss-out <dir>` | Also write the four FOSS attribution documents |
 | `--foss-format text\|markdown` | How `--foss-out` renders them; default `text` |
 | `--format cyclonedx-json\|spdx-json` | Output format; default `cyclonedx-json` |
-| `--spec-version <v>` | Version within the format: `1.6` (default) or `1.7` for CycloneDX, `3.0.1` for SPDX |
+| `--spec-version <v>` | Version within the format: `1.6` (default) or `1.7` for CycloneDX, `3.0.1` (default) or `2.3` for SPDX |
 | `--reproducible` | Same evidence, same bytes: a stable serial number or namespace. CycloneDX omits the timestamp; SPDX states `SOURCE_DATE_EPOCH` and needs it set |
 
 **Policy**
