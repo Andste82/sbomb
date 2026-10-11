@@ -1328,8 +1328,8 @@ Hashes reflect the file's current on-disk content, which may differ from what wa
 ### 24.2 Configuration Values
 
 `includeSystemHeaders`: `false` | `true`.
-`includeToolchainRuntime`: `exclude` | `main-sbom` | `separate-component` | `report-only`.
-`systemLibraries`: `exclude` (default) | `main-sbom` | `separate-component` | `report-only`.
+`includeToolchainRuntime`: `exclude` | `separate-component` | `report-only`.
+`systemLibraries`: `exclude` (default) | `separate-component` | `report-only`.
 
 **Rationale for the default.** Embedded targets link statically, so distribution shared libraries do not exist there and scanning for them is pure noise. They matter only for host-system builds, where the `host-linux` policy profile switches this to `separate-component` and enables §24.3. When the tool detects a dynamically linked ELF artifact with `DT_NEEDED` entries while `systemLibraries` is `exclude`, it emits `DYNAMIC_DEPENDENCIES_IGNORED` (info) naming the count, so the omission is never silent.
 

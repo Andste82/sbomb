@@ -41,6 +41,23 @@ when it has none to pass it now passes `--config=`, so a `sbomb.json` it did
 not choose -- with `SBOMB_DEFAULT_CONFIG` pointing elsewhere -- is not read
 behind its back.
 
+### `main-sbom` is refused, and the schema no longer requires `project`
+
+`includeToolchainRuntime` and `systemLibraries` accepted `main-sbom`, in the
+configuration file and from `--include-toolchain-runtime` and
+`--system-libraries`, although the value was never built: it did exactly what
+`separate-component` does, and toolchain and system files stayed under the
+`build-environment` component rather than in the main SBOM. `sbomb schema
+--config` never listed it. It is now a usage error (exit 1) that lists the
+allowed values; use `separate-component`, which is what such a run produced
+anyway (D56).
+
+The schema printed by `sbomb schema --config` required a top-level `project`
+key that sbomb never asked for: a configuration without one loads and runs,
+with the project root taken from the configuration's directory or
+`--source-dir` and the name from the build system. An editor validating
+against the schema no longer flags such a file.
+
 ### An unknown policy profile is refused
 
 A profile name sbomb does not know, from `--policy` or from `policy.profile`

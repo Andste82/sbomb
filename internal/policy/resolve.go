@@ -69,8 +69,8 @@ var scopeSetters = map[string]func(*Config, string){
 // allowedScopeValues rejects a typo rather than letting it silently disable a
 // scope rule, which is the same reasoning as the strict configuration keys.
 var allowedScopeValues = map[string][]string{
-	"includeToolchainRuntime":  {"exclude", "main-sbom", "separate-component", "report-only"},
-	"systemLibraries":          {"exclude", "main-sbom", "separate-component", "report-only"},
+	"includeToolchainRuntime":  {"exclude", "separate-component", "report-only"},
+	"systemLibraries":          {"exclude", "separate-component", "report-only"},
 	"pchHeaders":               {"include", "annotate-only", "exclude"},
 	"sectionGarbageCollection": {"ignore", "annotate", "exclude"},
 	"headerEvidence":           {"dwarf-preferred", "union", "depfiles"},

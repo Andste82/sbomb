@@ -3,7 +3,6 @@ package config
 import (
 	"encoding/json"
 	"reflect"
-	"sort"
 	"strings"
 )
 
@@ -59,15 +58,13 @@ var enums = map[string][]string{
 	"policy.severityOverrides.default": {"error", "warning", "info"},
 }
 
-// required are the fields `validate` and `Load` insist on, by path.
-// project.name and build.dir are deliberately absent: the build system
-// states both (CMAKE_PROJECT_NAME and CMAKE_BINARY_DIR, passed as
-// --build-dir), and in single-artifact mode the deliverable is the root
-// component anyway, so a configuration shared across build directories
+// The schema requires no field, because Load requires none. A run needs no
+// configuration file at all (`--config=`). The project root falls back to
+// the configuration's directory or --source-dir. The build system states
+// project.name and build.dir (CMAKE_PROJECT_NAME and CMAKE_BINARY_DIR,
+// passed as --build-dir), and in single-artifact mode the deliverable is the
+// root component anyway, so a configuration shared across build directories
 // (debug, release, ...) never has to repeat either one.
-var required = map[string][]string{
-	"": {"project"},
-}
 
 // Schema returns the JSON Schema of the configuration file.
 func Schema() string {
@@ -88,7 +85,7 @@ func Schema() string {
 }
 
 // objectSchema describes a struct. path is the dotted field path, used to look
-// up the enum and required tables.
+// up the enum table.
 func objectSchema(typ reflect.Type, path string) map[string]any {
 	properties := map[string]any{}
 	for index := 0; index < typ.NumField(); index++ {
@@ -106,10 +103,6 @@ func objectSchema(typ reflect.Type, path string) map[string]any {
 		// an error there too. A schema that permitted more would be the more
 		// permissive of two checks and therefore useless.
 		"additionalProperties": false,
-	}
-	if names := required[path]; len(names) > 0 {
-		sort.Strings(names)
-		schema["required"] = names
 	}
 	return schema
 }
