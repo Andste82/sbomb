@@ -15,11 +15,11 @@ import (
 // evaluated in the caller's context, so `${{ github.repository }}` there names
 // the calling repository, and every project using the action from outside
 // looked for sbomb in its own releases and got a 404. The default is therefore
-// empty and the download step resolves it: the input, then the repository the
-// action was loaded from, then the owner and repository in the remote checkout
-// path, because github.action_repository can be empty in a composite action
-// used remotely as well. Only a use by local path -- sbomb's own smoke test --
-// falls through to github.repository.
+// empty and the download step resolves it: the input, then the owner and
+// repository in the remote checkout path, then github.action_repository, which
+// in a composite action can be empty or name an enclosing action. Only a use
+// by local path -- sbomb's own smoke test -- falls through to
+// github.repository.
 func TestTheActionDownloadsFromItsOwnRepository(t *testing.T) {
 	root := testutil.RepoRoot(t)
 	data, err := os.ReadFile(filepath.Join(root, ".github", "actions", "sbomb", "action.yaml"))
@@ -99,9 +99,11 @@ func testTheActionResolvesItsRepository(t *testing.T, download string) {
 		want                                      string // empty: the step must fail
 	}{
 		{"input wins", "fork/sbomb", "Andste82/sbomb", "/home/runner/work/_actions/Andste82/sbomb/v1/.github/actions/sbomb", "fork/sbomb"},
-		{"action repository", "", "Andste82/sbomb", "/home/runner/work/_actions/Andste82/sbomb/v1/.github/actions/sbomb", "Andste82/sbomb"},
 		{"remote checkout path", "", "", "/home/runner/work/_actions/Andste82/sbomb/v1/.github/actions/sbomb", "Andste82/sbomb"},
+		{"remote checkout path over an enclosing action", "", "wrapper/action", "/home/runner/work/_actions/Andste82/sbomb/v1/.github/actions/sbomb", "Andste82/sbomb"},
 		{"remote checkout path on Windows", "", "", `D:\a\_actions\Andste82\sbomb\v1\.github\actions\sbomb`, "Andste82/sbomb"},
+		{"action repository", "", "Andste82/sbomb", "/home/runner/work/sbomb/sbomb/./.github/actions/sbomb", "Andste82/sbomb"},
+		{"action repository for an unreadable checkout path", "", "Andste82/sbomb", "/home/runner/work/_actions/Andste82", "Andste82/sbomb"},
 		{"local path", "", "", "/home/runner/work/sbomb/sbomb/./.github/actions/sbomb", "caller/project"},
 		{"unreadable remote checkout path", "", "", "/home/runner/work/_actions/Andste82", ""},
 	} {

@@ -110,17 +110,18 @@ runs:
         set -euo pipefail
         # Resolved here and not in the input's default: a default naming
         # github.repository is the calling repository, which has no sbomb
-        # release, and github.action_repository is empty when the action is
-        # used by local path, as sbomb's own smoke test does. It can be empty
-        # in a composite action used remotely too (actions/runner#2473), so
-        # the checkout path decides next: a remote action lives under
-        # _actions/<owner>/<repo>/<ref>. Only a use by local path falls
-        # through to github.repository.
-        SBOMB_REPOSITORY="${SBOMB_REPOSITORY:-$SBOMB_ACTION_REPOSITORY}"
+        # release. The checkout path decides first, because it is where the
+        # runner put this action: a remote action lives under
+        # _actions/<owner>/<repo>/<ref>. github.action_repository comes next;
+        # in a composite action it can be empty or name an enclosing action
+        # (actions/runner#2473). Only a use by local path, as sbomb's own
+        # smoke test does, falls through to github.repository.
         if [[ -z "$SBOMB_REPOSITORY" ]]; then
           action_path="${SBOMB_ACTION_PATH//\\//}"
           if [[ "$action_path" =~ /_actions/([^/]+)/([^/]+)/ ]]; then
             SBOMB_REPOSITORY="${BASH_REMATCH[1]}/${BASH_REMATCH[2]}"
+          elif [[ -n "$SBOMB_ACTION_REPOSITORY" ]]; then
+            SBOMB_REPOSITORY="$SBOMB_ACTION_REPOSITORY"
           elif [[ "$action_path" == */_actions/* ]]; then
             echo "Cannot tell which repository this action was loaded from (${SBOMB_ACTION_PATH}); set the repository input" >&2
             exit 1
