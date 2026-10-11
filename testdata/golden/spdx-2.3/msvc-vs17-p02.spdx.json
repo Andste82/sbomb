@@ -1,0 +1,2034 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "app.exe",
+  "documentNamespace": "urn:uuid:a7fc5b16-a125-5e1e-ab9e-c01b404675be",
+  "creationInfo": {
+    "created": "2023-11-14T22:13:20Z",
+    "creators": [
+      "Organization: sbomb",
+      "Tool: sbomb-0.0.0-test"
+    ]
+  },
+  "annotations": [
+    {
+      "annotationDate": "2023-11-14T22:13:20Z",
+      "annotationType": "OTHER",
+      "annotator": "Tool: sbomb-0.0.0-test",
+      "comment": "sbomb:build:config=Debug\nsbomb:build:generator=Visual Studio 17 2022\nsbomb:run:adapters=linker-map\nsbomb:run:adapters=resolver\nsbomb:run:reproducible=true\nsbomb:run:specVersion=2.3\nsbomb:run:toolVersion=0.0.0-test"
+    }
+  ],
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-product-3Aapp.exe",
+      "name": "app.exe",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "APPLICATION",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:artifact:role=application\nsbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:type=application"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aproject",
+      "name": "project",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "APPLICATION",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:archiveMembersUsed=1/2\nsbomb:component:detectedBy=anchor:project\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:linkageForm=static-object\nsbomb:component:modified=unknown\nsbomb:component:root=project:\nsbomb:component:scope=project\nsbomb:component:type=application\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dkernel32.dll",
+      "name": "unknown:abs/KERNEL32.dll",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=dynamic\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib",
+      "name": "unknown:abs/MSVCRTD.lib",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Damdsecgs.obj",
+      "name": "unknown:abs/MSVCRTD.lib(amdsecgs.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dargv-5Fmode.obj",
+      "name": "unknown:abs/MSVCRTD.lib(argv_mode.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dcommit-5Fmode.obj",
+      "name": "unknown:abs/MSVCRTD.lib(commit_mode.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dcpu-5Fdisp.obj",
+      "name": "unknown:abs/MSVCRTD.lib(cpu_disp.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Ddefault-5Flocal-5Fstdio-5Foptions.obj",
+      "name": "unknown:abs/MSVCRTD.lib(default_local_stdio_options.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Ddenormal-5Fcontrol.obj",
+      "name": "unknown:abs/MSVCRTD.lib(denormal_control.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Ddyn-5Ftls-5Fdtor.obj",
+      "name": "unknown:abs/MSVCRTD.lib(dyn_tls_dtor.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Ddyn-5Ftls-5Finit.obj",
+      "name": "unknown:abs/MSVCRTD.lib(dyn_tls_init.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Denv-5Fmode.obj",
+      "name": "unknown:abs/MSVCRTD.lib(env_mode.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Derror.obj",
+      "name": "unknown:abs/MSVCRTD.lib(error.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dexe-5Fmain.obj",
+      "name": "unknown:abs/MSVCRTD.lib(exe_main.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dfile-5Fmode.obj",
+      "name": "unknown:abs/MSVCRTD.lib(file_mode.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dgs-5Freport.obj",
+      "name": "unknown:abs/MSVCRTD.lib(gs_report.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dgs-5Fsupport.obj",
+      "name": "unknown:abs/MSVCRTD.lib(gs_support.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dgshandler.obj",
+      "name": "unknown:abs/MSVCRTD.lib(gshandler.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dguard-5Fdispatch.obj",
+      "name": "unknown:abs/MSVCRTD.lib(guard_dispatch.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dguard-5Fsupport.obj",
+      "name": "unknown:abs/MSVCRTD.lib(guard_support.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dguard-5Fxfg-5Fdispatch.obj",
+      "name": "unknown:abs/MSVCRTD.lib(guard_xfg_dispatch.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dinit.obj",
+      "name": "unknown:abs/MSVCRTD.lib(init.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dinitsect.obj",
+      "name": "unknown:abs/MSVCRTD.lib(initsect.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dinvalid-5Fparameter-5Fhandler.obj",
+      "name": "unknown:abs/MSVCRTD.lib(invalid_parameter_handler.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dmatherr.obj",
+      "name": "unknown:abs/MSVCRTD.lib(matherr.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dmatherr-5Fdetection.obj",
+      "name": "unknown:abs/MSVCRTD.lib(matherr_detection.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dnew-5Fmode.obj",
+      "name": "unknown:abs/MSVCRTD.lib(new_mode.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dpdblkup.obj",
+      "name": "unknown:abs/MSVCRTD.lib(pdblkup.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dthread-5Flocale.obj",
+      "name": "unknown:abs/MSVCRTD.lib(thread_locale.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dtncleanup.obj",
+      "name": "unknown:abs/MSVCRTD.lib(tncleanup.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Ducrt-5Fdetection.obj",
+      "name": "unknown:abs/MSVCRTD.lib(ucrt_detection.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Ducrt-5Fstubs.obj",
+      "name": "unknown:abs/MSVCRTD.lib(ucrt_stubs.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Duserapi.obj",
+      "name": "unknown:abs/MSVCRTD.lib(userapi.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dutility.obj",
+      "name": "unknown:abs/MSVCRTD.lib(utility.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dutility-5Fdesktop.obj",
+      "name": "unknown:abs/MSVCRTD.lib(utility_desktop.obj)",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Ducrtbased.dll",
+      "name": "unknown:abs/ucrtbased.dll",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=dynamic\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aunknown-2Dabs-2Dvcruntime140d.dll",
+      "name": "unknown:abs/VCRUNTIME140D.dll",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=unresolved\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=dynamic\nsbomb:component:modified=unknown\nsbomb:component:scope=unknown\nsbomb:component:type=library\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true\nsbomb:review:required=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AKERNEL32.dll",
+      "name": "abs:KERNEL32.dll",
+      "packageFileName": "abs:KERNEL32.dll",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=archive\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=dynamic\nsbomb:file:missing=true\nsbomb:path:canonical=abs:KERNEL32.dll"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib",
+      "name": "abs:MSVCRTD.lib",
+      "packageFileName": "abs:MSVCRTD.lib",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=archive\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28amdsecgs.obj-29",
+      "name": "abs:MSVCRTD.lib(amdsecgs.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(amdsecgs.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(amdsecgs.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28argv-5Fmode.obj-29",
+      "name": "abs:MSVCRTD.lib(argv_mode.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(argv_mode.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(argv_mode.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28commit-5Fmode.obj-29",
+      "name": "abs:MSVCRTD.lib(commit_mode.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(commit_mode.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(commit_mode.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28cpu-5Fdisp.obj-29",
+      "name": "abs:MSVCRTD.lib(cpu_disp.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(cpu_disp.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(cpu_disp.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28default-5Flocal-5Fstdio-5Foptions.obj-29",
+      "name": "abs:MSVCRTD.lib(default_local_stdio_options.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(default_local_stdio_options.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(default_local_stdio_options.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28denormal-5Fcontrol.obj-29",
+      "name": "abs:MSVCRTD.lib(denormal_control.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(denormal_control.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(denormal_control.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28dyn-5Ftls-5Fdtor.obj-29",
+      "name": "abs:MSVCRTD.lib(dyn_tls_dtor.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(dyn_tls_dtor.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(dyn_tls_dtor.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28dyn-5Ftls-5Finit.obj-29",
+      "name": "abs:MSVCRTD.lib(dyn_tls_init.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(dyn_tls_init.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(dyn_tls_init.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28env-5Fmode.obj-29",
+      "name": "abs:MSVCRTD.lib(env_mode.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(env_mode.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(env_mode.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28error.obj-29",
+      "name": "abs:MSVCRTD.lib(error.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(error.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(error.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28exe-5Fmain.obj-29",
+      "name": "abs:MSVCRTD.lib(exe_main.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(exe_main.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(exe_main.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28file-5Fmode.obj-29",
+      "name": "abs:MSVCRTD.lib(file_mode.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(file_mode.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(file_mode.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28gs-5Freport.obj-29",
+      "name": "abs:MSVCRTD.lib(gs_report.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(gs_report.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(gs_report.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28gs-5Fsupport.obj-29",
+      "name": "abs:MSVCRTD.lib(gs_support.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(gs_support.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(gs_support.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28gshandler.obj-29",
+      "name": "abs:MSVCRTD.lib(gshandler.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(gshandler.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(gshandler.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28guard-5Fdispatch.obj-29",
+      "name": "abs:MSVCRTD.lib(guard_dispatch.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(guard_dispatch.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(guard_dispatch.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28guard-5Fsupport.obj-29",
+      "name": "abs:MSVCRTD.lib(guard_support.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(guard_support.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(guard_support.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28guard-5Fxfg-5Fdispatch.obj-29",
+      "name": "abs:MSVCRTD.lib(guard_xfg_dispatch.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(guard_xfg_dispatch.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(guard_xfg_dispatch.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28init.obj-29",
+      "name": "abs:MSVCRTD.lib(init.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(init.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(init.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28initsect.obj-29",
+      "name": "abs:MSVCRTD.lib(initsect.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(initsect.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(initsect.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28invalid-5Fparameter-5Fhandler.obj-29",
+      "name": "abs:MSVCRTD.lib(invalid_parameter_handler.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(invalid_parameter_handler.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(invalid_parameter_handler.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28matherr.obj-29",
+      "name": "abs:MSVCRTD.lib(matherr.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(matherr.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(matherr.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28matherr-5Fdetection.obj-29",
+      "name": "abs:MSVCRTD.lib(matherr_detection.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(matherr_detection.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(matherr_detection.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28new-5Fmode.obj-29",
+      "name": "abs:MSVCRTD.lib(new_mode.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(new_mode.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(new_mode.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28pdblkup.obj-29",
+      "name": "abs:MSVCRTD.lib(pdblkup.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(pdblkup.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(pdblkup.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28thread-5Flocale.obj-29",
+      "name": "abs:MSVCRTD.lib(thread_locale.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(thread_locale.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(thread_locale.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28tncleanup.obj-29",
+      "name": "abs:MSVCRTD.lib(tncleanup.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(tncleanup.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(tncleanup.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28ucrt-5Fdetection.obj-29",
+      "name": "abs:MSVCRTD.lib(ucrt_detection.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(ucrt_detection.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(ucrt_detection.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28ucrt-5Fstubs.obj-29",
+      "name": "abs:MSVCRTD.lib(ucrt_stubs.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(ucrt_stubs.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(ucrt_stubs.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28userapi.obj-29",
+      "name": "abs:MSVCRTD.lib(userapi.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(userapi.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(userapi.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28utility.obj-29",
+      "name": "abs:MSVCRTD.lib(utility.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(utility.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(utility.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28utility-5Fdesktop.obj-29",
+      "name": "abs:MSVCRTD.lib(utility_desktop.obj)",
+      "packageFileName": "abs:MSVCRTD.lib(utility_desktop.obj)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=abs:MSVCRTD.lib(utility_desktop.obj)"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3AVCRUNTIME140D.dll",
+      "name": "abs:VCRUNTIME140D.dll",
+      "packageFileName": "abs:VCRUNTIME140D.dll",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=archive\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=dynamic\nsbomb:file:missing=true\nsbomb:path:canonical=abs:VCRUNTIME140D.dll"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aabs-3Aucrtbased.dll",
+      "name": "abs:ucrtbased.dll",
+      "packageFileName": "abs:ucrtbased.dll",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=unknown\nsbomb:file:class=archive\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=dynamic\nsbomb:file:missing=true\nsbomb:path:canonical=abs:ucrtbased.dll"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3ACRYPTO.C",
+      "name": "project:CRYPTO.C",
+      "packageFileName": "project:CRYPTO.C",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:file:class=source\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=project:CRYPTO.C"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3AMAIN.C",
+      "name": "project:MAIN.C",
+      "packageFileName": "project:MAIN.C",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:file:class=source\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-object\nsbomb:file:missing=true\nsbomb:path:canonical=project:MAIN.C"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relationshipType": "DESCRIBES",
+      "relatedSpdxElement": "SPDXRef-product-3Aapp.exe"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aproject",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3ACRYPTO.C"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aproject",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3AMAIN.C"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dkernel32.dll",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AKERNEL32.dll"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Damdsecgs.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28amdsecgs.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dargv-5Fmode.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28argv-5Fmode.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dcommit-5Fmode.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28commit-5Fmode.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dcpu-5Fdisp.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28cpu-5Fdisp.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Ddefault-5Flocal-5Fstdio-5Foptions.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28default-5Flocal-5Fstdio-5Foptions.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Ddenormal-5Fcontrol.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28denormal-5Fcontrol.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Ddyn-5Ftls-5Fdtor.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28dyn-5Ftls-5Fdtor.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Ddyn-5Ftls-5Finit.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28dyn-5Ftls-5Finit.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Denv-5Fmode.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28env-5Fmode.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Derror.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28error.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dexe-5Fmain.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28exe-5Fmain.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dfile-5Fmode.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28file-5Fmode.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dgs-5Freport.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28gs-5Freport.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dgs-5Fsupport.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28gs-5Fsupport.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dgshandler.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28gshandler.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dguard-5Fdispatch.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28guard-5Fdispatch.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dguard-5Fsupport.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28guard-5Fsupport.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dguard-5Fxfg-5Fdispatch.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28guard-5Fxfg-5Fdispatch.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dinit.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28init.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dinitsect.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28initsect.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dinvalid-5Fparameter-5Fhandler.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28invalid-5Fparameter-5Fhandler.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dmatherr-5Fdetection.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28matherr-5Fdetection.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dmatherr.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28matherr.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dnew-5Fmode.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28new-5Fmode.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dpdblkup.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28pdblkup.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dthread-5Flocale.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28thread-5Flocale.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dtncleanup.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28tncleanup.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Ducrt-5Fdetection.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28ucrt-5Fdetection.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Ducrt-5Fstubs.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28ucrt-5Fstubs.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Duserapi.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28userapi.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dutility-5Fdesktop.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28utility-5Fdesktop.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dutility.obj",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28utility.obj-29"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Ducrtbased.dll",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3Aucrtbased.dll"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aunknown-2Dabs-2Dvcruntime140d.dll",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aabs-3AVCRUNTIME140D.dll"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AKERNEL32.dll",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28amdsecgs.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28argv-5Fmode.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28commit-5Fmode.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28cpu-5Fdisp.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28default-5Flocal-5Fstdio-5Foptions.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28denormal-5Fcontrol.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28dyn-5Ftls-5Fdtor.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28dyn-5Ftls-5Finit.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28env-5Fmode.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28error.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28exe-5Fmain.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28file-5Fmode.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28gs-5Freport.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28gs-5Fsupport.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28gshandler.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28guard-5Fdispatch.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28guard-5Fsupport.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28guard-5Fxfg-5Fdispatch.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28init.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28initsect.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28invalid-5Fparameter-5Fhandler.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28matherr-5Fdetection.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28matherr.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28new-5Fmode.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28pdblkup.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28thread-5Flocale.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28tncleanup.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28ucrt-5Fdetection.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28ucrt-5Fstubs.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28userapi.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28utility-5Fdesktop.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AMSVCRTD.lib-28utility.obj-29",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3AVCRUNTIME140D.dll",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aabs-3Aucrtbased.dll",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3ACRYPTO.C",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3AMAIN.C",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "DYNAMIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dkernel32.dll"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "DYNAMIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Ducrtbased.dll"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "DYNAMIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dvcruntime140d.dll"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aproject"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Damdsecgs.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dargv-5Fmode.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dcommit-5Fmode.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dcpu-5Fdisp.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Ddefault-5Flocal-5Fstdio-5Foptions.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Ddenormal-5Fcontrol.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Ddyn-5Ftls-5Fdtor.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Ddyn-5Ftls-5Finit.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Denv-5Fmode.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Derror.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dexe-5Fmain.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dfile-5Fmode.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dgs-5Freport.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dgs-5Fsupport.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dgshandler.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dguard-5Fdispatch.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dguard-5Fsupport.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dguard-5Fxfg-5Fdispatch.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dinit.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dinitsect.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dinvalid-5Fparameter-5Fhandler.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dmatherr-5Fdetection.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dmatherr.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dnew-5Fmode.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dpdblkup.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dthread-5Flocale.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dtncleanup.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Ducrt-5Fdetection.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Ducrt-5Fstubs.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Duserapi.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dutility-5Fdesktop.obj"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp.exe",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aunknown-2Dabs-2Dmsvcrtd.lib-2Dutility.obj"
+    }
+  ]
+}

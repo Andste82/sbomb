@@ -1,0 +1,1254 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "sentinel-product",
+  "documentNamespace": "urn:uuid:2f5a8726-e56c-52cc-8c3a-f04087c40227",
+  "creationInfo": {
+    "created": "2023-11-14T22:13:20Z",
+    "creators": [
+      "Organization: Sentinel Vendor Org",
+      "Tool: sbomb-0.0.0-sentinel"
+    ],
+    "licenseListVersion": "3.28"
+  },
+  "annotations": [
+    {
+      "annotationDate": "2023-11-14T22:13:20Z",
+      "annotationType": "OTHER",
+      "annotator": "Tool: sbomb-0.0.0-sentinel",
+      "comment": "sbomb:build:config=SentinelConfig\nsbomb:build:generator=Sentinel Generator\nsbomb:run:adapters=sentinel-adapter-a\nsbomb:run:adapters=sentinel-adapter-b\nsbomb:run:policyProfile=sentinel-policy-profile\nsbomb:run:reproducible=true\nsbomb:run:specVersion=2.3\nsbomb:run:toolVersion=0.0.0-sentinel"
+    }
+  ],
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-product-3Asentinel-2Dproduct",
+      "name": "sentinel-product",
+      "versionInfo": "9.9.9-sentinel",
+      "supplier": "Organization: Sentinel Vendor Org",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "Apache-2.0",
+      "primaryPackagePurpose": "APPLICATION",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:artifact:role=application\nsbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:type=application\nsbomb:version:confidence=high\nsbomb:version:source=curated"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "licenseConcluded: Apache-2.0\nsbomb:license:evidenceClass=curated"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-artifact-3Abuild-3Abin-2Fapp",
+      "name": "app",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "APPLICATION",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:type=application"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-artifact-3Abuild-3Afs.img",
+      "name": "fs.img",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "FIRMWARE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:type=firmware"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aassets",
+      "name": "assets",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "MIT AND LicenseRef-sbomb-Sentinel-Unlisted-1.0",
+      "primaryPackagePurpose": "OTHER",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=embedded-asset\nsbomb:component:scope=project\nsbomb:component:type=data"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "licenseConcluded: MIT AND LicenseRef-sbomb-Sentinel-Unlisted-1.0\nsbomb:license:evidenceClass=file-level"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Abuild-2Denvironment",
+      "name": "build-environment",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "FRAMEWORK",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:detectedBy=synthetic\nsbomb:component:scope=toolchain\nsbomb:component:type=framework"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Agen",
+      "name": "gen",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NONE",
+      "primaryPackagePurpose": "APPLICATION",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:distributionRole=build-time-only\nsbomb:component:linkageForm=build-tool\nsbomb:component:scope=third-party\nsbomb:component:type=application"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "licenseConcluded: NONE\nsbomb:license:evidenceClass=curated\nsbomb:license:source=curated"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Ahdr",
+      "name": "hdr",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:distributionRole=distributed\nsbomb:component:headerOnly=true\nsbomb:component:linkageForm=header-only\nsbomb:component:scope=third-party"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Akitchen",
+      "name": "kitchen",
+      "versionInfo": "1.2.3-sentinel",
+      "supplier": "Organization: Sentinel Supplier Org",
+      "originator": "Organization: Sentinel Originator Org",
+      "downloadLocation": "NOASSERTION",
+      "sourceInfo": "sentinel signal prose",
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "licenseDeclared": "LicenseRef-sbomb-Sentinel-Custom-Licence-2ce69ab6-d9c0bbf6 AND MIT",
+      "copyrightText": "Copyright sentinel curated notice\nCopyright sentinel holder C, of no file",
+      "description": "sentinel description of kitchen",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:generic/kitchen@1.2.3-sentinel"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:sentinel:kitchen:1.2.3:*:*:*:*:*:*:*"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceType": "vcs",
+          "referenceLocator": "https://sentinel.example/kitchen.git"
+        }
+      ],
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:archiveMembersUsed=3/7\nsbomb:component:cveExclusion=CVE-2024-0001: sentinel reason one\nsbomb:component:cveExclusion=CVE-2024-0001: sentinel reason two\nsbomb:component:cveExclusion=CVE-2024-0002\nsbomb:component:cveExclusion=GHSA-sent-inel-0001: sentinel reason of an advisory\nsbomb:component:declaredRevision=sentinel-declared-revision\nsbomb:component:detectedBy=sentinel-detector\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=embedded-asset\nsbomb:component:linkageForm=generated-source\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:modified=true\nsbomb:component:originator=Sentinel Originator Org\nsbomb:component:root=build:_deps/kitchen-src\nsbomb:component:scope=third-party\nsbomb:component:sourceObligation=sentinel-obligation\nsbomb:component:type=library\nsbomb:component:vcsCommit=sentinelcommit111\nsbomb:component:vcsCommit=sentinelcommit222\nsbomb:component:vcsDirty=true\nsbomb:version:confidence=medium\nsbomb:version:source=conan"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "licenseConcluded: MIT OR Apache-2.0\nsbomb:license:confidence=high\nsbomb:license:conflictingValue=sentinel-conflicting-value\nsbomb:license:evidenceClass=file-level\nsbomb:license:reason=sentinel-reason-code\nsbomb:license:source=build:_deps/kitchen-src/kitchen.h\nsbomb:license:technique=spdx-identifier"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "licenseDeclared: LicenseRef-sbomb-Sentinel-Custom-Licence-2ce69ab6-d9c0bbf6\nsbomb:license:confidence=low\nsbomb:license:source=build:_deps/kitchen-src/COPYING.custom\nsbomb:license:technique=spdx-template"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "licenseDeclared: MIT\nsbomb:license:confidence=high\nsbomb:license:source=build:_deps/kitchen-src/LICENSE\nsbomb:license:technique=spdx-digest"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "not affected: CVE-2024-0001: sentinel reason one"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "not affected: CVE-2024-0001: sentinel reason two"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "not affected: CVE-2024-0002: the upstream lists this vulnerability as not applying to the version it shipped"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "not affected: GHSA-sent-inel-0001: sentinel reason of an advisory"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Akitchen-401.2.3-2Dsentinel",
+      "name": "kitchen",
+      "versionInfo": "1.2.3-sentinel",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "MIT OR LicenseRef-sbomb-Sentinel-Header-Licence-2.0",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=third-party\nsbomb:component:type=library"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "licenseConcluded: MIT OR LicenseRef-sbomb-Sentinel-Header-Licence-2.0\nsbomb:license:confidence=high\nsbomb:license:evidenceClass=file-level\nsbomb:license:source=build:_deps/kitchen-src/kitchen.h\nsbomb:license:technique=spdx-identifier"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Alibc",
+      "name": "libc",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "LGPL-2.1-or-later WITH GCC-exception-3.1",
+      "primaryPackagePurpose": "OPERATING_SYSTEM",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=dynamic\nsbomb:component:scope=system\nsbomb:component:type=operating-system"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "licenseConcluded: LGPL-2.1-or-later WITH GCC-exception-3.1\nsbomb:license:evidenceClass=component-level"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Atoolchain-2Dheaders",
+      "name": "toolchain headers",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "OTHER",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=toolchain\nsbomb:component:type=platform"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Atype-2Dcontainer",
+      "name": "type-container",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "Zlib",
+      "primaryPackagePurpose": "CONTAINER",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:linkageForm=static-object\nsbomb:component:scope=project\nsbomb:component:type=container"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "licenseConcluded: Zlib\nsbomb:license:evidenceClass=component-level"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Atype-2Dcrypto",
+      "name": "type-crypto",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "Zlib",
+      "primaryPackagePurpose": "OTHER",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:linkageForm=static-object\nsbomb:component:scope=project\nsbomb:component:type=cryptographic-asset"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "licenseConcluded: Zlib\nsbomb:license:evidenceClass=component-level"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Atype-2Ddevice",
+      "name": "type-device",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "Zlib",
+      "primaryPackagePurpose": "DEVICE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:linkageForm=static-object\nsbomb:component:scope=project\nsbomb:component:type=device"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "licenseConcluded: Zlib\nsbomb:license:evidenceClass=component-level"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Atype-2Ddriver",
+      "name": "type-driver",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "Zlib",
+      "primaryPackagePurpose": "OTHER",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:linkageForm=static-object\nsbomb:component:scope=project\nsbomb:component:type=device-driver"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "licenseConcluded: Zlib\nsbomb:license:evidenceClass=component-level"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Atype-2Dfile",
+      "name": "type-file",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "Zlib",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:linkageForm=static-object\nsbomb:component:scope=project\nsbomb:component:type=file"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "licenseConcluded: Zlib\nsbomb:license:evidenceClass=component-level"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Atype-2Dfirmware",
+      "name": "type-firmware",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "Zlib",
+      "primaryPackagePurpose": "FIRMWARE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:linkageForm=static-object\nsbomb:component:scope=project\nsbomb:component:type=firmware"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "licenseConcluded: Zlib\nsbomb:license:evidenceClass=component-level"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Atype-2Dframework",
+      "name": "type-framework",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "Zlib",
+      "primaryPackagePurpose": "FRAMEWORK",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:linkageForm=static-object\nsbomb:component:scope=project\nsbomb:component:type=framework"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "licenseConcluded: Zlib\nsbomb:license:evidenceClass=component-level"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Atype-2Dmodel",
+      "name": "type-model",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "Zlib",
+      "primaryPackagePurpose": "OTHER",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:linkageForm=static-object\nsbomb:component:scope=project\nsbomb:component:type=machine-learning-model"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "licenseConcluded: Zlib\nsbomb:license:evidenceClass=component-level"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Atype-2Duntyped",
+      "name": "type-untyped",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "Zlib",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:linkageForm=static-object\nsbomb:component:scope=project"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "licenseConcluded: Zlib\nsbomb:license:evidenceClass=component-level"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Abuild-3A-5Fdeps-2Fkitchen-2Dsrc-2Fkitchen.h",
+      "name": "build:_deps/kitchen-src/kitchen.h",
+      "packageFileName": "build:_deps/kitchen-src/kitchen.h",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "copyrightText": "Copyright sentinel holder A",
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and the document it was given states none for it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=third-party\nsbomb:evidence:artifacts=artifact:build:bin/app\nsbomb:evidence:header:class=third-party\nsbomb:file:class=header\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:path:canonical=build:_deps/kitchen-src/kitchen.h"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Abuild-3Agen-2Fkitchen-5Fconfig.h",
+      "name": "build:gen/kitchen_config.h",
+      "packageFileName": "build:gen/kitchen_config.h",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and the document it was given states none for it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=third-party\nsbomb:evidence:artifacts=artifact:build:bin/app\nsbomb:file:class=generated-header\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=generated-source\nsbomb:path:canonical=build:gen/kitchen_config.h"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Abuild-3Agen-2Ftable.c",
+      "name": "build:gen/table.c",
+      "packageFileName": "build:gen/table.c",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and the document it was given states none for it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=third-party\nsbomb:evidence:artifacts=artifact:build:bin/app\nsbomb:file:class=generated-source\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=generated-source\nsbomb:path:canonical=build:gen/table.c"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Abuild-3Alib-2Flibkitchen.a",
+      "name": "build:lib/libkitchen.a",
+      "packageFileName": "build:lib/libkitchen.a",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and the document it was given states none for it\ndigests SPDX 2.3 names no algorithm for: SENTINEL-UNKNOWN-KEY:abcdef0123",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=third-party\nsbomb:evidence:artifacts=artifact:build:bin/app\nsbomb:file:class=archive\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:path:canonical=build:lib/libkitchen.a"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Abuild-3Aobj-2Fkitchen.o",
+      "name": "build:obj/kitchen.o",
+      "packageFileName": "build:obj/kitchen.o",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and the document it was given states none for it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=third-party\nsbomb:evidence:artifacts=artifact:build:bin/app\nsbomb:file:class=object\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:path:canonical=build:obj/kitchen.o"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Aassets-2Flogo-20png.png",
+      "name": "project:assets/logo png.png",
+      "packageFileName": "project:assets/logo png.png",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and the document it was given states none for it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:evidence:artifacts=artifact:build:fs.img\nsbomb:file:class=asset\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=embedded-asset\nsbomb:path:canonical=project:assets/logo png.png"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Ahdr-2Fhdr.h",
+      "name": "project:hdr/hdr.h",
+      "packageFileName": "project:hdr/hdr.h",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=third-party\nsbomb:evidence:artifacts=artifact:build:bin/app\nsbomb:file:class=header\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=header-only\nsbomb:file:missing=true\nsbomb:path:canonical=project:hdr/hdr.h"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Atools-2Fgen.py",
+      "name": "project:tools/gen.py",
+      "packageFileName": "project:tools/gen.py",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and the document it was given states none for it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=third-party\nsbomb:evidence:artifacts=artifact:build:bin/app\nsbomb:evidence:artifacts=artifact:build:fs.img\nsbomb:file:class=unknown\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=build-tool\nsbomb:path:canonical=project:tools/gen.py"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Asysroot-3Ausr-2Finclude-2Fstdio.h",
+      "name": "sysroot:usr/include/stdio.h",
+      "packageFileName": "sysroot:usr/include/stdio.h",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and the document it was given states none for it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=toolchain\nsbomb:file:class=header\nsbomb:file:distributionRole=distributed\nsbomb:path:canonical=sysroot:usr/include/stdio.h"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Asysroot-3Ausr-2Flib-2Flibc.so.6",
+      "name": "sysroot:usr/lib/libc.so.6",
+      "packageFileName": "sysroot:usr/lib/libc.so.6",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and the document it was given states none for it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:scope=system\nsbomb:evidence:artifacts=artifact:build:bin/app\nsbomb:file:class=shared-library\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=dynamic\nsbomb:path:canonical=sysroot:usr/lib/libc.so.6"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-patch-3Acomponent-3Akitchen-2F1",
+      "name": "0002-sentinel.patch",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "description": "sentinel patch description B",
+      "comment": "sbomb states this patch as a package because SPDX 2.3 requires a SHA-1 of every file, and the patch is known only from the metadata that recorded it; its bytes were not read",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:patch:source=conandata.yml\nsbomb:patch:type=backport"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-patch-3Acomponent-3Akitchen-2F2",
+      "name": "patch 2 of kitchen (the metadata names no patch file)",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "description": "sentinel patch description C, of no file",
+      "comment": "sbomb states this patch as a package because SPDX 2.3 requires a SHA-1 of every file, and the patch is known only from the metadata that recorded it; its bytes were not read",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:patch:source=conandata.yml\nsbomb:patch:type=monkey"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-patch-3Acomponent-3Akitchen-2F3",
+      "name": "0001-sentinel.patch",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "description": "sentinel patch description A",
+      "comment": "sbomb states this patch as a package because SPDX 2.3 requires a SHA-1 of every file, and the patch is known only from the metadata that recorded it; its bytes were not read",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:patch:source=conandata.yml\nsbomb:patch:type=unofficial"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-patch-3Acomponent-3Akitchen-2F4",
+      "name": "0001-sentinel.patch",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "description": "sentinel patch description A2",
+      "comment": "sbomb states this patch as a package because SPDX 2.3 requires a SHA-1 of every file, and the patch is known only from the metadata that recorded it; its bytes were not read",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:patch:source=conandata.yml\nsbomb:patch:type=unofficial"
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "SPDXID": "SPDXRef-file-3Abuild-3A-5Fdeps-2Fkitchen-2Dsrc-2FCOPYING.custom",
+      "fileName": "build:_deps/kitchen-src/COPYING.custom",
+      "fileTypes": [
+        "DOCUMENTATION",
+        "TEXT"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "9c8eca33e577903af5b5421a7b545c0e18ad31e4"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5555555555555555555555555555555555555555555555555555555555555555"
+        }
+      ],
+      "licenseInfoInFiles": [
+        "LicenseRef-sbomb-Sentinel-Custom-Licence-2ce69ab6-d9c0bbf6"
+      ],
+      "comment": "a licence text was retained from this file (licenseTextInSBOM: evidence), but it is not UTF-8, and SPDX 2.3 has no field that carries it unaltered; it is in the FOSS outputs",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:path:canonical=build:_deps/kitchen-src/COPYING.custom"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "licenseInfoInFiles: LicenseRef-sbomb-Sentinel-Custom-Licence-2ce69ab6-d9c0bbf6\nsbomb:license:technique=spdx-template"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Abuild-3A-5Fdeps-2Fkitchen-2Dsrc-2FLICENSE",
+      "fileName": "build:_deps/kitchen-src/LICENSE",
+      "fileTypes": [
+        "DOCUMENTATION",
+        "OTHER",
+        "TEXT"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "4bb1a84fb21ebd2f4f2245de4a3b801d0110596c"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "3333333333333333333333333333333333333333333333333333333333333333"
+        }
+      ],
+      "licenseInfoInFiles": [
+        "MIT"
+      ],
+      "noticeText": "sentinel licence text of MIT\n",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=third-party\nsbomb:evidence:artifacts=artifact:build:fs.img\nsbomb:file:class=asset\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=embedded-asset\nsbomb:path:canonical=build:_deps/kitchen-src/LICENSE"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "licenseInfoInFiles: MIT\nsbomb:license:technique=spdx-identifier"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Abuild-3A-5Fdeps-2Fkitchen-2Dsrc-2FLICENSE.retained",
+      "fileName": "build:_deps/kitchen-src/LICENSE.retained",
+      "fileTypes": [
+        "DOCUMENTATION",
+        "TEXT"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "8eae7c91d785e417c68f271ebdfbe1f43f7580e2"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "6666666666666666666666666666666666666666666666666666666666666666"
+        }
+      ],
+      "licenseInfoInFiles": [
+        "LicenseRef-sbomb-Sentinel-Retained-Licence-d581e9c0-083d786f"
+      ],
+      "noticeText": "sentinel retained custom licence text\n",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:path:canonical=build:_deps/kitchen-src/LICENSE.retained"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "licenseInfoInFiles: LicenseRef-sbomb-Sentinel-Retained-Licence-d581e9c0-083d786f\nsbomb:license:technique=spdx-template"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Abuild-3A-5Fdeps-2Fkitchen-2Dsrc-2FNOTICE",
+      "fileName": "build:_deps/kitchen-src/NOTICE",
+      "fileTypes": [
+        "DOCUMENTATION",
+        "TEXT"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "2d361b39aae4f160bbfa3675b232e5997a0137aa"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "4444444444444444444444444444444444444444444444444444444444444444"
+        }
+      ],
+      "copyrightText": "Copyright sentinel holder B\nCopyright sentinel holder D",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:path:canonical=build:_deps/kitchen-src/NOTICE"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Abuild-3A-5Fdeps-2Fkitchen-2Dsrc-2Fkitchen.c",
+      "fileName": "build:_deps/kitchen-src/kitchen.c",
+      "fileTypes": [
+        "SOURCE"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "2222222222222222222222222222222222222222"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "1111111111111111111111111111111111111111111111111111111111111111"
+        }
+      ],
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=third-party\nsbomb:evidence:artifacts=artifact:build:bin/app\nsbomb:file:class=source\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:size=4242\nsbomb:path:canonical=build:_deps/kitchen-src/kitchen.c"
+        }
+      ]
+    }
+  ],
+  "hasExtractedLicensingInfos": [
+    {
+      "licenseId": "LicenseRef-sbomb-Sentinel-Custom-Licence-2ce69ab6-d9c0bbf6",
+      "name": "Sentinel Custom Licence",
+      "extractedText": "Sentinel Custom Licence",
+      "comment": "sbomb observed this licence name; the licence text was retained but is not UTF-8, and SPDX 2.3 cannot carry it unaltered; it is in the FOSS outputs, read from the file build:_deps/kitchen-src/COPYING.custom"
+    },
+    {
+      "licenseId": "LicenseRef-sbomb-Sentinel-Header-Licence-2.0",
+      "name": "Sentinel-Header-Licence-2.0",
+      "extractedText": "Sentinel-Header-Licence-2.0",
+      "comment": "sbomb observed only this licence name; no licence text was retained (licenseTextInSBOM is off, or no licence file was read)"
+    },
+    {
+      "licenseId": "LicenseRef-sbomb-Sentinel-Retained-Licence-d581e9c0-083d786f",
+      "name": "Sentinel Retained Licence",
+      "extractedText": "sentinel retained custom licence text\n"
+    },
+    {
+      "licenseId": "LicenseRef-sbomb-Sentinel-Unlisted-1.0",
+      "name": "Sentinel-Unlisted-1.0",
+      "extractedText": "Sentinel-Unlisted-1.0",
+      "comment": "sbomb observed only this licence name; no licence text was retained (licenseTextInSBOM is off, or no licence file was read)"
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relationshipType": "DESCRIBES",
+      "relatedSpdxElement": "SPDXRef-product-3Asentinel-2Dproduct"
+    },
+    {
+      "spdxElementId": "SPDXRef-artifact-3Abuild-3Abin-2Fapp",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-component-3Ahdr"
+    },
+    {
+      "spdxElementId": "SPDXRef-artifact-3Abuild-3Abin-2Fapp",
+      "relationshipType": "DYNAMIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Alibc"
+    },
+    {
+      "spdxElementId": "SPDXRef-artifact-3Abuild-3Abin-2Fapp",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Akitchen"
+    },
+    {
+      "spdxElementId": "SPDXRef-artifact-3Abuild-3Afs.img",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-component-3Aassets"
+    },
+    {
+      "spdxElementId": "SPDXRef-artifact-3Abuild-3Afs.img",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-component-3Akitchen"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aassets",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Aassets-2Flogo-20png.png"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Abuild-2Denvironment",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-component-3Alibc"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Abuild-2Denvironment",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-component-3Atoolchain-2Dheaders"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Agen",
+      "relationshipType": "BUILD_TOOL_OF",
+      "relatedSpdxElement": "SPDXRef-artifact-3Abuild-3Abin-2Fapp"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Agen",
+      "relationshipType": "BUILD_TOOL_OF",
+      "relatedSpdxElement": "SPDXRef-artifact-3Abuild-3Afs.img"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Agen",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Atools-2Fgen.py"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Ahdr",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Ahdr-2Fhdr.h"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Akitchen",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Abuild-3A-5Fdeps-2Fkitchen-2Dsrc-2FLICENSE"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Akitchen",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Abuild-3A-5Fdeps-2Fkitchen-2Dsrc-2Fkitchen.c"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Akitchen",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Abuild-3A-5Fdeps-2Fkitchen-2Dsrc-2Fkitchen.h"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Akitchen",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Abuild-3Agen-2Fkitchen-5Fconfig.h"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Akitchen",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Abuild-3Agen-2Ftable.c"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Akitchen",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Abuild-3Alib-2Flibkitchen.a"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Akitchen",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Abuild-3Aobj-2Fkitchen.o"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Akitchen",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-file-3Abuild-3A-5Fdeps-2Fkitchen-2Dsrc-2Fkitchen.h",
+      "comment": "evidence: a copyright statement of this package was read from this file"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Akitchen-401.2.3-2Dsentinel",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Alibc",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Asysroot-3Ausr-2Flib-2Flibc.so.6"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Alibc",
+      "relationshipType": "PROVIDED_DEPENDENCY_OF",
+      "relatedSpdxElement": "SPDXRef-artifact-3Abuild-3Abin-2Fapp"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Atoolchain-2Dheaders",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Asysroot-3Ausr-2Finclude-2Fstdio.h"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Atype-2Dcontainer",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Atype-2Dcrypto",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Atype-2Ddevice",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Atype-2Ddriver",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Atype-2Dfile",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Atype-2Dfirmware",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Atype-2Dframework",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Atype-2Dmodel",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Atype-2Duntyped",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Abuild-3A-5Fdeps-2Fkitchen-2Dsrc-2FCOPYING.custom",
+      "relationshipType": "DOCUMENTATION_OF",
+      "relatedSpdxElement": "SPDXRef-component-3Akitchen"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Abuild-3A-5Fdeps-2Fkitchen-2Dsrc-2FLICENSE",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Abuild-3A-5Fdeps-2Fkitchen-2Dsrc-2FLICENSE",
+      "relationshipType": "DOCUMENTATION_OF",
+      "relatedSpdxElement": "SPDXRef-component-3Akitchen"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Abuild-3A-5Fdeps-2Fkitchen-2Dsrc-2FLICENSE.retained",
+      "relationshipType": "DOCUMENTATION_OF",
+      "relatedSpdxElement": "SPDXRef-component-3Akitchen"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Abuild-3A-5Fdeps-2Fkitchen-2Dsrc-2FNOTICE",
+      "relationshipType": "DOCUMENTATION_OF",
+      "relatedSpdxElement": "SPDXRef-component-3Akitchen"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Abuild-3A-5Fdeps-2Fkitchen-2Dsrc-2FNOTICE",
+      "relationshipType": "DOCUMENTATION_OF",
+      "relatedSpdxElement": "SPDXRef-component-3Akitchen-401.2.3-2Dsentinel"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Abuild-3A-5Fdeps-2Fkitchen-2Dsrc-2Fkitchen.c",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Abuild-3A-5Fdeps-2Fkitchen-2Dsrc-2Fkitchen.h",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Abuild-3Agen-2Fkitchen-5Fconfig.h",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Abuild-3Agen-2Ftable.c",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Abuild-3Alib-2Flibkitchen.a",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Abuild-3Aobj-2Fkitchen.o",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Aassets-2Flogo-20png.png",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Ahdr-2Fhdr.h",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Atools-2Fgen.py",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Asysroot-3Ausr-2Finclude-2Fstdio.h",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Asysroot-3Ausr-2Flib-2Flibc.so.6",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-patch-3Acomponent-3Akitchen-2F1",
+      "relationshipType": "PATCH_APPLIED",
+      "relatedSpdxElement": "SPDXRef-component-3Akitchen"
+    },
+    {
+      "spdxElementId": "SPDXRef-patch-3Acomponent-3Akitchen-2F2",
+      "relationshipType": "PATCH_APPLIED",
+      "relatedSpdxElement": "SPDXRef-component-3Akitchen"
+    },
+    {
+      "spdxElementId": "SPDXRef-patch-3Acomponent-3Akitchen-2F3",
+      "relationshipType": "PATCH_APPLIED",
+      "relatedSpdxElement": "SPDXRef-component-3Akitchen"
+    },
+    {
+      "spdxElementId": "SPDXRef-patch-3Acomponent-3Akitchen-2F4",
+      "relationshipType": "PATCH_APPLIED",
+      "relatedSpdxElement": "SPDXRef-component-3Akitchen"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Asentinel-2Dproduct",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-artifact-3Abuild-3Abin-2Fapp"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Asentinel-2Dproduct",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-artifact-3Abuild-3Afs.img"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Asentinel-2Dproduct",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-component-3Abuild-2Denvironment"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Asentinel-2Dproduct",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-component-3Akitchen-401.2.3-2Dsentinel"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Asentinel-2Dproduct",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Atype-2Dcontainer"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Asentinel-2Dproduct",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Atype-2Dcrypto"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Asentinel-2Dproduct",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Atype-2Ddevice"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Asentinel-2Dproduct",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Atype-2Ddriver"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Asentinel-2Dproduct",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Atype-2Dfile"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Asentinel-2Dproduct",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Atype-2Dfirmware"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Asentinel-2Dproduct",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Atype-2Dframework"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Asentinel-2Dproduct",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Atype-2Dmodel"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Asentinel-2Dproduct",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Atype-2Duntyped"
+    }
+  ]
+}

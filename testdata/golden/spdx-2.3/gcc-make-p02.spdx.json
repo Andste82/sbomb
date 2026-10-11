@@ -1,0 +1,153 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "app",
+  "documentNamespace": "urn:uuid:73708236-b37f-5bec-bac1-2174b9db1db6",
+  "creationInfo": {
+    "created": "2023-11-14T22:13:20Z",
+    "creators": [
+      "Organization: sbomb",
+      "Tool: sbomb-0.0.0-test"
+    ]
+  },
+  "annotations": [
+    {
+      "annotationDate": "2023-11-14T22:13:20Z",
+      "annotationType": "OTHER",
+      "annotator": "Tool: sbomb-0.0.0-test",
+      "comment": "sbomb:build:config=Debug\nsbomb:build:generator=Unix Makefiles\nsbomb:run:adapters=binfmt\nsbomb:run:adapters=depfiles\nsbomb:run:adapters=linker-depfile\nsbomb:run:adapters=linker-map\nsbomb:run:adapters=resolver\nsbomb:run:reproducible=true\nsbomb:run:specVersion=2.3\nsbomb:run:toolVersion=0.0.0-test"
+    }
+  ],
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-product-3Aapp",
+      "name": "app",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "APPLICATION",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:artifact:role=application\nsbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:type=application"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Aproject",
+      "name": "project",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "APPLICATION",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:archiveMembersUsed=1/2\nsbomb:component:detectedBy=anchor:project\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=static-archive-member\nsbomb:component:linkageForm=static-object\nsbomb:component:modified=unknown\nsbomb:component:root=project:\nsbomb:component:scope=project\nsbomb:component:type=application\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence\nsbomb:license:review=true"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "licenseConcluded: NOASSERTION\nsbomb:license:evidenceClass=unknown\nsbomb:license:reason=no-evidence"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Acrypto.c",
+      "name": "project:crypto.c",
+      "packageFileName": "project:crypto.c",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:file:class=source\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-archive-member\nsbomb:file:missing=true\nsbomb:path:canonical=project:crypto.c"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Acrypto.h",
+      "name": "project:crypto.h",
+      "packageFileName": "project:crypto.h",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:evidence:header:class=project-header\nsbomb:file:class=header\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=header-only\nsbomb:file:missing=true\nsbomb:path:canonical=project:crypto.h"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Aproject-3Amain.c",
+      "name": "project:main.c",
+      "packageFileName": "project:main.c",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "comment": "sbomb states this file as a package because SPDX 2.3 requires a SHA-1 of every file, and no bytes of it were read; it is not present where the build named it",
+      "primaryPackagePurpose": "FILE",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-test",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:scope=project\nsbomb:file:class=source\nsbomb:file:distributionRole=distributed\nsbomb:file:linkageForm=static-object\nsbomb:file:missing=true\nsbomb:path:canonical=project:main.c"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relationshipType": "DESCRIBES",
+      "relatedSpdxElement": "SPDXRef-product-3Aapp"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aproject",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Acrypto.c"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aproject",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Acrypto.h"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Aproject",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Aproject-3Amain.c"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Acrypto.c",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Acrypto.h",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Aproject-3Amain.c",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Aapp",
+      "relationshipType": "STATIC_LINK",
+      "relatedSpdxElement": "SPDXRef-component-3Aproject"
+    }
+  ]
+}

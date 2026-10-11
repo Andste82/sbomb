@@ -101,6 +101,8 @@ func TestOutputSettingsAreChecked(t *testing.T) {
 	}{
 		{"the default format", `{"project":{"name":"a"},"build":{"dir":"build"},"output":{"format":"cyclonedx-json"}}`, false},
 		{"SPDX", `{"project":{"name":"a"},"build":{"dir":"build"},"output":{"format":"spdx-json","specVersion":"3.0.1"}}`, false},
+		{"SPDX 2.3", `{"project":{"name":"a"},"build":{"dir":"build"},"output":{"format":"spdx-json","specVersion":"2.3"}}`, false},
+		{"an SPDX version no writer emits", `{"project":{"name":"a"},"build":{"dir":"build"},"output":{"format":"spdx-json","specVersion":"2.2"}}`, true},
 		{"a format no writer emits", `{"project":{"name":"a"},"build":{"dir":"build"},"output":{"format":"spdx-tag-value"}}`, true},
 		{"the default version", `{"project":{"name":"a"},"build":{"dir":"build"},"output":{"specVersion":"1.6"}}`, false},
 		{"the opt-in version", `{"project":{"name":"a"},"build":{"dir":"build"},"output":{"specVersion":"1.7"}}`, false},

@@ -28,8 +28,7 @@ import (
 	"github.com/example/sbomb/internal/policy"
 	"github.com/example/sbomb/internal/report"
 	"github.com/example/sbomb/internal/sbomwriter"
-	_ "github.com/example/sbomb/internal/spdx"
-	"github.com/example/sbomb/internal/spdx/spdx3"
+	"github.com/example/sbomb/internal/spdx"
 )
 
 func main() {
@@ -1149,13 +1148,14 @@ func explainSubject(g *evidence.Graph, fileRef, bomRef string) (string, string) 
 	}
 }
 
-// localIdentity turns an SPDX element IRI of the form urn:uuid:<U>#<local>
-// back into the local identity it was built from, and returns anything else as
-// it is -- a bom-ref may contain "%" and is then not an IRI. The decoding is
-// the SPDX reader's own, so that a reference typed here and the same IRI read
-// out of a document name the same identity.
+// localIdentity turns an SPDX element reference -- an SPDX 3.0.1 IRI of the
+// form urn:uuid:<U>#<local>, or an SPDX 2.3 SPDXRef-<encoded> -- back into the
+// local identity it was built from, and returns anything else as it is: a
+// bom-ref may contain "%" and is then not an IRI. The decoding is the SPDX
+// writer's own, so that a reference typed here and the same element read out
+// of a document name the same identity, whichever version wrote it.
 func localIdentity(reference string) string {
-	return spdx3.LocalIdentity(reference)
+	return spdx.LocalIdentity(reference)
 }
 
 func loadEvidenceGraph(buildDir string) (*evidence.Graph, error) {

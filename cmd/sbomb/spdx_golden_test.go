@@ -45,6 +45,9 @@ type spdxFixture struct {
 	cdx cdxGoldenKind
 	// assembly marks the fixtures whose product is a set of deliverables.
 	assembly bool
+	// spdx23 marks the fixtures an SPDX 2.3 golden is also taken from, under
+	// testdata/golden/spdx-2.3/ (spdx23_golden_test.go).
+	spdx23 bool
 	// prepare builds what the run reads and returns the generate arguments
 	// that describe it, without --format, --spec-version and --output.
 	prepare func(t *testing.T) []string
@@ -64,7 +67,7 @@ const (
 // generated source, a package-manager component), and one curated build that
 // sets every field a configuration or a bundled sbom.yml can set.
 var spdxFixtures = []spdxFixture{
-	{name: "gcc-make-p02", cdx: cdxExisting, prepare: func(t *testing.T) []string {
+	{name: "gcc-make-p02", cdx: cdxExisting, spdx23: true, prepare: func(t *testing.T) []string {
 		return []string{"--build-dir", testutil.CorpusBuildDir(t, "gcc-make", "p02-static"), "--policy", "lenient"}
 	}},
 	{name: "gcc-ninja-p10-fetchcontent-declared", cdx: cdxExisting, prepare: prepareDeclaredRevision},
@@ -72,7 +75,7 @@ var spdxFixtures = []spdxFixture{
 		return []string{"--build-dir", testutil.CorpusBuildDir(t, "gcc-ninja", "p14-foss"), "--policy", "lenient",
 			"--source-dir", testutil.CorpusSourceTree(t)}
 	}},
-	{name: "gcc-ninja-p14-foss-licensetext", cdx: cdxExisting, prepare: func(t *testing.T) []string {
+	{name: "gcc-ninja-p14-foss-licensetext", cdx: cdxExisting, spdx23: true, prepare: func(t *testing.T) []string {
 		configuration := filepath.Join(t.TempDir(), "licencetext.json")
 		if err := os.WriteFile(configuration, []byte(licenceTextConfiguration), 0o600); err != nil {
 			t.Fatal(err)
@@ -80,7 +83,7 @@ var spdxFixtures = []spdxFixture{
 		return []string{"--build-dir", testutil.CorpusBuildDir(t, "gcc-ninja", "p14-foss"), "--policy", "lenient",
 			"--source-dir", testutil.CorpusSourceTree(t), "--config", configuration}
 	}},
-	{name: "gcc-ninja-p14-foss-modified", cdx: cdxExisting, prepare: func(t *testing.T) []string {
+	{name: "gcc-ninja-p14-foss-modified", cdx: cdxExisting, spdx23: true, prepare: func(t *testing.T) []string {
 		requireGit(t)
 		return []string{"--build-dir", testutil.CorpusBuildDir(t, "gcc-ninja", "p14-foss"),
 			"--source-dir", materializeFossRepositories(t), "--allow-introspection=git", "--policy", "lenient"}
@@ -93,11 +96,11 @@ var spdxFixtures = []spdxFixture{
 		return []string{"--build-dir", testutil.CorpusBuildDir(t, "msvc-nmake", "p02-static"),
 			"--path-flavor", "windows", "--policy", "lenient"}
 	}},
-	{name: "msvc-vs17-p02", cdx: cdxExisting, prepare: func(t *testing.T) []string {
+	{name: "msvc-vs17-p02", cdx: cdxExisting, spdx23: true, prepare: func(t *testing.T) []string {
 		return []string{"--build-dir", testutil.CorpusBuildDir(t, "msvc-vs17", "p02-static"),
 			"--config-name", "Debug", "--path-flavor", "windows", "--policy", "lenient"}
 	}},
-	{name: "gcc-ninja-p15-shared", assembly: true, prepare: func(t *testing.T) []string {
+	{name: "gcc-ninja-p15-shared", assembly: true, spdx23: true, prepare: func(t *testing.T) []string {
 		root := testutil.RepoRoot(t)
 		return []string{"--build-dir", testutil.CorpusBuildDir(t, "gcc-ninja", "p15-shared"),
 			"--config", filepath.Join(root, "testdata", "config", "p15-shared.json"),
@@ -121,7 +124,7 @@ var spdxFixtures = []spdxFixture{
 	{name: "clang-ninja-p11-conan", prepare: func(t *testing.T) []string {
 		return []string{"--build-dir", testutil.CorpusBuildDir(t, "clang-ninja", "p11-conan"), "--policy", "lenient"}
 	}},
-	{name: "gcc-ninja-p14-foss-curated", cdx: cdxNew, prepare: prepareCurated},
+	{name: "gcc-ninja-p14-foss-curated", cdx: cdxNew, spdx23: true, prepare: prepareCurated},
 }
 
 // requireGit skips a fixture that builds repositories when git is not there,
@@ -170,9 +173,11 @@ func prepareCurated(t *testing.T) []string {
 }
 
 // fixtureRenders is one fixture's build written three ways from one prepared
-// input: SPDX 3.0.1, CycloneDX 1.6 and CycloneDX 1.7.
+// input: SPDX 3.0.1, CycloneDX 1.6 and CycloneDX 1.7, and a fourth, SPDX 2.3,
+// for the fixtures marked spdx23.
 type fixtureRenders struct {
 	spdx, cdx16, cdx17 []byte
+	spdx23             []byte
 }
 
 // renderCache keeps the renders of each fixture for the rest of the test
@@ -205,6 +210,9 @@ func renderFixture(t *testing.T, fixture spdxFixture) fixtureRenders {
 		cdx16: run("cyclonedx-json", "1.6", ".cdx.json"),
 		cdx17: run("cyclonedx-json", "1.7", ".cdx.json"),
 	}
+	if fixture.spdx23 {
+		renders.spdx23 = run("spdx-json", "2.3", ".spdx.json")
+	}
 	renderCache[fixture.name] = renders
 	return renders
 }
@@ -212,11 +220,11 @@ func renderFixture(t *testing.T, fixture spdxFixture) fixtureRenders {
 // holdToBothTiers runs the writer's own checks on a document: conformance
 // (tier a) and the invariants of sbomb's output (tier b). Every golden must
 // pass both, or the golden would preserve a document sbomb refuses to write.
-func holdToBothTiers(t *testing.T, name string, data []byte) {
+func holdToBothTiers(t *testing.T, name, want string, data []byte) {
 	t.Helper()
 	writer, version, err := sbomwriter.DetectFormat(data)
-	if err != nil || writer.ID() != "spdx-json" || version != "3.0.1" {
-		t.Fatalf("%s is not an SPDX 3.0.1 document (%v)", name, err)
+	if err != nil || writer.ID() != "spdx-json" || version != want {
+		t.Fatalf("%s is not an SPDX %s document (%v)", name, want, err)
 	}
 	if err := writer.Validate(bytes.NewReader(data)); err != nil {
 		t.Errorf("%s is not conformant: %v", name, err)
@@ -251,7 +259,7 @@ func TestSpdxGoldenDocuments(t *testing.T) {
 			case cdxNew:
 				assertGolden(t, fixture.name+".cdx.json", renders.cdx16)
 			}
-			holdToBothTiers(t, fixture.name, renders.spdx)
+			holdToBothTiers(t, fixture.name, "3.0.1", renders.spdx)
 			graph := parseSpdxGraph(t, renders.spdx)
 			for _, relationship := range graph.relationships {
 				if relationship.relationshipType == "generates" {
@@ -326,7 +334,7 @@ func TestTheSyntheticDocumentGolden(t *testing.T) {
 	if err := writer.Write(&buffer, sbomwritertest.AllFields(), options); err != nil {
 		t.Fatal(err)
 	}
-	holdToBothTiers(t, "synthetic-all-fields", buffer.Bytes())
+	holdToBothTiers(t, "synthetic-all-fields", "3.0.1", buffer.Bytes())
 	assertGolden(t, "synthetic-all-fields.spdx.json", buffer.Bytes())
 }
 
