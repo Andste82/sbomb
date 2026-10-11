@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/example/sbomb/internal/sbomwriter"
+	"github.com/example/sbomb/internal/spdx/mapping"
 )
 
 // ComponentFiles answers explain --component --sbom for a 3.0.1 document: the
@@ -46,44 +47,28 @@ func ComponentFiles(data []byte, name string) ([]string, error) {
 			}
 		}
 	}
-	type candidate struct{ id, name string }
-	var components []candidate
+	var ids []string
+	var candidates []mapping.Candidate
 	for _, node := range parsed.nodes {
 		id := nodeID(node)
 		switch nodeType(node) {
 		case "software_Package":
 			if !roots[id] {
-				components = append(components, candidate{id: id, name: stringValue(node, "name")})
+				ids = append(ids, id)
+				candidates = append(candidates, mapping.Candidate{LocalID: localOf(id), Name: stringValue(node, "name")})
 			}
 		case "software_File":
 			if strings.HasPrefix(localOf(id), "file:") && leaves[id] {
-				components = append(components, candidate{id: id, name: baseName(stringValue(node, "name"))})
+				ids = append(ids, id)
+				candidates = append(candidates, mapping.Candidate{LocalID: localOf(id), Name: mapping.BaseName(stringValue(node, "name"))})
 			}
 		}
 	}
-	id := ""
-	for _, local := range []string{name, "component:" + name, "toolchain:" + name} {
-		for _, component := range components {
-			if localOf(component.id) == local {
-				id = component.id
-				break
-			}
-		}
-		if id != "" {
-			break
-		}
-	}
-	if id == "" {
-		for _, component := range components {
-			if component.name == name {
-				id = component.id
-				break
-			}
-		}
-	}
-	if id == "" {
+	match, found := mapping.FindComponent(candidates, name)
+	if !found {
 		return nil, sbomwriter.ErrNoSuchComponent
 	}
+	id := ids[match]
 
 	files := make([]string, 0)
 	for _, node := range parsed.nodes {
@@ -101,16 +86,4 @@ func ComponentFiles(data []byte, name string) ([]string, error) {
 		}
 	}
 	return files, nil
-}
-
-// baseName is the CycloneDX component name of a used file: the canonical path
-// after its last "/", or after the anchor when it has none.
-func baseName(canonical string) string {
-	if index := strings.LastIndexByte(canonical, '/'); index >= 0 {
-		return canonical[index+1:]
-	}
-	if index := strings.LastIndexByte(canonical, ':'); index >= 0 {
-		return canonical[index+1:]
-	}
-	return canonical
 }

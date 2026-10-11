@@ -323,3 +323,37 @@ func IsSbombLicenseRef(id string) bool { return strings.HasPrefix(id, sbombLicen
 // IsSbombAdditionRef reports whether an exception identifier is one sbomb
 // minted, and therefore one the document must define.
 func IsSbombAdditionRef(id string) bool { return strings.HasPrefix(id, sbombAdditionRefPrefix) }
+
+// localiseDocumentRefs replaces every LicenseRef qualified by a DocumentRef in
+// a routed target by a reference minted for it, for a version whose documents
+// must define every reference they name (Options.SelfContainedLicenseRefs).
+// SPDX 2.3 resolves "DocumentRef-x:LicenseRef-y" through an externalDocumentRefs
+// entry that states the other document's checksum, which sbomb does not know;
+// the minted reference is defined by the text that was observed, so the
+// statement keeps what it said and no reader meets a reference it cannot
+// resolve.
+func localiseDocumentRefs(target licenseTarget) licenseTarget {
+	if target.license.Kind != LicenseExpression || !strings.Contains(target.license.Expression, ":") {
+		return target
+	}
+	tokens, _, err := tokenize(target.license.Expression)
+	if err != nil {
+		return target
+	}
+	changed := false
+	for index, token := range tokens {
+		if !strings.Contains(token, ":") || !IsLicenseRef(token) {
+			continue
+		}
+		ref := sbombRef(sbombLicenseRefPrefix, token)
+		target.custom = append(target.custom, CustomLicense{Ref: ref, Name: token, Text: token})
+		tokens[index] = ref
+		changed = true
+	}
+	if !changed {
+		return target
+	}
+	target.license.Expression = joinTokens(tokens)
+	target.whole = len(tokens) == 1
+	return target
+}

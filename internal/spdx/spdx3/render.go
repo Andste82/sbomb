@@ -219,7 +219,7 @@ func (r *renderer) packageNode(pkg mapping.Package) node {
 			n.SuppliedBy = r.iri("agent:" + pkg.Supplier)
 		}
 		n.AdditionalPurpose = packageAdditionalPurposes(pkg)
-		n.CopyrightText = copyrightText(pkg)
+		n.CopyrightText = pkg.CopyrightText()
 		n.PrimaryPurpose = packagePurpose(pkg)
 		n.PackageURL = pkg.PURL
 		n.PackageVersion = pkg.Version
@@ -362,20 +362,6 @@ func (r *renderer) fileNode(file mapping.File) node {
 		n.PrimaryPurpose = filePurpose(file)
 		n.FileKind = "file"
 	})
-}
-
-// copyrightText is a package's copyright notices, one per line: the curated
-// notice first, then every statement sbomb read that names no file to sit on.
-// software_copyrightText is "the text of one or more copyright notices", so
-// both belong there; software_attributionText is for acknowledgements a
-// distributor adds, which neither is.
-func copyrightText(pkg mapping.Package) string {
-	lines := make([]string, 0, len(pkg.UnfiledCopyright)+1)
-	if pkg.Copyright != "" {
-		lines = append(lines, pkg.Copyright)
-	}
-	lines = append(lines, pkg.UnfiledCopyright...)
-	return strings.Join(lines, "\n")
 }
 
 // licenseTextRefs attaches the licence texts retained from a file to that

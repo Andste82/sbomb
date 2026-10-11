@@ -19,16 +19,22 @@
 // (Digest) and two runs over the same evidence build the same model whatever
 // order discovery handed things over in.
 //
-// What this does not provide for SPDX 2.3 (#3), deliberately: a SHA-1 of every
-// file, which 2.3 makes mandatory and which needs a hashing pass below the
-// writer seam; a rule for files that cannot be hashed at all (File.Missing and
-// the patch origin say which they are, so 2.3 can count or refuse them); and
-// a decision about extractedText when no licence text was retained
-// (CustomLicense.TextRetained says when that is the case). The model carries
-// what those decisions need; it does not make them.
+// The few places where the two versions differ in what they can state, rather
+// than in how they spell it, are options rather than fields (Options): whether
+// a custom exception can be named, which digests a file must carry beyond the
+// ones discovery computed, and whether every licence reference must be defined
+// in the document itself. SPDX 2.3 decides the rest in its renderer
+// (section 28.11.11): a file without a SHA-1 is stated as a one-file package,
+// and a reference defined by a name alone says that no text was retained.
+// The model gains no field for any of this, because its field names are part
+// of the digest every reproducible 3.0.1 document identity is derived from.
 package mapping
 
-import "github.com/example/sbomb/internal/sbommap"
+import (
+	"strings"
+
+	"github.com/example/sbomb/internal/sbommap"
+)
 
 // Property is one sbomb:* name and value (appendix B).
 type Property = sbommap.Property
@@ -54,6 +60,22 @@ type Options struct {
 	// one LicenseRef for the whole text. It is the only routing decision that
 	// depends on the version, and it is made here rather than in a renderer.
 	CustomAdditions bool
+	// Digests are the algorithms, in discovery's spelling ("SHA-1"), every
+	// file the version states must carry beyond what discovery computed. A
+	// used file gets them from the hashing pass, which the run asks for
+	// before it reads anything (sbomwriter.DigestRequirer); a retained
+	// licence file that is no used file gets them here, from the bytes the
+	// document already holds, exactly as its SHA-256 was computed from them.
+	// Nothing is read. Build refuses an algorithm it cannot compute.
+	Digests []string
+	// SelfContainedLicenseRefs says the version requires every LicenseRef an
+	// expression names to be defined in the document itself (SPDX 2.3:
+	// hasExtractedLicensingInfos, or an externalDocumentRefs entry with the
+	// other document's checksum, which sbomb cannot state). With it, a
+	// LicenseRef the build stated is defined by its identifier, and one
+	// qualified by a DocumentRef is replaced by a reference sbomb mints for
+	// it, as an identifier off the list is.
+	SelfContainedLicenseRefs bool
 }
 
 // Model is everything one SPDX document states.
@@ -150,6 +172,20 @@ type Package struct {
 	// KnownLeaf says the document knows the package depends on nothing.
 	KnownLeaf  bool
 	Properties []Property
+}
+
+// CopyrightText is the package's copyright notices, one per line: the
+// curated notice first, then every statement sbomb read that names no file to
+// sit on. Both are notices, and every version states them as the package's
+// copyright text; attribution text is for acknowledgements a distributor adds,
+// which neither is.
+func (p Package) CopyrightText() string {
+	lines := make([]string, 0, len(p.UnfiledCopyright)+1)
+	if p.Copyright != "" {
+		lines = append(lines, p.Copyright)
+	}
+	lines = append(lines, p.UnfiledCopyright...)
+	return strings.Join(lines, "\n")
 }
 
 // Origin says how a file came to be in the document. A file can be several.
