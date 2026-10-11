@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### An unmapped prebuilt library fails the run
+
+`prebuiltLibrariesRequireMapping` was read and resolved but decided nothing:
+`PREBUILT_LIBRARY_UNMAPPED`, reported for a prebuilt library from outside the
+build directory that no component claims, never failed a run. As the
+specification says, it now fails `default`, `cra` and `strict` with exit 3 and
+still passes under `lenient`. The finding stays a warning. A run that passed
+before can now fail; map the library to a component, or set
+`prebuiltLibrariesRequireMapping: false` (`--prebuilt-libraries-require-mapping=false`)
+or use `lenient` to keep the old behaviour.
+
 ### `sbomb.json` in the working directory is read without `--config`
 
 `generate`, `evidence` and `foss` read a configuration only when `--config`

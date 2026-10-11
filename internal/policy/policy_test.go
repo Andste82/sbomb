@@ -112,6 +112,7 @@ func TestEachFailureGateCanFailIndependently(t *testing.T) {
 		{"missing supplier", "MISSING_SUPPLIER", func(c *Config) { c.FailOnMissingSupplier = true }},
 		{"missing component hash", "MISSING_COMPONENT_HASH", func(c *Config) { c.FailOnMissingComponentHash = true }},
 		{"missing link", "MISSING_LINK_EVIDENCE", func(c *Config) { c.AllowMissingLinkEvidence = false }},
+		{"prebuilt unmapped", "PREBUILT_LIBRARY_UNMAPPED", func(c *Config) { c.PrebuiltLibrariesRequireMapping = true }},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -122,6 +123,48 @@ func TestEachFailureGateCanFailIndependently(t *testing.T) {
 				t.Fatalf("%s: result = %+v, want policy failure", test.id, result)
 			}
 		})
+	}
+}
+
+// TestPrebuiltLibraryUnmappedFollowsProfiles pins the profile table of
+// section 33.2: an unmapped prebuilt library is reported as a warning and
+// fails default, cra and strict, but not lenient.
+func TestPrebuiltLibraryUnmappedFollowsProfiles(t *testing.T) {
+	finding := domain.Finding{ID: "PREBUILT_LIBRARY_UNMAPPED", Severity: domain.SeverityWarning, Subject: domain.Subject{Kind: "file", Ref: "abs:opt/vendor/libx.a"}}
+	for _, test := range []struct {
+		profile string
+		fail    bool
+	}{
+		{"lenient", false},
+		{"default", true},
+		{"cra", true},
+		{"strict", true},
+	} {
+		t.Run(test.profile, func(t *testing.T) {
+			cfg, err := ResolveProfile(test.profile)
+			if err != nil {
+				t.Fatal(err)
+			}
+			result := Evaluate([]domain.Finding{finding}, cfg, nil, time.Time{})
+			wantExit := 0
+			if test.fail {
+				wantExit = 3
+			}
+			if result.Fail != test.fail || result.ExitCode != wantExit {
+				t.Fatalf("%s: result = %+v, want fail=%v exit=%d", test.profile, result, test.fail, wantExit)
+			}
+		})
+	}
+}
+
+// TestPrebuiltLibraryUnmappedPassesWhenMappingNotRequired checks that turning
+// the option off under a failing profile lets the run pass.
+func TestPrebuiltLibraryUnmappedPassesWhenMappingNotRequired(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.PrebuiltLibrariesRequireMapping = false
+	result := Evaluate([]domain.Finding{{ID: "PREBUILT_LIBRARY_UNMAPPED", Severity: domain.SeverityWarning}}, cfg, nil, time.Time{})
+	if result.Fail || result.ExitCode != 0 {
+		t.Fatalf("result = %+v, want no policy failure", result)
 	}
 }
 

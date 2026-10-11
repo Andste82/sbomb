@@ -29,6 +29,10 @@ type Config struct {
 	FailOnMissingSupplier              bool
 	FailOnMissingComponentHash         bool
 	AllowMissingLinkEvidence           bool
+	// PrebuiltLibrariesRequireMapping gates PREBUILT_LIBRARY_UNMAPPED. The
+	// spec lists it with the scope options of section 33.1, but it changes
+	// only the verdict, not what discovery includes.
+	PrebuiltLibrariesRequireMapping bool
 
 	// Scope options (section 33.1). Unlike the gates above these change what
 	// discovery includes, and section 33.3 requires each removal to be
@@ -42,7 +46,6 @@ type Config struct {
 	SystemLibraries                  string
 	PCHHeaders                       string
 	SectionGarbageCollection         string
-	PrebuiltLibrariesRequireMapping  bool
 	// LicenseTextInSBOM decides whether the licence texts retained per
 	// section 22.9 are written into the document: "off" or "evidence". It
 	// belongs with the scope options because it changes the output rather than
@@ -298,6 +301,8 @@ func shouldFail(f domain.Finding, cfg Config) bool {
 		return cfg.FailOnMissingComponentHash
 	case "MISSING_LINK_EVIDENCE":
 		return !cfg.AllowMissingLinkEvidence
+	case "PREBUILT_LIBRARY_UNMAPPED":
+		return cfg.PrebuiltLibrariesRequireMapping
 	case "WAIVER_EXPIRED", "WAIVER_UNUSED":
 		return false
 	default:

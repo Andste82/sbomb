@@ -269,7 +269,7 @@ binary, produced this way.
 | `--profile-overlay host-linux` | Report distribution libraries as components |
 | `--header-evidence=dwarf-preferred\|union\|depfiles` | Which header evidence governs |
 | `--waivers <file>` | Waivers, each with a reason and an expiry |
-| `--fail-on-<gate>[=false]`, `--allow-missing-link-evidence` | Turn one gate on or off, whatever the profile says |
+| `--fail-on-<gate>[=false]`, `--allow-missing-link-evidence`, `--prebuilt-libraries-require-mapping[=false]` | Turn one gate on or off, whatever the profile says |
 | `--include-<scope>[=false]` | Turn one scope option on or off |
 | `--system-libraries=`, `--pch-headers=`, `--section-garbage-collection=`, `--include-toolchain-runtime=` | Scope options taking a value, e.g. `--system-libraries=separate-component` |
 
