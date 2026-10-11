@@ -1293,6 +1293,13 @@ func (b *builder) recordMakeArchives(makeBuild *makeadapter.Build) {
 	}
 }
 
+// everyProjectArchiveIsBuilt reports whether producedArchives counts every
+// archive under the project root as produced: in an in-source build, and only
+// when no codemodel lists the archives the build writes.
+func everyProjectArchiveIsBuilt(model *cmakeapi.Model, registry *pathmodel.Registry, buildRoot string) bool {
+	return !archivesListed(model) && inSourceBuild(registry, buildRoot)
+}
+
 // archivesListed reports whether the File API reply lists the archives the
 // build writes: it has a codemodel, whose static library targets name them.
 // A reply with only a cache or toolchains object lists none.
