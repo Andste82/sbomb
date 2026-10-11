@@ -502,7 +502,7 @@ jobs:
           test -s "$work/build/sbom/app.cdx.json"
           # The binary it fetched has to be the one for this host, and verified.
           test -x "$work/build/_sbomb/v0.11.0/sbomb-linux-amd64"
-      - name: Without CONFIG, and without a default file, no --config is passed
+      - name: Without CONFIG, and without a default file, an empty --config is passed
         run: |
           set -euo pipefail
           work="$RUNNER_TEMP/noconfig"
@@ -522,10 +522,13 @@ jobs:
             -DSBOMB_EXECUTABLE="$PWD/dist/0.11.0/sbomb-linux-amd64" > "$work/configure.txt"
           # A cache default that leaks in when nobody asked for it turns every
           # project without that file into a build failure.
-          if grep -q -- '--config' "$work/build/CMakeFiles/sbomb-app.dir/build.make"; then
+          if grep -Eq -- '--config(=[^ ]| +[^- ])' "$work/build/CMakeFiles/sbomb-app.dir/build.make"; then
             echo "a configuration was passed although none was named" >&2
             exit 1
           fi
+          # The empty --config keeps sbomb from reading an sbomb.json of its
+          # own from the directory the target runs in.
+          grep -Eq -- '--config=( |$)' "$work/build/CMakeFiles/sbomb-app.dir/build.make"
           # A static library is archived, not linked, and carries no linker flags.
           grep -q "a STATIC_LIBRARY carries no linker flags" "$work/configure.txt"
           # One configure has to leave both, or the SBOM target would need to
