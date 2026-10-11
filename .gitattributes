@@ -5,12 +5,13 @@
 testdata/fixtures/** -text
 testdata/golden/** -text
 
-# The SPDX schema sbomb embeds is pinned to the upstream file by its SHA-256,
+# The SPDX schemas sbomb embeds are pinned to the upstream files by SHA-256,
 # and the SHACL model, context, examples and probes under testdata/spdx are
 # upstream bytes or derived from goldens. A CRLF conversion would break the pin
 # on a Windows checkout and make the copies something upstream never
 # published.
 internal/spdx/spdx3/schema/** -text
+internal/spdx/spdx23/schema/** -text
 testdata/spdx/** -text
 
 # The FOSS fixture's sources are committed twice over: once as the project the
