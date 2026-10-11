@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### `sbomb.json` in the working directory is read without `--config`
+
+`generate`, `evidence` and `foss` read a configuration only when `--config`
+named one, although the specification always gave `sbomb.json` as the default.
+Without the flag they now read `sbomb.json` from the working directory when it
+is there, and `generate -v` and `foss -v` say so. A run in a directory that
+holds a stray `sbomb.json` therefore applies it, and stops if it is invalid;
+an empty `--config=` runs without it. `--config` still names the one file
+read. The CMake module passes the project's file explicitly as before, and
+when it has none to pass it now passes `--config=`, so a `sbomb.json` it did
+not choose -- with `SBOMB_DEFAULT_CONFIG` pointing elsewhere -- is not read
+behind its back.
+
 ### An unknown policy profile is refused
 
 A profile name sbomb does not know, from `--policy` or from `policy.profile`

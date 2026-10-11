@@ -250,6 +250,24 @@ func handleValidate(args []string) (int, string, string) {
 	return 0, fmt.Sprintf("valid %s %s document: %s\n", sbomwriter.Label(writer), specVersion, input), ""
 }
 
+// defaultConfigFile is the configuration section 32.2 reads when --config is
+// not given.
+const defaultConfigFile = "sbomb.json"
+
+// resolveConfigPath applies the --config default of section 32.2: a named file
+// is used as given, so a missing one stays an error, and without the flag
+// sbomb.json in the working directory is read when it is there. implicit
+// reports that the default was picked up.
+func resolveConfigPath(flagValue string) (path string, implicit bool) {
+	if flagValue != "" {
+		return flagValue, false
+	}
+	if info, err := os.Stat(defaultConfigFile); err == nil && info.Mode().IsRegular() {
+		return defaultConfigFile, true
+	}
+	return "", false
+}
+
 // handleEvidence dumps the evidence graph without producing an SBOM, which is
 // what section 32.1 offers for inspecting discovery on its own.
 func handleEvidence(args []string) (int, string, string) {
@@ -289,6 +307,7 @@ func handleEvidence(args []string) (int, string, string) {
 	if buildDir == "" {
 		return 1, "", "--build-dir is required\n"
 	}
+	cfgPath, _ = resolveConfigPath(cfgPath)
 	loadedCfg := config.Config{}
 	if cfgPath != "" {
 		var err error
@@ -737,6 +756,10 @@ func handleGenerate(args []string, verbosity int) (int, string, string) {
 	}
 	cliLogger := generate.NewLogger(verbosity, logWriter)
 
+	cfgPath, implicitCfg := resolveConfigPath(cfgPath)
+	if implicitCfg {
+		cliLogger.Info("Using configuration '%s' from the working directory (no --config given)", cfgPath)
+	}
 	cliLogger.Info("Loading configuration (config file: '%s')...", cfgPath)
 	loadedCfg := config.Config{}
 	if cfgPath != "" {
