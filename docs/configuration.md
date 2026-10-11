@@ -70,12 +70,21 @@ cmake -S . -B build && cmake --build build
 sbomb generate --build-dir build --source-dir ./checkout --output app.cdx.json
 ```
 
-The document that comes out is identical to the one the build machine would
-have produced — same `bom-ref`s, same canonical paths — and the licences and
-hashes that need the sources are resolved rather than missing.
+The document that comes out has the same `bom-ref`s and canonical paths as the
+one the build machine would have produced, and the licences and hashes that
+need the sources are resolved rather than missing.
 `SOURCE_TREE_UNAVAILABLE` (warning) says when the tree is not where you pointed,
 instead of leaving you with `NOASSERTION` and no explanation. Package-manager
 caches are not relocated: their paths come from files the build wrote.
+
+One thing differs from the build machine's document: the toolchain. The
+evidence names the compiler's startup objects, runtime libraries and system
+headers by absolute path, such as `/usr/lib/gcc/.../crtbeginS.o`, and on the
+second machine the file at that path is that machine's, not the one that was
+linked. sbomb does not read it: these files carry no hash, and
+`HOST_FILES_NOT_READ` (warning) says so once per run. It does not fail the run.
+To have them hashed, generate the SBOM where the build ran, or in the same
+image.
 
 ## `build`
 
