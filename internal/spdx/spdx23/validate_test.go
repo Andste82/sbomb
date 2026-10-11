@@ -209,7 +209,10 @@ func TestEachConformanceRuleRefusesWhatItForbids(t *testing.T) {
 		"hasFiles without analysis":           {func(d map[string]any) { entry(d, "packages", 1)["hasFiles"] = []any{"SPDXRef-main.c"} }, "shall not contain any files"},
 		"contains without analysis": {func(d map[string]any) {
 			d["relationships"] = append(list(d, "relationships"), map[string]any{"spdxElementId": "SPDXRef-lib", "relationshipType": "CONTAINS", "relatedSpdxElement": "SPDXRef-main.c"})
-		}, "shall not contain any files"},
+		}, "package SPDXRef-lib has filesAnalyzed false and contains file SPDXRef-main.c"},
+		"contained by without analysis": {func(d map[string]any) {
+			d["relationships"] = append(list(d, "relationships"), map[string]any{"spdxElementId": "SPDXRef-main.c", "relationshipType": "CONTAINED_BY", "relatedSpdxElement": "SPDXRef-lib"})
+		}, "package SPDXRef-lib has filesAnalyzed false and contains file SPDXRef-main.c"},
 	} {
 		doc := minimalDocument()
 		test.mutate(doc)
@@ -220,14 +223,23 @@ func TestEachConformanceRuleRefusesWhatItForbids(t *testing.T) {
 	}
 }
 
-// documentDescribes is as good as DESCRIBES for tier a, and a document of one
-// element needs neither.
+// documentDescribes and the inverse DESCRIBED_BY are as good as DESCRIBES for
+// tier a, and a document of one element needs none of them.
 func TestTheRootMayBeStatedEitherWay(t *testing.T) {
 	doc := minimalDocument()
 	doc["relationships"] = list(doc, "relationships")[1:]
 	doc["documentDescribes"] = []any{"SPDXRef-app"}
 	if err := Validate(encodeDocument(t, doc)); err != nil {
 		t.Errorf("documentDescribes: %v", err)
+	}
+	// Clause 11.1: "SPDXRef-A DESCRIBED_BY SPDXRef-DOCUMENT" equals
+	// "SPDXRef-DOCUMENT DESCRIBES SPDXRef-A".
+	inverse := minimalDocument()
+	inverse["relationships"] = append([]any{map[string]any{
+		"spdxElementId": "SPDXRef-app", "relationshipType": "DESCRIBED_BY", "relatedSpdxElement": "SPDXRef-DOCUMENT",
+	}}, list(inverse, "relationships")[1:]...)
+	if err := Validate(encodeDocument(t, inverse)); err != nil {
+		t.Errorf("DESCRIBED_BY: %v", err)
 	}
 	// Clause 6.6: an idstring may hold "+", and a relationship may end in an
 	// element of the document it names.
