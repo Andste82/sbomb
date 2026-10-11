@@ -12,7 +12,6 @@ here is a version that goes stale the next time one is cut.
 ```yaml
 - uses: Andste82/sbomb/.github/actions/sbomb@<sbomb-version>
   with:
-    repository: Andste82/sbomb
     version: <sbomb-version>
     build-dir: build
     config: sbomb.json
@@ -36,7 +35,7 @@ here is a version that goes stale the next time one is cut.
 | `path-flavor` | the host's | Pin to `posix` when comparing across platforms |
 | `artifact-suffix` | — | Appended to the uploaded artifact's name. A matrix that varies anything but the platform needs it: two legs uploading under one name make the second a 409 that is swallowed, and one leg's attribution disappears |
 | `token` | `${{ github.token }}` | Needed while the repository is private; pass `""` to download anonymously |
-| `repository` | the calling repository | Where the release lives. Set `Andste82/sbomb` when the workflow runs in another repository |
+| `repository` | the repository the action is loaded from | Where the release lives; set it only to download from a fork or mirror |
 
 Build evidence must exist before the action runs, so call it after the project
 build.
@@ -58,7 +57,6 @@ SBOM red. It reads the same `config` and `policy` as the document.
 ```yaml
 - uses: Andste82/sbomb/.github/actions/sbomb@<sbomb-version>
   with:
-    repository: Andste82/sbomb
     version: <sbomb-version>
     build-dir: build
     policy: cra

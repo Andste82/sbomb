@@ -11,6 +11,15 @@ now a usage error (exit 1) that lists the profiles `default`, `lenient`, `cra`
 and `strict`, as an unknown `--profile-overlay` already was. Names are still
 matched regardless of case. This applies to `generate`, `foss` and `self`.
 
+### The GitHub Action downloads sbomb from its own repository
+
+The action's `repository` input defaulted to the repository whose workflow
+ran it, so a project using the action from outside looked for sbomb in its own
+releases and got a 404 unless it set `repository: Andste82/sbomb`. It now
+downloads from the repository the action was loaded from by default, and the
+download step logs the repository and tag it resolved. `repository` is needed
+only to download from a fork or a mirror.
+
 ### A relocated run no longer hashes this host's toolchain
 
 Where the build ran on another machine -- a CI job that only generates the

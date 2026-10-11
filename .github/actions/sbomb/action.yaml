@@ -2,9 +2,11 @@ name: sbomb
 description: Download and run a pinned sbomb release
 inputs:
   repository:
-    description: GitHub repository hosting the release
+    description: >-
+      GitHub repository hosting the release. Empty means the repository this
+      action was loaded from (github.repository when it is used by local path).
     required: false
-    default: ${{ github.repository }}
+    default: ''
   version:
     description: Release tag to download
     required: false
@@ -101,9 +103,16 @@ runs:
       env:
         SBOMB_VERSION: ${{ inputs.version }}
         SBOMB_REPOSITORY: ${{ inputs.repository }}
+        SBOMB_ACTION_REPOSITORY: ${{ github.action_repository }}
         GH_TOKEN: ${{ inputs.token }}
       run: |
         set -euo pipefail
+        # Resolved here and not in the input's default: a default naming
+        # github.repository is the calling repository, which has no sbomb
+        # release, and github.action_repository is empty when the action is
+        # used by local path, as sbomb's own smoke test does.
+        SBOMB_REPOSITORY="${SBOMB_REPOSITORY:-${SBOMB_ACTION_REPOSITORY:-$GITHUB_REPOSITORY}}"
+        echo "Downloading sbomb ${SBOMB_VERSION} from ${SBOMB_REPOSITORY}"
         case "${RUNNER_OS}/${RUNNER_ARCH}" in
           Linux/X64) asset=sbomb-linux-amd64 ;;
           Linux/ARM64) asset=sbomb-linux-arm64 ;;
