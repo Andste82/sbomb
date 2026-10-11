@@ -327,16 +327,14 @@ func TestTheDefaultProfileKeepsSbombsOwnGroupingOutOfTheNotices(t *testing.T) {
 // established, the document says so at the point the entry would have been,
 // and no canonical SPDX text is substituted for either.
 //
-// Two components carry one marker each, and which marker is the point. The
-// toolchain runtime has no retained licence text -- no source tree of GCC was
-// read -- but it does have copyright statements, because the narrowed headers
-// of section 32.6 are its own headers and they carry the FSF's notices. The
-// fixture's `nocopyright` dependency is the other way round: a licence file
-// and no notice anywhere in it. A marker that stood in both places would say
+// The two markers are told apart. The fixture's `nocopyright` dependency has a
+// licence file and no notice anywhere in it, so it carries the copyright
+// marker alone. The toolchain runtime carries both: no source tree of GCC was
+// read, and its headers are not read either, because the corpus was built on
+// another machine and the files at the paths it names are this host's
+// (section 7.9 rule 8). A marker that stood everywhere, or nowhere, would say
 // nothing about which of the two things was missing.
 func TestTheIncompletenessMarkersReachTheNoticesDocumentOnTheFixture(t *testing.T) {
-	// The toolchain entry's copyright comes from the headers the host has.
-	testutil.RequireFixtureToolchain(t)
 	files := runFOSSUnderTheDefaultProfile(t)
 	notices := files[foss.NoticesFile]
 	entryOf := func(name string) string {
@@ -359,14 +357,13 @@ func TestTheIncompletenessMarkersReachTheNoticesDocumentOnTheFixture(t *testing.
 	if !strings.Contains(toolchain, "Licence: not established (NOASSERTION)") {
 		t.Errorf("a licence was asserted for a component that resolved to none:\n%s", toolchain)
 	}
-	// The statements the licence view reads out of the narrowed headers. They
-	// reach the shipped document, which is what makes the missing-copyright
-	// marker absent here rather than unreported.
-	if !strings.Contains(toolchain, "Free Software Foundation") {
-		t.Errorf("the toolchain entry carries no copyright statement, and its own headers state one:\n%s", toolchain)
+	// The headers that state the FSF's notices are this host's, not the
+	// build's, and were not read.
+	if !strings.Contains(toolchain, "[no copyright statement found in component - attribution incomplete]") {
+		t.Errorf("the missing-copyright marker is not in the toolchain entry, whose headers were not read:\n%s", toolchain)
 	}
-	if strings.Contains(toolchain, "[no copyright statement found in component") {
-		t.Errorf("the missing-copyright marker stands although statements were found:\n%s", toolchain)
+	if strings.Contains(toolchain, "Free Software Foundation") {
+		t.Errorf("the toolchain entry states a copyright read from this host's headers:\n%s", toolchain)
 	}
 
 	bare := entryOf("nocopyright")

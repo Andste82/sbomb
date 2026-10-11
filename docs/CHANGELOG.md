@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### A relocated run no longer hashes this host's toolchain
+
+Where the build ran on another machine -- a CI job that only generates the
+SBOM, a restored build directory, the fixture corpus -- sbomb read the
+toolchain files the evidence names by absolute path, such as
+`/usr/lib/gcc/.../crtbeginS.o`, from the machine it ran on. Their hashes went
+into the document as the build's, although they were this host's files, and
+the same build directory gave other hashes on another host and none on
+Windows. Such a run now leaves these files unread, without a hash, and says so
+once with `HOST_FILES_NOT_READ`. A run on the machine that built reads them as
+before and notes it with `HOST_FILES_READ` (info). Package caches are read as
+before.
+
 ### SPDX output within the performance budget
 
 Writing an SPDX document of a large build took twice the time and two to

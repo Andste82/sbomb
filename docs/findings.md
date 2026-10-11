@@ -16,7 +16,7 @@ same build produce identical output.
 
 <!-- BEGIN GENERATED CATALOGUE -->
 
-This build emits 62 of the 71 identifiers below. The rest are specified and
+This build emits 64 of the 73 identifiers below. The rest are specified and
 reserved: they describe evidence this version does not yet read, and a run will
 never report them. They are listed and marked so that the table is the whole
 catalogue rather than a snapshot of one version.
@@ -47,6 +47,8 @@ catalogue rather than a snapshot of one version.
 | `FOSS_PER_FILE_LICENSE_DIVERGENCE` | info | — | Files of one component declare an identifier the component's own licence does not account for (§22.5) | emitted |
 | `FOSS_SOURCE_OBLIGATION` | info | — | A distributed component's license triggers a source obligation, which §32.6 names and does not produce | emitted |
 | `HEADER_EVIDENCE_FALLBACK` | info | — | A CU had no DWARF coverage; depfile used instead | emitted |
+| `HOST_FILES_NOT_READ` | warning | — | A relocated run left the toolchain and system files the evidence names by absolute path unread, because they are this host's and not the build's (§7.9 rule 8) | emitted |
+| `HOST_FILES_READ` | info | — | Toolchain and system files named by absolute path were read where the build recorded them (§7.9 rule 8) | emitted |
 | `INPUT_LIMIT_EXCEEDED` | warning | — | A parser limit of §30 was reached | emitted |
 | `INTERNAL_INVARIANT_VIOLATION` | error | always (exit 70) | A graph invariant of §8.8 or a `bom-ref` uniqueness assertion of §28.4 failed, or a writer could not render the document sbomb built (§32.5) | emitted |
 | `INVALID_COMPONENT_ROOT` | warning | — | `component-root` in an `sbom.yml` is absolute or leaves the component directory, so the redirection was refused | emitted |
