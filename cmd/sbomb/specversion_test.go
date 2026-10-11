@@ -162,19 +162,19 @@ func TestValidateReadsADocumentItDidNotWrite(t *testing.T) {
 		t.Errorf("CycloneDX 1.4 = code %d, want 4", code)
 	}
 
-	// An SPDX 2.3 document is recognised for what it is and refused by name,
+	// An SPDX 2.2 document is recognised for what it is and refused by name,
 	// rather than failing as though it were a broken CycloneDX file or an
-	// unknown one: the reader learns which version this build does read.
+	// unknown one: the reader learns which versions this build does read.
 	otherPath := filepath.Join(directory, "other.json")
-	if err := os.WriteFile(otherPath, []byte(`{"spdxVersion":"SPDX-2.3"}`), 0o600); err != nil {
+	if err := os.WriteFile(otherPath, []byte(`{"spdxVersion":"SPDX-2.2"}`), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	code, _, stderr = execute([]string{"validate", "--input", otherPath})
 	if code != 4 {
-		t.Errorf("an SPDX 2.3 document = code %d, want 4", code)
+		t.Errorf("an SPDX 2.2 document = code %d, want 4", code)
 	}
-	if !bytes.Contains([]byte(stderr), []byte("SPDX 2.3")) || !bytes.Contains([]byte(stderr), []byte("3.0.1")) {
-		t.Errorf("the error does not name the version it found and the one it reads: %q", stderr)
+	if !bytes.Contains([]byte(stderr), []byte("SPDX 2.2")) || !bytes.Contains([]byte(stderr), []byte("2.3, 3.0.1")) {
+		t.Errorf("the error does not name the version it found and the ones it reads: %q", stderr)
 	}
 
 	// A document in no format this build knows names what it can read.

@@ -1,0 +1,45 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "probe",
+  "documentNamespace": "urn:uuid:6f1d3a52-6c49-4f0e-9a52-2b1f4d6c0e11",
+  "creationInfo": {
+    "created": "2023-11-14T22:13:20Z",
+    "creators": [
+      "Tool: probe-1.0"
+    ]
+  },
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-app",
+      "name": "app",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "MIT AND LicenseRef-undefined"
+    }
+  ],
+  "files": [
+    {
+      "SPDXID": "SPDXRef-main.c",
+      "fileName": "./main.c",
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relationshipType": "DESCRIBES",
+      "relatedSpdxElement": "SPDXRef-app"
+    },
+    {
+      "spdxElementId": "SPDXRef-app",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-main.c"
+    }
+  ]
+}

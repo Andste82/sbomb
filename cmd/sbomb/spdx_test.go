@@ -184,7 +184,7 @@ func TestAVersionTheFormatDoesNotHaveIsAUsageError(t *testing.T) {
 		args []string
 		want string
 	}{
-		{[]string{"--format", "spdx-json", "--spec-version", "1.7"}, `format "spdx-json" does not support version "1.7"; supported: 3.0.1`},
+		{[]string{"--format", "spdx-json", "--spec-version", "1.7"}, `format "spdx-json" does not support version "1.7"; supported: 2.3, 3.0.1`},
 		{[]string{"--spec-version", "3.0.1"}, `format "cyclonedx-json" does not support version "3.0.1"; supported: 1.6, 1.7`},
 	} {
 		args := append([]string{"generate", "--build-dir", buildDir, "--output", filepath.Join(directory, "out.json")}, testCase.args...)
