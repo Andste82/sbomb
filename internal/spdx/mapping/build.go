@@ -2,6 +2,7 @@ package mapping
 
 import (
 	"bytes"
+	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/binary"
 	"encoding/hex"
@@ -34,6 +35,11 @@ func Build(document *sbomwriter.Document, options Options) (*Model, error) {
 	}
 	if options.SpecVersion == "" {
 		return nil, errors.New("no SPDX version to map the document for")
+	}
+	for _, digest := range options.Digests {
+		if _, known := digestFuncs[digest]; !known {
+			return nil, fmt.Errorf("the SPDX %s mapping cannot compute a %s digest of a retained licence file", options.SpecVersion, digest)
+		}
 	}
 	created, err := creationTime(document.Run.Timestamp)
 	if err != nil {
@@ -372,6 +378,15 @@ func (b *builder) licenseArtifacts(component domain.Component) []string {
 		if artifact.SHA256 != "" && !file.Missing {
 			file.Hashes = append(file.Hashes, Hash{Key: "SHA-256", Value: artifact.SHA256})
 		}
+		if !file.Missing && len(artifact.Bytes) > 0 {
+			// The digests the version needs beyond the SHA-256, from the
+			// bytes the document already holds: no read. A used file's own
+			// digest of the same algorithm came first and is the one kept
+			// (finish).
+			for _, digest := range b.options.Digests {
+				file.Hashes = append(file.Hashes, Hash{Key: digest, Value: digestFuncs[digest](artifact.Bytes)})
+			}
+		}
 		if b.options.LicenseText == sbomwriter.LicenseTextEvidence &&
 			artifact.Kind == domain.LicenseArtifactLicense && len(artifact.Bytes) > 0 {
 			file.LicenseText = append(file.LicenseText, artifact.Bytes)
@@ -390,6 +405,14 @@ func (b *builder) licenseArtifacts(component domain.Component) []string {
 		locals = append(locals, local)
 	}
 	return locals
+}
+
+// digestFuncs are the algorithms Options.Digests may name.
+var digestFuncs = map[string]func([]byte) string{
+	"SHA-1": func(data []byte) string {
+		sum := sha1.Sum(data)
+		return hex.EncodeToString(sum[:])
+	},
 }
 
 // fileAcknowledgement says how SPDX states the licence detected in a retained
@@ -426,6 +449,9 @@ func (b *builder) licenseUse(finding domain.LicenseFinding, component domain.Com
 	target, ok := routeLicense(finding, b.options.CustomAdditions)
 	if !ok {
 		return LicenseUse{}, false
+	}
+	if b.options.SelfContainedLicenseRefs {
+		target = localiseDocumentRefs(target)
 	}
 	if target.whole {
 		if readFrom == "" {
@@ -499,6 +525,11 @@ func (b *builder) defineCustom(custom CustomLicense) {
 // reached the document inside an expression sbomb did not mint -- a build that
 // wrote one into its own file. Every reference in sbomb's namespace is
 // defined, so a reader never meets one it cannot look up.
+//
+// A version whose documents must be self-contained (SelfContainedLicenseRefs)
+// gets a definition of every other LicenseRef the build stated as well: its
+// identifier is all sbomb knows of it, and a reference without a definition
+// would make the document one its readers refuse.
 func (b *builder) defineStrayRefs() {
 	for _, license := range b.licenses {
 		parsed, err := ParseExpression(license.Expression)
@@ -506,7 +537,9 @@ func (b *builder) defineStrayRefs() {
 			continue
 		}
 		for _, id := range parsed.Licenses {
-			if _, known := b.custom[id]; IsSbombLicenseRef(id) && !known {
+			stray := IsSbombLicenseRef(id) ||
+				b.options.SelfContainedLicenseRefs && IsLicenseRef(id) && !strings.Contains(id, ":")
+			if _, known := b.custom[id]; stray && !known {
 				b.custom[id] = CustomLicense{Ref: id, Name: id, Text: id}
 			}
 		}
