@@ -35,7 +35,8 @@ irm https://andste82.github.io/sbomb/install.ps1 | iex
 That takes the latest release for your platform and verifies it against the
 release's `SHA256SUMS` before installing — there is no way to skip that check.
 `--version <sbomb-version>` pins a release, `--bin-dir` chooses where it lands,
-and `--with-sbom` puts the release's own CycloneDX document beside the binary.
+and `--with-sbom` puts the release's own CycloneDX document beside the binary
+(`-Version`, `-BinDir` and `-WithSbom` in PowerShell).
 
 `<sbomb-version>` is a release tag, as written on the
 [releases page](https://github.com/Andste82/sbomb/releases) — `v` and all.
@@ -80,9 +81,13 @@ sbomb generate --build-dir build --output build/app.cdx.json
 ```
 
 sbomb finds the map and the dependency file next to the artifact. If they sit
-somewhere else, name them in the configuration under `artifacts[]`.
+somewhere else, name them with `--map` and `--link-depfile`, or in the
+configuration under `artifacts[]`.
 
 ## The CMake integration, without installing anything
+
+The module needs CMake 3.27 or newer, and stops the configure with a message
+on anything older.
 
 If the project would rather fetch sbomb than have everyone install it, the
 release ships a CMake bundle. One `FetchContent_Declare` gives you the module
@@ -434,6 +439,7 @@ reports what it could not establish instead of inventing it. The common ones:
 | `MISSING_LINK_EVIDENCE` | No linker map and no debug information — add the flags above |
 | `UNANCHORED_FILE` | A file outside every anchor — add an `anchors[]` entry so its identity stays portable |
 | `STALE_BUILD_EVIDENCE` | The artifact is older than its inputs; rebuild before believing the SBOM |
+| `HOST_FILES_NOT_READ` | The build ran on another machine, so the toolchain files it names by absolute path carry no hash; generate on the build machine to have them hashed |
 
 [docs/findings.md](findings.md) lists all of them.
 
