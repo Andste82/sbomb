@@ -228,12 +228,17 @@ func conformance(doc *document) *issues {
 		if !resolves(rel.RelatedSPDXElement, true) {
 			found.addf("relationship %s %s %s: %q is no element of the document", rel.SPDXElementID, rel.RelationshipType, rel.RelatedSPDXElement, rel.RelatedSPDXElement)
 		}
-		if rel.SPDXElementID == documentID && rel.RelationshipType == "DESCRIBES" {
+		// Clause 11.1: "A DESCRIBED_BY SPDXRef-DOCUMENT" says the same as
+		// "SPDXRef-DOCUMENT DESCRIBES A".
+		if rel.SPDXElementID == documentID && rel.RelationshipType == "DESCRIBES" ||
+			rel.RelatedSPDXElement == documentID && rel.RelationshipType == "DESCRIBED_BY" {
 			describes = true
 		}
-		if rel.RelationshipType == "CONTAINS" && notAnalyzed[rel.SPDXElementID] && kinds[rel.RelatedSPDXElement] == "file" ||
-			rel.RelationshipType == "CONTAINED_BY" && notAnalyzed[rel.RelatedSPDXElement] && kinds[rel.SPDXElementID] == "file" {
-			found.addf("package %s has filesAnalyzed false and contains a file (clause 7.8: it shall not contain any files)", rel.SPDXElementID)
+		switch {
+		case rel.RelationshipType == "CONTAINS" && notAnalyzed[rel.SPDXElementID] && kinds[rel.RelatedSPDXElement] == "file":
+			found.addf("package %s has filesAnalyzed false and contains file %s (clause 7.8: it shall not contain any files)", rel.SPDXElementID, rel.RelatedSPDXElement)
+		case rel.RelationshipType == "CONTAINED_BY" && notAnalyzed[rel.RelatedSPDXElement] && kinds[rel.SPDXElementID] == "file":
+			found.addf("package %s has filesAnalyzed false and contains file %s (clause 7.8: it shall not contain any files)", rel.RelatedSPDXElement, rel.SPDXElementID)
 		}
 	}
 	for _, described := range doc.DocumentDescribes {
@@ -242,7 +247,7 @@ func conformance(doc *document) *issues {
 		}
 	}
 	if len(doc.Packages)+len(doc.Files) > 1 && !describes && len(doc.DocumentDescribes) == 0 {
-		found.addf("the document has more than one package or file and says which it describes neither by a DESCRIBES relationship nor by documentDescribes (clause 11.1)")
+		found.addf("the document has more than one package or file and says which it describes neither by a DESCRIBES or DESCRIBED_BY relationship nor by documentDescribes (clause 11.1)")
 	}
 
 	licences(doc, documentRefs, found)
