@@ -1114,18 +1114,6 @@ func evidenceQualityFindings(graph *evidence.Graph, used []domain.Node, anchorRe
 					Message: "the translation unit reached the link but no dependency evidence names the headers it read",
 				})
 			}
-		case domain.NodeArchive:
-			// Section 33.1: a prebuilt library that maps to no component is a
-			// gap in the bill of materials, not a detail.
-			if strings.HasPrefix(string(node.ID), "build:") || !anchors.IncludedByDefault(scope) {
-				continue
-			}
-			findings = append(findings, domain.Finding{
-				ID: "PREBUILT_LIBRARY_UNMAPPED", Severity: domain.SeverityWarning,
-				Subject:     domain.Subject{Kind: "file", Ref: string(node.ID)},
-				Message:     "a prebuilt library is linked but belongs to no configured component",
-				Remediation: "Add a components[] entry naming the library, its version and its supplier.",
-			})
 		}
 	}
 

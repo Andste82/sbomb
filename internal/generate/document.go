@@ -328,6 +328,7 @@ func groupFilesByComponent(resolver *componentResolver, files []domain.UsedFile,
 	// described start empty here and are filled by the files below.
 	resolver.forgetSystemPackages()
 
+	unmappedLibraries := []domain.Finding{}
 	for _, file := range files {
 		id, name, componentType, scope, detectedBy := resolver.resolve(file)
 		group, known := byComponentID[id]
@@ -348,11 +349,14 @@ func groupFilesByComponent(resolver *componentResolver, files []domain.UsedFile,
 			order = append(order, id)
 		}
 		group.files = append(group.files, file)
+		if finding, unmapped := unmappedPrebuiltLibrary(file, detectedBy); unmapped {
+			unmappedLibraries = append(unmappedLibraries, finding)
+		}
 	}
 
 	sort.Strings(order)
 	groups := make([]fileGroup, 0, len(order))
-	findings := []domain.Finding{}
+	findings := unmappedLibraries
 	for _, id := range order {
 		group := byComponentID[id]
 		sort.Slice(group.files, func(i, j int) bool {
@@ -382,6 +386,36 @@ func groupFilesByComponent(resolver *componentResolver, files []domain.UsedFile,
 	findings = append(findings, resolver.takePkgConfigConflicts()...)
 	sortFindings(findings)
 	return groups, findings
+}
+
+// unmappedPrebuiltLibrary reports a prebuilt library that no component claims
+// (section 33.1). It is asked after resolve, because whether a library is
+// mapped is exactly what resolve decides: a components[] entry, a package
+// manager, a configured CMake target, package metadata beside the library or a
+// package, SDK or external anchor all name the component it belongs to. Two
+// answers name none. The project anchor folds the library into the product as
+// if this build had compiled it, and an unresolved file belongs to an unknown
+// component.
+//
+// An archive in the build directory is not prebuilt: this build produced it.
+// A toolchain or system library is the environment's, not the product's, and
+// is not asked about either.
+func unmappedPrebuiltLibrary(file domain.UsedFile, detectedBy string) (domain.Finding, bool) {
+	if file.Class != domain.FileClassArchive || file.ID.Anchor == "build" {
+		return domain.Finding{}, false
+	}
+	if scopes := file.Properties["sbomb:component:scope"]; len(scopes) > 0 && !anchors.IncludedByDefault(anchors.Scope(scopes[0])) {
+		return domain.Finding{}, false
+	}
+	if detectedBy != "anchor:project" && detectedBy != "unresolved" {
+		return domain.Finding{}, false
+	}
+	return domain.Finding{
+		ID: "PREBUILT_LIBRARY_UNMAPPED", Severity: domain.SeverityWarning,
+		Subject:     domain.Subject{Kind: "file", Ref: file.ID.Canonical()},
+		Message:     "a prebuilt library is linked but belongs to no configured component",
+		Remediation: "Add a components[] entry naming the library, its version and its supplier.",
+	}, true
 }
 
 // environmentProvided decides whether the target expects this component to be
