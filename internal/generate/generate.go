@@ -20,6 +20,7 @@ import (
 	"github.com/example/sbomb/internal/anchors"
 	"github.com/example/sbomb/internal/buildinfo"
 	"github.com/example/sbomb/internal/config"
+	"github.com/example/sbomb/internal/digest"
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/evidence"
 	"github.com/example/sbomb/internal/exec"
@@ -569,8 +570,8 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	// The configuration names the serialization; an empty value is the
 	// writer's default rather than a guess made here (section 32.2). It is
 	// resolved before the files are read, because a format may need a digest
-	// beyond SHA-256 of every file (SPDX 2.3 needs a SHA-1), and that digest
-	// comes out of the same read. The writer is asked through an optional
+	// beyond SHA-256 of every file, and that digest comes out of the same
+	// read. The writer is asked through an optional
 	// interface, so nothing here knows which format asked.
 	writer, specVersion, err := sbomwriter.Resolve(sbomwriter.FormatOrDefault(cfg.Output.Format), cfg.Output.SpecVersion)
 	if err != nil {
@@ -580,14 +581,14 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	if requirer, requires := writer.(sbomwriter.DigestRequirer); requires {
 		digests = requirer.FileDigests(specVersion)
 	}
-	for _, digest := range digests {
-		if !inventory.SupportsDigest(digest) {
+	for _, name := range digests {
+		if !digest.Supported(name) {
 			return Result{Graph: graph, Findings: findings}, &ExitError{
 				Code: 70,
 				Finding: domain.Finding{
 					ID: "INTERNAL_INVARIANT_VIOLATION", Severity: domain.SeverityError,
 					Subject: domain.Subject{Kind: "run", Ref: buildRootForIdentity},
-					Message: fmt.Sprintf("the %s writer needs a %s digest of every file, which hashing cannot compute", writer.ID(), digest),
+					Message: fmt.Sprintf("the %s writer needs a %s digest of every file, which hashing cannot compute", writer.ID(), name),
 				},
 			}
 		}
