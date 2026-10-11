@@ -25,7 +25,7 @@ here is a version that goes stale the next time one is cut.
 | `version` | a placeholder | Release tag to download. Always set it |
 | `build-dir` | the workspace | The CMake build directory |
 | `source-dir` | — | The source tree, where it is now. Needed when the build directory was restored somewhere else than it was built — building in one job and describing the result in another (§7.9) |
-| `config` | — | Configuration file |
+| `config` | `sbomb.json` in the working directory, if present | Configuration file |
 | `policy` | `default` | Policy profile |
 | `format` | the configuration's, else `cyclonedx-json` | `cyclonedx-json` or `spdx-json` |
 | `spec-version` | the format's default | `1.6` or `1.7` for CycloneDX, `3.0.1` for SPDX |

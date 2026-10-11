@@ -1966,7 +1966,7 @@ sbomb generate \
 |---|---|---|
 | `--source-dir` | logical source root | Physical source directory: where the source tree is now (§7.9). It never changes identity. |
 | `--build-dir` | required | Build directory |
-| `--config` | `sbomb.json` if present | Configuration file |
+| `--config` | `sbomb.json` in the working directory, if present | Configuration file |
 | `--output` | `sbomb.cdx.json` or `sbomb.spdx.json` | Output file (single artifact); the default name follows the format |
 | `--output-dir` | — | Output directory (multiple artifacts) |
 | `--mode` | from config, else `single` | `single` \| `assembly` |

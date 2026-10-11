@@ -246,6 +246,10 @@ func handleFOSS(args []string, verbosity int) (int, string, string) {
 	}
 	cliLogger := generate.NewLogger(verbosity, logWriter)
 
+	cfgPath, implicitCfg := resolveConfigPath(cfgPath)
+	if implicitCfg {
+		cliLogger.Info("Using configuration '%s' from the working directory (no --config given)", cfgPath)
+	}
 	loadedCfg := config.Config{}
 	if cfgPath != "" {
 		loaded, err := config.Load(cfgPath)

@@ -167,9 +167,9 @@ sbomb generate \
   --policy cra
 ```
 
-`--build-dir` is the only required flag. A configuration file is read only
-when `--config` names it; the CMake module passes `sbomb.json` for you when the
-project has one.
+`--build-dir` is the only required flag. Without `--config`, sbomb reads
+`sbomb.json` from the working directory when one is there; the CMake module
+passes the project's `sbomb.json` explicitly.
 
 `--format spdx-json` writes SPDX 3.0.1 instead of CycloneDX, from the same
 discovery; without `--output` the file is then `sbomb.spdx.json`. Combined with
@@ -234,7 +234,7 @@ binary, produced this way.
 | Flag | Meaning |
 |---|---|
 | `--build-dir <dir>` | The CMake build directory. Required. |
-| `--config <file>` | Configuration file; without it none is read |
+| `--config <file>` | Configuration file; default `sbomb.json` in the working directory if present |
 | `--output <file>` | Where to write the SBOM |
 | `--source-dir <dir>` | Where the sources are now; set it when the build directory has been restored somewhere else |
 | `--mode single\|assembly` | One deliverable, or several treated as one product |
