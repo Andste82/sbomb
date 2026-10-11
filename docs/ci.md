@@ -68,6 +68,13 @@ document is still written, and still exits 0, and every entry in it says the
 text could not be established — because the sources are not where the build
 recorded them. That is the ordinary CI split, and it is what the input is for.
 
+**A restored build hashes no toolchain file.** The compiler's startup objects
+and runtime libraries the build linked are named by absolute paths of the build
+machine; the runner that generates the SBOM has its own files there, or none.
+sbomb leaves them unread, reports `HOST_FILES_NOT_READ` once, and still exits
+0 for it. Run the action in the job, or the image, that built to have them
+hashed.
+
 `path-flavor` is empty by default, which means the host's. Pin it to `posix`
 when a document produced on a Windows runner has to be byte-identical to one
 produced on Linux: the flavors differ in case sensitivity, so the same evidence

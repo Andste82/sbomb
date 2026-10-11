@@ -171,6 +171,17 @@
   `p14-foss` resolves MIT, Apache-2.0, BSD-3-Clause, LGPL-2.1-only and 0BSD
   from the committed tree.
 
+- Section 7.9 rule 8, host files (issue #61): a relocated run -- build or
+  source tree read from somewhere other than the evidence records -- does not
+  read the toolchain, system and unanchored files the evidence names by
+  absolute path outside both trees, because they are the generating host's.
+  They carry no hash and no debug information is read from them; their
+  recorded location still classifies them. `HOST_FILES_NOT_READ` (warning,
+  never failing) is reported once per run, `HOST_FILES_READ` (info) once in a
+  local run. Package caches and toolchains inside a tree are read as before.
+  The fixture corpus is such a run, so no test depends on the host's GCC any
+  more.
+
 - Section 19.2, the component root as a resolved fact, is now verified against
   that fixture on both its toolchains rather than only by unit tests. Every
   root has a named source, `mit-lib` begins at `dep/mit-lib` although the
