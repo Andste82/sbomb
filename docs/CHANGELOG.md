@@ -5,13 +5,22 @@
 ### An unmapped prebuilt library fails the run
 
 `prebuiltLibrariesRequireMapping` was read and resolved but decided nothing:
-`PREBUILT_LIBRARY_UNMAPPED`, reported for a prebuilt library from outside the
-build directory that no component claims, never failed a run. As the
-specification says, it now fails `default`, `cra` and `strict` with exit 3 and
-still passes under `lenient`. The finding stays a warning. A run that passed
-before can now fail; map the library to a component, or set
-`prebuiltLibrariesRequireMapping: false` (`--prebuilt-libraries-require-mapping=false`)
-or use `lenient` to keep the old behaviour.
+`PREBUILT_LIBRARY_UNMAPPED` never failed a run. As the specification says, it
+now fails `default`, `cra` and `strict` with exit 3 and still passes under
+`lenient`. The finding stays a warning.
+
+The finding was also raised for every prebuilt library from outside the build
+directory, including the ones a `components[]` entry or a package manager
+already claimed. It is now raised only for a library no component claims --
+one that would otherwise be folded into the project or land in an unknown
+component. A library a `components[]` entry, a package manager, package
+metadata beside it, or a package, SDK or external anchor accounts for is not
+reported.
+
+A run that passed before can now fail; add a `components[]` entry for the
+library, or set `prebuiltLibrariesRequireMapping: false`
+(`--prebuilt-libraries-require-mapping=false`) or use `lenient` to keep the old
+behaviour.
 
 ### `sbomb.json` in the working directory is read without `--config`
 

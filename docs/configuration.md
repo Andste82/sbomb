@@ -598,7 +598,7 @@ the last two). Each names the findings that make the run fail.
 | `failOnMissingHeaderEvidence` | a translation unit contributed no header evidence |
 | `failOnUnanchoredFile` | a file matched no anchor and would carry an absolute path |
 | `allowMissingLinkEvidence` | inverted: **permits** a run in which no link evidence source succeeded |
-| `prebuiltLibrariesRequireMapping` | a prebuilt library from outside the build directory has no component mapping (`PREBUILT_LIBRARY_UNMAPPED`) |
+| `prebuiltLibrariesRequireMapping` | a prebuilt library from outside the build directory belongs to no component: no `components[]` entry, package manager, package metadata or package, SDK or external anchor claims it (`PREBUILT_LIBRARY_UNMAPPED`) |
 
 `severityOverrides` maps a finding identifier to `error`, `warning` or `info`
 when your process disagrees with the default severity.
