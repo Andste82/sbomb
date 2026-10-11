@@ -12,6 +12,7 @@ here is a version that goes stale the next time one is cut.
 ```yaml
 - uses: Andste82/sbomb/.github/actions/sbomb@<sbomb-version>
   with:
+    repository: Andste82/sbomb
     version: <sbomb-version>
     build-dir: build
     config: sbomb.json
@@ -21,7 +22,7 @@ here is a version that goes stale the next time one is cut.
 
 | Input | Default | Meaning |
 |---|---|---|
-| `version` | — | Release tag to download |
+| `version` | a placeholder | Release tag to download. Always set it |
 | `build-dir` | the workspace | The CMake build directory |
 | `source-dir` | — | The source tree, where it is now. Needed when the build directory was restored somewhere else than it was built — building in one job and describing the result in another (§7.9) |
 | `config` | — | Configuration file |
@@ -35,7 +36,7 @@ here is a version that goes stale the next time one is cut.
 | `path-flavor` | the host's | Pin to `posix` when comparing across platforms |
 | `artifact-suffix` | — | Appended to the uploaded artifact's name. A matrix that varies anything but the platform needs it: two legs uploading under one name make the second a 409 that is swallowed, and one leg's attribution disappears |
 | `token` | `${{ github.token }}` | Needed while the repository is private; pass `""` to download anonymously |
-| `repository` | this repository | Where the release lives |
+| `repository` | the calling repository | Where the release lives. Set `Andste82/sbomb` when the workflow runs in another repository |
 
 Build evidence must exist before the action runs, so call it after the project
 build.
@@ -57,6 +58,7 @@ SBOM red. It reads the same `config` and `policy` as the document.
 ```yaml
 - uses: Andste82/sbomb/.github/actions/sbomb@<sbomb-version>
   with:
+    repository: Andste82/sbomb
     version: <sbomb-version>
     build-dir: build
     policy: cra
@@ -113,6 +115,7 @@ same in every workflow.
 | | | `cmake-fetchcontent` | Pulls the CMake bundle built from this tree through FetchContent and lets it fetch the published binary; checks that path before a release carries it. |
 | `determinism` | `main`, pull request | `hash` | Repeats the same build on Linux and Windows targets, as CycloneDX 1.6 and 1.7 and as SPDX 3.0.1 with a pinned `SOURCE_DATE_EPOCH`, and a Windows-flavor unity build six times in both formats; detects timestamps or ordering that change output. Keeps the documents it hashed, so a disagreement can be diffed. |
 | | | `compare` | Compares hashes across platforms; proves equivalent evidence produces equivalent SBOM bytes. |
+| `pages` | `main`, when the install scripts or `docs/site` change | `publish` | Checks both install scripts parse, then publishes them with the configuration schema to GitHub Pages; keeps the install URL stable and the served copy equal to the tree. |
 | `release` | `v*` tag | `publish` | Rebuilds five targets, validates versions, checksums and self-SBOMs, then publishes; protects the release artifact set. |
 | `smoke-test` | called by `release` | `run` | Downloads and runs the published binaries on Linux and Windows; catches packaging or upload errors source CI cannot see. |
 | | | `compare` | Compares the published platform SBOMs; confirms the release behaves consistently outside the build runner. |
@@ -125,10 +128,10 @@ default `GITHUB_TOKEN`.
 
 Cutting a release is written down in `.claude/skills/release`.
 
-`release` is the only workflow with write access; the others are read-only.
-`spdx-drift` is the only job that may fail without blocking, because the SPDX
-list changes upstream; the SPDX step of `performance-budget` is the only such
-step, until SPDX output is within budget.
+`release` is the only workflow that can write to the repository; `pages` can
+deploy the site and nothing else, and the others are read-only. `spdx-drift` is
+the only job that may fail without blocking, because the SPDX list changes
+upstream.
 
 A release carries five executables -- linux/amd64, linux/arm64, windows/amd64,
 darwin/amd64 and darwin/arm64 -- a CycloneDX SBOM beside each one, and the

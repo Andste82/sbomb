@@ -110,6 +110,7 @@ produces the same document.
 | Package file lists | Which installed files belong to which package, where the manager wrote it down |
 | Bundled SBOMs | What a dependency says about itself, where it ships a CycloneDX or SPDX document |
 | Distribution image manifests | Name, version and licence for a component the evidence chain already reached, where a Yocto or Buildroot build wrote one |
+| Packaging manifests (sbomb's native manifest, CMake `install_manifest.txt`) | Which assets, data files and binaries an image or package contains — inputs no compiler or linker sees |
 
 Some of these are not there unless you ask the build to produce them. The
 linker map and link dependency file are produced by linker flags, which is what
@@ -118,6 +119,15 @@ builds additionally leave the structured `.tlog` evidence that the MSBuild
 adapter reads. A missing optional evidence source degrades to the next
 strategy and is reported as a finding rather than being silently replaced by a
 guess.
+
+An image is a deliverable built from other files: the firmware, a filesystem,
+certificates, a partition table. A packaging manifest that names a file as an
+input of an output is evidence for that file; a file lying next to the output is
+not. An output counts only when a deliverable reaches it — it is the deliverable,
+or an input of an output that is reached. A manifest describing an image no
+deliverable reaches adds nothing to the document. It is reported as
+`PACKAGING_OUTPUT_NOT_DELIVERED`, with how to declare the image as a
+deliverable.
 
 ## Resolving an object to its source
 
@@ -213,6 +223,64 @@ Anchoring is also what makes the output reproducible across machines: two
 builds of the same commit in different directories produce byte-identical
 documents.
 
+A path is read in the spelling the build wrote it in, not by the rules of the
+host sbomb runs on. A POSIX path stays a POSIX path on a Windows host, a UNC
+path such as `\\server\share\a.obj` is absolute on every host, and a relative
+path is relative to the build directory. Under Windows path rules names compare
+without case, and a file the evidence names in another case is found in its
+spelling on disk. The same build directory gives the same document on Linux and
+on Windows.
+
+## Where the build ran
+
+The SBOM is often generated somewhere other than where the build ran: one CI
+job builds, a second restores the build directory and runs sbomb. The evidence
+records the paths of the build machine. The build tree and the source tree
+therefore each have two roots: the **logical** root the evidence records, and
+the **physical** root sbomb reads from, `--build-dir` and `--source-dir`.
+
+Identity uses the logical roots only. Moving a tree changes no identity in the
+document — not even an anchor root an adapter found by reading the moved tree.
+Reads use the physical roots, and a moved read stays inside them: a path that
+would leave the physical source root is not read and has no hash. A physical
+source tree that does not exist is reported once, as
+`SOURCE_TREE_UNAVAILABLE`, and the hashes and licences that needed it are
+reported missing. Without a CMake File API reply there is no logical source
+root, and the source tree is not relocated.
+
+A file outside both trees that the evidence names by absolute path is a file of
+the machine that built. If it is a toolchain or system file, or anchors nowhere,
+the file of that name on this host need not be the same file. A **relocated**
+run — the build tree or the source tree is read from another directory than the
+evidence records — therefore does not read it: no hash, no debug information,
+nothing attributed from its content. Where it lies still classifies it. The run
+says so once, as `HOST_FILES_NOT_READ`. A run on the machine that built reads
+these files and notes it once, as `HOST_FILES_READ`. A package cache or an SDK
+is read where the build recorded it, relocated or not.
+
+```mermaid
+flowchart TB
+    P["path the evidence names"]
+    T{"in the build or<br/>source tree?"}
+    PH["read below the physical root<br/><i>never outside it</i>"]
+    K{"toolchain, system<br/>or unanchored?"}
+    REC["read where recorded<br/><i>package cache, SDK</i>"]
+    R{"relocated run?"}
+    NO["not read, no hash<br/>HOST_FILES_NOT_READ"]
+    YES["read where recorded<br/>HOST_FILES_READ"]
+
+    P --> T
+    T -->|yes| PH
+    T -->|no| K
+    K -->|no| REC
+    K -->|yes| R
+    R -->|yes| NO
+    R -->|no| YES
+
+    classDef bad fill:#f9d6d5,stroke:#c66,color:#000
+    class NO bad
+```
+
 ## Confidence
 
 Not every edge is equally strong, and the document says which is which. Two
@@ -251,12 +319,14 @@ flowchart LR
     S1{"named in the<br/>configuration"} -->|no| S2{"claimed by a<br/>package manager"}
     S2 -->|no| S3{"in a mapped<br/>CMake target"}
     S3 -->|no| S4{"below a<br/>marker directory"}
-    S4 -->|no| S5{"below an<br/>anchor root"}
+    S4 -->|no| S4P{"system file with a<br/>matching pkg-config file"}
+    S4P -->|no| S5{"below an<br/>anchor root"}
     S5 -->|no| U["unknown:<br/>kept, flagged for review"]
     S1 -->|yes| OK["the component"]
     S2 -->|yes| OK
     S3 -->|yes| OK
     S4 -->|yes| OK
+    S4P -->|yes| OK
     S5 -->|yes| OK
 
     classDef good fill:#dff0d8,stroke:#4a7,color:#000
@@ -280,12 +350,18 @@ build tree never turns into a walk of somebody's source tree.
 
 A **marker directory** is one carrying a package manifest — a conanfile, a
 `vcpkg.json`, an `idf_component.yml`, a `Cargo.toml` — a licence file, or a
-bundled SBOM under a conventional name (`sbom.cdx.json`, `bom.spdx.json` and
-their siblings). The licence file is the weakest of these and the most useful: a
-library that was copied into the source tree usually has nothing else to
-identify it. The search walks up from the file and stops at the anchor root, so
-your own top-level licence — and your own SBOM — can never be mistaken for a
-dependency's.
+bundled SBOM under a conventional name (`sbom.cdx.json`, `bom.spdx.json`,
+`sbom.yml` and their siblings). The licence file is the weakest of these and
+the most useful: a library that was copied into the source tree usually has
+nothing else to identify it. The search walks up from the file and stops at the
+anchor root, so your own top-level licence — and your own SBOM — can never be
+mistaken for a dependency's.
+
+A toolchain or system file below no marker can still be named. Where the
+distribution installed a pkg-config file that verifies against it, the file's
+component is named after that module and takes the version the file states,
+instead of folding into one component named after the sysroot. It remains a
+system component and stays out of the product's dependencies.
 
 Once a component is known, whatever the package wrote about itself is read.
 Several files may say something, and they disagree often enough that the order
@@ -368,7 +444,10 @@ separable halves:
 - **Gates** decide whether the run passes. Missing hashes, unknown licences,
   stale build artifacts, review-required components.
 
-Four profiles ship: `lenient`, `default`, `cra` and `strict`. Every individual
+Four profiles ship: `lenient`, `default`, `cra` and `strict`. One scope
+overlay combines with any of them: `host-linux` brings distribution shared
+libraries into the document as a separate component, for builds that run on a
+Linux host rather than an embedded target. Every individual
 gate can be overridden from the command line, and any finding can be waived in
 a file with a reason and an expiry.
 
@@ -405,12 +484,12 @@ flowchart LR
     S --> M["SPDX description<br/><i>packages · files · typed edges ·<br/>licences · VEX · patches</i>"]
     M --> R3["SPDX 3.0.1"]
     M -.-> R2["SPDX 2.3<br/><i>planned</i>"]
-    C --> VC["Schema and<br/>semantic check"]
-    R3 --> V["Conformance check<br/><i>schema + specification rules</i>"]
+    C --> V["Conformance check<br/><i>schema + specification rules</i>"]
+    R3 --> V
     R2 -.-> V
+    X["validate<br/><i>any tool's document</i>"] --> V
     V --> O["Own-output check<br/><i>what sbomb promises<br/>beyond conformance</i>"]
-    VC --> F["file<br/><i>written atomically</i>"]
-    O --> F
+    O --> F["file<br/><i>written atomically</i>"]
 ```
 
 **Shared derivations.** What every format must agree on is decided once, below
@@ -473,6 +552,42 @@ not have, a distribution marking it has no field for, a reproducible creation
 time it cannot state. Each is refused before anything is read, rather than
 after a full run.
 
+## What the product distributes
+
+Reachable is not the same as shipped. A code generator that produced a lookup
+table is reachable from the artifact, but it is not inside it. Every file and
+component carries two facts derived from the graph.
+
+**Distribution role.** A file is *build-time-only* when every chain from an
+artifact reaches it only through generator or toolchain edges, and
+*distributed* otherwise. The rule is stated in this direction on purpose: an
+edge kind the derivation does not know leaves the file distributed, so omission
+fails towards inclusion. A component is distributed when any of its files is.
+
+**Linkage form.** How the file reached the artifact: an extracted archive
+member, a directly linked object, a shared library referenced at run time,
+headers only, an asset embedded by packaging, a generated source, or a build
+tool. A file several chains reach takes the most direct form. A component
+carries the set of its files' forms; header-only stays in that set only where
+none of its files contributed object code. A component with archive members
+also states how many members were used out of how many the archive holds. The
+total comes from the archive's own index or is not stated.
+
+No path, directory name or component name enters either derivation.
+
+**Attribution documents.** `generate --foss-out`, or `foss` without an SBOM,
+renders the same run for licence compliance: a notices document that ships with
+the product, a review record as text and JSON, and the components whose
+licences oblige source material, with trigger and consequence. The notices
+document names every distributed component except the application itself;
+build-time-only components appear only in the review record. A component with
+no retained licence text is marked incomplete, and no canonical text is put in
+its place. The licence view reads headers as the union of both header sources,
+whatever the SBOM uses: for a licence, the question is whether a header's
+interface was used, not whether it emitted code. Asking for these documents
+never changes the SBOM, a waiver never changes the notices document, and no
+source file or archive is ever written to their directory.
+
 ## What comes out
 
 | Output | Contents |
@@ -482,17 +597,18 @@ after a full run.
 | `evidence.json` | The full evidence graph — every node, every edge, its strength, confidence and source |
 | Findings JSON | Machine-readable diagnostics, with severity, subject and remediation |
 | Review report | The same for a human, with the evidence chains behind the answers, and the commands the run executed if it was allowed any |
+| Attribution documents | `THIRD-PARTY-NOTICES.txt`, `foss-review.txt`, `foss-review.json` and `source-obligations.txt`, on request |
 
 `sbomb explain` answers the reverse question for one file or component: *why is
 this in my SBOM?* It prints the chains back to the deliverable.
 
-Three smaller commands round it out. `validate` checks an existing document —
-CycloneDX or SPDX, recognised from the document itself — against the schema and
-the rules of the specification it declares. For SPDX that is all it checks. For
-CycloneDX it still applies some rules sbomb only promises for its own output,
-so a conformant document from another tool can fail. `evidence` prints the graph
-on its own. `self` describes sbomb itself — the tool that makes the claim is
-part of the claim.
+Smaller commands round it out. `validate` checks an existing document —
+CycloneDX 1.6 or 1.7, or SPDX 3.0.1, recognised from the document itself —
+against the schema and the rules of the specification it declares, and nothing
+else: a conformant document from another tool passes. `evidence` prints the
+graph on its own. `schema` prints the embedded schemas. `self` describes sbomb
+itself, from the module record the Go linker wrote into its binary — the tool
+that makes the claim is part of the claim.
 
 ## Boundaries sbomb keeps
 
@@ -514,10 +630,14 @@ These are deliberate, and they are what the answer is worth.
   stays in the document.
 - **Bounded parsing.** Build metadata comes from somebody else's build tree and
   is treated as untrusted: line lengths, token counts, input sizes and
-  recursion depth are all capped, archive paths are checked for traversal, and
-  `--strict-symlinks` refuses to follow a link out of an anchor.
-- **Deterministic output.** The same evidence yields the same bytes, on Linux,
-  Windows and macOS.
+  recursion depth are all capped, and archive paths are checked for traversal.
+  A link whose target leaves every anchor is not read, and `--strict-symlinks`
+  refuses to read through a link at all.
+- **Bounded memory.** Memory grows with the number of used files, not with the
+  size of the source tree. Parsers stream, and the document and the evidence
+  dump are rendered element by element.
+- **Deterministic output.** The same evidence yields the same bytes, on Linux
+  and on Windows.
 
 ## Where to go next
 
@@ -525,4 +645,6 @@ These are deliberate, and they are what the answer is worth.
 - [Configuration](configuration.md) — the JSON file, anchors, components,
   policy.
 - [Findings](findings.md) — every diagnostic identifier and what it means.
+- [FOSS attribution](foss.md) — the notices document and the review record.
+- [Windows](windows.md) — MSVC builds and Windows hosts.
 - [CI](ci.md) — the GitHub Action and the workflows.

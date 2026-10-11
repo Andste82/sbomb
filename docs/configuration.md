@@ -22,7 +22,8 @@ configuration shared across `build/debug`, `build/release` and the rest should
 not have to name whichever one is current. Leave it out unless you need what it
 actually does — see below.
 
-`sbomb schema` prints the current schema document.
+`sbomb schema` prints the current schema document. A `$schema` key, for
+editors, is accepted and ignored; so is `schemaVersion`.
 
 ## `project`
 
@@ -545,7 +546,6 @@ Only the rows that differ are listed; everything else is the same in all four.
 | `includeToolchainRuntime` | report-only | separate-component | separate-component | separate-component |
 | `includeLinkerScripts` | – | – | – | ✓ |
 | `sectionGarbageCollection` | ignore | ignore | ignore | **annotate** |
-| `prebuiltLibrariesRequireMapping` | – | ✓ | ✓ | ✓ |
 
 The four *Content* rows are why two profiles can produce different documents.
 Everything above them only decides whether the run passes.
@@ -577,8 +577,9 @@ remain for these components; only introspection can close that.
 
 ### Gates
 
-Each is a boolean with a matching `--fail-on-…` flag. Each names the findings
-that make the run fail.
+Each is a boolean with a matching `--fail-on-…` flag
+(`--allow-missing-link-evidence` for the last). Each names the findings that
+make the run fail.
 
 | Gate | Fails when |
 |---|---|
@@ -616,9 +617,14 @@ runs that differ here are not comparable.
 | `systemLibraries` | `exclude`, `separate-component`, `report-only` | Libraries the distribution provides |
 | `pchHeaders` | `include`, `exclude`, `annotate-only` | Headers that arrived through a precompiled header |
 | `sectionGarbageCollection` | `ignore`, `annotate`, `exclude` | Objects the linker discarded with `--gc-sections`: keep them, mark them, or drop them |
-| `prebuiltLibrariesRequireMapping` | `true`, `false` | Whether a prebuilt library without a component mapping is an error |
+| `prebuiltLibrariesRequireMapping` | `true`, `false` | Accepted, but has no effect yet: `PREBUILT_LIBRARY_UNMAPPED` is always a warning and fails no run |
 | `licenseTextInSBOM` | `off`, `evidence` | Whether the licence texts sbomb retained from the component roots are written into the document, as `evidence.licenses[].license.text` |
 | `staleToleranceSeconds` | `5` | How much clock skew counts as "not stale" |
+
+Each has a flag of the same name: `--include-system-headers`,
+`--include-toolchain-runtime=<value>`, `--system-libraries=<value>`,
+`--header-evidence=<value>` and so on. `licenseTextInSBOM` and
+`staleToleranceSeconds` are set here only.
 
 `licenseTextInSBOM` is off because base64 inflates a licence text by a third,
 and most consumers want the identifier. Turn it on where the document itself has
@@ -637,10 +643,11 @@ licence obliges a distributor to reproduce.
 
 ### Precedence
 
-Command line, then profile, then this file, then the built-in default. Because
-every gate in the file is a tri-state, a configuration can turn a profile's
-gate *off* as well as on — and `--fail-on-x=false` can do the same from the
-command line.
+Command line, then this file, then the profile, then the built-in default.
+The profile — `--policy` or `policy.profile` — is the starting point, and
+every setting this file names overrides it. Because every gate in the file is
+a tri-state, a configuration can turn a profile's gate *off* as well as on —
+and `--fail-on-x=false` can do the same from the command line.
 
 ## Waivers
 
@@ -661,9 +668,11 @@ an expiry — not in a permanently loosened gate.
 }
 ```
 
-`id` accepts `*` for any finding. An expired waiver stops suppressing and is
-reported as `WAIVER_EXPIRED`; one that matches nothing is reported as
-`WAIVER_UNUSED`, so the file cannot quietly rot.
+`id` accepts `*` for any finding; `subject` accepts `*` and `?` wildcards, and
+left out it matches every subject. `expires` is a date or an RFC 3339 time.
+An expired waiver stops suppressing and is reported as `WAIVER_EXPIRED`; one
+that matches nothing is reported as `WAIVER_UNUSED`, so the file cannot
+quietly rot.
 
 A waiver silences a finding; it states nothing about the component. Where you
 know something sbomb could not find — a licence, a version, a copyright holder

@@ -20,8 +20,8 @@ sbomb foss --build-dir build --out build/foss
 
 Both write the same four files, byte for byte, for the same build. The
 rendering is plain text; `--foss-format markdown` on `generate` and
-`--format markdown` on `foss` write the markdown one instead. Selecting a
-rendering without asking for the output is a usage error, not a silent no-op.
+`--format markdown` on `foss` write the markdown one instead, under the same
+four file names. Selecting a rendering without asking for the output is a usage error, not a silent no-op.
 
 | File | Ships with the product | What it is |
 |---|:--:|---|
@@ -239,9 +239,9 @@ no exit code depends on licence content, and `sbomb foss` evaluates no policy
 gate at all. The findings it can emit are in
 [findings.md](findings.md): `FOSS_LICENSE_TEXT_MISSING`,
 `FOSS_LICENSE_ARTIFACT_LIMIT`, `FOSS_COPYRIGHT_MISSING`,
-`FOSS_COPYRIGHT_LIMIT`, `FOSS_MODIFICATION_UNKNOWN`, `FOSS_SOURCE_OBLIGATION`
-and `FOSS_LICENSE_UNCLASSIFIED`. They are waivable like any other finding, and
-a waiver leaves the notices document unchanged.
+`FOSS_COPYRIGHT_LIMIT`, `FOSS_MODIFICATION_UNKNOWN`, `FOSS_SOURCE_OBLIGATION`,
+`FOSS_LICENSE_UNCLASSIFIED` and `FOSS_PER_FILE_LICENSE_DIVERGENCE`. They are
+waivable like any other finding, and a waiver leaves the notices document unchanged.
 
 `FOSS_LICENSE_UNCLASSIFIED` deserves a note: the source-obligation
 classification is a small curated list of SPDX identifiers, not an imported

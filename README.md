@@ -61,10 +61,10 @@ want both.
 ## Requirements
 
 A CMake project built with **Ninja**, **Ninja Multi-Config**, **Unix
-Makefiles** or **Visual Studio 17 2022**. GCC, Clang, mingw-w64 and MSVC are
-supported, including cross-compilation to bare-metal ARM. Visual Studio/MSVC
-builds use MSBuild `.tlog` evidence when `compile_commands.json` and
-`build.ninja` are not available.
+Makefiles**, **NMake Makefiles** or **Visual Studio 17 2022**. GCC, Clang,
+mingw-w64 and MSVC are supported, including cross-compilation to bare-metal
+ARM. Visual Studio/MSVC builds use MSBuild `.tlog` evidence when
+`compile_commands.json` and `build.ninja` are not available.
 
 sbomb itself is a single static executable with no runtime dependencies, and it
 never accesses the network.
@@ -95,8 +95,8 @@ here is a version that goes stale the next time one is cut.
 Both scripts verify the download against the release's `SHA256SUMS` before
 installing it, and neither offers a way to skip that — a tool whose argument is
 that you should be able to check what you were given has no business handing
-you a binary it did not check itself. `--with-sbom` installs the release's own
-CycloneDX document beside the binary.
+you a binary it did not check itself. `--with-sbom` (`-WithSbom` in
+PowerShell) installs the release's own CycloneDX document beside the binary.
 
 They are short and worth reading before you pipe them anywhere:
 [install.sh](install.sh), [install.ps1](install.ps1). What the site serves is
@@ -150,6 +150,7 @@ module adds the right flags for you — see
 | `sbomb generate` | Produce the SBOM and evaluate policy |
 | `sbomb explain` | Show why a file or component is in the SBOM |
 | `sbomb validate` | Check an existing CycloneDX or SPDX document |
+| `sbomb foss` | Write the licence and copyright attribution documents without an SBOM |
 | `sbomb evidence` | Dump the evidence graph without writing an SBOM |
 | `sbomb self` | Describe a Go binary from the record its linker embedded |
 | `sbomb schema` | Print the embedded configuration schema, or the CycloneDX or SPDX schema |
@@ -166,8 +167,9 @@ sbomb generate \
   --policy cra
 ```
 
-`--build-dir` is the only required flag; `sbomb.json` is picked up
-automatically when it is present.
+`--build-dir` is the only required flag. A configuration file is read only
+when `--config` names it; the CMake module passes `sbomb.json` for you when the
+project has one.
 
 `--format spdx-json` writes SPDX 3.0.1 instead of CycloneDX, from the same
 discovery; without `--output` the file is then `sbomb.spdx.json`. Combined with
@@ -205,14 +207,11 @@ sbomb validate --input build/debug/app.spdx.json
 ```
 
 The format is read from the document. Runs both layers: the official JSON
-Schema of the version the document declares, and the semantic checks a schema
-cannot express — for CycloneDX a closed dependency graph, unique references,
-well-formed purls; for SPDX the rules of the 3.0.1 specification. An SPDX
-document another tool wrote is held to its specification, not to how sbomb
-writes. A CycloneDX document is still held to some of sbomb's own writing rules
-— `metadata` with an array of tools, a dependencies entry for every component,
-only `sbomb:` properties — so a conformant document from another tool can be
-refused.
+Schema of the version the document declares (CycloneDX 1.6 or 1.7, SPDX
+3.0.1), and the semantic checks a schema cannot express — for CycloneDX a
+closed dependency graph, unique references, well-formed purls; for SPDX the
+rules of the 3.0.1 specification. A document another tool wrote is held to its
+specification, not to how sbomb writes. Either layer failing is exit code 4.
 
 ### self
 
@@ -235,7 +234,7 @@ binary, produced this way.
 | Flag | Meaning |
 |---|---|
 | `--build-dir <dir>` | The CMake build directory. Required. |
-| `--config <file>` | Configuration file; defaults to `sbomb.json` if present |
+| `--config <file>` | Configuration file; without it none is read |
 | `--output <file>` | Where to write the SBOM |
 | `--source-dir <dir>` | Where the sources are now; set it when the build directory has been restored somewhere else |
 | `--mode single\|assembly` | One deliverable, or several treated as one product |
@@ -252,9 +251,11 @@ binary, produced this way.
 | `--findings-json <file>` | Machine-readable diagnostics |
 | `--review-report <file>` | Human-readable review report |
 | `--report-format text\|markdown` | Report rendering; default `text` |
-| `--report-chains all` | Include the full evidence chains in the report |
+| `--report-chains=all` | Include the full evidence chains in the report |
 | `--evidence-dump <path>` | Where the evidence graph goes; `off` writes none |
 | `--inventory-dump <file>` | The used-file set and components in sbomb's own format |
+| `--foss-out <dir>` | Also write the four FOSS attribution documents |
+| `--foss-format text\|markdown` | How `--foss-out` renders them; default `text` |
 | `--format cyclonedx-json\|spdx-json` | Output format; default `cyclonedx-json` |
 | `--spec-version <v>` | Version within the format: `1.6` (default) or `1.7` for CycloneDX, `3.0.1` for SPDX |
 | `--reproducible` | Same evidence, same bytes: a stable serial number or namespace. CycloneDX omits the timestamp; SPDX states `SOURCE_DATE_EPOCH` and needs it set |
@@ -265,9 +266,9 @@ binary, produced this way.
 |---|---|
 | `--policy lenient\|default\|cra\|strict` | Profile; default `default` |
 | `--profile-overlay host-linux` | Report distribution libraries as components |
-| `--header-evidence dwarf-preferred\|union\|depfiles` | Which header evidence governs |
+| `--header-evidence=dwarf-preferred\|union\|depfiles` | Which header evidence governs |
 | `--waivers <file>` | Waivers, each with a reason and an expiry |
-| `--fail-on-<gate>[=false]` | Turn one gate on or off, whatever the profile says |
+| `--fail-on-<gate>[=false]`, `--allow-missing-link-evidence` | Turn one gate on or off, whatever the profile says |
 | `--include-<scope>[=false]` | Turn one scope option on or off |
 | `--system-libraries=`, `--pch-headers=`, `--section-garbage-collection=`, `--include-toolchain-runtime=` | Scope options taking a value, e.g. `--system-libraries=separate-component` |
 
@@ -291,6 +292,7 @@ binary, produced this way.
 | 2 | Evidence could not be collected |
 | 3 | Policy failed |
 | 4 | The document failed validation |
+| 70 | Internal error: an invariant sbomb checks on itself failed |
 
 Exit code 3 still writes the SBOM. It means the document was produced and
 something in it needs a person.
