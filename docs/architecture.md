@@ -546,8 +546,8 @@ conformance. In CycloneDX it names the tool and the product, lists every
 component with what it depends on, and keeps its properties to sbomb's
 namespace. In SPDX every reference resolves inside the
 document, every element is reachable from the product, every licence name is
-defined, and the profiles the document claims are exactly the ones it uses,
-except the extension profile, which SPDX's 3.0.1 context makes unclaimable in a
+defined, and, in 3.0.1, the profiles the document claims are exactly the ones
+it uses, except the extension profile, which SPDX's 3.0.1 context makes unclaimable in a
 form both official validators accept. That last one the specification does not ask of anyone: a claimed profile is an
 intention, not an inventory, so `validate` does not hold another tool's
 document to it. A document failing a check is not written, and a previous one at the
@@ -559,7 +559,8 @@ SPDX reference document the tests compare against.
 **What SPDX states that a missing relationship cannot.** In CycloneDX every
 element is listed with what it depends on, and an empty list says "nothing". In
 SPDX an absent relationship means "no assertion", so sbomb states the empty
-case explicitly, as a relationship to the "none" element marked complete. How a
+case explicitly, as a relationship to the "none" element (marked complete in
+3.0.1). How a
 component reached the deliverable becomes the relationship type — a static
 link, a dynamic link at run time, a build tool, an embedded asset, a header
 dependency. A generated source is not an edge of its own: the object built
