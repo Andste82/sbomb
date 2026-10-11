@@ -1,7 +1,6 @@
 package inventory
 
 import (
-	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -13,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/example/sbomb/internal/digest"
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/pathmodel"
 )
@@ -62,31 +62,19 @@ type InventoryDump struct {
 }
 
 // HashAlgorithmSHA256 is the CycloneDX spelling of the default algorithm.
-const HashAlgorithmSHA256 = "SHA-256"
+const HashAlgorithmSHA256 = digest.SHA256
 
 // HashAlgorithmSHA1 is the one digest a run computes beside SHA-256, and only
 // when the document it writes requires it (SPDX 2.3 states a SHA-1 of every
 // file). It is computed over the bytes the SHA-256 was computed over, in the
 // same read.
-const HashAlgorithmSHA1 = "SHA-1"
-
-// extraDigests are the algorithms HashOptions.Digests may ask for, by the name
-// discovery keys digests by.
-var extraDigests = map[string]func([]byte) string{
-	HashAlgorithmSHA1: func(data []byte) string {
-		sum := sha1.Sum(data)
-		return hex.EncodeToString(sum[:])
-	},
-}
+const HashAlgorithmSHA1 = digest.SHA1
 
 // SupportsDigest reports whether hashing can compute the named digest beside
-// SHA-256, which it always computes.
+// SHA-256, which it always computes. It answers from the same table the
+// mapping of retained licence files computes from.
 func SupportsDigest(name string) bool {
-	if name == HashAlgorithmSHA256 {
-		return true
-	}
-	_, known := extraDigests[name]
-	return known
+	return digest.Supported(name)
 }
 
 type HashOptions struct {
@@ -272,8 +260,11 @@ func hashOne(file domain.UsedFile, options HashOptions) domain.UsedFile {
 	clone.SizeBytes = info.Size()
 	sum := sha256.Sum256(data)
 	for _, name := range options.Digests {
-		if digest, known := extraDigests[name]; known {
-			clone.Hashes[name] = digest(data)
+		if name == HashAlgorithmSHA256 {
+			continue
+		}
+		if value, known := digest.Compute(name, data); known {
+			clone.Hashes[name] = value
 		}
 	}
 	if options.Observe != nil {
@@ -328,6 +319,12 @@ func BuildInventoryDump(files []domain.UsedFile, components []domain.Component) 
 			Properties: cloneStringMap(f.Properties),
 		}
 		for alg, hash := range f.Hashes {
+			// A digest computed only because the chosen writer asked for it
+			// (the SHA-1 of SPDX 2.3) is left out: the dump must not move
+			// when the serialization does (WriteDump).
+			if digest.OnRequest(alg) {
+				continue
+			}
 			entry.Hashes[alg] = hash
 		}
 		ordered = append(ordered, entry)

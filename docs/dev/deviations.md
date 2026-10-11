@@ -2440,10 +2440,14 @@ nothing newer, and the default SPDX version stays 3.0.1.
    over; no file is read twice (§23). Always computing SHA-1 would cost
    every CycloneDX and 3.0.1 run hashing time for nothing and change every
    golden, since both write every digest they are given. A retained licence
-   file that is not a used file gets its SHA-1 from the retained bytes. The
-   inventory dump and the CycloneDX FOSS review record of a 2.3 run state the
-   SHA-1 the run computed, so those two files differ from a 3.0.1 or CycloneDX
-   run of the same evidence by exactly that digest.
+   file that is not a used file gets its SHA-1 from the retained bytes. Both
+   digests are computed from one table, so the hashing of used files and the
+   mapping of retained files cannot disagree about which digests exist. The
+   CycloneDX FOSS review record of a 2.3 run states the SHA-1 the run
+   computed, so it differs from a 3.0.1 or CycloneDX run of the same evidence
+   by exactly that digest. The inventory dump (§40) does not: a digest computed
+   only because a writer asked for it is the document's, and the dump must
+   not move when a serialization does.
 3. **Properties are annotations.** Every `sbomb:` property of an element is one
    line `name=value` of one annotation (`annotationType` OTHER, the tool as
    annotator, the creation time as date), with `\`, line feed and carriage

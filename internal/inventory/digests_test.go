@@ -77,6 +77,27 @@ func TestTheSHA1OfAKnownContent(t *testing.T) {
 	}
 }
 
+// The dump states what the inventory knows, not what one writer asked for: a
+// requested SHA-1 is left out, so that the dump of the same files is the same
+// whichever format the run writes.
+func TestTheDumpLeavesOutARequestedDigest(t *testing.T) {
+	files, options := observeFixture(t)
+	plain := BuildInventoryDump(HashUsedFilesWithOptions(files, options), nil)
+	options.Digests = []string{HashAlgorithmSHA1}
+	requested := HashUsedFilesWithOptions(files, options)
+	if !reflect.DeepEqual(BuildInventoryDump(requested, nil), plain) {
+		t.Errorf("asking for SHA-1 moved the dump:\n got %+v\nwant %+v", BuildInventoryDump(requested, nil), plain)
+	}
+	carried := false
+	for _, file := range requested {
+		carried = carried || file.Hashes[HashAlgorithmSHA1] != ""
+	}
+	if !carried {
+		t.Fatal("no file carries the requested SHA-1, so the dump had nothing to leave out")
+	}
+}
+
+// The inventory and the SPDX mapping check against one table.
 func TestSupportsDigest(t *testing.T) {
 	for name, want := range map[string]bool{"SHA-256": true, "SHA-1": true, "SHA1": false, "MD5": false, "": false} {
 		if got := SupportsDigest(name); got != want {

@@ -21,8 +21,8 @@ VEX; several licences of one package are one expression joined with `AND`;
 every licence reference is defined in the document, with the retained text
 where there is one and the observed name otherwise. SPDX 2.3 requires a SHA-1
 of every file, so a 2.3 run computes one beside the SHA-256 from the same
-read, and its inventory dump and FOSS review record carry it too; a CycloneDX
-or 3.0.1 run is unchanged. A file that has no SHA-1 because it could not be
+read, and its FOSS review record carries it too; the inventory dump stays the
+same whatever the format, and a CycloneDX or 3.0.1 run is unchanged. A file that has no SHA-1 because it could not be
 read is stated as a package that stands for it, with a comment saying why,
 rather than dropped.
 

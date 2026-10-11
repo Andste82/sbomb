@@ -178,3 +178,39 @@ func TestFossReviewStaysCycloneDXWhenTheSbomIsSpdx23(t *testing.T) {
 		t.Error("the review record of a 2.3 run does not state the SHA-1 the run computed")
 	}
 }
+
+// TestInventoryDumpDoesNotMoveWithTheSpdxVersion: SPDX 2.3 asks for a SHA-1
+// of every file, and that digest is the document's, not the inventory's. The
+// dump of the same build is byte-identical whichever version, or format, the
+// run writes (section 40: it must not move when a serialization does).
+func TestInventoryDumpDoesNotMoveWithTheSpdxVersion(t *testing.T) {
+	t.Setenv("SOURCE_DATE_EPOCH", pinnedEpoch)
+	buildDir := testutil.CorpusBuildDir(t, "gcc-ninja", "p14-foss")
+	sourceDir := testutil.CorpusSourceTree(t)
+	dump := func(name string, format ...string) []byte {
+		directory := t.TempDir()
+		dumpPath := filepath.Join(directory, "inventory.json")
+		args := append([]string{"generate", "--build-dir", buildDir, "--policy", "lenient", "--source-dir", sourceDir,
+			"--output", filepath.Join(directory, "out.json"), "--inventory-dump", dumpPath, "--reproducible"}, format...)
+		code, _, stderr := execute(args)
+		if code != 0 || stderr != "" {
+			t.Fatalf("%s: generate = code %d, stderr %q", name, code, stderr)
+		}
+		return readFile(t, dumpPath)
+	}
+	spdx23 := dump("SPDX 2.3", "--format", "spdx-json", "--spec-version", "2.3")
+	if !bytes.Contains(spdx23, []byte(`"SHA-256"`)) {
+		t.Fatal("the dump states no SHA-256; a fixture that hashes nothing proves nothing here")
+	}
+	if bytes.Contains(spdx23, []byte(`"SHA-1"`)) {
+		t.Error("the SPDX 2.3 run put the SHA-1 its writer asked for into the inventory dump")
+	}
+	for name, format := range map[string][]string{
+		"SPDX 3.0.1": {"--format", "spdx-json", "--spec-version", "3.0.1"},
+		"CycloneDX":  {"--format", "cyclonedx-json"},
+	} {
+		if other := dump(name, format...); !bytes.Equal(spdx23, other) {
+			t.Errorf("the inventory dump of an SPDX 2.3 run differs from that of a %s run", name)
+		}
+	}
+}
