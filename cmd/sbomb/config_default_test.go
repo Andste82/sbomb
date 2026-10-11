@@ -101,13 +101,13 @@ func TestAnExplicitConfigWinsOverSbombJSON(t *testing.T) {
 func TestNoSbombJSONMeansNoConfiguration(t *testing.T) {
 	buildDir := testutil.CorpusBuildDir(t, "gcc-make", "p02-static")
 	directory := chdirTemp(t)
-	if path, implicit := resolveConfigPath(""); path != "" || implicit {
+	if path, implicit := resolveConfigPath("", false); path != "" || implicit {
 		t.Errorf("resolveConfigPath without sbomb.json = %q, %v; want none", path, implicit)
 	}
 	if err := os.Mkdir(filepath.Join(directory, "sbomb.json"), 0o700); err != nil {
 		t.Fatal(err)
 	}
-	if path, implicit := resolveConfigPath(""); path != "" || implicit {
+	if path, implicit := resolveConfigPath("", false); path != "" || implicit {
 		t.Errorf("resolveConfigPath with a sbomb.json directory = %q, %v; want none", path, implicit)
 	}
 	code, _, stderr := execute([]string{"generate", "--build-dir", buildDir, "--policy", "lenient"})
@@ -116,5 +116,32 @@ func TestNoSbombJSONMeansNoConfiguration(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(directory, "sbomb.cdx.json")); err != nil {
 		t.Errorf("generate without a configuration did not write sbomb.cdx.json: %v", err)
+	}
+}
+
+// TestAnEmptyConfigSkipsSbombJSON: an explicitly empty --config is the way to
+// run without the sbomb.json of the working directory, in either spelling and
+// for each command that reads a configuration.
+func TestAnEmptyConfigSkipsSbombJSON(t *testing.T) {
+	buildDir := testutil.CorpusBuildDir(t, "gcc-make", "p02-static")
+	directory := chdirTemp(t)
+	if err := os.WriteFile(filepath.Join(directory, "sbomb.json"), []byte(`{"mode": "bogus-invalid"}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if path, implicit := resolveConfigPath("", true); path != "" || implicit {
+		t.Errorf("resolveConfigPath with an empty --config = %q, %v; want none", path, implicit)
+	}
+	for name, args := range map[string][]string{
+		"generate --config=":     {"generate", "--build-dir", buildDir, "--policy", "lenient", "--config="},
+		"generate --config \"\"": {"generate", "--build-dir", buildDir, "--policy", "lenient", "--config", ""},
+		"evidence --config=":     {"evidence", "--build-dir", buildDir, "--config="},
+		"foss --config=":         {"foss", "--build-dir", buildDir, "--out", filepath.Join(directory, "foss"), "--config="},
+	} {
+		if code, _, stderr := execute(args); code != 0 {
+			t.Errorf("%s = code %d, stderr %q; want the sbomb.json skipped", name, code, stderr)
+		}
+	}
+	if _, err := os.Stat(filepath.Join(directory, "sbomb.cdx.json")); err != nil {
+		t.Errorf("generate --config= did not run on the defaults: %v", err)
 	}
 }

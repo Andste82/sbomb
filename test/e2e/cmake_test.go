@@ -284,7 +284,9 @@ func run(dir, name string, args ...string) ([]byte, error) {
 // follows the format the document is in -- the configuration's output.format
 // when the call names no FORMAT, and FORMAT (here through its cache default)
 // when it does -- so that an SPDX document is never written under a .cdx.json
-// name.
+// name. With SBOMB_DEFAULT_CONFIG pointing away from the project's sbomb.json
+// the run reads no configuration, so that file cannot turn the document named
+// .cdx.json into SPDX.
 func TestTheCMakeTargetNamesTheDocumentAfterItsFormat(t *testing.T) {
 	if _, err := exec.LookPath("cmake"); err != nil {
 		t.Skip("cmake is not installed")
@@ -316,8 +318,12 @@ func TestTheCMakeTargetNamesTheDocumentAfterItsFormat(t *testing.T) {
 	for _, step := range []struct{ define, name, marker string }{
 		{"-DSBOMB_DEFAULT_FORMAT=", "app.spdx.json", `"@context": "https://spdx.org/rdf/3.0.1/spdx-context.jsonld"`},
 		{"-DSBOMB_DEFAULT_FORMAT=cyclonedx-json", "app.cdx.json", `"bomFormat": "CycloneDX"`},
+		{"-DSBOMB_DEFAULT_CONFIG=" + filepath.Join(work, "absent.json"), "app.cdx.json", `"bomFormat": "CycloneDX"`},
 	} {
-		if output, err := run(root, "cmake", "-S", src, "-B", build, "-DSBOMB_EXECUTABLE="+sbomb, step.define); err != nil {
+		if err := os.RemoveAll(filepath.Join(build, "sbom")); err != nil {
+			t.Fatal(err)
+		}
+		if output, err := run(root, "cmake", "-S", src, "-B", build, "-DSBOMB_EXECUTABLE="+sbomb, "-DSBOMB_DEFAULT_FORMAT=", step.define); err != nil {
 			t.Fatalf("cmake configure %s: %v\n%s", step.define, err, output)
 		}
 		if output, err := run(root, "cmake", "--build", build, "--target", "sbomb"); err != nil {

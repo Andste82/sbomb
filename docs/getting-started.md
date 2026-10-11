@@ -366,7 +366,11 @@ skipped rather than silently carrying a flag that does nothing.
 `CONFIG` is used when you name it. When you do not, `SBOMB_DEFAULT_CONFIG`
 applies — `${CMAKE_SOURCE_DIR}/sbomb.json` — but **only if that file exists**,
 because passing a configuration nobody wrote turns a run that would have worked
-on defaults into a failure.
+on defaults into a failure. Run by hand, sbomb reads `sbomb.json` from the
+directory it runs in when `--config` is not given. The target therefore passes
+an empty `--config=` when it has no configuration to name, so that clearing
+`SBOMB_DEFAULT_CONFIG`, or pointing it at a file that does not exist, really
+means no configuration rather than the project's `sbomb.json`.
 
 ## Reading the result
 

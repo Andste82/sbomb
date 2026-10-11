@@ -5,7 +5,8 @@ deliverable explicitly, curate component metadata for the CRA fields, give
 external directories a portable identity, or pin a policy.
 
 The file is JSON and is loaded when selected with `--config <file>`. Without
-the flag, `sbomb.json` in the working directory is loaded when it exists.
+the flag, `sbomb.json` in the working directory is loaded when it exists; an
+empty `--config=` loads none, for a run that must ignore that file.
 **Unknown keys are an error at every level of the document**, so a typo cannot
 silently disable a policy gate — `{"policy": {"failOnMisingHash": true}}` is refused,
 not ignored.

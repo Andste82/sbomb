@@ -103,6 +103,7 @@ func handleFOSS(args []string, verbosity int) (int, string, string) {
 	pathFlavor := ""
 	format, specVersion, configName, mode := "", "", "", ""
 	cfgPath, policyName, waiversPath := "", "", ""
+	cfgGiven := false
 	repro, redactUnanchored := false, false
 	allowIntrospection := false
 	var introspectionGroups []string
@@ -158,10 +159,10 @@ func handleFOSS(args []string, verbosity int) (int, string, string) {
 			if i+1 >= len(args) {
 				return 1, "", "missing value for --config\n"
 			}
-			cfgPath = args[i+1]
+			cfgPath, cfgGiven = args[i+1], true
 			i++
 		case strings.HasPrefix(args[i], "--config="):
-			cfgPath = strings.TrimPrefix(args[i], "--config=")
+			cfgPath, cfgGiven = strings.TrimPrefix(args[i], "--config="), true
 		case args[i] == "--policy":
 			if i+1 >= len(args) {
 				return 1, "", "missing value for --policy\n"
@@ -246,7 +247,7 @@ func handleFOSS(args []string, verbosity int) (int, string, string) {
 	}
 	cliLogger := generate.NewLogger(verbosity, logWriter)
 
-	cfgPath, implicitCfg := resolveConfigPath(cfgPath)
+	cfgPath, implicitCfg := resolveConfigPath(cfgPath, cfgGiven)
 	if implicitCfg {
 		cliLogger.Info("Using configuration '%s' from the working directory (no --config given)", cfgPath)
 	}

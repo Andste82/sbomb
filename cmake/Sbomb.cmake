@@ -265,9 +265,15 @@ function(sbomb_enable)
     set(_sbomb_output_dir ".")
   endif()
 
+  # Without a configuration the run is told so with an empty --config. sbomb
+  # would otherwise read sbomb.json from the directory it runs in on its own,
+  # a file this module did not choose and whose output.format the name above
+  # was not taken from.
   set(_sbomb_command "${SBOMB_EXECUTABLE}" generate --build-dir "${CMAKE_BINARY_DIR}" --output "${_sbomb_output}")
   if(_sbomb_config)
     list(APPEND _sbomb_command --config "${_sbomb_config}")
+  else()
+    list(APPEND _sbomb_command "--config=")
   endif()
   if(SBOMB_POLICY)
     list(APPEND _sbomb_command --policy "${SBOMB_POLICY}")
