@@ -27,6 +27,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/example/sbomb/internal/digest"
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/sbomwriter"
 )
@@ -183,7 +184,7 @@ func writeReviewJSON(directory string, in Input) error {
 	// The retained text always reaches the FOSS outputs and reaches the
 	// document only when the policy says so (decision B1). This is a FOSS
 	// output, so it carries the text whatever licenseTextInSBOM says.
-	err = writer.Write(&rendered, in.Document, sbomwriter.Options{
+	err = writer.Write(&rendered, withoutRequestedDigests(in.Document), sbomwriter.Options{
 		SpecVersion:  specVersion,
 		TLP:          in.TLP,
 		LicenseText:  sbomwriter.LicenseTextEvidence,
@@ -196,6 +197,33 @@ func writeReviewJSON(directory string, in Input) error {
 		return err
 	}
 	return writeDocument(directory, ReviewJSONFile, rendered.String())
+}
+
+// withoutRequestedDigests returns the document with every file digest left
+// out that the run computed only because the SBOM's writer asked for it (the
+// SHA-1 of SPDX 2.3). Such a digest says which format the SBOM was written in,
+// and the review record keeps one shape whatever that format is (section
+// 32.6). The caller's document is not changed.
+func withoutRequestedDigests(document *sbomwriter.Document) *sbomwriter.Document {
+	copied := *document
+	if document.Files == nil {
+		return &copied
+	}
+	copied.Files = make([]domain.UsedFile, len(document.Files))
+	for i, file := range document.Files {
+		copied.Files[i] = file
+		if file.Hashes == nil {
+			continue
+		}
+		hashes := make(map[string]string, len(file.Hashes))
+		for algorithm, value := range file.Hashes {
+			if !digest.OnRequest(algorithm) {
+				hashes[algorithm] = value
+			}
+		}
+		copied.Files[i].Hashes = hashes
+	}
+	return &copied
 }
 
 // writeDocument is the only function in this package that creates a file, and
