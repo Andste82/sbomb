@@ -104,14 +104,30 @@ runs:
         SBOMB_VERSION: ${{ inputs.version }}
         SBOMB_REPOSITORY: ${{ inputs.repository }}
         SBOMB_ACTION_REPOSITORY: ${{ github.action_repository }}
+        SBOMB_ACTION_PATH: ${{ github.action_path }}
         GH_TOKEN: ${{ inputs.token }}
       run: |
         set -euo pipefail
         # Resolved here and not in the input's default: a default naming
         # github.repository is the calling repository, which has no sbomb
         # release, and github.action_repository is empty when the action is
-        # used by local path, as sbomb's own smoke test does.
-        SBOMB_REPOSITORY="${SBOMB_REPOSITORY:-${SBOMB_ACTION_REPOSITORY:-$GITHUB_REPOSITORY}}"
+        # used by local path, as sbomb's own smoke test does. It can be empty
+        # in a composite action used remotely too (actions/runner#2473), so
+        # the checkout path decides next: a remote action lives under
+        # _actions/<owner>/<repo>/<ref>. Only a use by local path falls
+        # through to github.repository.
+        SBOMB_REPOSITORY="${SBOMB_REPOSITORY:-$SBOMB_ACTION_REPOSITORY}"
+        if [[ -z "$SBOMB_REPOSITORY" ]]; then
+          action_path="${SBOMB_ACTION_PATH//\\//}"
+          if [[ "$action_path" =~ /_actions/([^/]+)/([^/]+)/ ]]; then
+            SBOMB_REPOSITORY="${BASH_REMATCH[1]}/${BASH_REMATCH[2]}"
+          elif [[ "$action_path" == */_actions/* ]]; then
+            echo "Cannot tell which repository this action was loaded from (${SBOMB_ACTION_PATH}); set the repository input" >&2
+            exit 1
+          else
+            SBOMB_REPOSITORY="$GITHUB_REPOSITORY"
+          fi
+        fi
         echo "Downloading sbomb ${SBOMB_VERSION} from ${SBOMB_REPOSITORY}"
         case "${RUNNER_OS}/${RUNNER_ARCH}" in
           Linux/X64) asset=sbomb-linux-amd64 ;;
