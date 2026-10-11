@@ -44,3 +44,14 @@ func BaseName(canonical string) string {
 	}
 	return canonical
 }
+
+// ProductName is the name of the product package, which every SPDX version
+// names its document after, or "" when the model has none.
+func (m *Model) ProductName() string {
+	for _, pkg := range m.Packages {
+		if pkg.Role == RoleProduct {
+			return pkg.Name
+		}
+	}
+	return ""
+}

@@ -993,3 +993,13 @@ func TestAUsedFileKeepsItsOwnDigestWhenItsLicenceReadDisagrees(t *testing.T) {
 		t.Errorf("hashes = %+v, want the used file's own SHA-256 alone", file.Hashes)
 	}
 }
+
+// Both SPDX versions name their document after the product package.
+func TestTheProductNamesTheDocument(t *testing.T) {
+	if got := allFields(t).ProductName(); got != "sentinel-product" {
+		t.Errorf("ProductName() = %q, want the product's name", got)
+	}
+	if got := (&Model{}).ProductName(); got != "" {
+		t.Errorf("a model without a product is named %q", got)
+	}
+}
