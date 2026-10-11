@@ -564,7 +564,7 @@ The adapter reads `<build-dir>/.cmake/api/v1/reply/`. If no reply exists and `--
 
 `codemodel-v2` reply contains one `configuration` per config for multi-config generators. The tool MUST select exactly one configuration:
 
-1. `--config <name>` if given;
+1. `--config-name <name>` if given;
 2. `build.config` from configuration;
 3. the single configuration if only one exists;
 4. otherwise `AMBIGUOUS_BUILD_CONFIG`, exit 1.
