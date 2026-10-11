@@ -2471,7 +2471,17 @@ nothing newer, and the default SPDX version stays 3.0.1.
    NONE stand only where nothing else was stated. A product, artifact or
    component with no concluded licence states NOASSERTION. A file states the
    licences found in it as `licenseInfoInFiles`, one expression per entry, and
-   a curated conclusion as `licenseConcluded`.
+   a curated conclusion as `licenseConcluded`. This departs on purpose from a
+   SHOULD of clause 8.6.1, which asks for each option of a choice of licences
+   as an entry of its own: `MIT OR Apache-2.0` read from a file is the one
+   entry `MIT OR Apache-2.0`, not `MIT` and `Apache-2.0`. The field's format
+   allows an expression in each entry, the schema and the reference
+   implementation accept it, and the 3.0.1 document of the same run states
+   the same expression. Split, the entries would no longer say whether the
+   file offers a choice or demands both, nor which exception belongs to which
+   licence, and the provenance annotation of the statement
+   (`licenseInfoInFiles: <expression>`) would name an entry the field does
+   not hold.
 7. **`extractedText` is never invented.** A `LicenseRef-sbomb-*` carries the
    retained text where §22.9 kept one (`licenseTextInSBOM: evidence`), and
    otherwise the observed name, with a `comment` saying no text was retained.

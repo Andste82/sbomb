@@ -1,0 +1,179 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "choice",
+  "documentNamespace": "urn:uuid:fac28572-c6c2-546c-9fa2-47c3cd320fc1",
+  "creationInfo": {
+    "created": "2023-11-14T22:13:20Z",
+    "creators": [
+      "Organization: Sentinel Vendor Org",
+      "Tool: sbomb-0.0.0-sentinel"
+    ],
+    "licenseListVersion": "3.28"
+  },
+  "annotations": [
+    {
+      "annotationDate": "2023-11-14T22:13:20Z",
+      "annotationType": "OTHER",
+      "annotator": "Tool: sbomb-0.0.0-sentinel",
+      "comment": "sbomb:run:reproducible=true\nsbomb:run:specVersion=2.3\nsbomb:run:toolVersion=0.0.0-sentinel"
+    }
+  ],
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-product-3Achoice",
+      "name": "choice",
+      "versionInfo": "1.0.0",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "MIT",
+      "primaryPackagePurpose": "APPLICATION",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:type=application\nsbomb:version:source=curated"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "licenseConcluded: MIT\nsbomb:license:evidenceClass=curated"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-artifact-3Abuild-3Abin-2Fapp",
+      "name": "app",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "NOASSERTION",
+      "primaryPackagePurpose": "APPLICATION",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=executable\nsbomb:cdx:structuredProperty=unstructured\nsbomb:component:type=application"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-component-3Adual",
+      "name": "dual",
+      "versionInfo": "2.0.0",
+      "downloadLocation": "NOASSERTION",
+      "licenseConcluded": "MIT OR Apache-2.0",
+      "primaryPackagePurpose": "LIBRARY",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:component:distributionRole=distributed\nsbomb:component:linkageForm=header-only\nsbomb:component:scope=third-party\nsbomb:component:type=library"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "licenseConcluded: MIT OR Apache-2.0\nsbomb:license:confidence=high\nsbomb:license:evidenceClass=file-level\nsbomb:license:source=build:_deps/dual/LICENSE\nsbomb:license:technique=spdx-identifier"
+        }
+      ]
+    }
+  ],
+  "files": [
+    {
+      "SPDXID": "SPDXRef-file-3Abuild-3A-5Fdeps-2Fdual-2FLICENSE",
+      "fileName": "build:_deps/dual/LICENSE",
+      "fileTypes": [
+        "DOCUMENTATION",
+        "TEXT"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "fc5e9de6ad38c88f1a377972b3c9f709a49b49f5"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e1011a8d249fe5463b86287ce92f141abc29f64b20e5fd9ca16e158385eb669e"
+        }
+      ],
+      "licenseInfoInFiles": [
+        "MIT OR Apache-2.0"
+      ],
+      "noticeText": "SPDX-License-Identifier: MIT OR Apache-2.0\n",
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:path:canonical=build:_deps/dual/LICENSE"
+        },
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "licenseInfoInFiles: MIT OR Apache-2.0\nsbomb:license:technique=spdx-identifier"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-file-3Abuild-3A-5Fdeps-2Fdual-2Fdual.h",
+      "fileName": "build:_deps/dual/dual.h",
+      "fileTypes": [
+        "SOURCE"
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "0a1b2c3d4e5f60718293a4b5c6d7e8f901234567"
+        },
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "1f2e3d4c5b6a79881f2e3d4c5b6a79881f2e3d4c5b6a79881f2e3d4c5b6a7988"
+        }
+      ],
+      "annotations": [
+        {
+          "annotationDate": "2023-11-14T22:13:20Z",
+          "annotationType": "OTHER",
+          "annotator": "Tool: sbomb-0.0.0-sentinel",
+          "comment": "sbomb:cdx:archiveProperty=no-archive\nsbomb:cdx:executableProperty=non-executable\nsbomb:cdx:structuredProperty=structured\nsbomb:file:class=header\nsbomb:path:canonical=build:_deps/dual/dual.h"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relationshipType": "DESCRIBES",
+      "relatedSpdxElement": "SPDXRef-product-3Achoice"
+    },
+    {
+      "spdxElementId": "SPDXRef-artifact-3Abuild-3Abin-2Fapp",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-component-3Adual"
+    },
+    {
+      "spdxElementId": "SPDXRef-component-3Adual",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-file-3Abuild-3A-5Fdeps-2Fdual-2Fdual.h"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Abuild-3A-5Fdeps-2Fdual-2FLICENSE",
+      "relationshipType": "DOCUMENTATION_OF",
+      "relatedSpdxElement": "SPDXRef-component-3Adual"
+    },
+    {
+      "spdxElementId": "SPDXRef-file-3Abuild-3A-5Fdeps-2Fdual-2Fdual.h",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "NONE"
+    },
+    {
+      "spdxElementId": "SPDXRef-product-3Achoice",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-artifact-3Abuild-3Abin-2Fapp"
+    }
+  ]
+}
