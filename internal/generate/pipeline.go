@@ -891,7 +891,7 @@ func unresolvedObjects(graph *evidence.Graph, used []domain.Node, anchorResult *
 // evidence-selected files are read; the source tree is never walked
 // (section 23).
 func hashUsedFiles(files []domain.UsedFile, physical map[string]string, bounds limits.Config, logger *Logger,
-	observe func(domain.FileID, []byte), counters *Counters) ([]domain.UsedFile, []domain.Finding) {
+	observe func(domain.FileID, []byte), digests []string, counters *Counters) ([]domain.UsedFile, []domain.Finding) {
 	findings := []domain.Finding{}
 	for index := range files {
 		canonical := files[index].ID.Canonical()
@@ -922,6 +922,9 @@ func hashUsedFiles(files []domain.UsedFile, physical map[string]string, bounds l
 		// the digest needs them, so extraction is a look at what was read and
 		// not a pass of its own (decision Q9).
 		Observe: observe,
+		// The digests the selected format needs beyond SHA-256, computed
+		// over the same bytes in the same read.
+		Digests: digests,
 	})
 	for index := range hashed {
 		if len(hashed[index].Hashes) > 0 {

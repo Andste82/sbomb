@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"sort"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/example/sbomb/internal/config"
@@ -148,5 +149,99 @@ func TestNoProductionCodeBelowTheCommandRegistersAWriter(t *testing.T) {
 				t.Errorf("%s is a production dependency of the run; it registers its writer when imported", path)
 			}
 		}
+	}
+}
+
+// digestWriter is a fake that records the document it was handed.
+type digestWriter struct {
+	id      string
+	digests []string
+}
+
+var (
+	handedOverMutex sync.Mutex
+	handedOver      = map[string]*sbomwriter.Document{}
+)
+
+func (w digestWriter) ID() string             { return w.id }
+func (digestWriter) Versions() []string       { return []string{"0.2"} }
+func (digestWriter) DefaultVersion() string   { return "0.2" }
+func (digestWriter) Validate(io.Reader) error { return errors.New("never asked") }
+func (w digestWriter) Write(out io.Writer, document *sbomwriter.Document, options sbomwriter.Options) error {
+	handedOverMutex.Lock()
+	handedOver[w.id] = document
+	handedOverMutex.Unlock()
+	_, err := io.WriteString(out, fakeBytes)
+	return err
+}
+
+// requiringWriter is a digestWriter that asks for digests beyond SHA-256.
+type requiringWriter struct{ digestWriter }
+
+func (w requiringWriter) FileDigests(version string) []string {
+	if version != "0.2" {
+		return nil
+	}
+	return w.digests
+}
+
+func init() {
+	sbomwriter.Register(digestWriter{id: "fake-plain-json"})
+	sbomwriter.Register(requiringWriter{digestWriter{id: "fake-sha1-json", digests: []string{"SHA-1"}}})
+	sbomwriter.Register(requiringWriter{digestWriter{id: "fake-md5-json", digests: []string{"MD5"}}})
+}
+
+// TestTheRunComputesTheDigestsTheWriterAsksFor: a writer that needs a SHA-1
+// of every file gets one on every file that was read, and a writer that asks
+// for nothing gets SHA-256 alone -- the extra digest is the writer's request,
+// not a cost every run pays.
+func TestTheRunComputesTheDigestsTheWriterAsksFor(t *testing.T) {
+	base, buildDir := fossFixture(t)
+	hashed := func(format string) (sha1, sha256 int) {
+		t.Helper()
+		cfg := base
+		cfg.Output.Format = format
+		if _, err := RunWithOptions(cfg, buildDir, true, Options{PathFlavor: pathmodel.DefaultFlavor()}); err != nil {
+			t.Fatal(err)
+		}
+		handedOverMutex.Lock()
+		document := handedOver[format]
+		handedOverMutex.Unlock()
+		if document == nil {
+			t.Fatalf("%s was handed no document", format)
+		}
+		for _, file := range document.Files {
+			if file.Hashes["SHA-256"] != "" {
+				sha256++
+			}
+			if value := file.Hashes["SHA-1"]; value != "" {
+				if len(value) != 40 {
+					t.Errorf("%s: SHA-1 %q is not 40 hex digits", file.ID.Canonical(), value)
+				}
+				sha1++
+			}
+		}
+		return sha1, sha256
+	}
+	if sha1, sha256 := hashed("fake-sha1-json"); sha256 == 0 || sha1 != sha256 {
+		t.Errorf("a writer asking for SHA-1 got %d SHA-1 digests for %d files read", sha1, sha256)
+	}
+	if sha1, sha256 := hashed("fake-plain-json"); sha256 == 0 || sha1 != 0 {
+		t.Errorf("a writer asking for nothing got %d SHA-1 digests (%d files read)", sha1, sha256)
+	}
+}
+
+// A digest hashing cannot compute is a defect of the writer, refused before
+// anything is read rather than silently left out of every file.
+func TestADigestHashingCannotComputeIsRefused(t *testing.T) {
+	_, buildDir := portableFixture(t)
+	cfg := config.Config{
+		Project: config.Project{Root: "/__fixture_src__"},
+		Output:  config.Output{Format: "fake-md5-json"},
+	}
+	_, err := RunWithOptions(cfg, buildDir, true, Options{PathFlavor: pathmodel.PosixFlavor{}})
+	var exit *ExitError
+	if !errors.As(err, &exit) || exit.Code != 70 || exit.Finding.ID != "INTERNAL_INVARIANT_VIOLATION" || !strings.Contains(exit.Finding.Message, "MD5") {
+		t.Fatalf("err = %v, want exit 70 naming MD5", err)
 	}
 }

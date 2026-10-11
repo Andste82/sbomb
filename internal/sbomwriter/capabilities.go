@@ -41,6 +41,16 @@ type Preflighter interface {
 	Preflight(version string, options Options) error
 }
 
+// DigestRequirer names the digest algorithms a document of one version must
+// state for every file, beyond the SHA-256 hashing always computes, in the
+// spelling discovery keys digests by ("SHA-1"). The run asks before it hashes,
+// so the extra digest comes out of the one read of each file, and no stage
+// below the writer learns which format asked. A writer without it, or one
+// that answers nil, needs nothing beyond SHA-256.
+type DigestRequirer interface {
+	FileDigests(version string) []string
+}
+
 // ComponentReader answers the format-specific half of explain --component
 // --sbom: which file identities a document says the component of this name
 // contains. Reading the file, recognising its format and every message to the
