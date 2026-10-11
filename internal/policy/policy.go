@@ -123,10 +123,14 @@ func Overlay(name string) (func(*Config), error) {
 	}
 }
 
-func ResolveProfile(name string) Config {
+// ResolveProfile returns the gates of a named profile (section 33.2). The name
+// is matched case-insensitively and "" means default. An unknown name is an
+// error rather than the default, so that a typo such as "strcit" is not run
+// silently under weaker gates than the user asked for.
+func ResolveProfile(name string) (Config, error) {
 	switch strings.ToLower(name) {
 	case "", "default":
-		return DefaultConfig()
+		return DefaultConfig(), nil
 	case "lenient":
 		cfg := DefaultConfig()
 		cfg.Profile = "lenient"
@@ -137,7 +141,7 @@ func ResolveProfile(name string) Config {
 		cfg.HeaderEvidence = "dwarf-preferred"
 		cfg.IncludeToolchainRuntime = "report-only"
 		cfg.PrebuiltLibrariesRequireMapping = false
-		return cfg
+		return cfg, nil
 	case "strict":
 		cfg := DefaultConfig()
 		cfg.Profile = "strict"
@@ -157,7 +161,7 @@ func ResolveProfile(name string) Config {
 		cfg.HeaderEvidence = "union"
 		cfg.IncludeLinkerScripts = true
 		cfg.SectionGarbageCollection = "annotate"
-		return cfg
+		return cfg, nil
 	case "cra":
 		cfg := DefaultConfig()
 		cfg.Profile = "cra"
@@ -170,17 +174,15 @@ func ResolveProfile(name string) Config {
 		cfg.FailOnMissingComponentHash = true
 		cfg.FailOnUnknownVersion = true
 		cfg.HeaderEvidence = "dwarf-preferred"
-		return cfg
+		return cfg, nil
 	default:
-		cfg := DefaultConfig()
-		cfg.Profile = name
-		return cfg
+		return Config{}, fmt.Errorf("unknown policy profile %q; the profiles are default, lenient, cra, strict", name)
 	}
 }
 
 func Evaluate(findings []domain.Finding, cfg Config, waivers []Waiver, now time.Time) Result {
 	if cfg.Profile == "" {
-		cfg = ResolveProfile(cfg.Profile)
+		cfg = DefaultConfig()
 	}
 	if now.IsZero() {
 		now = time.Now().UTC()

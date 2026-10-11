@@ -645,9 +645,11 @@ licence obliges a distributor to reproduce.
 
 Command line, then this file, then the profile, then the built-in default.
 The profile — `--policy` or `policy.profile` — is the starting point, and
-every setting this file names overrides it. Because every gate in the file is
-a tri-state, a configuration can turn a profile's gate *off* as well as on —
-and `--fail-on-x=false` can do the same from the command line.
+every setting this file names overrides it. A profile name sbomb does not
+know — a typo such as `strcit` — is refused with exit 1 and the list of
+profiles, rather than run under the default gates. Because every gate in the
+file is a tri-state, a configuration can turn a profile's gate *off* as well
+as on — and `--fail-on-x=false` can do the same from the command line.
 
 ## Waivers
 

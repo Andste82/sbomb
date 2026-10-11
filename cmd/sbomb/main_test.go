@@ -26,6 +26,35 @@ func TestExecuteUnknownFlag(t *testing.T) {
 	}
 }
 
+// A misspelt profile used to run under the default gates and exit with an
+// ordinary verdict, so the typo went unnoticed. It is a usage error now, from
+// the flag and from policy.profile alike, as an unknown overlay already was.
+func TestExecuteUnknownPolicyProfileIsAUsageError(t *testing.T) {
+	buildDir := testutil.CorpusBuildDir(t, "gcc-ninja", "p01-hello")
+	configPath := filepath.Join(t.TempDir(), "sbomb.json")
+	if err := os.WriteFile(configPath, []byte(`{"project":{"name":"x"},"policy":{"profile":"bogus"}}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	executable, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for name, args := range map[string][]string{
+		"generate flag":   {"generate", "--build-dir", buildDir, "--policy", "strcit", "--output", filepath.Join(t.TempDir(), "out.json")},
+		"generate config": {"generate", "--build-dir", buildDir, "--config", configPath, "--output", filepath.Join(t.TempDir(), "out.json")},
+		"self flag":       {"self", executable, "--policy", "bogus", "--output", filepath.Join(t.TempDir(), "self.cdx.json")},
+	} {
+		code, _, stderr := execute(args)
+		if code != 1 {
+			t.Errorf("%s: exit code = %d, want 1 (stderr = %q)", name, code, stderr)
+		}
+		if !strings.Contains(stderr, "unknown policy profile") || !strings.Contains(stderr, "default, lenient, cra, strict") {
+			t.Errorf("%s: stderr = %q, want the unknown-profile message listing the profiles", name, stderr)
+		}
+	}
+}
+
 func TestExecuteExplainLoadsEvidenceDump(t *testing.T) {
 	buildDir := t.TempDir()
 	graph := evidence.New()

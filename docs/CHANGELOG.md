@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### An unknown policy profile is refused
+
+A profile name sbomb does not know, from `--policy` or from `policy.profile`
+in the configuration file, ran silently under the default gates, so a typo
+such as `strcit` gave an ordinary verdict that looked like a strict one. It is
+now a usage error (exit 1) that lists the profiles `default`, `lenient`, `cra`
+and `strict`, as an unknown `--profile-overlay` already was. Names are still
+matched regardless of case. This applies to `generate`, `foss` and `self`.
+
 ### A relocated run no longer hashes this host's toolchain
 
 Where the build ran on another machine -- a CI job that only generates the
