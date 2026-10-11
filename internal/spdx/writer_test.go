@@ -2,6 +2,8 @@ package spdx
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"os"
@@ -51,9 +53,16 @@ func TestTheWriterIsRegisteredAsSpdxJson(t *testing.T) {
 	if err != nil || writer.ID() != ID || version != Version301 {
 		t.Fatalf("Resolve = %v %q %v", writer, version, err)
 	}
-	if _, err := sbomwriter.Get("spdx-json", "2.3"); err == nil {
-		t.Error("SPDX 2.3 is not written by this build")
+	if _, err := sbomwriter.Get("spdx-json", Version23); err != nil {
+		t.Errorf("SPDX 2.3: %v", err)
 	}
+	if _, err := sbomwriter.Get("spdx-json", "2.2"); err == nil {
+		t.Error("SPDX 2.2 is not written by this build")
+	}
+	if got := (Writer{}).Versions(); strings.Join(got, ",") != "2.3,3.0.1" {
+		t.Errorf("Versions = %v", got)
+	}
+	var _ sbomwriter.DigestRequirer = Writer{}
 	var _ sbomwriter.Detector = Writer{}
 	var _ sbomwriter.Describer = Writer{}
 	var _ sbomwriter.SchemaProvider = Writer{}
@@ -91,12 +100,12 @@ func TestDetectRecognisesTheContext(t *testing.T) {
 }
 
 func TestDetectReportsAnSpdx2DocumentSoValidateCanRefuseIt(t *testing.T) {
-	document := []byte(`{"spdxVersion": "SPDX-2.3", "SPDXID": "SPDXRef-DOCUMENT"}`)
-	if version, ok := (Writer{}).Detect(document); !ok || version != "2.3" {
+	document := []byte(`{"spdxVersion": "SPDX-2.2", "SPDXID": "SPDXRef-DOCUMENT"}`)
+	if version, ok := (Writer{}).Detect(document); !ok || version != "2.2" {
 		t.Fatalf("Detect = %q %v", version, ok)
 	}
 	err := (Writer{}).Validate(bytes.NewReader(document))
-	if err == nil || !strings.Contains(err.Error(), "SPDX 2.3 documents are not read by this build") {
+	if err == nil || !strings.Contains(err.Error(), "SPDX 2.2 documents are not read by this build; it reads SPDX 2.3, 3.0.1") {
 		t.Errorf("Validate = %v", err)
 	}
 }
@@ -107,21 +116,21 @@ func TestDetectReportsAnSpdx2DocumentSoValidateCanRefuseIt(t *testing.T) {
 // table holds is read by that version's renderer -- an SPDX 2 version too,
 // which is otherwise refused before the table is asked.
 func TestAVersionIsOneLineOfTheDispatchTable(t *testing.T) {
-	t.Cleanup(func() { delete(renderers, "2.3") })
-	if got := (Writer{}).Versions(); strings.Join(got, ",") != Version301 {
-		t.Fatalf("Versions = %v, want the one version of the table", got)
+	t.Cleanup(func() { delete(renderers, "2.2") })
+	if got := (Writer{}).Versions(); strings.Join(got, ",") != Version23+","+Version301 {
+		t.Fatalf("Versions = %v, want the versions of the table", got)
 	}
-	refused := (Writer{}).Validate(strings.NewReader(`{"spdxVersion": "SPDX-2.3"}`))
-	if refused == nil || !strings.Contains(refused.Error(), "SPDX 2.3 documents are not read by this build") {
-		t.Fatalf("without a 2.3 renderer, Validate = %v", refused)
+	refused := (Writer{}).Validate(strings.NewReader(`{"spdxVersion": "SPDX-2.2"}`))
+	if refused == nil || !strings.Contains(refused.Error(), "SPDX 2.2 documents are not read by this build") {
+		t.Fatalf("without a 2.2 renderer, Validate = %v", refused)
 	}
 	called := false
-	renderers["2.3"] = renderer{validate: func([]byte) error { called = true; return nil }}
-	if got := (Writer{}).Versions(); strings.Join(got, ",") != "2.3,"+Version301 {
+	renderers["2.2"] = renderer{validate: func([]byte) error { called = true; return nil }}
+	if got := (Writer{}).Versions(); strings.Join(got, ",") != "2.2,2.3,"+Version301 {
 		t.Errorf("Versions = %v, want the table's versions in order", got)
 	}
-	if err := (Writer{}).Validate(strings.NewReader(`{"spdxVersion": "SPDX-2.3"}`)); err != nil || !called {
-		t.Errorf("a 2.3 document was not handed to the 2.3 renderer: %v (called %v)", err, called)
+	if err := (Writer{}).Validate(strings.NewReader(`{"spdxVersion": "SPDX-2.2"}`)); err != nil || !called {
+		t.Errorf("a 2.2 document was not handed to the 2.2 renderer: %v (called %v)", err, called)
 	}
 }
 
@@ -256,7 +265,12 @@ func TestEmbeddedSchemaIsServedPerVersion(t *testing.T) {
 	if err != nil || !bytes.Contains(schema, []byte(`"const": "https://spdx.org/rdf/3.0.1/spdx-context.jsonld"`)) {
 		t.Errorf("EmbeddedSchema = %v", err)
 	}
-	if _, err := (Writer{}).EmbeddedSchema("2.3"); err == nil {
+	schema23, err := (Writer{}).EmbeddedSchema(Version23)
+	sum := sha256.Sum256(schema23)
+	if err != nil || hex.EncodeToString(sum[:]) != "239208b7ac287b3cf5d9a9af23f9d69863971102a5e1587a27a398b43490b89b" {
+		t.Errorf("EmbeddedSchema(2.3) = %v, SHA-256 %x", err, sum)
+	}
+	if _, err := (Writer{}).EmbeddedSchema("2.2"); err == nil {
 		t.Error("a version this build does not write has a schema")
 	}
 }
@@ -352,6 +366,8 @@ func TestValidateOutputIsValidateAndCheckOutput(t *testing.T) {
 		"@graph first":    graphFirst,
 		"another version": bytes.Replace(written, []byte("3.0.1/spdx-context"), []byte("3.0.0/spdx-context"), 1),
 		"SPDX 2.3":        []byte(`{"spdxVersion": "SPDX-2.3"}`),
+		"SPDX 2.2":        []byte(`{"spdxVersion": "SPDX-2.2"}`),
+		"written as 2.3":  write(t, sbomwritertest.AllFields(), options23()),
 		"broken":          append(append([]byte(nil), written[:len(written)/2]...), '}'),
 	} {
 		want := (Writer{}).Validate(bytes.NewReader(data))
