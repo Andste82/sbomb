@@ -2,6 +2,7 @@ package spdx
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"go/parser"
 	"go/token"
@@ -18,6 +19,7 @@ import (
 	"github.com/example/sbomb/internal/sbomwriter"
 	"github.com/example/sbomb/internal/sbomwriter/sbomwritertest"
 	"github.com/example/sbomb/internal/spdx/mapping"
+	"github.com/example/sbomb/internal/spdx/spdx23"
 )
 
 // options23 are the all-fields options at SPDX 2.3.
@@ -43,7 +45,7 @@ func TestTheWriterWritesSpdx23(t *testing.T) {
 	}
 	model, err := mapping.Build(sbomwritertest.AllFields(), mapping.Options{
 		SpecVersion: Version23, LicenseText: sbomwriter.LicenseTextEvidence, Reproducible: true,
-		Digests: []string{"SHA-1"}, SelfContainedLicenseRefs: true,
+		Digests: spdx23.FileDigests(), SelfContainedLicenseRefs: spdx23.SelfContainedLicenseRefs,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -168,5 +170,72 @@ func TestTheRenderersAreSiblings(t *testing.T) {
 				}
 			}
 		}
+	}
+}
+
+// The 2.3 entry of the writer's version table, not a copy of it: a licence
+// reference the build stated is defined in the document, one of another
+// document and an unlisted exception become references sbomb defines, and no
+// AdditionRef appears. With customAdditions or selfContainedRefs flipped in
+// the table, this document is refused by the 2.3 checks.
+func TestTheSpdx23WriterDefinesTheReferencesTheBuildStated(t *testing.T) {
+	writer, err := sbomwriter.Get(ID, Version23)
+	if err != nil {
+		t.Fatal(err)
+	}
+	options := sbomwritertest.AllFieldsOptions()
+	options.SpecVersion = Version23
+	var buffer bytes.Buffer
+	if err := writer.Write(&buffer, sbomwritertest.LicenceReferences(), options); err != nil {
+		t.Fatal(err)
+	}
+	data := buffer.Bytes()
+	if err := spdx23.Validate(data); err != nil {
+		t.Errorf("Validate: %v", err)
+	}
+	if err := spdx23.ValidateOwnOutput(data); err != nil {
+		t.Errorf("ValidateOwnOutput: %v", err)
+	}
+	var doc struct {
+		Packages []struct {
+			Name             string `json:"name"`
+			LicenseConcluded string `json:"licenseConcluded"`
+		} `json:"packages"`
+		Extracted []struct {
+			LicenseID string `json:"licenseId"`
+			Text      string `json:"extractedText"`
+		} `json:"hasExtractedLicensingInfos"`
+	}
+	if err := json.Unmarshal(data, &doc); err != nil {
+		t.Fatal(err)
+	}
+	defined := map[string]string{}
+	for _, info := range doc.Extracted {
+		defined[info.LicenseID] = info.Text
+	}
+	if _, found := defined["LicenseRef-acme"]; !found {
+		t.Errorf("LicenseRef-acme is not defined in hasExtractedLicensingInfos (defined: %v)", defined)
+	}
+	if bytes.Contains(data, []byte("AdditionRef")) {
+		t.Error("the 2.3 document names an AdditionRef")
+	}
+	concluded := map[string]string{}
+	for _, p := range doc.Packages {
+		concluded[p.Name] = p.LicenseConcluded
+	}
+	// The reference of another document is replaced by one sbomb defines,
+	// whose text is the name the build stated.
+	acme := concluded["acme"]
+	if !strings.HasPrefix(acme, "LicenseRef-acme OR LicenseRef-sbomb-") || strings.Contains(acme, ":") {
+		t.Errorf("acme concludes %q, want LicenseRef-acme OR a reference sbomb defines", acme)
+	}
+	if other := strings.TrimPrefix(acme, "LicenseRef-acme OR "); defined[other] != "DocumentRef-other:LicenseRef-beta" {
+		t.Errorf("%s is defined as %q, want the stated reference", other, defined[other])
+	}
+	// The expression with an unlisted exception is one reference sbomb
+	// defines, whose text is the whole expression.
+	excepted := concluded["excepted"]
+	if !strings.HasPrefix(excepted, "LicenseRef-sbomb-") || defined[excepted] != sbomwritertest.LicenceUnlistedException {
+		t.Errorf("excepted concludes %q (defined as %q), want one reference for %q", excepted, defined[excepted], sbomwritertest.LicenceUnlistedException)
 	}
 }

@@ -18,7 +18,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/example/sbomb/internal/digest"
 	"github.com/example/sbomb/internal/sbommap"
 	"github.com/example/sbomb/internal/sbomwriter"
 	"github.com/example/sbomb/internal/spdx/mapping"
@@ -89,7 +88,7 @@ var renderers = map[string]renderer{
 		validateOwn:     spdx3.ValidateOwnOutput,
 		schema:          spdx3.SchemaJSON,
 		read:            spdx3.ComponentFiles,
-		customAdditions: true,
+		customAdditions: spdx3.CustomAdditions,
 	},
 	// SPDX 2.3 has no AdditionRef, requires a SHA-1 of every file (clause
 	// 8.4), and resolves a LicenseRef only through its own
@@ -101,9 +100,9 @@ var renderers = map[string]renderer{
 		validateOwn:       spdx23.ValidateOwnOutput,
 		schema:            spdx23.SchemaJSON,
 		read:              spdx23.ComponentFiles,
-		customAdditions:   false,
-		fileDigests:       []string{digest.SHA1},
-		selfContainedRefs: true,
+		customAdditions:   spdx23.CustomAdditions,
+		fileDigests:       spdx23.FileDigests(),
+		selfContainedRefs: spdx23.SelfContainedLicenseRefs,
 	},
 }
 
