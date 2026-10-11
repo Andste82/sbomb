@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/example/sbomb/internal/adapters/cmakeapi"
+	makeadapter "github.com/example/sbomb/internal/adapters/make"
 	"github.com/example/sbomb/internal/config"
 	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/evidence"
@@ -183,5 +185,52 @@ func TestAStaticLibraryTargetsArchiveIsProduced(t *testing.T) {
 	want := map[string]bool{"project:lib/libmine.a": true, "build:libinbuild.a": true}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("produced = %v, want %v", got, want)
+	}
+}
+
+// TestAStaticLibraryTargetsArchiveRaisesNothing: a target's archive need not
+// be linked into anything, and naming it as produced must not register a
+// location or a finding for a file the evidence never used -- an archive
+// outside every anchor would otherwise fail a strict run as unanchored.
+func TestAStaticLibraryTargetsArchiveRaisesNothing(t *testing.T) {
+	b := newBuilder(evidence.New(), hostReadAnchors(t), "/bd", "/bd", NewLogger(0, nil))
+	b.recordTargetArchives([]string{"/opt/out/libunlinked.a"})
+	if len(b.findings) != 0 || len(b.physical) != 0 {
+		t.Fatalf("findings %v, physical %v", b.findings, b.physical)
+	}
+}
+
+// TestAMakefilesArchivingTargetProducesItsArchive: a Makefiles static library
+// target names the archive it writes, here into the source tree; an
+// executable's link line names archives as inputs and proves nothing.
+func TestAMakefilesArchivingTargetProducesItsArchive(t *testing.T) {
+	b := newBuilder(evidence.New(), hostReadAnchors(t), "/bd", "/bd", NewLogger(0, nil))
+	b.recordMakeArchives(&makeadapter.Build{Targets: []makeadapter.Target{
+		{Name: "mine", Archive: "/src/lib/libmine.a", LinkInputs: []string{"/src/lib/libmine.a", "/bd/CMakeFiles/mine.dir/a.c.o"}},
+		{Name: "app", LinkInputs: []string{"/bd/CMakeFiles/app.dir/main.c.o", "/src/vendor/libfoo.a"}},
+	}})
+	got := b.producedArchives(false)
+	want := map[string]bool{"project:lib/libmine.a": true}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("produced = %v, want %v", got, want)
+	}
+}
+
+// TestOnlyACodemodelListsTheArchives: an in-source build counts every archive
+// under the project root as produced only when nothing lists the archives it
+// writes. A reply without a codemodel lists none.
+func TestOnlyACodemodelListsTheArchives(t *testing.T) {
+	for _, test := range []struct {
+		name  string
+		model *cmakeapi.Model
+		want  bool
+	}{
+		{"no reply", nil, false},
+		{"no codemodel", &cmakeapi.Model{}, false},
+		{"codemodel", &cmakeapi.Model{Configurations: []cmakeapi.Configuration{{Name: "Release"}}}, true},
+	} {
+		if got := archivesListed(test.model); got != test.want {
+			t.Errorf("%s: listed = %v, want %v", test.name, got, test.want)
+		}
 	}
 }
