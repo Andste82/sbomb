@@ -110,7 +110,7 @@ func parseBuildMake(path, buildDir string, target *Target) error {
 		if line == "" || strings.HasPrefix(line, "#") || strings.HasPrefix(line, "\t") {
 			continue
 		}
-		colon := strings.IndexByte(line, ':')
+		colon := ruleSeparator(line)
 		if colon <= 0 {
 			continue
 		}
@@ -283,6 +283,20 @@ func parseDependencyFiles(directory string, target *Target) error {
 		}
 		return nil
 	})
+}
+
+// ruleSeparator finds the colon that ends a rule's targets. An absolute
+// Windows target carries a drive colon before it: `C:\src\x.lib: a.obj`.
+func ruleSeparator(line string) int {
+	start := 0
+	if len(line) > 2 && (line[0]|0x20 >= 'a' && line[0]|0x20 <= 'z') && line[1] == ':' && (line[2] == '\\' || line[2] == '/') {
+		start = 2
+	}
+	colon := strings.IndexByte(line[start:], ':')
+	if colon < 0 {
+		return -1
+	}
+	return start + colon
 }
 
 func logicalLines(text string) []string {

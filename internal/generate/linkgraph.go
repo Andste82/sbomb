@@ -11,8 +11,10 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/example/sbomb/internal/adapters/cmakeapi"
 	"github.com/example/sbomb/internal/adapters/linkers/depfile"
 	"github.com/example/sbomb/internal/adapters/linkers/mapparser"
+	makeadapter "github.com/example/sbomb/internal/adapters/make"
 	"github.com/example/sbomb/internal/adapters/ninja"
 	"github.com/example/sbomb/internal/anchors"
 	"github.com/example/sbomb/internal/domain"
@@ -1253,26 +1255,67 @@ func (b *builder) recordBuiltArchive(archivePath string, objects []string) {
 // artifacts of static library targets. The reply states them whatever the
 // generator, so an archive a Makefiles build writes into the source tree is
 // known to be this build's even when no build graph or traced member says so.
+//
+// identityOf rather than identify: a target's archive need not be linked into
+// anything, and naming it here must not register a location or raise a
+// finding for a file the evidence never used.
 func (b *builder) recordTargetArchives(paths []string) {
 	for _, path := range paths {
-		canonical, _ := b.identify(path)
-		b.builtArchives[canonical] = true
+		if canonical := b.identityOf(path).Canonical(); canonical != "" {
+			b.builtArchives[canonical] = true
+		}
 	}
+}
+
+// recordMakeArchives takes what a Makefiles build says about its archives. A
+// static library target's build.make rule or archiver command names the
+// archive it writes; any other target's link line names archives as inputs,
+// some of them prebuilt, and only their objects are recorded.
+func (b *builder) recordMakeArchives(makeBuild *makeadapter.Build) {
+	if makeBuild == nil {
+		return
+	}
+	for _, target := range makeBuild.Targets {
+		if target.Archive != "" {
+			b.recordBuiltArchive(target.Archive, collectObjects(target.LinkInputs))
+			continue
+		}
+		var archived bool
+		for _, input := range target.LinkInputs {
+			if isArchivePath(input) {
+				b.recordArchiveInputs(input, collectObjects(target.LinkInputs))
+				archived = true
+			}
+		}
+		if !archived {
+			b.recordReconstructedLink(target.Name, target.LinkInputs)
+		}
+	}
+}
+
+// archivesListed reports whether the File API reply lists the archives the
+// build writes: it has a codemodel, whose static library targets name them.
+// A reply with only a cache or toolchains object lists none.
+func archivesListed(model *cmakeapi.Model) bool {
+	return model != nil && len(model.Configurations) > 0
 }
 
 // producedArchives names the archives this build produced itself, wherever
 // they lie. Section 33.1 asks about prebuilt libraries only, and an archive in
 // the build directory is plainly not one; these are the ones the build
 // directory alone does not account for, such as an archive a target writes
-// into the source tree. Each is named by evidence: build.ninja or the MSBuild
-// project states the objects it was archived from, or a member the link
-// extracted was traced to an object this build compiled.
+// into the source tree. Each is named by evidence: the CMake File API names it
+// as a static library target's artifact, build.ninja, the MSBuild project or a
+// Makefiles archiving rule states the objects it was archived from, or a
+// member the link extracted was traced to an object this build compiled.
 //
 // An in-source build has no build anchor, because the build root is the
-// project root and the project claimed that directory first. Every archive
-// under it is then in the build directory, as it would be under the build
-// anchor of an out-of-source build, and is counted as produced: the evidence
-// cannot tell one this build archived from one checked in beside its sources.
+// project root and the project claimed that directory first. Without a File
+// API codemodel (archivesListed), nothing lists the archives the build writes,
+// so every archive under the project root is counted as produced, as it would
+// be under the build anchor of an out-of-source build: the evidence cannot
+// tell one this build archived from one checked in beside its sources. The
+// caller passes inSource only then.
 func (b *builder) producedArchives(inSource bool) map[string]bool {
 	produced := map[string]bool{}
 	for canonical := range b.builtArchives {

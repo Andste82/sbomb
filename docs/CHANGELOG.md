@@ -19,11 +19,15 @@ reported. Neither is a library the build produced itself, wherever it lies:
 one the CMake File API names as the artifact of a static library target, one
 `build.ninja`, an MSBuild project or a Makefiles archiving rule names as
 archived from objects, or one whose extracted members trace back to objects of
-this build. In an in-source build without a File API reply, where the build
-directory is the project root and nothing lists the archives the build writes,
-every archive under the project root counts as built there, as one in a
-separate build directory always did; a prebuilt library checked in beside the
-sources of such a build is then not reported.
+this build. In an in-source build, where the build directory is the project
+root, an archive under the project root counts as built only on that evidence
+when the CMake File API reply has a codemodel: a prebuilt library checked in
+beside the sources is reported, and so is an archive an `ExternalProject`, a
+custom command or another step outside a static library target writes there
+-- give it a `components[]` entry, or build out of source. Without a codemodel
+nothing lists the archives the build writes, and every archive under the
+project root counts as built there, as one in a separate build directory
+always did.
 
 A run that passed before can now fail; add a `components[]` entry for the
 library, or set `prebuiltLibrariesRequireMapping: false`

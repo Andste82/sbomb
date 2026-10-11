@@ -202,3 +202,24 @@ func TestALinkFileNamesTheArchiveOnlyWhenItArchives(t *testing.T) {
 		}
 	}
 }
+
+// TestAnAbsoluteWindowsArchiveRuleIsRead: an archive a target writes outside
+// the build directory is named by an absolute path, and on Windows its drive
+// colon comes before the rule's own.
+func TestAnAbsoluteWindowsArchiveRuleIsRead(t *testing.T) {
+	root := t.TempDir()
+	for _, spelling := range []string{`C:\src\lib\crypto.lib`, `C:/src/lib/crypto.lib`} {
+		path := filepath.Join(root, "build.make")
+		content := spelling + ": CMakeFiles\\crypto.dir\\crypto.c.obj\n"
+		if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		target := Target{ObjectSources: map[string]string{}, ObjectDeps: map[string][]string{}}
+		if err := parseBuildMake(path, root, &target); err != nil {
+			t.Fatal(err)
+		}
+		if !strings.HasSuffix(strings.ReplaceAll(target.Archive, `\`, "/"), "src/lib/crypto.lib") || !strings.HasPrefix(target.Archive, "C:") {
+			t.Errorf("%s: Archive = %q, LinkInputs = %q", spelling, target.Archive, target.LinkInputs)
+		}
+	}
+}
