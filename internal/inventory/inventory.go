@@ -1,6 +1,7 @@
 package inventory
 
 import (
+	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -63,6 +64,31 @@ type InventoryDump struct {
 // HashAlgorithmSHA256 is the CycloneDX spelling of the default algorithm.
 const HashAlgorithmSHA256 = "SHA-256"
 
+// HashAlgorithmSHA1 is the one digest a run computes beside SHA-256, and only
+// when the document it writes requires it (SPDX 2.3 states a SHA-1 of every
+// file). It is computed over the bytes the SHA-256 was computed over, in the
+// same read.
+const HashAlgorithmSHA1 = "SHA-1"
+
+// extraDigests are the algorithms HashOptions.Digests may ask for, by the name
+// discovery keys digests by.
+var extraDigests = map[string]func([]byte) string{
+	HashAlgorithmSHA1: func(data []byte) string {
+		sum := sha1.Sum(data)
+		return hex.EncodeToString(sum[:])
+	},
+}
+
+// SupportsDigest reports whether hashing can compute the named digest beside
+// SHA-256, which it always computes.
+func SupportsDigest(name string) bool {
+	if name == HashAlgorithmSHA256 {
+		return true
+	}
+	_, known := extraDigests[name]
+	return known
+}
+
 type HashOptions struct {
 	Anchors              []string
 	AllowUnanchoredReads bool
@@ -85,6 +111,11 @@ type HashOptions struct {
 	// is the layering of section 35, and the reason this is a callback rather
 	// than a licence-shaped option.
 	Observe func(domain.FileID, []byte)
+	// Digests are the algorithms computed beside SHA-256, over the same
+	// bytes and in the same read. The caller learns which ones the document
+	// needs from the writer; this package learns only their names. A name
+	// SupportsDigest does not know is ignored, so the caller checks first.
+	Digests []string
 }
 
 // readFile is the one read of the hashing pass. It is a variable so that a
@@ -240,6 +271,11 @@ func hashOne(file domain.UsedFile, options HashOptions) domain.UsedFile {
 	}
 	clone.SizeBytes = info.Size()
 	sum := sha256.Sum256(data)
+	for _, name := range options.Digests {
+		if digest, known := extraDigests[name]; known {
+			clone.Hashes[name] = digest(data)
+		}
+	}
 	if options.Observe != nil {
 		// After the digest, not before it. The intent is that nothing is
 		// observed that was not also hashed, and calling it here satisfies
