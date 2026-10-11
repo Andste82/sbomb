@@ -396,6 +396,29 @@ func (m *Model) Configuration(name string) (Configuration, error) {
 	return Configuration{}, fmt.Errorf("no configuration named %q in the File API reply", name)
 }
 
+// StaticLibraryArtifacts lists the archives the static library targets of
+// every configuration write. CMake gives a path relative to the build root
+// when the archive lies under it, and an absolute one otherwise.
+func (m *Model) StaticLibraryArtifacts() []string {
+	if m == nil {
+		return nil
+	}
+	paths := make([]string, 0)
+	for _, cfg := range m.Configurations {
+		for _, target := range cfg.Targets {
+			if target.Type != "STATIC_LIBRARY" {
+				continue
+			}
+			for _, art := range target.Artifacts {
+				if art.Path != "" {
+					paths = append(paths, art.Path)
+				}
+			}
+		}
+	}
+	return paths
+}
+
 // ArtifactCandidates lists executable artifacts, preferring targets that have
 // an install rule, per the discovery order of section 5.3.
 func (m *Model) ArtifactCandidates() []string {

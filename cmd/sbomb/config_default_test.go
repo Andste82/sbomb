@@ -27,7 +27,7 @@ func chdirTemp(t *testing.T) string {
 
 // TestAnInvalidSbombJSONInTheWorkingDirectoryIsReadWithoutConfig: without
 // --config, generate, evidence and foss read sbomb.json from the working
-// directory (section 32.2 and 32.3), so an invalid one stops each of them with
+// directory (sections 32.2 and 32.6), so an invalid one stops each of them with
 // its configuration error rather than being passed over.
 func TestAnInvalidSbombJSONInTheWorkingDirectoryIsReadWithoutConfig(t *testing.T) {
 	buildDir := testutil.CorpusBuildDir(t, "gcc-make", "p02-static")

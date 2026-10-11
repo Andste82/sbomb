@@ -47,7 +47,9 @@ inputs:
     required: false
     default: ''
   config:
-    description: Optional sbomb JSON configuration file
+    description: >-
+      sbomb JSON configuration file. Empty means sbomb.json in the working
+      directory, if there is one.
     required: false
   policy:
     description: Optional policy profile

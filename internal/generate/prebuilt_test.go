@@ -171,3 +171,17 @@ func TestAnInSourceBuildsOwnArchiveIsNotPrebuilt(t *testing.T) {
 		t.Fatalf("verdict = %+v, want the default profile to pass", verdict)
 	}
 }
+
+// TestAStaticLibraryTargetsArchiveIsProduced: the CMake File API names the
+// archive of every static library target, whatever the generator. An archive
+// a Makefiles build writes into the source tree is this build's, though no
+// build graph states it and no member was traced.
+func TestAStaticLibraryTargetsArchiveIsProduced(t *testing.T) {
+	b := newBuilder(evidence.New(), hostReadAnchors(t), "/bd", "/bd", NewLogger(0, nil))
+	b.recordTargetArchives([]string{"/src/lib/libmine.a", "libinbuild.a"})
+	got := b.producedArchives(false)
+	want := map[string]bool{"project:lib/libmine.a": true, "build:libinbuild.a": true}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("produced = %v, want %v", got, want)
+	}
+}

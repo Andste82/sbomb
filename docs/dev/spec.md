@@ -2247,7 +2247,7 @@ licenseTextInSBOM
 
 ### 33.2 Built-in Profiles
 
-Five profiles exist: `lenient`, `default`, `strict`, `cra`, and `host-linux`. `cra` is the CRA/BSI field-completeness profile of §1.5. `host-linux` is a *scope* profile for hosted (non-embedded) Linux targets and is meant to be combined with one of the other three via `--policy cra --profile-overlay host-linux`. A profile or overlay name that is not one of these, from the command line or from `policy.profile`, is a usage error (exit 1); it never falls back to `default`.
+Five profiles exist: `lenient`, `default`, `strict`, `cra`, and `host-linux`. `cra` is the CRA/BSI field-completeness profile of §1.5. `host-linux` is a *scope* profile for hosted (non-embedded) Linux targets and is meant to be combined with one of the four gate profiles via `--policy cra --profile-overlay host-linux`. A profile name other than `default`, `lenient`, `cra` or `strict` (from `--policy` or `policy.profile`), or an overlay name other than `host-linux` (from `--profile-overlay` or `policy.profileOverlay`), is a usage error (exit 1); it never falls back to `default`.
 
 | Option | `lenient` | `default` | `strict` | `cra` | `host-linux` overlay |
 |---|---|---|---|---|---|

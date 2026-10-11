@@ -560,7 +560,8 @@ func RunWithOptions(cfg config.Config, buildDir string, reproducible bool, optio
 	// files are hashed so that the file records carry them.
 	attributes := deriveGraphAttributes(graph, artifactIDs, outcome.excludedByGC, b.physical, logger)
 	applyFileAttributes(used, attributes)
-	attributes.produced = b.producedArchives(inSourceBuild(anchorResult.Registry, b.logicalBuild))
+	b.recordTargetArchives(replyModel.StaticLibraryArtifacts())
+	attributes.produced = b.producedArchives(replyModel == nil && inSourceBuild(anchorResult.Registry, b.logicalBuild))
 	// Section 22.10 rides on the hashing pass: the copyright statements are
 	// taken from the bytes the digest already needed, so the read below is
 	// the only one either of them causes (decision Q9).

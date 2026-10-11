@@ -375,6 +375,12 @@ func buildEvidenceGraph(
 	// line that produced its artifact, in link.txt.
 	if makeBuild := compile.makeBuild; makeBuild != nil {
 		for _, target := range makeBuild.Targets {
+			// A static library target's command is an archiver, and the
+			// archive it names is the one it writes.
+			if target.Archive != "" {
+				b.recordBuiltArchive(target.Archive, collectObjects(target.LinkInputs))
+				continue
+			}
 			var archived bool
 			for _, input := range target.LinkInputs {
 				if isArchivePath(input) {

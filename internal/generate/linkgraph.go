@@ -1249,6 +1249,17 @@ func (b *builder) recordBuiltArchive(archivePath string, objects []string) {
 	}
 }
 
+// recordTargetArchives takes the archives the CMake File API names as the
+// artifacts of static library targets. The reply states them whatever the
+// generator, so an archive a Makefiles build writes into the source tree is
+// known to be this build's even when no build graph or traced member says so.
+func (b *builder) recordTargetArchives(paths []string) {
+	for _, path := range paths {
+		canonical, _ := b.identify(path)
+		b.builtArchives[canonical] = true
+	}
+}
+
 // producedArchives names the archives this build produced itself, wherever
 // they lie. Section 33.1 asks about prebuilt libraries only, and an archive in
 // the build directory is plainly not one; these are the ones the build
