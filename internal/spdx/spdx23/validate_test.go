@@ -4,8 +4,10 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 )
@@ -130,6 +132,14 @@ func encodeDocument(t *testing.T, doc map[string]any) []byte {
 	return data
 }
 
+// declaredDocument declares another document under the given identifier.
+func declaredDocument(id string) map[string]any {
+	return map[string]any{
+		"externalDocumentId": id, "spdxDocument": "https://example.com/other",
+		"checksum": map[string]any{"algorithm": "SHA1", "checksumValue": "da39a3ee5e6b4b0d3255bfef95601890afd80709"},
+	}
+}
+
 func list(doc map[string]any, key string) []any { items, _ := doc[key].([]any); return items }
 
 func entry(doc map[string]any, key string, index int) map[string]any {
@@ -175,6 +185,11 @@ func TestEachConformanceRuleRefusesWhatItForbids(t *testing.T) {
 		"NONE as source": {func(d map[string]any) {
 			d["relationships"] = append(list(d, "relationships"), map[string]any{"spdxElementId": "NONE", "relationshipType": "DEPENDS_ON", "relatedSpdxElement": "SPDXRef-app"})
 		}, `"NONE" is no element`},
+		"externalDocumentId pattern": {func(d map[string]any) {
+			d["externalDocumentRefs"] = []any{declaredDocument("DocumentRef-a_b")}
+		}, `externalDocumentId "DocumentRef-a_b" is not DocumentRef-[idstring] (clause 6.6)`},
+		"documentDescribes dangling": {func(d map[string]any) { d["documentDescribes"] = []any{"SPDXRef-nowhere"} },
+			`documentDescribes names "SPDXRef-nowhere", which is no element of the document`},
 		"no root":              {func(d map[string]any) { d["relationships"] = list(d, "relationships")[1:] }, "clause 11.1"},
 		"undefined LicenseRef": {func(d map[string]any) { entry(d, "packages", 0)["licenseConcluded"] = "LicenseRef-beta" }, "LicenseRef-beta, which hasExtractedLicensingInfos does not define"},
 		"unparsable licence":   {func(d map[string]any) { entry(d, "packages", 0)["licenseConcluded"] = "MIT AND" }, "licenseConcluded"},
@@ -213,6 +228,16 @@ func TestTheRootMayBeStatedEitherWay(t *testing.T) {
 	doc["documentDescribes"] = []any{"SPDXRef-app"}
 	if err := Validate(encodeDocument(t, doc)); err != nil {
 		t.Errorf("documentDescribes: %v", err)
+	}
+	// Clause 6.6: an idstring may hold "+", and a relationship may end in an
+	// element of the document it names.
+	plus := minimalDocument()
+	plus["externalDocumentRefs"] = []any{declaredDocument("DocumentRef-spdx+tool-1.2")}
+	plus["relationships"] = append(list(plus, "relationships"), map[string]any{
+		"spdxElementId": "SPDXRef-app", "relationshipType": "DEPENDS_ON", "relatedSpdxElement": "DocumentRef-spdx+tool-1.2:SPDXRef-ToolsElement",
+	})
+	if err := Validate(encodeDocument(t, plus)); err != nil {
+		t.Errorf("a DocumentRef with a +: %v", err)
 	}
 	single := minimalDocument()
 	single["packages"] = list(single, "packages")[:1]
@@ -265,6 +290,50 @@ func TestTierBHoldsAValidDocumentToSbombsPromises(t *testing.T) {
 			entry(d, "annotations", 0)["comment"] = "reviewed by hand"
 		}, "is not an sbomb:name=value property"},
 		"licence list version": {func(d map[string]any) { d["creationInfo"].(map[string]any)["licenseListVersion"] = "3.0" }, "licenseListVersion"},
+		"two roots": {func(d map[string]any) {
+			d["relationships"] = append(list(d, "relationships"), relationshipEntry(documentID, "DESCRIBES", entry(d, "packages", 1)["SPDXID"]))
+		}, "the document describes 2 packages"},
+		"root not first": {func(d map[string]any) {
+			packages := list(d, "packages")
+			packages[0], packages[1] = packages[1], packages[0]
+		}, "is not the first package"},
+		"DESCRIBES between packages": {func(d map[string]any) {
+			d["relationships"] = append(list(d, "relationships"), relationshipEntry(entry(d, "packages", 1)["SPDXID"], "DESCRIBES", entry(d, "packages", 2)["SPDXID"]))
+		}, "is not the document describing a package"},
+		"relationship to another document": {func(d map[string]any) {
+			d["externalDocumentRefs"] = []any{declaredDocument("DocumentRef-other")}
+			d["relationships"] = append(list(d, "relationships"), relationshipEntry(entry(d, "packages", 1)["SPDXID"], "DEPENDS_ON", "DocumentRef-other:SPDXRef-x"))
+		}, "refers to another document"},
+		"package without a name": {func(d map[string]any) { entry(d, "packages", 1)["name"] = " " }, "has no name"},
+		"file without a name":    {func(d map[string]any) { entry(d, "files", 0)["fileName"] = " " }, "has no name"},
+		"licence list version without a listed licence": {func(d map[string]any) {
+			for _, key := range []string{"packages", "files"} {
+				for _, item := range list(d, key) {
+					element := item.(map[string]any)
+					for _, field := range []string{"licenseConcluded", "licenseDeclared"} {
+						if _, stated := element[field]; stated {
+							element[field] = noAssertion
+						}
+					}
+					delete(element, "licenseInfoInFiles")
+					delete(element, "licenseInfoFromFiles")
+				}
+			}
+		}, "is stated, but no listed licence is named"},
+		"package after the file packages": {func(d map[string]any) {
+			packages := list(d, "packages")
+			moved := packages[1]
+			d["packages"] = append(append([]any{packages[0]}, packages[2:]...), moved)
+		}, "follows a package that stands for a file"},
+		"file package order": {func(d map[string]any) {
+			packages := list(d, "packages")
+			last := len(packages) - 1
+			packages[last-1], packages[last] = packages[last], packages[last-1]
+		}, "is out of order"},
+		"file order": {func(d map[string]any) {
+			files := list(d, "files")
+			files[0], files[1] = files[1], files[0]
+		}, "is out of order"},
 		"relationship order": {func(d map[string]any) {
 			rels := list(d, "relationships")
 			rels[1], rels[2] = rels[2], rels[1]
@@ -283,5 +352,30 @@ func TestTierBHoldsAValidDocumentToSbombsPromises(t *testing.T) {
 		if err := CheckOwnOutput(encoded); err == nil || !strings.Contains(err.Error(), test.want) {
 			t.Errorf("%s: %v; want %q", name, err, test.want)
 		}
+	}
+}
+
+func relationshipEntry(from any, kind string, to any) map[string]any {
+	return map[string]any{"spdxElementId": from, "relationshipType": kind, "relatedSpdxElement": to}
+}
+
+// A document with many defects is reported as the 3.0.1 validator reports
+// one: sorted, and capped with a count of the rest.
+func TestTheReportIsCappedAndSorted(t *testing.T) {
+	doc := minimalDocument()
+	for index := 0; index < maxReportedIssues+5; index++ {
+		doc["relationships"] = append(list(doc, "relationships"),
+			relationshipEntry(fmt.Sprintf("SPDXRef-nowhere%02d", index), "DEPENDS_ON", "SPDXRef-app"))
+	}
+	err := Validate(encodeDocument(t, doc))
+	if err == nil {
+		t.Fatal("no issues")
+	}
+	lines := strings.Split(err.Error(), "\n")
+	if len(lines) != 1+maxReportedIssues+1 || lines[len(lines)-1] != "  ... and 5 more" {
+		t.Fatalf("the report is not capped at %d:\n%v", maxReportedIssues, err)
+	}
+	if !sort.StringsAreSorted(lines[1 : 1+maxReportedIssues]) {
+		t.Errorf("the issues are not sorted:\n%v", err)
 	}
 }

@@ -89,9 +89,14 @@ var (
 	createdPattern   = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$`)
 	creatorPattern   = regexp.MustCompile(`^(Person|Organization|Tool): \S.*$`)
 	elementIDPattern = regexp.MustCompile(`^SPDXRef-[A-Za-z0-9.-]+$`)
-	documentRefID    = regexp.MustCompile(`^DocumentRef-[A-Za-z0-9.-]+$`)
-	licenseRefID     = regexp.MustCompile(`^LicenseRef-[A-Za-z0-9.-]+$`)
-	hexPattern       = regexp.MustCompile(`^[0-9a-fA-F]+$`)
+	// Clause 6.6 lets the idstring of a DocumentRef hold "+", which an
+	// SPDXRef (clause 7.2) and a LicenseRef (clause 10.1) do not. A
+	// relationship end names a declared DocumentRef whatever it holds; a
+	// licence expression cannot carry the "+" form, because annex D's idstring
+	// excludes it and reads a "+" as "or later".
+	documentRefID = regexp.MustCompile(`^DocumentRef-[A-Za-z0-9.+-]+$`)
+	licenseRefID  = regexp.MustCompile(`^LicenseRef-[A-Za-z0-9.-]+$`)
+	hexPattern    = regexp.MustCompile(`^[0-9a-fA-F]+$`)
 )
 
 // elementKinds is every element identifier of a document and what it is.
