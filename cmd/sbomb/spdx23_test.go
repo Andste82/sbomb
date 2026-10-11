@@ -155,27 +155,42 @@ func TestSelfWritesSpdx23(t *testing.T) {
 }
 
 // TestFossReviewStaysCycloneDXWhenTheSbomIsSpdx23: the review record is
-// CycloneDX 1.6 whatever the SBOM is written in. A 2.3 run computed a SHA-1
-// of every file it hashed, and the record states what the run computed, so
-// it carries that SHA-1 beside the SHA-256 (deviation D57).
+// CycloneDX 1.6 whatever the SBOM is written in, and it does not move with the
+// SBOM's format or version (section 32.6). A 2.3 run computes a SHA-1 of every
+// file only because its writer asked for it; that digest stays in the SBOM.
 func TestFossReviewStaysCycloneDXWhenTheSbomIsSpdx23(t *testing.T) {
 	t.Setenv("SOURCE_DATE_EPOCH", pinnedEpoch)
-	directory := t.TempDir()
-	out := filepath.Join(directory, "foss")
-	code, _, stderr := execute([]string{"generate", "--build-dir", testutil.CorpusBuildDir(t, "gcc-ninja", "p14-foss"),
-		"--source-dir", testutil.CorpusSourceTree(t), "--policy", "lenient", "--reproducible",
-		"--format", "spdx-json", "--spec-version", "2.3",
-		"--output", filepath.Join(directory, "out.spdx.json"), "--foss-out", out})
-	if code != 0 || stderr != "" {
-		t.Fatalf("generate = code %d, stderr %q", code, stderr)
+	buildDir := testutil.CorpusBuildDir(t, "gcc-ninja", "p14-foss")
+	sourceDir := testutil.CorpusSourceTree(t)
+	review := func(name string, format ...string) []byte {
+		directory := t.TempDir()
+		out := filepath.Join(directory, "foss")
+		args := append([]string{"generate", "--build-dir", buildDir, "--source-dir", sourceDir, "--policy", "lenient",
+			"--reproducible", "--output", filepath.Join(directory, "out.json"), "--foss-out", out}, format...)
+		code, _, stderr := execute(args)
+		if code != 0 || stderr != "" {
+			t.Fatalf("%s: generate = code %d, stderr %q", name, code, stderr)
+		}
+		return readFile(t, filepath.Join(out, "foss-review.json"))
 	}
-	data := readFile(t, filepath.Join(out, "foss-review.json"))
-	review := parseDocument(t, data)
-	if review["bomFormat"] != "CycloneDX" || review["specVersion"] != "1.6" {
-		t.Errorf("foss-review.json of an SPDX 2.3 run is %v %v, want CycloneDX 1.6", review["bomFormat"], review["specVersion"])
+	spdx23 := review("SPDX 2.3", "--format", "spdx-json", "--spec-version", "2.3")
+	document := parseDocument(t, spdx23)
+	if document["bomFormat"] != "CycloneDX" || document["specVersion"] != "1.6" {
+		t.Errorf("foss-review.json of an SPDX 2.3 run is %v %v, want CycloneDX 1.6", document["bomFormat"], document["specVersion"])
 	}
-	if !bytes.Contains(data, []byte(`"alg": "SHA-1"`)) {
-		t.Error("the review record of a 2.3 run does not state the SHA-1 the run computed")
+	if !bytes.Contains(spdx23, []byte(`"SHA-256"`)) {
+		t.Fatal("the review record states no SHA-256; a fixture that hashes nothing proves nothing here")
+	}
+	if bytes.Contains(spdx23, []byte(`"SHA-1"`)) {
+		t.Error("the review record of a 2.3 run carries the SHA-1 only the SPDX 2.3 writer asked for")
+	}
+	for name, format := range map[string][]string{
+		"SPDX 3.0.1": {"--format", "spdx-json", "--spec-version", "3.0.1"},
+		"CycloneDX":  {"--format", "cyclonedx-json"},
+	} {
+		if other := review(name, format...); !bytes.Equal(spdx23, other) {
+			t.Errorf("foss-review.json of an SPDX 2.3 run differs from that of a %s run", name)
+		}
 	}
 }
 

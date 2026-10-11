@@ -864,9 +864,9 @@ element ([properties.md](properties.md)). A CVE exclusion of a bundled SBOM is
 an annotation too (`not affected: CVE-…: <reason>`): 2.3 has no VEX.
 
 **Files without a SHA-1.** SPDX 2.3 requires a SHA-1 of every file, so a 2.3
-run computes one beside the SHA-256, from the same read; that run's
-`foss-review.json` carries it as well, while the inventory dump leaves it out
-and stays the same whatever the format. A file that could not be read
+run computes one beside the SHA-256, from the same read. The SHA-1 stays in
+the SBOM: `foss-review.json` and the inventory dump leave it out and stay the
+same whatever the format. A file that could not be read
 — not on disk, a patch known only from metadata — has no SHA-1, and a file
 element without one is invalid 2.3. Such a file is written as a package that
 stands for it, marked as not analysed and of purpose `FILE`, with a comment
