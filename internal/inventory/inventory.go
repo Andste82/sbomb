@@ -64,19 +64,6 @@ type InventoryDump struct {
 // HashAlgorithmSHA256 is the CycloneDX spelling of the default algorithm.
 const HashAlgorithmSHA256 = digest.SHA256
 
-// HashAlgorithmSHA1 is the one digest a run computes beside SHA-256, and only
-// when the document it writes requires it (SPDX 2.3 states a SHA-1 of every
-// file). It is computed over the bytes the SHA-256 was computed over, in the
-// same read.
-const HashAlgorithmSHA1 = digest.SHA1
-
-// SupportsDigest reports whether hashing can compute the named digest beside
-// SHA-256, which it always computes. It answers from the same table the
-// mapping of retained licence files computes from.
-func SupportsDigest(name string) bool {
-	return digest.Supported(name)
-}
-
 type HashOptions struct {
 	Anchors              []string
 	AllowUnanchoredReads bool
@@ -102,7 +89,7 @@ type HashOptions struct {
 	// Digests are the algorithms computed beside SHA-256, over the same
 	// bytes and in the same read. The caller learns which ones the document
 	// needs from the writer; this package learns only their names. A name
-	// SupportsDigest does not know is ignored, so the caller checks first.
+	// the digest table does not know is ignored, so the caller checks first.
 	Digests []string
 }
 
@@ -320,8 +307,8 @@ func BuildInventoryDump(files []domain.UsedFile, components []domain.Component) 
 		}
 		for alg, hash := range f.Hashes {
 			// A digest computed only because the chosen writer asked for it
-			// (the SHA-1 of SPDX 2.3) is left out: the dump must not move
-			// when the serialization does (WriteDump).
+			// is left out: the dump must not move when the serialization
+			// does (WriteDump).
 			if digest.OnRequest(alg) {
 				continue
 			}

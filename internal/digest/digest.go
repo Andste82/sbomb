@@ -14,8 +14,7 @@ import (
 // SHA256 is the digest every run computes of every file it reads.
 const SHA256 = "SHA-256"
 
-// SHA1 is computed only when the document a run writes requires it (SPDX 2.3
-// states a SHA-1 of every file).
+// SHA1 is computed only when the writer of a run's document asks for it.
 const SHA1 = "SHA-1"
 
 // onRequest are the digests computed only when a writer asks for them.
