@@ -83,6 +83,7 @@ flowchart LR
     COMP --> DOC["CycloneDX or SPDX<br/><i>written and validated</i>"]
     GRAPH --> POL["Policy<br/><i>findings · waivers · exit code</i>"]
     COMP --> POL
+    CFG -.->|"digests the format needs"| INV
 ```
 
 Discovery is the only stage that reads build metadata. Later stages still touch
@@ -91,6 +92,13 @@ is stale, and component mapping looks for a manifest or licence file at a
 component's root — but none of them adds anything to the graph. What belongs in
 the document was settled before they ran, which is why the same evidence always
 produces the same document.
+
+The format is chosen with the configuration, before discovery, and the one
+thing it may ask of an earlier stage is an extra digest of the bytes inventory
+already reads. It is asked before any file is read and handed down as the names
+of digest algorithms, so no stage learns which format asked and no file is read
+twice. SPDX 2.3 is the one format that asks: it requires a SHA-1 of every file,
+beside the SHA-256 every run computes.
 
 ## What sbomb reads
 
@@ -483,10 +491,10 @@ flowchart LR
     S --> C["CycloneDX<br/><i>1.6 · 1.7</i>"]
     S --> M["SPDX description<br/><i>packages · files · typed edges ·<br/>licences · VEX · patches</i>"]
     M --> R3["SPDX 3.0.1"]
-    M -.-> R2["SPDX 2.3<br/><i>planned</i>"]
+    M --> R2["SPDX 2.3"]
     C --> V["Conformance check<br/><i>schema + specification rules</i>"]
     R3 --> V
-    R2 -.-> V
+    R2 --> V
     X["validate<br/><i>any tool's document</i>"] --> V
     V --> O["Own-output check<br/><i>what sbomb promises<br/>beyond conformance</i>"]
     O --> F["file<br/><i>written atomically</i>"]
@@ -516,6 +524,16 @@ say: an exception the licence list does not carry gets a custom name of its own
 in SPDX 3, which has one, and makes the whole licence one custom licence in
 SPDX 2.3, which has none.
 
+**What a version cannot say.** SPDX 2.3 is flatter than 3.0.1: fixed fields,
+no name/value extension, no vulnerability statements, and a SHA-1 required of
+every file. Its renderer says each fact another way rather than drop it. The
+properties become annotation lines of the element they belong to, a "not
+affected" statement becomes an annotation of the component, and a file nobody
+could read — so no SHA-1 exists — is stated as a package that stands for that
+one file and says why, never as a file with an invented digest. The reference
+documents of 2.3 are each held to the 3.0.1 document of the same run, element
+by element, so what 2.3 states is what the run found.
+
 **Two checks, two questions.** Every document is checked against the
 specification it declares, on the exact bytes about to be written: the official
 schema, and the rules a schema cannot express. These are two separate
@@ -533,8 +551,9 @@ except the extension profile, which SPDX's 3.0.1 context makes unclaimable in a
 form both official validators accept. That last one the specification does not ask of anyone: a claimed profile is an
 intention, not an inventory, so `validate` does not hold another tool's
 document to it. A document failing a check is not written, and a previous one at the
-same path is left as it was. SPDX's own model-level validator has no
-implementation the single executable could carry, so it runs in CI, on every
+same path is left as it was. SPDX's own validators — the model-level one of
+3.0.1 and the reference implementation that checks 2.3 — have no
+implementation the single executable could carry, so they run in CI, on every
 SPDX reference document the tests compare against.
 
 **What SPDX states that a missing relationship cannot.** In CycloneDX every
@@ -593,7 +612,7 @@ source file or archive is ever written to their directory.
 | Output | Contents |
 |---|---|
 | `<name>.cdx.json` | The CycloneDX document, 1.6 by default and 1.7 on request. Validated against the official schema of the version it declares *and* semantically before it is written |
-| `<name>.spdx.json` | The SPDX 3.0.1 document, on request instead of CycloneDX. The same run, the same identities and properties, with typed relationships. Validated the same way, and against the invariants sbomb holds its own output to |
+| `<name>.spdx.json` | The SPDX document, 3.0.1 by default and 2.3 on request, instead of CycloneDX. The same run, the same identities and properties, with typed relationships. Validated the same way, and against the invariants sbomb holds its own output to |
 | `evidence.json` | The full evidence graph — every node, every edge, its strength, confidence and source |
 | Findings JSON | Machine-readable diagnostics, with severity, subject and remediation |
 | Review report | The same for a human, with the evidence chains behind the answers, and the commands the run executed if it was allowed any |
@@ -603,7 +622,7 @@ source file or archive is ever written to their directory.
 this in my SBOM?* It prints the chains back to the deliverable.
 
 Smaller commands round it out. `validate` checks an existing document —
-CycloneDX 1.6 or 1.7, or SPDX 3.0.1, recognised from the document itself —
+CycloneDX 1.6 or 1.7, or SPDX 3.0.1 or 2.3, recognised from the document itself —
 against the schema and the rules of the specification it declares, and nothing
 else: a conformant document from another tool passes. `evidence` prints the
 graph on its own. `schema` prints the embedded schemas. `self` describes sbomb

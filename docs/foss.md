@@ -125,9 +125,13 @@ into `evidence.json`, which is a format change to a file other tools read.
 
 `policy.licenseTextInSBOM` decides whether the retained texts are written into
 the SBOM — in a CycloneDX document as `evidence.licenses[].license.text`, in an
-SPDX document as a `license` external reference of the licence file, carrying
-its bytes as a `data:` URI (SPDX reserves attribution text for
-acknowledgements, not complete licence texts):
+SPDX 3.0.1 document as a `license` external reference of the licence file,
+carrying its bytes as a `data:` URI (SPDX reserves attribution text for
+acknowledgements, not complete licence texts), and in an SPDX 2.3 document as
+the licence file's `noticeText`, or as the `extractedText` of the licence
+reference it defines when the licence is not on the SPDX list. SPDX 2.3 has no
+field for bytes that are not UTF-8; such a text is left to the FOSS outputs,
+and the document says so:
 
 ```json
 {

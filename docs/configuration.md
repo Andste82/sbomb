@@ -693,14 +693,14 @@ Select it with `--waivers <file>` or `policy.waiversFile`.
 | Field | Values | Default |
 |---|---|---|
 | `format` | `cyclonedx-json`, `spdx-json` | `cyclonedx-json` |
-| `specVersion` | `1.6`, `1.7` for CycloneDX; `3.0.1` for SPDX | the format's default: `1.6`, `3.0.1` |
+| `specVersion` | `1.6`, `1.7` for CycloneDX; `3.0.1`, `2.3` for SPDX | the format's default: `1.6`, `3.0.1` |
 | `tlp` | `CLEAR`, `GREEN`, `AMBER`, `AMBER_AND_STRICT`, `RED` | none |
 | `reproducible` | boolean | `false` |
 
 `reproducible` makes two runs over the same evidence produce the same bytes.
 CycloneDX omits the timestamp and derives the serial number from the document's
 content; SPDX has to state a creation time, so it states `SOURCE_DATE_EPOCH` and
-refuses to run without it (see [SPDX 3.0.1](#spdx-301) below).
+refuses to run without it, at either version (see [SPDX 3.0.1](#spdx-301) below).
 It belongs here as well as on the command line because it is a property of the
 project: a project whose SBOMs have to be comparable wants that of every run,
 not only of the ones where somebody remembered `--reproducible`. The flag still
@@ -723,7 +723,8 @@ it says.
 
 **CycloneDX 1.6 is the default.** BSI TR-03183-2 maps its required fields onto
 two formats, CycloneDX 1.6 and SPDX 3.0.1; either satisfies it. Choose SPDX when
-the recipient asks for SPDX.
+the recipient asks for SPDX, and SPDX 2.3 only when the recipient's tools read
+nothing newer ([SPDX 2.3](#spdx-23) below).
 
 ```json
 {
@@ -771,9 +772,8 @@ Everything else is written identically at both versions.
 
 ### SPDX 3.0.1
 
-SPDX has one version here, 3.0.1, the one BSI TR-03183-2 names. SPDX 2.3 is
-planned; until then a 2.3 document is recognised by `validate` and refused by
-name.
+3.0.1 is the default SPDX version, and the one BSI TR-03183-2 names. SPDX 2.3
+is written on request ([below](#spdx-23)).
 
 **What is native.** Where SPDX 3.0.1 has a field or relationship for something
 sbomb records, it is used: packages and files with their purpose, version,
@@ -830,6 +830,73 @@ fail one of SPDX's two official validators whichever way it is written
 The FOSS review record `foss-review.json` stays CycloneDX whatever `format`
 says, so its consumers see one shape.
 
+### SPDX 2.3
+
+`--spec-version 2.3` (or `specVersion: "2.3"`) writes SPDX 2.3, for tools that
+read nothing newer. It describes the same run as 3.0.1, with the same
+identities, and is checked against the schema released with SPDX 2.3 and the
+rules of its specification before it is written. 2.3 is a flatter format than
+3.0.1, and where it has no field for something, sbomb says it another way
+rather than leave it out; [D57](dev/deviations.md) lists every case.
+
+```json
+{
+  "output": {
+    "format": "spdx-json",
+    "specVersion": "2.3",
+    "reproducible": true
+  }
+}
+```
+
+**What is native.** Packages and files with their purpose, version, purl and
+CPE, supplier, originator, description, checksums and copyright text; typed
+relationships for how each component reached the deliverable — `STATIC_LINK`,
+`DYNAMIC_LINK`, `PROVIDED_DEPENDENCY_OF`, `BUILD_TOOL_OF`, `CONTAINS`,
+`DEPENDS_ON` — and `PATCH_APPLIED` for patches and `DOCUMENTATION_OF` for
+licence files; the modification signal as `sourceInfo`; the repository as a
+VCS download location (`git+https://…`) where it is a network URL, and
+`NOASSERTION` otherwise.
+
+**What is an annotation.** SPDX 2.3 has no name/value field, so every `sbomb:`
+property of an element is one `name=value` line of an annotation of that
+element ([properties.md](properties.md)). A CVE exclusion of a bundled SBOM is
+an annotation too (`not affected: CVE-…: <reason>`): 2.3 has no VEX.
+
+**Files without a SHA-1.** SPDX 2.3 requires a SHA-1 of every file, so a 2.3
+run computes one beside the SHA-256, from the same read; the inventory dump and
+`foss-review.json` of that run carry it as well. A file that could not be read
+— not on disk, a patch known only from metadata — has no SHA-1, and a file
+element without one is invalid 2.3. Such a file is written as a package that
+stands for it, marked as not analysed and of purpose `FILE`, with a comment
+saying why. It is neither dropped nor given a digest nobody computed, and
+`MISSING_FILE_HASH` still reports it.
+
+**Licences.** One field holds one expression: several licences of one package
+are joined with `AND`. Every licence reference the document uses is defined in
+it, as 2.3 requires. Its text is the retained licence text when
+`licenseTextInSBOM` is `evidence`, and otherwise the observed name, with a
+comment saying no text was retained. The retained text of a listed licence is
+the licence file's `noticeText`. 2.3 has no `AdditionRef`, so an expression
+whose exception the list does not know becomes one `LicenseRef-sbomb-…`
+reference for the whole expression.
+
+| | SPDX 3.0.1 | SPDX 2.3 |
+|---|---|---|
+| `sbomb:` properties | extension, name and value | annotation lines `name=value` |
+| CVE exclusions | VEX "not affected" statements | annotations |
+| A file that could not be read | a file element without a hash | a package standing for the file |
+| Hashes | SHA-256 | SHA-256 and SHA-1 |
+| Several licences of a package | one relationship each | one expression, joined with `AND` |
+| An unknown licence exception | `AdditionRef-sbomb-…` | one `LicenseRef-sbomb-…` for the whole expression |
+| "depends on nothing" | `dependsOn` to `NoneElement`, complete | `DEPENDS_ON NONE` |
+| Element identity | `urn:uuid:<uuid>#<identity>` | `SPDXRef-<identity>`, every character outside letters, digits and `.` written `-XX` |
+| `dataLicense` | not stated | `CC0-1.0`, which 2.3 requires |
+
+`explain` reads a 2.3 document like any other, and accepts an `SPDXRef-…`
+wherever it accepts an identity. `sbomb schema --format spdx-json
+--spec-version 2.3` prints the schema a 2.3 document is checked against.
+
 ### The repository URL, and where things live
 
 Where CycloneDX specifies a field for something sbomb records, the specified
@@ -848,7 +915,7 @@ document may be shared freely.
 
 `sbomb validate` needs no format and no version: it reads what the document
 declares and checks it against the matching embedded schema, including a 1.7 or
-SPDX 3.0.1 document written by another tool. A version this build has no schema
+SPDX 3.0.1 or 2.3 document written by another tool. A version this build has no schema
 for is refused rather than checked against the wrong one.
 
 ## A worked example

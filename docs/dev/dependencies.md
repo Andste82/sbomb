@@ -15,7 +15,7 @@ redistributed with the source.
 | Module | Purpose | Cost of removing it |
 |---|---|---|
 | `github.com/google/uuid` | Serial numbers and SPDX document namespaces: UUIDv4 in normal mode, UUIDv5 over the canonical document in reproducible mode (sections 28.9, 28.11.2). | Small. RFC 4122 v4 and v5 are a few dozen lines over `crypto/rand` and `crypto/sha1`. |
-| `github.com/santhosh-tekuri/jsonschema/v6` | The first of the two validation layers section 32.5 requires: checking the generated document against the official CycloneDX JSON Schema, and against the official SPDX 3.0.1 JSON schema (draft 2020-12). The SPDX schema's one lookahead pattern is matched by a hand-written function, because Go's regular expressions have no lookahead. | Large. Hand-writing a JSON Schema evaluator is exactly the kind of drift risk the second layer exists to avoid. |
+| `github.com/santhosh-tekuri/jsonschema/v6` | The first of the two validation layers section 32.5 requires: checking the generated document against the official CycloneDX JSON Schema, against the official SPDX 3.0.1 JSON schema (draft 2020-12), and against the official SPDX 2.3 JSON schema (draft-07). The SPDX schema's one lookahead pattern is matched by a hand-written function, because Go's regular expressions have no lookahead. | Large. Hand-writing a JSON Schema evaluator is exactly the kind of drift risk the second layer exists to avoid. |
 | `golang.org/x/text` | Required by the schema validator to render its messages. Not used directly beyond supplying its message printer. | None on its own; it comes with the validator. |
 
 Not used, though section 37 suggests them:
@@ -29,11 +29,13 @@ Not used, though section 37 suggests them:
   worthwhile with the package-manager adapters, where percent-encoding is easy
   to get subtly wrong.
 
-The SPDX writer adds no dependency. Its document is serialized with
-`encoding/json`, and the SPDX project's own SHACL validation runs in CI only, in
-Python (`check-jsonschema`, `pyshacl`, `rdflib` at pinned versions), because no
-Go implementation exists and a Python one cannot ship in a static executable
-(deviation D51).
+The SPDX writer adds no dependency, for either version. Its documents are
+serialized with `encoding/json`, and the SPDX project's own validators run in
+CI only, in Python at pinned versions: the SHACL model of 3.0.1
+(`check-jsonschema`, `pyshacl`, `rdflib`) and the reference implementation for
+2.3 (`check-jsonschema`, `pyspdxtools` from `spdx-tools`), because no Go
+implementation of either exists and a Python one cannot ship in a static
+executable (deviation D51).
 
 Everything else -- depfile parsing, map parsing, Ninja parsing, DWARF, archive
 reading, the path model -- stays on the standard library, and adding a
