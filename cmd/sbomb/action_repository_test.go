@@ -93,6 +93,13 @@ func testTheActionResolvesItsRepository(t *testing.T, download string) {
 		t.Fatal("the download step does not report the repository it resolved")
 	}
 	script += `printf '%s' "$SBOMB_REPOSITORY"` + "\n"
+	// The script goes in a file, as the runner does it, and not through
+	// bash -c: Git Bash on Windows parses its command line and halves the
+	// backslashes in ${SBOMB_ACTION_PATH//\\//}.
+	scriptPath := filepath.Join(t.TempDir(), "download.sh")
+	if err := os.WriteFile(scriptPath, []byte(script), 0o600); err != nil {
+		t.Fatal(err)
+	}
 
 	for _, tc := range []struct {
 		name, input, actionRepository, actionPath string
@@ -108,7 +115,7 @@ func testTheActionResolvesItsRepository(t *testing.T, download string) {
 		{"unreadable remote checkout path", "", "", "/home/runner/work/_actions/Andste82", ""},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			cmd := exec.Command(bash, "-c", script)
+			cmd := exec.Command(bash, scriptPath)
 			cmd.Env = append(os.Environ(),
 				"SBOMB_REPOSITORY="+tc.input,
 				"SBOMB_ACTION_REPOSITORY="+tc.actionRepository,
