@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/example/sbomb/internal/domain"
 	"github.com/example/sbomb/internal/sbomwriter"
 	"github.com/example/sbomb/internal/sbomwriter/sbomwritertest"
 )
@@ -106,6 +107,87 @@ func TestSpdx23SyntheticDocumentGolden(t *testing.T) {
 	data := syntheticRender23(t)
 	holdToBothTiers(t, "synthetic-all-fields", "2.3", data)
 	assertGolden(t, spdx23Golden("synthetic-all-fields"), data)
+}
+
+// choiceInAFile is a build whose one third-party component states a choice of
+// licences in a file of its own: a LICENSE that reads "SPDX-License-Identifier:
+// MIT OR Apache-2.0".
+func choiceInAFile() *sbomwriter.Document {
+	header := domain.FileID{Anchor: "build", RelPath: "_deps/dual/dual.h"}
+	licence := domain.FileID{Anchor: "build", RelPath: "_deps/dual/LICENSE"}
+	const statement = "SPDX-License-Identifier: MIT OR Apache-2.0\n"
+	return &sbomwriter.Document{
+		Product: domain.Component{
+			ID: "product", Name: "choice", Version: "1.0.0", VersionSource: "curated", Type: "application",
+			Licenses: []domain.LicenseFinding{{Expression: "MIT", Evidence: "curated"}},
+		},
+		Artifacts: []domain.Component{{ID: "build:bin/app", Name: "app", Type: "application"}},
+		Components: []domain.Component{{
+			ID: "component:dual", Name: "dual", Version: "2.0.0", Type: "library", Scope: "third-party",
+			LinkageForms: []string{domain.LinkageHeaderOnly}, DistributionRole: domain.RoleDistributed,
+			Licenses: []domain.LicenseFinding{{
+				Expression: "MIT OR Apache-2.0", Evidence: "file-level", Confidence: domain.ConfidenceHigh,
+				Source: licence.Canonical(), Technique: "spdx-identifier",
+			}},
+			LicenseArtifacts: []domain.LicenseArtifact{{
+				Kind: domain.LicenseArtifactLicense, File: licence,
+				SHA256:     "e1011a8d249fe5463b86287ce92f141abc29f64b20e5fd9ca16e158385eb669e",
+				Bytes:      []byte(statement),
+				DetectedID: "MIT OR Apache-2.0", Technique: "spdx-identifier",
+			}},
+		}},
+		Files: []domain.UsedFile{{
+			ID: header, Class: domain.FileClassHeader,
+			Hashes: map[string]string{
+				"SHA-256": "1f2e3d4c5b6a79881f2e3d4c5b6a79881f2e3d4c5b6a79881f2e3d4c5b6a7988",
+				"SHA-1":   "0a1b2c3d4e5f60718293a4b5c6d7e8f901234567",
+			},
+		}},
+		Relations: []sbomwriter.Relation{
+			{From: "component:dual", To: []string{header.Canonical()}},
+			{From: "build:bin/app", To: []string{"component:dual"}},
+			{From: "product", To: []string{"build:bin/app"}},
+		},
+		Run: sbomwriter.RunMetadata{
+			ToolName: "sbomb", ToolVendor: "Sentinel Vendor Org", ToolVersion: "0.0.0-sentinel",
+			Timestamp: "2023-11-14T22:13:20Z", Reproducible: true,
+		},
+	}
+}
+
+// TestSpdx23ChoiceInAFileGolden: a file that offers a choice of licences
+// states the whole expression as one licenseInfoInFiles entry, not one entry
+// per option as clause 8.6.1 suggests (deviation D57), so that the choice
+// itself is not lost; the 3.0.1 document of the same build states the same
+// expression.
+func TestSpdx23ChoiceInAFileGolden(t *testing.T) {
+	render := func(version string) []byte {
+		writer, err := sbomwriter.Get("spdx-json", version)
+		if err != nil {
+			t.Fatal(err)
+		}
+		options := sbomwritertest.AllFieldsOptions()
+		options.SpecVersion = version
+		var buffer bytes.Buffer
+		if err := writer.Write(&buffer, choiceInAFile(), options); err != nil {
+			t.Fatal(err)
+		}
+		return buffer.Bytes()
+	}
+	data := render("2.3")
+	holdToBothTiers(t, "synthetic-choice-in-file", "2.3", data)
+	doc := parseSpdx23(t, data)
+	var entries []any
+	for _, f := range doc.files {
+		if strings.HasSuffix(f["fileName"].(string), "/LICENSE") {
+			entries, _ = f["licenseInfoInFiles"].([]any)
+		}
+	}
+	if len(entries) != 1 || entries[0] != "MIT OR Apache-2.0" {
+		t.Errorf("the LICENSE states licenseInfoInFiles %v, want the whole choice as one entry", entries)
+	}
+	assertNoProblems(t, "synthetic-choice-in-file", crossCheck23(t, render("3.0.1"), data))
+	assertGolden(t, spdx23Golden("synthetic-choice-in-file"), data)
 }
 
 // TestSpdx23DocumentStatesWhatThe301DocumentStates is the completeness
